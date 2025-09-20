@@ -1,3 +1,3 @@
-# danterealestate.github.io http://dantepropiedades.com.ar/
+# danterealestate.github.io 
 PAGINA VENTA DANTE PROPIEDADES
 SE DEDICA VENTA ALQUILER PROPIEDADES EN ARGENTINA
