@@ -99,9 +99,23 @@
     font-size: 1rem;
     margin-top: 5px; /* Adjusted margin */
   }
+<style>
+  .blinking{
+    animation:blinkingText 1.2s infinite;
+  }
+  @keyframes blinkingText{
+    0%{     color: #000;    }
+    49%{    color: #000; }
+    60%{    color: transparent; }
+    99%{    color:transparent;  }
+    100%{   color: #000;    }
+  }
 </style>
 </head>
 <body>
+<div style="text-align: center; background: yellow; padding: 10px;">
+  <h1 class="blinking">PAGINA EN CONSTRUCCION</h1>
+</div>
   <div class="cartel">
     <div class="title-container">
       <span>DANTE PROPIEDADES</span>
