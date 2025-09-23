@@ -1022,3 +1022,22 @@ section {
 .slick-initialized .slick-slide {
     display: block;
 }
+
+/* Estilos para las propiedades destacadas */
+.propiedad-item {
+    height: 250px; /* Altura fija para todas las imágenes */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* Oculta cualquier parte de la imagen que se desborde */
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px; /* Separación entre las propiedades */
+}
+
+.propiedad-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Asegura que la imagen cubra el área manteniendo su relación de aspecto */
+    display: block;
+}
