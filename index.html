@@ -1,4 +1,4 @@
-<!<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -6,18 +6,23 @@
     <title>DANTE PROPIEDADES | TU CIUDAD</title>
     <meta name="description" content="Propiedades en venta y alquiler en Capital Federal - Dante Propiedades">
     
-    <!-- Open Graph -->
+    <!-- Open Graph optimizado -->
     <meta property="og:title" content="DANTE PROPIEDADES | TU CIUDAD">
     <meta property="og:description" content="Propiedades en venta y alquiler en Capital Federal">
     <meta property="og:image" content="https://dantepropiedades.com.ar/img/logo-web-compartir.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:url" content="https://dantepropiedades.com.ar/">
     <meta property="og:type" content="website">
+    <meta property="og:site_name" content="DANTE PROPIEDADES">
     
-    <!-- Favicon -->
+    <!-- Favicon optimizado -->
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     
     <!-- CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css">
     <link rel="stylesheet" href="app.css">
     
     <!-- Google Analytics -->
@@ -31,11 +36,16 @@
 </head>
 <body>
 
+    <!-- Banner de construcción -->
+    <div class="construction-banner">
+        <h1 class="blinking">PAGINA EN CONSTRUCCION</h1>
+    </div>
+
     <!-- Header -->
     <header id="cab">
         <div class="cont">
             <a href="index" class="logo">
-                <img src="llave.png" alt="Dante Propiedades" width="90" height="30">
+                <img src="llave.png" alt="Dante Propiedades" width="90" height="30" loading="eager">
                 <span class="logo-text">DANTE PROPIEDADES</span>
             </a>
             
@@ -58,11 +68,6 @@
             </nav>
         </div>
     </header>
-
-    <!-- Banner de construcción -->
-    <div class="construction-banner">
-        <h1 class="blinking">PAGINA EN CONSTRUCCION</h1>
-    </div>
 
     <!-- Menú móvil -->
     <nav id="menuslide">
@@ -115,8 +120,9 @@
         </ul>
     </nav>
 
-    <!-- Slider principal -->
+    <!-- Slider principal - COMPLETAMENTE CORREGIDO -->
     <section id="sliderini" class="slihome">
+        <!-- Buscador -->
         <form class="buscadorcab" action="propiedades" method="GET">
             <input type="hidden" name="ope" value="V">
             
@@ -130,6 +136,12 @@
                 <div class="sel colini">
                     <select name="tipo" aria-label="Tipo de propiedad">
                         <option value="">Propiedad</option>
+                        <option value="departamento">Departamento</option>
+                        <option value="casa">Casa</option>
+                        <option value="ph">PH</option>
+                        <option value="oficina">Oficina</option>
+                        <option value="local">Local</option>
+                        <option value="terreno">Terreno</option>
                     </select>
                 </div>
                 
@@ -141,20 +153,60 @@
                     </div>
                 </div>
                 
-                <input type="number" class="cod" name="cod" placeholder="Código" min="0" aria-label="Código de propiedad">
+                <input type="number" class="cod colini" name="cod" placeholder="Código" min="0" aria-label="Código de propiedad">
+                
                 <button type="submit" aria-label="Buscar propiedades">
                     <i class="fas fa-search"></i>
                 </button>
             </div>
         </form>
 
+        <!-- Slider de imágenes - ESTRUCTURA CORREGIDA -->
         <div class="slider-container">
             <div class="slini">
-                <img src="UF004-1.jpg" alt="Propiedad destacada 1" loading="lazy">
-                <img src="UF004-2.jpg" alt="Propiedad destacada 2" loading="lazy">
-                <img src="UF004-3.jpg" alt="Propiedad destacada 3" loading="lazy">
-                <img src="UF004-4.jpg" alt="Propiedad destacada 4" loading="lazy">
-                <img src="UF004-5.jpg" alt="Propiedad destacada 5" loading="lazy">
+                <!-- Imagen 1 -->
+                <div class="slide">
+                    <div class="image-wrapper">
+                        <img src="UF004-1.jpg" alt="Propiedad destacada 1" loading="eager" class="slider-img">
+                    </div>
+                </div>
+                
+                <!-- Imagen 2 -->
+                <div class="slide">
+                    <div class="image-wrapper">
+                        <img src="UF004-2.jpg" alt="Propiedad destacada 2" loading="lazy" class="slider-img">
+                    </div>
+                </div>
+                
+                <!-- Imagen 3 -->
+                <div class="slide">
+                    <div class="image-wrapper">
+                        <img src="UF004-3.jpg" alt="Propiedad destacada 3" loading="lazy" class="slider-img">
+                    </div>
+                </div>
+                
+                <!-- Imagen 4 -->
+                <div class="slide">
+                    <div class="image-wrapper">
+                        <img src="UF004-4.jpg" alt="Propiedad destacada 4" loading="lazy" class="slider-img">
+                    </div>
+                </div>
+                
+                <!-- Imagen 5 -->
+                <div class="slide">
+                    <div class="image-wrapper">
+                        <img src="UF004-5.jpg" alt="Propiedad destacada 5" loading="lazy" class="slider-img">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navegación personalizada -->
+            <div class="slider-nav" id="sliderNav">
+                <button data-slide="0" class="active"></button>
+                <button data-slide="1"></button>
+                <button data-slide="2"></button>
+                <button data-slide="3"></button>
+                <button data-slide="4"></button>
             </div>
         </div>
     </section>
@@ -167,7 +219,9 @@
                 <p>La ciudad en tus manos</p>
             </div>
             
-            <div class="slidest listaDestacadas"></div>
+            <div class="propiedades-grid" id="listaDestacadas">
+                <!-- Las propiedades se cargarán dinámicamente aquí -->
+            </div>
             
             <div class="cargando cargandodest">
                 <div class="centrado">
@@ -184,12 +238,14 @@
     <section id="Lotes">
         <div class="cont">
             <div class="coltit">
-                <h3>Em<br>pren<br>dimien<br>tos</h3>
-                <p>Tenemos<br>lotes<br>con opciones<br>a tu alcance</p>
+                <h3>Emprendimientos</h3>
+                <p>Tenemos lotes con opciones a tu alcance</p>
             </div>
             
             <div class="colemp">
-                <div class="listaEmprendimientos"></div>
+                <div class="emprendimientos-grid" id="listaEmprendimientos">
+                    <!-- Los emprendimientos se cargarán dinámicamente aquí -->
+                </div>
                 
                 <div class="cargando cargaemp">
                     <div class="centrado">
@@ -210,15 +266,17 @@
 
     <!-- Banner de empleo -->
     <section class="empleo-banner">
-        <a class="btn empleo-btn" href="https://dante.com.ar/busquedaslaborales">
-            SUMATE A NUESTRO STAFF
-        </a>
+        <div class="cont">
+            <a class="btn empleo-btn" href="https://dante.com.ar/busquedaslaborales">
+                SUMATE A NUESTRO STAFF
+            </a>
+        </div>
     </section>
 
     <!-- WhatsApp flotante -->
-    <div class="fixed-bottom">
+    <div class="whatsapp-fixed">
         <a href="https://wa.me/5491125368595" id="whatsappLink" class="btn-whatsapp" aria-label="Contactar por WhatsApp">
-            <img src="img/ws-ico.png" alt="WhatsApp" width="40" height="40">
+            <img src="img/ws-ico.png" alt="WhatsApp" width="40" height="40" loading="lazy">
         </a>
     </div>
 
@@ -227,7 +285,7 @@
         <div class="cont">
             <div class="col">
                 <a href="index" class="logopie">
-                    <img src="img/logo.svg" alt="Dante Propiedades" width="130" height="60">
+                    <img src="img/logo.svg" alt="Dante Propiedades" width="130" height="60" loading="lazy">
                 </a>
             </div>
             
@@ -290,7 +348,7 @@
     <div id="copy">
         <div class="cont">
             <p>
-                <strong>“Confíe solo en corredores matriculados. Su tranquilidad, nuestra prioridad.”</strong>
+                <strong>"Confíe solo en corredores matriculados. Su tranquilidad, nuestra prioridad."</strong>
                 <br>
                 <strong>© DANTE PROPIEDADES</strong>
                 <br>
@@ -305,7 +363,7 @@
             
             <div class="prov">
                 <a href="#" target="_blank">
-                    <img src="llave.png" alt="By Arona" width="80" height="80">
+                    <img src="llave.png" alt="By Arona" width="80" height="80" loading="lazy">
                 </a>
                 <br>
                 <a href="#" target="_blank">by <strong>Arona</strong></a>
@@ -316,51 +374,84 @@
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
-    <script src="js/general.js"></script>
     
     <script>
-        // Script optimizado para mejor rendimiento
         document.addEventListener('DOMContentLoaded', function() {
-            // Inicialización de componentes
-            initMenu();
-            initSlider();
-            initSearch();
-            initWhatsApp();
+            console.log('Iniciando inicialización del sitio...');
+            
+            // Inicializar todas las funciones
+            try { initMenu(); } catch(e) { console.error('initMenu error:', e); }
+            try { initSlider(); } catch(e) { console.error('initSlider error:', e); }
+            try { initSearch(); } catch(e) { console.error('initSearch error:', e); }
+            try { initWhatsApp(); } catch(e) { console.error('initWhatsApp error:', e); }
+            try { initImageCentering(); } catch(e) { console.error('initImageCentering error:', e); }
         });
 
         function initMenu() {
-            // Lógica del menú móvil
             const menuBtn = document.querySelector('.menudesp');
             const closeBtn = document.querySelector('.cerrarmenu');
             const menuSlide = document.getElementById('menuslide');
             
-            menuBtn.addEventListener('click', () => menuSlide.classList.add('menuabierto'));
-            closeBtn.addEventListener('click', () => menuSlide.classList.remove('menuabierto'));
-            
-            // Cerrar menú al hacer clic fuera
-            document.addEventListener('click', (e) => {
-                if (!menuSlide.contains(e.target) && !menuBtn.contains(e.target)) {
-                    menuSlide.classList.remove('menuabierto');
-                }
-            });
+            if (menuBtn && closeBtn && menuSlide) {
+                menuBtn.addEventListener('click', () => menuSlide.classList.add('menuabierto'));
+                closeBtn.addEventListener('click', () => menuSlide.classList.remove('menuabierto'));
+                
+                document.addEventListener('click', (e) => {
+                    if (!menuSlide.contains(e.target) && !menuBtn.contains(e.target)) {
+                        menuSlide.classList.remove('menuabierto');
+                    }
+                });
+            }
         }
 
         function initSlider() {
-            // Inicializar slider principal
-            $('.slini').slick({
-                dots: false,
-                arrows: false,
-                infinite: true,
-                speed: 500,
-                fade: true,
-                autoplay: true,
-                autoplaySpeed: 4000,
-                cssEase: 'linear'
-            });
+            if (typeof $ !== 'undefined' && $('.slini').length) {
+                console.log('Inicializando Slick slider...');
+                
+                $('.slini').slick({
+                    dots: false,
+                    arrows: false,
+                    infinite: true,
+                    speed: 500,
+                    fade: true,
+                    autoplay: true,
+                    autoplaySpeed: 4000,
+                    cssEase: 'linear',
+                    adaptiveHeight: false,
+                    swipe: true,
+                    touchMove: true,
+                    accessibility: true
+                });
+
+                // Manejar navegación personalizada
+                const navButtons = document.querySelectorAll('.slider-nav button');
+                navButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const slideIndex = parseInt(this.dataset.slide);
+                        $('.slini').slick('slickGoTo', slideIndex);
+                        
+                        // Actualizar botón activo
+                        navButtons.forEach(btn => btn.classList.remove('active'));
+                        this.classList.add('active');
+                    });
+                });
+
+                // Sincronizar navegación con cambios automáticos
+                $('.slini').on('afterChange', function(event, slick, currentSlide) {
+                    navButtons.forEach(btn => btn.classList.remove('active'));
+                    const activeBtn = document.querySelector(`[data-slide="${currentSlide}"]`);
+                    if (activeBtn) {
+                        activeBtn.classList.add('active');
+                    }
+                });
+
+                console.log('Slider inicializado correctamente');
+            } else {
+                console.error('jQuery o elemento .slini no encontrado');
+            }
         }
 
         function initSearch() {
-            // Lógica del buscador
             const opciones = document.querySelectorAll('.buscadorcab .ope span');
             const inputOpe = document.querySelector('input[name="ope"]');
             
@@ -368,23 +459,64 @@
                 opcion.addEventListener('click', function() {
                     opciones.forEach(o => o.classList.remove('activo'));
                     this.classList.add('activo');
-                    inputOpe.value = this.dataset.val;
+                    if (inputOpe) {
+                        inputOpe.value = this.dataset.val;
+                    }
                 });
             });
         }
 
         function initWhatsApp() {
-            // Lógica del botón de WhatsApp
             const whatsappLink = document.getElementById('whatsappLink');
-            const telefonoDefault = '5491125368595';
-            
-            // Detectar sucursal desde URL si es necesario
-            const url = window.location.href;
-            let telefono = telefonoDefault;
-            
-            // Aquí puedes agregar lógica para diferentes sucursales
-            whatsappLink.href = `https://wa.me/${telefono}`;
+            if (whatsappLink) {
+                whatsappLink.href = 'https://wa.me/5491125368595';
+            }
         }
+
+        function initImageCentering() {
+            // Asegurar que las imágenes se centren correctamente
+            const images = document.querySelectorAll('.slider-img');
+            images.forEach((img, index) => {
+                img.addEventListener('load', function() {
+                    this.classList.add('loaded');
+                    console.log(`Imagen ${index + 1} cargada correctamente:`, this.src);
+                    
+                    // Recalcular posición del slider después de cargar
+                    setTimeout(() => {
+                        if (typeof $ !== 'undefined' && $('.slini').hasClass('slick-initialized')) {
+                            $('.slini').slick('setPosition');
+                        }
+                    }, 100);
+                });
+                
+                img.addEventListener('error', function() {
+                    console.warn(`Error cargando imagen ${index + 1}:`, this.src);
+                    this.setAttribute('data-error', 'true');
+                    this.classList.add('loaded');
+                });
+            });
+        }
+
+        // Header sticky
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('cab');
+            if (header) {
+                if (window.scrollY > 100) {
+                    header.classList.add('cabfix');
+                } else {
+                    header.classList.remove('cabfix');
+                }
+            }
+        });
+
+        // Redimensionar slider al cambiar tamaño de ventana
+        window.addEventListener('resize', function() {
+            if (typeof $ !== 'undefined' && $('.slini').hasClass('slick-initialized')) {
+                setTimeout(() => {
+                    $('.slini').slick('setPosition');
+                }, 100);
+            }
+        });
     </script>
 </body>
 </html>
