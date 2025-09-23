@@ -847,6 +847,7 @@ section {
     
     #cab .cont {
         padding: 10px 15px;
+        align-items: center; /* Ensure vertical alignment on mobile */
     }
     
     #cab .logo-text {
