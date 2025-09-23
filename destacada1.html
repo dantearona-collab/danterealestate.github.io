@@ -3,14 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DANTE PROPIEDADES | TU CIUDAD</title>
+    <title>Propiedad Destacada 1</title>
     <meta name="description" content="Propiedades en venta y alquiler en Capital Federal - Dante Propiedades">
     
-    <!-- Preload de recursos críticos -->
-     <!--<link rel="preload" href="img/UF004-1.jpg" as="image">
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com"> -->
-    
-   
     <!-- Open Graph optimizado -->
     <meta property="og:title" content="DANTE PROPIEDADES | TU CIUDAD">
     <meta property="og:description" content="Propiedades en venta y alquiler en Capital Federal">
@@ -28,6 +23,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css">
     <link rel="stylesheet" href="app.css">
+    <link rel="stylesheet" href="destacada1.css">
     
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-80451183-1"></script>
@@ -39,8 +35,6 @@
     </script>
 </head>
 <body>
-
-    
 
     <!-- Header -->
     <header id="cab">
@@ -70,44 +64,7 @@
         </div>
     </header>
 
-    <!-- Buscador -->
-    <form class="buscadorcab" action="propiedades" method="GET">
-        <input type="hidden" name="ope" value="V">
-        
-        <div class="cont">
-            <div class="ope">
-                <span class="activo" data-val="V">Venta</span>
-                <span data-val="A">Alquiler</span>
-                <span data-val="T">Alquiler<br>temporal</span>
-            </div>
-            
-            <div class="sel colini">
-                <select name="tipo" aria-label="Tipo de propiedad">
-                    <option value="">Propiedad</option>
-                    <option value="departamento">Departamento</option>
-                    <option value="casa">Casa</option>
-                    <option value="ph">PH</option>
-                    <option value="oficina">Oficina</option>
-                    <option value="local">Local</option>
-                    <option value="terreno">Terreno</option>
-                </select>
-            </div>
-            
-            <div class="buscarsug colini">
-                <input type="text" class="loc" placeholder="Búsqueda por barrio o localidad" 
-                       id="campobusq" autocomplete="off" aria-label="Buscar por ubicación">
-                <div class="suggestionsBox" id="suggestions">
-                    <ul class="suggestionList" id="suggestionsList"></ul>
-                </div>
-            </div>
-            
-            <input type="number" class="cod colini" name="cod" placeholder="Código" min="0" aria-label="Código de propiedad">
-            
-            <button type="submit" aria-label="Buscar propiedades">
-                <i class="fas fa-search"></i>
-            </button>
-        </div>
-    </form>
+    
 
     <!-- Menú móvil -->
     <nav id="menuslide">
@@ -154,145 +111,13 @@
 
         <ul class="redesmenuslide">
             <li><a href="https://instagram.com/danteprop" target="_blank"><i class="fab fa-instagram"></i></a></li>
-            <li><a href="https://facebook.com/DantePropiedades" target="_blank"><i class="fab fa-facebook"></i></a></li>
-            <li><a href="https://www.youtube.com/channel/UCclLOUtNIhOYTcJTxVPBrCA" target="_blank"><i class="fab fa-youtube"></i></a></li>
+            <li><a href="https://facebook.com/DantePropiedades" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i></a></li>
+            <li><a href="https://www.youtube.com/channel/UCclLOUtNIhOYTcJTxVPBrCA" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a></li>
             <li class="hashtag"><a href="https://www.instagram.com/explore/tags/dantepropiedades/" target="_blank">#DANTEPROPIEDADES</a></li>
         </ul>
     </nav>
 
-    <!-- Slider principal - CORREGIDO CON MANEJO DE ERRORES -->
-    <section id="sliderini" class="slihome">
-        <!-- Slider de imágenes -->
-        <div class="slider-container">
-            <div class="slini">
-                <!-- Imagen 1 -->
-                <div class="slide">
-                    <div class="image-wrapper">
-                        <img src="INSTITUCIONAL 1.PNG" alt="Propiedad destacada 1" loading="eager" class="slider-img">
-                    </div>
-                </div>
-                
-                <!-- Imagen 2 -->
-                <div class="slide">
-                    <div class="image-wrapper">
-                        <img src="INSTITUCIONAL 2.PNG" alt="Propiedad destacada 2" loading="lazy" class="slider-img">
-                    </div>
-                </div>
-                
-                <!-- Imagen 3 -->
-                <div class="slide">
-                    <div class="image-wrapper">
-                        <img src="INSTITUCIONAL 3.PNG" alt="Propiedad destacada 3" loading="lazy" class="slider-img">
-                    </div>
-                </div>
-                
-                <!-- Imagen 4 -->
-                <div class="slide">
-                    <div class="image-wrapper">
-                        <img src="INSTITUCIONAL 4.PNG" alt="Propiedad destacada 4" loading="lazy" class="slider-img">
-                    </div>
-                </div>
-                
-                <!-- Imagen 5 -->
-                <div class="slide">
-                    <div class="image-wrapper">
-                        <img src="INSTITUCIONAL 5.PNG" alt="Propiedad destacada 5" loading="lazy" class="slider-img">
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Navegación -->
-            <div class="slider-nav" id="sliderNav">
-                <button data-slide="0" class="active"></button>
-                <button data-slide="1"></button>
-                <button data-slide="2"></button>
-                <button data-slide="3"></button>
-                <button data-slide="4"></button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Propiedades destacadas -->
-    <section id="destacadasini">
-        <div class="cont">
-            <div class="tit">
-                <h2>Tus deseos están aquí</h2>
-                <p>La ciudad en tus manos</p>
-            </div>
-            
-            <div class="propiedades-grid" id="listaDestacadas">
-                <div class="propiedad-item">
-                    <a href="destacada1.html">
-                        <img src="UF000-1.JPG" alt="Propiedad destacada 1" loading="lazy">
-                    </a>
-                    <div class="image-description">Texto explicativo de la imagen 1</div>
-                    
-                </div>
-                <div class="propiedad-item">
-                    <a href="destacada2.html">
-                        <img src="UF000-2.JPG" alt="Propiedad destacada 2" loading="lazy">
-                    </a>
-                    <div class="image-description">Texto explicativo de la imagen 2</div>
-                    
-                </div>
-                <div class="propiedad-item">
-                    <a href="destacada3.html">
-                        <img src="UF000-3.JPG" alt="Propiedad destacada 1" loading="lazy">
-                    </a>
-                    <div class="image-description">Texto explicativo de la imagen 3</div>
-                </div>
-                <!-- Las propiedades se cargarán dinámicamente aquí -->
-            </div>
-            
-            <div class="cargando cargandodest">
-                <div class="centrado">
-                    <div class="cargaprop">
-                        <div class="loader"><div></div><div></div></div>
-                    </div>
-                    <span>Cargando propiedades destacadas</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Emprendimientos -->
-    <section id="Lotes">
-        <div class="cont">
-            <div class="coltit">
-                <h3>Emprendimientos</h3>
-                <p>Tenemos lotes con opciones a tu alcance</p>
-            </div>
-            
-            <div class="colemp">
-                <div class="emprendimientos-grid" id="listaEmprendimientos">
-                    <!-- Los emprendimientos se cargarán dinámicamente aquí -->
-                </div>
-                
-                <div class="cargando cargaemp">
-                    <div class="centrado">
-                        <div class="cargaprop">
-                            <div class="loader"><div></div><div></div></div>
-                        </div>
-                        <span>Cargando emprendimientos</span>
-                    </div>
-                </div>
-                
-                <div class="btn-container">
-                    <a class="btn" href="Lotes">Ver en mapa</a>
-                    <a class="btn" href="Lotes">Ver listado</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Banner de empleo -->
-    <section class="empleo-banner">
-        <div class="cont">
-            <a class="btn empleo-btn" href="https://dante.com.ar/busquedaslaborales">
-                SUMATE A NUESTRO STAFF
-            </a>
-        </div>
-    </section>
+    <!-- Contenido específico de la página destacada 1 (vacío) -->
 
     <!-- WhatsApp flotante -->
     <div class="whatsapp-fixed">
@@ -405,9 +230,9 @@
             
             // Inicializar funciones en orden de importancia
             initMenu();
-            initSlider();
             initSearch();
             initWhatsApp();
+            // initSlider() is not needed for detail pages unless they have a slider
         });
 
         function initMenu() {
@@ -428,40 +253,7 @@
             }
         }
 
-        function initSlider() {
-            if (typeof $ !== 'undefined' && $('.slini').length) {
-                console.log('Inicializando slider...');
-                
-                $('.slini').slick({
-                    dots: false,
-                    arrows: false,
-                    infinite: true,
-                    speed: 500,
-                    fade: true,
-                    autoplay: true,
-                    autoplaySpeed: 4000,
-                    cssEase: 'linear',
-                    adaptiveHeight: false
-                });
-
-                // Navegación
-                const navButtons = document.querySelectorAll('.slider-nav button');
-                navButtons.forEach(button => {
-                    button.addEventListener('click', function() {
-                        const slideIndex = parseInt(this.dataset.slide);
-                        $('.slini').slick('slickGoTo', slideIndex);
-                    });
-                });
-
-                $('.slini').on('afterChange', function(event, slick, currentSlide) {
-                    navButtons.forEach(btn => btn.classList.remove('active'));
-                    const activeBtn = document.querySelector(`[data-slide="${currentSlide}"]`);
-                    if (activeBtn) activeBtn.classList.add('active');
-                });
-                
-                console.log('Slider inicializado correctamente');
-            }
-        }
+        // initSlider function is not included as it's specific to the main page slider
 
         function initSearch() {
             const opciones = document.querySelectorAll('.buscadorcab .ope span');
