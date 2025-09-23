@@ -40,10 +40,7 @@
 </head>
 <body>
 
-    <!-- Banner de construcción -->
-    <div class="construction-banner">
-        <h1 class="blinking">PAGINA EN CONSTRUCCION</h1>
-    </div>
+    
 
     <!-- Header -->
     <header id="cab">
@@ -72,6 +69,45 @@
             </nav>
         </div>
     </header>
+
+    <!-- Buscador -->
+    <form class="buscadorcab" action="propiedades" method="GET">
+        <input type="hidden" name="ope" value="V">
+        
+        <div class="cont">
+            <div class="ope">
+                <span class="activo" data-val="V">Venta</span>
+                <span data-val="A">Alquiler</span>
+                <span data-val="T">Alquiler<br>temporal</span>
+            </div>
+            
+            <div class="sel colini">
+                <select name="tipo" aria-label="Tipo de propiedad">
+                    <option value="">Propiedad</option>
+                    <option value="departamento">Departamento</option>
+                    <option value="casa">Casa</option>
+                    <option value="ph">PH</option>
+                    <option value="oficina">Oficina</option>
+                    <option value="local">Local</option>
+                    <option value="terreno">Terreno</option>
+                </select>
+            </div>
+            
+            <div class="buscarsug colini">
+                <input type="text" class="loc" placeholder="Búsqueda por barrio o localidad" 
+                       id="campobusq" autocomplete="off" aria-label="Buscar por ubicación">
+                <div class="suggestionsBox" id="suggestions">
+                    <ul class="suggestionList" id="suggestionsList"></ul>
+                </div>
+            </div>
+            
+            <input type="number" class="cod colini" name="cod" placeholder="Código" min="0" aria-label="Código de propiedad">
+            
+            <button type="submit" aria-label="Buscar propiedades">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </form>
 
     <!-- Menú móvil -->
     <nav id="menuslide">
@@ -126,45 +162,6 @@
 
     <!-- Slider principal - CORREGIDO CON MANEJO DE ERRORES -->
     <section id="sliderini" class="slihome">
-        <!-- Buscador -->
-        <form class="buscadorcab" action="propiedades" method="GET">
-            <input type="hidden" name="ope" value="V">
-            
-            <div class="cont">
-                <div class="ope">
-                    <span class="activo" data-val="V">Venta</span>
-                    <span data-val="A">Alquiler</span>
-                    <span data-val="T">Alquiler<br>temporal</span>
-                </div>
-                
-                <div class="sel colini">
-                    <select name="tipo" aria-label="Tipo de propiedad">
-                        <option value="">Propiedad</option>
-                        <option value="departamento">Departamento</option>
-                        <option value="casa">Casa</option>
-                        <option value="ph">PH</option>
-                        <option value="oficina">Oficina</option>
-                        <option value="local">Local</option>
-                        <option value="terreno">Terreno</option>
-                    </select>
-                </div>
-                
-                <div class="buscarsug colini">
-                    <input type="text" class="loc" placeholder="Búsqueda por barrio o localidad" 
-                           id="campobusq" autocomplete="off" aria-label="Buscar por ubicación">
-                    <div class="suggestionsBox" id="suggestions">
-                        <ul class="suggestionList" id="suggestionsList"></ul>
-                    </div>
-                </div>
-                
-                <input type="number" class="cod colini" name="cod" placeholder="Código" min="0" aria-label="Código de propiedad">
-                
-                <button type="submit" aria-label="Buscar propiedades">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-        </form>
-
         <!-- Slider de imágenes -->
         <div class="slider-container">
             <div class="slini">
