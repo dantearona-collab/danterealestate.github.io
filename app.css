@@ -321,7 +321,7 @@ body {
 
 .ope {
     display: flex;
-    border-radius: 5px;
+    border-radius: 50px;
     overflow: hidden;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
@@ -384,7 +384,7 @@ body {
     width: 100%;
     padding: 10px;
     border: 1px solid #ddd;
-    border-radius: 5px;
+    border-radius: 50px;
     font-size: 0.9rem;
 }
 
@@ -400,7 +400,7 @@ body {
     color: white;
     border: none;
     padding: 10px 16px;
-    border-radius: 5px;
+    border-radius: 50px;
     cursor: pointer;
     font-size: 1.1rem;
     transition: all 0.3s ease;
@@ -1025,11 +1025,10 @@ section {
 
 /* Estilos para las propiedades destacadas */
 .propiedad-item {
-    height: 250px; /* Altura fija para todas las imágenes */
+    min-height: 250px; /* Altura mínima para todas las imágenes */
     display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden; /* Oculta cualquier parte de la imagen que se desborde */
+    flex-direction: column; /* Stack children vertically */
+    align-items: stretch; /* Make children fill the width */
     border-radius: 6px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     margin-bottom: 20px; /* Separación entre las propiedades */
@@ -1040,4 +1039,14 @@ section {
     height: 100%;
     object-fit: cover; /* Asegura que la imagen cubra el área manteniendo su relación de aspecto */
     display: block;
+}
+
+.image-description {
+    padding: 10px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--texto); /* Use a suitable text color */
+    background-color: var(--gris-claro); /* A light background to separate it visually */
+    margin-top: 5px; /* Space between image and text */
+    border-radius: 0 0 6px 6px; /* Match the border-radius of the item */
 }
