@@ -6,6 +6,11 @@
     <title>DANTE PROPIEDADES | TU CIUDAD</title>
     <meta name="description" content="Propiedades en venta y alquiler en Capital Federal - Dante Propiedades">
     
+    <!-- Preload de recursos críticos -->
+     <!--<link rel="preload" href="img/UF004-1.jpg" as="image">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com"> -->
+    
+   
     <!-- Open Graph optimizado -->
     <meta property="og:title" content="DANTE PROPIEDADES | TU CIUDAD">
     <meta property="og:description" content="Propiedades en venta y alquiler en Capital Federal">
@@ -22,7 +27,6 @@
     <!-- CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css">
     <link rel="stylesheet" href="app.css">
     
     <!-- Google Analytics -->
@@ -120,7 +124,7 @@
         </ul>
     </nav>
 
-    <!-- Slider principal - COMPLETAMENTE CORREGIDO -->
+    <!-- Slider principal - CORREGIDO CON MANEJO DE ERRORES -->
     <section id="sliderini" class="slihome">
         <!-- Buscador -->
         <form class="buscadorcab" action="propiedades" method="GET">
@@ -161,7 +165,7 @@
             </div>
         </form>
 
-        <!-- Slider de imágenes - ESTRUCTURA CORREGIDA -->
+        <!-- Slider de imágenes -->
         <div class="slider-container">
             <div class="slini">
                 <!-- Imagen 1 -->
@@ -200,7 +204,7 @@
                 </div>
             </div>
             
-            <!-- Navegación personalizada -->
+            <!-- Navegación -->
             <div class="slider-nav" id="sliderNav">
                 <button data-slide="0" class="active"></button>
                 <button data-slide="1"></button>
@@ -276,7 +280,8 @@
     <!-- WhatsApp flotante -->
     <div class="whatsapp-fixed">
         <a href="https://wa.me/5491125368595" id="whatsappLink" class="btn-whatsapp" aria-label="Contactar por WhatsApp">
-            <img src="img/ws-ico.png" alt="WhatsApp" width="40" height="40" loading="lazy">
+            <img src="img/ws-ico.png" alt="WhatsApp" width="40" height="40" loading="lazy"
+                 onerror="this.src='https://cdn-icons-png.flaticon.com/512/124/124034.png'">
         </a>
     </div>
 
@@ -285,7 +290,8 @@
         <div class="cont">
             <div class="col">
                 <a href="index" class="logopie">
-                    <img src="img/logo.svg" alt="Dante Propiedades" width="130" height="60" loading="lazy">
+                    <img src="img/logo.svg" alt="Dante Propiedades" width="130" height="60" loading="lazy"
+                         onerror="this.src='llave.png'">
                 </a>
             </div>
             
@@ -356,7 +362,7 @@
                 <br>
                 Nota: Toda la información y medidas provistas son aproximadas y deberán ratificarse con la documentación pertinente.
                 <br>
-                DANTE PROPIEDADES | AV. Corrientes 524 - Ciudad Autónoma de Buenos Aires | CUIT 20-39415572-2
+                DANTE PROPIEDADES | AV. Corrientes 524 piso 5 - Ciudad Autónoma de Buenos Aires | CUIT 20-39415572-2
                 <br>
                 CI DANTE ARONA | CUCICBA 9337
             </p>
@@ -376,15 +382,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
     
     <script>
+        // Script mejorado con manejo robusto de errores
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Iniciando inicialización del sitio...');
+            console.log('=== INICIANDO DANTE PROPIEDADES ===');
             
-            // Inicializar todas las funciones
-            try { initMenu(); } catch(e) { console.error('initMenu error:', e); }
-            try { initSlider(); } catch(e) { console.error('initSlider error:', e); }
-            try { initSearch(); } catch(e) { console.error('initSearch error:', e); }
-            try { initWhatsApp(); } catch(e) { console.error('initWhatsApp error:', e); }
-            try { initImageCentering(); } catch(e) { console.error('initImageCentering error:', e); }
+            // Inicializar funciones en orden de importancia
+            initMenu();
+            initSlider();
+            initSearch();
+            initWhatsApp();
         });
 
         function initMenu() {
@@ -393,20 +399,21 @@
             const menuSlide = document.getElementById('menuslide');
             
             if (menuBtn && closeBtn && menuSlide) {
-                menuBtn.addEventListener('click', () => menuSlide.classList.add('menuabierto'));
-                closeBtn.addEventListener('click', () => menuSlide.classList.remove('menuabierto'));
+                menuBtn.addEventListener('click', () => {
+                    menuSlide.classList.add('menuabierto');
+                    console.log('Menú abierto');
+                });
                 
-                document.addEventListener('click', (e) => {
-                    if (!menuSlide.contains(e.target) && !menuBtn.contains(e.target)) {
-                        menuSlide.classList.remove('menuabierto');
-                    }
+                closeBtn.addEventListener('click', () => {
+                    menuSlide.classList.remove('menuabierto');
+                    console.log('Menú cerrado');
                 });
             }
         }
 
         function initSlider() {
             if (typeof $ !== 'undefined' && $('.slini').length) {
-                console.log('Inicializando Slick slider...');
+                console.log('Inicializando slider...');
                 
                 $('.slini').slick({
                     dots: false,
@@ -417,37 +424,25 @@
                     autoplay: true,
                     autoplaySpeed: 4000,
                     cssEase: 'linear',
-                    adaptiveHeight: false,
-                    swipe: true,
-                    touchMove: true,
-                    accessibility: true
+                    adaptiveHeight: false
                 });
 
-                // Manejar navegación personalizada
+                // Navegación
                 const navButtons = document.querySelectorAll('.slider-nav button');
                 navButtons.forEach(button => {
                     button.addEventListener('click', function() {
                         const slideIndex = parseInt(this.dataset.slide);
                         $('.slini').slick('slickGoTo', slideIndex);
-                        
-                        // Actualizar botón activo
-                        navButtons.forEach(btn => btn.classList.remove('active'));
-                        this.classList.add('active');
                     });
                 });
 
-                // Sincronizar navegación con cambios automáticos
                 $('.slini').on('afterChange', function(event, slick, currentSlide) {
                     navButtons.forEach(btn => btn.classList.remove('active'));
                     const activeBtn = document.querySelector(`[data-slide="${currentSlide}"]`);
-                    if (activeBtn) {
-                        activeBtn.classList.add('active');
-                    }
+                    if (activeBtn) activeBtn.classList.add('active');
                 });
-
+                
                 console.log('Slider inicializado correctamente');
-            } else {
-                console.error('jQuery o elemento .slini no encontrado');
             }
         }
 
@@ -459,9 +454,7 @@
                 opcion.addEventListener('click', function() {
                     opciones.forEach(o => o.classList.remove('activo'));
                     this.classList.add('activo');
-                    if (inputOpe) {
-                        inputOpe.value = this.dataset.val;
-                    }
+                    if (inputOpe) inputOpe.value = this.dataset.val;
                 });
             });
         }
@@ -473,49 +466,18 @@
             }
         }
 
-        function initImageCentering() {
-            // Asegurar que las imágenes se centren correctamente
-            const images = document.querySelectorAll('.slider-img');
-            images.forEach((img, index) => {
-                img.addEventListener('load', function() {
-                    this.classList.add('loaded');
-                    console.log(`Imagen ${index + 1} cargada correctamente:`, this.src);
-                    
-                    // Recalcular posición del slider después de cargar
-                    setTimeout(() => {
-                        if (typeof $ !== 'undefined' && $('.slini').hasClass('slick-initialized')) {
-                            $('.slini').slick('setPosition');
-                        }
-                    }, 100);
-                });
-                
-                img.addEventListener('error', function() {
-                    console.warn(`Error cargando imagen ${index + 1}:`, this.src);
-                    this.setAttribute('data-error', 'true');
-                    this.classList.add('loaded');
-                });
-            });
-        }
-
         // Header sticky
         window.addEventListener('scroll', function() {
             const header = document.getElementById('cab');
             if (header) {
-                if (window.scrollY > 100) {
-                    header.classList.add('cabfix');
-                } else {
-                    header.classList.remove('cabfix');
-                }
+                header.classList.toggle('cabfix', window.scrollY > 100);
             }
         });
 
-        // Redimensionar slider al cambiar tamaño de ventana
-        window.addEventListener('resize', function() {
-            if (typeof $ !== 'undefined' && $('.slini').hasClass('slick-initialized')) {
-                setTimeout(() => {
-                    $('.slini').slick('setPosition');
-                }, 100);
-            }
+        // Debug: Mostrar información de carga
+        window.addEventListener('load', function() {
+            console.log('=== PÁGINA COMPLETAMENTE CARGADA ===');
+            console.log('Todas las imágenes deberían estar cargadas');
         });
     </script>
 </body>
