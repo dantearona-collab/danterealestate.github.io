@@ -223,25 +223,25 @@
             <div class="propiedades-grid" id="listaDestacadas">
                 <div class="propiedad-item">
                     <a href="destacada1.html">
-                        <img src="UF000-1.JPG" alt="Propiedad destacada 1" loading="lazy">
+                        <img src="UF000-1.jpg" alt="Propiedad destacada 1" loading="lazy">
                     </a>
                     <div class="image-description">Texto explicativo de la imagen 1</div>
                     
                 </div>
                 <div class="propiedad-item">
                     <a href="destacada2.html">
-                        <img src="UF000-2.JPG" alt="Propiedad destacada 2" loading="lazy">
+                        <img src="UF000-2.jpg" alt="Propiedad destacada 2" loading="lazy">
                     </a>
                     <div class="image-description">Texto explicativo de la imagen 2</div>
                     
                 </div>
                 <div class="propiedad-item">
                     <a href="destacada3.html">
-                        <img src="UF000-3.JPG" alt="Propiedad destacada 1" loading="lazy">
+                        <img src="UF000-3.jpg" alt="Propiedad destacada 1" loading="lazy">
                     </a>
                     <div class="image-description">Texto explicativo de la imagen 3</div>
                 </div>
-                <!-- Las propiedades se cargarán dinámicamente aquí -->
+                <!-- Las propiedades se cargarán dinámicamente aquí ---->
             </div>
             
             <div class="cargando cargandodest">
@@ -367,7 +367,7 @@
         </div>
     </footer>
 
-    <!-- Copyright -->
+    <!-- Copyright --> <!-- Copyright -->
     <div id="copy">
         <div class="cont">
             <p>
@@ -381,7 +381,7 @@
                 <br>
                 DANTE PROPIEDADES | AV. Corrientes 524 piso 5 - Ciudad Autónoma de Buenos Aires | CUIT 20-39415572-2
                 <br>
-                CI DANTE ARONA | CUCICBA 9337
+                CI DANTE ARONA | CUCICBA 9337 |
             </p>
             
             <div class="prov">
@@ -406,7 +406,7 @@
             // Inicializar funciones en orden de importancia
             initMenu();
             initSlider();
-            initSearch();
+            initSearch(); // This now includes the AJAX call
             initWhatsApp();
         });
 
@@ -464,17 +464,108 @@
         }
 
         function initSearch() {
-            const opciones = document.querySelectorAll('.buscadorcab .ope span');
+            const searchForm = document.querySelector('.buscadorcab');
+            const opeSpans = document.querySelectorAll('.buscadorcab .ope span');
             const inputOpe = document.querySelector('input[name="ope"]');
-            
-            opciones.forEach(opcion => {
+            const listaDestacadas = document.getElementById('listaDestacadas'); // Assuming this is where results go
+
+            // Handle operation type selection
+            opeSpans.forEach(opcion => {
                 opcion.addEventListener('click', function() {
-                    opciones.forEach(o => o.classList.remove('activo'));
+                    opeSpans.forEach(o => o.classList.remove('activo'));
                     this.classList.add('activo');
                     if (inputOpe) inputOpe.value = this.dataset.val;
                 });
             });
+
+            // Handle form submission
+            if (searchForm) {
+                searchForm.addEventListener('submit', async function(event) {
+                    event.preventDefault(); // Prevent default form submission
+
+                    const formData = new FormData(searchForm);
+                    const params = new URLSearchParams();
+                    for (const pair of formData.entries()) {
+                        if (pair[1]) { // Only add if value is not empty
+                            params.append(pair[0], pair[1]);
+                        }
+                    }
+                    // Get the active operation value
+                    const activeOpe = document.querySelector('.buscadorcab .ope span.activo');
+                    if (activeOpe && activeOpe.dataset.val) {
+                        params.set('ope', activeOpe.dataset.val);
+                    } else {
+                        params.delete('ope'); // Remove if no active operation
+                    }
+
+                    // Get the location input value
+                    const locInput = document.getElementById('campobusq');
+                    if (locInput && locInput.value) {
+                        params.set('loc', locInput.value);
+                    } else {
+                        params.delete('loc');
+                    }
+
+                    const queryString = params.toString();
+                    const backendUrl = `http://127.0.0.1:5000/api/properties/search?${queryString}`; // Your Flask backend URL
+
+                    try {
+                        const response = await fetch(backendUrl);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        const properties = await response.json();
+                        displayProperties(properties); // Function to display results
+                    } catch (error) {
+                        console.error('Error fetching properties:', error);
+                        if (listaDestacadas) {
+                            listaDestacadas.innerHTML = '<p>Error al cargar propiedades. Intente de nuevo más tarde.</p>';
+                        }
+                    }
+                });
+            }
         }
+
+        function displayProperties(properties) {
+            const listaDestacadas = document.getElementById('listaDestacadas');
+            if (!listaDestacadas) return;
+
+            listaDestacadas.innerHTML = ''; // Clear previous results
+
+            if (properties.length === 0) {
+                listaDestacadas.innerHTML = '<p>No se encontraron propiedades que coincidan con su búsqueda.</p>';
+                return;
+            }
+
+            properties.forEach(prop => {
+                const propertyItem = document.createElement('div');
+                propertyItem.classList.add('propiedad-item'); // Use your existing CSS class
+
+                const imageUrl = prop.images && prop.images.length > 0 ? prop.images[0].url : 'llave.png'; // Default image
+                const descriptionText = prop.description || 'Sin descripción';
+                const priceText = prop.price ? `${prop.currency} ${prop.price.toLocaleString('es-AR')}` : 'Consultar precio';
+                const titleText = prop.title || 'Propiedad sin título';
+                const codeText = prop.code ? `Código: ${prop.code}` : '';
+                const locationText = prop.location && prop.location.neighborhood ? prop.location.neighborhood : '';
+                const typeOpText = `${prop.property_type || ''} en ${prop.operation || ''}`;
+
+
+                propertyItem.innerHTML = `
+                    <a href="details.html?id=${prop.property_id}">
+                        <img src="${imageUrl}" alt="${titleText}" loading="lazy">
+                    </a>
+                    <div class="image-description">
+                        <h3>${titleText}</h3>
+                        <p>${locationText}</p>
+                        <p>${typeOpText}</p>
+                        <p>${priceText}</p>
+                        <p>${codeText}</p>
+                    </div>
+                `;
+                listaDestacadas.appendChild(propertyItem);
+            });
+        }
+
 
         function initWhatsApp() {
             const whatsappLink = document.getElementById('whatsappLink');
