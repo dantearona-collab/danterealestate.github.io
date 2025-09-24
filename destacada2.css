@@ -420,3 +420,16 @@ body {
         margin-top: 15px;
     }
 }
+
+.btn-agente {
+    background-color: #0056b3;
+    color: white !important;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    display: inline-block;
+    font-size: 1.3rem;
+}
+.btn-agente:hover {
+    background-color: #004494;
+}
