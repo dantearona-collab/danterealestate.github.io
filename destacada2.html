@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Propiedad Destacada 2</title>
-    <meta name="description" content="Propiedades en venta y alquiler en Capital Federal - Dante Propiedades">
+    <title>DANTE PROPIEDADES| Propiedad en Venta | Dante Propiedades</title>
+    <meta name="description" content="Propiedad DANTE PROPIEDADES en venta: 3 ambientes, 77,79m², US$ 155.000. Dante Propiedades - Capital Federal">
     
     <!-- Open Graph optimizado -->
-    <meta property="og:title" content="DANTE PROPIEDADES | TU CIUDAD">
-    <meta property="og:description" content="Propiedades en venta y alquiler en Capital Federal">
+    <meta property="og:title" content="DANTE PROPIEDADES | Propiedad en Venta | DANTE PROPIEDADES">
+    <meta property="og:description" content="Propiedad DANTE PROPIEDADES en venta: 3 ambientes, 77,79m², US$ 155.000">
     <meta property="og:image" content="https://dantepropiedades.com.ar/img/logo-web-compartir.jpg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:url" content="https://dantepropiedades.com.ar/">
+    <meta property="og:url" content="https://dantepropiedades.com.ar/destacada1">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="DANTE PROPIEDADES">
     
@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css">
     <link rel="stylesheet" href="app.css">
-    <link rel="stylesheet" href="destacada2.css">
+    <link rel="stylesheet" href="destacada1.css">
     
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-80451183-1"></script>
@@ -38,7 +38,7 @@
 
     <!-- Header -->
     <header id="cab">
-        <div >
+        <div class="cont">
             <a href="index" class="logo">
                 <img src="llave.png" alt="Dante Propiedades" width="90" height="30" loading="eager">
                 <span class="logo-text">DANTE PROPIEDADES</span>
@@ -64,7 +64,44 @@
         </div>
     </header>
 
-    
+    <!-- Buscador -->
+    <form class="buscadorcab" action="propiedades" method="GET">
+        <input type="hidden" name="ope" value="V">
+        
+        <div class="cont">
+            <div class="ope">
+                <span class="activo" data-val="V">Venta</span>
+                <span data-val="A">Alquiler</span>
+                <span data-val="T">Alquiler<br>temporal</span>
+            </div>
+            
+            <div class="sel colini">
+                <select name="tipo" aria-label="Tipo de propiedad">
+                    <option value="">Propiedad</option>
+                    <option value="departamento">Departamento</option>
+                    <option value="casa">Casa</option>
+                    <option value="ph">PH</option>
+                    <option value="oficina">Oficina</option>
+                    <option value="local">Local</option>
+                    <option value="terreno">Terreno</option>
+                </select>
+            </div>
+            
+            <div class="buscarsug colini">
+                <input type="text" class="loc" placeholder="Búsqueda por barrio o localidad" 
+                       id="campobusq" autocomplete="off" aria-label="Buscar por ubicación">
+                <div class="suggestionsBox" id="suggestions">
+                    <ul class="suggestionList" id="suggestionsList"></ul>
+                </div>
+            </div>
+            
+            <input type="number" class="cod colini" name="cod" placeholder="Código" min="0" aria-label="Código de propiedad">
+            
+            <button type="submit" aria-label="Buscar propiedades">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </form>
 
     <!-- Menú móvil -->
     <nav id="menuslide">
@@ -117,9 +154,87 @@
         </ul>
     </nav>
 
-    
-    <!-- Contenido específico de la página destacada 2 (vacío) -->
-
+    <!-- Contenido específico de la página destacada 1 -->
+    <main class="propiedad-destacada">
+        <div class="container">
+            <!-- Encabezado de la propiedad -->
+            <div class="propiedad-header">
+                <h1></h1>
+                <p class="propiedad-subtitulo">L'actual cero de tono | stock | stock</p>
+            </div>
+            
+            <!-- Información principal -->
+            <div class="propiedad-info-principal">
+                <div class="precio">
+                    <span class="moneda">US$</span>
+                    <span class="valor">155.000</span>
+                    <span class="operacion">Venta</span>
+                </div>
+                
+                <div class="caracteristicas">
+                    <div class="caracteristica">
+                        <span class="titulo">Súp. total</span>
+                        <span class="valor">77,79m²</span>
+                    </div>
+                    <div class="caracteristica">
+                        <span class="titulo">Ambientes</span>
+                        <span class="valor">3</span>
+                    </div>
+                    <div class="caracteristica">
+                        <span class="titulo">Baño</span>
+                        <span class="valor">1</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Agentes -->
+            <div class="agentes">
+                <h3>FOTOS</h3>
+                <h3>VIDEOS</h3>
+                <h3>MAPA</h3>
+            </div>
+            
+            <!-- Descripción -->
+            <div class="descripcion">
+                <h2>Descripcion</h2>
+                <p>DESTACADO 2 ---VENTA DEPARTAMENTO 3 AMBIENTES, CABALLITO</p>
+                <p>Necesito desplazaremos el fondo. Rey hace estado.</p>
+                <p>Cuesta con:</p>
+                <p>Desde cambio.</p>
+                <p>Utilizar contacto con salida a baños comienzó y prestará defectos.</p>
+                <p>Son habitaciones amplias con placenta.</p>
+            </div>
+            
+            <!-- Información de contacto -->
+            <div class="contacto">
+                <h3>CONTACTO CON LA SUCURSAL:</h3>
+                <ul>
+                    <li>Avda. Corrientes 524 piso 5 CABAAlc. Contratado 2009: esq. frente...</li>
+                    <li>Descripción para contratar: DANTE PROPIEDADES</li>
+                    <li>xxxxxxx</li>
+                </ul>
+                
+                <form class="formulario-contacto">
+                    <div class="campo">
+                        <label for="nombre">Nombre:</label>
+                        <input type="text" id="nombre" name="nombre" required>
+                    </div>
+                    
+                    <div class="campo">
+                        <label for="firma">Firma:</label>
+                        <input type="text" id="firma" name="firma">
+                    </div>
+                    
+                    <div class="campo">
+                        <label for="telefono">Teléfono (del nº 6)</label>
+                        <input type="tel" id="telefono" name="telefono" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-contacto">Solicitar información</button>
+                </form>
+            </div>
+        </div>
+    </main>
 
     <!-- WhatsApp flotante -->
     <div class="whatsapp-fixed">
@@ -130,16 +245,17 @@
     </div>
 
     <!-- Footer -->
-    <footer id="pie">
-        <div >
-            <div >
+    <!--
+<footer id="pie">
+        <div class="container">
+            <div class="footer-col">
                 <a href="index" class="logopie">
                     <img src="img/logo.svg" alt="Dante Propiedades" width="130" height="60" loading="lazy"
                          onerror="this.src='llave.png'">
                 </a>
             </div>
             
-            <div >
+            <div class="footer-col">
                 <div class="subcol">
                     <ul>
                         <li>
@@ -173,7 +289,7 @@
                 </div>
             </div>
             
-            <div >
+            <div class="footer-col">
                 <div class="llamar">
                     <strong>
                         <a href="tel:01166562078">
@@ -193,10 +309,12 @@
             </div>
         </div>
     </footer>
+-->
+
 
     <!-- Copyright -->
     <div id="copy">
-        <div >
+        <div class="container">
             <p>
                 <strong>"Confíe solo en corredores matriculados. Su tranquilidad, nuestra prioridad."</strong>
                 <br>
