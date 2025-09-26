@@ -29,14 +29,39 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css">
     <link rel="stylesheet" href="app.css">
     
-    <!-- Google Analytics -->
+    <!-- Google Analytics 
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-80451183-1"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
         gtag('config', 'UA-80451183-1');
+    </script> -->
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E6K41V8BHB"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-E6K41V8BHB');
     </script>
+    <style>
+    .construction-banner {
+        background-color: yellow;
+        text-align: center;
+        padding: 10px;
+        font-weight: bold;
+        animation: blinker 1s linear infinite;
+    }
+
+    @keyframes blinker {
+        50% {
+            opacity: 0;
+        }
+    }
+    </style>
 </head>
 <body>
 
@@ -51,6 +76,9 @@
             </a>
             
             <nav class="menugen">
+                <div class="construction-banner">
+                    <p>Página en Construcción</p>
+                </div>
                 <ul class="menucab">
                     <li><a href="tel:1166562078"><i class="fas fa-phone"></i> Llamá <span>11 6656 2078</span></a></li>
                     <li><a href="tasaciones">Tasá</a></li>
