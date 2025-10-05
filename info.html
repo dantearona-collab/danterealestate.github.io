@@ -6,6 +6,19 @@
     <title>Información de la Propiedad</title>
     <link rel="stylesheet" href="app.css">
     <style>
+        .construction-banner {
+            background-color: yellow;
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+            animation: blinker 1s linear infinite;
+        }
+
+        @keyframes blinker {
+            50% {
+                opacity: 0;
+            }
+        }
         body {
             font-family: 'Fira Sans', sans-serif;
             line-height: 1.6;
@@ -59,6 +72,9 @@
                 <span class="logo-text">DANTE PROPIEDADES</span>
             </a>
             <nav class="menugen">
+                <div class="construction-banner">
+                    <p>Página en Construcción</p>
+                </div>
                 <ul class="menucab">
                     <li><a href="tel:1166562078"><i class="fas fa-phone"></i> Llamá <span>11 6656 2078</span></a></li>
                     <li><a href="tasaciones">Tasá</a></li>
