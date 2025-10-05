@@ -1025,18 +1025,17 @@ section {
 
 /* Estilos para las propiedades destacadas */
 .propiedad-item {
-    min-height: 250px; /* Altura mínima para todas las imágenes */
     display: flex;
     flex-direction: column; /* Stack children vertically */
     align-items: stretch; /* Make children fill the width */
     border-radius: 6px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    margin-bottom: 20px; /* Separación entre las propiedades */
+    overflow: hidden;
 }
 
 .propiedad-item img {
     width: 100%;
-    height: 100%;
+    height: 200px;
     object-fit: cover; /* Asegura que la imagen cubra el área manteniendo su relación de aspecto */
     display: block;
 }
