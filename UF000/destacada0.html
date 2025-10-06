@@ -466,6 +466,8 @@
 
 <script>
 // Script para manejar el envío del formulario a Python/Excel
+// Script UNIVERSAL para formularios de contacto - Dante Propiedades
+// Funciona en destacada0.html, destacada1.html, destacada2.html, etc.
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✓ Script de formulario cargado');
     
@@ -478,8 +480,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('✓ Formulario encontrado');
     
+    // Detectar automáticamente el nombre de la página actual
+    const nombrePagina = window.location.pathname.split('/').pop() || 'index.html';
+    console.log('📄 Página actual:', nombrePagina);
+    
     formulario.addEventListener('submit', async function(e) {
-        e.preventDefault(); // Evitar recarga de página
+        e.preventDefault();
         console.log('📤 Formulario enviado');
         
         // Obtener los datos del formulario
@@ -487,7 +493,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const firma = document.getElementById('firma').value.trim();
         const telefono = document.getElementById('telefono').value.trim();
         
-        console.log('Datos capturados:', { nombre, firma, telefono });
+        console.log('Datos capturados:', { nombre, firma, telefono, pagina: nombrePagina });
         
         // Validación básica
         if (!nombre || !telefono) {
@@ -495,12 +501,12 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Preparar los datos
+        // Preparar los datos - ahora incluye la página automáticamente
         const datos = {
             nombre: nombre,
             firma: firma,
             telefono: telefono,
-            propiedad: 'DESTACADA0'
+            pagina: nombrePagina  // Se detecta automáticamente
         };
         
         console.log('Datos a enviar:', datos);
@@ -517,10 +523,14 @@ document.addEventListener('DOMContentLoaded', function() {
         boton.textContent = 'Enviando...';
         
         try {
-            console.log('🌐 Enviando petición a http://localhost:5000/guardar_contacto');
+            // CAMBIA ESTA IP por la IP de tu computadora
+            const serverURL = 'http://192.168.0.207:5000/guardar_contacto';
+            // Si estás probando en la misma PC, usa localhost
+            // const serverURL = 'http://localhost:5000/guardar_contacto';
             
-            // Enviar datos al servidor Python
-            const response = await fetch('http://localhost:5000/guardar_contacto', {
+            console.log('🌐 Enviando petición a', serverURL);
+            
+            const response = await fetch(serverURL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -535,7 +545,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (resultado.success) {
                 alert('✓ ' + resultado.message);
-                // Limpiar formulario
                 formulario.reset();
             } else {
                 alert('✗ ' + resultado.message);
@@ -545,13 +554,11 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('❌ Error completo:', error);
             alert('✗ Error de conexión. Asegúrate de que el servidor Python esté ejecutándose.\n\nError: ' + error.message);
         } finally {
-            // Rehabilitar botón
             boton.disabled = false;
             boton.textContent = textoOriginal;
         }
     });
-});
-</script>
+})
 
 
 </body>
