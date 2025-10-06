@@ -49,6 +49,15 @@
     }
     </style>
 </head>
+
+
+
+
+
+
+
+
+
 <body>
 
     <!-- Header -->
@@ -216,7 +225,7 @@
             <!-- Descripción -->
             <div class="descripcion">
                 <h2>Descripcion</h2>
-                <p>DESTACADO 0 --VENTA DEPARTAMENTO 3 AMBIENTES, BALVANERA</p>
+                <p>DESTACADO 4 --VENTA DEPARTAMENTO 3 AMBIENTES, BALVANERA</p>
                 <p>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.</p>
                 <p>xxxxxxxxxxx</p>
                 <p>xxxxxxxxxxx</p>
@@ -234,7 +243,30 @@
                     <li>xxxxxxx</li>
                 </ul>
                 
-                <form class="formulario-contacto">
+                
+                
+            <form class="formulario-contacto" id="formContactoDante">
+                <div class="campo">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                </div>
+    
+                <div class="campo">
+                    <label for="firma">Firma:</label>
+                    <input type="text" id="firma" name="firma">
+                </div>
+                
+                <div class="campo">
+                    <label for="telefono">Teléfono (del nº 6)</label>
+                    <input type="tel" id="telefono" name="telefono" required>
+                </div>
+                
+                <button type="submit" class="btn-contacto">Solicitar información</button>
+                
+                <!-- Mensaje de confirmación -->
+                <div id="mensajeRespuesta" style="margin-top: 15px; padding: 10px; border-radius: 5px; display: none;"></div>
+                
+            <!-- <form class="formulario-contacto">
                     <div class="campo">
                         <label for="nombre">Nombre:</label>
                         <input type="text" id="nombre" name="nombre" required>
@@ -250,8 +282,10 @@
                         <input type="tel" id="telefono" name="telefono" required>
                     </div>
                     
+            
+                    
                     <button type="submit" class="btn-contacto">Solicitar información</button>
-                </form>
+                </form> -->
             </div>
         </div>
     </main>
@@ -430,6 +464,94 @@
         });
     </script>
 
+<script>
+// Script para manejar el envío del formulario a Python/Excel
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✓ Script de formulario cargado');
+    
+    const formulario = document.querySelector('.formulario-contacto');
+    
+    if (!formulario) {
+        console.error('✗ No se encontró el formulario con class="formulario-contacto"');
+        return;
+    }
+    
+    console.log('✓ Formulario encontrado');
+    
+    formulario.addEventListener('submit', async function(e) {
+        e.preventDefault(); // Evitar recarga de página
+        console.log('📤 Formulario enviado');
+        
+        // Obtener los datos del formulario
+        const nombre = document.getElementById('nombre').value.trim();
+        const firma = document.getElementById('firma').value.trim();
+        const telefono = document.getElementById('telefono').value.trim();
+        
+        console.log('Datos capturados:', { nombre, firma, telefono });
+        
+        // Validación básica
+        if (!nombre || !telefono) {
+            alert('Por favor completa todos los campos obligatorios');
+            return;
+        }
+        
+        // Preparar los datos
+        const datos = {
+            nombre: nombre,
+            firma: firma,
+            telefono: telefono,
+            propiedad: 'DESTACADA0'
+        };
+        
+        console.log('Datos a enviar:', datos);
+        
+        // Deshabilitar botón mientras se envía
+        const boton = this.querySelector('.btn-contacto');
+        if (!boton) {
+            console.error('✗ No se encontró el botón');
+            return;
+        }
+        
+        const textoOriginal = boton.textContent;
+        boton.disabled = true;
+        boton.textContent = 'Enviando...';
+        
+        try {
+            console.log('🌐 Enviando petición a http://localhost:5000/guardar_contacto');
+            
+            // Enviar datos al servidor Python
+            const response = await fetch('http://localhost:5000/guardar_contacto', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(datos)
+            });
+            
+            console.log('📥 Respuesta recibida:', response.status);
+            
+            const resultado = await response.json();
+            console.log('Resultado:', resultado);
+            
+            if (resultado.success) {
+                alert('✓ ' + resultado.message);
+                // Limpiar formulario
+                formulario.reset();
+            } else {
+                alert('✗ ' + resultado.message);
+            }
+            
+        } catch (error) {
+            console.error('❌ Error completo:', error);
+            alert('✗ Error de conexión. Asegúrate de que el servidor Python esté ejecutándose.\n\nError: ' + error.message);
+        } finally {
+            // Rehabilitar botón
+            boton.disabled = false;
+            boton.textContent = textoOriginal;
+        }
+    });
+});
+</script>
 
 
 </body>
