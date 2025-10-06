@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DANTE PROPIEDADES | TU CIUDAD</title>
+    <meta name="description" content="Propiedades en venta y alquiler en Capital Federal - Dante Propiedades">
+    
+    <!-- Preload de recursos críticos -->
+     <!--<link rel="preload" href="img/UF004-1.jpg" as="image">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com"> -->
+    
+   
+    <!-- Open Graph optimizado -->
+    <meta property="og:title" content="DANTE PROPIEDADES | TU CIUDAD">
+    <meta property="og:description" content="Propiedades en venta y alquiler en Capital Federal">
+    <meta property="og:image" content="https://dantepropiedades.com.ar/img/logo-web-compartir.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" content="https://dantepropiedades.com.ar/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="DANTE PROPIEDADES">
+    
+    <!-- Favicon optimizado -->
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css">
+    <link rel="stylesheet" href="app.css">
+    
+    <!-- Google Analytics 
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-80451183-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-80451183-1');
+    </script> -->
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E6K41V8BHB"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-E6K41V8BHB');
+    </script>
+    <style>
+    .construction-banner {
+        background-color: yellow;
+        text-align: center;
+        padding: 10px;
+        font-weight: bold;
+        animation: blinker 1s linear infinite;
+    }
+
+    @keyframes blinker {
+        50% {
+            opacity: 0;
+        }
+    }
+    </style>
+</head>
+<body>
+
+    
+
+    <!-- Header -->
+    <header id="cab">
+        <div class="cont">
+            <a href="index" class="logo">
+                <img src="llave.png" alt="Dante Propiedades" width="90" height="30" loading="eager">
+                <span class="logo-text">DANTE PROPIEDADES</span>
+            </a>
+            
+            <nav class="menugen">
+                <div class="construction-banner">
+                    <p>Página en Construcción</p>
+                </div>
+                <ul class="menucab">
+                    <li><a href="tel:1166562078"><i class="fas fa-phone"></i> Llamá <span>11 6656 2078</span></a></li>
+                    <li><a href="tasaciones">Tasá</a></li>
+                    <li><a href="propiedades">Buscá</a></li>
+                </ul>
+
+                <ul class="redescab">
+                    <li><a href="https://instagram.com/danteprop" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a></li>
+                    <li><a href="https://facebook.com/DantePropiedades" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i></a></li>
+                    <li><a href="https://www.youtube.com/channel/UCclLOUtNIhOYTcJTxVPBrCA" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a></li>
+                </ul>
+
+                <button class="menudesp" aria-label="Abrir menú">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Buscador -->
+    <form class="buscadorcab" action="propiedades" method="GET">
+        <input type="hidden" name="ope" value="V">
+        
+        <div class="cont">
+            <div class="ope">
+                <span class="activo" data-val="V">Venta</span>
+                <span data-val="A">Alquiler</span>
+                <span data-val="T">Alquiler<br>temporal</span>
+            </div>
+            
+            <div class="sel colini">
+                <select name="tipo" aria-label="Tipo de propiedad">
+                    <option value="">Propiedad</option>
+                    <option value="departamento">Departamento</option>
+                    <option value="casa">Casa</option>
+                    <option value="ph">PH</option>
+                    <option value="oficina">Oficina</option>
+                    <option value="local">Local</option>
+                    <option value="terreno">Terreno</option>
+                </select>
+            </div>
+            
+            <div class="buscarsug colini">
+                <input type="text" class="loc" placeholder="Búsqueda por barrio o localidad" 
+                       id="campobusq" autocomplete="off" aria-label="Buscar por ubicación">
+                <div class="suggestionsBox" id="suggestions">
+                    <ul class="suggestionList" id="suggestionsList"></ul>
+                </div>
+            </div>
+            
+            <input type="number" class="cod colini" name="cod" placeholder="Código" min="0" aria-label="Código de propiedad">
+            
+            <button type="submit" aria-label="Buscar propiedades">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </form>
+
+    <!-- Menú móvil -->
+    <nav id="menuslide">
+        <button class="cerrarmenu" aria-label="Cerrar menú">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="btng">
+            <a href="tasaciones">Tasá hoy</a>
+        </div>
+        
+        <div class="menu-sections">
+            <section>
+                <h5>Encontrá tu lugar para vivir</h5>
+                <ul>
+                    <li><a href="emprendimientos">Emprendimientos</a></li>
+                    <li>
+                        <a href="propiedades">Propiedades</a>
+                        <ul>
+                            <li><a href="propiedades?ope=V">Venta</a></li>
+                            <li><a href="propiedades?ope=A">Alquiler</a></li>
+                            <li><a href="propiedades?ope=T">Alquiler temporario</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+
+            <section>
+                <h5>Dejá tu propiedad en las mejores manos</h5>
+                <ul>
+                    <li><a href="tasaciones">Tasaciones</a></li>
+                    <li>
+                        <a href="sucursales">Sucursales</a>
+                        <ul>
+                            <li><a href="sucursales?sucu=capital">Capital Federal</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="nosotros">Nosotros</a></li>
+                    <li><a href="https://dante.com.ar/busquedaslaborales">Integrate</a></li>
+                    <li><a href="contacto">Contacto</a></li>
+                </ul>
+            </section>
+        </div>
+
+        <ul class="redesmenuslide">
+            <li><a href="https://instagram.com/danteprop" target="_blank"><i class="fab fa-instagram"></i></a></li>
+            <li><a href="https://facebook.com/DantePropiedades" target="_blank"><i class="fab fa-facebook"></i></a></li>
+            <li><a href="https://www.youtube.com/channel/UCclLOUtNIhOYTcJTxVPBrCA" target="_blank"><i class="fab fa-youtube"></i></a></li>
+            <li class="hashtag"><a href="https://www.instagram.com/explore/tags/dantepropiedades/" target="_blank">#DANTEPROPIEDADES</a></li>
+        </ul>
+    </nav>
+
+    <!-- Slider principal - CORREGIDO CON MANEJO DE ERRORES -->
+    <section id="sliderini" class="slihome">
+        <!-- Slider de imágenes -->
+        <div class="slider-container">
+            <div class="slini">
+                <!-- Imagen 1 -->
+                <div class="slide">
+                    <div class="image-wrapper">
+                        <img src="INSTITUCIONALES/INSTITUCIONAL 1.png" alt="Propiedad institucional 1" loading="eager" class="slider-img">
+                    </div>
+                </div>
+                
+                <!-- Imagen 2 -->
+                <div class="slide">
+                    <div class="image-wrapper">
+                        <img src="INSTITUCIONALES/INSTITUCIONAL 2.png" alt="Propiedad institucional 2" loading="lazy" class="slider-img">
+                    </div>
+                </div>
+                
+                <!-- Imagen 3 -->
+                <div class="slide">
+                    <div class="image-wrapper">
+                        <img src="INSTITUCIONALES/INSTITUCIONAL 3.png" alt="Propiedad institucional 3" loading="lazy" class="slider-img">
+                    </div>
+                </div>
+                
+                <!-- Imagen 4 -->
+                <div class="slide">
+                    <div class="image-wrapper">
+                        <img src="INSTITUCIONALES/INSTITUCIONAL 4.png" alt="Propiedad institucional 4" loading="lazy" class="slider-img">
+                    </div>
+                </div>
+                
+                <!-- Imagen 5 -->
+                <div class="slide">
+                    <div class="image-wrapper">
+                        <img src="INSTITUCIONALES/INSTITUCIONAL 5.png" alt="Propiedad institucional 5" loading="lazy" class="slider-img">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navegación -->
+            <div class="slider-nav" id="sliderNav">
+                <button data-slide="0" class="active"></button>
+                <button data-slide="1"></button>
+                <button data-slide="2"></button>
+                <button data-slide="3"></button>
+                <button data-slide="4"></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Propiedades destacadas -->
+    <section id="destacadasini">
+        <div class="cont">
+            <div class="tit">
+                <h2>Tus deseos están aquí</h2>
+                <p>La ciudad en tus manos</p>
+            </div>
+            
+            <div class="propiedades-grid" id="listaDestacadas">
+                <div class="propiedad-item">
+                    <a href="UF000/destacada0.html">
+                        <img src="UF000/UF000-1.jpg" alt="Propiedad destacada 0" loading="lazy">
+                    </a>
+                    <div class="image-description">Texto explicativo de la imagen 1</div>
+                    
+                </div>
+                <div class="propiedad-item">
+                    <a href="UF003/destacada3.html">
+                        <img src="UF003/UF003-1.jpg" alt="Propiedad destacada 3" loading="lazy">
+                    </a>
+                    <div class="image-description">Texto explicativo de la imagen 2</div>
+                    
+                </div>
+                <div class="propiedad-item">
+                    <a href="UF004/destacada4.html">
+                        <img src="UF004/UF004-1.jpg" alt="Propiedad destacada 4" loading="lazy">
+                    </a>
+                    <div class="image-description">Texto explicativo de la imagen 3</div>
+                </div>
+
+                <div class="propiedad-item">
+                    <a href="UF009/destacada9.html">
+                        <img src="UF009/UF009-1.jpg" alt="Propiedad destacada 9" loading="lazy">
+                    </a>
+                    <div class="image-description">Texto explicativo de la imagen 4</div>
+                </div>
+                
+                <div class="propiedad-item">
+                    <a href="UF012/destacada12.html">
+                        <img src="UF012/UF012-1.jpg" alt="Propiedad destacada 12" loading="lazy">
+                    </a>
+                    <div class="image-description">Texto explicativo de la imagen 5</div>
+                </div>
+            </div>
+      <!-- Las propiedades se cargarán dinámicamente aquí ---->      
+            <div class="cargando cargandodest" style="display: none;">
+                <div class="centrado">
+                    <div class="cargaprop">
+                        <div class="loader"><div></div><div></div></div>
+                    </div>
+                    <span>Cargando propiedades destacadas</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Emprendimientos -->
+    <!-- Los emprendimientos se cargarán dinámicamente aquí -->
+    <!--  <section id="Lotes">
+        <div class="cont">
+            <div class="coltit">
+                <h3>Emprendimientos</h3>
+                <p>Tenemos lotes con opciones a tu alcance</p>
+            </div>
+            
+            <div class="colemp">
+                <div class="emprendimientos-grid" id="listaEmprendimientos">
+                    
+                </div>
+                
+                <div class="cargando cargaemp">
+                    <div class="centrado">
+                        <div class="cargaprop">
+                            <div class="loader"><div></div><div></div></div>
+                        </div>
+                        <span>Cargando emprendimientos</span>
+                    </div>
+                </div>
+                
+                <div class="btn-container">
+                    <a class="btn" href="Lotes">Ver en mapa</a>
+                    <a class="btn" href="Lotes">Ver listado</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    -->
+    <!-- Banner de empleo -->
+    
+    <!--
+    <section class="empleo-banner">
+        <div class="cont">
+            <a class="btn empleo-btn" href="https://dante.com.ar/busquedaslaborales">
+                SUMATE A NUESTRO STAFF
+            </a>
+        </div>
+    </section>
+    -->
+    
+    <!-- WhatsApp flotante -->
+    <div class="whatsapp-fixed">
+        <a href="https://wa.me/5491125368595" id="whatsappLink" class="btn-whatsapp" aria-label="Contactar por WhatsApp">
+            <img src="img/ws-ico.png" alt="WhatsApp" width="40" height="40" loading="lazy"
+                 onerror="this.src='https://cdn-icons-png.flaticon.com/512/124/124034.png'">
+        </a>
+    </div>
+
+    <!-- Footer -->
+    <footer id="pie">
+        <div class="cont">
+            <div class="col">
+                <a href="index" class="logopie">
+                    <img src="img/logo.svg" alt="Dante Propiedades" width="130" height="60" loading="lazy"
+                         onerror="this.src='llave.png'">
+                </a>
+            </div>
+            
+            <div class="col">
+                <div class="subcol">
+                    <ul>
+                        <li>
+                            <h4>Propiedades</h4>
+                            <ul>
+                                <li><a href="propiedades?ope=V">En venta</a></li>
+                                <li><a href="propiedades?ope=A">En alquiler</a></li>
+                                <li><a href="propiedades?ope=T">Alquiler temporario</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <h4>Emprendimientos</h4>
+                            <ul>
+                                <li><a href="emprendimientos?estado=En+Construccion">En construcción</a></li>
+                                <li><a href="emprendimientos?estado=En+Pozo">En pozo</a></li>
+                                <li><a href="emprendimientos?estado=Terminado">Listos para vivir</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <h4>Sucursales</h4>
+                            <ul>
+                                <li><a href="sucursales?sucu=capital">Capital Federal</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <h4><a href="tasaciones">Tasaciones</a></h4>
+                            <h4><a href="nosotros">Nosotros</a></h4>
+                            <h4><a href="contacto">Contacto</a></h4>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="col">
+                <div class="llamar">
+                    <strong>
+                        <a href="tel:01166562078">
+                            <span>011 6656 2058</span>
+                        </a>
+                    </strong>
+                </div>
+                
+                <div class="redes">
+                    <strong><a href="https://www.instagram.com/explore/tags/dantepropiedades/" target="_blank">#DANTE Propiedades</a></strong>
+                    <ul class="redespie">
+                        <li><a href="https://instagram.com/danteprop" target="_blank"><i class="fab fa-instagram"></i></a></li>
+                        <li><a href="https://facebook.com/DantePropiedades" target="_blank"><i class="fab fa-facebook"></i></a></li>
+                        <li><a href="https://www.youtube.com/channel/UCclLOUtNIhOYTcJTxVPBrCA" target="_blank"><i class="fab fa-youtube"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Copyright --> <!-- Copyright -->
+    <div id="copy">
+        <div class="cont">
+            <p>
+                <strong>"Confíe solo en corredores matriculados. Su tranquilidad, nuestra prioridad."</strong>
+                <br>
+                <strong>© DANTE PROPIEDADES</strong>
+                <br>
+                Todos los derechos reservados - www.dantepropiedades.com.ar
+                <br>
+                Nota: Toda la información y medidas provistas son aproximadas y deberán ratificarse con la documentación pertinente.
+                <br>
+                DANTE PROPIEDADES | AV. Corrientes 524 piso 5 - Ciudad Autónoma de Buenos Aires | CUIT 20-39415572-2
+                <br>
+                CI DANTE ARONA | CUCICBA 9337 |
+            </p>
+            
+            <div class="prov">
+                <a href="#" target="_blank">
+                    <img src="llave.png" alt="By Arona" width="80" height="80" loading="lazy">
+                </a>
+                <br>
+                <a href="#" target="_blank">by <strong>Arona</strong></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+    
+    <script>
+        // Script mejorado con manejo robusto de errores
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('=== INICIANDO DANTE PROPIEDADES ===');
+            
+            // Inicializar funciones en orden de importancia
+            initMenu();
+            initSlider();
+            initSearch(); // This now includes the AJAX call
+            initWhatsApp();
+        });
+
+        function initMenu() {
+            const menuBtn = document.querySelector('.menudesp');
+            const closeBtn = document.querySelector('.cerrarmenu');
+            const menuSlide = document.getElementById('menuslide');
+            
+            if (menuBtn && closeBtn && menuSlide) {
+                menuBtn.addEventListener('click', () => {
+                    menuSlide.classList.add('menuabierto');
+                    console.log('Menú abierto');
+                });
+                
+                closeBtn.addEventListener('click', () => {
+                    menuSlide.classList.remove('menuabierto');
+                    console.log('Menú cerrado');
+                });
+            }
+        }
+
+        function initSlider() {
+            if (typeof $ !== 'undefined' && $('.slini').length) {
+                console.log('Inicializando slider...');
+                
+                $('.slini').slick({
+                    dots: false,
+                    arrows: false,
+                    infinite: true,
+                    speed: 500,
+                    fade: true,
+                    autoplay: true,
+                    autoplaySpeed: 4000,
+                    cssEase: 'linear',
+                    adaptiveHeight: false
+                });
+
+                // Navegación
+                const navButtons = document.querySelectorAll('.slider-nav button');
+                navButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const slideIndex = parseInt(this.dataset.slide);
+                        $('.slini').slick('slickGoTo', slideIndex);
+                    });
+                });
+
+                $('.slini').on('afterChange', function(event, slick, currentSlide) {
+                    navButtons.forEach(btn => btn.classList.remove('active'));
+                    const activeBtn = document.querySelector(`[data-slide="${currentSlide}"]`);
+                    if (activeBtn) activeBtn.classList.add('active');
+                });
+                
+                console.log('Slider inicializado correctamente');
+            }
+        }
+
+        function initSearch() {
+            const searchForm = document.querySelector('.buscadorcab');
+            const opeSpans = document.querySelectorAll('.buscadorcab .ope span');
+            const inputOpe = document.querySelector('input[name="ope"]');
+            const listaDestacadas = document.getElementById('listaDestacadas'); // Assuming this is where results go
+
+            // Handle operation type selection
+            opeSpans.forEach(opcion => {
+                opcion.addEventListener('click', function() {
+                    opeSpans.forEach(o => o.classList.remove('activo'));
+                    this.classList.add('activo');
+                    if (inputOpe) inputOpe.value = this.dataset.val;
+                });
+            });
+
+            // Handle form submission
+            if (searchForm) {
+                searchForm.addEventListener('submit', async function(event) {
+                    event.preventDefault(); // Prevent default form submission
+
+                    const formData = new FormData(searchForm);
+                    const params = new URLSearchParams();
+                    for (const pair of formData.entries()) {
+                        if (pair[1]) { // Only add if value is not empty
+                            params.append(pair[0], pair[1]);
+                        }
+                    }
+                    // Get the active operation value
+                    const activeOpe = document.querySelector('.buscadorcab .ope span.activo');
+                    if (activeOpe && activeOpe.dataset.val) {
+                        params.set('ope', activeOpe.dataset.val);
+                    } else {
+                        params.delete('ope'); // Remove if no active operation
+                    }
+
+                    // Get the location input value
+                    const locInput = document.getElementById('campobusq');
+                    if (locInput && locInput.value) {
+                        params.set('loc', locInput.value);
+                    } else {
+                        params.delete('loc');
+                    }
+
+                    const queryString = params.toString();
+                    const backendUrl = `http://127.0.0.1:5000/api/properties/search?${queryString}`; // Your Flask backend URL
+
+                    try {
+                        const response = await fetch(backendUrl);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        const properties = await response.json();
+                        displayProperties(properties); // Function to display results
+                    } catch (error) {
+                        console.error('Error fetching properties:', error);
+                        if (listaDestacadas) {
+                            listaDestacadas.innerHTML = '<p>Error al cargar propiedades. Intente de nuevo más tarde.</p>';
+                        }
+                    }
+                });
+            }
+        }
+
+        function displayProperties(properties) {
+            const listaDestacadas = document.getElementById('listaDestacadas');
+            if (!listaDestacadas) return;
+
+            listaDestacadas.innerHTML = ''; // Clear previous results
+
+            if (properties.length === 0) {
+                listaDestacadas.innerHTML = '<p>No se encontraron propiedades que coincidan con su búsqueda.</p>';
+                return;
+            }
+
+            properties.forEach(prop => {
+                const propertyItem = document.createElement('div');
+                propertyItem.classList.add('propiedad-item'); // Use your existing CSS class
+
+                const imageUrl = prop.images && prop.images.length > 0 ? prop.images[0].url : 'llave.png'; // Default image
+                const descriptionText = prop.description || 'Sin descripción';
+                const priceText = prop.price ? `${prop.currency} ${prop.price.toLocaleString('es-AR')}` : 'Consultar precio';
+                const titleText = prop.title || 'Propiedad sin título';
+                const codeText = prop.code ? `Código: ${prop.code}` : '';
+                const locationText = prop.location && prop.location.neighborhood ? prop.location.neighborhood : '';
+                const typeOpText = `${prop.property_type || ''} en ${prop.operation || ''}`;
+
+
+                propertyItem.innerHTML = `
+                    <a href="details.html?id=${prop.property_id}">
+                        <img src="${imageUrl}" alt="${titleText}" loading="lazy">
+                    </a>
+                    <div class="image-description">
+                        <h3>${titleText}</h3>
+                        <p>${locationText}</p>
+                        <p>${typeOpText}</p>
+                        <p>${priceText}</p>
+                        <p>${codeText}</p>
+                    </div>
+                `;
+                listaDestacadas.appendChild(propertyItem);
+            });
+        }
+
+
+        function initWhatsApp() {
+            const whatsappLink = document.getElementById('whatsappLink');
+            if (whatsappLink) {
+                whatsappLink.href = 'https://wa.me/5491125368595';
+            }
+        }
+
+        // Header sticky
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('cab');
+            if (header) {
+                header.classList.toggle('cabfix', window.scrollY > 100);
+            }
+        });
+
+        // Debug: Mostrar información de carga
+        window.addEventListener('load', function() {
+            console.log('=== PÁGINA COMPLETAMENTE CARGADA ===');
+            console.log('Todas las imágenes deberían estar cargadas');
+        });
+    </script>
+</body>
+</html>
