@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from sqlalchemy.orm import Session
 from database import init_db, get_db, Property, PropertyType, Operation, Location, Image
 from sqlalchemy import or_
+import os
 
 app = Flask(__name__)
 
@@ -108,6 +109,38 @@ with app.app_context():
         print("Sample data inserted successfully.")
     db.close()
 
+
+@app.route("/api/dinamica")
+def dinamica_properties():
+    image_folder = 'DINAMICA'
+    try:
+        image_files = [f for f in os.listdir(image_folder) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))]
+        
+        properties = []
+        for i, image_file in enumerate(image_files):
+            properties.append({
+                "property_id": f"dinamica_{i}",
+                "title": "Propiedad Dinámica",
+                "description": f"Imagen {i+1} de la carpeta DINAMICA",
+                "price": None,
+                "currency": "",
+                "surface_area_m2": None,
+                "num_rooms": None,
+                "num_bathrooms": None,
+                "status": "available",
+                "property_type": "Imagen",
+                "operation": "Dinamica",
+                "location": {
+                    "city": "DINAMICA",
+                    "neighborhood": "Carpeta local"
+                },
+                "images": [{"url": os.path.join(image_folder, image_file).replace('\\', '/'), "description": "Imagen dinámica"}]
+            })
+        return jsonify(properties)
+    except FileNotFoundError:
+        return jsonify({"error": "La carpeta 'DINAMICA' no fue encontrada."}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/api/properties/search", methods=["GET"])
 def search_properties():
