@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DANTE PROPIEDADES| Propiedad en Venta | Dante Propiedades</title>
+    <meta name="description" content="Propiedad DANTE PROPIEDADES en venta: xx ambientes, xx,xx m², US$ xxx.xxx. Dante Propiedades - Capital Federal">
+    
+    <!-- Open Graph optimizado -->
+    <meta property="og:title" content="DANTE PROPIEDADES | Propiedad en Venta | DANTE PROPIEDADES">
+    <meta property="og:description" content="Propiedad DANTE PROPIEDADES en venta: xx ambientes, xx,xx m², US$ xxx.xxx">
+    <meta property="og:image" content="https://dantepropiedades.com.ar/img/logo-web-compartir.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" content="https://dantepropiedades.com.ar/destacada1">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="DANTE PROPIEDADES">
+    
+    <!-- Favicon optimizado -->
+    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css">
+    <link rel="stylesheet" href="../app.css">
+    <link rel="stylesheet" href="../destacada.css">
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-80451183-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-80451183-1');
+    </script>
+    <style>
+    .construction-banner {
+        background-color: yellow;
+        text-align: center;
+        padding: 10px;
+        font-weight: bold;
+        animation: blinker 1s linear infinite;
+    }
+
+    @keyframes blinker {
+        50% {
+            opacity: 0;
+        }
+    }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header id="cab">
+        <div class="cont">
+            <a href="../index.html" class="logo">
+                <img src="../llave.png" alt="Dante Propiedades" width="90" height="30" loading="eager">
+                <span class="logo-text">DANTE PROPIEDADES</span>
+            </a>
+            
+            <nav class="menugen">
+                <div class="construction-banner">
+                    <p>Página en Construcción</p>
+                </div>
+                <ul class="menucab">
+                    <li><a href="tel:1123568595"><i class="fas fa-phone"></i> Llamá <span>11 6656 2078</span></a></li>
+                    <li><a href="../tasaciones.html">Tasá</a></li>
+                    <li><a href="../propiedades.html">Buscá</a></li>
+                </ul>
+
+                <ul class="redescab">
+                    <li><a href="https://instagram.com/danteprop" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a></li>
+                    <li><a href="https://facebook.com/DantePropiedades" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i></a></li>
+                    <li><a href="https://www.youtube.com/channel/UCclLOUtNIhOYTcJTxVPBrCA" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a></li>
+                </ul>
+
+                <button class="menudesp" aria-label="Abrir menú">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Buscador -->
+    <form class="buscadorcab" action="../propiedades.html" method="GET">
+        <input type="hidden" name="ope" value="V">
+        
+        <div class="cont">
+            <div class="ope">
+                <span class="activo" data-val="V">Venta</span>
+                <span data-val="A">Alquiler</span>
+                <span data-val="T">Alquiler<br>temporal</span>
+            </div>
+            
+            <div class="sel colini">
+                <select name="tipo" aria-label="Tipo de propiedad">
+                    <option value="">Propiedad</option>
+                    <option value="departamento">Departamento</option>
+                    <option value="casa">Casa</option>
+                    <option value="ph">PH</option>
+                    <option value="oficina">Oficina</option>
+                    <option value="local">Local</option>
+                    <option value="terreno">Terreno</option>
+                </select>
+            </div>
+            
+            <div class="buscarsug colini">
+                <input type="text" class="loc" placeholder="Búsqueda por barrio o localidad" 
+                       id="campobusq" autocomplete="off" aria-label="Buscar por ubicación">
+                <div class="suggestionsBox" id="suggestions">
+                    <ul class="suggestionList" id="suggestionsList"></ul>
+                </div>
+            </div>
+            
+            <input type="number" class="cod colini" name="cod" placeholder="Código" min="0" aria-label="Código de propiedad">
+            
+            <button type="submit" aria-label="Buscar propiedades">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </form>
+
+    <!-- Menú móvil -->
+    <nav id="menuslide">
+        <button class="cerrarmenu" aria-label="Cerrar menú">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="btng">
+            <a href="../tasaciones.html">Tasá hoy</a>
+        </div>
+        
+        <div class="menu-sections">
+            <section>
+                <h5>Encontrá tu lugar para vivir</h5>
+                <ul>
+                    <li><a href="../emprendimientos.html">Emprendimientos</a></li>
+                    <li>
+                        <a href="../propiedades.html">Propiedades</a>
+                        <ul>
+                            <li><a href="../propiedades.html?ope=V">Venta</a></li>
+                            <li><a href="../propiedades.html?ope=A">Alquiler</a></li>
+                            <li><a href="../propiedades.html?ope=T">Alquiler temporario</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+
+            <section>
+                <h5>Dejá tu propiedad en las mejores manos</h5>
+                <ul>
+                    <li><a href="../tasaciones.html">Tasaciones</a></li>
+                    <li>
+                        <a href="../sucursales.html">Sucursales</a>
+                        <ul>
+                            <li><a href="../sucursales.html?sucu=capital">Capital Federal</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="../nosotros.html">Nosotros</a></li>
+                    <li><a href="https://dante.com.ar/busquedaslaborales">Integrate</a></li>
+                    <li><a href="../contacto.html">Contacto</a></li>
+                </ul>
+            </section>
+        </div>
+
+        <ul class="redesmenuslide">
+            <li><a href="https://instagram.com/danteprop" target="_blank"><i class="fab fa-instagram"></i></a></li>
+            <li><a href="https://facebook.com/DantePropiedades" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i></a></li>
+            <li><a href="https://www.youtube.com/channel/UCclLOUtNIhOYTcJTxVPBrCA" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a></li>
+            <li class="hashtag"><a href="https://www.instagram.com/explore/tags/dantepropiedades/" target="_blank">#DANTEPROPIEDADES</a></li>
+        </ul>
+    </nav>
+
+    <!-- Contenido específico de la página destacada 1 -->
+    <main class="propiedad-destacada">
+        <div class="container">
+            <!-- Encabezado de la propiedad -->
+            <div class="propiedad-header">
+                <h1></h1>
+                <p class="propiedad-subtitulo">L'actual cero de tono | stock | stock</p>
+            </div>
+            
+            <!-- Información principal -->
+            <div class="propiedad-info-principal">
+                <div class="precio">
+                    <span class="moneda">US$</span>
+                    <span class="valor">xxx.xxx</span>
+                    <span class="operacion">Venta</span>
+                </div>
+                
+                <div class="caracteristicas">
+                    <div class="caracteristica">
+                        <span class="titulo">Súp. total</span>
+                        <span class="valor">xx,xx m²</span>
+                    </div>
+                    <div class="caracteristica">
+                        <span class="titulo">Ambientes</span>
+                        <span class="valor">x</span>
+                    </div>
+                    <div class="caracteristica">
+                        <span class="titulo">Baño</span>
+                        <span class="valor">x</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Agentes -->
+            <div class="agentes">
+                <a href="../details.html?image=UF004/UF004-2.jpg" class="btn-agente">FOTOS</a>
+                <a href="videos4.html" class="btn-agente">VIDEOS</a>
+                <a href="mapa4.html" class="btn-agente">MAPA</a>
+                <a href="../index.html" class="btn-agente"">Volver al Inicio</a>
+            </div>
+            
+            <!-- Descripción -->
+            <div class="descripcion">
+                <h2>Descripcion</h2>
+                <p>DESTACADO 0 --VENTA DEPARTAMENTO 3 AMBIENTES, BALVANERA</p>
+                <p>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.</p>
+                <p>xxxxxxxxxxx</p>
+                <p>xxxxxxxxxxx</p>
+                <p>xxxxxxxxxxxx</p>
+                <p>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.</p>
+                <p>xxxxxxxxxxxxxxxxxxxxxx.</p>
+            </div>
+            
+            <!-- Información de contacto -->
+            <div class="contacto">
+                <h3>CONTACTO CON LA SUCURSAL:</h3>
+                <ul>
+                    <li>Avda. Corrientes 524 piso 5 CABA.</li>
+                    <li>Descripción para contratar: DANTE PROPIEDADES</li>
+                    <li>xxxxxxx</li>
+                </ul>
+                
+                <form class="formulario-contacto">
+                    <div class="campo">
+                        <label for="nombre">Nombre:</label>
+                        <input type="text" id="nombre" name="nombre" required>
+                    </div>
+                    
+                    <div class="campo">
+                        <label for="firma">Firma:</label>
+                        <input type="text" id="firma" name="firma">
+                    </div>
+                    
+                    <div class="campo">
+                        <label for="telefono">Teléfono (del nº 6)</label>
+                        <input type="tel" id="telefono" name="telefono" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-contacto">Solicitar información</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- WhatsApp flotante -->
+    <div class="whatsapp-fixed">
+        <a href="https://wa.me/5491125368595" id="whatsappLink" class="btn-whatsapp" aria-label="Contactar por WhatsApp">
+            <img src="../img/ws-ico.png" alt="WhatsApp" width="40" height="40" loading="lazy"
+                 onerror="this.src='https://cdn-icons-png.flaticon.com/512/124/124034.png'">
+        </a>
+    </div>
+
+    <!-- Footer -->
+    <!--
+<footer id="pie">
+        <div class="container">
+            <div class="footer-col">
+                <a href="../index.html" class="logopie">
+                    <img src="../img/logo.svg" alt="Dante Propiedades" width="130" height="60" loading="lazy"
+                         onerror="this.src='../llave.png'">
+                </a>
+            </div>
+            
+            <div class="footer-col">
+                <div class="subcol">
+                    <ul>
+                        <li>
+                            <h4>Propiedades</h4>
+                            <ul>
+                                <li><a href="../propiedades.html?ope=V">En venta</a></li>
+                                <li><a href="../propiedades.html?ope=A">En alquiler</a></li>
+                                <li><a href="../propiedades.html?ope=T">Alquiler temporario</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <h4>Emprendimientos</h4>
+                            <ul>
+                                <li><a href="../emprendimientos.html?estado=En+Construccion">En construcción</a></li>
+                                <li><a href="../emprendimientos.html?estado=En+Pozo">En pozo</a></li>
+                                <li><a href="../emprendimientos.html?estado=Terminado">Listos para vivir</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <h4>Sucursales</h4>
+                            <ul>
+                                <li><a href="../sucursales.html?sucu=capital">Capital Federal</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <h4><a href="../tasaciones.html">Tasaciones</a></h4>
+                            <h4><a href="../nosotros.html">Nosotros</a></h4>
+                            <h4><a href="../contacto.html">Contacto</a></h4>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-col">
+                <div class="llamar">
+                    <strong>
+                        <a href="tel:01166562078">
+                            <span>011 6656 2058</span>
+                        </a>
+                    </strong>
+                </div>
+                
+                <div class="redes">
+                    <strong><a href="https://www.instagram.com/explore/tags/dantepropiedades/" target="_blank">#DANTE Propiedades</a></strong>
+                    <ul class="redespie">
+                        <li><a href="https://instagram.com/danteprop" target="_blank"><i class="fab fa-instagram"></i></a></li>
+                        <li><a href="https://facebook.com/DantePropiedades" target="_blank"><i class="fab fa-facebook"></i></a></li>
+                        <li><a href="https://www.youtube.com/channel/UCclLOUtNIhOYTcJTxVPBrCA" target="_blank"><i class="fab fa-youtube"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+-->
+
+
+    <!-- Copyright -->
+    <div id="copy">
+        <div class="container">
+            <p>
+                <strong>"Confíe solo en corredores matriculados. Su tranquilidad, nuestra prioridad."</strong>
+                <br>
+                <strong>© DANTE PROPIEDADES</strong>
+                <br>
+                Todos los derechos reservados - www.dantepropiedades.com.ar
+                <br>
+                Nota: Toda la información y medidas provistas son aproximadas y deberán ratificarse con la documentación pertinente.
+                <br>
+                DANTE PROPIEDADES | AV. Corrientes 524 piso 5 - Ciudad Autónoma de Buenos Aires | CUIT 20-39415572-2
+                <br>
+                CI DANTE ARONA | CUCICBA 9337
+            </p>
+            
+            <div class="prov">
+                <a href="#" target="_blank">
+                    <img src="../llave.png" alt="By Arona" width="80" height="80" loading="lazy">
+                </a>
+                <br>
+                <a href="#" target="_blank">by <strong>Arona</strong></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+    
+    <script>
+        // Script mejorado con manejo robusto de errores
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('=== INICIANDO DANTE PROPIEDADES ===');
+            
+            // Inicializar funciones en orden de importancia
+            initMenu();
+            initSearch();
+            initWhatsApp();
+            // initSlider() is not needed for detail pages unless they have a slider
+        });
+
+        function initMenu() {
+            const menuBtn = document.querySelector('.menudesp');
+            const closeBtn = document.querySelector('.cerrarmenu');
+            const menuSlide = document.getElementById('menuslide');
+            
+            if (menuBtn && closeBtn && menuSlide) {
+                menuBtn.addEventListener('click', () => {
+                    menuSlide.classList.add('menuabierto');
+                    console.log('Menú abierto');
+                });
+                
+                closeBtn.addEventListener('click', () => {
+                    menuSlide.classList.remove('menuabierto');
+                    console.log('Menú cerrado');
+                });
+            }
+        }
+
+        // initSlider function is not included as it's specific to the main page slider
+
+        function initSearch() {
+            const opciones = document.querySelectorAll('.buscadorcab .ope span');
+            const inputOpe = document.querySelector('input[name="ope"]');
+            
+            opciones.forEach(opcion => {
+                opcion.addEventListener('click', function() {
+                    opciones.forEach(o => o.classList.remove('activo'));
+                    this.classList.add('activo');
+                    if (inputOpe) inputOpe.value = this.dataset.val;
+                });
+            });
+        }
+
+        function initWhatsApp() {
+            const whatsappLink = document.getElementById('whatsappLink');
+            if (whatsappLink) {
+                whatsappLink.href = 'https://wa.me/5491125368595';
+            }
+        }
+
+        // Header sticky
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('cab');
+            if (header) {
+                header.classList.toggle('cabfix', window.scrollY > 100);
+            }
+        });
+
+        // Debug: Mostrar información de carga
+        window.addEventListener('load', function() {
+            console.log('=== PÁGINA COMPLETAMENTE CARGADA ===');
+            console.log('Todas las imágenes deberían estar cargadas');
+        });
+    </script>
+
+
+
+</body>
+</html>
