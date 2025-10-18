@@ -92,6 +92,13 @@ def guardar_contacto_route():
 @app.route("/api/dinamica")
 def dinamica_properties():
     basedir = os.path.abspath(os.path.dirname(__file__))
+    
+    # --- DEBUGGING CODE ---
+    print("--- DEBUGGING ---")
+    print(f"basedir: {basedir}")
+    print(f"listdir(basedir): {os.listdir(basedir)}")
+    print("--- END DEBUGGING ---")
+    
     image_folder = os.path.join(basedir, 'DINAMICA')
     try:
         image_files = [f for f in os.listdir(image_folder) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))]
