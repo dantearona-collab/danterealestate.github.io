@@ -521,7 +521,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('🌐 Enviando petición a /guardar_contacto');
             
             // Enviar datos al servidor Python
-            const response = await fetch('/guardar_contacto', {
+            const response = await fetch('https://danterealestate-github-io.onrender.com/guardar_contacto', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
