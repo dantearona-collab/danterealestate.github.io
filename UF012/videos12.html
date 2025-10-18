@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Videos de la Propiedad</title>
+    <link rel="stylesheet" href="../app.css">
+    <style>
+        .construction-banner {
+            background-color: yellow;
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+            animation: blinker 1s linear infinite;
+        }
+
+        @keyframes blinker {
+            50% {
+                opacity: 0;
+            }
+        }
+        body {
+            font-family: 'Fira Sans', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            padding-top: 130px; /* Adjust based on your header height */
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 50px;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 400px; /* o cualquier altura que defina tu fondo */
+            background: url('fondo.jpg') no-repeat center center;
+            background-size: cover;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+
+
+        h1 {
+            color: #ff0101;
+            margin-bottom: 15px;
+        }
+        p {
+            margin-bottom: 10px;
+        }
+        .back-button {
+            display: inline-block;
+            background: #232deb;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            margin-right: 10px;
+        }
+        .back-button:hover {
+            background: #ff0101;
+        }
+    </style>
+</head>
+<body>
+    <header id="cab">
+        <div class="cont">
+            <a href="index.html" class="logo">
+                <img src="llave.png" alt="Dante Propiedades" width="90" height="30" loading="eager">
+                <span class="logo-text">DANTE PROPIEDADES</span>
+            </a>
+            <nav class="menugen">
+                <div class="construction-banner">
+                    <p>Página en Construcción</p>
+                </div>
+                <ul class="menucab">
+                    <li><a href="tel:1166562078"><i class="fas fa-phone"></i> Llamá <span>11 6656 2078</span></a></li>
+                    <li><a href="tasaciones">Tasá</a></li>
+                    <li><a href="propiedades">Buscá</a></li>
+                </ul>
+                <ul class="redescab">
+                    <li><a href="https://instagram.com/danteprop" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a></li>
+                    <li><a href="https://facebook.com/DantePropiedades" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i></a></li>
+                    <li><a href="https://www.youtube.com/channel/UCclLOUtNIhOYTcJTxVPBrCA" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a></li>
+                </ul>
+                <button class="menudesp" aria-label="Abrir menú">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>Videos de la Propiedad</h1>
+        <div class="video-container">
+            <!-- Reemplaza este iframe con el código de tu video de YouTube o Vimeo -->
+            <!--<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe> -->
+            <video src="videos12.mp4" controls autoplay loop muted></video>
+            
+        </div>
+        <p>Aquí puedes encontrar videos relacionados con la propiedad.</p>
+        <ul>
+            <li>Video 1: Recorrido virtual</li>
+            <li>Video 2: Vista aérea</li>
+            <li>Video 3: Detalles del interior</li>
+        </ul>
+        <a href="destacada12.html" class="back-button">Volver a la Propiedad</a>
+        <a href="../index.html" class="back-button">Volver al Inicio</a>
+    </div>
+</body>
+</html>
