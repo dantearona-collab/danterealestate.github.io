@@ -87,9 +87,7 @@ def guardar_contacto_route():
 
 # --- End of Excel Contact Logic ---
 
-@app.route('/')
-def home():
-    return render_template('index.html')
+
 
 @app.route("/api/dinamica")
 def dinamica_properties():
