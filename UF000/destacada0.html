@@ -92,7 +92,8 @@
     </header>
 
     <!-- Buscador -->
-    <form class="buscadorcab" action="../propiedades.html" method="GET">
+    
+    <!-- <form class="buscadorcab" action="../propiedades.html" method="GET">
         <input type="hidden" name="ope" value="V">
         
         <div class="cont">
@@ -128,7 +129,7 @@
                 <i class="fas fa-search"></i>
             </button>
         </div>
-    </form>
+    </form> -->
 
     <!-- Menú móvil -->
     <nav id="menuslide">
@@ -245,47 +246,7 @@
                 
                 
                 
-            <form class="formulario-contacto" id="formContactoDante">
-                <div class="campo">
-                    <label for="nombre">Nombre:</label>
-                    <input type="text" id="nombre" name="nombre" required>
-                </div>
-    
-                <div class="campo">
-                    <label for="firma">Firma:</label>
-                    <input type="text" id="firma" name="firma">
-                </div>
-                
-                <div class="campo">
-                    <label for="telefono">Teléfono (del nº 6)</label>
-                    <input type="tel" id="telefono" name="telefono" required>
-                </div>
-                
-                <button type="submit" class="btn-contacto">Solicitar información</button>
-                
-                <!-- Mensaje de confirmación -->
-                <div id="mensajeRespuesta" style="margin-top: 15px; padding: 10px; border-radius: 5px; display: none;"></div>
-                
-            <!-- <form class="formulario-contacto">
-                    <div class="campo">
-                        <label for="nombre">Nombre:</label>
-                        <input type="text" id="nombre" name="nombre" required>
-                    </div>
-                    
-                    <div class="campo">
-                        <label for="firma">Firma:</label>
-                        <input type="text" id="firma" name="firma">
-                    </div>
-                    
-                    <div class="campo">
-                        <label for="telefono">Teléfono (del nº 6)</label>
-                        <input type="tel" id="telefono" name="telefono" required>
-                    </div>
-                    
-            
-                    
-                    <button type="submit" class="btn-contacto">Solicitar información</button>
-                </form> -->
+            <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSf8rjceDDnuJysCI8lMziNK2PK1vBd5zJ_sTpGeolHnBzaZQQ/viewform?embedded=true" width="640" height="823" frameborder="0" marginheight="0" marginwidth="0">Cargando…</iframe>
             </div>
         </div>
     </main>
@@ -463,102 +424,6 @@
             console.log('Todas las imágenes deberían estar cargadas');
         });
     </script>
-
-<script>
-// Script para manejar el envío del formulario a Python/Excel
-// Script UNIVERSAL para formularios de contacto - Dante Propiedades
-// Funciona en destacada0.html, destacada1.html, destacada2.html, etc.
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('✓ Script de formulario cargado');
-    
-    const formulario = document.querySelector('.formulario-contacto');
-    
-    if (!formulario) {
-        console.error('✗ No se encontró el formulario con class="formulario-contacto"');
-        return;
-    }
-    
-    console.log('✓ Formulario encontrado');
-    
-    // Detectar automáticamente el nombre de la página actual
-    const nombrePagina = window.location.pathname.split('/').pop() || 'index.html';
-    console.log('📄 Página actual:', nombrePagina);
-    
-    formulario.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        console.log('📤 Formulario enviado');
-        
-        // Obtener los datos del formulario
-        const nombre = document.getElementById('nombre').value.trim();
-        const firma = document.getElementById('firma').value.trim();
-        const telefono = document.getElementById('telefono').value.trim();
-        
-        console.log('Datos capturados:', { nombre, firma, telefono, pagina: nombrePagina });
-        
-        // Validación básica
-        if (!nombre || !telefono) {
-            alert('Por favor completa todos los campos obligatorios');
-            return;
-        }
-        
-        // Preparar los datos - ahora incluye la página automáticamente
-        const datos = {
-            nombre: nombre,
-            firma: firma,
-            telefono: telefono,
-            pagina: nombrePagina  // Se detecta automáticamente
-        };
-        
-        console.log('Datos a enviar:', datos);
-        
-        // Deshabilitar botón mientras se envía
-        const boton = this.querySelector('.btn-contacto');
-        if (!boton) {
-            console.error('✗ No se encontró el botón');
-            return;
-        }
-        
-        const textoOriginal = boton.textContent;
-        boton.disabled = true;
-        boton.textContent = 'Enviando...';
-        
-        try {
-            // CAMBIA ESTA IP por la IP de tu computadora
-            const serverURL = 'http://192.168.0.207:5000/guardar_contacto';
-            // Si estás probando en la misma PC, usa localhost
-            // const serverURL = 'http://localhost:5000/guardar_contacto';
-            
-            console.log('🌐 Enviando petición a', serverURL);
-            
-            const response = await fetch(serverURL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(datos)
-            });
-            
-            console.log('📥 Respuesta recibida:', response.status);
-            
-            const resultado = await response.json();
-            console.log('Resultado:', resultado);
-            
-            if (resultado.success) {
-                alert('✓ ' + resultado.message);
-                formulario.reset();
-            } else {
-                alert('✗ ' + resultado.message);
-            }
-            
-        } catch (error) {
-            console.error('❌ Error completo:', error);
-            alert('✗ Error de conexión. Asegúrate de que el servidor Python esté ejecutándose.\n\nError: ' + error.message);
-        } finally {
-            boton.disabled = false;
-            boton.textContent = textoOriginal;
-        }
-    });
-})
 
 
 </body>
