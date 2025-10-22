@@ -211,11 +211,11 @@
                 </div>
                 
                 <!-- Imagen 2 -->
-                <div class="slide">
+                <!-- <div class="slide">
                     <div class="image-wrapper">
                         <img src="INSTITUCIONALES/INSTITUCIONAL 2.png" alt="Propiedad institucional 2" loading="lazy" class="slider-img">
                     </div>
-                </div>
+                </div> -->
                 
                 <!-- Imagen 3 -->
                 <div class="slide">
@@ -232,11 +232,11 @@
                 </div>
                 
                 <!-- Imagen 5 -->
-                <div class="slide">
+                <!-- <div class="slide">
                     <div class="image-wrapper">
                         <img src="INSTITUCIONALES/INSTITUCIONAL 5.png" alt="Propiedad institucional 5" loading="lazy" class="slider-img">
                     </div>
-                </div>
+                </div> -->
             </div>
             
             <!-- Navegación -->
@@ -260,13 +260,13 @@
             
             <div class="propiedades-grid" id="listaDestacadas">
                 <div class="propiedad-item">
-                    <a href="UF000/destacada0.html">
-                        <img src="UF000/UF000-1.jpg" alt="Propiedad destacada 0" loading="lazy">
+                    <a href="UF001/destacada1.html">
+                        <img src="UF001/UF001-1.jpg" alt="Propiedad destacada 0" loading="lazy">
                     </a>
                     <div class="image-description">Texto explicativo de la imagen 1</div>
                     
                 </div>
-                <div class="propiedad-item">
+                <!-- <div class="propiedad-item">
                     <a href="UF003/destacada3.html">
                         <img src="UF003/UF003-1.jpg" alt="Propiedad destacada 3" loading="lazy">
                     </a>
@@ -292,7 +292,7 @@
                         <img src="UF012/UF012-1.jpg" alt="Propiedad destacada 12" loading="lazy">
                     </a>
                     <div class="image-description">Texto explicativo de la imagen 5</div>
-                </div>
+                </div> -->
             </div>
       <!-- Las propiedades se cargarán dinámicamente aquí ---->      
             <div class="cargando cargandodest" style="display: none;">
@@ -562,7 +562,7 @@
                     }
 
                     const queryString = params.toString();
-                    const backendUrl = `http://127.0.0.1:5000/api/properties/search?${queryString}`; // Your Flask backend URL
+                    const backendUrl = `https://danterealestate-github-io.onrender.com/api/properties/search?${queryString}`; // Your Flask backend URL
 
                     try {
                         const response = await fetch(backendUrl);
@@ -644,9 +644,6 @@
         });
     </script>
 </body>
-<!-- <body>
-    <h1>Redirigiendo...</h1>
-    <p>Si no sos redirigido automáticamente, hacé clic <a href="https://www.dantepropiedades.com.ar">aquí</a>.</p>
-</body> -->
+
 
 </html>
