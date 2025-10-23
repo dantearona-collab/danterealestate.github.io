@@ -1,11 +1,4 @@
 /* Estilos específicos para la página de propiedad destacada */
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f5f5f5;
-    color: #333;
-}
 
 .container {
     max-width: 1200px;
@@ -13,88 +6,7 @@ body {
     padding: 0 20px;
 }
 
-/* Header */
-#cab {
-    background-color: var(--azul);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
 
-#cab .container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 20px;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    color: #333;
-}
-
-.logo img {
-    margin-right: 10px;
-}
-
-.logo-text {
-    font-weight: bold;
-    font-size: 1.2rem;
-}
-
-.menugen {
-    display: flex;
-    align-items: center;
-}
-
-.menucab {
-    display: flex;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.menucab li {
-    margin-left: 20px;
-}
-
-.menucab a {
-    text-decoration: none;
-    color: #333;
-    font-weight: 500;
-}
-
-.menucab a:hover {
-    color: #0056b3;
-}
-
-.redescab {
-    display: flex;
-    list-style: none;
-    margin: 0 0 0 20px;
-    padding: 0;
-}
-
-.redescab li {
-    margin-left: 15px;
-}
-
-.redescab a {
-    color: #333;
-    font-size: 1.2rem;
-}
-
-.menudesp {
-    display: none;
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    margin-left: 20px;
-}
 
 /* Contenido principal de la propiedad */
 .propiedad-destacada {
@@ -385,13 +297,6 @@ body {
 
 /* Responsive */
 @media (max-width: 768px) {
-    .menucab, .redescab {
-        display: none;
-    }
-    
-    .menudesp {
-        display: block;
-    }
     
     .propiedad-info-principal {
         flex-direction: column;
