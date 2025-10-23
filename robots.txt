@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /details1.html
+Disallow: /info.html
+Disallow: /llave.png
+Allow: /index.html
