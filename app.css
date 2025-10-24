@@ -1,4 +1,4 @@
-/* Variables y breakpoints para responsive */
+/* app. css /Variables y breakpoints para responsive */
 :root {
     --azul: #232deb;
     --rojo: #ff0101;
@@ -549,12 +549,17 @@ section {
     margin-bottom: 8px;
 }
 
+
 .precio {
-    color: var(--rojo);
-    font-weight: 600;
-    font-size: 1.2rem;
-    margin-top: 8px;
-    display: block;
+  color: var(--rojo);
+  font-weight: 600;
+  font-size: 1.2rem;
+  margin-top: 8px;
+  margin-bottom: 20px; /* opcional para separación inferior */
+  padding: 15px 20px;   /* opcional para que el fondo blanco se note */
+  background-color: #fff; /* ✅ fondo blanco */
+  border-radius: 8px;      /* opcional para estética consistente */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* opcional para profundidad visual */
 }
 
 /* Botones */
@@ -1047,6 +1052,27 @@ section {
     display: block;
 }
 
+.propiedad-info-principal {
+  display: flex;
+  flex-direction: column; /* si querés disposición vertical */
+  align-items: center;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  overflow: hidden; /* evita que el contenido se desborde visualmente */
+}
+
+
+
+.property-image {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  border-radius: 8px;
+}
+
 .image-description {
     padding: 10px;
     text-align: center;
@@ -1057,3 +1083,84 @@ section {
     border-radius: 0 0 6px 6px;
     flex-grow: 1; /* Permite que la descripción se estire para igualar la altura de otros items en la misma fila */
 }
+
+/* Estilos para la descripcion del inmueble */
+.descripcion {
+  background-image: url('fondo.jpg'); /* reemplazar cuando tengas la imagen */
+  background-size: cover;
+  background-position: center;
+  padding: 40px;
+  color: #333;
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(2px);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 900px;
+  margin: 40px auto;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.descripcion h2 {
+  color: #004080;
+  font-size: 28px;
+  margin-bottom: 20px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+}
+
+.descripcion p {
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.descripcion strong {
+  color: #000;
+  font-weight: 600;
+}
+
+.descripcion em {
+  color: #555;
+  font-style: italic;
+}
+
+.boton-contacto {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 12px 24px;
+  background-color: #25D366;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.boton-contacto:hover {
+  background-color: #1ebe5d;
+}
+@media (max-width: 600px) {
+  .descripcion {
+    padding: 20px;
+    font-size: 15px;
+  }
+
+  .descripcion h2 {
+    font-size: 22px;
+  }
+
+  .descripcion a.boton-contacto {
+    width: 100%;
+    text-align: center;
+  }
+}.caracteristicas {
+  display: flex;
+  gap: 30px;
+  background-color: #fff; /* Fondo blanco */
+  padding: 20px;           /* Espaciado interno para que el contenido no toque los bordes */
+  border-radius: 8px;      /* Opcional: bordes redondeados para mantener consistencia visual */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Opcional: sombra suave como en otras secciones */
+}
+
