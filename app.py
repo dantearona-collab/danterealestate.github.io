@@ -15,10 +15,25 @@ def search_properties():
     cod = request.args.get("cod")
 
     # Simulación de propiedades
+    
+    
+    
     propiedades = [
-        {"tipo": "departamento", "barrio": "palermo", "precio": 120000, "codigo": "DP001"},
-        {"tipo": "casa", "barrio": "belgrano", "precio": 250000, "codigo": "CS002"}
-    ]
+    {
+        "tipo": "departamento",
+        "barrio": "palermo",
+        "precio": 120000,
+        "codigo": "DP001",
+        "operacion": "venta"
+    },
+    {
+        "tipo": "casa",
+        "barrio": "belgrano",
+        "precio": 250000,
+        "codigo": "CS002",
+        "operacion": "alquiler"
+    }
+]
 
     # Filtro básico
     filtradas = [p for p in propiedades if
