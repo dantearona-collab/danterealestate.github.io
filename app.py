@@ -4,7 +4,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app, origins=[
     "https://www.dantepropiedades.com.ar",
-    "https://tuusuario.github.io"
+    "https://danterealestate.github.io"
 ])
 
 @app.route("/api/properties/search")
