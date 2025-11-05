@@ -92,54 +92,6 @@
 
 <body>
 
-  <!-- 🔍 FORMULARIO DE BÚSQUEDA -->
-  <form class="buscadorcab" action="#" method="GET">
-    <input type="hidden" name="ope" value="V">
-
-    <div class="cont">
-      <div class="ope">
-        <span class="activo" data-val="V">Venta</span>
-        <span data-val="A">Alquiler</span>
-        <span data-val="T">Alquiler<br>temporal</span>
-      </div>
-
-      <div class="sel colini">
-        <select name="tipo" aria-label="Tipo de propiedad">
-          <option value="">Propiedad</option>
-          <option value="departamento">Departamento</option>
-          <option value="casa">Casa</option>
-          <option value="ph">PH</option>
-          <option value="oficina">Oficina</option>
-          <option value="local">Local</option>
-          <option value="terreno">Terreno</option>
-        </select>
-      </div>
-
-      <<div class="sel colini">
-        <select name="barrio" id="campobusq" aria-label="Barrio o localidad">
-            <option value="">Barrio</option>
-            <option value="palermo">Palermo</option>
-            <option value="belgrano">Belgrano</option>
-            <option value="colegiales">Colegiales</option>
-            <option value="microcentro">Microcentro</option>
-            <option value="recoleta">Recoleta</option>
-            <option value="san isidro">San Isidro</option>
-            <option value="almagro">Almagro</option>
-            <option value="villa crespo">Villa Crespo</option>
-            <option value="caballito">Caballito</option>
-            <option value="nuñez">Nuñez</option>
-            <option value="boedo">Boedo</option>
-            <option value="balvanera">Balvanera</option>
-            <option value="vicente lopez">Vicente López</option>
-            <option value="puerto madero">Puerto Madero</option>
-        </select>
-        </div>
-
-      <input type="number" class="cod colini" name="cod" placeholder="Código" min="0">
-
-      <button type="submit"><i class="fas fa-search"></i></button>
-    </div>
-  </form>
 
   <!-- 📦 RESULTADOS DINÁMICOS -->
   <div id="resultados"></div>
@@ -182,7 +134,7 @@
 
     <!-- ****************** Buscador ****************-->
   
-    <form class="buscadorcab" action="propiedades" method="GET">
+    <form class="buscadorcab" action="#" method="GET">
         <input type="hidden" name="ope" value="V">
         
         <div class="cont">

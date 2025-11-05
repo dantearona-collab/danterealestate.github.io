@@ -9,6 +9,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const barrio = document.getElementById("campobusq").value.toLowerCase();
     const operacion = form.querySelector('input[name="ope"]').value;
 
+    // 🔍 Ver qué filtros se están enviando
+    console.log("Filtros enviados:", { tipo, cod, barrio, operacion });
+
+
+
     fetch("propiedades.json")
       .then(res => res.json())
       .then(data => {
@@ -18,8 +23,18 @@ document.addEventListener("DOMContentLoaded", () => {
           (!barrio || p.barrio.toLowerCase().includes(barrio)) &&
           (!operacion || p.operacion === operacion)
         );
+        // 🔍 Ver qué propiedades pasaron el filtro
+        console.log("Propiedades filtradas:", filtradas);
 
+
+        
         resultados.innerHTML = "";
+
+        if (filtradas.length === 0) {
+          resultados.innerHTML = "<p>No se encontraron propiedades que coincidan con su búsqueda.</p>";
+          return;
+        }       
+        
         filtradas.forEach(prop => {
           const card = document.createElement("div");
           card.className = "propiedad";
