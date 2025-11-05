@@ -66,7 +66,10 @@ function initSearch() {
     const searchForm = document.querySelector('.buscadorcab');
     const opeSpans = document.querySelectorAll('.buscadorcab .ope span');
     const inputOpe = document.querySelector('input[name="ope"]');
-    const searchResults = document.getElementById('search-results-grid');
+    
+    // Modal elements
+    const modal = document.getElementById('results-modal');
+    const closeModalBtn = document.getElementById('modal-close-btn');
 
     // Handle operation type selection
     opeSpans.forEach(opcion => {
@@ -89,15 +92,13 @@ function initSearch() {
                     params.append(pair[0], pair[1]);
                 }
             }
-            // Get the active operation value
             const activeOpe = document.querySelector('.buscadorcab .ope span.activo');
             if (activeOpe && activeOpe.dataset.val) {
                 params.set('ope', activeOpe.dataset.val);
             } else {
-                params.delete('ope'); // Remove if no active operation
+                params.delete('ope');
             }
 
-            // Get the location input value
             const locInput = document.getElementById('campobusq');
             if (locInput && locInput.value) {
                 params.set('loc', locInput.value);
@@ -106,7 +107,7 @@ function initSearch() {
             }
 
             const queryString = params.toString();
-            const backendUrl = `https://danterealestate-github-io.onrender.com/api/properties/search?${queryString}`; // Your Flask backend URL
+            const backendUrl = `https://dantepropiedades.com.ar/api/propiedades/search?${queryString}`;
 
             try {
                 const response = await fetch(backendUrl);
@@ -114,55 +115,80 @@ function initSearch() {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const properties = await response.json();
-                displayProperties(properties); // Function to display results
+                console.log('Raw properties response:', JSON.stringify(properties));
+                displayResultsInModal(properties);
+
             } catch (error) {
                 console.error('Error fetching properties:', error);
-                if (searchResults) {
-                    searchResults.innerHTML = '<p>Error al cargar propiedades. Intente de nuevo más tarde.</p>';
+                const modalResultsGrid = document.getElementById('modal-results-grid');
+                if (modalResultsGrid) {
+                    modalResultsGrid.innerHTML = '<p>Error al cargar propiedades. Intente de nuevo más tarde.</p>';
+                    modal.classList.add('active'); // Show modal even on error
                 }
+            }
+        });
+    }
+
+    // Close modal
+    if (modal && closeModalBtn) {
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+        // Also close when clicking outside the modal content
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                modal.classList.remove('active');
             }
         });
     }
 }
 
-function displayProperties(properties) {
-    const searchResults = document.getElementById('search-results-grid');
-    if (!searchResults) return;
+function displayResultsInModal(properties) {
+    const modal = document.getElementById('results-modal');
+    const modalResultsGrid = document.getElementById('modal-results-grid');
 
-    searchResults.innerHTML = ''; // Clear previous results
-
-    if (properties.length === 0) {
-        searchResults.innerHTML = '<p>No se encontraron propiedades que coincidan con su búsqueda.</p>';
+    if (!modal || !modalResultsGrid) {
+        console.error('Modal elements not found');
         return;
     }
 
-    properties.forEach(prop => {
-        const propertyItem = document.createElement('div');
-        propertyItem.classList.add('propiedad-item'); // Use your existing CSS class
+    modalResultsGrid.innerHTML = ''; // Clear previous results
 
-        const imageUrl = prop.images && prop.images.length > 0 ? prop.images[0].url : 'llave.png'; // Default image
-        const descriptionText = prop.description || 'Sin descripción';
-        const priceText = prop.price ? `${prop.currency} ${prop.price.toLocaleString('es-AR')}` : 'Consultar precio';
-        const titleText = prop.title || 'Propiedad sin título';
-        const codeText = prop.code ? `Código: ${prop.code}` : '';
-        const locationText = prop.location && prop.location.neighborhood ? prop.location.neighborhood : '';
-        const typeOpText = `${prop.property_type || ''} en ${prop.operation || ''}`;
+    console.log('Properties received:', properties);
 
+    if (properties.length === 0) {
+        modalResultsGrid.innerHTML = '<p>No se encontraron propiedades que coincidan con su búsqueda.</p>';
+    } else {
+        properties.forEach(prop => {
+            console.log('Processing property:', prop);
+            console.log('Full property object (JSON):', JSON.stringify(prop));
+            const imageUrl = 'llave.png'; // Default image as 'images' array is not in JSON
+            const titleText = prop.titulo || 'Propiedad sin título';
+            const priceText = prop.precio ? `USD ${prop.precio.toLocaleString('es-AR')}` : 'Consultar precio'; // Assuming USD as currency
+            const locationText = prop.barrio || '';
+            const typeOpText = `${prop.tipo || ''} en ${prop.operacion || ''}`;
+            const codeText = prop.id_temporal ? `Código: ${prop.id_temporal}` : '';
 
-        propertyItem.innerHTML = `
-            <a href="details.html?id=${prop.property_id}">
-                <img src="${imageUrl}" alt="${titleText}" loading="lazy">
-            </a>
-            <div class="image-description">
-                <h3>${titleText}</h3>
-                <p>${locationText}</p>
-                <p>${typeOpText}</p>
-                <p>${priceText}</p>
-                <p>${codeText}</p>
-            </div>
-        `;
-        searchResults.appendChild(propertyItem);
-    });
+            const propertyElement = document.createElement('div');
+            propertyElement.className = 'propiedad-item';
+            propertyElement.innerHTML = `
+                <a href="details.html?id=${prop.id_temporal}" target="_blank">
+                    <img src="${imageUrl}" alt="${titleText}" loading="lazy" style="width:100%">
+                </a>
+                <div class="image-description">
+                    <h3>${titleText}</h3>
+                    <p>${locationText}</p>
+                    <p>${typeOpText}</p>
+                    <p>${priceText}</p>
+                    <p>${codeText}</p>
+                </div>
+            `;
+            console.log('Generated HTML for property:', propertyElement.innerHTML);
+            modalResultsGrid.appendChild(propertyElement);
+        });
+    }
+
+    modal.classList.add('active');
 }
 
 
