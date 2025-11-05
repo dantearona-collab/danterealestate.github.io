@@ -107,7 +107,7 @@ function initSearch() {
             }
 
             const queryString = params.toString();
-            const backendUrl = `https://dantepropiedades.com.ar/api/propiedades/search?${queryString}`;
+            const backendUrl = `http://127.0.0.1:5000/api/properties/search?${queryString}`;
 
             try {
                 const response = await fetch(backendUrl);

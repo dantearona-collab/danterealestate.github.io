@@ -1386,16 +1386,12 @@ button {
     transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-/* TEMPORARY DEBUGGING STYLES */
 .modal-overlay.active {
-    background-color: rgba(255, 0, 0, 0.8) !important; /* Bright red to ensure visibility */
-    visibility: visible !important;
-    opacity: 1 !important;
-    z-index: 99999 !important; /* Extremely high z-index */
+    opacity: 1;
+    visibility: visible;
 }
 
 .modal-content {
-    border: 5px solid blue !important; /* Blue border for content */
     background-color: white;
     padding: 30px;
     border-radius: 8px;
@@ -1407,13 +1403,6 @@ button {
     transform: translateY(-20px);
     transition: transform 0.3s ease;
 }
-/* END TEMPORARY DEBUGGING STYLES */
-
-.modal-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
-
 
 .modal-overlay.active .modal-content {
     transform: translateY(0);
