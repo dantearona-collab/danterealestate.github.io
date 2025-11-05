@@ -20,7 +20,7 @@
   <meta name="twitter:image" content="https://tusitio.com/imagenes/og-dante.jpg">
 
   <!-- Favicon optimizado -->
-  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <!-- <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"> -->
 
   <!-- CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -86,9 +86,68 @@
     }
     </style>
 </head>
+
+
+
+
 <body>
 
-    
+  <!-- 🔍 FORMULARIO DE BÚSQUEDA -->
+  <form class="buscadorcab" action="#" method="GET">
+    <input type="hidden" name="ope" value="V">
+
+    <div class="cont">
+      <div class="ope">
+        <span class="activo" data-val="V">Venta</span>
+        <span data-val="A">Alquiler</span>
+        <span data-val="T">Alquiler<br>temporal</span>
+      </div>
+
+      <div class="sel colini">
+        <select name="tipo" aria-label="Tipo de propiedad">
+          <option value="">Propiedad</option>
+          <option value="departamento">Departamento</option>
+          <option value="casa">Casa</option>
+          <option value="ph">PH</option>
+          <option value="oficina">Oficina</option>
+          <option value="local">Local</option>
+          <option value="terreno">Terreno</option>
+        </select>
+      </div>
+
+      <<div class="sel colini">
+        <select name="barrio" id="campobusq" aria-label="Barrio o localidad">
+            <option value="">Barrio</option>
+            <option value="palermo">Palermo</option>
+            <option value="belgrano">Belgrano</option>
+            <option value="colegiales">Colegiales</option>
+            <option value="microcentro">Microcentro</option>
+            <option value="recoleta">Recoleta</option>
+            <option value="san isidro">San Isidro</option>
+            <option value="almagro">Almagro</option>
+            <option value="villa crespo">Villa Crespo</option>
+            <option value="caballito">Caballito</option>
+            <option value="nuñez">Nuñez</option>
+            <option value="boedo">Boedo</option>
+            <option value="balvanera">Balvanera</option>
+            <option value="vicente lopez">Vicente López</option>
+            <option value="puerto madero">Puerto Madero</option>
+        </select>
+        </div>
+
+      <input type="number" class="cod colini" name="cod" placeholder="Código" min="0">
+
+      <button type="submit"><i class="fas fa-search"></i></button>
+    </div>
+  </form>
+
+  <!-- 📦 RESULTADOS DINÁMICOS -->
+  <div id="resultados"></div>
+
+  <!-- 📜 SCRIPT DE FUNCIONALIDAD -->
+  <script src="script.js"></script>
+
+
 
     <!-- Header -->
     <header id="cab">
@@ -121,7 +180,7 @@
         </div>
     </header>
 
-    <!-- Buscador -->
+    <!-- ****************** Buscador ****************-->
   
     <form class="buscadorcab" action="propiedades" method="GET">
         <input type="hidden" name="ope" value="V">
@@ -146,8 +205,23 @@
             </div>
             
             <div class="buscarsug colini">
-                <input type="text" class="loc" placeholder="Búsqueda por barrio o localidad" 
-                       id="campobusq" autocomplete="off" aria-label="Buscar por ubicación">
+                <select name="barrio" id="campobusq" class="loc" aria-label="Barrio o localidad">
+                    <option value="">Barrio</option>
+                    <option value="palermo">Palermo</option>
+                    <option value="belgrano">Belgrano</option>
+                    <option value="colegiales">Colegiales</option>
+                    <option value="microcentro">Microcentro</option>
+                    <option value="recoleta">Recoleta</option>
+                    <option value="san isidro">San Isidro</option>
+                    <option value="almagro">Almagro</option>
+                    <option value="villa crespo">Villa Crespo</option>
+                    <option value="caballito">Caballito</option>
+                    <option value="nuñez">Nuñez</option>
+                    <option value="boedo">Boedo</option>
+                    <option value="balvanera">Balvanera</option>
+                    <option value="vicente lopez">Vicente López</option>
+                    <option value="puerto madero">Puerto Madero</option>
+                    </select>
                 <div class="suggestionsBox" id="suggestions">
                     <ul class="suggestionList" id="suggestionsList"></ul>
                 </div>
@@ -163,6 +237,9 @@
     
         
     </form>
+  <!-- ****************** END Buscador ****************-->
+
+
 
     <!-- Menú móvil -->
     <nav id="menuslide">
@@ -369,7 +446,7 @@
     <!-- WhatsApp flotante -->
     <div class="whatsapp-fixed">
         <a href="https://wa.me/5491125368595" id="whatsappLink" class="btn-whatsapp" aria-label="Contactar por WhatsApp">
-            <img src="img/ws-ico.png" alt="WhatsApp" width="40" height="40" loading="lazy"
+            <!-- <img src="img/ws-ico.png" alt="WhatsApp" width="40" height="40" loading="lazy" -->
                  onerror="this.src='https://cdn-icons-png.flaticon.com/512/124/124034.png'">
         </a>
     </div>
@@ -380,7 +457,7 @@
         <div class="cont">
             <div class="col">
                 <a href="index" class="logopie">
-                    <img src="img/logo.svg" alt="Dante Propiedades" width="100" height="45" loading="lazy"
+                    <!-- <img src="img/logo.svg" alt="Dante Propiedades" width="100" height="45" loading="lazy" -->
                          onerror="this.src='llave.png'">
                 </a>
             </div>

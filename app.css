@@ -49,6 +49,8 @@ body {
     overflow-x: hidden;
 }
 
+const barrio = document.getElementById("campobusq").value.toLowerCase();
+
 /* Banner de construcción */
 .construction-banner {
     display: none; /* Hiding this temporarily to diagnose the issue */
@@ -1275,3 +1277,67 @@ section {
   box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Opcional: sombra suave como en otras secciones */
 }
 
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background: #f2f2f2;
+}
+
+.buscadorcab {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.cont {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: center;
+}
+
+.ope span {
+  cursor: pointer;
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+.ope .activo {
+  background-color: #0077cc;
+  color: white;
+}
+
+.sel select,
+.buscarsug input,
+.cod {
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  min-width: 180px;
+}
+
+button {
+  padding: 10px 15px;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#resultados {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.propiedad {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
