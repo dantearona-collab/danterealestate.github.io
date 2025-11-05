@@ -130,7 +130,8 @@ def search_properties():
         filtered_properties.append(prop)
     
     safe_print(f"Propiedades encontradas: {len(filtered_properties)}")
-    return jsonify(filtered_properties)
+    response = jsonify(filtered_properties)
+    return response
 
 @app.route("/")
 def index():
