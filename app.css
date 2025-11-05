@@ -1171,7 +1171,6 @@ section {
 .propiedad-item {
   display: flex;
   flex-direction: column;
-  min-height: 550px;
   background-color: #f9f9f9; /* o "white" si preferís fondo blanco puro */
   border-radius: 10px;
   overflow: hidden;

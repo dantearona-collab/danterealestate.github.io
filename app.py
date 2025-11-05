@@ -4,12 +4,12 @@ import sys
 import os
 import json
 from flask import Flask, request, jsonify
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from openpyxl import Workbook, load_workbook
 from datetime import datetime
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": ["null", "http://127.0.0.1:5500", "http://localhost:5500", "https://danterealestate-github-io.onrender.com", "https://www.danterealestate.com", "https://www.dantepropiedades.com.ar"]}})
+CORS(app, origins=["https://www.dantepropiedades.com.ar", "https://danterealestate-github-io.onrender.com"])
 
 # --- Excel Contact Logic ---
 EXCEL_FILE = 'contactos_dante_propiedades.xlsx'
