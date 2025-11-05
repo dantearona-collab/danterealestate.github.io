@@ -1,7 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.querySelector(".buscadorcab");
   const resultados = document.getElementById("resultados");
-
+  resultados.appendChild(card);
+  
   form.addEventListener("submit", e => {
     e.preventDefault();
     const tipo = form.tipo.value;
