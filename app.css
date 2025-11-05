@@ -521,6 +521,63 @@ section {
   margin-top: 35px;
 }
 
+.col .logopie img {
+  max-width: 100px;
+  height: auto;
+  margin-right: 10px;
+}
+
+.col:first-child {
+  flex: 0 0 100px; /* 👈 fuerza que la columna del logo no crezca más allá de 100px */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+
+.formulario-legal {
+  display: flex;
+  flex-wrap: nowrap; /* 👈 evita que los elementos se apilen */
+  gap: 30px;
+  width: 100%;
+  max-width: 1400px;
+  margin: 40px auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.formulario-iframe {
+  flex: 0 0 70%; /* 👈 ocupa el 70% del ancho */
+  min-width: 700px;
+  height: 823px;
+  border: none;
+}
+
+
+.nota-legal {
+  flex: 0 1 45%; /* 👈 antes era 30% o 35% */
+  min-width: 500px;
+  padding: 20px;
+  font-size: 14px;
+  line-height: 1.6;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  color: #333;
+}
+
+
+.col:first-child {
+  flex: 0 0 80px;
+  max-width: 80px;
+}
+
+
+.formulario-iframe {
+  flex: 1 1 600px;
+  height: 823px;
+  border: none;
+}
+
 
 .propiedad-item img,
 .property-image {
@@ -655,17 +712,30 @@ section {
 }
 
 .logopie img {
-    max-width: 120px;
-    height: auto;
+  max-width: 80px;
+  height: auto;
+}
+
+.col {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+
+.subcol {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
 }
 
 .subcol > ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 25px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* o 1fr si querés una sola columna */
+  gap: 25px; /* ajustá según lo que prefieras */
 }
 
 .subcol > ul > li {
@@ -866,6 +936,28 @@ section {
 }
 
 /* RESPONSIVE DESIGN - OPTIMIZADO */
+
+
+@media (max-width: 900px) {
+  .nota-legal {
+    width: 100%;
+  }
+}
+
+@media (max-width: 1000px) {
+  .formulario-legal {
+    flex-direction: column;
+    flex-wrap: wrap;
+  }
+
+  .formulario-iframe,
+  .nota-legal {
+    flex: 1 1 100%;
+    min-width: auto;
+  }
+}
+
+
 @media (max-width: 768px) {
     body {
         padding-top: 70px;
