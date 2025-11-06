@@ -93,26 +93,31 @@ function initSlider() {
     }
 }
 
+// En tu script.js, asegúrate de que esta parte esté funcionando:
 function initSearch() {
-    const searchForm = document.querySelector('.buscadorcab');
     const opeSpans = document.querySelectorAll('.buscadorcab .ope span');
-    const inputOpe = document.querySelector('input[name="ope"]');
     
-    // Modal elements
-    const modal = document.getElementById('results-modal');
-    const closeModalBtn = document.getElementById('modal-close-btn');
-
-    // Handle operation type selection con mejoras táctiles
+    // Handle operation type selection
     opeSpans.forEach(opcion => {
-        opcion.addEventListener('touchstart', function(e) {
-            e.preventDefault();
-            selectOperation(this);
+        opcion.addEventListener('click', function() {
+            opeSpans.forEach(o => o.classList.remove('activo'));
+            this.classList.add('activo');
+            const inputOpe = document.querySelector('input[name="ope"]');
+            if (inputOpe) inputOpe.value = this.dataset.val;
+            console.log('Operación seleccionada:', this.dataset.val);
         });
         
-        opcion.addEventListener('click', function() {
-            selectOperation(this);
+        // Para móviles - evento táctil
+        opcion.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            opeSpans.forEach(o => o.classList.remove('activo'));
+            this.classList.add('activo');
+            const inputOpe = document.querySelector('input[name="ope"]');
+            if (inputOpe) inputOpe.value = this.dataset.val;
+            console.log('Operación seleccionada (touch):', this.dataset.val);
         });
     });
+}
     
     function selectOperation(element) {
         opeSpans.forEach(o => o.classList.remove('activo'));

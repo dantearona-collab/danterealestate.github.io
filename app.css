@@ -25,14 +25,17 @@ html {
 }
 
 body {
-    font-family: 'Fira Sans', sans-serif;
+    padding-top: 70px; Re-adjusted for smaller header
+    /* font-family: 'Fira Sans', sans-serif;
     line-height: 1.6;
     color: var(--texto);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    padding-top: 130px; /* Re-adjusted for smaller header */
-    background-color: var(--azul);
+    /* background-color: var(--azul);  */
 }
+
+
+
 
 /* Utilidades */
 .cont {
@@ -54,11 +57,11 @@ const barrio = document.getElementById("campobusq").value.toLowerCase();
 /* Banner de construcción */
 .construction-banner {
     display: none; /* Hiding this temporarily to diagnose the issue */
-    text-align: center;
+    /* text-align: center;
     background: yellow;
     padding: 10px;
     position: relative;
-    z-index: 999;
+    z-index: 999; */
 }
 
 .blinking {
@@ -83,47 +86,84 @@ const barrio = document.getElementById("campobusq").value.toLowerCase();
     50% { opacity: 0.3; }
 }
 
+
+
 /* Header */
-#cab {
-    background: var(--azul);
-    color: white;
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 1001;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
+/* OPERACIONES - CORREGIDO PARA SER TOCABLE */
+    .ope {
+        order: 1;
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        gap: 5px;
+        position: relative;
+        z-index: 10;
+    }
+    
+    .ope span {
+        flex: 1;
+        padding: 12px 5px;
+        font-size: 0.75rem;
+        line-height: 1.2;
+        text-align: center;
+        border-radius: 20px;
+        background: var(--azul);
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid var(--azul);
+        position: relative;
+        z-index: 11;
+    }
+    
+    .ope span:hover {
+        background: #1a23c7;
+    }
+    
+    .ope span.activo {
+        background: var(--rojo);
+        border-color: var(--rojo);
+    }
+    
+    /* HEADER COMPACTO PARA DEJAR ESPACIO AL BUSCADOR */
+    #cab {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1001;
+        background: var(--azul);
+        padding: 5px 0;
+        height: auto;
+        min-height: 60px;
+    }
+    
+    #cab .cont {
+        padding: 5px 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 60px;
+    }
+    
+    /* ELEMENTOS OCULTOS EN MÓVIL */
+    .menucab {
+        display: none !important;
+    }
+    
+    #cab .logo-text {
+        display: none;
+    }
+    
+    #cab .logo img {
+        width: 40px;
+        height: auto;
+    }
+    
 
-#cab.cabfix {
-    box-shadow: 0 2px 15px rgba(0,0,0,0.2);
-}
-
-#cab .cont {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 9px 20px; /* Further reduced padding */
-}
-
-#cab .logo {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    text-decoration: none;
-    color: white;
-}
-
-#cab .logo img {
-    width: 57px; /* Further reduced size */
-    height: auto;
-}
-
-#cab .logo-text {
-    font-size: 1.0rem; /* Further reduced size */
-    font-weight: 600;
-    letter-spacing: 0.5px;
-}
 
 .menugen {
     display: flex;
@@ -1287,99 +1327,105 @@ button {
     color: var(--texto-claro);
 }
 
-/* ========== MEJORAS PARA MÓVILES ========== */
 
 /* ========== CORRECCIONES PARA MÓVILES - SIN SUPERPOSICIÓN ========== */
 
+/* ========== CORRECCIONES MÓVILES SIMPLIFICADAS ========== */
+
 @media (max-width: 768px) {
     body {
-        padding-top: 120px; /* Aumentado para header + banner */
+        padding-top: 70px; /* Volvemos al padding original */
     }
     
-    /* HEADER OPTIMIZADO - SIN SUPERPOSICIÓN */
+    /* HEADER FIXED CORREGIDO */
     #cab {
-        height: auto;
-        min-height: 70px;
         position: fixed;
         top: 0;
         width: 100%;
         z-index: 1001;
         background: var(--azul);
+        padding: 5px 0;
     }
     
     #cab .cont {
-        padding: 8px 15px;
+        padding: 5px 15px;
         display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
         align-items: center;
+        justify-content: space-between;
+        flex-wrap: nowrap;
+        min-height: 60px;
     }
     
+    /* LOGO COMPACTO */
     #cab .logo {
-        order: 1;
         flex: 0 0 auto;
-        margin-right: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
     
     #cab .logo img {
-        width: 45px;
+        width: 40px;
         height: auto;
     }
     
     #cab .logo-text {
-        display: none; /* Oculto en móvil para ahorrar espacio */
+        font-size: 0.9rem;
+        color: white;
+        display: none; /* Oculto en móvil */
     }
     
-    /* BANNER DE CONSTRUCCIÓN REORGANIZADO */
+    /* BANNER DE CONSTRUCCIÓN COMPACTO */
     .construction-banner {
-        display: block;
-        order: 2;
+        display: none; /* OCULTAMOS TEMPORALMENTE EL BANNER */
+        /* order: 2;
         width: 100%;
-        margin: 5px 0 0 0;
-        padding: 6px 10px;
-        font-size: 0.8rem;
+        margin: 2px 0 0 0;
+        padding: 4px 8px;
+        font-size: 0.7rem;
         background: yellow;
         color: #000;
         text-align: center;
-        border-radius: 4px;
+        border-radius: 3px;
         animation: blinker 1s linear infinite;
-    }
+    } */
     
-    /* MENÚ PRINCIPAL - OCULTO EN MÓVIL */
+    /* MENÚ COMPACTO */
     .menugen {
-        order: 3;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
         flex: 0 0 auto;
-        justify-content: flex-end;
     }
     
     .menucab {
-        display: none !important; /* Oculto en móvil */
+        display: none; /* Oculto en móvil */
     }
     
     .menudesp {
-        display: block;
         background: white;
         color: var(--rojo);
         border: none;
-        font-size: 1.2rem;
-        padding: 8px 10px;
+        font-size: 1.1rem;
+        padding: 8px;
         border-radius: 4px;
-        min-width: 44px;
-        min-height: 44px;
+        min-width: 40px;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     
-    /* BUSCADOR COMPLETAMENTE RESPONSIVO */
+    /* BUSCADOR DEBAJO DEL HEADER */
+
     .buscadorcab {
         position: relative;
         top: 0;
+        margin-top: 0;
         padding: 10px 0;
         background: white;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         z-index: 1000;
-        margin-top: 0;
     }
     
     .buscadorcab .cont {
@@ -1388,39 +1434,69 @@ button {
         gap: 8px;
         padding: 0 15px;
     }
-    
-    /* REORGANIZACIÓN ESPECÍFICA DEL BUSCADOR */
+
+
+    /* OPERACIONES COMPACTAS */
+ /* OPERACIONES - CORREGIDO PARA SER TOCABLE */
     .ope {
         order: 1;
         display: flex;
         justify-content: space-between;
         width: 100%;
         gap: 5px;
+        position: relative;
+        z-index: 10;
     }
     
     .ope span {
         flex: 1;
-        min-width: 0;
-        padding: 10px 5px;
+        padding: 12px 5px;
         font-size: 0.75rem;
         line-height: 1.2;
         text-align: center;
         border-radius: 20px;
+        background: var(--azul);
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid var(--azul);
+        position: relative;
+        z-index: 11;
     }
     
-    .sel {
+    .ope span:hover {
+        background: #1a23c7;
+    }
+    
+    .ope span.activo {
+        background: var(--rojo);
+        border-color: var(--rojo);
+    }
+       
+    /* ELEMENTOS DEL BUSCADOR */
+     .sel {
         order: 2;
         width: 100%;
+        position: relative;
+        z-index: 9;
     }
     
     .buscarsug {
         order: 3;
         width: 100%;
+        position: relative;
+        z-index: 9;
     }
     
     .cod {
         order: 4;
         width: 100%;
+        position: relative;
+        z-index: 9;
     }
     
     .buscadorcab button[type="submit"] {
@@ -1429,6 +1505,9 @@ button {
         margin-top: 5px;
         padding: 12px;
         border-radius: 25px;
+        min-height: 44px;
+        position: relative;
+        z-index: 9;
     }
     
     .colini input,
@@ -1439,28 +1518,29 @@ button {
         border: 1px solid #ddd;
         border-radius: 25px;
         background: white;
+        min-height: 44px;
     }
-    
-    /* SLIDER OPTIMIZADO PARA MÓVILES */
+}
+    /* SLIDER COMPACTO */
     #sliderini {
-        height: 220px;
+        height: 200px;
         margin-top: 0;
     }
     
     .slini .slick-slide {
-        height: 220px !important;
+        height: 200px !important;
     }
     
     .slide, .image-wrapper {
-        height: 220px !important;
+        height: 200px !important;
     }
     
     .slider-img {
-        max-height: 220px;
+        max-height: 200px;
         object-fit: cover;
     }
     
-    /* PROPIEDADES DESTACADAS */
+    /* RESTANTE DEL CSS MÓVIL (igual que antes) */
     .propiedades-grid {
         grid-template-columns: 1fr;
         gap: 15px;
@@ -1471,7 +1551,6 @@ button {
         height: 200px;
     }
     
-    /* FOOTER OPTIMIZADO PARA MÓVILES */
     #pie .cont {
         grid-template-columns: 1fr;
         gap: 25px;
@@ -1499,7 +1578,6 @@ button {
         padding: 15px;
     }
     
-    /* MODAL OPTIMIZADO PARA MÓVILES */
     .modal-content {
         width: 95%;
         max-height: 85vh;
@@ -1521,14 +1599,12 @@ button {
         height: 180px;
     }
     
-    /* AJUSTES PARA EL MENÚ MÓVIL */
     #menuslide {
-        top: 70px;
+        top: 60px;
         width: 85%;
         max-width: 300px;
     }
     
-    /* WHATSAPP FLOTANTE */
     .whatsapp-fixed {
         bottom: 15px;
         right: 15px;
@@ -1539,7 +1615,6 @@ button {
         height: 50px;
     }
     
-    /* COPYRIGHT OPTIMIZADO */
     #copy .cont {
         flex-direction: column;
         text-align: center;
@@ -1552,26 +1627,8 @@ button {
     }
 }
 
-/* AJUSTES ADICIONALES PARA PANTALLAS MUY PEQUEÑAS */
+/* DISPOSITIVOS MUY PEQUEÑOS */
 @media (max-width: 480px) {
-    body {
-        padding-top: 110px;
-    }
-    
-    #cab .cont {
-        padding: 6px 10px;
-    }
-    
-    #cab .logo img {
-        width: 40px;
-    }
-    
-    .construction-banner {
-        font-size: 0.75rem;
-        padding: 5px 8px;
-        margin-top: 6px;
-    }
-    
     #sliderini {
         height: 180px;
     }
@@ -1602,100 +1659,44 @@ button {
     }
     
     .ope span {
-        font-size: 0.7rem;
-        padding: 8px 3px;
-    }
-}
-
-/* AJUSTE ESPECÍFICO PARA IPHONE SE Y DISPOSITIVOS MUY PEQUEÑOS */
-@media (max-width: 375px) {
-    body {
-        padding-top: 105px;
-    }
-    
-    .ope span {
         font-size: 0.65rem;
-        padding: 8px 2px;
-    }
-    
-    .construction-banner {
-        font-size: 0.7rem;
+        padding: 6px 2px;
     }
 }
 
-/* MEJORAS DE USABILIDAD TÁCTIL */
+
+
+@media (max-width: 480px) {
+    .ope span {
+        font-size: 0.7rem;
+        padding: 10px 3px;
+        min-height: 40px;
+    }
+    
+    .buscadorcab .cont {
+        padding: 0 10px;
+        gap: 6px;
+    }
+}
+
+
+/* MEJORAS TÁCTILES */
 @media (max-width: 768px) {
     .btn, 
     .ope span,
     .menudesp,
     .cerrarmenu,
     .suggestionList li {
-        min-height: 44px; /* Tamaño mínimo recomendado para elementos táctiles */
+        min-height: 44px;
         display: flex;
         align-items: center;
         justify-content: center;
     }
-    
-    .menucab li a {
-        padding: 12px 15px;
-    }
 }
 
-/* PREVENIR ZOOM EN INPUTS EN iOS */
+/* PREVENIR ZOOM iOS */
 @media (max-width: 768px) {
     input, select, textarea {
         font-size: 16px !important;
-    }
-}
-
-/* CORRECCIONES ESPECÍFICAS PARA SUPERPOSICIÓN */
-@media (max-width: 768px) {
-    /* Aseguramos que el header tenga suficiente altura */
-    #cab {
-        min-height: 70px;
-    }
-    
-    /* Flexbox reorganizado para evitar superposiciones */
-    #cab .cont {
-        display: flex;
-        flex-wrap: wrap;
-    }
-    
-    #cab .logo {
-        order: 1;
-        flex: 0 0 auto;
-    }
-    
-    .menugen {
-        order: 3;
-        flex: 0 0 auto;
-    }
-    
-    .construction-banner {
-        order: 2;
-        flex: 1 1 100%;
-    }
-    
-    /* Elementos que deben estar ocultos en móvil */
-    .menucab {
-        display: none !important;
-    }
-    
-    #cab .logo-text {
-        display: none;
-    }
-}
-
-/* AJUSTE FINO PARA DISPOSITIVOS MUY PEQUEÑOS */
-@media (max-width: 360px) {
-    .ope span {
-        font-size: 0.6rem;
-        padding: 6px 2px;
-    }
-    
-    .construction-banner p {
-        margin: 0;
-        padding: 0;
-        line-height: 1.2;
     }
 }
