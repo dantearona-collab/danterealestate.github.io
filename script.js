@@ -3,11 +3,12 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('=== INICIANDO DANTE PROPIEDADES ===');
     
     // Inicializar funciones en orden de importancia
+    initConstructionBanner(); // Nueva función para el banner
     initMenu();
     initSlider();
     initSearch();
     initWhatsApp();
-    initTouchOptimizations(); // Nueva función para optimizaciones táctiles
+    initTouchOptimizations();
 });
 
 function initMenu() {
@@ -210,6 +211,25 @@ function initSearch() {
     }
 }
 
+
+// Función para manejar el banner de construcción
+function initConstructionBanner() {
+    const constructionBanner = document.querySelector('.construction-banner');
+    if (constructionBanner) {
+        // Añadir clase al body cuando el banner está visible
+        document.body.classList.add('has-construction-banner');
+        
+        // Opcional: Ocultar banner después de 10 segundos
+        setTimeout(() => {
+            constructionBanner.style.display = 'none';
+            document.body.classList.remove('has-construction-banner');
+            // Ajustar el padding del body
+            document.body.style.paddingTop = '70px';
+        }, 10000);
+    }
+}
+
+
 function displayResultsInModal(properties) {
     const modal = document.getElementById('results-modal');
     const modalResultsGrid = document.getElementById('modal-results-grid');
@@ -257,6 +277,26 @@ function displayResultsInModal(properties) {
     document.body.style.overflow = 'hidden'; // Prevenir scroll del body
 }
 
+
+
+// Función para ajustar dinámicamente el header en móvil
+function adjustMobileHeader() {
+    if (window.innerWidth <= 768px) {
+        const header = document.getElementById('cab');
+        const constructionBanner = document.querySelector('.construction-banner');
+        
+        if (header && constructionBanner) {
+            const headerHeight = header.offsetHeight;
+            const bannerHeight = constructionBanner.offsetHeight;
+            const totalHeight = headerHeight + bannerHeight;
+            
+            // Ajustar el padding del body
+            document.body.style.paddingTop = totalHeight + 'px';
+        }
+    }
+}
+
+
 function initWhatsApp() {
     const whatsappLink = document.getElementById('whatsappLink');
     if (whatsappLink) {
@@ -291,6 +331,11 @@ function initTouchOptimizations() {
         });
     });
 }
+
+// Ejecutar al cargar y al redimensionar
+window.addEventListener('load', adjustMobileHeader);
+window.addEventListener('resize', adjustMobileHeader);
+
 
 // Header sticky
 window.addEventListener('scroll', function() {
