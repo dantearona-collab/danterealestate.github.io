@@ -131,14 +131,7 @@ const barrio = document.getElementById("campobusq").value.toLowerCase();
     
     /* HEADER COMPACTO PARA DEJAR ESPACIO AL BUSCADOR */
     #cab {
-        position: fixed;
-        top: 0;
-        width: 100%;
-        z-index: 1001;
-        background: var(--azul);
-        padding: 5px 0;
-        height: auto;
-        min-height: 60px;
+        z-index: 10002 !important;
     }
     
     #cab .cont {
@@ -1419,14 +1412,8 @@ button {
     /* BUSCADOR DEBAJO DEL HEADER */
 
     .buscadorcab {
-        position: relative;
-        top: 0;
-        margin-top: 0;
-        padding: 10px 0;
-        background: white;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        z-index: 1000;
-    }
+        position: relative !important;
+        z-index: 9999 !important;
     
     .buscadorcab .cont {
         display: flex;
@@ -1439,13 +1426,8 @@ button {
     /* OPERACIONES COMPACTAS */
  /* OPERACIONES - CORREGIDO PARA SER TOCABLE */
     .ope {
-        order: 1;
-        display: flex;
-        justify-content: space-between;
-        width: 100%;
-        gap: 5px;
-        position: relative;
-        z-index: 10;
+        position: relative !important;
+        z-index: 10000 !important;
     }
     
     .ope span {
@@ -1659,8 +1641,10 @@ button {
     }
     
     .ope span {
-        font-size: 0.65rem;
-        padding: 6px 2px;
+        position: relative !important;
+        z-index: 10001 !important;
+        pointer-events: auto !important;
+        touch-action: manipulation !important;
     }
 }
 

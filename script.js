@@ -1,14 +1,13 @@
-// Script mejorado con manejo robusto de errores y optimizaciones móviles
+// Script mejorado con manejo robusto de errores
 document.addEventListener('DOMContentLoaded', function() {
     console.log('=== INICIANDO DANTE PROPIEDADES ===');
     
     // Inicializar funciones en orden de importancia
-    initConstructionBanner(); // Nueva función para el banner
     initMenu();
     initSlider();
     initSearch();
     initWhatsApp();
-    initTouchOptimizations();
+    initConstructionBanner();
 });
 
 function initMenu() {
@@ -17,27 +16,14 @@ function initMenu() {
     const menuSlide = document.getElementById('menuslide');
     
     if (menuBtn && closeBtn && menuSlide) {
-        // Mejorar usabilidad táctil
-        menuBtn.addEventListener('click', (e) => {
-            e.preventDefault();
+        menuBtn.addEventListener('click', () => {
             menuSlide.classList.add('menuabierto');
-            document.body.style.overflow = 'hidden'; // Prevenir scroll del body
             console.log('Menú abierto');
         });
         
-        closeBtn.addEventListener('click', (e) => {
-            e.preventDefault();
+        closeBtn.addEventListener('click', () => {
             menuSlide.classList.remove('menuabierto');
-            document.body.style.overflow = ''; // Restaurar scroll
             console.log('Menú cerrado');
-        });
-        
-        // Cerrar menú al tocar fuera
-        menuSlide.addEventListener('click', (e) => {
-            if (e.target === menuSlide) {
-                menuSlide.classList.remove('menuabierto');
-                document.body.style.overflow = '';
-            }
         });
     }
 }
@@ -46,7 +32,6 @@ function initSlider() {
     if (typeof $ !== 'undefined' && $('.slini').length) {
         console.log('Inicializando slider...');
         
-        // Configuración optimizada para móviles
         $('.slini').slick({
             dots: false,
             arrows: false,
@@ -56,27 +41,12 @@ function initSlider() {
             autoplay: true,
             autoplaySpeed: 4000,
             cssEase: 'linear',
-            adaptiveHeight: false,
-            mobileFirst: true,
-            responsive: [
-                {
-                    breakpoint: 768,
-                    settings: {
-                        adaptiveHeight: true
-                    }
-                }
-            ]
+            adaptiveHeight: false
         });
 
-        // Navegación táctil mejorada
+        // Navegación
         const navButtons = document.querySelectorAll('.slider-nav button');
         navButtons.forEach(button => {
-            button.addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                const slideIndex = parseInt(this.dataset.slide);
-                $('.slini').slick('slickGoTo', slideIndex);
-            });
-            
             button.addEventListener('click', function() {
                 const slideIndex = parseInt(this.dataset.slide);
                 $('.slini').slick('slickGoTo', slideIndex);
@@ -93,44 +63,40 @@ function initSlider() {
     }
 }
 
-// En tu script.js, asegúrate de que esta parte esté funcionando:
 function initSearch() {
+    const searchForm = document.querySelector('.buscadorcab');
     const opeSpans = document.querySelectorAll('.buscadorcab .ope span');
+    const inputOpe = document.querySelector('input[name="ope"]');
     
+    // Modal elements
+    const modal = document.getElementById('results-modal');
+    const closeModalBtn = document.getElementById('modal-close-btn');
+
     // Handle operation type selection
     opeSpans.forEach(opcion => {
         opcion.addEventListener('click', function() {
             opeSpans.forEach(o => o.classList.remove('activo'));
             this.classList.add('activo');
-            const inputOpe = document.querySelector('input[name="ope"]');
             if (inputOpe) inputOpe.value = this.dataset.val;
             console.log('Operación seleccionada:', this.dataset.val);
         });
         
-        // Para móviles - evento táctil
+        // Para móviles
         opcion.addEventListener('touchstart', function(e) {
             e.preventDefault();
             opeSpans.forEach(o => o.classList.remove('activo'));
             this.classList.add('activo');
-            const inputOpe = document.querySelector('input[name="ope"]');
             if (inputOpe) inputOpe.value = this.dataset.val;
             console.log('Operación seleccionada (touch):', this.dataset.val);
         });
     });
-}
-    
-    function selectOperation(element) {
-        opeSpans.forEach(o => o.classList.remove('activo'));
-        element.classList.add('activo');
-        if (inputOpe) inputOpe.value = element.dataset.val;
-    }
 
     // Handle form submission
     if (searchForm) {
         searchForm.addEventListener('submit', async function(event) {
             event.preventDefault();
 
-            // Mostrar indicador de carga en móviles
+            // Mostrar indicador de carga
             const submitBtn = searchForm.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
@@ -184,56 +150,19 @@ function initSearch() {
         });
     }
 
-    // Close modal con mejoras móviles
+    // Close modal
     if (modal && closeModalBtn) {
         closeModalBtn.addEventListener('click', () => {
-            closeModal();
-        });
-        
-        // Cerrar modal al tocar fuera en móviles
-        modal.addEventListener('touchstart', (event) => {
-            if (event.target === modal) {
-                closeModal();
-            }
+            modal.classList.remove('active');
         });
         
         modal.addEventListener('click', (event) => {
             if (event.target === modal) {
-                closeModal();
+                modal.classList.remove('active');
             }
         });
-        
-        // Prevenir cierre accidental al desplazarse
-        const modalContent = modal.querySelector('.modal-content');
-        modalContent.addEventListener('touchstart', (e) => {
-            e.stopPropagation();
-        });
-    }
-    
-    function closeModal() {
-        modal.classList.remove('active');
-        document.body.style.overflow = ''; // Restaurar scroll
     }
 }
-
-
-// Función para manejar el banner de construcción
-function initConstructionBanner() {
-    const constructionBanner = document.querySelector('.construction-banner');
-    if (constructionBanner) {
-        // Añadir clase al body cuando el banner está visible
-        document.body.classList.add('has-construction-banner');
-        
-        // Opcional: Ocultar banner después de 10 segundos
-        setTimeout(() => {
-            constructionBanner.style.display = 'none';
-            document.body.classList.remove('has-construction-banner');
-            // Ajustar el padding del body
-            document.body.style.paddingTop = '70px';
-        }, 10000);
-    }
-}
-
 
 function displayResultsInModal(properties) {
     const modal = document.getElementById('results-modal');
@@ -270,7 +199,7 @@ function displayResultsInModal(properties) {
                     <h3>${titleText}</h3>
                     <p>${locationText}</p>
                     <p>${typeOpText}</p>
-                    <p class="precio">${priceText}</p>
+                    <p>${priceText}</p>
                     <p>${codeText}</p>
                 </div>
             `;
@@ -279,68 +208,21 @@ function displayResultsInModal(properties) {
     }
 
     modal.classList.add('active');
-    document.body.style.overflow = 'hidden'; // Prevenir scroll del body
 }
-
-
-
-// Función para ajustar dinámicamente el header en móvil
-function adjustMobileHeader() {
-    if (window.innerWidth <= 768px) {
-        const header = document.getElementById('cab');
-        const constructionBanner = document.querySelector('.construction-banner');
-        
-        if (header && constructionBanner) {
-            const headerHeight = header.offsetHeight;
-            const bannerHeight = constructionBanner.offsetHeight;
-            const totalHeight = headerHeight + bannerHeight;
-            
-            // Ajustar el padding del body
-            document.body.style.paddingTop = totalHeight + 'px';
-        }
-    }
-}
-
 
 function initWhatsApp() {
     const whatsappLink = document.getElementById('whatsappLink');
     if (whatsappLink) {
         whatsappLink.href = 'https://wa.me/5491125368595';
-        
-        // Mejorar usabilidad táctil
-        whatsappLink.addEventListener('touchstart', function(e) {
-            e.preventDefault();
-            window.open(this.href, '_blank');
-        });
     }
 }
 
-// Nueva función para optimizaciones táctiles
-function initTouchOptimizations() {
-    // Prevenir zoom de doble tap en elementos interactivos
-    document.addEventListener('touchstart', function(e) {
-        if (e.touches.length > 1) {
-            e.preventDefault();
-        }
-    }, { passive: false });
-    
-    // Mejorar respuesta táctil en botones
-    const buttons = document.querySelectorAll('button, .btn, .ope span');
-    buttons.forEach(button => {
-        button.addEventListener('touchstart', function() {
-            this.style.transform = 'scale(0.95)';
-        });
-        
-        button.addEventListener('touchend', function() {
-            this.style.transform = '';
-        });
-    });
+function initConstructionBanner() {
+    const constructionBanner = document.querySelector('.construction-banner');
+    if (constructionBanner) {
+        console.log('Banner de construcción detectado');
+    }
 }
-
-// Ejecutar al cargar y al redimensionar
-window.addEventListener('load', adjustMobileHeader);
-window.addEventListener('resize', adjustMobileHeader);
-
 
 // Header sticky
 window.addEventListener('scroll', function() {
@@ -355,3 +237,21 @@ window.addEventListener('load', function() {
     console.log('=== PÁGINA COMPLETAMENTE CARGADA ===');
     console.log('Todas las imágenes deberían estar cargadas');
 });
+
+// Función para ajustar header en móvil
+function adjustMobileHeader() {
+    if (window.innerWidth <= 768px) {
+        const header = document.getElementById('cab');
+        const constructionBanner = document.querySelector('.construction-banner');
+        
+        if (header && constructionBanner) {
+            const headerHeight = header.offsetHeight;
+            const bannerHeight = constructionBanner.offsetHeight;
+            const totalHeight = headerHeight + bannerHeight;
+            document.body.style.paddingTop = totalHeight + 'px';
+        }
+    }
+}
+
+window.addEventListener('load', adjustMobileHeader);
+window.addEventListener('resize', adjustMobileHeader);
