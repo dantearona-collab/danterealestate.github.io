@@ -1,4 +1,4 @@
-// Script mejorado con manejo robusto de errores
+// Script mejorado con manejo robusto de errores y optimizaciones móviles
 document.addEventListener('DOMContentLoaded', function() {
     console.log('=== INICIANDO DANTE PROPIEDADES ===');
     
@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initSlider();
     initSearch();
     initWhatsApp();
-    initConstructionBanner();
+    initTouchOptimizations(); // Nueva función para optimizaciones táctiles
 });
 
 function initMenu() {
@@ -16,14 +16,27 @@ function initMenu() {
     const menuSlide = document.getElementById('menuslide');
     
     if (menuBtn && closeBtn && menuSlide) {
-        menuBtn.addEventListener('click', () => {
+        // Mejorar usabilidad táctil
+        menuBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             menuSlide.classList.add('menuabierto');
+            document.body.style.overflow = 'hidden'; // Prevenir scroll del body
             console.log('Menú abierto');
         });
         
-        closeBtn.addEventListener('click', () => {
+        closeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             menuSlide.classList.remove('menuabierto');
+            document.body.style.overflow = ''; // Restaurar scroll
             console.log('Menú cerrado');
+        });
+        
+        // Cerrar menú al tocar fuera
+        menuSlide.addEventListener('click', (e) => {
+            if (e.target === menuSlide) {
+                menuSlide.classList.remove('menuabierto');
+                document.body.style.overflow = '';
+            }
         });
     }
 }
@@ -32,6 +45,7 @@ function initSlider() {
     if (typeof $ !== 'undefined' && $('.slini').length) {
         console.log('Inicializando slider...');
         
+        // Configuración optimizada para móviles
         $('.slini').slick({
             dots: false,
             arrows: false,
@@ -41,12 +55,27 @@ function initSlider() {
             autoplay: true,
             autoplaySpeed: 4000,
             cssEase: 'linear',
-            adaptiveHeight: false
+            adaptiveHeight: false,
+            mobileFirst: true,
+            responsive: [
+                {
+                    breakpoint: 768,
+                    settings: {
+                        adaptiveHeight: true
+                    }
+                }
+            ]
         });
 
-        // Navegación
+        // Navegación táctil mejorada
         const navButtons = document.querySelectorAll('.slider-nav button');
         navButtons.forEach(button => {
+            button.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                const slideIndex = parseInt(this.dataset.slide);
+                $('.slini').slick('slickGoTo', slideIndex);
+            });
+            
             button.addEventListener('click', function() {
                 const slideIndex = parseInt(this.dataset.slide);
                 $('.slini').slick('slickGoTo', slideIndex);
@@ -72,31 +101,30 @@ function initSearch() {
     const modal = document.getElementById('results-modal');
     const closeModalBtn = document.getElementById('modal-close-btn');
 
-    // Handle operation type selection
+    // Handle operation type selection con mejoras táctiles
     opeSpans.forEach(opcion => {
-        opcion.addEventListener('click', function() {
-            opeSpans.forEach(o => o.classList.remove('activo'));
-            this.classList.add('activo');
-            if (inputOpe) inputOpe.value = this.dataset.val;
-            console.log('Operación seleccionada:', this.dataset.val);
-        });
-        
-        // Para móviles
         opcion.addEventListener('touchstart', function(e) {
             e.preventDefault();
-            opeSpans.forEach(o => o.classList.remove('activo'));
-            this.classList.add('activo');
-            if (inputOpe) inputOpe.value = this.dataset.val;
-            console.log('Operación seleccionada (touch):', this.dataset.val);
+            selectOperation(this);
+        });
+        
+        opcion.addEventListener('click', function() {
+            selectOperation(this);
         });
     });
+    
+    function selectOperation(element) {
+        opeSpans.forEach(o => o.classList.remove('activo'));
+        element.classList.add('activo');
+        if (inputOpe) inputOpe.value = element.dataset.val;
+    }
 
     // Handle form submission
     if (searchForm) {
         searchForm.addEventListener('submit', async function(event) {
             event.preventDefault();
 
-            // Mostrar indicador de carga
+            // Mostrar indicador de carga en móviles
             const submitBtn = searchForm.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
@@ -150,17 +178,35 @@ function initSearch() {
         });
     }
 
-    // Close modal
+    // Close modal con mejoras móviles
     if (modal && closeModalBtn) {
         closeModalBtn.addEventListener('click', () => {
-            modal.classList.remove('active');
+            closeModal();
+        });
+        
+        // Cerrar modal al tocar fuera en móviles
+        modal.addEventListener('touchstart', (event) => {
+            if (event.target === modal) {
+                closeModal();
+            }
         });
         
         modal.addEventListener('click', (event) => {
             if (event.target === modal) {
-                modal.classList.remove('active');
+                closeModal();
             }
         });
+        
+        // Prevenir cierre accidental al desplazarse
+        const modalContent = modal.querySelector('.modal-content');
+        modalContent.addEventListener('touchstart', (e) => {
+            e.stopPropagation();
+        });
+    }
+    
+    function closeModal() {
+        modal.classList.remove('active');
+        document.body.style.overflow = ''; // Restaurar scroll
     }
 }
 
@@ -199,7 +245,7 @@ function displayResultsInModal(properties) {
                     <h3>${titleText}</h3>
                     <p>${locationText}</p>
                     <p>${typeOpText}</p>
-                    <p>${priceText}</p>
+                    <p class="precio">${priceText}</p>
                     <p>${codeText}</p>
                 </div>
             `;
@@ -208,20 +254,42 @@ function displayResultsInModal(properties) {
     }
 
     modal.classList.add('active');
+    document.body.style.overflow = 'hidden'; // Prevenir scroll del body
 }
 
 function initWhatsApp() {
     const whatsappLink = document.getElementById('whatsappLink');
     if (whatsappLink) {
         whatsappLink.href = 'https://wa.me/5491125368595';
+        
+        // Mejorar usabilidad táctil
+        whatsappLink.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            window.open(this.href, '_blank');
+        });
     }
 }
 
-function initConstructionBanner() {
-    const constructionBanner = document.querySelector('.construction-banner');
-    if (constructionBanner) {
-        console.log('Banner de construcción detectado');
-    }
+// Nueva función para optimizaciones táctiles
+function initTouchOptimizations() {
+    // Prevenir zoom de doble tap en elementos interactivos
+    document.addEventListener('touchstart', function(e) {
+        if (e.touches.length > 1) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+    
+    // Mejorar respuesta táctil en botones
+    const buttons = document.querySelectorAll('button, .btn, .ope span');
+    buttons.forEach(button => {
+        button.addEventListener('touchstart', function() {
+            this.style.transform = 'scale(0.95)';
+        });
+        
+        button.addEventListener('touchend', function() {
+            this.style.transform = '';
+        });
+    });
 }
 
 // Header sticky
@@ -237,21 +305,3 @@ window.addEventListener('load', function() {
     console.log('=== PÁGINA COMPLETAMENTE CARGADA ===');
     console.log('Todas las imágenes deberían estar cargadas');
 });
-
-// Función para ajustar header en móvil
-function adjustMobileHeader() {
-    if (window.innerWidth <= 768px) {
-        const header = document.getElementById('cab');
-        const constructionBanner = document.querySelector('.construction-banner');
-        
-        if (header && constructionBanner) {
-            const headerHeight = header.offsetHeight;
-            const bannerHeight = constructionBanner.offsetHeight;
-            const totalHeight = headerHeight + bannerHeight;
-            document.body.style.paddingTop = totalHeight + 'px';
-        }
-    }
-}
-
-window.addEventListener('load', adjustMobileHeader);
-window.addEventListener('resize', adjustMobileHeader);
