@@ -112,7 +112,9 @@ async function loadFilterOptions() {
         // Poblar select de barrios
         const barrioSelect = document.getElementById('barrio-select');
         if (barrioSelect && options.barrios) {
-            barrioSelect.innerHTML = '<option value="">Todos los barrios</option>';
+            barrioSelect.innerHTML = '
+```Todos los barrios```
+';
             options.barrios.forEach(barrio => {
                 const option = document.createElement('option');
                 option.value = barrio;
@@ -124,7 +126,9 @@ async function loadFilterOptions() {
         // Poblar select de tipos
         const tipoSelect = document.getElementById('tipo-select');
         if (tipoSelect && options.tipos) {
-            tipoSelect.innerHTML = '<option value="">Todos los tipos</option>';
+            tipoSelect.innerHTML = '
+```Todos los tipos```
+';
             options.tipos.forEach(tipo => {
                 const option = document.createElement('option');
                 option.value = tipo;
@@ -514,7 +518,7 @@ function improveTouchExperience() {
             });
             
             button.addEventListener('touchend', function() {
-                this.style.transform = 'scale(1)';
+                this.style.transform = 'scale(1)');
             });
         });
         
