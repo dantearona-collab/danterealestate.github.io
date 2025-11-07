@@ -3,11 +3,10 @@
 import sys
 import os
 import json
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from openpyxl import Workbook, load_workbook
 from datetime import datetime
-import mimetypes
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": ["null", "http://dantepropiedades.com.ar", "http://www.dantepropiedades.com.ar", "https://dantepropiedades.com.ar", "https://www.dantepropiedades.com.ar", "http://dantepropiedades.com", "https://danterealestate-github-io.onrender.com"]}})
@@ -42,173 +41,42 @@ def init_excel():
         safe_print(f"INFO: Archivo {EXCEL_FILE} encontrado")
 
 def serve_static_file(filename):
-    """Sirve archivos estáticos desde la raíz del repositorio - VERSIÓN OPTIMIZADA"""
+    """Sirve archivos estáticos desde la raíz del repositorio"""
     try:
         # Buscar el archivo en la raíz del repositorio
         file_path = os.path.join(os.getcwd(), filename)
         
-        safe_print(f"🔍 Buscando archivo: {file_path}")
+        safe_print(f"Buscando archivo: {file_path}")
         
         if os.path.exists(file_path):
             try:
-                # Obtener el tipo MIME correcto
-                mime_type, _ = mimetypes.guess_type(filename)
-                if not mime_type:
-                    if filename.endswith('.css'):
-                        mime_type = 'text/css'
-                    elif filename.endswith('.js'):
-                        mime_type = 'application/javascript'
-                    elif filename.endswith('.json'):
-                        mime_type = 'application/json'
-                    elif filename.endswith('.html'):
-                        mime_type = 'text/html'
-                    else:
-                        mime_type = 'text/plain'
-                
-                safe_print(f"✅ Archivo encontrado: {file_path}")
-                safe_print(f"📏 Tamaño: {os.path.getsize(file_path)} bytes")
-                safe_print(f"🎯 Tipo MIME: {mime_type}")
-                
-                # Leer el archivo
                 with open(file_path, 'r', encoding='utf-8') as f:
                     content = f.read()
-                
-                if filename.endswith('.css'):
-                    safe_print(f"✅ Sirviendo {filename} como CSS (Cache: 1h)")
-                    return content, 200, {'Content-Type': 'text/css', 'Cache-Control': 'public, max-age=3600'}
-                elif filename.endswith('.js'):
-                    safe_print(f"✅ Sirviendo {filename} como JavaScript (Cache: 1h)")
-                    return content, 200, {'Content-Type': 'application/javascript', 'Cache-Control': 'public, max-age=3600'}
-                elif filename.endswith('.json'):
-                    safe_print(f"✅ Sirviendo {filename} como JSON (Cache: 1h)")
-                    return content, 200, {'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=3600'}
-                elif filename.endswith('.html'):
-                    safe_print(f"✅ Sirviendo {filename} como HTML (Cache: 1h)")
-                    return content, 200, {'Content-Type': 'text/html', 'Cache-Control': 'public, max-age=3600'}
-                else:
-                    safe_print(f"✅ Sirviendo {filename} como {mime_type}")
-                    return content, 200, {'Content-Type': mime_type}
-                    
+                    if filename.endswith('.css'):
+                        safe_print(f"Sirviendo {filename} como CSS")
+                        return content, 200, {'Content-Type': 'text/css'}
+                    elif filename.endswith('.js'):
+                        safe_print(f"Sirveindo {filename} como JavaScript")
+                        return content, 200, {'Content-Type': 'application/javascript'}
+                    elif filename.endswith('.json'):
+                        safe_print(f"Sirviendo {filename} como JSON")
+                        return content, 200, {'Content-Type': 'application/json'}
+                    elif filename.endswith('.html'):
+                        safe_print(f"Sirviendo {filename} como HTML")
+                        return content, 200, {'Content-Type': 'text/html'}
+                    else:
+                        safe_print(f"Sirviendo {filename} como texto")
+                        return content
             except Exception as e:
-                safe_print(f"❌ Error leyendo {filename}: {str(e)}")
+                safe_print(f"Error leyendo {filename}: {str(e)}")
                 return jsonify({"error": f"Error leyendo archivo: {str(e)}"}), 500
         else:
-            safe_print(f"❌ Archivo NO encontrado: {file_path}")
-            return jsonify({"error": f"Archivo {filename} no encontrado en {os.getcwd()}"}), 404
+            safe_print(f"Archivo NO encontrado: {file_path}")
+            return jsonify({"error": f"Archivo {filename} no encontrado"}), 404
             
     except Exception as e:
-        safe_print(f"❌ Error sirviendo {filename}: {str(e)}")
+        safe_print(f"Error sirviendo {filename}: {str(e)}")
         return jsonify({"error": f"Error sirviendo archivo: {str(e)}"}), 500
-
-@app.route('/test-css')
-def test_css():
-    """Servir página de prueba CSS con diagnóstico"""
-    test_html = '''<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test CSS - Propiedades Dante</title>
-    <link rel="stylesheet" href="app.css">
-    <style>
-        .test-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .test-section { background: #f0f0f0; border: 2px solid #333; margin: 20px 0; padding: 20px; }
-        .highlight { background: #ffff00; padding: 10px; border: 2px solid red; }
-        .btn-test { background: blue; color: white; padding: 10px 20px; border: none; cursor: pointer; }
-        .btn-test:hover { background: darkblue; }
-    </style>
-</head>
-<body>
-    <div class="test-container">
-        <h1>🔥 DIAGNÓSTICO CSS - Propiedades Dante</h1>
-        
-        <div class="test-section">
-            <h2>✅ Test 1: HTML Básico</h2>
-            <p>Si ves este texto con formato básico, el HTML funciona correctamente</p>
-        </div>
-        
-        <div class="highlight">
-            <h2>🎯 Test 2: CSS Inline</h2>
-            <p>Si este recuadro es <strong>AMARILLO con borde ROJO</strong>, el CSS inline funciona</p>
-        </div>
-        
-        <div class="test-section">
-            <h2>📋 Test 3: CSS Externo (app.css)</h2>
-            <p>Si esta sección tiene <strong>background gris claro con borde</strong>, el archivo app.css se está aplicando</p>
-            <p><strong>Tamaño esperado:</strong> 49,021 bytes</p>
-        </div>
-        
-        <div class="test-section">
-            <h2>🔧 Test 4: JavaScript</h2>
-            <button class="btn-test" onclick="testJavaScript()">Probar JavaScript</button>
-            <div id="js-result"></div>
-        </div>
-        
-        <div class="test-section">
-            <h2>🔍 Diagnóstico de Carga de Recursos</h2>
-            <div id="resource-diagnosis">Cargando diagnóstico...</div>
-        </div>
-        
-        <div class="test-section">
-            <h2>📊 Resultados</h2>
-            <ul>
-                <li>✅ <strong>SI tienes formato:</strong> CSS funciona - Problema con HTML original</li>
-                <li>❌ <strong>SI NO tienes formato:</strong> Problema con carga de recursos</li>
-            </ul>
-        </div>
-    </div>
-    
-    <script>
-        function testJavaScript() {
-            document.getElementById('js-result').innerHTML = '✅ <strong style="color: green;">JavaScript funciona correctamente!</strong>';
-        }
-        
-        // Diagnóstico automático de recursos
-        function diagnoseResources() {
-            const diagnosis = document.getElementById('resource-diagnosis');
-            
-            setTimeout(function() {
-                // Verificar CSS
-                const cssTest = getComputedStyle(document.querySelector('.test-section'));
-                const hasCSS = cssTest.backgroundColor === 'rgb(240, 240, 240)' || cssTest.backgroundColor === '#f0f0f0';
-                
-                // Verificar JavaScript
-                const hasJS = typeof testJavaScript === 'function';
-                
-                // Verificar fuentes
-                const font = getComputedStyle(document.body).fontFamily;
-                const hasCustomFont = font.includes('Fira Sans') || font.includes('sans-serif');
-                
-                let result = '<h3>Diagnóstico de Recursos:</h3><ul>';
-                result += '<li>' + (hasCSS ? '✅' : '❌') + ' <strong>CSS:</strong> ' + (hasCSS ? 'Aplicándose correctamente' : 'NO se está aplicando') + '</li>';
-                result += '<li>' + (hasJS ? '✅' : '❌') + ' <strong>JavaScript:</strong> ' + (hasJS ? 'Funcionando' : 'No funciona') + '</li>';
-                result += '<li>' + (hasCustomFont ? '✅' : '❌') + ' <strong>Fuentes:</strong> ' + (hasCustomFont ? 'Cargando (Fira Sans)' : 'Fallback (sans-serif)') + '</li>';
-                result += '</ul>';
-                
-                diagnosis.innerHTML = result;
-            }, 1000);
-        }
-        
-        diagnoseResources();
-    </script>
-</body>
-</html>'''
-    return test_html, 200, {'Content-Type': 'text/html'}
-
-@app.route('/debug')
-def debug_info():
-    """Información de debug sobre archivos disponibles"""
-    debug_info = {
-        "current_directory": os.getcwd(),
-        "files_in_directory": sorted(os.listdir('.')),
-        "app_css_exists": os.path.exists('app.css'),
-        "app_js_exists": os.path.exists('app.js'),
-        "index_html_exists": os.path.exists('index.html'),
-        "test_css_exists": True,  # Esta página siempre existe
-        "propiedades_json_exists": os.path.exists('propiedades.json'),
-        "main_py_exists": os.path.exists('main.py')
-    }
-    return jsonify(debug_info)
 
 @app.route('/<path:filename>')
 def serve_static(filename):
@@ -224,44 +92,46 @@ def guardar_contacto_route():
     
     try:
         data = request.get_json()
-        init_excel()
+        if not data:
+            return jsonify({'success': False, 'message': 'No data received'}), 400
         
-        fecha_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         nombre = data.get('nombre', '').strip()
         firma = data.get('firma', '').strip()
         telefono = data.get('telefono', '').strip()
-        propiedad = data.get('propiedad', '').strip()
+        propiedad = data.get('propiedad', 'DESTACADA0')
         
-        if not nombre and not telefono:
-            return jsonify({'error': 'Se requiere al menos nombre o teléfono'}), 400
+        if not nombre or not telefono:
+            return jsonify({'success': False, 'message': 'Name and phone are required'}), 400
         
-        wb = load_workbook(EXCEL_FILE)
-        ws = wb.active
-        next_row = ws.max_row + 1
-        
-        ws[f'A{next_row}'] = fecha_hora
-        ws[f'B{next_row}'] = nombre
-        ws[f'C{next_row}'] = firma
-        ws[f'D{next_row}'] = telefono
-        ws[f'E{next_row}'] = propiedad
-        
-        wb.save(EXCEL_FILE)
-        safe_print(f"SUCCESS: Contacto guardado - {nombre} - {telefono} - {fecha_hora}")
-        
-        return jsonify({'message': 'Contacto guardado exitosamente'}), 200
-        
+        try:
+            wb = load_workbook(EXCEL_FILE)
+            ws = wb.active
+            next_row = ws.max_row + 1
+            ws[f'A{next_row}'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            ws[f'B{next_row}'] = nombre
+            ws[f'C{next_row}'] = firma if firma else '-'
+            ws[f'D{next_row}'] = telefono
+            ws[f'E{next_row}'] = propiedad
+            wb.save(EXCEL_FILE)
+            safe_print(f"SUCCESS: Contact saved: {nombre} - {telefono}")
+            return jsonify({'success': True, 'message': 'Data saved correctly in Excel'})
+            
+        except Exception as e:
+            safe_print(f"ERROR saving to Excel: {str(e)}")
+            return jsonify({'success': False, 'message': 'Error saving data'}), 500
+            
     except Exception as e:
-        safe_print(f"ERROR: {str(e)}")
-        return jsonify({'error': f'Error interno: {str(e)}'}), 500
+        safe_print(f"ERROR in server: {str(e)}")
+        return jsonify({'success': False, 'message': 'Server error occurred'}), 500
 
 @app.route("/")
 def index():
-    """Servir la página principal ORIGINAL (no la de prueba)"""
+    """Servir la página principal"""
     try:
         return serve_static_file('index.html')
     except Exception as e:
         safe_print(f"Error sirviendo index.html: {str(e)}")
-        return jsonify({"error": f"Error sirviendo index.html: {str(e)}"}), 500
+        return "Welcome to the Property Search API. Use /api/properties/search to query."
 
 # --- API Endpoints ---
 
