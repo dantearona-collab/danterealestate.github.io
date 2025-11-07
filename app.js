@@ -31,7 +31,6 @@ async function initializeSystem() {
         
         // Inicializar formularios
         initSearchForm();
-        initQuickFilters();
         
         console.log('✅ Sistema inicializado completamente');
         
@@ -45,8 +44,8 @@ async function loadPropertiesData() {
     try {
         console.log('📂 Cargando datos de propiedades...');
         
-        // Cargar desde properties.json
-        const response = await fetch('./properties.json');
+        // Cargar desde propiedades.json
+        const response = await fetch('./propiedades.json');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -117,22 +116,22 @@ async function populateFilters() {
         }
         
         // Obtener valores únicos
+        const uniqueOperaciones = [...new Set(allProperties.map(p => p.operacion).filter(Boolean))].sort();
         const uniqueBarrios = [...new Set(allProperties.map(p => p.barrio).filter(Boolean))].sort();
         const uniqueTipos = [...new Set(allProperties.map(p => p.tipo).filter(Boolean))].sort();
-        const uniqueEstados = [...new Set(allProperties.map(p => p.estado).filter(Boolean))].sort();
         
+        console.log('💰 Operaciones encontradas:', uniqueOperaciones);
         console.log('📋 Barrios encontrados:', uniqueBarrios);
         console.log('🏠 Tipos encontrados:', uniqueTipos);
-        console.log('✅ Estados encontrados:', uniqueEstados);
+        
+        // Poblar select de operación
+        populateSelect('operacion-select-styled', uniqueOperaciones, 'Todas las operaciones');
         
         // Poblar select de barrio
         populateSelect('barrio-select-styled', uniqueBarrios, 'Todos los barrios');
         
         // Poblar select de tipo
         populateSelect('tipo-select-styled', uniqueTipos, 'Todos los tipos');
-        
-        // Poblar select de estado
-        populateSelect('estado-select-styled', uniqueEstados, 'Todos los estados');
         
         console.log('✅ Filtros poblados correctamente');
         
@@ -199,20 +198,22 @@ function performSearch() {
         console.log('🔍 Realizando búsqueda avanzada...');
         
         // Obtener valores de filtros
+        const operacion = document.getElementById('operacion-select-styled')?.value || '';
         const barrio = document.getElementById('barrio-select-styled')?.value || '';
         const tipo = document.getElementById('tipo-select-styled')?.value || '';
-        const estado = document.getElementById('estado-select-styled')?.value || '';
+        
+        console.log('🔍 Filtros aplicados:', { operacion, barrio, tipo });
         
         // Filtrar propiedades
         filteredProperties = allProperties.filter(property => {
+            // Filtro por operación
+            if (operacion && property.operacion !== operacion) return false;
+            
             // Filtro por barrio
             if (barrio && property.barrio !== barrio) return false;
             
             // Filtro por tipo
             if (tipo && property.tipo !== tipo) return false;
-            
-            // Filtro por estado
-            if (estado && property.estado !== estado) return false;
             
             return true;
         });
@@ -228,53 +229,7 @@ function performSearch() {
     }
 }
 
-// ===== FILTROS RÁPIDOS =====
-function initQuickFilters() {
-    const quickFilterButtons = document.querySelectorAll('.quick-filter-btn');
-    quickFilterButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            // Remover clase activa de todos
-            quickFilterButtons.forEach(b => b.classList.remove('active'));
-            
-            // Agregar clase activa
-            this.classList.add('active');
-            
-            // Aplicar filtro
-            const filterType = this.dataset.filter;
-            const filterValue = this.dataset.value;
-            applyQuickFilter(filterType, filterValue);
-        });
-    });
-}
-
-function applyQuickFilter(filterType, filterValue) {
-    try {
-        console.log(`⚡ Aplicando filtro rápido: ${filterType} = ${filterValue}`);
-        
-        if (filterType === 'tipo' && filterValue === 'Venta') {
-            // Filtrar por Venta
-            filteredProperties = allProperties.filter(p => p.operacion === 'Venta');
-        } else if (filterType === 'tipo' && filterValue === 'Alquiler') {
-            // Filtrar por Alquiler
-            filteredProperties = allProperties.filter(p => p.operacion === 'Alquiler');
-        } else if (filterType === 'estado' && filterValue === 'Disponible') {
-            // Filtrar por Disponibles (asumiendo que las que están en la base están disponibles)
-            filteredProperties = [...allProperties];
-        } else if (filterType === 'estado' && filterValue === 'Vendido') {
-            // Si tuvieras campo de estado, aquí filtrarías
-            filteredProperties = [];
-        } else {
-            // Sin filtro
-            filteredProperties = [...allProperties];
-        }
-        
-        renderProperties();
-        updateResultsCounter();
-        
-    } catch (error) {
-        console.error('❌ Error aplicando filtro rápido:', error);
-    }
-}
+// ===== FUNCIONES DE FILTROS RÁPIDOS ELIMINADAS =====
 
 // ===== RENDERIZADO DE PROPIEDADES =====
 function renderProperties() {

@@ -864,6 +864,13 @@
           
           <div class="search-grid" style="display: grid !important; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important; gap: 20px !important; align-items: end !important; margin-bottom: 20px !important; position: relative !important;">
               <div class="search-field" style="display: flex !important; flex-direction: column !important; position: relative !important;">
+                  <label style="display: block !important; margin-bottom: 8px !important; font-weight: 600 !important; color: #495057 !important; font-size: 14px !important; position: relative !important;">💰 Operación:</label>
+                  <select id="operacion-select-styled" name="operacion" style="padding: 12px !important; border: 2px solid #e9ecef !important; border-radius: 6px !important; font-size: 14px !important; transition: border-color 0.3s ease !important; background: white !important; width: 100% !important; position: relative !important; display: block !important;">
+                      <option value="">Todas las operaciones</option>
+                  </select>
+              </div>
+              
+              <div class="search-field" style="display: flex !important; flex-direction: column !important; position: relative !important;">
                   <label style="display: block !important; margin-bottom: 8px !important; font-weight: 600 !important; color: #495057 !important; font-size: 14px !important; position: relative !important;">📍 Barrio:</label>
                   <select id="barrio-select-styled" name="barrio" style="padding: 12px !important; border: 2px solid #e9ecef !important; border-radius: 6px !important; font-size: 14px !important; transition: border-color 0.3s ease !important; background: white !important; width: 100% !important; position: relative !important; display: block !important;">
                       <option value="">Todos los barrios</option>
@@ -877,38 +884,11 @@
                   </select>
               </div>
               
-              <div class="search-field" style="display: flex !important; flex-direction: column !important; position: relative !important;">
-                  <label style="display: block !important; margin-bottom: 8px !important; font-weight: 600 !important; color: #495057 !important; font-size: 14px !important; position: relative !important;">✅ Estado:</label>
-                  <select id="estado-select-styled" name="estado" style="padding: 12px !important; border: 2px solid #e9ecef !important; border-radius: 6px !important; font-size: 14px !important; transition: border-color 0.3s ease !important; background: white !important; width: 100% !important; position: relative !important; display: block !important;">
-                      <option value="">Todos los estados</option>
-                  </select>
-              </div>
-              
-              <div class="search-button-container" style="display: flex !important; gap: 10px !important; align-items: end !important; position: relative !important;">
+              <div class="search-button-container" style="display: flex !important; align-items: end !important; position: relative !important;">
                   <button type="submit" class="search-btn" style="padding: 12px 24px !important; background: linear-gradient(135deg, #232deb, #1a1bb3) !important; color: white !important; border: none !important; border-radius: 6px !important; cursor: pointer !important; font-weight: 600 !important; font-size: 14px !important; transition: all 0.3s ease !important; box-shadow: 0 4px 8px rgba(35, 45, 235, 0.3) !important; position: relative !important; display: block !important;">
                       🔍 Buscar
                   </button>
-                  <button type="button" id="test-filters-btn" style="padding: 12px 16px !important; background: linear-gradient(135deg, #ff0101, #cc0000) !important; color: white !important; border: none !important; border-radius: 6px !important; cursor: pointer !important; font-weight: 600 !important; font-size: 12px !important; transition: all 0.3s ease !important; box-shadow: 0 4px 8px rgba(255, 1, 1, 0.3) !important; position: relative !important; display: block !important;">
-                      🧪 Test Filtros
-                  </button>
               </div>
-          </div>
-          
-          <!-- FILTROS RÁPIDOS CON COLORES CORPORATIVOS -->
-          <div class="quick-filters-section" style="margin-top: 20px !important; text-align: center !important; position: relative !important; display: block !important;">
-              <div class="quick-filters-title" style="margin-bottom: 15px !important; color: #6c757d !important; font-weight: 500 !important; font-size: 14px !important; position: relative !important; display: block !important;">⚡ Filtros Rápidos:</div>
-              <button type="button" class="quick-filter-btn" data-filter="tipo" data-value="Venta" style="margin: 5px !important; padding: 10px 20px !important; border: 2px solid #232deb !important; background: white !important; color: #232deb !important; border-radius: 25px !important; cursor: pointer !important; font-weight: 500 !important; transition: all 0.3s ease !important; font-size: 13px !important; position: relative !important; display: inline-block !important;">
-                  🏠 Venta
-              </button>
-              <button type="button" class="quick-filter-btn" data-filter="tipo" data-value="Alquiler" style="margin: 5px !important; padding: 10px 20px !important; border: 2px solid #ff0101 !important; background: white !important; color: #ff0101 !important; border-radius: 25px !important; cursor: pointer !important; font-weight: 500 !important; transition: all 0.3s ease !important; font-size: 13px !important; position: relative !important; display: inline-block !important;">
-                  🏢 Alquiler
-              </button>
-              <button type="button" class="quick-filter-btn" data-filter="estado" data-value="Disponible" style="margin: 5px !important; padding: 10px 20px !important; border: 2px solid #28a745 !important; background: white !important; color: #28a745 !important; border-radius: 25px !important; cursor: pointer !important; font-weight: 500 !important; transition: all 0.3s ease !important; font-size: 13px !important; position: relative !important; display: inline-block !important;">
-                  ✅ Disponibles
-              </button>
-              <button type="button" class="quick-filter-btn" data-filter="estado" data-value="Vendido" style="margin: 5px !important; padding: 10px 20px !important; border: 2px solid #6f42c1 !important; background: white !important; color: #6f42c1 !important; border-radius: 25px !important; cursor: pointer !important; font-weight: 500 !important; transition: all 0.3s ease !important; font-size: 13px !important; position: relative !important; display: inline-block !important;">
-                  🏆 Vendidos
-              </button>
           </div>
       </form>
       
@@ -1157,37 +1137,27 @@
       console.log('🔍 DEBUG - Verificando estado de la página...');
       
       // Verificar elementos de filtro
+      const operacionSelect = document.getElementById('operacion-select-styled');
       const barrioSelect = document.getElementById('barrio-select-styled');
       const tipoSelect = document.getElementById('tipo-select-styled');
-      const estadoSelect = document.getElementById('estado-select-styled');
-      const testBtn = document.getElementById('test-filters-btn');
       
+      console.log('💰 Operación select:', operacionSelect ? 'ENCONTRADO' : 'NO ENCONTRADO');
       console.log('📍 Barrio select:', barrioSelect ? 'ENCONTRADO' : 'NO ENCONTRADO');
       console.log('🏠 Tipo select:', tipoSelect ? 'ENCONTRADO' : 'NO ENCONTRADO');
-      console.log('✅ Estado select:', estadoSelect ? 'ENCONTRADO' : 'NO ENCONTRADO');
-      console.log('🧪 Test button:', testBtn ? 'ENCONTRADO' : 'NO ENCONTRADO');
       
       // Verificar opciones actuales
+      if (operacionSelect) {
+          console.log('💰 Opciones en operación:', operacionSelect.options.length);
+      }
       if (barrioSelect) {
           console.log('📍 Opciones en barrio:', barrioSelect.options.length);
       }
       if (tipoSelect) {
           console.log('🏠 Opciones en tipo:', tipoSelect.options.length);
       }
-      if (estadoSelect) {
-          console.log('✅ Opciones en estado:', estadoSelect.options.length);
-      }
-      
-      // Configurar botón de test
-      if (testBtn) {
-          testBtn.addEventListener('click', () => {
-              console.log('🧪 Botón de test clickeado');
-              manualLoadFilters();
-          });
-      }
       
       // Agregar event listeners para debug
-      [barrioSelect, tipoSelect, estadoSelect].forEach(select => {
+      [operacionSelect, barrioSelect, tipoSelect].forEach(select => {
           if (select) {
               select.addEventListener('change', (e) => {
                   console.log('🔄 Filtro cambiado:', e.target.id, '=>', e.target.value);
@@ -1197,5 +1167,6 @@
       
   }, 2000);
   </script>
-</body> 
+
+</body>
 </html>
