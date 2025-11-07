@@ -891,6 +891,9 @@
                   <button type="button" onclick="debugFiltros()" class="debug-btn" style="padding: 12px 16px !important; background: linear-gradient(135deg, #ff0101, #cc0000) !important; color: white !important; border: none !important; border-radius: 6px !important; cursor: pointer !important; font-weight: 600 !important; font-size: 12px !important; transition: all 0.3s ease !important; box-shadow: 0 4px 8px rgba(255, 1, 1, 0.3) !important; position: relative !important; display: block !important;">
                       🧪 Debug
                   </button>
+                  <button type="button" onclick="location.reload()" class="reset-btn" style="padding: 12px 16px !important; background: linear-gradient(135deg, #6c757d, #495057) !important; color: white !important; border: none !important; border-radius: 6px !important; cursor: pointer !important; font-weight: 600 !important; font-size: 12px !important; transition: all 0.3s ease !important; box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3) !important; position: relative !important; display: block !important;">
+                      🔄 Recargar
+                  </button>
               </div>
           </div>
       </form>
@@ -1173,6 +1176,29 @@
 
 <!-- SCRIPT DE BACKUP PARA CARGA DE DATOS -->
 <script>
+// Función de debug global
+function debugFiltros() {
+    console.log('🧪 === DIAGNÓSTICO MANUAL DE FILTROS ===');
+    
+    // Verificar elementos del DOM
+    const elementos = {
+        operacionSelect: document.getElementById('operacion-select-styled'),
+        barrioSelect: document.getElementById('barrio-select-styled'),
+        tipoSelect: document.getElementById('tipo-select-styled')
+    };
+    
+    console.log('🔍 === ELEMENTOS DOM ===');
+    Object.keys(elementos).forEach(key => {
+        const elemento = elementos[key];
+        console.log(`${key}: ${elemento ? '✅ Existe' : '❌ No existe'}`);
+        if (elemento) {
+            console.log(`  Opciones disponibles: ${elemento.options.length}`);
+            console.log(`  Valor actual: "${elemento.value}"`);
+            console.log(`  HTML: ${elemento.innerHTML.substring(0, 200)}...`);
+        }
+    });
+}
+
 // Script de backup que se ejecuta si el archivo principal falla
 (async function() {
     console.log('🆘 === INICIANDO SCRIPT DE BACKUP ===');
