@@ -69,6 +69,84 @@
       z-index: 1000 !important;
   }
 
+  /* ESTILOS DEL CONTENEDOR DEL HEADER */
+  #cab .cont {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      max-width: 1200px !important;
+      margin: 0 auto !important;
+      padding: 0 20px !important;
+  }
+
+  /* ESTILOS DEL LOGO */
+  #cab .logo {
+      display: flex !important;
+      align-items: center !important;
+      text-decoration: none !important;
+      gap: 15px !important;
+  }
+
+  #cab .logo img {
+      width: 60px !important;
+      height: 60px !important;
+      object-fit: contain !important;
+      flex-shrink: 0 !important;
+  }
+
+  #cab .logo-text {
+      color: white !important;
+      font-weight: 600 !important;
+      font-size: 24px !important;
+      white-space: nowrap !important;
+  }
+
+  /* ESTILOS DEL MENÚ */
+  #cab .menucab {
+      display: flex !important;
+      list-style: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      gap: 25px !important;
+      align-items: center !important;
+  }
+
+  #cab .menucab li {
+      margin: 0 !important;
+  }
+
+  #cab .menucab a {
+      color: white !important;
+      text-decoration: none !important;
+      font-weight: 500 !important;
+      font-size: 16px !important;
+      transition: color 0.3s ease !important;
+      white-space: nowrap !important;
+  }
+
+  #cab .menucab a:hover {
+      color: rgba(255, 255, 255, 0.8) !important;
+  }
+
+  #cab .menucab a span {
+      font-weight: 600 !important;
+      color: white !important;
+  }
+
+  #cab .menucab i {
+      margin-right: 8px !important;
+  }
+
+  /* BOTÓN DE MENÚ MÓVIL */
+  #cab .menudesp {
+      display: none !important;
+      background: none !important;
+      border: none !important;
+      color: white !important;
+      font-size: 24px !important;
+      cursor: pointer !important;
+  }
+
   /* SECCIÓN DE BÚSQUEDA CON COLORES CORPORATIVOS */
   #search-container-section {
       background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
@@ -114,7 +192,6 @@
       align-items: end !important;
       margin-bottom: 20px !important;
       position: relative !important;
-      display: grid !important;
   }
 
   .search-field {
@@ -142,19 +219,13 @@
       background: white !important;
       width: 100% !important;
       position: relative !important;
-      display: block !important;
-  }
-
-  .search-field select:hover,
-  .search-field input:hover {
-      border-color: var(--dante-azul) !important;
   }
 
   .search-field select:focus,
   .search-field input:focus {
       outline: none !important;
       border-color: var(--dante-azul) !important;
-      box-shadow: 0 0 0 3px rgba(35, 45, 235, 0.25) !important;
+      box-shadow: 0 0 0 3px rgba(35, 45, 235, 0.1) !important;
   }
 
   .search-button-container {
@@ -181,9 +252,13 @@
   .search-btn:hover {
       transform: translateY(-1px) !important;
       box-shadow: 0 6px 12px rgba(35, 45, 235, 0.4) !important;
-      background: linear-gradient(135deg, var(--dante-azul-oscuro), #14147a) !important;
   }
 
+  .search-btn:active {
+      transform: translateY(0) !important;
+  }
+
+  /* FILTROS RÁPIDOS CON COLORES CORPORATIVOS */
   .quick-filters-section {
       margin-top: 20px !important;
       text-align: center !important;
@@ -297,107 +372,8 @@
       margin: 0 auto !important;
   }
 
-  /* MENSAJE DE ESTADO CON COLOR CORPORATIVO */
-  #initial-status-styled {
-      text-align: center !important;
-      margin-top: 20px !important;
-      padding: 15px !important;
-      background: rgba(255, 1, 1, 0.1) !important;
-      border: 1px solid rgba(255, 1, 1, 0.3) !important;
-      border-radius: 6px !important;
-      color: #8b0000 !important;
-      position: relative !important;
-      display: block !important;
-      font-size: 14px !important;
-      max-width: 1200px !important;
-      margin-left: auto !important;
-      margin-right: auto !important;
-  }
-
-  #initial-status-styled a {
-      color: var(--dante-rojo) !important;
-      text-decoration: underline !important;
-      font-weight: 600 !important;
-  }
-
-  #initial-status-styled a:hover {
-      color: var(--dante-rojo-oscuro) !important;
-  }
-
-  /* ANIMACIONES FORZADAS */
-  @keyframes slideIn {
-      from { 
-          opacity: 0 !important; 
-          transform: translateY(30px) !important; 
-      }
-      to { 
-          opacity: 1 !important; 
-          transform: translateY(0) !important; 
-      }
-  }
-
-  @keyframes pulse {
-      0%, 100% { opacity: 1 !important; }
-      50% { opacity: 0.5 !important; }
-  }
-
-  /* RESPONSIVE */
-  @media (max-width: 768px) {
-      #search-container-section {
-          padding: 20px !important;
-      }
-      
-      .search-grid {
-          grid-template-columns: 1fr !important;
-          gap: 15px !important;
-      }
-      
-      .quick-filter-btn {
-          display: block !important;
-          margin: 8px auto !important;
-          width: fit-content !important;
-      }
-  }
-
-  @media (max-width: 480px) {
-      #search-container-section {
-          padding: 15px !important;
-      }
-      
-      #search-form-styled {
-          padding: 15px !important;
-      }
-  }
-
-  /* ESTILOS PARA EL SLIDER (ABAJO) */
+  /* SLIDER */
   #sliderini {
-      position: relative !important;
-      z-index: 0 !important;
-      width: 100% !important;
-  }
-  
-  #sliderini .slider-container {
-      position: relative !important;
-      overflow: hidden !important;
-      max-height: 400px !important;
-  }
-  
-  #sliderini .slide {
-      display: none !important;
-  }
-  
-  #sliderini .slide.active {
-      display: block !important;
-  }
-  
-  #sliderini .slide img {
-      width: 100% !important;
-      height: 400px !important;
-      object-fit: cover !important;
-  }
-
-  /* ESTILOS PARA DESTACADASINI */
-  #destacadasini {
       position: relative !important;
       z-index: 0 !important;
   }
@@ -426,6 +402,84 @@
   .btn-whatsapp:hover {
       background: var(--dante-azul-oscuro) !important;
   }
+
+  /* ANIMACIONES */
+  @keyframes slideIn {
+      from {
+          opacity: 0 !important;
+          transform: translateY(30px) !important;
+      }
+      to {
+          opacity: 1 !important;
+          transform: translateY(0) !important;
+      }
+  }
+
+  @keyframes pulse {
+      0%, 100% {
+          opacity: 1 !important;
+      }
+      50% {
+          opacity: 0.5 !important;
+      }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+      #cab .cont {
+          padding: 0 15px !important;
+      }
+      
+      #cab .logo-text {
+          font-size: 18px !important;
+      }
+      
+      #cab .menucab {
+          gap: 15px !important;
+      }
+      
+      #cab .menucab a {
+          font-size: 14px !important;
+      }
+      
+      .search-grid {
+          grid-template-columns: 1fr !important;
+          gap: 15px !important;
+      }
+      
+      .quick-filters-section {
+          margin-top: 15px !important;
+      }
+      
+      .quick-filter-btn {
+          margin: 3px !important;
+          padding: 8px 16px !important;
+          font-size: 12px !important;
+      }
+  }
+
+  @media (max-width: 480px) {
+      #search-container-section {
+          padding: 20px !important;
+      }
+      
+      #search-form-styled {
+          padding: 20px !important;
+      }
+      
+      #search-form-styled h3 {
+          font-size: 20px !important;
+      }
+      
+      #cab .logo img {
+          width: 50px !important;
+          height: 50px !important;
+      }
+      
+      #cab .logo-text {
+          font-size: 16px !important;
+      }
+  }
   </style>
 </head>
 
@@ -435,7 +489,7 @@
   <header id="cab">
       <div class="cont">
           <a href="index" class="logo">
-              <img src="llave.png" alt="Dante Propiedades" width="90" height="30" loading="eager">
+              <img src="llave.png" alt="Dante Propiedades" width="60" height="60" style="object-fit: contain !important;" loading="eager">
               <span class="logo-text">DANTE PROPIEDADES</span>
           </a>
           
@@ -514,42 +568,11 @@
       
       <!-- CONTENEDOR DE PROPIEDADES -->
       <div id="property-grid-styled" style="background: white !important; border-radius: 8px !important; box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important; min-height: 300px !important; padding: 20px !important; position: relative !important; display: block !important; border: 1px solid #e1e5e9 !important; max-width: 1200px !important; margin: 0 auto !important;">
-          <div style="text-align: center; padding: 60px 40px; color: #6c757d;">
-              <div style="font-size: 48px; margin-bottom: 20px;">🏠</div>
-              <h4 style="margin: 0 0 15px 0; color: #495057; font-size: 20px; font-weight: 600;">Sistema de Búsqueda de Propiedades</h4>
-              <p style="margin: 0; font-size: 16px;">Use los filtros arriba para encontrar su propiedad ideal</p>
-              <div id="loading-indicator-styled" style="display: none; margin-top: 20px; color: #232deb; font-weight: 500;">
-                  <span style="animation: pulse 1.5s infinite;">🔄</span> Cargando propiedades...
-              </div>
+          <div id="loading-indicator-styled" style="display: none; margin-top: 20px; color: #232deb; font-weight: 500; text-align: center;">
+              <span style="animation: pulse 1.5s infinite;">🔄</span> Cargando propiedades...
           </div>
       </div>
-      
-      <!-- MENSAJE DE ESTADO CON COLOR CORPORATIVO ROJO -->
-      <div id="initial-status-styled" style="text-align: center !important; margin-top: 20px !important; padding: 15px !important; background: rgba(255, 1, 1, 0.1) !important; border: 1px solid rgba(255, 1, 1, 0.3) !important; border-radius: 6px !important; color: #8b0000 !important; position: relative !important; display: block !important; font-size: 14px !important; max-width: 1200px !important; margin-left: auto !important; margin-right: auto !important;">
-          <strong>ℹ️ Estado:</strong> Sistema cargado correctamente. La base de datos está vacía (0 propiedades). 
-          <a href="javascript:void(0)" onclick="showDataInfo()" style="color: #ff0101 !important; text-decoration: underline !important; font-weight: 600 !important;">¿Cómo agregar propiedades?</a>
-      </div>
   </section>
-
-  <!-- SCRIPT PARA MOSTRAR INFORMACIÓN DE DATOS -->
-  <script>
-  function showDataInfo() {
-      const info = document.getElementById('initial-status-styled');
-      if (info) {
-          info.innerHTML = `
-              <strong>📝 Para agregar propiedades a tu sistema:</strong><br>
-              1. <strong>Subir archivo Excel:</strong> Ve al dashboard de Render y sube un archivo .xlsx con las propiedades<br>
-              2. <strong>Formato requerido:</strong> El archivo debe tener columnas: id, titulo, barrio, tipo, precio, imagen, estado, etc.<br>
-              3. <strong>Procesamiento automático:</strong> El sistema cargará automáticamente las propiedades<br>
-              4. <strong>Verificación:</strong> Los filtros se poblarán con los datos del Excel<br><br>
-              <em>Actualmente la base de datos está vacía, por eso no aparecen propiedades.</em>
-          `;
-          info.style.background = 'rgba(40, 167, 69, 0.1)';
-          info.style.border = '1px solid rgba(40, 167, 69, 0.3)';
-          info.style.color = '#155724';
-      }
-  }
-  </script>
 
   <!-- Slider principal - AHORA DESPUÉS DE LA BÚSQUEDA -->
   <section id="sliderini" class="slihome">
@@ -587,145 +610,9 @@
       </div>
   </section>
 
-  <!-- Menú móvil -->
-  <nav id="menuslide">
-      <button class="cerrarmenu" aria-label="Cerrar menú">
-          <i class="fas fa-times"></i>
-      </button>
-      
-      <div class="btng mobile-info">
-          <a href="tel:1166562078" class="mobile-call-btn">
-              <i class="fas fa-phone"></i> Llamá 11 6656 2078
-          </a>
-          <a href="tasaciones" class="mobile-valuation-btn">Tasación</a>
-      </div>
-      
-      <div class="menu-sections">
-          <section>
-              <h5>Encontrá tu lugar para vivir</h5>
-              <ul>
-                  <li><a href="emprendimientos">Emprendimientos</a></li>
-                  <li>
-                      <a href="propiedades">Propiedades</a>
-                      <ul>
-                          <li><a href="propiedades?ope=V">Venta</a></li>
-                          <li><a href="propiedades?ope=A">Alquiler</a></li>
-                          <li><a href="propiedades?ope=T">Alquiler temporario</a></li>
-                      </ul>
-                  </li>
-              </ul>
-          </section>
-
-          <section>
-              <h5>Dejá tu propiedad en las mejores manos</h5>
-              <ul>
-                  <li><a href="tasaciones">Tasaciones</a></li>
-                  <li>
-                      <a href="sucursales">Sucursales</a>
-                      <ul>
-                          <li><a href="sucursales?sucu=capital">Capital Federal</a></li>
-                      </ul>
-                  </li>
-                  <li><a href="nosotros">Nosotros</a></li>
-                  <li><a href="https://dante.com.ar/busquedaslaborales">Integrate</a></li>
-                  <li><a href="contacto">Contacto</a></li>
-              </ul>
-          </section>
-      </div>
-
-      <ul class="redesmenuslide">
-          <li><a href="https://instagram.com/danteprop" target="_blank"><i class="fab fa-instagram"></i></a></li>
-          <li><a href="https://facebook.com/DantePropiedades" target="_blank"><i class="fab fa-facebook"></i></a></li>
-          <li><a href="https://www.youtube.com/channel/UCclLOUtNIhOYTcJTxVPBrCA" target="_blank"><i class="fab fa-youtube"></i></a></li>
-          <li class="hashtag"><a href="https://www.instagram.com/explore/tags/dantepropiedades/" target="_blank">#DANTEPROPIEDADES</a></li>
-      </ul>
-  </nav>
-
-  <!-- Propiedades destacadas -->
-  <section id="destacadasini">
-      <div class="cont">
-          <div class="propiedades-grid" id="listaDestacadas">
-              <div class="propiedad-item">
-                  <a href="UF001/destacada1.html">
-                      <img src="UF001/UF001-1.jpg" alt="Inmueble apto para consstruir" loading="lazy">
-                  </a>
-                  <div class="image-description">Inmueble Unico sobre Avda. La Plata -Boedo-</div>
-              </div>
-          </div>
-          <div class="cargando cargandodest" style="display: none;">
-              <div class="centrado">
-                  <div class="cargaprop">
-                      <div class="loader"><div></div><div></div></div>
-                  </div>
-                  <span>Cargando propiedades destacadas</span>
-              </div>
-          </div>
-      </div>
-  </section>
-
-  <!-- WhatsApp flotante -->
-  <div class="whatsapp-fixed">
-      <a href="https://wa.me/5491125368595" id="whatsappLink" class="btn-whatsapp" aria-label="Contactar por WhatsApp">
-      </a>
-  </div>
-
-  <!-- Footer -->
-  <footer id="pie">
-      <div class="cont">
-          <div class="col">
-              <a href="index" class="logopie">
-                  <img src="logo.png" onerror="this.src='llave.png'" alt="Logo alternativo">
-              </a>
-          </div>
-          
-          <div class="col">
-              <div class="subcol">
-                  <div class="formulario-legal">
-                      <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSf8rjceDDnuJysCI8lMziNK2PK1vBd5zJ_sTpGeolHnBzaZQQ/viewform?embedded=true" style="width:100%; height:823px;" frameborder="0" marginheight="0" marginwidth="0">Cargando…</iframe>
-                      <div class="nota-legal">
-                      <p>Todas las medidas enunciadas son meramente orientativas, las medidas exactas serán las que se expresen en el respectivo título de propiedad de cada inmueble. Todas las fotos, imágenes y videos son meramente ilustrativos y no contractuales. Los precios enunciados son meramente orientativos y no contractuales.</p>
-                      <p>CIA Colegio Profesional Inmobiliario Leyes Nº 3588, 2340 art. 11 y 57, Ley Nº 3588 art. 1 y 2</p>
-                      <p>Artículo 5°.- Incorpórese como inciso 9 del artículo 10 de la Ley 2340 (texto consolidado según Ley 5666)</p>
-                      <p>LEY 5859 – ART. 5 "Se encuentra prohibido cobrar comisiones inmobiliarias y gastos de gestoría de informes a los inquilinos que sean personas físicas. Para los casos de alquiler de vivienda, el monto máximo de comisión que se le puede requerir a los propietarios será el equivalente al cuatro con quince centésimos por ciento (4,15%) del valor total del respectivo contrato"</p>
-                      </div>
-                  </div>
-              </div>
-          </div>
-          
-          <div class="col">
-          </div>
-      </div>
-  </footer>
-
-  <!-- Copyright -->
-  <div id="copy">
-      <div class="cont">
-          <p>
-              <strong>"Confíe solo en corredores matriculados. Su tranquilidad, nuestra prioridad."</strong>
-              <br>
-              <strong>© DANTE PROPIEDADES</strong>
-              <br>
-              Todos los derechos reservados - www.dantepropiedades.com.ar
-              <br>
-              Nota: Toda la información y medidas provistas son aproximadas y deberán ratificarse con la documentación pertinente.
-              <br>
-              DANTE PROPIEDADES | AV. Corrientes 524 piso 5 - Ciudad Autónoma de Buenos Aires 
-              <br>
-              CUIT 20-39415572-2 | CI DANTE ARONA | CUCICBA 9337 |
-          </p>
-          
-          <div class="prov">
-              <a href="#" target="_blank">
-                  <img src="llave.png" alt="By Arona" width="80" height="80" loading="lazy">
-              </a>
-              <br>
-              <a href="#" target="_blank">by <strong>Arona</strong></a>
-          </div>
-      </div>
-  </div>
-
-  <!-- Scripts -->
+  <!-- JavaScript -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
-  <script src="app.js"></script>
-    <style> 
+  <script src="app_SIMPLIFICADO.js"></script>
+</body>
+</html>     
