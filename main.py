@@ -1,20 +1,15 @@
 # pip install -r requirements.txt
-# pip install -r requirements.txt
 
 import sys
 import os
-from flask import Flask, request, jsonify, render_template
-from database import init_db
+import json
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from openpyxl import Workbook, load_workbook
 from datetime import datetime
 
 app = Flask(__name__)
-# REMPLACE "YOUR_GITHUB_PAGES_URL" CON LA URL DE SU SITIO EN GITHUB PAGES
-# CORS(app, resources={r"/api/*": {"origins": "YOUR_GITHUB_PAGES_URL"}})
-
-# Inicializar base de datos
-init_db()
+CORS(app, resources={r"/api/*": {"origins": ["null", "http://dantepropiedades.com.ar", "http://www.dantepropiedades.com.ar", "https://dantepropiedades.com.ar", "https://www.dantepropiedades.com.ar", "http://dantepropiedades.com", "https://danterealestate-github-io.onrender.com"]}})
 
 # --- Excel Contact Logic ---
 EXCEL_FILE = 'contactos_dante_propiedades.xlsx'
@@ -87,38 +82,63 @@ def guardar_contacto_route():
 
 # --- End of Excel Contact Logic ---
 
-
-
-@app.route("/api/dinamica")
-def dinamica_properties():
-    basedir = os.path.abspath(os.path.dirname(__file__))
-    
-    # --- DEBUGGING CODE ---
-    print("--- DEBUGGING ---")
-    print(f"basedir: {basedir}")
-    print(f"listdir(basedir): {os.listdir(basedir)}")
-    print("--- END DEBUGGING ---")
-    
-    image_folder = os.path.join(basedir, 'DINAMICA')
+@app.route("/api/properties/search", methods=["GET"])
+def search_properties():
+    safe_print("--- Nueva Búsqueda ---")
     try:
-        image_files = [f for f in os.listdir(image_folder) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))]
-        properties = []
-        for i, image_file in enumerate(image_files):
-            properties.append({
-                "property_id": f"dinamica_{i}",
-                "title": "Propiedad Dinámica",
-                "description": f"Imagen {i+1} de la carpeta DINAMICA",
-                "images": [{"url": f"/DINAMICA/{image_file}", "description": "Imagen dinámica"}]
-            })
-        return jsonify(properties)
+        with open('propiedades.json', 'r', encoding='utf-8') as f:
+            properties = json.load(f)
     except FileNotFoundError:
-        return jsonify({"error": f"La carpeta '{image_folder}' no fue encontrada."})
+        return jsonify({"error": "El archivo propiedades.json no fue encontrado."}), 404
+    except json.JSONDecodeError:
+        return jsonify({"error": "El archivo propiedades.json no tiene un formato JSON válido."}), 500
+
+    ope = request.args.get("ope")
+    tipo = request.args.get("tipo")
+    loc = request.args.get("loc")
+    cod = request.args.get("cod")
+
+    safe_print(f"Parámetros recibidos: ope={ope}, tipo={tipo}, loc={loc}, cod={cod}")
+
+    operation_map = {
+        "V": "venta",
+        "A": "alquiler",
+        "T": "alquiler temporal"
+    }
+    
+    if ope in operation_map:
+        ope = operation_map[ope]
+
+    filtered_properties = []
+    for prop in properties:
+        # Match operation
+        if ope and (prop.get('operacion') is None or prop.get('operacion').lower() != ope.lower()):
+            continue
+        
+        # Match property type
+        if tipo and (prop.get('tipo') is None or prop.get('tipo').lower() != tipo.lower()):
+            continue
+
+        # Match neighborhood (loc)
+        if loc and (prop.get('barrio') is None or prop.get('barrio').lower() != loc.lower()):
+            continue
+
+        # Match code
+        if cod and (prop.get('id_temporal') is None or str(prop.get('id_temporal')) != cod):
+            continue
+
+        filtered_properties.append(prop)
+    
+    safe_print(f"Propiedades encontradas: {len(filtered_properties)}")
+    return jsonify(filtered_properties)
+
+@app.route("/")
+def index():
+    return "Welcome to the Property Search API. Use /api/properties/search to query."
 
 if __name__ == '__main__':
-    init_excel()  # Inicializar archivo Excel
+    init_excel()  # Initialize Excel file
     safe_print("INFO: Iniciando servidor Flask...")
     safe_print("INFO: Excel inicializado")
     safe_print("INFO: Servidor corriendo en: http://127.0.0.1:5000")
     app.run(host='0.0.0.0', port=5000)
-    # O si quieres eliminar la advertencia:
-    # app.run(debug=True, host='0.0.0.0', port=5000, use_reloader=False)
