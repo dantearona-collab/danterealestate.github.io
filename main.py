@@ -84,6 +84,7 @@ def guardar_contacto_route():
 
 @app.route("/api/properties/search", methods=["GET"])
 def search_properties():
+    """Búsqueda avanzada de propiedades con filtros flexibles"""
     safe_print("--- Nueva Búsqueda ---")
     try:
         with open('propiedades.json', 'r', encoding='utf-8') as f:
@@ -93,13 +94,18 @@ def search_properties():
     except json.JSONDecodeError:
         return jsonify({"error": "El archivo propiedades.json no tiene un formato JSON válido."}), 500
 
+    # Parámetros de búsqueda
     ope = request.args.get("ope")
     tipo = request.args.get("tipo")
     loc = request.args.get("loc")
     cod = request.args.get("cod")
+    precio_min = request.args.get("precio_min")
+    precio_max = request.args.get("precio_max")
+    ambientes = request.args.get("ambientes")
 
-    safe_print(f"Parámetros recibidos: ope={ope}, tipo={tipo}, loc={loc}, cod={cod}")
+    safe_print(f"Parámetros recibidos: ope={ope}, tipo={tipo}, loc={loc}, cod={cod}, precio_min={precio_min}, precio_max={precio_max}, ambientes={ambientes}")
 
+    # Mapeo de operaciones
     operation_map = {
         "V": "venta",
         "A": "alquiler",
@@ -119,18 +125,129 @@ def search_properties():
         if tipo and (prop.get('tipo') is None or prop.get('tipo').lower() != tipo.lower()):
             continue
 
-        # Match neighborhood (loc)
-        if loc and (prop.get('barrio') is None or prop.get('barrio').lower() != loc.lower()):
+        # Match neighborhood (busqueda flexible por substring)
+        if loc and (prop.get('barrio') is None or loc.lower() not in prop.get('barrio', '').lower()):
             continue
 
         # Match code
-        if cod and (prop.get('id_temporal') is None or str(prop.get('id_temporal')) != cod):
+        if cod and (prop.get('id_temporal') is None or cod.lower() not in prop.get('id_temporal', '').lower()):
             continue
+
+        # Match price range
+        if precio_min and prop.get('precio'):
+            if float(prop.get('precio', 0)) < float(precio_min):
+                continue
+                
+        if precio_max and prop.get('precio'):
+            if float(prop.get('precio', 0)) > float(precio_max):
+                continue
+
+        # Match ambientes
+        if ambientes and prop.get('ambientes'):
+            if int(prop.get('ambientes', 0)) < int(ambientes):
+                continue
 
         filtered_properties.append(prop)
     
     safe_print(f"Propiedades encontradas: {len(filtered_properties)}")
-    return jsonify(filtered_properties)
+    
+    # Agregar información de metadatos
+    response = {
+        "properties": filtered_properties,
+        "total_found": len(filtered_properties),
+        "filters_applied": {
+            "operacion": ope,
+            "tipo": tipo,
+            "barrio": loc,
+            "codigo": cod,
+            "precio_min": precio_min,
+            "precio_max": precio_max,
+            "ambientes_min": ambientes
+        }
+    }
+    
+    return jsonify(response)
+
+@app.route("/api/properties/filter-options", methods=["GET"])
+def get_filter_options():
+    """Obtiene las opciones disponibles para los filtros"""
+    try:
+        with open('propiedades.json', 'r', encoding='utf-8') as f:
+            properties = json.load(f)
+    except FileNotFoundError:
+        return jsonify({"error": "El archivo propiedades.json no fue encontrado."}), 404
+
+    # Obtener barrios únicos
+    barrios = []
+    tipos = []
+    operaciones = []
+    
+    for prop in properties:
+        # Barrios
+        if prop.get('barrio') and prop['barrio'] not in barrios:
+            barrios.append(prop['barrio'])
+        
+        # Tipos
+        if prop.get('tipo') and prop['tipo'] not in tipos:
+            tipos.append(prop['tipo'])
+        
+        # Operaciones
+        if prop.get('operacion') and prop['operacion'] not in operaciones:
+            operaciones.append(prop['operacion'])
+    
+    return jsonify({
+        "barrios": sorted(barrios),
+        "tipos": sorted(tipos),
+        "operaciones": sorted(operaciones)
+    })
+
+@app.route("/api/properties/stats", methods=["GET"])
+def get_property_stats():
+    """Obtiene estadísticas generales de las propiedades"""
+    try:
+        with open('propiedades.json', 'r', encoding='utf-8') as f:
+            properties = json.load(f)
+    except FileNotFoundError:
+        return jsonify({"error": "El archivo propiedades.json no fue encontrado."}), 404
+
+    stats = {
+        "total_properties": len(properties),
+        "by_operacion": {},
+        "by_tipo": {},
+        "by_barrio": {},
+        "price_ranges": {
+            "min": None,
+            "max": None,
+            "avg": None
+        }
+    }
+    
+    precios = []
+    
+    for prop in properties:
+        # Contar por operación
+        op = prop.get('operacion', 'No especificado')
+        stats["by_operacion"][op] = stats["by_operacion"].get(op, 0) + 1
+        
+        # Contar por tipo
+        tipo = prop.get('tipo', 'No especificado')
+        stats["by_tipo"][tipo] = stats["by_tipo"].get(tipo, 0) + 1
+        
+        # Contar por barrio
+        barrio = prop.get('barrio', 'No especificado')
+        stats["by_barrio"][barrio] = stats["by_barrio"].get(barrio, 0) + 1
+        
+        # Recopilar precios
+        if prop.get('precio'):
+            precios.append(float(prop['precio']))
+    
+    # Calcular rangos de precios
+    if precios:
+        stats["price_ranges"]["min"] = min(precios)
+        stats["price_ranges"]["max"] = max(precios)
+        stats["price_ranges"]["avg"] = sum(precios) / len(precios)
+    
+    return jsonify(stats)
 
 @app.route("/")
 def index():
