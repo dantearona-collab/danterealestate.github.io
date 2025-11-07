@@ -1171,5 +1171,137 @@
   }, 2000);
   </script>
 
+<!-- SCRIPT DE BACKUP PARA CARGA DE DATOS -->
+<script>
+// Script de backup que se ejecuta si el archivo principal falla
+(async function() {
+    console.log('🆘 === INICIANDO SCRIPT DE BACKUP ===');
+    
+    try {
+        console.log('🔍 Cargando propiedades.json...');
+        let response = await fetch('./propiedades.json');
+        
+        if (!response.ok) {
+            console.log('🔄 Intentando con archivo simple...');
+            response = await fetch('./propiedades_simple.json');
+        }
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const propiedades = await response.json();
+        console.log('✅ Datos cargados:', propiedades.length, 'propiedades');
+        
+        // Poblar filtros
+        const operaciones = [...new Set(propiedades.map(p => p.operacion).filter(Boolean))].sort();
+        const barrios = [...new Set(propiedades.map(p => p.barrio).filter(Boolean))].sort();
+        const tipos = [...new Set(propiedades.map(p => p.tipo).filter(Boolean))].sort();
+        
+        console.log('💰 Operaciones:', operaciones);
+        console.log('📍 Barrios:', barrios);
+        console.log('🏠 Tipos:', tipos);
+        
+        // Poblar los selects
+        function poblarSelect(id, opciones, textoDefault) {
+            const select = document.getElementById(id);
+            if (!select) {
+                console.error('❌ No se encontró:', id);
+                return;
+            }
+            
+            select.innerHTML = '';
+            
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = textoDefault;
+            select.appendChild(defaultOption);
+            
+            opciones.forEach(opcion => {
+                const opt = document.createElement('option');
+                opt.value = opcion;
+                opt.textContent = opcion;
+                select.appendChild(opt);
+            });
+            
+            console.log('✅ Poblado:', id, 'con', opciones.length, 'opciones');
+        }
+        
+        poblarSelect('operacion-select-styled', operaciones, 'Todas las operaciones');
+        poblarSelect('barrio-select-styled', barrios, 'Todos los barrios');
+        poblarSelect('tipo-select-styled', tipos, 'Todos los tipos');
+        
+        // Agregar eventos de búsqueda
+        ['operacion-select-styled', 'barrio-select-styled', 'tipo-select-styled'].forEach(id => {
+            const select = document.getElementById(id);
+            if (select) {
+                select.addEventListener('change', () => {
+                    console.log('🔍 Filtro cambiado:', id, '=', select.value);
+                    realizarBusqueda();
+                });
+            }
+        });
+        
+        // Función de búsqueda
+        function realizarBusqueda() {
+            const opcion = document.getElementById('operacion-select-styled')?.value || '';
+            const barrio = document.getElementById('barrio-select-styled')?.value || '';
+            const tipo = document.getElementById('tipo-select-styled')?.value || '';
+            
+            const filtros = propiedades.filter(p => {
+                if (opcion && p.operacion !== opcion) return false;
+                if (barrio && p.barrio !== barrio) return false;
+                if (tipo && p.tipo !== tipo) return false;
+                return true;
+            });
+            
+            console.log('🔍 Búsqueda realizada:', filtros.length, 'resultados');
+            
+            // Actualizar contador si existe
+            const contador = document.querySelector('.results-count, #resultados-count, .counter');
+            if (contador) {
+                contador.textContent = `${filtros.length} propiedades encontradas`;
+            }
+        }
+        
+        console.log('🆘 === SCRIPT DE BACKUP COMPLETADO ===');
+        
+        // Verificar resultado final
+        setTimeout(() => {
+            console.log('🔍 === VERIFICACIÓN FINAL ===');
+            
+            ['operacion-select-styled', 'barrio-select-styled', 'tipo-select-styled'].forEach(id => {
+                const select = document.getElementById(id);
+                if (select) {
+                    console.log(`📊 ${id}: ${select.options.length} opciones`);
+                    const opciones = Array.from(select.options).map(opt => opt.value);
+                    console.log(`📋 ${id} valores: [${opciones.join(', ')}]`);
+                }
+            });
+        }, 1000);
+        
+    } catch (error) {
+        console.error('❌ Error en script de backup:', error);
+        console.log('🔍 Intentando cargar datos con fallback...');
+        
+        // Fallback: datos hardcodeados
+        const propiedadesEjemplo = [
+            {"operacion": "alquiler", "barrio": "Palermo", "tipo": "departamento"},
+            {"operacion": "venta", "barrio": "Belgrano", "tipo": "casa"},
+            {"operacion": "alquiler", "barrio": "Recoleta", "tipo": "departamento"}
+        ];
+        
+        const operaciones = ["alquiler", "venta"];
+        const barrios = ["Palermo", "Belgrano", "Recoleta"];
+        const tipos = ["departamento", "casa", "ph"];
+        
+        console.log('🆘 Usando datos de fallback');
+        console.log('💰 Operaciones:', operaciones);
+        console.log('📍 Barrios:', barrios);
+        console.log('🏠 Tipos:', tipos);
+    }
+})();
+</script>
+
 </body>
 </html>
