@@ -324,7 +324,7 @@ function createPropertyCard(property) {
             <img src="${mainImage}" 
                  alt="${property.titulo}" 
                  style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
-                 onerror="this.src=INSTITUCIONAL/INSTITUCIONAL 2.jpg "
+                 onerror="this.src='INSTITUCIONAL/INSTITUCIONAL 2.jpg'"
             <div style="position: absolute; top: 10px; left: 10px;">
                 <span style="background: #232deb !important; color: white !important; padding: 4px 8px !important; border-radius: 4px !important; font-size: 12px !important; font-weight: 600 !important;">
                     ${property.operacion}
