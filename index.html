@@ -147,6 +147,17 @@
       cursor: pointer !important;
   }
 
+  /* Ocultar menú desktop en móvil */
+  @media (max-width: 768px) {
+      #cab .menucab {
+          display: none !important;
+      }
+      
+      #cab .menudesp {
+          display: block !important;
+      }
+  }
+
   /* SECCIÓN DE BÚSQUEDA CON COLORES CORPORATIVOS */
   #search-container-section {
       background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
@@ -378,6 +389,305 @@
       z-index: 0 !important;
   }
 
+  /* MENÚ MÓVIL */
+  #menuslide {
+      position: fixed !important;
+      top: 0 !important;
+      right: -100% !important;
+      width: 300px !important;
+      height: 100vh !important;
+      background: var(--dante-azul) !important;
+      color: white !important;
+      z-index: 10000 !important;
+      transition: right 0.3s ease !important;
+      overflow-y: auto !important;
+      padding: 20px !important;
+  }
+
+  #menuslide.active {
+      right: 0 !important;
+  }
+
+  .cerrarmenu {
+      position: absolute !important;
+      top: 20px !important;
+      right: 20px !important;
+      background: none !important;
+      border: none !important;
+      color: white !important;
+      font-size: 24px !important;
+      cursor: pointer !important;
+  }
+
+  .btng {
+      margin: 60px 0 30px 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 15px !important;
+  }
+
+  .mobile-call-btn, .mobile-valuation-btn {
+      background: rgba(255, 255, 255, 0.1) !important;
+      color: white !important;
+      text-decoration: none !important;
+      padding: 12px 20px !important;
+      border-radius: 8px !important;
+      text-align: center !important;
+      font-weight: 500 !important;
+      transition: background 0.3s ease !important;
+  }
+
+  .mobile-call-btn:hover, .mobile-valuation-btn:hover {
+      background: rgba(255, 255, 255, 0.2) !important;
+  }
+
+  .menu-sections h5 {
+      color: white !important;
+      font-size: 16px !important;
+      margin: 25px 0 15px 0 !important;
+      font-weight: 600 !important;
+  }
+
+  .menu-sections ul {
+      list-style: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+  }
+
+  .menu-sections li {
+      margin: 8px 0 !important;
+  }
+
+  .menu-sections a {
+      color: rgba(255, 255, 255, 0.8) !important;
+      text-decoration: none !important;
+      font-size: 14px !important;
+      transition: color 0.3s ease !important;
+  }
+
+  .menu-sections a:hover {
+      color: white !important;
+  }
+
+  .menu-sections ul ul {
+      margin-left: 20px !important;
+      margin-top: 5px !important;
+  }
+
+  .redesmenuslide {
+      list-style: none !important;
+      display: flex !important;
+      gap: 15px !important;
+      margin: 30px 0 !important;
+      padding: 0 !important;
+      justify-content: center !important;
+  }
+
+  .redesmenuslide li a {
+      color: white !important;
+      font-size: 20px !important;
+      transition: transform 0.3s ease !important;
+  }
+
+  .redesmenuslide li a:hover {
+      transform: scale(1.2) !important;
+  }
+
+  .redesmenuslide .hashtag a {
+      font-size: 12px !important;
+      font-weight: 500 !important;
+  }
+
+  /* PROPIEDADES DESTACADAS */
+  #destacadasini {
+      background: #f8f9fa !important;
+      padding: 40px 0 !important;
+  }
+
+  #destacadasini .cont {
+      max-width: 1200px !important;
+      margin: 0 auto !important;
+      padding: 0 20px !important;
+  }
+
+  .propiedades-grid {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+      gap: 20px !important;
+  }
+
+  .propiedad-item {
+      background: white !important;
+      border-radius: 8px !important;
+      overflow: hidden !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+      transition: transform 0.3s ease !important;
+  }
+
+  .propiedad-item:hover {
+      transform: translateY(-5px) !important;
+  }
+
+  .propiedad-item img {
+      width: 100% !important;
+      height: 200px !important;
+      object-fit: cover !important;
+  }
+
+  .image-description {
+      padding: 15px !important;
+      font-size: 14px !important;
+      color: #495057 !important;
+      text-align: center !important;
+  }
+
+  .cargandodest {
+      text-align: center !important;
+      padding: 40px !important;
+  }
+
+  .loader {
+      display: inline-block !important;
+      position: relative !important;
+      width: 40px !important;
+      height: 40px !important;
+      margin-bottom: 20px !important;
+  }
+
+  .loader div {
+      box-sizing: border-box !important;
+      display: block !important;
+      position: absolute !important;
+      width: 32px !important;
+      height: 32px !important;
+      margin: 4px !important;
+      border: 3px solid var(--dante-azul) !important;
+      border-radius: 50% !important;
+      animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite !important;
+      border-color: var(--dante-azul) transparent transparent transparent !important;
+  }
+
+  .loader div:nth-child(1) { animation-delay: -0.45s !important; }
+  .loader div:nth-child(2) { animation-delay: -0.3s !important; }
+  .loader div:nth-child(3) { animation-delay: -0.15s !important; }
+
+  @keyframes lds-ring {
+      0% { transform: rotate(0deg) !important; }
+      100% { transform: rotate(360deg) !important; }
+  }
+
+  /* WHATSAPP FLOTANTE */
+  .whatsapp-fixed {
+      position: fixed !important;
+      bottom: 20px !important;
+      right: 20px !important;
+      z-index: 1000 !important;
+  }
+
+  .whatsapp-fixed .btn-whatsapp {
+      width: 60px !important;
+      height: 60px !important;
+      background: #25d366 !important;
+      border-radius: 50% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-decoration: none !important;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+      transition: all 0.3s ease !important;
+      background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"white\"><path d=\"M12.036 5.339c-3.635 0-6.591 2.956-6.593 6.589-.001 1.483.434 2.594 1.164 3.756l-.669 2.448 2.501-.654c1.134.699 2.205 1.113 3.597 1.113 3.636 0 6.592-2.955 6.593-6.59-.001-3.636-2.958-6.662-6.593-6.662m-1.097 9.924c-1.32 0-2.515-.355-3.557-.998l-.255-.149-2.599.681.696-2.534-.166-.281c-.473-.78-.723-1.682-.723-2.642 0-3.167 2.582-5.748 5.762-5.748 3.179 0 5.76 2.581 5.761 5.748 0 3.168-2.583 5.749-5.761 5.749m4.715-4.152c-.13-.065-.765-.377-1.883-.674-1.117-.297-2.073-.473-2.073-.473s-.255-.127-.255-.318c0-.191.256-.239.259-.243.255-.19 1.53-.749 1.53-.749l.114.064s.89.5 1.865.644c.975.143 1.869.113 2.327.107.458-.006 1.329-.217 1.521-.432.191-.215.19-.633.19-.633s-.026-1.024-.062-1.448c-.037-.424-.126-.624-.331-.881-.206-.257-.5-.381-.5-.381s-.17-.106-.5-.206c-.33-.101-.892-.203-1.489-.238-.597-.035-1.282-.01-1.889.027-.607.037-1.151.161-1.587.376-.436.215-.915.647-1.107 1.127-.191.48-.342 1.174-.342 1.174s.116.127.33.191c.215.064.51.032.658-.203.148-.235.203-.495.203-.495s.014-.612-.051-.915c-.065-.303-.239-.625-.425-.861-.186-.236-.319-.432-.319-.432s-.116-.08-.116-.239c0-.159.064-.255.064-.255s1.109-.637 1.109-.637z\"/></svg>') !important;
+      background-repeat: no-repeat !important;
+      background-position: center !important;
+      background-size: 35px !important;
+  }
+
+  .whatsapp-fixed .btn-whatsapp:hover {
+      transform: scale(1.1) !important;
+      background: #1fb855 !important;
+  }
+
+  /* FOOTER */
+  #pie {
+      background: #2c3e50 !important;
+      color: white !important;
+      padding: 40px 0 20px 0 !important;
+  }
+
+  #pie .cont {
+      max-width: 1200px !important;
+      margin: 0 auto !important;
+      padding: 0 20px !important;
+      display: grid !important;
+      grid-template-columns: 1fr 2fr 1fr !important;
+      gap: 40px !important;
+  }
+
+  .logopie img {
+      width: 120px !important;
+      height: auto !important;
+  }
+
+  .formulario-legal iframe {
+      border: none !important;
+      border-radius: 8px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+  }
+
+  .nota-legal {
+      margin-top: 20px !important;
+      font-size: 12px !important;
+      line-height: 1.4 !important;
+      color: #bdc3c7 !important;
+  }
+
+  .nota-legal p {
+      margin-bottom: 10px !important;
+  }
+
+  /* COPYRIGHT */
+  #copy {
+      background: #1a252f !important;
+      color: #95a5a6 !important;
+      padding: 20px 0 !important;
+      text-align: center !important;
+  }
+
+  #copy .cont {
+      max-width: 1200px !important;
+      margin: 0 auto !important;
+      padding: 0 20px !important;
+      position: relative !important;
+  }
+
+  #copy p {
+      margin: 0 0 10px 0 !important;
+      font-size: 12px !important;
+      line-height: 1.4 !important;
+  }
+
+  #copy strong {
+      color: #ecf0f1 !important;
+  }
+
+  .prov {
+      position: absolute !important;
+      right: 20px !important;
+      bottom: 10px !important;
+      text-align: center !important;
+  }
+
+  .prov a {
+      color: #95a5a6 !important;
+      text-decoration: none !important;
+      font-size: 11px !important;
+  }
+
+  .prov img {
+      width: 50px !important;
+      height: 50px !important;
+      margin-bottom: 5px !important;
+  }
+
   /* ELEMENTOS ADICIONALES CON COLORES CORPORATIVOS */
   .logo-text {
       color: white !important;
@@ -435,7 +745,11 @@
       }
       
       #cab .menucab {
-          gap: 15px !important;
+          display: none !important;
+      }
+      
+      #cab .menudesp {
+          display: block !important;
       }
       
       #cab .menucab a {
@@ -478,6 +792,41 @@
       
       #cab .logo-text {
           font-size: 16px !important;
+      }
+
+      /* RESPONSIVE PARA NUEVOS ELEMENTOS */
+      #menuslide {
+          width: 280px !important;
+      }
+
+      #pie .cont {
+          grid-template-columns: 1fr !important;
+          gap: 30px !important;
+      }
+
+      .formulario-legal iframe {
+          height: 400px !important;
+      }
+
+      .whatsapp-fixed .btn-whatsapp {
+          width: 50px !important;
+          height: 50px !important;
+          background-size: 28px !important;
+      }
+
+      .whatsapp-fixed {
+          bottom: 15px !important;
+          right: 15px !important;
+      }
+
+      .propiedades-grid {
+          grid-template-columns: 1fr !important;
+      }
+
+      .prov {
+          position: static !important;
+          margin-top: 20px !important;
+          text-align: center !important;
       }
   }
   </style>
@@ -614,5 +963,141 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
   <script src="app_SIMPLIFICADO.js"></script>
-</body>
-</html>     
+
+  <!-- Menú móvil -->
+  <nav id="menuslide">
+      <button class="cerrarmenu" aria-label="Cerrar menú">
+          <i class="fas fa-times"></i>
+      </button>
+      
+      <div class="btng mobile-info">
+          <a href="tel:1166562078" class="mobile-call-btn">
+              <i class="fas fa-phone"></i> Llamá 11 6656 2078
+          </a>
+          <a href="tasaciones" class="mobile-valuation-btn">Tasación</a>
+      </div>
+      
+      <div class="menu-sections">
+          <section>
+              <h5>Encontrá tu lugar para vivir</h5>
+              <ul>
+                  <li><a href="emprendimientos">Emprendimientos</a></li>
+                  <li>
+                      <a href="propiedades">Propiedades</a>
+                      <ul>
+                          <li><a href="propiedades?ope=V">Venta</a></li>
+                          <li><a href="propiedades?ope=A">Alquiler</a></li>
+                          <li><a href="propiedades?ope=T">Alquiler temporario</a></li>
+                      </ul>
+                  </li>
+              </ul>
+          </section>
+
+          <section>
+              <h5>Dejá tu propiedad en las mejores manos</h5>
+              <ul>
+                  <li><a href="tasaciones">Tasaciones</a></li>
+                  <li>
+                      <a href="sucursales">Sucursales</a>
+                      <ul>
+                          <li><a href="sucursales?sucu=capital">Capital Federal</a></li>
+                      </ul>
+                  </li>
+                  <li><a href="nosotros">Nosotros</a></li>
+                  <li><a href="https://dante.com.ar/busquedaslaborales">Integrate</a></li>
+                  <li><a href="contacto">Contacto</a></li>
+              </ul>
+          </section>
+      </div>
+
+      <ul class="redesmenuslide">
+          <li><a href="https://instagram.com/danteprop" target="_blank"><i class="fab fa-instagram"></i></a></li>
+          <li><a href="https://facebook.com/DantePropiedades" target="_blank"><i class="fab fa-facebook"></i></a></li>
+          <li><a href="https://www.youtube.com/channel/UCclLOUtNIhOYTcJTxVPBrCA" target="_blank"><i class="fab fa-youtube"></i></a></li>
+          <li class="hashtag"><a href="https://www.instagram.com/explore/tags/dantepropiedades/" target="_blank">#DANTEPROPIEDADES</a></li>
+      </ul>
+  </nav>
+
+  <!-- Propiedades destacadas -->
+  <section id="destacadasini">
+      <div class="cont">
+          <div class="propiedades-grid" id="listaDestacadas">
+              <div class="propiedad-item">
+                  <a href="UF001/destacada1.html">
+                      <img src="UF001/UF001-1.jpg" alt="Inmueble apto para consstruir" loading="lazy">
+                  </a>
+                  <div class="image-description">Inmueble Unico sobre Avda. La Plata -Boedo-</div>
+              </div>
+          </div>
+          <div class="cargando cargandodest" style="display: none;">
+              <div class="centrado">
+                  <div class="cargaprop">
+                      <div class="loader"><div></div><div></div></div>
+                  </div>
+                  <span>Cargando propiedades destacadas</span>
+              </div>
+          </div>
+      </div>
+  </section>
+
+  <!-- WhatsApp flotante -->
+  <div class="whatsapp-fixed">
+      <a href="https://wa.me/5491125368595" id="whatsappLink" class="btn-whatsapp" aria-label="Contactar por WhatsApp">
+      </a>
+  </div>
+
+  <!-- Footer -->
+  <footer id="pie">
+      <div class="cont">
+          <div class="col">
+              <a href="index" class="logopie">
+                  <img src="logo.png" onerror="this.src='llave.png'" alt="Logo alternativo">
+              </a>
+          </div>
+          
+          <div class="col">
+              <div class="subcol">
+                  <div class="formulario-legal">
+                      <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSf8rjceDDnuJysCI8lMziNK2PK1vBd5zJ_sTpGeolHnBzaZQQ/viewform?embedded=true" style="width:100%; height:823px;" frameborder="0" marginheight="0" marginwidth="0">Cargando…</iframe>
+                      <div class="nota-legal">
+                      <p>Todas las medidas enunciadas son meramente orientativas, las medidas exactas serán las que se expresen en el respectivo título de propiedad de cada inmueble. Todas las fotos, imágenes y videos son meramente ilustrativos y no contractuales. Los precios enunciados son meramente orientativos y no contractuales.</p>
+                      <p>CIA Colegio Profesional Inmobiliario Leyes Nº 3588, 2340 art. 11 y 57, Ley Nº 3588 art. 1 y 2</p>
+                      <p>Artículo 5°.- Incorpórese como inciso 9 del artículo 10 de la Ley 2340 (texto consolidado según Ley 5666)</p>
+                      <p>LEY 5859 – ART. 5 "Se encuentra prohibido cobrar comisiones inmobiliarias y gastos de gestoría de informes a los inquilinos que sean personas físicas. Para los casos de alquiler de vivienda, el monto máximo de comisión que se le puede requerir a los propietarios será el equivalente al cuatro con quince centésimos por ciento (4,15%) del valor total del respectivo contrato"</p>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          
+          <div class="col">
+          </div>
+      </div>
+  </footer>
+
+  <!-- Copyright -->
+  <div id="copy">
+      <div class="cont">
+          <p>
+              <strong>"Confíe solo en corredores matriculados. Su tranquilidad, nuestra prioridad."</strong>
+              <br>
+              <strong>© DANTE PROPIEDADES</strong>
+              <br>
+              Todos los derechos reservados - www.dantepropiedades.com.ar
+              <br>
+              Nota: Toda la información y medidas provistas son aproximadas y deberán ratificarse con la documentación pertinente.
+              <br>
+              DANTE PROPIEDADES | AV. Corrientes 524 piso 5 - Ciudad Autónoma de Buenos Aires 
+              <br>
+              CUIT 20-39415572-2 | CI DANTE ARONA | CUCICBA 9337 |
+          </p>
+          
+          <div class="prov">
+              <a href="#" target="_blank">
+                  <img src="llave.png" alt="By Arona" width="80" height="80" loading="lazy">
+              </a>
+              <br>
+              <a href="#" target="_blank">by <strong>Arona</strong></a>
+          </div>
+      </div>
+  </div>
+    <style>     
