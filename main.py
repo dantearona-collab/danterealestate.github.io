@@ -9,7 +9,7 @@ from openpyxl import Workbook, load_workbook
 from datetime import datetime
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": ["null", "http://dantepropiedades.com.ar", "http://dantepropiedades.com", "https://danterealestate-github-io.onrender.com"]}})
+CORS(app, resources={r"/api/*": {"origins": ["null", "http://dantepropiedades.com.ar", "http://www.dantepropiedades.com.ar", "https://dantepropiedades.com.ar", "https://www.dantepropiedades.com.ar", "http://dantepropiedades.com", "https://danterealestate-github-io.onrender.com"]}})
 
 # --- Excel Contact Logic ---
 EXCEL_FILE = 'contactos_dante_propiedades.xlsx'
