@@ -76,7 +76,6 @@ def serve_static_file(filename):
         safe_print(f"Error sirviendo {filename}: {str(e)}")
         return jsonify({"error": f"Error sirviendo archivo: {str(e)}"}), 500
 
-# APIs ANTES de la ruta genérica - CRÍTICO para el funcionamiento
 @app.route('/api/guardar_contacto', methods=['POST', 'OPTIONS'])
 @app.route('/guardar_contacto', methods=['POST', 'OPTIONS'])
 def guardar_contacto_route():
@@ -157,6 +156,11 @@ def search_properties():
 
     filtered_properties = []
     for prop in properties:
+        # CORRECCIÓN: Verificar que prop sea un diccionario
+        if not isinstance(prop, dict):
+            safe_print(f"Elemento no es un diccionario en search: {type(prop)} - {prop}")
+            continue
+            
         if ope and (prop.get('operacion') is None or prop.get('operacion').lower() != ope.lower()):
             continue
         
@@ -215,14 +219,22 @@ def get_filter_options():
     operaciones = []
     
     for prop in properties:
-        if prop.get('barrio') and prop['barrio'] not in barrios:
-            barrios.append(prop['barrio'])
-        
-        if prop.get('tipo') and prop['tipo'] not in tipos:
-            tipos.append(prop['tipo'])
-        
-        if prop.get('operacion') and prop['operacion'] not in operaciones:
-            operaciones.append(prop['operacion'])
+        # CORRECCIÓN: Verificar que prop sea un diccionario antes de usar .get()
+        if isinstance(prop, dict):
+            # Barrios
+            if prop.get('barrio') and prop['barrio'] not in barrios:
+                barrios.append(prop['barrio'])
+            
+            # Tipos
+            if prop.get('tipo') and prop['tipo'] not in tipos:
+                tipos.append(prop['tipo'])
+            
+            # Operaciones
+            if prop.get('operacion') and prop['operacion'] not in operaciones:
+                operaciones.append(prop['operacion'])
+        else:
+            # Si el elemento no es un dict, lo registramos para debug
+            safe_print(f"Elemento no es un diccionario en filter-options: {type(prop)} - {prop}")
     
     return jsonify({
         "barrios": sorted(barrios),
@@ -254,6 +266,11 @@ def get_property_stats():
     precios = []
     
     for prop in properties:
+        # CORRECCIÓN: Verificar que prop sea un diccionario
+        if not isinstance(prop, dict):
+            safe_print(f"Elemento no es un diccionario en stats: {type(prop)} - {prop}")
+            continue
+            
         op = prop.get('operacion', 'No especificado')
         stats["by_operacion"][op] = stats["by_operacion"].get(op, 0) + 1
         
@@ -273,7 +290,6 @@ def get_property_stats():
     
     return jsonify(stats)
 
-# RUTA GENÉRICA AL FINAL - Solo archivos estáticos
 @app.route('/<path:filename>')
 def serve_static(filename):
     if filename.startswith('api/'):
