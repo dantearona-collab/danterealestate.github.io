@@ -31,90 +31,68 @@ function initMenu() {
             menuSlide.classList.remove('menuabierto');
             console.log('Menú cerrado');
         });
-        
-        // Cerrar menú al hacer clic fuera en dispositivos táctiles
-        document.addEventListener('click', (e) => {
-            if (menuSlide.classList.contains('menuabierto') && 
-                !menuSlide.contains(e.target) && 
-                !menuBtn.contains(e.target)) {
-                menuSlide.classList.remove('menuabierto');
-            }
-        });
     }
 }
 
 function initSlider() {
-    if (typeof $ !== 'undefined' && $('.slini').length) {
-        console.log('Inicializando slider...');
+    const slides = document.querySelectorAll('.slide');
+    const prevBtn = document.querySelector('.prev');
+    const nextBtn = document.querySelector('.next');
+    
+    if (slides.length > 0 && prevBtn && nextBtn) {
+        let currentSlide = 0;
+        showSlide(currentSlide);
         
-        $('.slini').slick({
-            dots: false,
-            arrows: false,
-            infinite: true,
-            speed: 500,
-            fade: true,
-            autoplay: true,
-            autoplaySpeed: 4000,
-            cssEase: 'linear',
-            adaptiveHeight: false
-        });
-
-        // Navegación
-        const navButtons = document.querySelectorAll('.slider-nav button');
-        navButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const slideIndex = parseInt(this.dataset.slide);
-                $('.slini').slick('slickGoTo', slideIndex);
-            });
-        });
-
-        $('.slini').on('afterChange', function(event, slick, currentSlide) {
-            navButtons.forEach(btn => btn.classList.remove('active'));
-            const activeBtn = document.querySelector(`[data-slide="${currentSlide}"]`);
-            if (activeBtn) activeBtn.classList.add('active');
+        prevBtn.addEventListener('click', () => {
+            currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+            showSlide(currentSlide);
         });
         
-        console.log('Slider inicializado correctamente');
+        nextBtn.addEventListener('click', () => {
+            currentSlide = (currentSlide + 1) % slides.length;
+            showSlide(currentSlide);
+        });
+        
+        function showSlide(index) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[index].classList.add('active');
+        }
     }
 }
 
-// ====================================
-// SISTEMA AVANZADO DE BÚSQUEDA DE PROPIEDADES
-// ====================================
+// =============================================================================
+// SISTEMA DE BÚSQUEDA AVANZADO
+// =============================================================================
 
-let currentViewMode = 'grid';
-let currentResults = [];
-let currentFilters = {};
-
-/**
- * Inicializar el sistema de búsqueda avanzada
- */
 function initAdvancedSearch() {
-    console.log('Inicializando búsqueda avanzada...');
+    console.log('Inicializando sistema de búsqueda avanzado...');
     
+    // Configurar formulario de búsqueda avanzada
     initSearchForm();
+    
+    // Configurar filtros rápidos
     initQuickFilters();
-    initViewControls();
-    initModal();
-    initNoResultsActions();
+    
+    // Cargar opciones de filtros
+    loadFilterOptions();
 }
 
-/**
- * Cargar opciones de filtros desde la API
- */
 async function loadFilterOptions() {
     try {
+        console.log('Cargando opciones de filtros...');
         const response = await fetch('https://danterealestate-github-io.onrender.com/api/properties/filter-options');
-        if (!response.ok) throw new Error('Error loading filter options');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         
         const options = await response.json();
+        console.log('Opciones cargadas:', options);
         
         // Poblar select de barrios
         const barrioSelect = document.getElementById('barrio-select');
         if (barrioSelect && options.barrios) {
-            barrioSelect.innerHTML = '
-```Todos los barrios```
-';
+            barrioSelect.innerHTML = '<option value="">Todos los barrios</option>';
             options.barrios.forEach(barrio => {
                 const option = document.createElement('option');
                 option.value = barrio;
@@ -126,594 +104,157 @@ async function loadFilterOptions() {
         // Poblar select de tipos
         const tipoSelect = document.getElementById('tipo-select');
         if (tipoSelect && options.tipos) {
-            tipoSelect.innerHTML = '
-```Todos los tipos```
-';
+            tipoSelect.innerHTML = '<option value="">Todos los tipos</option>';
             options.tipos.forEach(tipo => {
                 const option = document.createElement('option');
                 option.value = tipo;
-                option.textContent = tipo.charAt(0).toUpperCase() + tipo.slice(1);
+                option.textContent = tipo;
                 tipoSelect.appendChild(option);
             });
         }
         
-        console.log('Opciones de filtros cargadas:', options);
+        // Poblar select de estados
+        const estadoSelect = document.getElementById('estado-select');
+        if (estadoSelect && options.estados) {
+            estadoSelect.innerHTML = '<option value="">Todos los estados</option>';
+            options.estados.forEach(estado => {
+                const option = document.createElement('option');
+                option.value = estado;
+                option.textContent = estado;
+                estadoSelect.appendChild(option);
+            });
+        }
+        
     } catch (error) {
         console.error('Error cargando opciones de filtros:', error);
     }
 }
 
-/**
- * Inicializar formulario de búsqueda
- */
 function initSearchForm() {
     const searchForm = document.getElementById('advanced-search-form');
-    const opeSpans = document.querySelectorAll('.buscadorcab .ope span');
-    const inputOpe = document.getElementById('ope-input');
-    
-    // Handle operation type selection
-    opeSpans.forEach(opcion => {
-        opcion.addEventListener('click', function() {
-            opeSpans.forEach(o => o.classList.remove('activo'));
-            this.classList.add('activo');
-            if (inputOpe) inputOpe.value = this.dataset.val;
-        });
-    });
-    
-    // Handle form submission
     if (searchForm) {
-        searchForm.addEventListener('submit', async function(event) {
-            event.preventDefault();
-            await performSearch();
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            performAdvancedSearch();
         });
     }
+    
+    // Configurar búsqueda en tiempo real
+    const searchInputs = document.querySelectorAll('#advanced-search-form input, #advanced-search-form select');
+    searchInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            if (this.type !== 'submit') {
+                performAdvancedSearch();
+            }
+        });
+    });
 }
 
-/**
- * Inicializar filtros rápidos
- */
 function initQuickFilters() {
-    const filterTabs = document.querySelectorAll('.filter-tab');
-    
-    filterTabs.forEach(tab => {
-        tab.addEventListener('click', async function() {
-            // Remover clase active de todos
-            filterTabs.forEach(t => t.classList.remove('active'));
+    const quickFilterButtons = document.querySelectorAll('.quick-filter-btn');
+    quickFilterButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const filterType = this.dataset.filter;
+            const filterValue = this.dataset.value;
+            
+            // Remover clase activa de todos los botones
+            quickFilterButtons.forEach(b => b.classList.remove('active'));
+            
+            // Agregar clase activa al botón clickeado
             this.classList.add('active');
             
             // Aplicar filtro
-            const filterType = this.dataset.filter;
-            await applyQuickFilter(filterType);
+            applyQuickFilter(filterType, filterValue);
         });
     });
 }
 
-/**
- * Inicializar controles de vista
- */
-function initViewControls() {
-    const gridBtn = document.getElementById('grid-view');
-    const listBtn = document.getElementById('list-view');
-    const mapBtn = document.getElementById('map-view');
-    
-    if (gridBtn) {
-        gridBtn.addEventListener('click', () => changeViewMode('grid'));
-    }
-    if (listBtn) {
-        listBtn.addEventListener('click', () => changeViewMode('list'));
-    }
-    if (mapBtn) {
-        mapBtn.addEventListener('click', () => changeViewMode('map'));
-    }
-}
-
-/**
- * Inicializar modal de propiedades
- */
-function initModal() {
-    const modal = document.getElementById('property-modal');
-    const closeBtn = modal?.querySelector('.modal-close');
-    const overlay = modal?.querySelector('.modal-overlay');
-    
-    if (closeBtn) {
-        closeBtn.addEventListener('click', closePropertyModal);
-    }
-    if (overlay) {
-        overlay.addEventListener('click', closePropertyModal);
-    }
-    
-    // Cerrar con ESC
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
-            closePropertyModal();
-        }
-    });
-}
-
-/**
- * Inicializar acciones para casos sin resultados
- */
-function initNoResultsActions() {
-    const clearFiltersBtn = document.getElementById('clear-filters');
-    const showAllBtn = document.getElementById('show-all-properties');
-    const retryBtn = document.getElementById('retry-search');
-    
-    if (clearFiltersBtn) {
-        clearFiltersBtn.addEventListener('click', clearAllFilters);
-    }
-    if (showAllBtn) {
-        showAllBtn.addEventListener('click', showAllProperties);
-    }
-    if (retryBtn) {
-        retryBtn.addEventListener('click', performSearch);
-    }
-}
-
-/**
- * Realizar búsqueda de propiedades
- */
-async function performSearch() {
-    showLoadingState();
-    
+async function performAdvancedSearch() {
     try {
-        const searchForm = document.getElementById('advanced-search-form');
-        const formData = new FormData(searchForm);
+        console.log('Realizando búsqueda avanzada...');
         
-        // Build query parameters
+        // Obtener valores del formulario
+        const form = document.getElementById('advanced-search-form');
+        const formData = new FormData(form);
+        
+        // Construir query string
         const params = new URLSearchParams();
-        for (const [key, value] of formData.entries()) {
-            if (value.trim()) {
+        for (let [key, value] of formData.entries()) {
+            if (value) {
                 params.append(key, value);
             }
         }
         
-        // Add operation from active tab
-        const activeOpe = document.querySelector('.buscadorcab .ope span.activo');
-        if (activeOpe && activeOpe.dataset.val) {
-            params.set('ope', activeOpe.dataset.val);
-        }
-        
         const queryString = params.toString();
-        const backendUrl = `https://danterealestate-github-io.onrender.com/api/properties/search?${queryString}`;
+        const apiUrl = `https://danterealestate-github-io.onrender.com/api/properties/search?${queryString}`;
         
-        console.log('Searching with URL:', backendUrl);
+        console.log('URL de búsqueda:', apiUrl);
         
-        const response = await fetch(backendUrl);
+        const response = await fetch(apiUrl);
+        
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const data = await response.json();
-        console.log('Search results:', data);
+        const properties = await response.json();
+        console.log('Propiedades encontradas:', properties);
         
-        // Handle both old and new API response formats
-        const properties = data.properties || data;
-        currentResults = properties;
-        currentFilters = Object.fromEntries(params);
-        
-        displayResults(properties);
-        updateResultsInfo(properties);
+        // Mostrar resultados
+        displaySearchResults(properties);
         
     } catch (error) {
-        console.error('Error fetching properties:', error);
-        showErrorState(error.message);
+        console.error('Error en búsqueda avanzada:', error);
+        showSearchError('Error al realizar la búsqueda. Por favor, inténtelo de nuevo.');
     }
 }
 
-/**
- * Mostrar todas las propiedades
- */
-async function showAllProperties() {
-    showLoadingState();
+function displaySearchResults(properties) {
+    const container = document.getElementById('property-grid');
+    const resultsCounter = document.getElementById('results-counter');
     
-    try {
-        const response = await fetch('https://danterealestate-github-io.onrender.com/api/properties/search');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        const properties = data.properties || data;
-        
-        currentResults = properties;
-        currentFilters = {};
-        
-        displayResults(properties);
-        updateResultsInfo(properties);
-        
-        // Reset form
-        resetSearchForm();
-        
-    } catch (error) {
-        console.error('Error loading all properties:', error);
-        showErrorState(error.message);
-    }
-}
-
-/**
- * Aplicar filtro rápido
- */
-async function applyQuickFilter(filterType) {
-    showLoadingState();
-    
-    try {
-        let params = new URLSearchParams();
-        
-        switch (filterType) {
-            case 'venta':
-                params.set('ope', 'V');
-                break;
-            case 'alquiler':
-                params.set('ope', 'A');
-                break;
-            case 'departamentos':
-                params.set('tipo', 'departamento');
-                break;
-            case 'casas':
-                params.set('tipo', 'casa');
-                break;
-            case 'todas':
-            default:
-                // No filters, just load all
-                break;
-        }
-        
-        const queryString = params.toString();
-        const backendUrl = `https://danterealestate-github-io.onrender.com/api/properties/search?${queryString}`;
-        
-        const response = await fetch(backendUrl);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        const properties = data.properties || data;
-        
-        currentResults = properties;
-        currentFilters = Object.fromEntries(params);
-        
-        displayResults(properties);
-        updateResultsInfo(properties);
-        
-    } catch (error) {
-        console.error('Error applying quick filter:', error);
-        showErrorState(error.message);
-    }
-}
-
-function displayResultsInModal(properties) {
-    const modal = document.getElementById('results-modal');
-    const modalResultsGrid = document.getElementById('modal-results-grid');
-
-    if (!modal || !modalResultsGrid) {
-        console.error('Modal elements not found');
-        return;
-    }
-
-    modalResultsGrid.innerHTML = ''; // Clear previous results
-
-    console.log('Properties received:', properties);
-
-    if (properties.length === 0) {
-        modalResultsGrid.innerHTML = '<p>No se encontraron propiedades que coincidan con su búsqueda.</p>';
-    } else {
-        properties.forEach(prop => {
-            console.log('Processing property:', prop);
-            console.log('Full property object (JSON):', JSON.stringify(prop));
-            const imageUrl = 'llave.png'; // Default image as 'images' array is not in JSON
-            const titleText = prop.titulo || 'Propiedad sin título';
-            const priceText = prop.precio ? `USD ${prop.precio.toLocaleString('es-AR')}` : 'Consultar precio'; // Assuming USD as currency
-            const locationText = prop.barrio || '';
-            const typeOpText = `${prop.tipo || ''} en ${prop.operacion || ''}`;
-            const codeText = prop.id_temporal ? `Código: ${prop.id_temporal}` : '';
-
-            const propertyElement = document.createElement('div');
-            propertyElement.className = 'propiedad-item';
-            propertyElement.innerHTML = `
-                <a href="details.html?id=${prop.id_temporal}" target="_blank">
-                    <img src="${imageUrl}" alt="${titleText}" loading="lazy" style="width:100%">
-                </a>
-                <div class="image-description">
-                    <h3>${titleText}</h3>
-                    <p>${locationText}</p>
-                    <p>${typeOpText}</p>
-                    <p>${priceText}</p>
-                    <p>${codeText}</p>
-                </div>
-            `;
-            console.log('Generated HTML for property:', propertyElement.innerHTML);
-            modalResultsGrid.appendChild(propertyElement);
-        });
-    }
-
-    modal.classList.add('active');
-}
-
-
-function initWhatsApp() {
-    const whatsappLink = document.getElementById('whatsappLink');
-    if (whatsappLink) {
-        whatsappLink.href = 'https://wa.me/5491125368595';
-    }
-}
-
-// Header sticky con mejoras para móviles
-window.addEventListener('scroll', function() {
-    const header = document.getElementById('cab');
-    if (header) {
-        // En móviles, activar el sticky más pronto para evitar problemas
-        const isMobile = window.innerWidth <= 768;
-        const threshold = isMobile ? 30 : 100;
-        header.classList.toggle('cabfix', window.scrollY > threshold);
-    }
-});
-
-// Mejorar la responsividad del buscador específicamente para móviles
-function adjustSearchForMobile() {
-    const buscador = document.querySelector('.buscadorcab');
-    if (buscador) {
-        const isMobile = window.innerWidth <= 768;
-        
-        if (isMobile) {
-            // En móviles, asegurar layout vertical y evitar superposiciones
-            buscador.style.position = 'fixed';
-            buscador.style.top = '60px';
-            buscador.style.zIndex = '1000';
-            buscador.style.background = 'rgba(255,255,255,0.98)';
-            buscador.style.width = '100%';
-            buscador.style.left = '0';
-        }
-    }
-}
-
-// Ocultar/mostrar elementos según el dispositivo
-function optimizeForMobile() {
-    const isMobile = window.innerWidth <= 768;
-    const constructionBanner = document.querySelector('.construction-banner');
-    const codField = document.querySelector('.cod');
-    const menuCab = document.querySelector('.menucab');
-    const menuDesp = document.querySelector('.menudesp');
-    
-    if (isMobile) {
-        // Ocultar banner de construcción en móviles
-        if (constructionBanner) {
-            constructionBanner.style.display = 'none';
-        }
-        
-        // Ocultar campo código para dar más espacio al buscador
-        if (codField) {
-            codField.style.display = 'none';
-        }
-        
-        // Mostrar menú hamburguesa
-        if (menuCab && menuDesp) {
-            menuCab.style.display = 'none';
-            menuDesp.style.display = 'block';
-        }
-    }
-}
-
-// Ajustar cuando se cambia el tamaño de la ventana
-window.addEventListener('resize', function() {
-    adjustSearchForMobile();
-    optimizeForMobile();
-});
-
-// Ajustar cuando se carga la página
-document.addEventListener('DOMContentLoaded', function() {
-    adjustSearchForMobile();
-    optimizeForMobile();
-});
-
-// Mejorar la experiencia táctil en móviles
-function improveTouchExperience() {
-    const isMobile = window.innerWidth <= 768;
-    
-    if (isMobile) {
-        // Mejorar la responsividad de los botones de operación
-        const opeButtons = document.querySelectorAll('.ope span');
-        opeButtons.forEach(button => {
-            button.addEventListener('touchstart', function() {
-                this.style.transform = 'scale(0.95)';
-            });
-            
-            button.addEventListener('touchend', function() {
-                this.style.transform = 'scale(1)');
-            });
-        });
-        
-        // Mejorar la experiencia del menú móvil
-        const menuBtn = document.querySelector('.menudesp');
-        const menuSlide = document.getElementById('menuslide');
-        
-        if (menuBtn && menuSlide) {
-            menuBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                menuSlide.classList.toggle('menuabierto');
-            });
-        }
-    }
-}
-
-// ====================================
-// FUNCIONES DE VISUALIZACIÓN Y ESTADOS
-// ====================================
-
-/**
- * Cambiar modo de vista
- */
-function changeViewMode(mode) {
-    currentViewMode = mode;
-    
-    // Update button states
-    document.querySelectorAll('.view-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    document.getElementById(`${mode}-view`)?.classList.add('active');
-    
-    // Re-render current results
-    if (currentResults.length > 0) {
-        displayResults(currentResults);
-    }
-}
-
-/**
- * Mostrar estado de carga
- */
-function showLoadingState() {
-    hideAllStates();
-    document.getElementById('loading-indicator')?.classList.remove('hidden');
-    document.getElementById('results-controls')?.classList.add('hidden');
-}
-
-/**
- * Mostrar estado de error
- */
-function showErrorState(message) {
-    hideAllStates();
-    document.getElementById('error-state')?.classList.remove('hidden');
-    document.getElementById('results-controls')?.classList.add('hidden');
-    
-    console.error('Error state shown:', message);
-}
-
-/**
- * Mostrar estado de no resultados
- */
-function showNoResultsState() {
-    hideAllStates();
-    document.getElementById('no-results')?.classList.remove('hidden');
-    document.getElementById('results-controls')?.classList.add('hidden');
-}
-
-/**
- * Ocultar todos los estados
- */
-function hideAllStates() {
-    document.getElementById('loading-indicator')?.classList.add('hidden');
-    document.getElementById('error-state')?.classList.add('hidden');
-    document.getElementById('no-results')?.classList.add('hidden');
-    document.getElementById('results-controls')?.classList.remove('hidden');
-}
-
-/**
- * Mostrar resultados de propiedades
- */
-function displayResults(properties) {
-    const resultsGrid = document.getElementById('search-results-grid');
-    if (!resultsGrid) return;
-    
-    if (properties.length === 0) {
-        showNoResultsState();
+    if (!container) {
+        console.error('No se encontró el contenedor de propiedades');
         return;
     }
     
-    hideAllStates();
-    
-    // Clear previous results
-    resultsGrid.innerHTML = '';
-    
-    // Apply current view mode
-    if (currentViewMode === 'grid') {
-        displayGridView(resultsGrid, properties);
-    } else if (currentViewMode === 'list') {
-        displayListView(resultsGrid, properties);
-    } else if (currentViewMode === 'map') {
-        displayMapView(resultsGrid, properties);
+    // Actualizar contador
+    if (resultsCounter) {
+        resultsCounter.textContent = `Se encontraron ${properties.length} propiedades`;
     }
-}
-
-/**
- * Mostrar vista de cuadrícula
- */
-function displayGridView(container, properties) {
+    
+    // Limpiar contenedor
+    container.innerHTML = '';
+    
+    if (properties.length === 0) {
+        container.innerHTML = '<p>No se encontraron propiedades con los criterios seleccionados.</p>';
+        return;
+    }
+    
+    // Crear tarjetas de propiedades
     properties.forEach(property => {
-        const card = createPropertyCard(property);
-        container.appendChild(card);
+        const propertyCard = createPropertyCard(property);
+        container.appendChild(propertyCard);
     });
 }
 
-/**
- * Mostrar vista de lista
- */
-function displayListView(container, properties) {
-    properties.forEach(property => {
-        const listItem = createPropertyListItem(property);
-        container.appendChild(listItem);
-    });
-}
-
-/**
- * Mostrar vista de mapa (placeholder)
- */
-function displayMapView(container, properties) {
-    container.innerHTML = `
-        <div class="map-placeholder">
-            <i class="fas fa-map" style="font-size: 3rem; color: #d1d5db; margin-bottom: 1rem;"></i>
-            <h3>Vista de mapa</h3>
-            <p>La vista de mapa estará disponible próximamente</p>
-        </div>
-    `;
-}
-
-/**
- * Crear tarjeta de propiedad
- */
 function createPropertyCard(property) {
     const card = document.createElement('div');
     card.className = 'property-card';
-    card.onclick = () => openPropertyModal(property);
     
-    const formatPrice = (price) => {
-        if (!price) return 'Consultar';
-        return new Intl.NumberFormat('es-AR', {
-            style: 'currency',
-            currency: 'ARS',
-            minimumFractionDigits: 0
-        }).format(price);
-    };
-    
-    const formatAmenities = (amenities) => {
-        if (!amenities) return [];
-        return amenities.split(',').map(a => a.trim()).slice(0, 3);
-    };
-    
+    // Estructura de la tarjeta
     card.innerHTML = `
-        <div class="property-card-image">
-            <div class="property-card-badge">${property.operacion || 'Venta'}</div>
-            <img src="https://via.placeholder.com/300x200/f3f4f6/6b7280?text=Sin+Imagen" 
-                 alt="${property.titulo || 'Propiedad'}" 
-                 onerror="this.src='https://via.placeholder.com/300x200/f3f4f6/6b7280?text=Sin+Imagen'">
+        <div class="property-image">
+            <img src="${property.imagen || '/api/placeholder/400/300'}" alt="${property.titulo}" loading="lazy">
         </div>
-        <div class="property-card-content">
-            <h3 class="property-card-title">${property.titulo || 'Propiedad'}</h3>
-            <div class="property-card-price">${formatPrice(property.precio)}</div>
-            <div class="property-card-details">
-                <div class="property-card-detail">
-                    <i class="fas fa-home"></i>
-                    <span>${property.ambientes || 0} amb.</span>
-                </div>
-                <div class="property-card-detail">
-                    <i class="fas fa-ruler-combined"></i>
-                    <span>${property.metros || 0} m²</span>
-                </div>
-                <div class="property-card-detail">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <span>${property.barrio || 'Ubicación'}</span>
-                </div>
-                <div class="property-card-detail">
-                    <i class="fas fa-building"></i>
-                    <span>${property.tipo || 'Propiedad'}</span>
-                </div>
+        <div class="property-content">
+            <h3 class="property-title">${property.titulo}</h3>
+            <p class="property-location">${property.barrio || 'Ubicación no especificada'}</p>
+            <div class="property-details">
+                <span class="property-type">${property.tipo}</span>
+                <span class="property-price">$${property.precio ? property.precio.toLocaleString() : 'Consultar'}</span>
             </div>
-            <div class="property-card-amenities">
-                ${formatAmenities(property.amenities).map(amenity => 
-                    `<span class="property-amenity">${amenity}</span>`
-                ).join('')}
-            </div>
-            <div class="property-card-actions">
-                <button class="property-card-btn">Ver detalles</button>
-                <button class="property-card-btn primary">Contactar</button>
+            <div class="property-actions">
+                <button class="btn-contact" onclick="contactProperty('${property.id}')">Contactar</button>
             </div>
         </div>
     `;
@@ -721,294 +262,328 @@ function createPropertyCard(property) {
     return card;
 }
 
-/**
- * Crear elemento de lista de propiedad
- */
-function createPropertyListItem(property) {
-    const item = document.createElement('div');
-    item.className = 'property-list-item';
-    item.onclick = () => openPropertyModal(property);
-    
-    const formatPrice = (price) => {
-        if (!price) return 'Consultar';
-        return new Intl.NumberFormat('es-AR', {
-            style: 'currency',
-            currency: 'ARS',
-            minimumFractionDigits: 0
-        }).format(price);
-    };
-    
-    const formatAmenities = (amenities) => {
-        if (!amenities) return [];
-        return amenities.split(',').map(a => a.trim()).slice(0, 4);
-    };
-    
-    item.innerHTML = `
-        <div class="property-list-image">
-            <img src="https://via.placeholder.com/200x150/f3f4f6/6b7280?text=Sin+Imagen" 
-                 alt="${property.titulo || 'Propiedad'}"
-                 onerror="this.src='https://via.placeholder.com/200x150/f3f4f6/6b7280?text=Sin+Imagen'">
-        </div>
-        <div class="property-list-content">
-            <div class="property-list-header">
-                <h3 class="property-list-title">${property.titulo || 'Propiedad'}</h3>
-                <div class="property-list-price">${formatPrice(property.precio)}</div>
-            </div>
-            <div class="property-list-details">
-                <div class="property-card-detail">
-                    <i class="fas fa-home"></i>
-                    <span>${property.ambientes || 0} ambientes</span>
-                </div>
-                <div class="property-card-detail">
-                    <i class="fas fa-ruler-combined"></i>
-                    <span>${property.metros || 0} m²</span>
-                </div>
-                <div class="property-card-detail">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <span>${property.barrio || 'Ubicación'}</span>
-                </div>
-                <div class="property-card-detail">
-                    <i class="fas fa-building"></i>
-                    <span>${property.tipo || 'Propiedad'}</span>
-                </div>
-            </div>
-            <div class="property-list-amenities">
-                ${formatAmenities(property.amenities).map(amenity => 
-                    `<span class="property-amenity">${amenity}</span>`
-                ).join('')}
-            </div>
-        </div>
-    `;
-    
-    return item;
-}
-
-/**
- * Abrir modal de propiedad
- */
-function openPropertyModal(property) {
-    const modal = document.getElementById('property-modal');
-    const title = document.getElementById('modal-property-title');
-    const body = modal?.querySelector('.modal-body');
-    
-    if (!modal || !title || !body) return;
-    
-    // Set title
-    title.textContent = property.titulo || 'Propiedad';
-    
-    // Populate content
-    body.innerHTML = createPropertyDetailContent(property);
-    
-    // Show modal
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-}
-
-/**
- * Cerrar modal de propiedad
- */
-function closePropertyModal() {
-    const modal = document.getElementById('property-modal');
-    if (modal) {
-        modal.classList.add('hidden');
-        document.body.style.overflow = 'auto';
+function showSearchError(message) {
+    const container = document.getElementById('property-grid');
+    if (container) {
+        container.innerHTML = `<div class="error-message">${message}</div>`;
     }
 }
 
-/**
- * Crear contenido detallado de propiedad
- */
-function createPropertyDetailContent(property) {
-    const formatPrice = (price) => {
-        if (!price) return 'Consultar precio';
-        return new Intl.NumberFormat('es-AR', {
-            style: 'currency',
-            currency: 'ARS',
-            minimumFractionDigits: 0
-        }).format(price);
-    };
+function applyQuickFilter(filterType, filterValue) {
+    console.log('Aplicando filtro rápido:', filterType, filterValue);
     
-    const formatBoolean = (value) => {
-        if (value === 'Sí' || value === 'si' || value === true) return 'Sí';
-        if (value === 'No' || value === 'no' || value === false) return 'No';
-        return value || 'No especificado';
-    };
-    
-    return `
-        <div class="property-detail">
-            <div class="property-detail-gallery">
-                <div class="property-detail-images">
-                    <img src="https://via.placeholder.com/200x150/f3f4f6/6b7280?text=Imagen+1" 
-                         alt="Imagen 1" class="property-detail-image">
-                    <img src="https://via.placeholder.com/200x150/f3f4f6/6b7280?text=Imagen+2" 
-                         alt="Imagen 2" class="property-detail-image">
-                    <img src="https://via.placeholder.com/200x150/f3f4f6/6b7280?text=Imagen+3" 
-                         alt="Imagen 3" class="property-detail-image">
-                </div>
-                ${property.info_multimedia ? `
-                    <div class="multimedia-info">
-                        <h4>Multimedia</h4>
-                        <p>${property.info_multimedia}</p>
-                    </div>
-                ` : ''}
-            </div>
-            
-            <div class="property-detail-info">
-                <div class="property-detail-header">
-                    <h1 class="property-detail-title">${property.titulo || 'Propiedad'}</h1>
-                    <div class="property-detail-price">${formatPrice(property.precio)}</div>
-                </div>
-                
-                <div class="property-detail-specs">
-                    <div class="property-spec-item">
-                        <i class="fas fa-home"></i>
-                        <span>${property.ambientes || 0} ambientes</span>
-                    </div>
-                    <div class="property-spec-item">
-                        <i class="fas fa-ruler-combined"></i>
-                        <span>${property.metros || 0} m²</span>
-                    </div>
-                    <div class="property-spec-item">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>${property.barrio || 'Ubicación'}</span>
-                    </div>
-                    <div class="property-spec-item">
-                        <i class="fas fa-building"></i>
-                        <span>${property.tipo || 'Propiedad'}</span>
-                    </div>
-                    <div class="property-spec-item">
-                        <i class="fas fa-calendar"></i>
-                        <span>${property.antiguedad || 'N/A'} años</span>
-                    </div>
-                    <div class="property-spec-item">
-                        <i class="fas fa-tachometer-alt"></i>
-                        <span>${property.estado || 'Estado'}</span>
-                    </div>
-                    <div class="property-spec-item">
-                        <i class="fas fa-compass"></i>
-                        <span>${property.orientacion || 'N/A'}</span>
-                    </div>
-                    <div class="property-spec-item">
-                        <i class="fas fa-stairs"></i>
-                        <span>Piso ${property.piso || 'N/A'}</span>
-                    </div>
-                    <div class="property-spec-item">
-                        <i class="fas fa-dollar-sign"></i>
-                        <span>Expensas: ${formatPrice(property.expensas)}</span>
-                    </div>
-                    <div class="property-spec-item">
-                        <i class="fas fa-map"></i>
-                        <span>${property.direccion || 'Dirección no disponible'}</span>
-                    </div>
-                </div>
-                
-                <div class="property-detail-description">
-                    <h4>Descripción</h4>
-                    <p>${property.descripcion || 'Descripción no disponible.'}</p>
-                </div>
-                
-                <div class="property-detail-amenities-grid">
-                    <div class="property-amenity-item">
-                        <i class="fas fa-parking"></i>
-                        <span>Cochera: ${formatBoolean(property.cochera)}</span>
-                    </div>
-                    <div class="property-amenity-item">
-                        <i class="fas fa-balcony"></i>
-                        <span>Balcón: ${formatBoolean(property.balcon)}</span>
-                    </div>
-                    <div class="property-amenity-item">
-                        <i class="fas fa-swimming-pool"></i>
-                        <span>Pileta: ${formatBoolean(property.pileta)}</span>
-                    </div>
-                    <div class="property-amenity-item">
-                        <i class="fas fa-dog"></i>
-                        <span>Acepta mascotas: ${formatBoolean(property.acepta_mascotas)}</span>
-                    </div>
-                    <div class="property-amenity-item">
-                        <i class="fas fa-snowflake"></i>
-                        <span>Aire acondicionado: ${formatBoolean(property.aire_acondicionado)}</span>
-                    </div>
-                </div>
-                
-                <div class="property-detail-actions">
-                    <button class="property-detail-action primary" onclick="window.open('tel:1166562078')">
-                        <i class="fas fa-phone"></i>
-                        Llamar
-                    </button>
-                    <button class="property-detail-action secondary" onclick="window.open('https://wa.me/5491166562078?text=Interesado%20en%20${encodeURIComponent(property.titulo)}', '_blank')">
-                        <i class="fab fa-whatsapp"></i>
-                        WhatsApp
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-/**
- * Actualizar información de resultados
- */
-function updateResultsInfo(properties) {
-    const countElement = document.getElementById('results-count');
-    const titleElement = document.getElementById('results-title');
-    
-    if (countElement) {
-        countElement.textContent = `${properties.length} ${properties.length === 1 ? 'propiedad encontrada' : 'propiedades encontradas'}`;
-    }
-    
-    if (titleElement) {
-        let title = 'Resultados de búsqueda';
-        if (currentFilters.ope) {
-            const opMap = { 'V': 'venta', 'A': 'alquiler', 'T': 'alquiler temporal' };
-            title += ` - ${opMap[currentFilters.ope] || currentFilters.ope}`;
-        }
-        if (currentFilters.loc) {
-            title += ` - ${currentFilters.loc}`;
-        }
-        if (currentFilters.tipo) {
-            title += ` - ${currentFilters.tipo}`;
-        }
-        titleElement.textContent = title;
-    }
-}
-
-/**
- * Limpiar todos los filtros
- */
-function clearAllFilters() {
-    resetSearchForm();
-    showAllProperties();
-}
-
-/**
- * Resetear formulario de búsqueda
- */
-function resetSearchForm() {
+    // Actualizar el formulario de búsqueda
     const form = document.getElementById('advanced-search-form');
     if (form) {
-        form.reset();
-        
-        // Reset operation to Venta
-        const ventaOption = document.querySelector('.buscadorcab .ope span[data-val="V"]');
-        if (ventaOption) {
-            document.querySelectorAll('.buscadorcab .ope span').forEach(s => s.classList.remove('activo'));
-            ventaOption.classList.add('activo');
-            document.getElementById('ope-input').value = 'V';
+        // Limpiar filtros anteriores del mismo tipo
+        const existingField = form.querySelector(`[name="${filterType}"]`);
+        if (existingField) {
+            existingField.value = filterValue;
         }
         
-        // Reset filter tabs
-        document.querySelectorAll('.filter-tab').forEach(tab => {
-            tab.classList.remove('active');
-        });
-        document.querySelector('.filter-tab[data-filter="todas"]')?.classList.add('active');
+        // Realizar búsqueda
+        performAdvancedSearch();
     }
 }
 
-// Inicializar mejoras táctiles
-document.addEventListener('DOMContentLoaded', improveTouchExperience);
+function showAllProperties() {
+    console.log('Mostrando todas las propiedades...');
+    performAdvancedSearch();
+}
 
-// Debug: Mostrar información de carga
-window.addEventListener('load', function() {
-    console.log('=== PÁGINA COMPLETAMENTE CARGADA ===');
-    console.log('Todas las imágenes deberían estar cargadas');
+// =============================================================================
+// WHATSAPP INTEGRATION
+// =============================================================================
+
+function initWhatsApp() {
+    const whatsappBtn = document.getElementById('whatsapp-btn');
+    if (whatsappBtn) {
+        whatsappBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            openWhatsApp();
+        });
+    }
+}
+
+function openWhatsApp() {
+    const phoneNumber = '5491123456789'; // Reemplazar con el número real
+    const message = 'Hola, estoy interesado en las propiedades que tienen disponibles.';
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+}
+
+// =============================================================================
+// FORMULARIO DE CONTACTO
+// =============================================================================
+
+function initContactForm() {
+    const contactForm = document.getElementById('contact-form');
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitContactForm();
+        });
+    }
+}
+
+async function submitContactForm() {
+    try {
+        const form = document.getElementById('contact-form');
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData);
+        
+        console.log('Enviando formulario de contacto:', data);
+        
+        // Enviar a la API de contacto
+        const response = await fetch('https://danterealestate-github-io.onrender.com/api/contact', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+            showContactSuccess('¡Gracias! Su consulta ha sido enviada correctamente.');
+            form.reset();
+        } else {
+            showContactError('Hubo un error al enviar su consulta. Por favor, inténtelo de nuevo.');
+        }
+        
+    } catch (error) {
+        console.error('Error enviando formulario:', error);
+        showContactError('Hubo un error al enviar su consulta. Por favor, inténtelo de nuevo.');
+    }
+}
+
+function showContactSuccess(message) {
+    // Crear o actualizar mensaje de éxito
+    let successMsg = document.getElementById('contact-success');
+    if (!successMsg) {
+        successMsg = document.createElement('div');
+        successMsg.id = 'contact-success';
+        successMsg.className = 'contact-message success';
+        document.getElementById('contact-form').after(successMsg);
+    }
+    successMsg.textContent = message;
+    successMsg.style.display = 'block';
+    
+    // Ocultar después de 5 segundos
+    setTimeout(() => {
+        successMsg.style.display = 'none';
+    }, 5000);
+}
+
+function showContactError(message) {
+    // Crear o actualizar mensaje de error
+    let errorMsg = document.getElementById('contact-error');
+    if (!errorMsg) {
+        errorMsg = document.createElement('div');
+        errorMsg.id = 'contact-error';
+        errorMsg.className = 'contact-message error';
+        document.getElementById('contact-form').after(errorMsg);
+    }
+    errorMsg.textContent = message;
+    errorMsg.style.display = 'block';
+    
+    // Ocultar después de 5 segundos
+    setTimeout(() => {
+        errorMsg.style.display = 'none';
+    }, 5000);
+}
+
+// =============================================================================
+// FUNCIONES DE UTILIDAD
+// =============================================================================
+
+function contactProperty(propertyId) {
+    // Abrir WhatsApp con información específica de la propiedad
+    const phoneNumber = '5491123456789'; // Reemplazar con el número real
+    const message = `Hola, estoy interesado en la propiedad ID: ${propertyId}. ¿Podrían proporcionarme más información?`;
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+}
+
+function formatPrice(price) {
+    if (!price) return 'Consultar';
+    return new Intl.NumberFormat('es-AR', {
+        style: 'currency',
+        currency: 'ARS'
+    }).format(price);
+}
+
+function formatNumber(number) {
+    return new Intl.NumberFormat('es-AR').format(number);
+}
+
+// =============================================================================
+// EVENTOS ADICIONALES
+// =============================================================================
+
+// Lazy loading de imágenes
+function initLazyLoading() {
+    const images = document.querySelectorAll('img[loading="lazy"]');
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src || img.src;
+                    img.classList.remove('lazy');
+                    imageObserver.unobserve(img);
+                }
+            });
+        });
+        
+        images.forEach(img => imageObserver.observe(img));
+    }
+}
+
+// Manejo de errores globales
+window.addEventListener('error', function(e) {
+    console.error('Error global:', e.error);
+    console.error('Archivo:', e.filename);
+    console.error('Línea:', e.lineno);
+    console.error('Columna:', e.colno);
 });
+
+// Inicializar componentes adicionales
+document.addEventListener('DOMContentLoaded', function() {
+    // Lazy loading
+    initLazyLoading();
+    
+    // Formulario de contacto
+    initContactForm();
+    
+    console.log('Sistema inicializado completamente');
+});
+
+// =============================================================================
+// ESTILOS CSS DINÁMICOS
+// =============================================================================
+
+// Agregar estilos para la búsqueda avanzada
+const searchStyles = `
+<style>
+.property-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.property-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.property-image img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.property-content {
+    padding: 16px;
+}
+
+.property-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    color: #333;
+}
+
+.property-location {
+    color: #666;
+    font-size: 14px;
+    margin: 0 0 12px 0;
+}
+
+.property-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.property-type {
+    background: #f0f0f0;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #666;
+}
+
+.property-price {
+    font-weight: 600;
+    color: #007bff;
+    font-size: 16px;
+}
+
+.btn-contact {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s ease;
+}
+
+.btn-contact:hover {
+    background: #0056b3;
+}
+
+.quick-filter-btn.active {
+    background: #007bff;
+    color: white;
+}
+
+.contact-message {
+    padding: 12px;
+    border-radius: 4px;
+    margin: 12px 0;
+    display: none;
+}
+
+.contact-message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.contact-message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.error-message {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-size: 16px;
+}
+
+#results-counter {
+    margin: 20px 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    text-align: center;
+}
+</style>
+`;
+
+// Agregar estilos al head del documento
+if (!document.getElementById('search-styles')) {
+    const styleElement = document.createElement('div');
+    styleElement.id = 'search-styles';
+    styleElement.innerHTML = searchStyles;
+    document.head.appendChild(styleElement);
+}
+
+console.log('=== SISTEMA JA INICIALIZADO COMPLETAMENTE ===');
