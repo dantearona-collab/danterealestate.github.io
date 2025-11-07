@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <meta name="description" content="Propiedades en venta y alquiler en Capital Federal - Dante Propiedades">
   <title>Dante Propiedades</title>
-  
+
   <!-- Open Graph (para Facebook, WhatsApp, LinkedIn) -->
   <meta property="og:title" content="Dante Propiedades | Tu Ciudad">
   <meta property="og:description" content="Propiedades en venta y alquiler en Capital Federal - Dante Propiedades">
@@ -23,73 +23,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css">
   <link rel="stylesheet" href="app.css">
-  
-  <style>
-  .construction-banner {
-      background-color: yellow;
-      text-align: center;
-      padding: 10px;
-      font-weight: bold;
-      animation: blinker 1s linear infinite;
-  }
-
-  @keyframes blinker {
-      50% {
-          opacity: 0;
-      }
-  }
-
-  /* Estilos para las secciones */
-  .page-section {
-      display: none;
-  }
-  
-  .page-section.active {
-      display: block;
-  }
-
-  /* Botón de volver */
-  .back-btn {
-      background: #007bff;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-bottom: 20px;
-      font-size: 16px;
-  }
-
-  .back-btn:hover {
-      background: #0056b3;
-  }
-
-  .tasaciones-content {
-      background: #f8f9fa;
-      padding: 40px 20px;
-      text-align: center;
-  }
-
-  .tasaciones-content h2 {
-      color: #333;
-      margin-bottom: 20px;
-  }
-
-  .tasaciones-content p {
-      font-size: 18px;
-      margin-bottom: 20px;
-      color: #666;
-  }
-
-  .contact-info {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      max-width: 600px;
-      margin: 0 auto;
-  }
-  </style>
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-E6K41V8BHB"></script>
@@ -97,375 +30,378 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
+
   gtag('config', 'G-E6K41V8BHB');
   </script>
 </head>
 
 <body>
-    <!-- Header -->
-    <header id="cab">
-        <div class="cont">
-            <a href="#" class="logo" onclick="showSection('home')">
-                <img src="llave.png" alt="Dante Propiedades" width="90" height="30" loading="eager">
-                <span class="logo-text">DANTE PROPIEDADES</span>
-            </a>
-            
-            <nav class="menugen">
-                <!-- Banner de construcción oculto por defecto, solo visible en desktop -->
-                <div class="construction-banner desktop-only">
-                    <p>Página en Construcción</p>
-                </div>
-                <ul class="menucab">
-                    <li class="desktop-only"><a href="tel:1166562078"><i class="fas fa-phone"></i> Llamá <span>11 6656 2078</span></a></li>
-                    <li><a href="#" onclick="showSection('tasaciones')">Tasación</a></li>
-                    <li><a href="#" onclick="showSection('propiedades')">Propiedades</a></li>
-                </ul>
 
-                <button class="menudesp" aria-label="Abrir menú">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </nav>
-        </div>
-    </header>
+  <!-- Header -->
+  <header id="cab">
+      <div class="cont">
+          <a href="index" class="logo">
+              <img src="llave.png" alt="Dante Propiedades" width="90" height="30" loading="eager">
+              <span class="logo-text">DANTE PROPIEDADES</span>
+          </a>
+          
+          <nav class="menugen">
+              <ul class="menucab">
+                  <li class="desktop-only"><a href="tel:1166562078"><i class="fas fa-phone"></i> Llamá <span>11 6656 2078</span></a></li>
+                  <li><a href="tasaciones">Tasación</a></li>
+                  <li><a href="propiedades">Propiedades</a></li>
+              </ul>
 
-    <!-- Sección Principal (Home) -->
-    <div id="home-section" class="page-section active">
-        <!-- Buscador Avanzado -->
-        <form class="buscadorcab" action="#" method="GET" id="advanced-search-form">
-            <input type="hidden" name="ope" value="V" id="ope-input">
-            
-            <div class="cont">
-                <!-- Selector de Operación -->
-                <div class="search-group">
-                    <label for="operacion">Operación:</label>
-                    <div class="ope" id="operacion">
-                        <span class="activo" data-val="V">Venta</span>
-                        <span data-val="A">Alquiler</span>
-                        <span data-val="T">Alquiler Temporal</span>
-                    </div>
-                </div>
-                
-                <!-- Selector de Barrio -->
-                <div class="search-group">
-                    <label for="barrio">Barrio:</label>
-                    <select name="loc" id="barrio-select" class="form-select">
-                        <option value="">Todos los barrios</option>
-                        <option value="palermo">Palermo</option>
-                        <option value="belgrano">Belgrano</option>
-                        <option value="colegiales">Colegiales</option>
-                        <option value="microcentro">Microcentro</option>
-                        <option value="recoleta">Recoleta</option>
-                        <option value="san isidro">San Isidro</option>
-                        <option value="almagro">Almagro</option>
-                        <option value="villa crespo">Villa Crespo</option>
-                        <option value="caballito">Caballito</option>
-                        <option value="nuñez">Nuñez</option>
-                        <option value="boedo">Boedo</option>
-                        <option value="balvanera">Balvanera</option>
-                        <option value="vicente lopez">Vicente López</option>
-                        <option value="puerto madero">Puerto Madero</option>
-                    </select>
-                </div>
-                
-                <!-- Selector de Tipo -->
-                <div class="search-group">
-                    <label for="tipo">Tipo de Propiedad:</label>
-                    <select name="tipo" id="tipo-select" class="form-select">
-                        <option value="">Todos los tipos</option>
-                        <option value="departamento">Departamento</option>
-                        <option value="casa">Casa</option>
-                        <option value="ph">PH</option>
-                        <option value="oficina">Oficina</option>
-                        <option value="local">Local</option>
-                        <option value="terreno">Terreno</option>
-                    </select>
-                </div>
-                
-                <!-- Filtros Adicionales -->
-                <div class="search-group">
-                    <label for="precio_max">Precio máximo:</label>
-                    <input type="number" name="precio_max" id="precio-input" placeholder="Ej: 300000" class="form-input">
-                </div>
-                
-                <div class="search-group">
-                    <label for="ambientes">Mín. ambientes:</label>
-                    <input type="number" name="ambientes" id="ambientes-input" placeholder="Ej: 2" class="form-input" min="1" max="10">
-                </div>
-                
-                <button type="submit" class="search-btn" aria-label="Buscar propiedades">
-                    <i class="fas fa-search"></i>
-                    <span>Buscar</span>
-                </button>
-            </div>
-        </form>
+              <button class="menudesp" aria-label="Abrir menú">
+                  <i class="fas fa-bars"></i>
+              </button>
+          </nav>
+      </div>
+  </header>
 
-        <!-- Sección de Propiedades Destacadas -->
-        <section class="propiedades-destacadas">
-            <div class="cont">
-                <h2 class="section-title">Propiedades Destacadas</h2>
-                <div class="propiedades-grid" id="featured-properties-grid">
-                    <!-- Las propiedades destacadas se cargarán aquí dinámicamente -->
-                    <div class="loading">
-                        <p>Cargando propiedades destacadas...</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
+  <!-- ****************** Buscador Avanzado ****************-->
+  
+  <form class="buscadorcab" action="#" method="GET" id="advanced-search-form">
+      <input type="hidden" name="ope" value="V" id="ope-input">
+      
+      <div class="cont">
+          <!-- Selector de Operación -->
+          <div class="search-group">
+              <label for="operacion">Operación:</label>
+              <div class="ope" id="operacion">
+                  <span class="activo" data-val="V">Venta</span>
+                  <span data-val="A">Alquiler</span>
+                  <span data-val="T">Alquiler Temporal</span>
+              </div>
+          </div>
+          
+          <!-- Selector de Barrio -->
+          <div class="search-group">
+              <label for="barrio">Barrio:</label>
+              <select name="loc" id="barrio-select" class="form-select">
+                  <option value="">Todos los barrios</option>
+                  <option value="palermo">Palermo</option>
+                  <option value="belgrano">Belgrano</option>
+                  <option value="colegiales">Colegiales</option>
+                  <option value="microcentro">Microcentro</option>
+                  <option value="recoleta">Recoleta</option>
+                  <option value="san isidro">San Isidro</option>
+                  <option value="almagro">Almagro</option>
+                  <option value="villa crespo">Villa Crespo</option>
+                  <option value="caballito">Caballito</option>
+                  <option value="nuñez">Nuñez</option>
+                  <option value="boedo">Boedo</option>
+                  <option value="balvanera">Balvanera</option>
+                  <option value="vicente lopez">Vicente López</option>
+                  <option value="puerto madero">Puerto Madero</option>
+              </select>
+          </div>
+          
+          <!-- Selector de Tipo -->
+          <div class="search-group">
+              <label for="tipo">Tipo de Propiedad:</label>
+              <select name="tipo" id="tipo-select" class="form-select">
+                  <option value="">Todos los tipos</option>
+                  <option value="departamento">Departamento</option>
+                  <option value="casa">Casa</option>
+                  <option value="ph">PH</option>
+                  <option value="oficina">Oficina</option>
+                  <option value="local">Local</option>
+                  <option value="terreno">Terreno</option>
+              </select>
+          </div>
+          
+          <!-- Filtros Adicionales -->
+          <div class="search-group">
+              <label for="precio_max">Precio máximo:</label>
+              <input type="number" name="precio_max" id="precio-input" placeholder="Ej: 300000" class="form-input">
+          </div>
+          
+          <div class="search-group">
+              <label for="ambientes">Mín. ambientes:</label>
+              <input type="number" name="ambientes" id="ambientes-input" placeholder="Ej: 2" class="form-input" min="1" max="10">
+          </div>
+          
+          <button type="submit" class="search-btn" aria-label="Buscar propiedades">
+              <i class="fas fa-search"></i>
+              <span>Buscar</span>
+          </button>
+      </div>
+      
+      <!-- Filtros rápidos -->
+      <div class="quick-filters">
+          <div class="filter-tabs">
+              <button type="button" class="filter-tab active" data-filter="todas">Todas las propiedades</button>
+              <button type="button" class="filter-tab" data-filter="venta">Solo venta</button>
+              <button type="button" class="filter-tab" data-filter="alquiler">Solo alquiler</button>
+              <button type="button" class="filter-tab" data-filter="departamentos">Departamentos</button>
+              <button type="button" class="filter-tab" data-filter="casas">Casas</button>
+          </div>
+      </div>
+  </form>
+  <!-- ****************** END Buscador ****************-->
 
-    <!-- Sección Propiedades -->
-    <div id="propiedades-section" class="page-section">
-        <div class="cont" style="padding: 20px;">
-            <button class="back-btn" onclick="showSection('home')">
-                <i class="fas fa-arrow-left"></i> Volver al Inicio
-            </button>
-            
-            <h2 style="text-align: center; margin-bottom: 30px;">Todas las Propiedades</h2>
-            <div class="propiedades-grid" id="all-properties-grid">
-                <!-- Las propiedades se cargarán aquí -->
-                <div class="loading">
-                    <p>Cargando propiedades...</p>
-                </div>
-            </div>
-        </div>
-    </div>
+  <!-- Menú móvil -->
+  <nav id="menuslide">
+      <button class="cerrarmenu" aria-label="Cerrar menú">
+          <i class="fas fa-times"></i>
+      </button>
+      
+      <div class="btng mobile-info">
+          <a href="tel:1166562078" class="mobile-call-btn">
+              <i class="fas fa-phone"></i> Llamá 11 6656 2078
+          </a>
+          <a href="tasaciones" class="mobile-valuation-btn">Tasación</a>
+      </div>
+      
+      <div class="menu-sections">
+          <section>
+              <h5>Encontrá tu lugar para vivir</h5>
+              <ul>
+                  <li><a href="emprendimientos">Emprendimientos</a></li>
+                  <li>
+                      <a href="propiedades">Propiedades</a>
+                      <ul>
+                          <li><a href="propiedades?ope=V">Venta</a></li>
+                          <li><a href="propiedades?ope=A">Alquiler</a></li>
+                          <li><a href="propiedades?ope=T">Alquiler temporario</a></li>
+                      </ul>
+                  </li>
+              </ul>
+          </section>
 
-    <!-- Sección Tasaciones -->
-    <div id="tasaciones-section" class="page-section">
-        <div class="cont">
-            <button class="back-btn" onclick="showSection('home')">
-                <i class="fas fa-arrow-left"></i> Volver al Inicio
-            </button>
-            
-            <div class="tasaciones-content">
-                <h2><i class="fas fa-calculator"></i> Tasaciones de Propiedades</h2>
-                <p>Ofrecemos servicios profesionales de tasación para compra, venta o refacción de tu propiedad.</p>
-                
-                <div class="contact-info">
-                    <h3>¿Necesitás una tasación?</h3>
-                    <p><strong>Contactanos ahora:</strong></p>
-                    <p><i class="fas fa-phone"></i> <a href="tel:1166562078">11 6656 2078</a></p>
-                    <p><i class="fas fa-envelope"></i> <a href="/cdn-cgi/l/email-protection#355c5b535a7551545b415045475a455c5051545150461b565a581b5447"><span class="__cf_email__" data-cfemail="d8b1b6beb798bcb9b6acbda8aab7a8b1bdbcb9bcbdabf6bbb7b5f6b9aa">[email&#160;protected]</span></a></p>
-                    <p><i class="fas fa-map-marker-alt"></i> Buenos Aires, Argentina</p>
-                </div>
-            </div>
-        </div>
-    </div>
+          <section>
+              <h5>Dejá tu propiedad en las mejores manos</h5>
+              <ul>
+                  <li><a href="tasaciones">Tasaciones</a></li>
+                  <li>
+                      <a href="sucursales">Sucursales</a>
+                      <ul>
+                          <li><a href="sucursales?sucu=capital">Capital Federal</a></li>
+                      </ul>
+                  </li>
+                  <li><a href="nosotros">Nosotros</a></li>
+                  <li><a href="https://dante.com.ar/busquedaslaborales">Integrate</a></li>
+                  <li><a href="contacto">Contacto</a></li>
+              </ul>
+          </section>
+      </div>
 
-    <!-- Modal para Contacto -->
-    <div id="contact-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <button id="modal-close-btn" class="modal-close">&times;</button>
-            <h2>Contactar por esta propiedad</h2>
-            <form id="contact-form">
-                <input type="hidden" id="property-id" name="propiedad">
-                
-                <div class="form-group">
-                    <label for="contact-name">Nombre completo *</label>
-                    <input type="text" id="contact-name" name="nombre" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="contact-firma">Firma</label>
-                    <input type="text" id="contact-firma" name="firma" placeholder="Ej: Realtor, Particular">
-                </div>
-                
-                <div class="form-group">
-                    <label for="contact-phone">Teléfono *</label>
-                    <input type="tel" id="contact-phone" name="telefono" required>
-                </div>
-                
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" id="cancel-contact">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Enviar Consulta</button>
-                </div>
-                
-                <div id="contact-result" class="contact-result"></div>
-            </form>
-        </div>
-    </div>
+      <ul class="redesmenuslide">
+          <li><a href="https://instagram.com/danteprop" target="_blank"><i class="fab fa-instagram"></i></a></li>
+          <li><a href="https://facebook.com/DantePropiedades" target="_blank"><i class="fab fa-facebook"></i></a></li>
+          <li><a href="https://www.youtube.com/channel/UCclLOUtNIhOYTcJTxVPBrCA" target="_blank"><i class="fab fa-youtube"></i></a></li>
+          <li class="hashtag"><a href="https://www.instagram.com/explore/tags/dantepropiedades/" target="_blank">#DANTEPROPIEDADES</a></li>
+      </ul>
+  </nav>
 
-    <!-- Modal para resultados de búsqueda -->
-    <div id="results-modal" class="modal-overlay">
-        <div class="modal-content">
-            <button id="modal-close-btn" class="modal-close">&times;</button>
-            <h2>Resultados de la Búsqueda</h2>
-            <div id="modal-results-grid" class="propiedades-grid">
-                <!-- Resultados se insertarán aquí -->
-            </div>
-        </div>
-    </div>
+  <!-- Slider principal -->
+  <section id="sliderini" class="slihome">
+      <!-- Slider de imágenes -->
+      <div class="slider-container">
+          <div class="slini">
+              <!-- Imagen 1 -->
+              <div class="slide">
+                  <div class="image-wrapper">
+                      <img src="INSTITUCIONALES/INSTITUCIONAL 1.jpg" alt="Propiedad institucional 1" loading="eager" class="slider-img">
+                  </div>
+              </div>
+              
+              <!-- Imagen 3 -->
+              <div class="slide">
+                  <div class="image-wrapper">
+                      <img src="INSTITUCIONALES/INSTITUCIONAL 3.png" alt="Propiedad institucional 3" loading="lazy" class="slider-img">
+                  </div>
+              </div>
+              
+              <!-- Imagen 4 -->
+              <div class="slide">
+                  <div class="image-wrapper">
+                      <img src="INSTITUCIONALES/INSTITUCIONAL 4.png" alt="Propiedad institucional 4" loading="lazy" class="slider-img">
+                  </div>
+              </div>
+          </div>
+          
+          <!-- Navegación -->
+          <div class="slider-nav" id="sliderNav">
+              <button data-slide="0" class="active"></button>
+              <button data-slide="1"></button>
+              <button data-slide="2"></button>
+              <button data-slide="3"></button>
+          </div>
+      </div>
+  </section>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="cont">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>Contactanos</h3>
-                    <p>📍 Buenos Aires, Argentina</p>
-                    <p>📱 <a href="tel:1166562078">11 6656 2078</a></p>
-                    <p>📧 <a href="/cdn-cgi/l/email-protection#3e575058517e5a5f504a5b4e4c514e575b5a5f5a5b4d105d5153105f4c"><span class="__cf_email__" data-cfemail="5a33343c351a3e3b342e3f2a28352a333f3e3b3e3f2974393537743b28">[email&#160;protected]</span></a></p>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Servicios</h3>
-                    <ul>
-                        <li><a href="#" onclick="showSection('propiedades')">Propiedades</a></li>
-                        <li><a href="#" onclick="showSection('propiedades')">Alquiler</a></li>
-                        <li><a href="#" onclick="showSection('propiedades')">Alquiler Temporal</a></li>
-                        <li><a href="#" onclick="showSection('tasaciones')">Tasaciones</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Zonas</h3>
-                    <ul>
-                        <li><a href="#" onclick="showSection('propiedades')">Palermo</a></li>
-                        <li><a href="#" onclick="showSection('propiedades')">Belgrano</a></li>
-                        <li><a href="#" onclick="showSection('propiedades')">Recoleta</a></li>
-                        <li><a href="#" onclick="showSection('propiedades')">Colegiales</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Síguenos</h3>
-                    <div class="social-links">
-                        <a href="https://instagram.com/danteprop" target="_blank" aria-label="Instagram">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="https://facebook.com/DantePropiedades" target="_blank" aria-label="Facebook">
-                            <i class="fab fa-facebook"></i>
-                        </a>
-                        <a href="https://www.youtube.com/channel/UCclLOUtNIhOYTcJTxVPBrCA" target="_blank" aria-label="YouTube">
-                            <i class="fab fa-youtube"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="footer-bottom">
-                <p>&copy; 2024 Dante Propiedades. Todos los derechos reservados.</p>
-                <br>
-                <a href="#" target="_blank">by <strong>Arona</strong></a>
-            </div>
-        </div>
-    </div>
+  <!-- Propiedades destacadas -->
+  <section id="destacadasini">
+      <div class="cont">
+          <div class="propiedades-grid" id="listaDestacadas">
+              <div class="propiedad-item">
+                  <a href="UF001/destacada1.html">
+                      <img src="UF001/UF001-1.jpg" alt="Inmueble apto para consstruir" loading="lazy">
+                  </a>
+                  <div class="image-description">Inmueble Unico sobre Avda. La Plata -Boedo-</div>
+              </div>
+          </div>
+          <div class="cargando cargandodest" style="display: none;">
+              <div class="centrado">
+                  <div class="cargaprop">
+                      <div class="loader"><div></div><div></div></div>
+                  </div>
+                  <span>Cargando propiedades destacadas</span>
+              </div>
+          </div>
+      </div>
+  </section>
 
-    <!-- Scripts -->
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
-    <script src="app.js"></script>
+  <!-- Search Results -->
+  <section id="search-results" class="cont">
+      <!-- Indicador de carga -->
+      <div id="loading-indicator" class="loading hidden">
+          <div class="spinner"></div>
+          <p>Buscando propiedades...</p>
+      </div>
+      
+      <!-- Controles de vista -->
+      <div id="results-controls" class="results-controls hidden">
+          <div class="results-info">
+              <h3 id="results-title">Resultados de búsqueda</h3>
+              <p id="results-count">0 propiedades encontradas</p>
+          </div>
+          <div class="view-controls">
+              <button id="grid-view" class="view-btn active" aria-label="Vista de tarjetas">
+                  <i class="fas fa-th"></i>
+              </button>
+              <button id="list-view" class="view-btn" aria-label="Vista de lista">
+                  <i class="fas fa-list"></i>
+              </button>
+              <button id="map-view" class="view-btn" aria-label="Vista de mapa">
+                  <i class="fas fa-map"></i>
+              </button>
+          </div>
+      </div>
+      
+      <!-- Grid de propiedades -->
+      <div class="propiedades-grid" id="search-results-grid">
+          <!-- Los resultados de la búsqueda se cargarán dinámicamente aquí -->
+      </div>
+      
+      <!-- Estado vacío - No se encontraron resultados -->
+      <div id="no-results" class="no-results hidden">
+          <div class="no-results-content">
+              <i class="fas fa-search"></i>
+              <h3>No se encontraron propiedades</h3>
+              <p>Intenta ajustar tus filtros de búsqueda</p>
+              <div class="no-results-actions">
+                  <button id="clear-filters" class="btn-secondary">Limpiar filtros</button>
+                  <button id="show-all-properties" class="btn-primary">Ver todas las propiedades</button>
+              </div>
+          </div>
+      </div>
+      
+      <!-- Estado de error -->
+      <div id="error-state" class="error-state hidden">
+          <div class="error-content">
+              <i class="fas fa-exclamation-triangle"></i>
+              <h3>Error al buscar propiedades</h3>
+              <p>Hubo un problema al buscar las propiedades. Por favor, intenta nuevamente.</p>
+              <button id="retry-search" class="btn-primary">Intentar nuevamente</button>
+          </div>
+      </div>
+  </section>
 
-    <script>
-    // Función para mostrar secciones
-    function showSection(sectionName) {
-        // Ocultar todas las secciones
-        document.querySelectorAll('.page-section').forEach(section => {
-            section.classList.remove('active');
-        });
-        
-        // Mostrar la sección seleccionada
-        document.getElementById(sectionName + '-section').classList.add('active');
-        
-        // Cargar propiedades si es la sección de propiedades
-        if (sectionName === 'propiedades') {
-            loadAllProperties();
-        }
-        
-        // Scroll hacia arriba
-        window.scrollTo(0, 0);
-    }
+  <!-- Modal para vista detallada de propiedad -->
+  <div id="property-modal" class="modal hidden">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h2 id="modal-property-title">Propiedad</h2>
+              <button class="modal-close" aria-label="Cerrar modal">
+                  <i class="fas fa-times"></i>
+              </button>
+          </div>
+          
+          <div class="modal-body">
+              <!-- Contenido dinámico se cargará aquí -->
+          </div>
+      </div>
+      <div class="modal-overlay"></div>
+  </div>
 
-    // Función para cargar todas las propiedades
-    function loadAllProperties() {
-        fetch('/api/properties/search')
-            .then(response => response.json())
-            .then(data => {
-                const grid = document.getElementById('all-properties-grid');
-                if (data.properties && data.properties.length > 0) {
-                    grid.innerHTML = data.properties.map(prop => createPropertyCard(prop)).join('');
-                } else {
-                    grid.innerHTML = '<p style="text-align: center; color: #666;">No se encontraron propiedades.</p>';
-                }
-            })
-            .catch(error => {
-                console.error('Error cargando propiedades:', error);
-                document.getElementById('all-properties-grid').innerHTML = 
-                    '<p style="text-align: center; color: red;">Error cargando propiedades.</p>';
-            });
-    }
+  <!-- WhatsApp flotante -->
+  <div class="whatsapp-fixed">
+      <a href="https://wa.me/5491125368595" id="whatsappLink" class="btn-whatsapp" aria-label="Contactar por WhatsApp">
+      </a>
+  </div>
 
-    // Función para crear tarjeta de propiedad
-    function createPropertyCard(prop) {
-        const precio = prop.precio ? `$${prop.precio.toLocaleString()}` : 'Consultar';
-        const ambientes = prop.ambientes || 'N/D';
-        const barrio = prop.barrio || 'N/D';
-        const tipo = prop.tipo || 'N/D';
-        
-        return `
-            <div class="property-card" onclick="openContactModal('${prop.id_temporal || ''}')">
-                <div class="property-image">
-                    <img src="${prop.imagenes?.[0] || 'placeholder.jpg'}" alt="${prop.titulo || 'Propiedad'}" loading="lazy">
-                </div>
-                <div class="property-info">
-                    <h3>${prop.titulo || 'Propiedad'}</h3>
-                    <p class="property-price">${precio}</p>
-                    <p class="property-details">${ambientes} ambientes • ${tipo}</p>
-                    <p class="property-location">${barrio}</p>
-                </div>
-            </div>
-        `;
-    }
+  <!-- Footer -->
+  <footer id="pie">
+      <div class="cont">
+          <div class="col">
+              <a href="index" class="logopie">
+                  <img src="logo.png" onerror="this.src='llave.png'" alt="Logo alternativo">
+              </a>
+          </div>
+          
+          <div class="col">
+              <div class="subcol">
+                  <div class="formulario-legal">
+                      <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSf8rjceDDnuJysCI8lMziNK2PK1vBd5zJ_sTpGeolHnBzaZQQ/viewform?embedded=true" style="width:100%; height:823px;" frameborder="0" marginheight="0" marginwidth="0">Cargando…</iframe>
+                      <div class="nota-legal">
+                      <p>Todas las medidas enunciadas son meramente orientativas, las medidas exactas serán las que se expresen en el respectivo título de propiedad de cada inmueble. Todas las fotos, imágenes y videos son meramente ilustrativos y no contractuales. Los precios enunciados son meramente orientativos y no contractuales.</p>
+                      <p>CIA Colegio Profesional Inmobiliario Leyes Nº 3588, 2340 art. 11 y 57, Ley Nº 3588 art. 1 y 2</p>
+                      <p>Artículo 5°.- Incorpórese como inciso 9 del artículo 10 de la Ley 2340 (texto consolidado según Ley 5666)</p>
+                      <p>LEY 5859 – ART. 5 "Se encuentra prohibido cobrar comisiones inmobiliarias y gastos de gestoría de informes a los inquilinos que sean personas físicas. Para los casos de alquiler de vivienda, el monto máximo de comisión que se le puede requerir a los propietarios será el equivalente al cuatro con quince centésimos por ciento (4,15%) del valor total del respectivo contrato"</p>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          
+          <div class="col">
+          </div>
+      </div>
+  </footer>
 
-    // Función para abrir modal de contacto
-    function openContactModal(propertyId = '') {
-        document.getElementById('property-id').value = propertyId;
-        document.getElementById('contact-modal').style.display = 'flex';
-    }
+  <!-- Copyright -->
+  <div id="copy">
+      <div class="cont">
+          <p>
+              <strong>"Confíe solo en corredores matriculados. Su tranquilidad, nuestra prioridad."</strong>
+              <br>
+              <strong>© DANTE PROPIEDADES</strong>
+              <br>
+              Todos los derechos reservados - www.dantepropiedades.com.ar
+              <br>
+              Nota: Toda la información y medidas provistas son aproximadas y deberán ratificarse con la documentación pertinente.
+              <br>
+              DANTE PROPIEDADES | AV. Corrientes 524 piso 5 - Ciudad Autónoma de Buenos Aires 
+              <br>
+              CUIT 20-39415572-2 | CI DANTE ARONA | CUCICBA 9337 |
+          </p>
+          
+          <div class="prov">
+              <a href="#" target="_blank">
+                  <img src="llave.png" alt="By Arona" width="80" height="80" loading="lazy">
+              </a>
+              <br>
+              <a href="#" target="_blank">by <strong>Arona</strong></a>
+          </div>
+      </div>
+  </div>
 
-    // Manejar envío del formulario de contacto
-    document.getElementById('contact-form').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData(this);
-        const data = Object.fromEntries(formData);
-        
-        try {
-            const response = await fetch('/guardar_contacto', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data)
-            });
-            
-            const result = await response.json();
-            
-            if (response.ok) {
-                document.getElementById('contact-result').innerHTML = 
-                    '<div style="color: green;">¡Mensaje enviado correctamente!</div>';
-                this.reset();
-                setTimeout(() => {
-                    document.getElementById('contact-modal').style.display = 'none';
-                }, 2000);
-            } else {
-                document.getElementById('contact-result').innerHTML = 
-                    '<div style="color: red;">Error: ' + result.error + '</div>';
-            }
-        } catch (error) {
-            document.getElementById('contact-result').innerHTML = 
-                '<div style="color: red;">Error de conexión</div>';
-        }
-    });
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+  <script src="app.js"></script>
 
-    // Cerrar modal
-    document.getElementById('cancel-contact').addEventListener('click', function() {
-        document.getElementById('contact-modal').style.display = 'none';
-    });
-
-    document.getElementById('modal-close-btn').addEventListener('click', function() {
-        document.getElementById('contact-modal').style.display = 'none';
-    });
-    </script>
+  <!-- Modal para resultados de búsqueda -->
+  <div id="results-modal" class="modal-overlay">
+      <div class="modal-content">
+          <button id="modal-close-btn" class="modal-close">&times;</button>
+          <h2>Resultados de la Búsqueda</h2>
+          <div id="modal-results-grid" class="propiedades-grid">
+              <!-- Resultados se insertarán aquí -->
+          </div>
+      </div>
+  </div>
 </body>
-</html>
+</html> 
