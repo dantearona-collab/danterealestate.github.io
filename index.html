@@ -34,7 +34,7 @@
   gtag('config', 'G-E6K41V8BHB');
   </script>
 
-  <!-- CSS ULTRA FORZADO PARA LA BÚSQUEDA -->
+  <!-- CSS CON COLORES CORPORATIVOS DANTE PROPIEDADES -->
   <style>
   /* RESET Y BASE ULTRA FORZADA */
   * {
@@ -50,16 +50,26 @@
       color: #333 !important;
   }
 
-  /* HEADER FORZADO */
+  /* VARIABLES DE COLORES CORPORATIVOS DANTE */
+  :root {
+      --dante-azul: #232deb !important;
+      --dante-rojo: #ff0101 !important;
+      --dante-azul-oscuro: #1a1bb3 !important;
+      --dante-rojo-oscuro: #cc0000 !important;
+      --dante-azul-claro: #4a4bed !important;
+      --dante-rojo-claro: #ff3333 !important;
+  }
+
+  /* HEADER CON COLORES CORPORATIVOS */
   #cab {
-      background: #2c3e50 !important;
+      background: var(--dante-azul) !important;
       color: white !important;
       padding: 15px 0 !important;
       position: relative !important;
       z-index: 1000 !important;
   }
 
-  /* SECCIÓN DE BÚSQUEDA ULTRA FORZADA - PRIMERA SECCIÓN */
+  /* SECCIÓN DE BÚSQUEDA CON COLORES CORPORATIVOS */
   #search-container-section {
       background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
       margin: 0 !important;
@@ -73,7 +83,7 @@
       z-index: 1 !important;
   }
 
-  /* FORMULARIO DE BÚSQUEDA ULTRA FORZADO */
+  /* FORMULARIO DE BÚSQUEDA CON COLORES CORPORATIVOS */
   #search-form-styled {
       background: white !important;
       padding: 25px !important;
@@ -89,7 +99,7 @@
 
   #search-form-styled h3 {
       margin: 0 0 25px 0 !important;
-      color: #2c3e50 !important;
+      color: var(--dante-azul) !important;
       text-align: center !important;
       font-size: 24px !important;
       font-weight: 600 !important;
@@ -137,14 +147,14 @@
 
   .search-field select:hover,
   .search-field input:hover {
-      border-color: #007bff !important;
+      border-color: var(--dante-azul) !important;
   }
 
   .search-field select:focus,
   .search-field input:focus {
       outline: none !important;
-      border-color: #007bff !important;
-      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25) !important;
+      border-color: var(--dante-azul) !important;
+      box-shadow: 0 0 0 3px rgba(35, 45, 235, 0.25) !important;
   }
 
   .search-button-container {
@@ -155,7 +165,7 @@
 
   .search-btn {
       padding: 12px 24px !important;
-      background: linear-gradient(135deg, #007bff, #0056b3) !important;
+      background: linear-gradient(135deg, var(--dante-azul), var(--dante-azul-oscuro)) !important;
       color: white !important;
       border: none !important;
       border-radius: 6px !important;
@@ -163,15 +173,15 @@
       font-weight: 600 !important;
       font-size: 14px !important;
       transition: all 0.3s ease !important;
-      box-shadow: 0 4px 8px rgba(0,123,255,0.3) !important;
+      box-shadow: 0 4px 8px rgba(35, 45, 235, 0.3) !important;
       position: relative !important;
       display: block !important;
   }
 
   .search-btn:hover {
       transform: translateY(-1px) !important;
-      box-shadow: 0 6px 12px rgba(0,123,255,0.4) !important;
-      background: linear-gradient(135deg, #0056b3, #004085) !important;
+      box-shadow: 0 6px 12px rgba(35, 45, 235, 0.4) !important;
+      background: linear-gradient(135deg, var(--dante-azul-oscuro), #14147a) !important;
   }
 
   .quick-filters-section {
@@ -193,9 +203,9 @@
   .quick-filter-btn {
       margin: 5px !important;
       padding: 10px 20px !important;
-      border: 2px solid #28a745 !important;
+      border: 2px solid var(--dante-azul) !important;
       background: white !important;
-      color: #28a745 !important;
+      color: var(--dante-azul) !important;
       border-radius: 25px !important;
       cursor: pointer !important;
       font-weight: 500 !important;
@@ -205,14 +215,32 @@
       display: inline-block !important;
   }
 
+  /* FILTROS CON COLORES CORPORATIVOS DIFERENCIADOS */
+  .quick-filter-btn[data-filter="tipo"][data-value="Venta"] {
+      border-color: var(--dante-azul) !important;
+      color: var(--dante-azul) !important;
+  }
+
+  .quick-filter-btn[data-filter="tipo"][data-value="Venta"]:hover:not(.active) {
+      background: rgba(35, 45, 235, 0.1) !important;
+  }
+
   .quick-filter-btn[data-filter="tipo"][data-value="Alquiler"] {
-      border-color: #fd7e14 !important;
-      color: #fd7e14 !important;
+      border-color: var(--dante-rojo) !important;
+      color: var(--dante-rojo) !important;
+  }
+
+  .quick-filter-btn[data-filter="tipo"][data-value="Alquiler"]:hover:not(.active) {
+      background: rgba(255, 1, 1, 0.1) !important;
   }
 
   .quick-filter-btn[data-filter="estado"][data-value="Disponible"] {
-      border-color: #20c997 !important;
-      color: #20c997 !important;
+      border-color: #28a745 !important;
+      color: #28a745 !important;
+  }
+
+  .quick-filter-btn[data-filter="estado"][data-value="Disponible"]:hover:not(.active) {
+      background: rgba(40, 167, 69, 0.1) !important;
   }
 
   .quick-filter-btn[data-filter="estado"][data-value="Vendido"] {
@@ -220,20 +248,23 @@
       color: #6f42c1 !important;
   }
 
+  .quick-filter-btn[data-filter="estado"][data-value="Vendido"]:hover:not(.active) {
+      background: rgba(111, 66, 193, 0.1) !important;
+  }
+
   .quick-filter-btn:hover:not(.active) {
-      background: rgba(0, 123, 255, 0.1) !important;
       transform: translateY(-1px) !important;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
   }
 
   .quick-filter-btn.active {
-      background: linear-gradient(135deg, #007bff, #0056b3) !important;
+      background: linear-gradient(135deg, var(--dante-azul), var(--dante-azul-oscuro)) !important;
       color: white !important;
-      border-color: #0056b3 !important;
-      box-shadow: 0 4px 8px rgba(0,123,255,0.3) !important;
+      border-color: var(--dante-azul-oscuro) !important;
+      box-shadow: 0 4px 8px rgba(35, 45, 235, 0.3) !important;
   }
 
-  /* CONTADOR DE RESULTADOS FORZADO */
+  /* CONTADOR DE RESULTADOS CON COLOR CORPORATIVO */
   #results-counter-styled {
       text-align: center !important;
       margin: 25px 0 !important;
@@ -241,7 +272,7 @@
       background: white !important;
       border-radius: 8px !important;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
-      border-left: 4px solid #007bff !important;
+      border-left: 4px solid var(--dante-azul) !important;
       position: relative !important;
       display: block !important;
       font-size: 16px !important;
@@ -252,7 +283,7 @@
       margin-right: auto !important;
   }
 
-  /* CONTENEDOR DE PROPIEDADES FORZADO */
+  /* CONTENEDOR DE PROPIEDADES */
   #property-grid-styled {
       background: white !important;
       border-radius: 8px !important;
@@ -266,21 +297,31 @@
       margin: 0 auto !important;
   }
 
-  /* MENSAJE DE ESTADO INICIAL FORZADO */
+  /* MENSAJE DE ESTADO CON COLOR CORPORATIVO */
   #initial-status-styled {
       text-align: center !important;
       margin-top: 20px !important;
       padding: 15px !important;
-      background: rgba(255, 193, 7, 0.1) !important;
-      border: 1px solid rgba(255, 193, 7, 0.3) !important;
+      background: rgba(255, 1, 1, 0.1) !important;
+      border: 1px solid rgba(255, 1, 1, 0.3) !important;
       border-radius: 6px !important;
-      color: #856404 !important;
+      color: #8b0000 !important;
       position: relative !important;
       display: block !important;
       font-size: 14px !important;
       max-width: 1200px !important;
       margin-left: auto !important;
       margin-right: auto !important;
+  }
+
+  #initial-status-styled a {
+      color: var(--dante-rojo) !important;
+      text-decoration: underline !important;
+      font-weight: 600 !important;
+  }
+
+  #initial-status-styled a:hover {
+      color: var(--dante-rojo-oscuro) !important;
   }
 
   /* ANIMACIONES FORZADAS */
@@ -300,7 +341,7 @@
       50% { opacity: 0.5 !important; }
   }
 
-  /* RESPONSIVE FORZADO */
+  /* RESPONSIVE */
   @media (max-width: 768px) {
       #search-container-section {
           padding: 20px !important;
@@ -360,6 +401,31 @@
       position: relative !important;
       z-index: 0 !important;
   }
+
+  /* ELEMENTOS ADICIONALES CON COLORES CORPORATIVOS */
+  .logo-text {
+      color: white !important;
+      font-weight: 600 !important;
+  }
+
+  .menucab a {
+      color: white !important;
+      text-decoration: none !important;
+      transition: color 0.3s ease !important;
+  }
+
+  .menucab a:hover {
+      color: rgba(255, 255, 255, 0.8) !important;
+  }
+
+  /* WhatsApp con color corporativo */
+  .btn-whatsapp {
+      background: var(--dante-azul) !important;
+  }
+
+  .btn-whatsapp:hover {
+      background: var(--dante-azul-oscuro) !important;
+  }
   </style>
 </head>
 
@@ -387,12 +453,12 @@
       </div>
   </header>
 
-  <!-- SECCIÓN DE BÚSQUEDA ULTRA FORZADA - PRIMERA SECCIÓN INMEDIATAMENTE DESPUÉS DEL HEADER -->
+  <!-- SECCIÓN DE BÚSQUEDA CON COLORES CORPORATIVOS DANTE -->
   <section id="search-container-section" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important; margin: 0 !important; padding: 30px !important; width: 100% !important; border-radius: 0 !important; box-shadow: 0 8px 32px rgba(0,0,0,0.1) !important; animation: slideIn 0.6s ease-out !important; position: relative !important; display: block !important; z-index: 1 !important;">
       
-      <!-- FORMULARIO DE BÚSQUEDA ULTRA FORZADO -->
+      <!-- FORMULARIO DE BÚSQUEDA CON COLORES CORPORATIVOS -->
       <form id="search-form-styled" style="background: white !important; padding: 25px !important; border-radius: 8px !important; box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important; margin: 0 auto !important; max-width: 1200px !important; margin-bottom: 30px !important; position: relative !important; display: block !important; border: 1px solid #e1e5e9 !important;">
-          <h3 style="margin: 0 0 25px 0 !important; color: #2c3e50 !important; text-align: center !important; font-size: 24px !important; font-weight: 600 !important; position: relative !important; display: block !important;">🔍 Buscar Propiedades</h3>
+          <h3 style="margin: 0 0 25px 0 !important; color: #232deb !important; text-align: center !important; font-size: 24px !important; font-weight: 600 !important; position: relative !important; display: block !important;">🔍 Buscar Propiedades</h3>
           
           <div class="search-grid" style="display: grid !important; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important; gap: 20px !important; align-items: end !important; margin-bottom: 20px !important; position: relative !important;">
               <div class="search-field" style="display: flex !important; flex-direction: column !important; position: relative !important;">
@@ -417,22 +483,22 @@
               </div>
               
               <div class="search-button-container" style="display: flex !important; align-items: end !important; position: relative !important;">
-                  <button type="submit" class="search-btn" style="padding: 12px 24px !important; background: linear-gradient(135deg, #007bff, #0056b3) !important; color: white !important; border: none !important; border-radius: 6px !important; cursor: pointer !important; font-weight: 600 !important; font-size: 14px !important; transition: all 0.3s ease !important; box-shadow: 0 4px 8px rgba(0,123,255,0.3) !important; position: relative !important; display: block !important;">
+                  <button type="submit" class="search-btn" style="padding: 12px 24px !important; background: linear-gradient(135deg, #232deb, #1a1bb3) !important; color: white !important; border: none !important; border-radius: 6px !important; cursor: pointer !important; font-weight: 600 !important; font-size: 14px !important; transition: all 0.3s ease !important; box-shadow: 0 4px 8px rgba(35, 45, 235, 0.3) !important; position: relative !important; display: block !important;">
                       🔍 Buscar
                   </button>
               </div>
           </div>
           
-          <!-- FILTROS RÁPIDOS ULTRA FORZADOS -->
+          <!-- FILTROS RÁPIDOS CON COLORES CORPORATIVOS -->
           <div class="quick-filters-section" style="margin-top: 20px !important; text-align: center !important; position: relative !important; display: block !important;">
               <div class="quick-filters-title" style="margin-bottom: 15px !important; color: #6c757d !important; font-weight: 500 !important; font-size: 14px !important; position: relative !important; display: block !important;">⚡ Filtros Rápidos:</div>
-              <button type="button" class="quick-filter-btn" data-filter="tipo" data-value="Venta" style="margin: 5px !important; padding: 10px 20px !important; border: 2px solid #28a745 !important; background: white !important; color: #28a745 !important; border-radius: 25px !important; cursor: pointer !important; font-weight: 500 !important; transition: all 0.3s ease !important; font-size: 13px !important; position: relative !important; display: inline-block !important;">
+              <button type="button" class="quick-filter-btn" data-filter="tipo" data-value="Venta" style="margin: 5px !important; padding: 10px 20px !important; border: 2px solid #232deb !important; background: white !important; color: #232deb !important; border-radius: 25px !important; cursor: pointer !important; font-weight: 500 !important; transition: all 0.3s ease !important; font-size: 13px !important; position: relative !important; display: inline-block !important;">
                   🏠 Venta
               </button>
-              <button type="button" class="quick-filter-btn" data-filter="tipo" data-value="Alquiler" style="margin: 5px !important; padding: 10px 20px !important; border: 2px solid #fd7e14 !important; background: white !important; color: #fd7e14 !important; border-radius: 25px !important; cursor: pointer !important; font-weight: 500 !important; transition: all 0.3s ease !important; font-size: 13px !important; position: relative !important; display: inline-block !important;">
+              <button type="button" class="quick-filter-btn" data-filter="tipo" data-value="Alquiler" style="margin: 5px !important; padding: 10px 20px !important; border: 2px solid #ff0101 !important; background: white !important; color: #ff0101 !important; border-radius: 25px !important; cursor: pointer !important; font-weight: 500 !important; transition: all 0.3s ease !important; font-size: 13px !important; position: relative !important; display: inline-block !important;">
                   🏢 Alquiler
               </button>
-              <button type="button" class="quick-filter-btn" data-filter="estado" data-value="Disponible" style="margin: 5px !important; padding: 10px 20px !important; border: 2px solid #20c997 !important; background: white !important; color: #20c997 !important; border-radius: 25px !important; cursor: pointer !important; font-weight: 500 !important; transition: all 0.3s ease !important; font-size: 13px !important; position: relative !important; display: inline-block !important;">
+              <button type="button" class="quick-filter-btn" data-filter="estado" data-value="Disponible" style="margin: 5px !important; padding: 10px 20px !important; border: 2px solid #28a745 !important; background: white !important; color: #28a745 !important; border-radius: 25px !important; cursor: pointer !important; font-weight: 500 !important; transition: all 0.3s ease !important; font-size: 13px !important; position: relative !important; display: inline-block !important;">
                   ✅ Disponibles
               </button>
               <button type="button" class="quick-filter-btn" data-filter="estado" data-value="Vendido" style="margin: 5px !important; padding: 10px 20px !important; border: 2px solid #6f42c1 !important; background: white !important; color: #6f42c1 !important; border-radius: 25px !important; cursor: pointer !important; font-weight: 500 !important; transition: all 0.3s ease !important; font-size: 13px !important; position: relative !important; display: inline-block !important;">
@@ -441,27 +507,27 @@
           </div>
       </form>
       
-      <!-- CONTADOR DE RESULTADOS ULTRA FORZADO -->
-      <div id="results-counter-styled" style="text-align: center !important; margin: 25px 0 !important; padding: 20px !important; background: white !important; border-radius: 8px !important; box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important; border-left: 4px solid #007bff !important; position: relative !important; display: block !important; font-size: 16px !important; font-weight: 500 !important; color: #6c757d !important; max-width: 1200px !important; margin-left: auto !important; margin-right: auto !important;">
+      <!-- CONTADOR DE RESULTADOS CON COLOR CORPORATIVO -->
+      <div id="results-counter-styled" style="text-align: center !important; margin: 25px 0 !important; padding: 20px !important; background: white !important; border-radius: 8px !important; box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important; border-left: 4px solid #232deb !important; position: relative !important; display: block !important; font-size: 16px !important; font-weight: 500 !important; color: #6c757d !important; max-width: 1200px !important; margin-left: auto !important; margin-right: auto !important;">
           <div style="color: #6c757d; font-size: 16px; font-weight: 500;">📊 Usar los filtros arriba para buscar propiedades</div>
       </div>
       
-      <!-- CONTENEDOR DE PROPIEDADES ULTRA FORZADO -->
+      <!-- CONTENEDOR DE PROPIEDADES -->
       <div id="property-grid-styled" style="background: white !important; border-radius: 8px !important; box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important; min-height: 300px !important; padding: 20px !important; position: relative !important; display: block !important; border: 1px solid #e1e5e9 !important; max-width: 1200px !important; margin: 0 auto !important;">
           <div style="text-align: center; padding: 60px 40px; color: #6c757d;">
               <div style="font-size: 48px; margin-bottom: 20px;">🏠</div>
               <h4 style="margin: 0 0 15px 0; color: #495057; font-size: 20px; font-weight: 600;">Sistema de Búsqueda de Propiedades</h4>
               <p style="margin: 0; font-size: 16px;">Use los filtros arriba para encontrar su propiedad ideal</p>
-              <div id="loading-indicator-styled" style="display: none; margin-top: 20px; color: #007bff; font-weight: 500;">
+              <div id="loading-indicator-styled" style="display: none; margin-top: 20px; color: #232deb; font-weight: 500;">
                   <span style="animation: pulse 1.5s infinite;">🔄</span> Cargando propiedades...
               </div>
           </div>
       </div>
       
-      <!-- MENSAJE DE ESTADO INICIAL ULTRA FORZADO -->
-      <div id="initial-status-styled" style="text-align: center !important; margin-top: 20px !important; padding: 15px !important; background: rgba(255, 193, 7, 0.1) !important; border: 1px solid rgba(255, 193, 7, 0.3) !important; border-radius: 6px !important; color: #856404 !important; position: relative !important; display: block !important; font-size: 14px !important; max-width: 1200px !important; margin-left: auto !important; margin-right: auto !important;">
+      <!-- MENSAJE DE ESTADO CON COLOR CORPORATIVO ROJO -->
+      <div id="initial-status-styled" style="text-align: center !important; margin-top: 20px !important; padding: 15px !important; background: rgba(255, 1, 1, 0.1) !important; border: 1px solid rgba(255, 1, 1, 0.3) !important; border-radius: 6px !important; color: #8b0000 !important; position: relative !important; display: block !important; font-size: 14px !important; max-width: 1200px !important; margin-left: auto !important; margin-right: auto !important;">
           <strong>ℹ️ Estado:</strong> Sistema cargado correctamente. La base de datos está vacía (0 propiedades). 
-          <a href="javascript:void(0)" onclick="showDataInfo()" style="color: #856404; text-decoration: underline; font-weight: 600;">¿Cómo agregar propiedades?</a>
+          <a href="javascript:void(0)" onclick="showDataInfo()" style="color: #ff0101 !important; text-decoration: underline !important; font-weight: 600 !important;">¿Cómo agregar propiedades?</a>
       </div>
   </section>
 
@@ -662,3 +728,4 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
   <script src="app.js"></script>
+    <style> 
