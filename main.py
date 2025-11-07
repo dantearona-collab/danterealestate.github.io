@@ -11,16 +11,13 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": ["null", "http://dantepropiedades.com.ar", "http://www.dantepropiedades.com.ar", "https://dantepropiedades.com.ar", "https://www.dantepropiedades.com.ar", "http://dantepropiedades.com", "https://danterealestate-github-io.onrender.com"]}})
 
-# --- Excel Contact Logic ---
 EXCEL_FILE = 'contactos_dante_propiedades.xlsx'
 
 def safe_print(message):
-    """Función segura para imprimir sin problemas de codificación"""
     safe_message = message.encode('ascii', 'ignore').decode('ascii')
     print(safe_message)
 
 def init_excel():
-    """Initializes the Excel file if it does not exist"""
     if not os.path.exists(EXCEL_FILE):
         wb = Workbook()
         ws = wb.active
@@ -41,11 +38,12 @@ def init_excel():
         safe_print(f"INFO: Archivo {EXCEL_FILE} encontrado")
 
 def serve_static_file(filename):
-    """Sirve archivos estáticos desde la raíz del repositorio"""
     try:
-        # Buscar el archivo en la raíz del repositorio
-        file_path = os.path.join(os.getcwd(), filename)
+        if filename.startswith('api/') or filename in ['contactos_dante_propiedades.xlsx', 'propiedades.json']:
+            safe_print(f"Archivo {filename} no se sirve como estático - será manejado por endpoint específico")
+            return jsonify({"error": f"Archivo {filename} no encontrado"}), 404
         
+        file_path = os.path.join(os.getcwd(), filename)
         safe_print(f"Buscando archivo: {file_path}")
         
         if os.path.exists(file_path):
@@ -78,76 +76,66 @@ def serve_static_file(filename):
         safe_print(f"Error sirviendo {filename}: {str(e)}")
         return jsonify({"error": f"Error sirviendo archivo: {str(e)}"}), 500
 
-@app.route('/<path:filename>')
-def serve_static(filename):
-    """Ruta genérica para servir archivos estáticos"""
-    return serve_static_file(filename)
-
+# APIs ANTES de la ruta genérica - CRÍTICO para el funcionamiento
 @app.route('/api/guardar_contacto', methods=['POST', 'OPTIONS'])
 @app.route('/guardar_contacto', methods=['POST', 'OPTIONS'])
 def guardar_contacto_route():
-    """Endpoint to save form data"""
     if request.method == 'OPTIONS':
         return '', 204
     
     try:
         data = request.get_json()
-        if not data:
-            return jsonify({'success': False, 'message': 'No data received'}), 400
+        init_excel()
         
+        fecha_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         nombre = data.get('nombre', '').strip()
         firma = data.get('firma', '').strip()
         telefono = data.get('telefono', '').strip()
-        propiedad = data.get('propiedad', 'DESTACADA0')
+        propiedad = data.get('propiedad', '').strip()
         
-        if not nombre or not telefono:
-            return jsonify({'success': False, 'message': 'Name and phone are required'}), 400
+        if not nombre and not telefono:
+            return jsonify({'error': 'Se requiere al menos nombre o teléfono'}), 400
         
-        try:
-            wb = load_workbook(EXCEL_FILE)
-            ws = wb.active
-            next_row = ws.max_row + 1
-            ws[f'A{next_row}'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            ws[f'B{next_row}'] = nombre
-            ws[f'C{next_row}'] = firma if firma else '-'
-            ws[f'D{next_row}'] = telefono
-            ws[f'E{next_row}'] = propiedad
-            wb.save(EXCEL_FILE)
-            safe_print(f"SUCCESS: Contact saved: {nombre} - {telefono}")
-            return jsonify({'success': True, 'message': 'Data saved correctly in Excel'})
-            
-        except Exception as e:
-            safe_print(f"ERROR saving to Excel: {str(e)}")
-            return jsonify({'success': False, 'message': 'Error saving data'}), 500
-            
+        wb = load_workbook(EXCEL_FILE)
+        ws = wb.active
+        next_row = ws.max_row + 1
+        
+        ws[f'A{next_row}'] = fecha_hora
+        ws[f'B{next_row}'] = nombre
+        ws[f'C{next_row}'] = firma
+        ws[f'D{next_row}'] = telefono
+        ws[f'E{next_row}'] = propiedad
+        
+        wb.save(EXCEL_FILE)
+        safe_print(f"SUCCESS: Contacto guardado - {nombre} - {telefono} - {fecha_hora}")
+        
+        return jsonify({'message': 'Contacto guardado exitosamente'}), 200
+        
     except Exception as e:
-        safe_print(f"ERROR in server: {str(e)}")
-        return jsonify({'success': False, 'message': 'Server error occurred'}), 500
+        safe_print(f"ERROR: {str(e)}")
+        return jsonify({'error': f'Error interno: {str(e)}'}), 500
 
 @app.route("/")
 def index():
-    """Servir la página principal"""
     try:
         return serve_static_file('index.html')
     except Exception as e:
         safe_print(f"Error sirviendo index.html: {str(e)}")
         return "Welcome to the Property Search API. Use /api/properties/search to query."
 
-# --- API Endpoints ---
-
 @app.route("/api/properties/search", methods=["GET"])
 def search_properties():
-    """Búsqueda avanzada de propiedades con filtros flexibles"""
     safe_print("--- Nueva Búsqueda ---")
     try:
         with open('propiedades.json', 'r', encoding='utf-8') as f:
             properties = json.load(f)
     except FileNotFoundError:
+        safe_print("ERROR: El archivo propiedades.json no fue encontrado.")
         return jsonify({"error": "El archivo propiedades.json no fue encontrado."}), 404
     except json.JSONDecodeError:
+        safe_print("ERROR: El archivo propiedades.json no tiene un formato JSON válido.")
         return jsonify({"error": "El archivo propiedades.json no tiene un formato JSON válido."}), 500
 
-    # Parámetros de búsqueda
     ope = request.args.get("ope")
     tipo = request.args.get("tipo")
     loc = request.args.get("loc")
@@ -158,7 +146,6 @@ def search_properties():
 
     safe_print(f"Parámetros recibidos: ope={ope}, tipo={tipo}, loc={loc}, cod={cod}, precio_min={precio_min}, precio_max={precio_max}, ambientes={ambientes}")
 
-    # Mapeo de operaciones
     operation_map = {
         "V": "venta",
         "A": "alquiler", 
@@ -170,23 +157,18 @@ def search_properties():
 
     filtered_properties = []
     for prop in properties:
-        # Match operation
         if ope and (prop.get('operacion') is None or prop.get('operacion').lower() != ope.lower()):
             continue
         
-        # Match property type
         if tipo and (prop.get('tipo') is None or prop.get('tipo').lower() != tipo.lower()):
             continue
 
-        # Match neighborhood (busqueda flexible por substring)
         if loc and (prop.get('barrio') is None or loc.lower() not in prop.get('barrio', '').lower()):
             continue
 
-        # Match code
         if cod and (prop.get('id_temporal') is None or cod.lower() not in prop.get('id_temporal', '').lower()):
             continue
 
-        # Match price range
         if precio_min and prop.get('precio'):
             if float(prop.get('precio', 0)) < float(precio_min):
                 continue
@@ -195,7 +177,6 @@ def search_properties():
             if float(prop.get('precio', 0)) > float(precio_max):
                 continue
 
-        # Match ambientes
         if ambientes and prop.get('ambientes'):
             if int(prop.get('ambientes', 0)) < int(ambientes):
                 continue
@@ -204,7 +185,6 @@ def search_properties():
     
     safe_print(f"Propiedades encontradas: {len(filtered_properties)}")
     
-    # Agregar información de metadatos
     response = {
         "properties": filtered_properties,
         "total_found": len(filtered_properties),
@@ -223,28 +203,24 @@ def search_properties():
 
 @app.route("/api/properties/filter-options", methods=["GET"])
 def get_filter_options():
-    """Obtiene las opciones disponibles para los filtros"""
     try:
         with open('propiedades.json', 'r', encoding='utf-8') as f:
             properties = json.load(f)
     except FileNotFoundError:
+        safe_print("ERROR: El archivo propiedades.json no fue encontrado en filter-options.")
         return jsonify({"error": "El archivo propiedades.json no fue encontrado."}), 404
 
-    # Obtener barrios únicos
     barrios = []
     tipos = []
     operaciones = []
     
     for prop in properties:
-        # Barrios
         if prop.get('barrio') and prop['barrio'] not in barrios:
             barrios.append(prop['barrio'])
         
-        # Tipos
         if prop.get('tipo') and prop['tipo'] not in tipos:
             tipos.append(prop['tipo'])
         
-        # Operaciones
         if prop.get('operacion') and prop['operacion'] not in operaciones:
             operaciones.append(prop['operacion'])
     
@@ -256,11 +232,11 @@ def get_filter_options():
 
 @app.route("/api/properties/stats", methods=["GET"])
 def get_property_stats():
-    """Obtiene estadísticas generales de las propiedades"""
     try:
         with open('propiedades.json', 'r', encoding='utf-8') as f:
             properties = json.load(f)
     except FileNotFoundError:
+        safe_print("ERROR: El archivo propiedades.json no fue encontrado en stats.")
         return jsonify({"error": "El archivo propiedades.json no fue encontrado."}), 404
 
     stats = {
@@ -278,23 +254,18 @@ def get_property_stats():
     precios = []
     
     for prop in properties:
-        # Contar por operación
         op = prop.get('operacion', 'No especificado')
         stats["by_operacion"][op] = stats["by_operacion"].get(op, 0) + 1
         
-        # Contar por tipo
         tipo = prop.get('tipo', 'No especificado')
         stats["by_tipo"][tipo] = stats["by_tipo"].get(tipo, 0) + 1
         
-        # Contar por barrio
         barrio = prop.get('barrio', 'No especificado')
         stats["by_barrio"][barrio] = stats["by_barrio"].get(barrio, 0) + 1
         
-        # Recopilar precios
         if prop.get('precio'):
             precios.append(float(prop['precio']))
     
-    # Calcular rangos de precios
     if precios:
         stats["price_ranges"]["min"] = min(precios)
         stats["price_ranges"]["max"] = max(precios)
@@ -302,8 +273,17 @@ def get_property_stats():
     
     return jsonify(stats)
 
+# RUTA GENÉRICA AL FINAL - Solo archivos estáticos
+@app.route('/<path:filename>')
+def serve_static(filename):
+    if filename.startswith('api/'):
+        safe_print(f"Ruta API interceptada incorrectamente: {filename}")
+        return jsonify({"error": "Endpoint no encontrado"}), 404
+    
+    return serve_static_file(filename)
+
 if __name__ == '__main__':
-    init_excel()  # Initialize Excel file
+    init_excel()
     safe_print("INFO: Iniciando servidor Flask...")
     safe_print("INFO: Excel inicializado")
     safe_print("INFO: Servidor corriendo en: http://127.0.0.1:5000")
