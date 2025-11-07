@@ -3,10 +3,11 @@
 import sys
 import os
 import json
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from openpyxl import Workbook, load_workbook
 from datetime import datetime
+import mimetypes
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": ["null", "http://dantepropiedades.com.ar", "http://www.dantepropiedades.com.ar", "https://dantepropiedades.com.ar", "https://www.dantepropiedades.com.ar", "http://dantepropiedades.com", "https://danterealestate-github-io.onrender.com"]}})
@@ -41,42 +42,157 @@ def init_excel():
         safe_print(f"INFO: Archivo {EXCEL_FILE} encontrado")
 
 def serve_static_file(filename):
-    """Sirve archivos estáticos desde la raíz del repositorio"""
+    """Sirve archivos estáticos desde la raíz del repositorio - VERSIÓN MEJORADA"""
     try:
         # Buscar el archivo en la raíz del repositorio
         file_path = os.path.join(os.getcwd(), filename)
         
-        safe_print(f"Buscando archivo: {file_path}")
+        safe_print(f"🔍 Buscando archivo: {file_path}")
         
         if os.path.exists(file_path):
             try:
+                # Obtener el tipo MIME correcto
+                mime_type, _ = mimetypes.guess_type(filename)
+                if not mime_type:
+                    if filename.endswith('.css'):
+                        mime_type = 'text/css'
+                    elif filename.endswith('.js'):
+                        mime_type = 'application/javascript'
+                    elif filename.endswith('.json'):
+                        mime_type = 'application/json'
+                    elif filename.endswith('.html'):
+                        mime_type = 'text/html'
+                    else:
+                        mime_type = 'text/plain'
+                
+                safe_print(f"📂 Archivo encontrado: {file_path}")
+                safe_print(f"🎯 Tipo MIME detectado: {mime_type}")
+                
+                # Leer el archivo
                 with open(file_path, 'r', encoding='utf-8') as f:
                     content = f.read()
-                    if filename.endswith('.css'):
-                        safe_print(f"Sirviendo {filename} como CSS")
-                        return content, 200, {'Content-Type': 'text/css'}
-                    elif filename.endswith('.js'):
-                        safe_print(f"Sirveindo {filename} como JavaScript")
-                        return content, 200, {'Content-Type': 'application/javascript'}
-                    elif filename.endswith('.json'):
-                        safe_print(f"Sirviendo {filename} como JSON")
-                        return content, 200, {'Content-Type': 'application/json'}
-                    elif filename.endswith('.html'):
-                        safe_print(f"Sirviendo {filename} como HTML")
-                        return content, 200, {'Content-Type': 'text/html'}
-                    else:
-                        safe_print(f"Sirviendo {filename} como texto")
-                        return content
+                    
+                # Log del tamaño del contenido
+                content_size = len(content)
+                safe_print(f"📏 Tamaño del contenido: {content_size} bytes")
+                
+                if filename.endswith('.css'):
+                    safe_print(f"✅ Sirviendo {filename} como CSS")
+                    return content, 200, {'Content-Type': 'text/css', 'Cache-Control': 'public, max-age=3600'}
+                elif filename.endswith('.js'):
+                    safe_print(f"✅ Sirviendo {filename} como JavaScript")
+                    return content, 200, {'Content-Type': 'application/javascript', 'Cache-Control': 'public, max-age=3600'}
+                elif filename.endswith('.json'):
+                    safe_print(f"✅ Sirviendo {filename} como JSON")
+                    return content, 200, {'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=3600'}
+                elif filename.endswith('.html'):
+                    safe_print(f"✅ Sirviendo {filename} como HTML")
+                    return content, 200, {'Content-Type': 'text/html', 'Cache-Control': 'public, max-age=3600'}
+                else:
+                    safe_print(f"✅ Sirviendo {filename} como texto ({mime_type})")
+                    return content, 200, {'Content-Type': mime_type}
+                    
             except Exception as e:
-                safe_print(f"Error leyendo {filename}: {str(e)}")
+                safe_print(f"❌ Error leyendo {filename}: {str(e)}")
                 return jsonify({"error": f"Error leyendo archivo: {str(e)}"}), 500
         else:
-            safe_print(f"Archivo NO encontrado: {file_path}")
-            return jsonify({"error": f"Archivo {filename} no encontrado"}), 404
+            safe_print(f"❌ Archivo NO encontrado: {file_path}")
+            
+            # Intentar también desde el directorio de aplicación
+            app_path = os.path.join(os.getcwd(), 'app', filename)
+            if os.path.exists(app_path):
+                safe_print(f"✅ Archivo encontrado en app/: {app_path}")
+                return send_file(app_path, mimetype=mimetypes.guess_type(filename)[0])
+            
+            return jsonify({"error": f"Archivo {filename} no encontrado en {os.getcwd()}"}), 404
             
     except Exception as e:
-        safe_print(f"Error sirviendo {filename}: {str(e)}")
+        safe_print(f"❌ Error sirviendo {filename}: {str(e)}")
         return jsonify({"error": f"Error sirviendo archivo: {str(e)}"}), 500
+
+@app.route('/test')
+def test_page():
+    """Página de prueba para diagnosticar CSS/JS"""
+    test_html = '''<!DOCTYPE html>
+<html>
+<head>
+    <title>Test CSS - Render</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        .test-box {
+            background: red;
+            color: white;
+            padding: 20px;
+            margin: 20px;
+            text-align: center;
+            font-size: 20px;
+        }
+        .status {
+            background: green;
+            color: white;
+            padding: 10px;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-box">
+        🔥 TEST PAGE - SI VES ESTE TEXTO EN ROJO, EL HTML BÁSICO FUNCIONA
+    </div>
+    
+    <div class="status">
+        ✅ <strong>Estado de archivos CSS:</strong><br>
+        <span id="css-status">Cargando...</span>
+    </div>
+    
+    <div class="status">
+        ✅ <strong>Estado de archivos JS:</strong><br>
+        <span id="js-status">Cargando...</span>
+    </div>
+    
+    <div style="background: blue; color: white; padding: 20px; margin: 20px;">
+        🔵 SI VES ESTE TEXTO EN AZUL, EL CSS SE ESTÁ APLICANDO<br>
+        <small>El CSS tiene 2676 líneas, debe tener un diseño completo</small>
+    </div>
+    
+    <script>
+        // Verificar si el CSS se cargó correctamente
+        setTimeout(function() {
+            const testColor = getComputedStyle(document.querySelector('.test-box')).backgroundColor;
+            const cssStatus = document.getElementById('css-status');
+            
+            if (testColor === 'rgb(255, 0, 0)' || testColor === 'red') {
+                cssStatus.innerHTML = '✅ <strong style="color: green;">CSS SÍ SE ESTÁ APLICANDO</strong> - El problema puede ser específico del HTML principal';
+            } else {
+                cssStatus.innerHTML = '❌ <strong style="color: red;">CSS NO SE ESTÁ APLICANDO</strong> - Hay un problema con la carga de estilos';
+            }
+        }, 1000);
+        
+        // Verificar JavaScript
+        const jsStatus = document.getElementById('js-status');
+        if (typeof app !== 'undefined') {
+            jsStatus.innerHTML = '✅ <strong style="color: green;">JavaScript disponible</strong>';
+        } else {
+            jsStatus.innerHTML = '❌ <strong style="color: red;">JavaScript no encontrado</strong>';
+        }
+    </script>
+</body>
+</html>'''
+    return test_html, 200, {'Content-Type': 'text/html'}
+
+@app.route('/debug')
+def debug_info():
+    """Información de debug sobre archivos disponibles"""
+    debug_info = {
+        "current_directory": os.getcwd(),
+        "files_in_directory": os.listdir('.'),
+        "app_css_exists": os.path.exists('app.css'),
+        "app_js_exists": os.path.exists('app.js'),
+        "index_html_exists": os.path.exists('index.html'),
+        "propiedades_json_exists": os.path.exists('propiedades.json'),
+        "main_py_exists": os.path.exists('main.py')
+    }
+    return jsonify(debug_info)
 
 @app.route('/<path:filename>')
 def serve_static(filename):
