@@ -297,3 +297,22 @@ if __name__ == '__main__':
     # Start Flask app
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
+    @app.route('/<path:filename>')
+    @app.route('/<path:filename>')
+    def serve_static(filename):
+        """Serve static files"""
+        # Intentar servir desde la raíz primero
+        if os.path.exists(filename):
+            try:
+                with open(filename, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    if filename.endswith('.css'):
+                        return content, 200, {'Content-Type': 'text/css'}
+                    elif filename.endswith('.js'):
+                        return content, 200, {'Content-Type': 'application/javascript'}
+                    return content
+            except:
+                pass
+        
+        # Si no está en la raíz, buscar en static
+        return app.send_static_file(filename)   
