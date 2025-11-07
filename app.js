@@ -317,14 +317,14 @@ function createPropertyCard(property) {
     `;
     
     // Imagen principal
-    const mainImage = property.fotos && property.fotos.length > 0 ? property.fotos[0] : 'INSTITUCIONALES/INSTITUCIONAL 1.jpg';
+    const mainImage = property.fotos && property.fotos.length > 0 ? property.fotos[0] : 'INSTITUCIONAL 1.jpg';
     
     card.innerHTML = `
         <div style="position: relative;">
             <img src="${mainImage}" 
                  alt="${property.titulo}" 
                  style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
-                 onerror="this.src='INSTITUCIONALES/INSTITUCIONAL 2.jpg'"
+                 onerror="this.src='INSTITUCIONAL 3.png'">
             <div style="position: absolute; top: 10px; left: 10px;">
                 <span style="background: #232deb !important; color: white !important; padding: 4px 8px !important; border-radius: 4px !important; font-size: 12px !important; font-weight: 600 !important;">
                     ${property.operacion}
