@@ -1,517 +1,1010 @@
-// Configuración global
-const API_URL = '/api/properties/search';
-const FILTER_OPTIONS_URL = '/api/properties/filter-options';
-const CONTACT_URL = '/guardar_contacto';
-
-// Estado de la aplicación
-let currentProperties = [];
-let currentView = 'grid';
-let currentFilters = {};
-
-// Inicialización cuando se carga el DOM
+// Script avanzado con sistema completo de gestión de propiedades
 document.addEventListener('DOMContentLoaded', function() {
-    initializeApp();
+    console.log('=== INICIANDO SISTEMA AVANZADO DANTE PROPIEDADES ===');
+    
+    // Inicializar funciones en orden de importancia
+    initMenu();
+    initSlider();
+    initAdvancedSearch(); // Sistema de búsqueda avanzado
+    initWhatsApp();
+    
+    // Cargar opciones de filtros al inicio
+    loadFilterOptions();
+    
+    // Mostrar todas las propiedades por defecto
+    showAllProperties();
 });
 
-function initializeApp() {
-    setupEventListeners();
-    loadFilterOptions();
-    initSearch();
-}
-
-function setupEventListeners() {
-    // Formulario de búsqueda
-    const searchForm = document.getElementById('property-search-form');
-    if (searchForm) {
-        searchForm.addEventListener('submit', handleSearch);
-    }
+function initMenu() {
+    const menuBtn = document.querySelector('.menudesp');
+    const closeBtn = document.querySelector('.cerrarmenu');
+    const menuSlide = document.getElementById('menuslide');
     
-    // Botón limpiar filtros
-    const clearFiltersBtn = document.getElementById('clear-filters');
-    if (clearFiltersBtn) {
-        clearFiltersBtn.addEventListener('click', clearFilters);
-    }
-    
-    // Filtros rápidos
-    const filterTags = document.querySelectorAll('.filter-tag');
-    filterTags.forEach(tag => {
-        tag.addEventListener('click', handleQuickFilter);
-    });
-    
-    // Controles de vista
-    const viewBtns = document.querySelectorAll('.view-btn');
-    viewBtns.forEach(btn => {
-        btn.addEventListener('click', handleViewChange);
-    });
-    
-    // Modal
-    const modal = document.getElementById('property-modal');
-    const modalClose = document.getElementById('modal-close');
-    const modalOverlay = document.querySelector('.modal-overlay');
-    
-    if (modalClose) {
-        modalClose.addEventListener('click', closeModal);
-    }
-    
-    if (modalOverlay) {
-        modalOverlay.addEventListener('click', closeModal);
-    }
-    
-    // Formulario de contacto
-    const contactForm = document.getElementById('contact-form');
-    if (contactForm) {
-        contactForm.addEventListener('submit', handleContactSubmit);
-    }
-    
-    // Navegación móvil
-    const navToggle = document.getElementById('nav-toggle');
-    const navMenu = document.getElementById('nav-menu');
-    
-    if (navToggle && navMenu) {
-        navToggle.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
+    if (menuBtn && closeBtn && menuSlide) {
+        menuBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            menuSlide.classList.add('menuabierto');
+            console.log('Menú abierto');
+        });
+        
+        closeBtn.addEventListener('click', () => {
+            menuSlide.classList.remove('menuabierto');
+            console.log('Menú cerrado');
+        });
+        
+        // Cerrar menú al hacer clic fuera en dispositivos táctiles
+        document.addEventListener('click', (e) => {
+            if (menuSlide.classList.contains('menuabierto') && 
+                !menuSlide.contains(e.target) && 
+                !menuBtn.contains(e.target)) {
+                menuSlide.classList.remove('menuabierto');
+            }
         });
     }
 }
 
-function initSearch() {
-    // Cargar todas las propiedades al inicializar
-    performAdvancedSearch({});
+function initSlider() {
+    if (typeof $ !== 'undefined' && $('.slini').length) {
+        console.log('Inicializando slider...');
+        
+        $('.slini').slick({
+            dots: false,
+            arrows: false,
+            infinite: true,
+            speed: 500,
+            fade: true,
+            autoplay: true,
+            autoplaySpeed: 4000,
+            cssEase: 'linear',
+            adaptiveHeight: false
+        });
+
+        // Navegación
+        const navButtons = document.querySelectorAll('.slider-nav button');
+        navButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const slideIndex = parseInt(this.dataset.slide);
+                $('.slini').slick('slickGoTo', slideIndex);
+            });
+        });
+
+        $('.slini').on('afterChange', function(event, slick, currentSlide) {
+            navButtons.forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.querySelector(`[data-slide="${currentSlide}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+        });
+        
+        console.log('Slider inicializado correctamente');
+    }
 }
 
+// ====================================
+// SISTEMA AVANZADO DE BÚSQUEDA DE PROPIEDADES
+// ====================================
+
+let currentViewMode = 'grid';
+let currentResults = [];
+let currentFilters = {};
+
+/**
+ * Inicializar el sistema de búsqueda avanzada
+ */
+function initAdvancedSearch() {
+    console.log('Inicializando búsqueda avanzada...');
+    
+    initSearchForm();
+    initQuickFilters();
+    initViewControls();
+    initModal();
+    initNoResultsActions();
+}
+
+/**
+ * Cargar opciones de filtros desde la API
+ */
 async function loadFilterOptions() {
     try {
-        const response = await fetch(FILTER_OPTIONS_URL);
+        const response = await fetch('https://danterealestate-github-io.onrender.com/api/properties/filter-options');
+        if (!response.ok) throw new Error('Error loading filter options');
+        
         const options = await response.json();
         
-        // Poblar opciones de filtros
-        populateFilterOptions(options);
+        // Poblar select de barrios
+        const barrioSelect = document.getElementById('barrio-select');
+        if (barrioSelect && options.barrios) {
+            barrioSelect.innerHTML = '<option value="">Todos los barrios</option>';
+            options.barrios.forEach(barrio => {
+                const option = document.createElement('option');
+                option.value = barrio;
+                option.textContent = barrio;
+                barrioSelect.appendChild(option);
+            });
+        }
+        
+        // Poblar select de tipos
+        const tipoSelect = document.getElementById('tipo-select');
+        if (tipoSelect && options.tipos) {
+            tipoSelect.innerHTML = '<option value="">Todos los tipos</option>';
+            options.tipos.forEach(tipo => {
+                const option = document.createElement('option');
+                option.value = tipo;
+                option.textContent = tipo.charAt(0).toUpperCase() + tipo.slice(1);
+                tipoSelect.appendChild(option);
+            });
+        }
+        
+        console.log('Opciones de filtros cargadas:', options);
     } catch (error) {
-        console.error('Error loading filter options:', error);
+        console.error('Error cargando opciones de filtros:', error);
     }
 }
 
-function populateFilterOptions(options) {
-    // Poblar selector de ambientes
-    const ambientesSelect = document.getElementById('ambientes');
-    if (ambientesSelect && options.ambiente_range) {
-        const { min, max } = options.ambiente_range;
-        for (let i = min; i <= max; i++) {
-            const option = document.createElement('option');
-            option.value = i;
-            option.textContent = i === 5 ? '5+ ambientes' : `${i} ambiente${i > 1 ? 's' : ''}`;
-            ambientesSelect.appendChild(option);
-        }
+/**
+ * Inicializar formulario de búsqueda
+ */
+function initSearchForm() {
+    const searchForm = document.getElementById('advanced-search-form');
+    const opeSpans = document.querySelectorAll('.buscadorcab .ope span');
+    const inputOpe = document.getElementById('ope-input');
+    
+    // Handle operation type selection
+    opeSpans.forEach(opcion => {
+        opcion.addEventListener('click', function() {
+            opeSpans.forEach(o => o.classList.remove('activo'));
+            this.classList.add('activo');
+            if (inputOpe) inputOpe.value = this.dataset.val;
+        });
+    });
+    
+    // Handle form submission
+    if (searchForm) {
+        searchForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            await performSearch();
+        });
+    }
+}
+
+/**
+ * Inicializar filtros rápidos
+ */
+function initQuickFilters() {
+    const filterTabs = document.querySelectorAll('.filter-tab');
+    
+    filterTabs.forEach(tab => {
+        tab.addEventListener('click', async function() {
+            // Remover clase active de todos
+            filterTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Aplicar filtro
+            const filterType = this.dataset.filter;
+            await applyQuickFilter(filterType);
+        });
+    });
+}
+
+/**
+ * Inicializar controles de vista
+ */
+function initViewControls() {
+    const gridBtn = document.getElementById('grid-view');
+    const listBtn = document.getElementById('list-view');
+    const mapBtn = document.getElementById('map-view');
+    
+    if (gridBtn) {
+        gridBtn.addEventListener('click', () => changeViewMode('grid'));
+    }
+    if (listBtn) {
+        listBtn.addEventListener('click', () => changeViewMode('list'));
+    }
+    if (mapBtn) {
+        mapBtn.addEventListener('click', () => changeViewMode('map'));
+    }
+}
+
+/**
+ * Inicializar modal de propiedades
+ */
+function initModal() {
+    const modal = document.getElementById('property-modal');
+    const closeBtn = modal?.querySelector('.modal-close');
+    const overlay = modal?.querySelector('.modal-overlay');
+    
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closePropertyModal);
+    }
+    if (overlay) {
+        overlay.addEventListener('click', closePropertyModal);
     }
     
-    // Aquí se pueden poblar otros selectores dinámicamente
+    // Cerrar con ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+            closePropertyModal();
+        }
+    });
 }
 
-async function performAdvancedSearch(filters = {}) {
+/**
+ * Inicializar acciones para casos sin resultados
+ */
+function initNoResultsActions() {
+    const clearFiltersBtn = document.getElementById('clear-filters');
+    const showAllBtn = document.getElementById('show-all-properties');
+    const retryBtn = document.getElementById('retry-search');
+    
+    if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener('click', clearAllFilters);
+    }
+    if (showAllBtn) {
+        showAllBtn.addEventListener('click', showAllProperties);
+    }
+    if (retryBtn) {
+        retryBtn.addEventListener('click', performSearch);
+    }
+}
+
+/**
+ * Realizar búsqueda de propiedades
+ */
+async function performSearch() {
     showLoadingState();
     
     try {
+        const searchForm = document.getElementById('advanced-search-form');
+        const formData = new FormData(searchForm);
+        
+        // Build query parameters
         const params = new URLSearchParams();
-        Object.entries(filters).forEach(([key, value]) => {
-            if (value) params.append(key, value);
-        });
-        
-        const response = await fetch(`${API_URL}?${params}`);
-        const data = await response.json();
-        
-        if (response.ok) {
-            currentProperties = data.properties;
-            currentFilters = filters;
-            displayResults(currentProperties);
-        } else {
-            showError('Error al buscar propiedades: ' + (data.error || 'Error desconocido'));
+        for (const [key, value] of formData.entries()) {
+            if (value.trim()) {
+                params.append(key, value);
+            }
         }
+        
+        // Add operation from active tab
+        const activeOpe = document.querySelector('.buscadorcab .ope span.activo');
+        if (activeOpe && activeOpe.dataset.val) {
+            params.set('ope', activeOpe.dataset.val);
+        }
+        
+        const queryString = params.toString();
+        const backendUrl = `https://danterealestate-github-io.onrender.com/api/properties/search?${queryString}`;
+        
+        console.log('Searching with URL:', backendUrl);
+        
+        const response = await fetch(backendUrl);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Search results:', data);
+        
+        // Handle both old and new API response formats
+        const properties = data.properties || data;
+        currentResults = properties;
+        currentFilters = Object.fromEntries(params);
+        
+        displayResults(properties);
+        updateResultsInfo(properties);
+        
     } catch (error) {
-        console.error('Error searching properties:', error);
-        showError('Error de conexión. Intenta nuevamente.');
+        console.error('Error fetching properties:', error);
+        showErrorState(error.message);
     }
 }
 
-function displayResults(properties) {
-    hideLoadingState();
+/**
+ * Mostrar todas las propiedades
+ */
+async function showAllProperties() {
+    showLoadingState();
     
-    const resultsSection = document.getElementById('search-results-section');
-    const resultsGrid = document.getElementById('search-results-grid');
-    const resultsCount = document.getElementById('results-count');
-    
-    if (!resultsSection || !resultsGrid) return;
-    
-    // Actualizar contador
-    if (resultsCount) {
-        resultsCount.textContent = properties.length;
+    try {
+        const response = await fetch('https://danterealestate-github-io.onrender.com/api/properties/search');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const properties = data.properties || data;
+        
+        currentResults = properties;
+        currentFilters = {};
+        
+        displayResults(properties);
+        updateResultsInfo(properties);
+        
+        // Reset form
+        resetSearchForm();
+        
+    } catch (error) {
+        console.error('Error loading all properties:', error);
+        showErrorState(error.message);
     }
+}
+
+/**
+ * Aplicar filtro rápido
+ */
+async function applyQuickFilter(filterType) {
+    showLoadingState();
     
-    // Mostrar sección de resultados
-    resultsSection.style.display = 'block';
+    try {
+        let params = new URLSearchParams();
+        
+        switch (filterType) {
+            case 'venta':
+                params.set('ope', 'V');
+                break;
+            case 'alquiler':
+                params.set('ope', 'A');
+                break;
+            case 'departamentos':
+                params.set('tipo', 'departamento');
+                break;
+            case 'casas':
+                params.set('tipo', 'casa');
+                break;
+            case 'todas':
+            default:
+                // No filters, just load all
+                break;
+        }
+        
+        const queryString = params.toString();
+        const backendUrl = `https://danterealestate-github-io.onrender.com/api/properties/search?${queryString}`;
+        
+        const response = await fetch(backendUrl);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const properties = data.properties || data;
+        
+        currentResults = properties;
+        currentFilters = Object.fromEntries(params);
+        
+        displayResults(properties);
+        updateResultsInfo(properties);
+        
+    } catch (error) {
+        console.error('Error applying quick filter:', error);
+        showErrorState(error.message);
+    }
+}
+
+function displayResultsInModal(properties) {
+    const modal = document.getElementById('results-modal');
+    const modalResultsGrid = document.getElementById('modal-results-grid');
+
+    if (!modal || !modalResultsGrid) {
+        console.error('Modal elements not found');
+        return;
+    }
+
+    modalResultsGrid.innerHTML = ''; // Clear previous results
+
+    console.log('Properties received:', properties);
+
+    if (properties.length === 0) {
+        modalResultsGrid.innerHTML = '<p>No se encontraron propiedades que coincidan con su búsqueda.</p>';
+    } else {
+        properties.forEach(prop => {
+            console.log('Processing property:', prop);
+            console.log('Full property object (JSON):', JSON.stringify(prop));
+            const imageUrl = 'llave.png'; // Default image as 'images' array is not in JSON
+            const titleText = prop.titulo || 'Propiedad sin título';
+            const priceText = prop.precio ? `USD ${prop.precio.toLocaleString('es-AR')}` : 'Consultar precio'; // Assuming USD as currency
+            const locationText = prop.barrio || '';
+            const typeOpText = `${prop.tipo || ''} en ${prop.operacion || ''}`;
+            const codeText = prop.id_temporal ? `Código: ${prop.id_temporal}` : '';
+
+            const propertyElement = document.createElement('div');
+            propertyElement.className = 'propiedad-item';
+            propertyElement.innerHTML = `
+                <a href="details.html?id=${prop.id_temporal}" target="_blank">
+                    <img src="${imageUrl}" alt="${titleText}" loading="lazy" style="width:100%">
+                </a>
+                <div class="image-description">
+                    <h3>${titleText}</h3>
+                    <p>${locationText}</p>
+                    <p>${typeOpText}</p>
+                    <p>${priceText}</p>
+                    <p>${codeText}</p>
+                </div>
+            `;
+            console.log('Generated HTML for property:', propertyElement.innerHTML);
+            modalResultsGrid.appendChild(propertyElement);
+        });
+    }
+
+    modal.classList.add('active');
+}
+
+
+function initWhatsApp() {
+    const whatsappLink = document.getElementById('whatsappLink');
+    if (whatsappLink) {
+        whatsappLink.href = 'https://wa.me/5491125368595';
+    }
+}
+
+// Header sticky con mejoras para móviles
+window.addEventListener('scroll', function() {
+    const header = document.getElementById('cab');
+    if (header) {
+        // En móviles, activar el sticky más pronto para evitar problemas
+        const isMobile = window.innerWidth <= 768;
+        const threshold = isMobile ? 30 : 100;
+        header.classList.toggle('cabfix', window.scrollY > threshold);
+    }
+});
+
+// Mejorar la responsividad del buscador específicamente para móviles
+function adjustSearchForMobile() {
+    const buscador = document.querySelector('.buscadorcab');
+    if (buscador) {
+        const isMobile = window.innerWidth <= 768;
+        
+        if (isMobile) {
+            // En móviles, asegurar layout vertical y evitar superposiciones
+            buscador.style.position = 'fixed';
+            buscador.style.top = '60px';
+            buscador.style.zIndex = '1000';
+            buscador.style.background = 'rgba(255,255,255,0.98)';
+            buscador.style.width = '100%';
+            buscador.style.left = '0';
+        }
+    }
+}
+
+// Ocultar/mostrar elementos según el dispositivo
+function optimizeForMobile() {
+    const isMobile = window.innerWidth <= 768;
+    const constructionBanner = document.querySelector('.construction-banner');
+    const codField = document.querySelector('.cod');
+    const menuCab = document.querySelector('.menucab');
+    const menuDesp = document.querySelector('.menudesp');
+    
+    if (isMobile) {
+        // Ocultar banner de construcción en móviles
+        if (constructionBanner) {
+            constructionBanner.style.display = 'none';
+        }
+        
+        // Ocultar campo código para dar más espacio al buscador
+        if (codField) {
+            codField.style.display = 'none';
+        }
+        
+        // Mostrar menú hamburguesa
+        if (menuCab && menuDesp) {
+            menuCab.style.display = 'none';
+            menuDesp.style.display = 'block';
+        }
+    }
+}
+
+// Ajustar cuando se cambia el tamaño de la ventana
+window.addEventListener('resize', function() {
+    adjustSearchForMobile();
+    optimizeForMobile();
+});
+
+// Ajustar cuando se carga la página
+document.addEventListener('DOMContentLoaded', function() {
+    adjustSearchForMobile();
+    optimizeForMobile();
+});
+
+// Mejorar la experiencia táctil en móviles
+function improveTouchExperience() {
+    const isMobile = window.innerWidth <= 768;
+    
+    if (isMobile) {
+        // Mejorar la responsividad de los botones de operación
+        const opeButtons = document.querySelectorAll('.ope span');
+        opeButtons.forEach(button => {
+            button.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.95)';
+            });
+            
+            button.addEventListener('touchend', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+        
+        // Mejorar la experiencia del menú móvil
+        const menuBtn = document.querySelector('.menudesp');
+        const menuSlide = document.getElementById('menuslide');
+        
+        if (menuBtn && menuSlide) {
+            menuBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                menuSlide.classList.toggle('menuabierto');
+            });
+        }
+    }
+}
+
+// ====================================
+// FUNCIONES DE VISUALIZACIÓN Y ESTADOS
+// ====================================
+
+/**
+ * Cambiar modo de vista
+ */
+function changeViewMode(mode) {
+    currentViewMode = mode;
+    
+    // Update button states
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.getElementById(`${mode}-view`)?.classList.add('active');
+    
+    // Re-render current results
+    if (currentResults.length > 0) {
+        displayResults(currentResults);
+    }
+}
+
+/**
+ * Mostrar estado de carga
+ */
+function showLoadingState() {
+    hideAllStates();
+    document.getElementById('loading-indicator')?.classList.remove('hidden');
+    document.getElementById('results-controls')?.classList.add('hidden');
+}
+
+/**
+ * Mostrar estado de error
+ */
+function showErrorState(message) {
+    hideAllStates();
+    document.getElementById('error-state')?.classList.remove('hidden');
+    document.getElementById('results-controls')?.classList.add('hidden');
+    
+    console.error('Error state shown:', message);
+}
+
+/**
+ * Mostrar estado de no resultados
+ */
+function showNoResultsState() {
+    hideAllStates();
+    document.getElementById('no-results')?.classList.remove('hidden');
+    document.getElementById('results-controls')?.classList.add('hidden');
+}
+
+/**
+ * Ocultar todos los estados
+ */
+function hideAllStates() {
+    document.getElementById('loading-indicator')?.classList.add('hidden');
+    document.getElementById('error-state')?.classList.add('hidden');
+    document.getElementById('no-results')?.classList.add('hidden');
+    document.getElementById('results-controls')?.classList.remove('hidden');
+}
+
+/**
+ * Mostrar resultados de propiedades
+ */
+function displayResults(properties) {
+    const resultsGrid = document.getElementById('search-results-grid');
+    if (!resultsGrid) return;
     
     if (properties.length === 0) {
-        showEmptyState();
+        showNoResultsState();
         return;
     }
     
-    // Limpiar resultados anteriores
+    hideAllStates();
+    
+    // Clear previous results
     resultsGrid.innerHTML = '';
     
-    // Crear tarjetas de propiedades
+    // Apply current view mode
+    if (currentViewMode === 'grid') {
+        displayGridView(resultsGrid, properties);
+    } else if (currentViewMode === 'list') {
+        displayListView(resultsGrid, properties);
+    } else if (currentViewMode === 'map') {
+        displayMapView(resultsGrid, properties);
+    }
+}
+
+/**
+ * Mostrar vista de cuadrícula
+ */
+function displayGridView(container, properties) {
     properties.forEach(property => {
-        const propertyCard = createPropertyCard(property);
-        resultsGrid.appendChild(propertyCard);
+        const card = createPropertyCard(property);
+        container.appendChild(card);
     });
 }
 
+/**
+ * Mostrar vista de lista
+ */
+function displayListView(container, properties) {
+    properties.forEach(property => {
+        const listItem = createPropertyListItem(property);
+        container.appendChild(listItem);
+    });
+}
+
+/**
+ * Mostrar vista de mapa (placeholder)
+ */
+function displayMapView(container, properties) {
+    container.innerHTML = `
+        <div class="map-placeholder">
+            <i class="fas fa-map" style="font-size: 3rem; color: #d1d5db; margin-bottom: 1rem;"></i>
+            <h3>Vista de mapa</h3>
+            <p>La vista de mapa estará disponible próximamente</p>
+        </div>
+    `;
+}
+
+/**
+ * Crear tarjeta de propiedad
+ */
 function createPropertyCard(property) {
     const card = document.createElement('div');
     card.className = 'property-card';
     card.onclick = () => openPropertyModal(property);
     
-    const precio = formatPrice(property.precio);
-    const operacion = property.operacion ? property.operacion.toUpperCase() : '';
+    const formatPrice = (price) => {
+        if (!price) return 'Consultar';
+        return new Intl.NumberFormat('es-AR', {
+            style: 'currency',
+            currency: 'ARS',
+            minimumFractionDigits: 0
+        }).format(price);
+    };
+    
+    const formatAmenities = (amenities) => {
+        if (!amenities) return [];
+        return amenities.split(',').map(a => a.trim()).slice(0, 3);
+    };
     
     card.innerHTML = `
-        <div class="property-image">
-            ${property.info_multimedia ? `
-                <img src="${getPropertyImage(property.info_multimedia)}" alt="${property.titulo}" loading="lazy">
-            ` : `
-                <div class="placeholder-image">
-                    <i class="fas fa-home"></i>
-                </div>
-            `}
-            <div class="property-badge">${operacion}</div>
+        <div class="property-card-image">
+            <div class="property-card-badge">${property.operacion || 'Venta'}</div>
+            <img src="https://via.placeholder.com/300x200/f3f4f6/6b7280?text=Sin+Imagen" 
+                 alt="${property.titulo || 'Propiedad'}" 
+                 onerror="this.src='https://via.placeholder.com/300x200/f3f4f6/6b7280?text=Sin+Imagen'">
         </div>
-        <div class="property-content">
-            <h3 class="property-title">${property.titulo}</h3>
-            <div class="property-price">${precio}</div>
-            <div class="property-details">
-                <div class="property-detail">
-                    <i class="fas fa-door-open"></i>
-                    <span>${property.ambientes || 'N/A'} amb.</span>
+        <div class="property-card-content">
+            <h3 class="property-card-title">${property.titulo || 'Propiedad'}</h3>
+            <div class="property-card-price">${formatPrice(property.precio)}</div>
+            <div class="property-card-details">
+                <div class="property-card-detail">
+                    <i class="fas fa-home"></i>
+                    <span>${property.ambientes || 0} amb.</span>
                 </div>
-                <div class="property-detail">
+                <div class="property-card-detail">
                     <i class="fas fa-ruler-combined"></i>
-                    <span>${property.metros || 'N/A'} m²</span>
+                    <span>${property.metros || 0} m²</span>
+                </div>
+                <div class="property-card-detail">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>${property.barrio || 'Ubicación'}</span>
+                </div>
+                <div class="property-card-detail">
+                    <i class="fas fa-building"></i>
+                    <span>${property.tipo || 'Propiedad'}</span>
                 </div>
             </div>
-            <div class="property-location">
-                <i class="fas fa-map-marker-alt"></i>
-                <span>${property.barrio}</span>
+            <div class="property-card-amenities">
+                ${formatAmenities(property.amenities).map(amenity => 
+                    `<span class="property-amenity">${amenity}</span>`
+                ).join('')}
             </div>
-            <p class="property-description">${truncateText(property.descripcion, 100)}</p>
+            <div class="property-card-actions">
+                <button class="property-card-btn">Ver detalles</button>
+                <button class="property-card-btn primary">Contactar</button>
+            </div>
         </div>
     `;
     
     return card;
 }
 
+/**
+ * Crear elemento de lista de propiedad
+ */
+function createPropertyListItem(property) {
+    const item = document.createElement('div');
+    item.className = 'property-list-item';
+    item.onclick = () => openPropertyModal(property);
+    
+    const formatPrice = (price) => {
+        if (!price) return 'Consultar';
+        return new Intl.NumberFormat('es-AR', {
+            style: 'currency',
+            currency: 'ARS',
+            minimumFractionDigits: 0
+        }).format(price);
+    };
+    
+    const formatAmenities = (amenities) => {
+        if (!amenities) return [];
+        return amenities.split(',').map(a => a.trim()).slice(0, 4);
+    };
+    
+    item.innerHTML = `
+        <div class="property-list-image">
+            <img src="https://via.placeholder.com/200x150/f3f4f6/6b7280?text=Sin+Imagen" 
+                 alt="${property.titulo || 'Propiedad'}"
+                 onerror="this.src='https://via.placeholder.com/200x150/f3f4f6/6b7280?text=Sin+Imagen'">
+        </div>
+        <div class="property-list-content">
+            <div class="property-list-header">
+                <h3 class="property-list-title">${property.titulo || 'Propiedad'}</h3>
+                <div class="property-list-price">${formatPrice(property.precio)}</div>
+            </div>
+            <div class="property-list-details">
+                <div class="property-card-detail">
+                    <i class="fas fa-home"></i>
+                    <span>${property.ambientes || 0} ambientes</span>
+                </div>
+                <div class="property-card-detail">
+                    <i class="fas fa-ruler-combined"></i>
+                    <span>${property.metros || 0} m²</span>
+                </div>
+                <div class="property-card-detail">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>${property.barrio || 'Ubicación'}</span>
+                </div>
+                <div class="property-card-detail">
+                    <i class="fas fa-building"></i>
+                    <span>${property.tipo || 'Propiedad'}</span>
+                </div>
+            </div>
+            <div class="property-list-amenities">
+                ${formatAmenities(property.amenities).map(amenity => 
+                    `<span class="property-amenity">${amenity}</span>`
+                ).join('')}
+            </div>
+        </div>
+    `;
+    
+    return item;
+}
+
+/**
+ * Abrir modal de propiedad
+ */
 function openPropertyModal(property) {
     const modal = document.getElementById('property-modal');
     const title = document.getElementById('modal-property-title');
-    const price = document.getElementById('modal-price');
-    const details = document.getElementById('modal-details');
-    const description = document.getElementById('modal-description');
-    const features = document.getElementById('modal-features');
-    const gallery = document.getElementById('modal-gallery');
+    const body = modal?.querySelector('.modal-body');
     
-    if (!modal) return;
+    if (!modal || !title || !body) return;
     
-    // Llenar información básica
-    if (title) title.textContent = property.titulo;
-    if (price) price.textContent = formatPrice(property.precio);
-    if (description) description.textContent = property.descripcion;
+    // Set title
+    title.textContent = property.titulo || 'Propiedad';
     
-    // Llenar detalles
-    if (details) {
-        details.innerHTML = `
-            <div class="modal-detail">
-                <div class="modal-detail-label">Ambientes</div>
-                <div class="modal-detail-value">${property.ambientes || 'N/A'}</div>
-            </div>
-            <div class="modal-detail">
-                <div class="modal-detail-label">Metros</div>
-                <div class="modal-detail-value">${property.metros || 'N/A'} m²</div>
-            </div>
-            <div class="modal-detail">
-                <div class="modal-detail-label">Tipo</div>
-                <div class="modal-detail-value">${property.tipo || 'N/A'}</div>
-            </div>
-            <div class="modal-detail">
-                <div class="modal-detail-label">Barrio</div>
-                <div class="modal-detail-value">${property.barrio || 'N/A'}</div>
-            </div>
-            <div class="modal-detail">
-                <div class="modal-detail-label">Operación</div>
-                <div class="modal-detail-value">${property.operacion || 'N/A'}</div>
-            </div>
-            <div class="modal-detail">
-                <div class="modal-detail-label">Dirección</div>
-                <div class="modal-detail-value">${property.direccion || 'N/A'}</div>
-            </div>
-        `;
-    }
+    // Populate content
+    body.innerHTML = createPropertyDetailContent(property);
     
-    // Llenar características
-    if (features) {
-        const featuresList = [];
-        if (property.amenities) featuresList.push({icon: 'fas fa-star', text: property.amenities});
-        if (property.cochera) featuresList.push({icon: 'fas fa-car', text: 'Cochera'});
-        if (property.balcon) featuresList.push({icon: 'fas fa-building', text: 'Balcón'});
-        if (property.pileta) featuresList.push({icon: 'fas fa-swimming-pool', text: 'Pileta'});
-        if (property.acepta_mascotas) featuresList.push({icon: 'fas fa-paw', text: 'Acepta mascotas'});
-        if (property.aire_acondicionado) featuresList.push({icon: 'fas fa-snowflake', text: 'Aire acondicionado'});
-        if (property.expensas) featuresList.push({icon: 'fas fa-receipt', text: `Expensas: ${property.expensas}`});
-        if (property.orientacion) featuresList.push({icon: 'fas fa-compass', text: `Orientación: ${property.orientacion}`});
-        
-        features.innerHTML = featuresList.map(feature => `
-            <div class="feature-item">
-                <i class="${feature.icon}"></i>
-                <span>${feature.text}</span>
-            </div>
-        `).join('');
-    }
-    
-    // Llenar galería
-    if (gallery && property.info_multimedia) {
-        const images = extractImagesFromMultimedia(property.info_multimedia);
-        if (images.length > 0) {
-            gallery.innerHTML = `<img src="${images[0]}" alt="${property.titulo}">`;
-        } else {
-            gallery.innerHTML = '<div class="placeholder-image"><i class="fas fa-home"></i></div>';
-        }
-    }
-    
-    // Configurar botón de contacto
-    const contactBtn = document.getElementById('contact-property');
-    if (contactBtn) {
-        contactBtn.onclick = () => {
-            closeModal();
-            // Pre-llenar formulario de contacto
-            const propiedadField = document.getElementById('contact-propiedad');
-            if (propiedadField) {
-                propiedadField.value = `${property.titulo} (${property.id_temporal})`;
-            }
-            // Scroll al formulario
-            document.getElementById('contacto').scrollIntoView({behavior: 'smooth'});
-        };
-    }
-    
-    // Mostrar modal
-    modal.style.display = 'flex';
+    // Show modal
+    modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 }
 
-function closeModal() {
+/**
+ * Cerrar modal de propiedad
+ */
+function closePropertyModal() {
     const modal = document.getElementById('property-modal');
     if (modal) {
-        modal.style.display = 'none';
+        modal.classList.add('hidden');
         document.body.style.overflow = 'auto';
     }
 }
 
-function handleSearch(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(e.target);
-    const filters = {};
-    
-    for (let [key, value] of formData.entries()) {
-        if (value.trim()) {
-            filters[key] = value.trim();
-        }
-    }
-    
-    performAdvancedSearch(filters);
-}
-
-function handleQuickFilter(e) {
-    const filterType = e.target.dataset.filter;
-    const filterValue = e.target.dataset.value;
-    
-    // Actualizar estado activo
-    document.querySelectorAll(`.filter-tag[data-filter="${filterType}"]`).forEach(tag => {
-        tag.classList.remove('active');
-    });
-    e.target.classList.add('active');
-    
-    // Aplicar filtro
-    if (filterType === 'operacion') {
-        const operacionField = document.getElementById('operacion');
-        if (operacionField) {
-            operacionField.value = filterValue;
-        }
-        performAdvancedSearch({operacion: filterValue});
-    }
-}
-
-function handleViewChange(e) {
-    const view = e.target.dataset.view;
-    currentView = view;
-    
-    // Actualizar botones activos
-    document.querySelectorAll('.view-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    e.target.classList.add('active');
-    
-    // Cambiar vista
-    const resultsGrid = document.getElementById('search-results-grid');
-    if (resultsGrid) {
-        if (view === 'list') {
-            resultsGrid.classList.add('list-view');
-        } else {
-            resultsGrid.classList.remove('list-view');
-        }
-    }
-}
-
-function clearFilters() {
-    // Limpiar formulario
-    const searchForm = document.getElementById('property-search-form');
-    if (searchForm) {
-        searchForm.reset();
-    }
-    
-    // Limpiar filtros rápidos
-    document.querySelectorAll('.filter-tag').forEach(tag => {
-        tag.classList.remove('active');
-    });
-    document.querySelector('.filter-tag[data-value=""]').classList.add('active');
-    
-    // Realizar nueva búsqueda
-    performAdvancedSearch({});
-}
-
-async function handleContactSubmit(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(e.target);
-    const data = {
-        nombre: formData.get('nombre'),
-        telefono: formData.get('telefono'),
-        firma: formData.get('firma'),
-        propiedad: formData.get('propiedad')
+/**
+ * Crear contenido detallado de propiedad
+ */
+function createPropertyDetailContent(property) {
+    const formatPrice = (price) => {
+        if (!price) return 'Consultar precio';
+        return new Intl.NumberFormat('es-AR', {
+            style: 'currency',
+            currency: 'ARS',
+            minimumFractionDigits: 0
+        }).format(price);
     };
     
-    if (!data.nombre && !data.telefono) {
-        alert('Por favor, completa al menos tu nombre o teléfono.');
-        return;
+    const formatBoolean = (value) => {
+        if (value === 'Sí' || value === 'si' || value === true) return 'Sí';
+        if (value === 'No' || value === 'no' || value === false) return 'No';
+        return value || 'No especificado';
+    };
+    
+    return `
+        <div class="property-detail">
+            <div class="property-detail-gallery">
+                <div class="property-detail-images">
+                    <img src="https://via.placeholder.com/200x150/f3f4f6/6b7280?text=Imagen+1" 
+                         alt="Imagen 1" class="property-detail-image">
+                    <img src="https://via.placeholder.com/200x150/f3f4f6/6b7280?text=Imagen+2" 
+                         alt="Imagen 2" class="property-detail-image">
+                    <img src="https://via.placeholder.com/200x150/f3f4f6/6b7280?text=Imagen+3" 
+                         alt="Imagen 3" class="property-detail-image">
+                </div>
+                ${property.info_multimedia ? `
+                    <div class="multimedia-info">
+                        <h4>Multimedia</h4>
+                        <p>${property.info_multimedia}</p>
+                    </div>
+                ` : ''}
+            </div>
+            
+            <div class="property-detail-info">
+                <div class="property-detail-header">
+                    <h1 class="property-detail-title">${property.titulo || 'Propiedad'}</h1>
+                    <div class="property-detail-price">${formatPrice(property.precio)}</div>
+                </div>
+                
+                <div class="property-detail-specs">
+                    <div class="property-spec-item">
+                        <i class="fas fa-home"></i>
+                        <span>${property.ambientes || 0} ambientes</span>
+                    </div>
+                    <div class="property-spec-item">
+                        <i class="fas fa-ruler-combined"></i>
+                        <span>${property.metros || 0} m²</span>
+                    </div>
+                    <div class="property-spec-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>${property.barrio || 'Ubicación'}</span>
+                    </div>
+                    <div class="property-spec-item">
+                        <i class="fas fa-building"></i>
+                        <span>${property.tipo || 'Propiedad'}</span>
+                    </div>
+                    <div class="property-spec-item">
+                        <i class="fas fa-calendar"></i>
+                        <span>${property.antiguedad || 'N/A'} años</span>
+                    </div>
+                    <div class="property-spec-item">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>${property.estado || 'Estado'}</span>
+                    </div>
+                    <div class="property-spec-item">
+                        <i class="fas fa-compass"></i>
+                        <span>${property.orientacion || 'N/A'}</span>
+                    </div>
+                    <div class="property-spec-item">
+                        <i class="fas fa-stairs"></i>
+                        <span>Piso ${property.piso || 'N/A'}</span>
+                    </div>
+                    <div class="property-spec-item">
+                        <i class="fas fa-dollar-sign"></i>
+                        <span>Expensas: ${formatPrice(property.expensas)}</span>
+                    </div>
+                    <div class="property-spec-item">
+                        <i class="fas fa-map"></i>
+                        <span>${property.direccion || 'Dirección no disponible'}</span>
+                    </div>
+                </div>
+                
+                <div class="property-detail-description">
+                    <h4>Descripción</h4>
+                    <p>${property.descripcion || 'Descripción no disponible.'}</p>
+                </div>
+                
+                <div class="property-detail-amenities-grid">
+                    <div class="property-amenity-item">
+                        <i class="fas fa-parking"></i>
+                        <span>Cochera: ${formatBoolean(property.cochera)}</span>
+                    </div>
+                    <div class="property-amenity-item">
+                        <i class="fas fa-balcony"></i>
+                        <span>Balcón: ${formatBoolean(property.balcon)}</span>
+                    </div>
+                    <div class="property-amenity-item">
+                        <i class="fas fa-swimming-pool"></i>
+                        <span>Pileta: ${formatBoolean(property.pileta)}</span>
+                    </div>
+                    <div class="property-amenity-item">
+                        <i class="fas fa-dog"></i>
+                        <span>Acepta mascotas: ${formatBoolean(property.acepta_mascotas)}</span>
+                    </div>
+                    <div class="property-amenity-item">
+                        <i class="fas fa-snowflake"></i>
+                        <span>Aire acondicionado: ${formatBoolean(property.aire_acondicionado)}</span>
+                    </div>
+                </div>
+                
+                <div class="property-detail-actions">
+                    <button class="property-detail-action primary" onclick="window.open('tel:1166562078')">
+                        <i class="fas fa-phone"></i>
+                        Llamar
+                    </button>
+                    <button class="property-detail-action secondary" onclick="window.open('https://wa.me/5491166562078?text=Interesado%20en%20${encodeURIComponent(property.titulo)}', '_blank')">
+                        <i class="fab fa-whatsapp"></i>
+                        WhatsApp
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Actualizar información de resultados
+ */
+function updateResultsInfo(properties) {
+    const countElement = document.getElementById('results-count');
+    const titleElement = document.getElementById('results-title');
+    
+    if (countElement) {
+        countElement.textContent = `${properties.length} ${properties.length === 1 ? 'propiedad encontrada' : 'propiedades encontradas'}`;
     }
     
-    try {
-        const response = await fetch(CONTACT_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        });
-        
-        const result = await response.json();
-        
-        if (response.ok) {
-            alert('¡Gracias por tu consulta! Te contactaremos pronto.');
-            e.target.reset();
-        } else {
-            alert('Error al enviar la consulta: ' + (result.error || 'Error desconocido'));
+    if (titleElement) {
+        let title = 'Resultados de búsqueda';
+        if (currentFilters.ope) {
+            const opMap = { 'V': 'venta', 'A': 'alquiler', 'T': 'alquiler temporal' };
+            title += ` - ${opMap[currentFilters.ope] || currentFilters.ope}`;
         }
-    } catch (error) {
-        console.error('Error submitting contact form:', error);
-        alert('Error de conexión. Intenta nuevamente.');
+        if (currentFilters.loc) {
+            title += ` - ${currentFilters.loc}`;
+        }
+        if (currentFilters.tipo) {
+            title += ` - ${currentFilters.tipo}`;
+        }
+        titleElement.textContent = title;
     }
 }
 
-function showLoadingState() {
-    const resultsGrid = document.getElementById('search-results-grid');
-    if (resultsGrid) {
-        resultsGrid.innerHTML = `
-            <div class="loading">
-                <div class="loading-spinner"></div>
-                <span>Buscando propiedades...</span>
-            </div>
-        `;
+/**
+ * Limpiar todos los filtros
+ */
+function clearAllFilters() {
+    resetSearchForm();
+    showAllProperties();
+}
+
+/**
+ * Resetear formulario de búsqueda
+ */
+function resetSearchForm() {
+    const form = document.getElementById('advanced-search-form');
+    if (form) {
+        form.reset();
+        
+        // Reset operation to Venta
+        const ventaOption = document.querySelector('.buscadorcab .ope span[data-val="V"]');
+        if (ventaOption) {
+            document.querySelectorAll('.buscadorcab .ope span').forEach(s => s.classList.remove('activo'));
+            ventaOption.classList.add('activo');
+            document.getElementById('ope-input').value = 'V';
+        }
+        
+        // Reset filter tabs
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelector('.filter-tab[data-filter="todas"]')?.classList.add('active');
     }
 }
 
-function hideLoadingState() {
-    // La función se ejecuta automáticamente al mostrar resultados
-}
+// Inicializar mejoras táctiles
+document.addEventListener('DOMContentLoaded', improveTouchExperience);
 
-function showEmptyState() {
-    const resultsGrid = document.getElementById('search-results-grid');
-    if (resultsGrid) {
-        resultsGrid.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-search"></i>
-                <h3>No se encontraron propiedades</h3>
-                <p>Intenta ajustar tus filtros de búsqueda</p>
-            </div>
-        `;
-    }
-}
-
-function showError(message) {
-    const resultsGrid = document.getElementById('search-results-grid');
-    if (resultsGrid) {
-        resultsGrid.innerHTML = `
-            <div class="error-message">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p>${message}</p>
-            </div>
-        `;
-    }
-}
-
-// Funciones de utilidad
-function formatPrice(precio) {
-    if (!precio || isNaN(precio)) return 'Consultar precio';
-    
-    const numPrice = parseFloat(precio);
-    if (numPrice >= 1000000) {
-        return `U$${(numPrice / 1000000).toFixed(1)}M`;
-    } else if (numPrice >= 1000) {
-        return `$${(numPrice / 1000).toFixed(0)}K`;
-    } else {
-        return `$${numPrice.toLocaleString()}`;
-    }
-}
-
-function truncateText(text, maxLength) {
-    if (!text) return '';
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
-}
-
-function getPropertyImage(multimediaInfo) {
-    // Extraer la primera imagen de la información multimedia
-    const images = extractImagesFromMultimedia(multimediaInfo);
-    return images.length > 0 ? images[0] : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzlDQTNBRiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlbjwvdGV4dD48L3N2Zz4=';
-}
-
-function extractImagesFromMultimedia(multimediaInfo) {
-    if (!multimediaInfo) return [];
-    
-    // Buscar URLs de imágenes en la información multimedia
-    const imageRegex = /https?:\/\/[^\s]+?\.(jpg|jpeg|png|webp|gif)/gi;
-    const matches = multimediaInfo.match(imageRegex);
-    return matches ? matches : [];
-}
-
-// Funcionalidad adicional
-function scrollToSection(sectionId) {
-    const section = document.getElementById(sectionId);
-    if (section) {
-        section.scrollIntoView({behavior: 'smooth'});
-    }
-}
-
-// Event listeners para navegación
-document.addEventListener('click', function(e) {
-    if (e.target.matches('a[href^="#"]')) {
-        e.preventDefault();
-        const targetId = e.target.getAttribute('href').substring(1);
-        scrollToSection(targetId);
-    }
+// Debug: Mostrar información de carga
+window.addEventListener('load', function() {
+    console.log('=== PÁGINA COMPLETAMENTE CARGADA ===');
+    console.log('Todas las imágenes deberían estar cargadas');
 });
