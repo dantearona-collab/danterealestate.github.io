@@ -360,11 +360,24 @@ function createPropertyCard(property) {
             </div>
             
             <div style="margin-bottom: 15px !important;">
-                ${property.amenities && property.amenities.length > 0 ? 
-                    `<div style="font-size: 12px !important; color: #6c757d !important;">
-                        <i class="fas fa-star"></i> ${property.amenities.slice(0, 3).join(' • ')}
-                    </div>` : ''
-                }
+                ${(() => {
+                    let amenities = property.amenities;
+                    let amenitiesText = '';
+                    
+                    if (typeof amenities === 'string' && amenities.trim().length > 0) {
+                        // Convertir string a array y tomar los primeros 3
+                        const amenitiesArray = amenities.split(',').map(item => item.trim());
+                        amenitiesText = amenitiesArray.slice(0, 3).join(' • ');
+                    } else if (Array.isArray(amenities) && amenities.length > 0) {
+                        // Ya es un array
+                        amenitiesText = amenities.slice(0, 3).join(' • ');
+                    }
+                    
+                    return amenitiesText ? 
+                        `<div style="font-size: 12px !important; color: #6c757d !important;">
+                            <i class="fas fa-star"></i> ${amenitiesText}
+                        </div>` : '';
+                })()}
             </div>
             
             <div style="margin-bottom: 15px !important;">
