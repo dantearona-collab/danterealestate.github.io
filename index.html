@@ -59,13 +59,13 @@
       z-index: 1000 !important;
   }
 
-  /* SECCIÓN DE BÚSQUEDA ULTRA FORZADA */
+  /* SECCIÓN DE BÚSQUEDA ULTRA FORZADA - PRIMERA SECCIÓN */
   #search-container-section {
       background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
-      margin: 20px auto !important;
+      margin: 0 !important;
       padding: 30px !important;
-      max-width: 1200px !important;
-      border-radius: 12px !important;
+      width: 100% !important;
+      border-radius: 0 !important;
       box-shadow: 0 8px 32px rgba(0,0,0,0.1) !important;
       animation: slideIn 0.6s ease-out !important;
       position: relative !important;
@@ -79,6 +79,8 @@
       padding: 25px !important;
       border-radius: 8px !important;
       box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
+      margin: 0 auto !important;
+      max-width: 1200px !important;
       margin-bottom: 30px !important;
       position: relative !important;
       display: block !important;
@@ -245,6 +247,9 @@
       font-size: 16px !important;
       font-weight: 500 !important;
       color: #6c757d !important;
+      max-width: 1200px !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
   }
 
   /* CONTENEDOR DE PROPIEDADES FORZADO */
@@ -257,6 +262,8 @@
       position: relative !important;
       display: block !important;
       border: 1px solid #e1e5e9 !important;
+      max-width: 1200px !important;
+      margin: 0 auto !important;
   }
 
   /* MENSAJE DE ESTADO INICIAL FORZADO */
@@ -271,6 +278,9 @@
       position: relative !important;
       display: block !important;
       font-size: 14px !important;
+      max-width: 1200px !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
   }
 
   /* ANIMACIONES FORZADAS */
@@ -293,7 +303,6 @@
   /* RESPONSIVE FORZADO */
   @media (max-width: 768px) {
       #search-container-section {
-          margin: 20px 10px !important;
           padding: 20px !important;
       }
       
@@ -311,7 +320,6 @@
 
   @media (max-width: 480px) {
       #search-container-section {
-          margin: 10px 5px !important;
           padding: 15px !important;
       }
       
@@ -320,10 +328,11 @@
       }
   }
 
-  /* ESTILOS ADICIONALES PARA EL SLIDER EXISTENTE */
+  /* ESTILOS PARA EL SLIDER (ABAJO) */
   #sliderini {
       position: relative !important;
       z-index: 0 !important;
+      width: 100% !important;
   }
   
   #sliderini .slider-container {
@@ -378,47 +387,11 @@
       </div>
   </header>
 
-  <!-- Slider principal -->
-  <section id="sliderini" class="slihome">
-      <!-- Slider de imágenes -->
-      <div class="slider-container">
-          <div class="slini">
-              <!-- Imagen 1 -->
-              <div class="slide active">
-                  <div class="image-wrapper">
-                      <img src="INSTITUCIONALES/INSTITUCIONAL 1.jpg" alt="Propiedad institucional 1" loading="eager" class="slider-img">
-                  </div>
-              </div>
-              
-              <!-- Imagen 3 -->
-              <div class="slide">
-                  <div class="image-wrapper">
-                      <img src="INSTITUCIONALES/INSTITUCIONAL 3.png" alt="Propiedad institucional 3" loading="lazy" class="slider-img">
-                  </div>
-              </div>
-              
-              <!-- Imagen 4 -->
-              <div class="slide">
-                  <div class="image-wrapper">
-                      <img src="INSTITUCIONALES/INSTITUCIONAL 4.png" alt="Propiedad institucional 4" loading="lazy" class="slider-img">
-                  </div>
-              </div>
-          </div>
-          
-          <!-- Navegación -->
-          <div class="slider-nav" id="sliderNav">
-              <button data-slide="0" class="active"></button>
-              <button data-slide="1"></button>
-              <button data-slide="2"></button>
-          </div>
-      </div>
-  </section>
-
-  <!-- SECCIÓN DE BÚSQUEDA ULTRA FORZADA -->
-  <section id="search-container-section" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important; margin: 20px auto !important; padding: 30px !important; max-width: 1200px !important; border-radius: 12px !important; box-shadow: 0 8px 32px rgba(0,0,0,0.1) !important; animation: slideIn 0.6s ease-out !important; position: relative !important; display: block !important; z-index: 1 !important;">
+  <!-- SECCIÓN DE BÚSQUEDA ULTRA FORZADA - PRIMERA SECCIÓN INMEDIATAMENTE DESPUÉS DEL HEADER -->
+  <section id="search-container-section" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important; margin: 0 !important; padding: 30px !important; width: 100% !important; border-radius: 0 !important; box-shadow: 0 8px 32px rgba(0,0,0,0.1) !important; animation: slideIn 0.6s ease-out !important; position: relative !important; display: block !important; z-index: 1 !important;">
       
       <!-- FORMULARIO DE BÚSQUEDA ULTRA FORZADO -->
-      <form id="search-form-styled" style="background: white !important; padding: 25px !important; border-radius: 8px !important; box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important; margin-bottom: 30px !important; position: relative !important; display: block !important; border: 1px solid #e1e5e9 !important;">
+      <form id="search-form-styled" style="background: white !important; padding: 25px !important; border-radius: 8px !important; box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important; margin: 0 auto !important; max-width: 1200px !important; margin-bottom: 30px !important; position: relative !important; display: block !important; border: 1px solid #e1e5e9 !important;">
           <h3 style="margin: 0 0 25px 0 !important; color: #2c3e50 !important; text-align: center !important; font-size: 24px !important; font-weight: 600 !important; position: relative !important; display: block !important;">🔍 Buscar Propiedades</h3>
           
           <div class="search-grid" style="display: grid !important; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important; gap: 20px !important; align-items: end !important; margin-bottom: 20px !important; position: relative !important;">
@@ -469,12 +442,12 @@
       </form>
       
       <!-- CONTADOR DE RESULTADOS ULTRA FORZADO -->
-      <div id="results-counter-styled" style="text-align: center !important; margin: 25px 0 !important; padding: 20px !important; background: white !important; border-radius: 8px !important; box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important; border-left: 4px solid #007bff !important; position: relative !important; display: block !important; font-size: 16px !important; font-weight: 500 !important; color: #6c757d !important;">
+      <div id="results-counter-styled" style="text-align: center !important; margin: 25px 0 !important; padding: 20px !important; background: white !important; border-radius: 8px !important; box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important; border-left: 4px solid #007bff !important; position: relative !important; display: block !important; font-size: 16px !important; font-weight: 500 !important; color: #6c757d !important; max-width: 1200px !important; margin-left: auto !important; margin-right: auto !important;">
           <div style="color: #6c757d; font-size: 16px; font-weight: 500;">📊 Usar los filtros arriba para buscar propiedades</div>
       </div>
       
       <!-- CONTENEDOR DE PROPIEDADES ULTRA FORZADO -->
-      <div id="property-grid-styled" style="background: white !important; border-radius: 8px !important; box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important; min-height: 300px !important; padding: 20px !important; position: relative !important; display: block !important; border: 1px solid #e1e5e9 !important;">
+      <div id="property-grid-styled" style="background: white !important; border-radius: 8px !important; box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important; min-height: 300px !important; padding: 20px !important; position: relative !important; display: block !important; border: 1px solid #e1e5e9 !important; max-width: 1200px !important; margin: 0 auto !important;">
           <div style="text-align: center; padding: 60px 40px; color: #6c757d;">
               <div style="font-size: 48px; margin-bottom: 20px;">🏠</div>
               <h4 style="margin: 0 0 15px 0; color: #495057; font-size: 20px; font-weight: 600;">Sistema de Búsqueda de Propiedades</h4>
@@ -486,7 +459,7 @@
       </div>
       
       <!-- MENSAJE DE ESTADO INICIAL ULTRA FORZADO -->
-      <div id="initial-status-styled" style="text-align: center !important; margin-top: 20px !important; padding: 15px !important; background: rgba(255, 193, 7, 0.1) !important; border: 1px solid rgba(255, 193, 7, 0.3) !important; border-radius: 6px !important; color: #856404 !important; position: relative !important; display: block !important; font-size: 14px !important;">
+      <div id="initial-status-styled" style="text-align: center !important; margin-top: 20px !important; padding: 15px !important; background: rgba(255, 193, 7, 0.1) !important; border: 1px solid rgba(255, 193, 7, 0.3) !important; border-radius: 6px !important; color: #856404 !important; position: relative !important; display: block !important; font-size: 14px !important; max-width: 1200px !important; margin-left: auto !important; margin-right: auto !important;">
           <strong>ℹ️ Estado:</strong> Sistema cargado correctamente. La base de datos está vacía (0 propiedades). 
           <a href="javascript:void(0)" onclick="showDataInfo()" style="color: #856404; text-decoration: underline; font-weight: 600;">¿Cómo agregar propiedades?</a>
       </div>
@@ -511,6 +484,96 @@
       }
   }
   </script>
+
+  <!-- Slider principal - AHORA DESPUÉS DE LA BÚSQUEDA -->
+  <section id="sliderini" class="slihome">
+      <!-- Slider de imágenes -->
+      <div class="slider-container">
+          <div class="slini">
+              <!-- Imagen 1 -->
+              <div class="slide active">
+                  <div class="image-wrapper">
+                      <img src="INSTITUCIONALES/INSTITUCIONAL 1.jpg" alt="Propiedad institucional 1" loading="eager" class="slider-img">
+                  </div>
+              </div>
+              
+              <!-- Imagen 3 -->
+              <div class="slide">
+                  <div class="image-wrapper">
+                      <img src="INSTITUCIONALES/INSTITUCIONAL 3.png" alt="Propiedad institucional 3" loading="lazy" class="slider-img">
+                  </div>
+              </div>
+              
+              <!-- Imagen 4 -->
+              <div class="slide">
+                  <div class="image-wrapper">
+                      <img src="INSTITUCIONALES/INSTITUCIONAL 4.png" alt="Propiedad institucional 4" loading="lazy" class="slider-img">
+                  </div>
+              </div>
+          </div>
+          
+          <!-- Navegación -->
+          <div class="slider-nav" id="sliderNav">
+              <button data-slide="0" class="active"></button>
+              <button data-slide="1"></button>
+              <button data-slide="2"></button>
+          </div>
+      </div>
+  </section>
+
+  <!-- Menú móvil -->
+  <nav id="menuslide">
+      <button class="cerrarmenu" aria-label="Cerrar menú">
+          <i class="fas fa-times"></i>
+      </button>
+      
+      <div class="btng mobile-info">
+          <a href="tel:1166562078" class="mobile-call-btn">
+              <i class="fas fa-phone"></i> Llamá 11 6656 2078
+          </a>
+          <a href="tasaciones" class="mobile-valuation-btn">Tasación</a>
+      </div>
+      
+      <div class="menu-sections">
+          <section>
+              <h5>Encontrá tu lugar para vivir</h5>
+              <ul>
+                  <li><a href="emprendimientos">Emprendimientos</a></li>
+                  <li>
+                      <a href="propiedades">Propiedades</a>
+                      <ul>
+                          <li><a href="propiedades?ope=V">Venta</a></li>
+                          <li><a href="propiedades?ope=A">Alquiler</a></li>
+                          <li><a href="propiedades?ope=T">Alquiler temporario</a></li>
+                      </ul>
+                  </li>
+              </ul>
+          </section>
+
+          <section>
+              <h5>Dejá tu propiedad en las mejores manos</h5>
+              <ul>
+                  <li><a href="tasaciones">Tasaciones</a></li>
+                  <li>
+                      <a href="sucursales">Sucursales</a>
+                      <ul>
+                          <li><a href="sucursales?sucu=capital">Capital Federal</a></li>
+                      </ul>
+                  </li>
+                  <li><a href="nosotros">Nosotros</a></li>
+                  <li><a href="https://dante.com.ar/busquedaslaborales">Integrate</a></li>
+                  <li><a href="contacto">Contacto</a></li>
+              </ul>
+          </section>
+      </div>
+
+      <ul class="redesmenuslide">
+          <li><a href="https://instagram.com/danteprop" target="_blank"><i class="fab fa-instagram"></i></a></li>
+          <li><a href="https://facebook.com/DantePropiedades" target="_blank"><i class="fab fa-facebook"></i></a></li>
+          <li><a href="https://www.youtube.com/channel/UCclLOUtNIhOYTcJTxVPBrCA" target="_blank"><i class="fab fa-youtube"></i></a></li>
+          <li class="hashtag"><a href="https://www.instagram.com/explore/tags/dantepropiedades/" target="_blank">#DANTEPROPIEDADES</a></li>
+      </ul>
+  </nav>
 
   <!-- Propiedades destacadas -->
   <section id="destacadasini">
@@ -599,5 +662,3 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
   <script src="app.js"></script>
-</body>
-</html>
