@@ -254,79 +254,6 @@
       </div>
   </section>
 
-  <!-- Search Results -->
-  <section id="search-results" class="cont">
-      <!-- Indicador de carga -->
-      <div id="loading-indicator" class="loading hidden">
-          <div class="spinner"></div>
-          <p>Buscando propiedades...</p>
-      </div>
-      
-      <!-- Controles de vista -->
-      <div id="results-controls" class="results-controls hidden">
-          <div class="results-info">
-              <h3 id="results-title">Resultados de búsqueda</h3>
-              <p id="results-count">0 propiedades encontradas</p>
-          </div>
-          <div class="view-controls">
-              <button id="grid-view" class="view-btn active" aria-label="Vista de tarjetas">
-                  <i class="fas fa-th"></i>
-              </button>
-              <button id="list-view" class="view-btn" aria-label="Vista de lista">
-                  <i class="fas fa-list"></i>
-              </button>
-              <button id="map-view" class="view-btn" aria-label="Vista de mapa">
-                  <i class="fas fa-map"></i>
-              </button>
-          </div>
-      </div>
-      
-      <!-- Grid de propiedades -->
-      <div class="propiedades-grid" id="search-results-grid">
-          <!-- Los resultados de la búsqueda se cargarán dinámicamente aquí -->
-      </div>
-      
-      <!-- Estado vacío - No se encontraron resultados -->
-      <div id="no-results" class="no-results hidden">
-          <div class="no-results-content">
-              <i class="fas fa-search"></i>
-              <h3>No se encontraron propiedades</h3>
-              <p>Intenta ajustar tus filtros de búsqueda</p>
-              <div class="no-results-actions">
-                  <button id="clear-filters" class="btn-secondary">Limpiar filtros</button>
-                  <button id="show-all-properties" class="btn-primary">Ver todas las propiedades</button>
-              </div>
-          </div>
-      </div>
-      
-      <!-- Estado de error -->
-      <div id="error-state" class="error-state hidden">
-          <div class="error-content">
-              <i class="fas fa-exclamation-triangle"></i>
-              <h3>Error al buscar propiedades</h3>
-              <p>Hubo un problema al buscar las propiedades. Por favor, intenta nuevamente.</p>
-              <button id="retry-search" class="btn-primary">Intentar nuevamente</button>
-          </div>
-      </div>
-  </section>
-
-  <!-- Modal para vista detallada de propiedad -->
-  <div id="property-modal" class="modal hidden">
-      <div class="modal-content">
-          <div class="modal-header">
-              <h2 id="modal-property-title">Propiedad</h2>
-              <button class="modal-close" aria-label="Cerrar modal">
-                  <i class="fas fa-times"></i>
-              </button>
-          </div>
-          
-          <div class="modal-body">
-              <!-- Contenido dinámico se cargará aquí -->
-          </div>
-      </div>
-      <div class="modal-overlay"></div>
-  </div>
-
   <!-- WhatsApp flotante -->
   <div class="whatsapp-fixed">
       <a href="https://wa.me/5491125368595" id="whatsappLink" class="btn-whatsapp" aria-label="Contactar por WhatsApp">
@@ -392,16 +319,5 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
   <script src="app.js"></script>
-
-  <!-- Modal para resultados de búsqueda -->
-  <div id="results-modal" class="modal-overlay">
-      <div class="modal-content">
-          <button id="modal-close-btn" class="modal-close">&times;</button>
-          <h2>Resultados de la Búsqueda</h2>
-          <div id="modal-results-grid" class="propiedades-grid">
-              <!-- Resultados se insertarán aquí -->
-          </div>
-      </div>
-  </div>
 </body>
-</html>     
+</html> 
