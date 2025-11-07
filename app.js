@@ -43,14 +43,19 @@ async function initializeSystem() {
 async function loadPropertiesData() {
     try {
         console.log('📂 Cargando datos de propiedades...');
+        console.log('🔍 DEBUG: Intentando cargar desde ./propiedades.json');
         
         // Cargar desde propiedades.json
         const response = await fetch('./propiedades.json');
+        console.log('🔍 DEBUG: Response status:', response.status);
+        console.log('🔍 DEBUG: Response ok:', response.ok);
+        
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const data = await response.json();
+        console.log('🔍 DEBUG: Datos recibidos:', typeof data, Array.isArray(data) ? `(array de ${data.length})` : '');
         
         if (!Array.isArray(data)) {
             throw new Error('Los datos no son un array');
@@ -60,6 +65,11 @@ async function loadPropertiesData() {
         filteredProperties = [...allProperties];
         
         console.log(`✅ Cargadas ${allProperties.length} propiedades`);
+        
+        // Debug: Mostrar primera propiedad
+        if (allProperties.length > 0) {
+            console.log('🔍 DEBUG: Primera propiedad:', allProperties[0]);
+        }
         
         return data;
     } catch (error) {
@@ -112,7 +122,15 @@ async function populateFilters() {
         
         if (allProperties.length === 0) {
             console.warn('⚠️ No hay propiedades cargadas para poblar filtros');
-            return;
+            console.log('🔍 DEBUG: Intentando esperar datos...');
+            // Esperar 2 segundos más por si acaso
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            console.log('🔍 DEBUG: Después de esperar, propiedades:', allProperties.length);
+            
+            if (allProperties.length === 0) {
+                console.error('❌ CRÍTICO: No se pudieron cargar los datos');
+                return;
+            }
         }
         
         // Obtener valores únicos
@@ -125,31 +143,40 @@ async function populateFilters() {
         console.log('🏠 Tipos encontrados:', uniqueTipos);
         
         // Poblar select de operación
+        console.log('🔧 Poblando operación...');
         populateSelect('operacion-select-styled', uniqueOperaciones, 'Todas las operaciones');
         
         // Poblar select de barrio
+        console.log('🔧 Poblando barrio...');
         populateSelect('barrio-select-styled', uniqueBarrios, 'Todos los barrios');
         
         // Poblar select de tipo
+        console.log('🔧 Poblando tipo...');
         populateSelect('tipo-select-styled', uniqueTipos, 'Todos los tipos');
         
         console.log('✅ Filtros poblados correctamente');
         
     } catch (error) {
         console.error('❌ Error poblando filtros:', error);
+        console.error('❌ Stack trace:', error.stack);
     }
 }
 
 // Función auxiliar para poblar un select
 function populateSelect(selectId, options, defaultText) {
+    console.log(`🔧 Intentando poblar ${selectId} con ${options.length} opciones`);
+    
     const selectElement = document.getElementById(selectId);
     
     if (!selectElement) {
         console.error(`❌ No se encontró el elemento con ID: ${selectId}`);
+        console.log('🔍 DEBUG: Elementos disponibles:', Array.from(document.querySelectorAll('select')).map(s => s.id));
         return;
     }
     
     try {
+        console.log(`🔧 Elemento encontrado: ${selectId}, limpiando...`);
+        
         // Limpiar opciones existentes
         selectElement.innerHTML = '';
         
@@ -159,15 +186,19 @@ function populateSelect(selectId, options, defaultText) {
         defaultOption.textContent = defaultText;
         selectElement.appendChild(defaultOption);
         
+        console.log(`🔧 Agregando ${options.length} opciones...`);
+        
         // Agregar opciones
-        options.forEach(option => {
+        options.forEach((option, index) => {
             const optionElement = document.createElement('option');
             optionElement.value = option;
             optionElement.textContent = option;
             selectElement.appendChild(optionElement);
+            console.log(`🔧 Opción ${index + 1}: ${option}`);
         });
         
-        console.log(`✅ ${selectId} poblado con ${options.length} opciones`);
+        console.log(`✅ ${selectId} poblado correctamente con ${options.length} opciones`);
+        console.log(`🔍 DEBUG: HTML final de ${selectId}:`, selectElement.innerHTML.substring(0, 300) + '...');
         
     } catch (error) {
         console.error(`❌ Error poblando select ${selectId}:`, error);
@@ -496,3 +527,105 @@ function initWhatsApp() {
 }
 
 console.log('📱 Sistema Dante Propiedades - Versión Actualizada cargada');
+
+// ===== FUNCIÓN DE DEBUG MANUAL =====
+function debugFiltros() {
+    console.log('🧪 === DIAGNÓSTICO MANUAL DE FILTROS ===');
+    
+    // Verificar elementos del DOM
+    const elementos = {
+        operacionSelect: document.getElementById('operacion-select-styled'),
+        barrioSelect: document.getElementById('barrio-select-styled'),
+        tipoSelect: document.getElementById('tipo-select-styled')
+    };
+    
+    console.log('🔍 === ELEMENTOS DOM ===');
+    Object.keys(elementos).forEach(key => {
+        const elemento = elementos[key];
+        console.log(`${key}: ${elemento ? '✅ Existe' : '❌ No existe'}`);
+        if (elemento) {
+            console.log(`  Opciones disponibles: ${elemento.options.length}`);
+            console.log(`  Valor actual: "${elemento.value}"`);
+            console.log(`  HTML: ${elemento.innerHTML.substring(0, 200)}...`);
+        }
+    });
+    
+    // Verificar datos globales
+    console.log('🔍 === DATOS GLOBALES ===');
+    console.log(`allProperties.length: ${allProperties.length}`);
+    console.log(`filteredProperties.length: ${filteredProperties.length}`);
+    
+    if (allProperties.length > 0) {
+        const uniqueOperaciones = [...new Set(allProperties.map(p => p.operacion).filter(Boolean))].sort();
+        const uniqueBarrios = [...new Set(allProperties.map(p => p.barrio).filter(Boolean))].sort();
+        const uniqueTipos = [...new Set(allProperties.map(p => p.tipo).filter(Boolean))].sort();
+        
+        console.log('🔍 === VALORES ÚNICOS ===');
+        console.log(`Operaciones: [${uniqueOperaciones.join(', ')}]`);
+        console.log(`Barrios: [${uniqueBarrios.join(', ')}]`);
+        console.log(`Tipos: [${uniqueTipos.join(', ')}]`);
+        
+        // Forzar población de filtros
+        console.log('🧪 === FORZANDO POBLACIÓN DE FILTROS ===');
+        populateSelect('operacion-select-styled', uniqueOperaciones, 'Todas las operaciones');
+        populateSelect('barrio-select-styled', uniqueBarrios, 'Todos los barrios');
+        populateSelect('tipo-select-styled', uniqueTipos, 'Todos los tipos');
+        
+        console.log('✅ Filtros forzosamente poblados. Revisa los dropdowns.');
+    } else {
+        console.error('❌ No hay datos para poblar filtros');
+        console.log('🧪 Intentando recargar datos...');
+        loadPropertiesData().then(() => {
+            if (allProperties.length > 0) {
+                console.log('✅ Datos recargados. Vuelve a hacer clic en Debug.');
+            }
+        });
+    }
+}
+
+// ===== SCRIPT DE DEBUG PARA DIAGNOSTICAR FILTROS =====
+console.log('🔍 DEBUG: Iniciando diagnóstico de filtros...');
+
+// Verificar que los elementos existen
+setTimeout(() => {
+    console.log('🔍 DEBUG: Verificando elementos del DOM...');
+    
+    const operacionSelect = document.getElementById('operacion-select-styled');
+    const barrioSelect = document.getElementById('barrio-select-styled');
+    const tipoSelect = document.getElementById('tipo-select-styled');
+    
+    console.log('🔍 DEBUG: Elementos encontrados:', {
+        operacion: operacionSelect ? '✅' : '❌',
+        barrio: barrioSelect ? '✅' : '❌', 
+        tipo: tipoSelect ? '✅' : '❌'
+    });
+    
+    // Verificar contenido actual
+    if (operacionSelect) {
+        console.log('🔍 DEBUG: Opciones en operación:', operacionSelect.options.length);
+        console.log('🔍 DEBUG: Contenido operación:', operacionSelect.innerHTML.substring(0, 200) + '...');
+    }
+    
+    if (barrioSelect) {
+        console.log('🔍 DEBUG: Opciones en barrio:', barrioSelect.options.length);
+        console.log('🔍 DEBUG: Contenido barrio:', barrioSelect.innerHTML.substring(0, 200) + '...');
+    }
+    
+    if (tipoSelect) {
+        console.log('🔍 DEBUG: Opciones en tipo:', tipoSelect.options.length);
+        console.log('🔍 DEBUG: Contenido tipo:', tipoSelect.innerHTML.substring(0, 200) + '...');
+    }
+    
+    // Verificar datos cargados
+    console.log('🔍 DEBUG: Datos globales:', {
+        allProperties: allProperties.length,
+        filteredProperties: filteredProperties.length
+    });
+    
+    if (allProperties.length > 0) {
+        console.log('🔍 DEBUG: Primera propiedad:', allProperties[0]);
+        console.log('🔍 DEBUG: Operaciones únicas:', [...new Set(allProperties.map(p => p.operacion).filter(Boolean))]);
+        console.log('🔍 DEBUG: Barrios únicos:', [...new Set(allProperties.map(p => p.barrio).filter(Boolean))]);
+        console.log('🔍 DEBUG: Tipos únicos:', [...new Set(allProperties.map(p => p.tipo).filter(Boolean))]);
+    }
+}, 3000);
