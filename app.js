@@ -1,4 +1,4 @@
-// Script avanzado con sistema completo de gestión de propiedades
+// Script avanzado con sistema completo de gestión de propiedades - VERSIÓN CON MANEJO DE ERRORES
 document.addEventListener('DOMContentLoaded', function() {
     console.log('=== INICIANDO SISTEMA AVANZADO DANTE PROPIEDADES ===');
     
@@ -79,15 +79,27 @@ function initAdvancedSearch() {
 
 async function loadFilterOptions() {
     try {
-        console.log('Cargando opciones de filtros...');
+        console.log('🔄 Cargando opciones de filtros...');
         const response = await fetch('https://danterealestate-github-io.onrender.com/api/properties/filter-options');
+        
+        console.log('📡 Respuesta de API (filter-options):', response);
+        console.log('📡 Status de respuesta:', response.status, response.statusText);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const options = await response.json();
-        console.log('Opciones cargadas:', options);
+        const responseText = await response.text();
+        console.log('📄 Respuesta de texto:', responseText);
+        
+        let options;
+        try {
+            options = JSON.parse(responseText);
+        } catch (parseError) {
+            throw new Error(`Error parseando JSON: ${parseError.message}. Respuesta: ${responseText.substring(0, 200)}...`);
+        }
+        
+        console.log('✅ Opciones cargadas:', options);
         
         // Poblar select de barrios
         const barrioSelect = document.getElementById('barrio-select');
@@ -99,6 +111,9 @@ async function loadFilterOptions() {
                 option.textContent = barrio;
                 barrioSelect.appendChild(option);
             });
+            console.log('✅ Barrios cargados:', options.barrios.length);
+        } else {
+            console.warn('⚠️ No se encontraron barrios en la respuesta');
         }
         
         // Poblar select de tipos
@@ -111,6 +126,9 @@ async function loadFilterOptions() {
                 option.textContent = tipo;
                 tipoSelect.appendChild(option);
             });
+            console.log('✅ Tipos cargados:', options.tipos.length);
+        } else {
+            console.warn('⚠️ No se encontraron tipos en la respuesta');
         }
         
         // Poblar select de estados
@@ -123,10 +141,27 @@ async function loadFilterOptions() {
                 option.textContent = estado;
                 estadoSelect.appendChild(option);
             });
+            console.log('✅ Estados cargados:', options.estados.length);
+        } else {
+            console.warn('⚠️ No se encontraron estados en la respuesta');
         }
         
     } catch (error) {
-        console.error('Error cargando opciones de filtros:', error);
+        console.error('❌ Error cargando opciones de filtros:', error);
+        
+        // Mostrar mensaje de error en la interfaz
+        const barrioSelect = document.getElementById('barrio-select');
+        if (barrioSelect) {
+            barrioSelect.innerHTML = '<option value="">Error al cargar barrios</option>';
+        }
+        const tipoSelect = document.getElementById('tipo-select');
+        if (tipoSelect) {
+            tipoSelect.innerHTML = '<option value="">Error al cargar tipos</option>';
+        }
+        const estadoSelect = document.getElementById('estado-select');
+        if (estadoSelect) {
+            estadoSelect.innerHTML = '<option value="">Error al cargar estados</option>';
+        }
     }
 }
 
@@ -171,11 +206,11 @@ function initQuickFilters() {
 
 async function performAdvancedSearch() {
     try {
-        console.log('Realizando búsqueda avanzada...');
+        console.log('🔍 Realizando búsqueda avanzada...');
         
         // Obtener valores del formulario
         const form = document.getElementById('advanced-search-form');
-        const formData = new FormData(form);
+        const formData = form ? new FormData(form) : new FormData();
         
         // Construir query string
         const params = new URLSearchParams();
@@ -186,55 +221,100 @@ async function performAdvancedSearch() {
         }
         
         const queryString = params.toString();
-        const apiUrl = `https://danterealestate-github-io.onrender.com/api/properties/search?${queryString}`;
+        const apiUrl = `https://danterealestate-github-io.onrender.com/api/properties/search${queryString ? '?' + queryString : ''}`;
         
-        console.log('URL de búsqueda:', apiUrl);
+        console.log('🔗 URL de búsqueda:', apiUrl);
         
         const response = await fetch(apiUrl);
         
+        console.log('📡 Respuesta de API (search):', response);
+        console.log('📡 Status de respuesta:', response.status, response.statusText);
+        
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorText = await response.text();
+            console.error('❌ Error en respuesta de API:', errorText);
+            throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
         }
         
-        const properties = await response.json();
-        console.log('Propiedades encontradas:', properties);
+        const responseText = await response.text();
+        console.log('📄 Respuesta completa de texto:', responseText);
+        
+        let properties;
+        try {
+            const parsedData = JSON.parse(responseText);
+            console.log('📋 Datos parseados:', parsedData);
+            
+            // Verificar si la respuesta es un array directamente
+            if (Array.isArray(parsedData)) {
+                properties = parsedData;
+            } else if (parsedData.properties && Array.isArray(parsedData.properties)) {
+                properties = parsedData.properties;
+            } else if (parsedData.data && Array.isArray(parsedData.data)) {
+                properties = parsedData.data;
+            } else {
+                console.error('❌ Estructura de respuesta inesperada:', parsedData);
+                throw new Error('La respuesta de la API no tiene la estructura esperada');
+            }
+        } catch (parseError) {
+            console.error('❌ Error parseando respuesta JSON:', parseError);
+            console.error('❌ Respuesta que falló en parsear:', responseText);
+            throw new Error(`Error parseando respuesta de la API: ${parseError.message}`);
+        }
+        
+        console.log('✅ Propiedades extraídas:', properties);
+        console.log('✅ Tipo de propiedades:', typeof properties, Array.isArray(properties) ? '(array)' : '(no array)');
+        
+        // Verificar que propiedades es un array
+        if (!Array.isArray(properties)) {
+            console.error('❌ PROPERTIES no es un array:', properties);
+            throw new Error(`Se esperaba un array de propiedades, pero se recibió: ${typeof properties}`);
+        }
         
         // Mostrar resultados
         displaySearchResults(properties);
         
     } catch (error) {
-        console.error('Error en búsqueda avanzada:', error);
-        showSearchError('Error al realizar la búsqueda. Por favor, inténtelo de nuevo.');
+        console.error('❌ Error en búsqueda avanzada:', error);
+        showSearchError('Error al realizar la búsqueda: ' + error.message);
     }
 }
 
 function displaySearchResults(properties) {
+    console.log('🎨 Renderizando resultados:', properties.length, 'propiedades');
+    
     const container = document.getElementById('property-grid');
     const resultsCounter = document.getElementById('results-counter');
     
     if (!container) {
-        console.error('No se encontró el contenedor de propiedades');
+        console.error('❌ No se encontró el contenedor de propiedades (#property-grid)');
         return;
     }
     
     // Actualizar contador
     if (resultsCounter) {
         resultsCounter.textContent = `Se encontraron ${properties.length} propiedades`;
+        console.log('📊 Contador actualizado:', properties.length);
     }
     
     // Limpiar contenedor
     container.innerHTML = '';
     
     if (properties.length === 0) {
-        container.innerHTML = '<p>No se encontraron propiedades con los criterios seleccionados.</p>';
+        container.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">No se encontraron propiedades con los criterios seleccionados.</p>';
+        console.log('ℹ️ No se encontraron propiedades');
         return;
     }
     
+    console.log('🏠 Creando tarjetas para', properties.length, 'propiedades');
+    
     // Crear tarjetas de propiedades
-    properties.forEach(property => {
+    properties.forEach((property, index) => {
+        console.log(`🏠 Procesando propiedad ${index + 1}:`, property);
         const propertyCard = createPropertyCard(property);
         container.appendChild(propertyCard);
     });
+    
+    console.log('✅ Renderización completada');
 }
 
 function createPropertyCard(property) {
@@ -244,17 +324,17 @@ function createPropertyCard(property) {
     // Estructura de la tarjeta
     card.innerHTML = `
         <div class="property-image">
-            <img src="${property.imagen || '/api/placeholder/400/300'}" alt="${property.titulo}" loading="lazy">
+            <img src="${property.imagen || '/api/placeholder/400/300'}" alt="${property.titulo || 'Propiedad'}" loading="lazy" onerror="this.src='/api/placeholder/400/300'">
         </div>
         <div class="property-content">
-            <h3 class="property-title">${property.titulo}</h3>
+            <h3 class="property-title">${property.titulo || 'Título no disponible'}</h3>
             <p class="property-location">${property.barrio || 'Ubicación no especificada'}</p>
             <div class="property-details">
-                <span class="property-type">${property.tipo}</span>
+                <span class="property-type">${property.tipo || 'Tipo no especificado'}</span>
                 <span class="property-price">$${property.precio ? property.precio.toLocaleString() : 'Consultar'}</span>
             </div>
             <div class="property-actions">
-                <button class="btn-contact" onclick="contactProperty('${property.id}')">Contactar</button>
+                <button class="btn-contact" onclick="contactProperty('${property.id || 'unknown'}')">Contactar</button>
             </div>
         </div>
     `;
@@ -263,14 +343,15 @@ function createPropertyCard(property) {
 }
 
 function showSearchError(message) {
+    console.log('🚨 Mostrando error de búsqueda:', message);
     const container = document.getElementById('property-grid');
     if (container) {
-        container.innerHTML = `<div class="error-message">${message}</div>`;
+        container.innerHTML = `<div class="error-message" style="text-align: center; padding: 40px; color: #dc3545; border: 1px solid #dc3545; border-radius: 4px; background: #f8d7da;">${message}</div>`;
     }
 }
 
 function applyQuickFilter(filterType, filterValue) {
-    console.log('Aplicando filtro rápido:', filterType, filterValue);
+    console.log('⚡ Aplicando filtro rápido:', filterType, filterValue);
     
     // Actualizar el formulario de búsqueda
     const form = document.getElementById('advanced-search-form');
@@ -287,7 +368,7 @@ function applyQuickFilter(filterType, filterValue) {
 }
 
 function showAllProperties() {
-    console.log('Mostrando todas las propiedades...');
+    console.log('🏠 Mostrando todas las propiedades...');
     performAdvancedSearch();
 }
 
@@ -455,7 +536,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Formulario de contacto
     initContactForm();
     
-    console.log('Sistema inicializado completamente');
+    console.log('✅ Sistema inicializado completamente');
 });
 
 // =============================================================================
@@ -564,8 +645,10 @@ const searchStyles = `
 .error-message {
     text-align: center;
     padding: 40px;
-    color: #666;
-    font-size: 16px;
+    color: #dc3545;
+    border: 1px solid #dc3545;
+    border-radius: 4px;
+    background: #f8d7da;
 }
 
 #results-counter {
@@ -586,4 +669,4 @@ if (!document.getElementById('search-styles')) {
     document.head.appendChild(styleElement);
 }
 
-console.log('=== SISTEMA JA INICIALIZADO COMPLETAMENTE ===');
+console.log('=== SISTEMA JAVASCRIPT CON MANEJO DE ERRORES CARGADO CORRECTAMENTE ===');
