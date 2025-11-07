@@ -368,4 +368,4 @@ function contactProperty(propertyId) {
     window.open(whatsappUrl, '_blank');
 }
 
-console.log('=== JAVASCRIPT SIMPLIFICADO CARGADO ===');
+console.log('=== JAVASCRIPT CARGADO ===');

@@ -232,192 +232,183 @@
       </div>
   </section>
 
-  
-  
-  ========================================== -->
-<!-- ESTRUCTURA HTML BASE PARA LA BÚSQUEDA -->
-<!-- DEBES AGREGAR ESTO A TU PÁGINA HTML -->
-<!-- ========================================== -->
+  <!-- ========================================== -->
+  <!-- SECCIÓN DE BÚSQUEDA - UBICACIÓN CORRECTA -->
+  <!-- ========================================== -->
+  <section id="search-container" style="margin: 40px auto; padding: 30px; max-width: 1200px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.1);">
+      
+      <!-- FORMULARIO DE BÚSQUEDA -->
+      <form id="advanced-search-form" style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); margin-bottom: 30px;">
+          <h3 style="margin: 0 0 25px 0; color: #2c3e50; text-align: center; font-size: 24px; font-weight: 600;">🔍 Buscar Propiedades</h3>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; align-items: end; margin-bottom: 20px;">
+              <div style="display: flex; flex-direction: column;">
+                  <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #495057; font-size: 14px;">📍 Barrio:</label>
+                  <select id="barrio-select" name="barrio" style="padding: 12px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 14px; transition: border-color 0.3s ease; background: white;">
+                      <option value="">Todos los barrios</option>
+                  </select>
+              </div>
+              
+              <div style="display: flex; flex-direction: column;">
+                  <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #495057; font-size: 14px;">🏠 Tipo:</label>
+                  <select id="tipo-select" name="tipo" style="padding: 12px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 14px; transition: border-color 0.3s ease; background: white;">
+                      <option value="">Todos los tipos</option>
+                  </select>
+              </div>
+              
+              <div style="display: flex; flex-direction: column;">
+                  <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #495057; font-size: 14px;">✅ Estado:</label>
+                  <select id="estado-select" name="estado" style="padding: 12px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 14px; transition: border-color 0.3s ease; background: white;">
+                      <option value="">Todos los estados</option>
+                  </select>
+              </div>
+              
+              <div style="display: flex; align-items: end;">
+                  <button type="submit" style="padding: 12px 24px; background: linear-gradient(135deg, #007bff, #0056b3); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.3s ease; box-shadow: 0 4px 8px rgba(0,123,255,0.3);">
+                      🔍 Buscar
+                  </button>
+              </div>
+          </div>
+          
+          <!-- FILTROS RÁPIDOS -->
+          <div style="margin-top: 20px; text-align: center;">
+              <div style="margin-bottom: 15px; color: #6c757d; font-weight: 500; font-size: 14px;">⚡ Filtros Rápidos:</div>
+              <button type="button" class="quick-filter-btn" data-filter="tipo" data-value="Venta" style="margin: 5px; padding: 10px 20px; border: 2px solid #28a745; background: white; color: #28a745; border-radius: 25px; cursor: pointer; font-weight: 500; transition: all 0.3s ease; font-size: 13px;">
+                  🏠 Venta
+              </button>
+              <button type="button" class="quick-filter-btn" data-filter="tipo" data-value="Alquiler" style="margin: 5px; padding: 10px 20px; border: 2px solid #fd7e14; background: white; color: #fd7e14; border-radius: 25px; cursor: pointer; font-weight: 500; transition: all 0.3s ease; font-size: 13px;">
+                  🏢 Alquiler
+              </button>
+              <button type="button" class="quick-filter-btn" data-filter="estado" data-value="Disponible" style="margin: 5px; padding: 10px 20px; border: 2px solid #20c997; background: white; color: #20c997; border-radius: 25px; cursor: pointer; font-weight: 500; transition: all 0.3s ease; font-size: 13px;">
+                  ✅ Disponibles
+              </button>
+              <button type="button" class="quick-filter-btn" data-filter="estado" data-value="Vendido" style="margin: 5px; padding: 10px 20px; border: 2px solid #6f42c1; background: white; color: #6f42c1; border-radius: 25px; cursor: pointer; font-weight: 500; transition: all 0.3s ease; font-size: 13px;">
+                  🏆 Vendidos
+              </button>
+          </div>
+      </form>
+      
+      <!-- CONTADOR DE RESULTADOS -->
+      <div id="results-counter" style="text-align: center; margin: 25px 0; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #007bff;">
+          <div style="color: #6c757d; font-size: 16px; font-weight: 500;">📊 Usar los filtros arriba para buscar propiedades</div>
+      </div>
+      
+      <!-- CONTENEDOR DE PROPIEDADES -->
+      <div id="property-grid" style="background: white; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); min-height: 300px; padding: 20px;">
+          <div style="text-align: center; padding: 60px 40px; color: #6c757d;">
+              <div style="font-size: 48px; margin-bottom: 20px;">🏠</div>
+              <h4 style="margin: 0 0 15px 0; color: #495057; font-size: 20px; font-weight: 600;">Sistema de Búsqueda de Propiedades</h4>
+              <p style="margin: 0; font-size: 16px;">Use los filtros arriba para encontrar su propiedad ideal</p>
+              <div id="loading-indicator" style="display: none; margin-top: 20px; color: #007bff; font-weight: 500;">
+                  <span style="animation: pulse 1.5s infinite;">🔄</span> Cargando propiedades...
+              </div>
+          </div>
+      </div>
+      
+      <!-- MENSAJE DE ESTADO INICIAL -->
+      <div id="initial-status" style="text-align: center; margin-top: 20px; padding: 15px; background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 6px; color: #856404;">
+          <strong>ℹ️ Estado:</strong> Sistema cargado correctamente. La base de datos está vacía (0 propiedades). 
+          <a href="javascript:void(0)" onclick="showDataInfo()" style="color: #856404; text-decoration: underline; font-weight: 600;">¿Cómo agregar propiedades?</a>
+      </div>
+  </section>
 
-<!-- SECCIÓN DE BÚSQUEDA - Colocar DESPUÉS de tu hero/banner principal -->
-<section id="property-section" class="property-section" style="margin: 40px auto; padding: 30px; max-width: 1200px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.1);">
-    
-    <!-- FORMULARIO DE BÚSQUEDA -->
-    <form id="advanced-search-form" style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); margin-bottom: 30px;">
-        <h3 style="margin: 0 0 25px 0; color: #2c3e50; text-align: center; font-size: 24px; font-weight: 600;">🔍 Buscar Propiedades</h3>
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; align-items: end; margin-bottom: 20px;">
-            <div style="display: flex; flex-direction: column;">
-                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #495057; font-size: 14px;">📍 Barrio:</label>
-                <select id="barrio-select" name="barrio" style="padding: 12px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 14px; transition: border-color 0.3s ease; background: white;">
-                    <option value="">Todos los barrios</option>
-                </select>
-            </div>
-            
-            <div style="display: flex; flex-direction: column;">
-                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #495057; font-size: 14px;">🏠 Tipo:</label>
-                <select id="tipo-select" name="tipo" style="padding: 12px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 14px; transition: border-color 0.3s ease; background: white;">
-                    <option value="">Todos los tipos</option>
-                </select>
-            </div>
-            
-            <div style="display: flex; flex-direction: column;">
-                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #495057; font-size: 14px;">✅ Estado:</label>
-                <select id="estado-select" name="estado" style="padding: 12px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 14px; transition: border-color 0.3s ease; background: white;">
-                    <option value="">Todos los estados</option>
-                </select>
-            </div>
-            
-            <div style="display: flex; align-items: end;">
-                <button type="submit" style="padding: 12px 24px; background: linear-gradient(135deg, #007bff, #0056b3); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.3s ease; box-shadow: 0 4px 8px rgba(0,123,255,0.3);">
-                    🔍 Buscar
-                </button>
-            </div>
-        </div>
-        
-        <!-- FILTROS RÁPIDOS -->
-        <div style="margin-top: 20px; text-align: center;">
-            <div style="margin-bottom: 15px; color: #6c757d; font-weight: 500; font-size: 14px;">⚡ Filtros Rápidos:</div>
-            <button type="button" class="quick-filter-btn" data-filter="tipo" data-value="Venta" style="margin: 5px; padding: 10px 20px; border: 2px solid #28a745; background: white; color: #28a745; border-radius: 25px; cursor: pointer; font-weight: 500; transition: all 0.3s ease; font-size: 13px;">
-                🏠 Venta
-            </button>
-            <button type="button" class="quick-filter-btn" data-filter="tipo" data-value="Alquiler" style="margin: 5px; padding: 10px 20px; border: 2px solid #fd7e14; background: white; color: #fd7e14; border-radius: 25px; cursor: pointer; font-weight: 500; transition: all 0.3s ease; font-size: 13px;">
-                🏢 Alquiler
-            </button>
-            <button type="button" class="quick-filter-btn" data-filter="estado" data-value="Disponible" style="margin: 5px; padding: 10px 20px; border: 2px solid #20c997; background: white; color: #20c997; border-radius: 25px; cursor: pointer; font-weight: 500; transition: all 0.3s ease; font-size: 13px;">
-                ✅ Disponibles
-            </button>
-            <button type="button" class="quick-filter-btn" data-filter="estado" data-value="Vendido" style="margin: 5px; padding: 10px 20px; border: 2px solid #6f42c1; background: white; color: #6f42c1; border-radius: 25px; cursor: pointer; font-weight: 500; transition: all 0.3s ease; font-size: 13px;">
-                🏆 Vendidos
-            </button>
-        </div>
-    </form>
-    
-    <!-- CONTADOR DE RESULTADOS -->
-    <div id="results-counter" style="text-align: center; margin: 25px 0; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #007bff;">
-        <div style="color: #6c757d; font-size: 16px; font-weight: 500;">📊 Usar los filtros arriba para buscar propiedades</div>
-    </div>
-    
-    <!-- CONTENEDOR DE PROPIEDADES -->
-    <div id="property-grid" style="background: white; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); min-height: 300px; padding: 20px;">
-        <div style="text-align: center; padding: 60px 40px; color: #6c757d;">
-            <div style="font-size: 48px; margin-bottom: 20px;">🏠</div>
-            <h4 style="margin: 0 0 15px 0; color: #495057; font-size: 20px; font-weight: 600;">Sistema de Búsqueda de Propiedades</h4>
-            <p style="margin: 0; font-size: 16px;">Use los filtros arriba para encontrar su propiedad ideal</p>
-            <div id="loading-indicator" style="display: none; margin-top: 20px; color: #007bff; font-weight: 500;">
-                <span style="animation: pulse 1.5s infinite;">🔄</span> Cargando propiedades...
-            </div>
-        </div>
-    </div>
-    
-    <!-- MENSAJE DE ESTADO INICIAL -->
-    <div id="initial-status" style="text-align: center; margin-top: 20px; padding: 15px; background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 6px; color: #856404;">
-        <strong>ℹ️ Estado:</strong> Sistema cargado correctamente. La base de datos está vacía (0 propiedades). 
-        <a href="javascript:void(0)" onclick="showDataInfo()" style="color: #856404; text-decoration: underline; font-weight: 600;">¿Cómo agregar propiedades?</a>
-    </div>
-</section>
+  <!-- ESTILOS CSS ADICIONALES -->
+  <style>
+  /* Estilos para los elementos de búsqueda */
+  .quick-filter-btn:hover:not(.active) {
+      background: rgba(0, 123, 255, 0.1) !important;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
 
-<!-- ESTILOS CSS ADICIONALES -->
-<style>
-/* Estilos para los elementos de búsqueda */
-.quick-filter-btn:hover:not(.active) {
-    background: rgba(0, 123, 255, 0.1) !important;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
+  .quick-filter-btn.active {
+      background: linear-gradient(135deg, #007bff, #0056b3) !important;
+      color: white !important;
+      border-color: #0056b3 !important;
+      box-shadow: 0 4px 8px rgba(0,123,255,0.3) !important;
+  }
 
-.quick-filter-btn.active {
-    background: linear-gradient(135deg, #007bff, #0056b3) !important;
-    color: white !important;
-    border-color: #0056b3 !important;
-    box-shadow: 0 4px 8px rgba(0,123,255,0.3) !important;
-}
+  /* Animaciones */
+  #search-container {
+      animation: slideIn 0.6s ease-out;
+  }
 
-/* Animaciones */
-#property-section {
-    animation: slideIn 0.6s ease-out;
-}
+  @keyframes slideIn {
+      from { 
+          opacity: 0; 
+          transform: translateY(30px); 
+      }
+      to { 
+          opacity: 1; 
+          transform: translateY(0); 
+      }
+  }
 
-@keyframes slideIn {
-    from { 
-        opacity: 0; 
-        transform: translateY(30px); 
-    }
-    to { 
-        opacity: 1; 
-        transform: translateY(0); 
-    }
-}
+  @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+  }
 
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
+  /* Hover effects para los selects */
+  #barrio-select:hover, #tipo-select:hover, #estado-select:hover {
+      border-color: #007bff;
+  }
 
-/* Hover effects para los selects */
-#barrio-select:hover, #tipo-select:hover, #estado-select:hover {
-    border-color: #007bff;
-}
+  #barrio-select:focus, #tipo-select:focus, #estado-select:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+  }
 
-#barrio-select:focus, #tipo-select:focus, #estado-select:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
-}
+  /* Responsive */
+  @media (max-width: 768px) {
+      #search-container {
+          margin: 20px 10px;
+          padding: 20px;
+      }
+      
+      #advanced-search-form > div {
+          grid-template-columns: 1fr !important;
+          gap: 15px !important;
+      }
+      
+      .quick-filter-btn {
+          display: block;
+          margin: 8px auto !important;
+          width: fit-content;
+      }
+  }
 
-/* Responsive */
-@media (max-width: 768px) {
-    #property-section {
-        margin: 20px 10px;
-        padding: 20px;
-    }
-    
-    #advanced-search-form > div {
-        grid-template-columns: 1fr !important;
-        gap: 15px !important;
-    }
-    
-    .quick-filter-btn {
-        display: block;
-        margin: 8px auto !important;
-        width: fit-content;
-    }
-}
+  @media (max-width: 480px) {
+      #search-container {
+          margin: 10px 5px;
+          padding: 15px;
+      }
+      
+      #advanced-search-form {
+          padding: 15px !important;
+      }
+  }
+  </style>
 
-@media (max-width: 480px) {
-    #property-section {
-        margin: 10px 5px;
-        padding: 15px;
-    }
-    
-    #advanced-search-form {
-        padding: 15px !important;
-    }
-}
-</style>
+  <!-- SCRIPT PARA MOSTRAR INFORMACIÓN DE DATOS -->
+  <script>
+  function showDataInfo() {
+      const info = document.getElementById('initial-status');
+      info.innerHTML = `
+          <strong>📝 Para agregar propiedades a tu sistema:</strong><br>
+          1. <strong>Subir archivo Excel:</strong> Ve al dashboard de Render y sube un archivo .xlsx con las propiedades<br>
+          2. <strong>Formato requerido:</strong> El archivo debe tener columnas: id, titulo, barrio, tipo, precio, imagen, estado, etc.<br>
+          3. <strong>Procesamiento automático:</strong> El sistema cargará automáticamente las propiedades<br>
+          4. <strong>Verificación:</strong> Los filtros se poblarán con los datos del Excel<br><br>
+          <em>Actualmente la base de datos está vacía, por eso no aparecen propiedades.</em>
+      `;
+      info.style.background = 'rgba(40, 167, 69, 0.1)';
+      info.style.border = '1px solid rgba(40, 167, 69, 0.3)';
+      info.style.color = '#155724';
+  }
+  </script>
 
-<!-- SCRIPT PARA MOSTRAR INFORMACIÓN DE DATOS -->
-<script>
-function showDataInfo() {
-    const info = document.getElementById('initial-status');
-    info.innerHTML = `
-        <strong>📝 Para agregar propiedades a tu sistema:</strong><br>
-        1. <strong>Subir archivo Excel:</strong> Ve al dashboard de Render y sube un archivo .xlsx con las propiedades<br>
-        2. <strong>Formato requerido:</strong> El archivo debe tener columnas: id, titulo, barrio, tipo, precio, imagen, estado, etc.<br>
-        3. <strong>Procesamiento automático:</strong> El sistema cargará automáticamente las propiedades<br>
-        4. <strong>Verificación:</strong> Los filtros se poblarán con los datos del Excel<br><br>
-        <em>Actualmente la base de datos está vacía, por eso no aparecen propiedades.</em>
-    `;
-    info.style.background = 'rgba(40, 167, 69, 0.1)';
-    info.style.border = '1px solid rgba(40, 167, 69, 0.3)';
-    info.style.color = '#155724';
-}
-</script>
-  
-  
-  
-  
-  
   <!-- Propiedades destacadas -->
   <section id="destacadasini">
       <div class="cont">
@@ -505,62 +496,3 @@ function showDataInfo() {
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
   <script src="app.js"></script>
-
-
-  <!-- ESTE ES EL CONTENEDOR QUE DEBES AGREGAR A TU HTML -->
-<div id="property-grid">
-    <!-- Las propiedades aparecerán aquí dinámicamente -->
-    <p style="text-align: center; color: #666; padding: 40px;">
-        Cargando propiedades...
-    </p>
-</div>
-
-<!-- OPCIONAL: Contador de resultados (recomendado) -->
-<div id="results-counter" style="text-align: center; margin: 20px 0; font-weight: 500;">
-    Buscando propiedades...
-</div>
-
-<!-- FORMULARIO DE BÚSQUEDA AVANZADA (si no existe) -->
-<form id="advanced-search-form" style="margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 8px;">
-    <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: end;">
-        <div>
-            <label style="display: block; margin-bottom: 5px; font-weight: 500;">Barrio:</label>
-            <select id="barrio-select" name="barrio" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                <option value="">Todos los barrios</option>
-            </select>
-        </div>
-        
-        <div>
-            <label style="display: block; margin-bottom: 5px; font-weight: 500;">Tipo:</label>
-            <select id="tipo-select" name="tipo" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                <option value="">Todos los tipos</option>
-            </select>
-        </div>
-        
-        <div>
-            <label style="display: block; margin-bottom: 5px; font-weight: 500;">Estado:</label>
-            <select id="estado-select" name="estado" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                <option value="">Todos los estados</option>
-            </select>
-        </div>
-        
-        <div>
-            <button type="submit" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                Buscar
-            </button>
-        </div>
-    </div>
-</form>
-
-<!-- FILTROS RÁPIDOS (opcional) -->
-<div style="margin: 20px 0; text-align: center;">
-    <button class="quick-filter-btn" data-filter="tipo" data-value="Venta" style="margin: 5px; padding: 8px 16px; border: 1px solid #007bff; background: white; color: #007bff; border-radius: 20px; cursor: pointer;">
-        Venta
-    </button>
-    <button class="quick-filter-btn" data-filter="tipo" data-value="Alquiler" style="margin: 5px; padding: 8px 16px; border: 1px solid #007bff; background: white; color: #007bff; border-radius: 20px; cursor: pointer;">
-        Alquiler
-    </button>
-    <button class="quick-filter-btn" data-filter="estado" data-value="Disponible" style="margin: 5px; padding: 8px 16px; border: 1px solid #007bff; background: white; color: #007bff; border-radius: 20px; cursor: pointer;">
-        Disponibles
-</body>
-</html> 
