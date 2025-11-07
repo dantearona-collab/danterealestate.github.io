@@ -1,4 +1,4 @@
-// JAVASCRIPT ACTUALIZADO PARA HTML CON ESTRUCTURA JSON DETALLADA - VERSIÓN CORREGIDA
+  // JAVASCRIPT ACTUALIZADO PARA HTML CON ESTRUCTURA JSON DETALLADA - VERSIÓN CORREGIDA
 document.addEventListener('DOMContentLoaded', function() {
     console.log('=== DANTE PROPIEDADES - SISTEMA ACTUALIZADO ===');
     
@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initSlider();
     initWhatsApp();
     
-    // Cargar datos y inicializar todo el sistema
+    //                      Cargar datos y inicializar todo el sistema
     initializeSystem();
 });
 
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
 async function initializeSystem() {
     try {
         console.log('🚀 Inicializando sistema completo...');
-        
+                
         // Cargar datos
         await loadPropertiesData();
         
@@ -641,4 +641,4 @@ setTimeout(() => {
         console.log('🔍 DEBUG: Barrios únicos:', [...new Set(allProperties.map(p => p.barrio).filter(Boolean))]);
         console.log('🔍 DEBUG: Tipos únicos:', [...new Set(allProperties.map(p => p.tipo).filter(Boolean))]);
     }
-}, 3000);
+}, 3000)

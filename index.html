@@ -945,6 +945,112 @@
           font-size: 24px !important;
       }
   }
+
+  /* SLIDER INSTITUCIONAL - ESTILOS COMPLETOS */
+  .slider-container {
+      position: relative !important;
+      width: 100% !important;
+      max-width: 1200px !important;
+      margin: 0 auto !important;
+      overflow: hidden !important;
+      border-radius: 12px !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
+  }
+
+  .slini {
+      position: relative !important;
+      width: 100% !important;
+      height: 400px !important;
+  }
+
+  .slide {
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      opacity: 0 !important;
+      transition: opacity 0.8s ease-in-out !important;
+      z-index: 1 !important;
+  }
+
+  .slide.active {
+      opacity: 1 !important;
+      z-index: 2 !important;
+  }
+
+  .image-wrapper {
+      width: 100% !important;
+      height: 100% !important;
+      position: relative !important;
+      overflow: hidden !important;
+  }
+
+  .slider-img {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      object-position: center !important;
+      display: block !important;
+  }
+
+  /* Navegación del slider */
+  .slider-nav {
+      position: absolute !important;
+      bottom: 20px !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      display: flex !important;
+      gap: 10px !important;
+      z-index: 10 !important;
+  }
+
+  .slider-nav button {
+      width: 12px !important;
+      height: 12px !important;
+      border-radius: 50% !important;
+      border: none !important;
+      background: rgba(255, 255, 255, 0.5) !important;
+      cursor: pointer !important;
+      transition: all 0.3s ease !important;
+    }
+
+  .slider-nav button.active {
+      background: var(--dante-azul) !important;
+      transform: scale(1.2) !important;
+      box-shadow: 0 0 10px rgba(35, 45, 235, 0.5) !important;
+  }
+
+  .slider-nav button:hover {
+      background: rgba(255, 255, 255, 0.8) !important;
+      transform: scale(1.1) !important;
+  }
+
+  /* Responsivo para el slider */
+  @media (max-width: 768px) {
+      .slini {
+          height: 300px !important;
+      }
+      
+      .slider-nav {
+          bottom: 15px !important;
+      }
+      
+      .slider-nav button {
+          width: 10px !important;
+          height: 10px !important;
+      }
+  }
+
+  @media (max-width: 480px) {
+      .slini {
+          height: 250px !important;
+      }
+      
+      .slider-container {
+          margin: 0 10px !important;
+      }
+  }
   </style>
 </head>
 
@@ -1314,6 +1420,63 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
   <script src="./app.js"></script>
+
+  <!-- SLIDER INSTITUCIONAL - INICIALIZACIÓN JAVASCRIPT -->
+  <script>
+  $(document).ready(function() {
+      console.log('🎠 === INICIALIZANDO SLIDER INSTITUCIONAL ===');
+      
+      // Inicializar Slick Carousel para el slider institucional
+      $('.slini').slick({
+          dots: false,
+          infinite: true,
+          speed: 800,
+          fade: true,
+          cssEase: 'linear',
+          autoplay: true,
+          autoplaySpeed: 4000,
+          pauseOnHover: true,
+          pauseOnFocus: true,
+          arrows: false,
+          slidesToShow: 1,
+          slidesToScroll: 1,
+          responsive: [
+              {
+                  breakpoint: 768,
+                  settings: {
+                      autoplaySpeed: 3500
+                  }
+              },
+              {
+                  breakpoint: 480,
+                  settings: {
+                      autoplaySpeed: 3000
+                  }
+              }
+          ]
+      });
+      
+      // Personalizar navegación manual
+      $('.slider-nav button').click(function() {
+          const slideIndex = $(this).data('slide');
+          $('.slini').slick('slickGoTo', slideIndex);
+          
+          // Actualizar estado activo de los botones
+          $('.slider-nav button').removeClass('active');
+          $(this).addClass('active');
+      });
+      
+      // Actualizar navegación cuando cambie el slide automáticamente
+      $('.slini').on('afterChange', function(event, slick, currentSlide) {
+          $('.slider-nav button').removeClass('active');
+          $('.slider-nav button[data-slide="' + currentSlide + '"]').addClass('active');
+      });
+      
+      console.log('✅ Slider institucional inicializado correctamente');
+      console.log('🔄 Rotación automática cada 4 segundos');
+      console.log('🖱️ Navegación manual disponible');
+  });
+  </script>
 
   <!-- Menú móvil -->
   <nav id="menuslide">
@@ -1949,3 +2112,4 @@ window.danteLab = {
     showDetails: showTechnicalDetails
 };
 </script>
+    </body>
