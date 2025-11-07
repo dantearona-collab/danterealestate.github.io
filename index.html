@@ -1288,6 +1288,26 @@ function debugFiltros() {
             if (contador) {
                 contador.textContent = `${filtros.length} propiedades encontradas`;
             }
+            
+            // Actualizar resultados visualmente si existe contenedor
+            const contenedor = document.getElementById('listaDestacadas') || document.getElementById('property-grid-styled');
+            if (contenedor && filtros.length > 0) {
+                let html = '';
+                filtros.forEach(propiedad => {
+                    html += `
+                        <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 8px;">
+                            <h4>${propiedad.titulo}</h4>
+                            <p><strong>Barrio:</strong> ${propiedad.barrio}</p>
+                            <p><strong>Tipo:</strong> ${propiedad.tipo}</p>
+                            <p><strong>Operación:</strong> ${propiedad.operacion}</p>
+                            <p><strong>Precio:</strong> $${propiedad.precio?.toLocaleString()}</p>
+                        </div>
+                    `;
+                });
+                contenedor.innerHTML = html;
+            } else if (contenedor) {
+                contenedor.innerHTML = '<p style="text-align: center; color: #666;">No se encontraron propiedades con estos filtros.</p>';
+            }
         }
         
         console.log('🆘 === SCRIPT DE BACKUP COMPLETADO ===');
