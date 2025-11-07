@@ -48,97 +48,252 @@ def guardar_contacto_route():
     
     try:
         data = request.get_json()
-        if not data:
-            return jsonify({'success': False, 'message': 'No data received'}), 400
+        init_excel()
         
+        fecha_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         nombre = data.get('nombre', '').strip()
         firma = data.get('firma', '').strip()
         telefono = data.get('telefono', '').strip()
-        propiedad = data.get('propiedad', 'DESTACADA0')
+        propiedad = data.get('propiedad', '').strip()
         
-        if not nombre or not telefono:
-            return jsonify({'success': False, 'message': 'Name and phone are required'}), 400
+        if not nombre and not telefono:
+            return jsonify({'error': 'Se requiere al menos nombre o teléfono'}), 400
         
-        try:
-            wb = load_workbook(EXCEL_FILE)
-            ws = wb.active
-            next_row = ws.max_row + 1
-            ws[f'A{next_row}'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            ws[f'B{next_row}'] = nombre
-            ws[f'C{next_row}'] = firma if firma else '-'
-            ws[f'D{next_row}'] = telefono
-            ws[f'E{next_row}'] = propiedad
-            wb.save(EXCEL_FILE)
-            safe_print(f"SUCCESS: Contact saved: {nombre} - {telefono}")
-            return jsonify({'success': True, 'message': 'Data saved correctly in Excel'})
-            
-        except Exception as e:
-            safe_print(f"ERROR saving to Excel: {str(e)}")
-            return jsonify({'success': False, 'message': 'Error saving data'}), 500
-            
+        wb = load_workbook(EXCEL_FILE)
+        ws = wb.active
+        next_row = ws.max_row + 1
+        
+        ws[f'A{next_row}'] = fecha_hora
+        ws[f'B{next_row}'] = nombre
+        ws[f'C{next_row}'] = firma
+        ws[f'D{next_row}'] = telefono
+        ws[f'E{next_row}'] = propiedad
+        
+        wb.save(EXCEL_FILE)
+        safe_print(f"SUCCESS: Contacto guardado - {nombre} - {telefono} - {fecha_hora}")
+        
+        return jsonify({'message': 'Contacto guardado exitosamente'}), 200
+        
     except Exception as e:
-        safe_print(f"ERROR in server: {str(e)}")
-        return jsonify({'success': False, 'message': 'Server error occurred'}), 500
+        safe_print(f"ERROR: {str(e)}")
+        return jsonify({'error': f'Error interno: {str(e)}'}), 500
 
-# --- End of Excel Contact Logic ---
-
-@app.route("/api/properties/search", methods=["GET"])
+# --- Property Search API ---
+@app.route('/api/properties/search', methods=['GET'])
 def search_properties():
-    safe_print("--- Nueva Búsqueda ---")
+    """Advanced property search with filters"""
     try:
-        with open('propiedades.json', 'r', encoding='utf-8') as f:
+        # Load properties data
+        with open('propriedades.json', 'r', encoding='utf-8') as f:
             properties = json.load(f)
-    except FileNotFoundError:
-        return jsonify({"error": "El archivo propiedades.json no fue encontrado."}), 404
-    except json.JSONDecodeError:
-        return jsonify({"error": "El archivo propiedades.json no tiene un formato JSON válido."}), 500
-
-    ope = request.args.get("ope")
-    tipo = request.args.get("tipo")
-    loc = request.args.get("loc")
-    cod = request.args.get("cod")
-
-    safe_print(f"Parámetros recibidos: ope={ope}, tipo={tipo}, loc={loc}, cod={cod}")
-
-    operation_map = {
-        "V": "venta",
-        "A": "alquiler",
-        "T": "alquiler temporal"
-    }
-    
-    if ope in operation_map:
-        ope = operation_map[ope]
-
-    filtered_properties = []
-    for prop in properties:
-        # Match operation
-        if ope and (prop.get('operacion') is None or prop.get('operacion').lower() != ope.lower()):
-            continue
         
-        # Match property type
-        if tipo and (prop.get('tipo') is None or prop.get('tipo').lower() != tipo.lower()):
-            continue
+        # Get filter parameters
+        operacion = request.args.get('operacion', '').lower()
+        barrio = request.args.get('barrio', '').lower()
+        tipo = request.args.get('tipo', '').lower()
+        precio_min = request.args.get('precio_min')
+        precio_max = request.args.get('precio_max')
+        ambientes = request.args.get('ambientes')
+        metros = request.args.get('metros')
+        search_term = request.args.get('search', '').lower()
+        
+        # Apply filters
+        filtered_properties = properties
+        
+        if operacion:
+            filtered_properties = [p for p in filtered_properties if 
+                                 p.get('operacion', '').lower() == operacion]
+        
+        if barrio:
+            filtered_properties = [p for p in filtered_properties if 
+                                 barrio in p.get('barrio', '').lower()]
+        
+        if tipo:
+            filtered_properties = [p for p in filtered_properties if 
+                                 tipo in p.get('tipo', '').lower()]
+        
+        if precio_min:
+            try:
+                min_price = float(precio_min)
+                filtered_properties = [p for p in filtered_properties 
+                                     if float(p.get('precio', 0)) >= min_price]
+            except ValueError:
+                pass
+        
+        if precio_max:
+            try:
+                max_price = float(precio_max)
+                filtered_properties = [p for p in filtered_properties 
+                                     if float(p.get('precio', 0)) <= max_price]
+            except ValueError:
+                pass
+        
+        if ambientes:
+            try:
+                target_ambientes = int(ambientes)
+                filtered_properties = [p for p in filtered_properties 
+                                     if int(p.get('ambientes', 0)) == target_ambientes]
+            except ValueError:
+                pass
+        
+        if metros:
+            try:
+                target_metros = int(metros)
+                filtered_properties = [p for p in filtered_properties 
+                                     if int(p.get('metros', 0)) >= target_metros]
+            except ValueError:
+                pass
+        
+        if search_term:
+            filtered_properties = [p for p in filtered_properties if 
+                                 search_term in p.get('titulo', '').lower() or
+                                 search_term in p.get('descripcion', '').lower() or
+                                 search_term in p.get('direccion', '').lower() or
+                                 search_term in p.get('barrio', '').lower()]
+        
+        # Return results with metadata
+        return jsonify({
+            'properties': filtered_properties,
+            'total': len(filtered_properties),
+            'filters_applied': {
+                'operacion': operacion,
+                'barrio': barrio,
+                'tipo': tipo,
+                'precio_min': precio_min,
+                'precio_max': precio_max,
+                'ambientes': ambientes,
+                'metros': metros,
+                'search': search_term
+            }
+        })
+        
+    except Exception as e:
+        return jsonify({'error': f'Error searching properties: {str(e)}'}), 500
 
-        # Match neighborhood (loc)
-        if loc and (prop.get('barrio') is None or prop.get('barrio').lower() != loc.lower()):
-            continue
+@app.route('/api/properties/filter-options', methods=['GET'])
+def get_filter_options():
+    """Get available filter options from data"""
+    try:
+        with open('propriedades.json', 'r', encoding='utf-8') as f:
+            properties = json.load(f)
+        
+        # Extract unique values for filters
+        barrios = list(set(p.get('barrio', '') for p in properties if p.get('barrio')))
+        tipos = list(set(p.get('tipo', '') for p in properties if p.get('tipo')))
+        operaciones = list(set(p.get('operacion', '') for p in properties if p.get('operacion')))
+        
+        # Get price range
+        precios = [float(p.get('precio', 0)) for p in properties if p.get('precio')]
+        precio_min = min(precios) if precios else 0
+        precio_max = max(precios) if precios else 0
+        
+        # Get ambiente range
+        ambientes = [int(p.get('ambientes', 0)) for p in properties if p.get('ambientes')]
+        ambiente_min = min(ambientes) if ambientes else 0
+        ambiente_max = max(ambientes) if ambientes else 0
+        
+        return jsonify({
+            'barrios': sorted([b for b in barrios if b]),
+            'tipos': sorted([t for t in tipos if t]),
+            'operaciones': sorted([o for o in operaciones if o]),
+            'precio_range': {'min': int(precio_min), 'max': int(precio_max)},
+            'ambiente_range': {'min': int(ambiente_min), 'max': int(ambiente_max)}
+        })
+        
+    except Exception as e:
+        return jsonify({'error': f'Error getting filter options: {str(e)}'}), 500
 
-        # Match code
-        if cod and (prop.get('id_temporal') is None or str(prop.get('id_temporal')) != cod):
-            continue
+@app.route('/api/properties/stats', methods=['GET'])
+def get_property_stats():
+    """Get property statistics"""
+    try:
+        with open('propriedades.json', 'r', encoding='utf-8') as f:
+            properties = json.load(f)
+        
+        stats = {
+            'total_properties': len(properties),
+            'by_operacion': {},
+            'by_tipo': {},
+            'by_barrio': {},
+            'price_stats': {},
+            'ambiente_stats': {}
+        }
+        
+        # Count by operation
+        for prop in properties:
+            operacion = prop.get('operacion', 'Sin especificar')
+            stats['by_operacion'][operacion] = stats['by_operacion'].get(operacion, 0) + 1
+            
+            tipo = prop.get('tipo', 'Sin especificar')
+            stats['by_tipo'][tipo] = stats['by_tipo'].get(tipo, 0) + 1
+            
+            barrio = prop.get('barrio', 'Sin especificar')
+            stats['by_barrio'][barrio] = stats['by_barrio'].get(barrio, 0) + 1
+        
+        # Price statistics
+        precios = [float(p.get('precio', 0)) for p in properties if p.get('precio')]
+        if precios:
+            stats['price_stats'] = {
+                'min': min(precios),
+                'max': max(precios),
+                'average': sum(precios) / len(precios)
+            }
+        
+        # Ambiente statistics
+        ambientes = [int(p.get('ambientes', 0)) for p in properties if p.get('ambientes')]
+        if ambientes:
+            stats['ambiente_stats'] = {
+                'min': min(ambientes),
+                'max': max(ambientes),
+                'average': sum(ambientes) / len(ambientes)
+            }
+        
+        return jsonify(stats)
+        
+    except Exception as e:
+        return jsonify({'error': f'Error getting statistics: {str(e)}'}), 500
 
-        filtered_properties.append(prop)
-    
-    safe_print(f"Propiedades encontradas: {len(filtered_properties)}")
-    return jsonify(filtered_properties)
+@app.route('/api/properties/<int:property_id>', methods=['GET'])
+def get_property(property_id):
+    """Get single property by ID"""
+    try:
+        with open('propriedades.json', 'r', encoding='utf-8') as f:
+            properties = json.load(f)
+        
+        # Find property by id_temporal
+        property_obj = None
+        for prop in properties:
+            if str(prop.get('id_temporal', '')) == str(property_id):
+                property_obj = prop
+                break
+        
+        if not property_obj:
+            return jsonify({'error': 'Property not found'}), 404
+        
+        return jsonify(property_obj)
+        
+    except Exception as e:
+        return jsonify({'error': f'Error getting property: {str(e)}'}), 500
 
-@app.route("/")
-def index():
-    return "Welcome to the Property Search API. Use /api/properties/search to query."
+# --- Original Routes ---
+@app.route('/')
+def home():
+    """Serve the main HTML file"""
+    try:
+        with open('index.html', 'r', encoding='utf-8') as f:
+            return f.read()
+    except Exception as e:
+        return f"Error loading page: {str(e)}", 500
+
+@app.route('/<path:filename>')
+def serve_static(filename):
+    """Serve static files"""
+    return app.send_static_file(filename)
 
 if __name__ == '__main__':
-    init_excel()  # Initialize Excel file
-    safe_print("INFO: Iniciando servidor Flask...")
-    safe_print("INFO: Excel inicializado")
-    safe_print("INFO: Servidor corriendo en: http://127.0.0.1:5000")
-    app.run(host='0.0.0.0', port=5000)
+    # Initialize Excel file
+    init_excel()
+    
+    # Start Flask app
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
