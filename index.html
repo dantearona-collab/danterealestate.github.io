@@ -1,336 +1,281 @@
-  <div class="nav-menu" id="nav-menu">
-    <a href="#inicio" class="nav-link">Inicio</a>
-    <a href="#ventas" class="nav-link">Ventas</a>
-    <a href="#alquileres" class="nav-link">Alquileres</a>
-    <a href="#servicios" class="nav-link">Servicios</a>
-    <a href="#contacto" class="nav-link">Contacto</a>
-    <a href="tel:+5491123456789" class="nav-link phone-link">
-      <i class="fas fa-phone"></i>
-      11 2345-6789
-    </a>
-  </div>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <meta name="description" content="Propiedades en venta y alquiler en Capital Federal - Dante Propiedades">
+  <title>Dante Propiedades</title>
   
-  <div class="nav-toggle" id="nav-toggle">
-    <span class="hamburger"></span>
-    <span class="hamburger"></span>
-    <span class="hamburger"></span>
-  </div>
-</nav>
-  <div class="hero-content">
-    <h1 class="hero-title">
-      Encuentra tu hogar ideal
-      <span class="hero-subtitle">en Capital Federal</span>
-    </h1>
-    
-    <p class="hero-description">
-      Con años de experiencia, te ayudamos a encontrar la propiedad perfecta
-      para vos y tu familia
-    </p>
-    
-    <div class="hero-cta">
-      <a href="#propiedades" class="btn btn-primary">
-        <i class="fas fa-search"></i>
-        Ver Propiedades
-      </a>
-      <a href="#contacto" class="btn btn-secondary">
-        <i class="fas fa-phone"></i>
-        Contactar
-      </a>
-    </div>
-  </div>
-</section>
+  <!-- Open Graph (para Facebook, WhatsApp, LinkedIn) -->
+  <meta property="og:title" content="Dante Propiedades | Tu Ciudad">
+  <meta property="og:description" content="Propiedades en venta y alquiler en Capital Federal - Dante Propiedades">
+  <meta property="og:image" content="https://dantepropiedades.com.ar/imagenes/og-dante.jpg">
+  <meta property="og:url" content="https://dantepropiedades.com.ar">
+  <meta property="og:type" content="website">
 
-<!-- Property Search Section -->
-<section id="propiedades" class="properties-section">
-  <div class="cont">
-    <div class="section-header">
-      <h2 class="section-title">Buscar Propiedades</h2>
-      <p class="section-description">
-        Encontrá la propiedad perfecta usando nuestros filtros avanzados
-      </p>
-    </div>
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Dante Propiedades | Tu Ciudad">
+  <meta name="twitter:description" content="Propiedades en venta y alquiler en Capital Federal - Dante Propiedades">
+  <meta name="twitter:image" content="https://dantepropiedades.com.ar/imagenes/og-dante.jpg">
 
-    <!-- Search Form -->
-    <div class="search-container">
-      <form id="property-search-form" class="search-form">
-        <div class="search-row">
-          <div class="search-field">
-            <label for="operacion">Operación</label>
-            <select id="operacion" name="operacion">
-              <option value="">Todas las operaciones</option>
-              <option value="venta">Venta</option>
-              <option value="alquiler">Alquiler</option>
-            </select>
-          </div>
+  <!-- Favicon optimizado -->
+  <!-- <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"> -->
 
-          <div class="search-field">
-            <label for="barrio">Barrio</label>
-            <input type="text" id="barrio" name="barrio" placeholder="Ej: Palermo, Belgrano">
-          </div>
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css">
+  <link rel="stylesheet" href="app.css">
+  
+  <style>
+  .construction-banner {
+      background-color: yellow;
+      text-align: center;
+      padding: 10px;
+      font-weight: bold;
+      animation: blinker 1s linear infinite;
+  }
 
-          <div class="search-field">
-            <label for="tipo">Tipo</label>
-            <input type="text" id="tipo" name="tipo" placeholder="Ej: Departamento, Casa">
-          </div>
+  @keyframes blinker {
+      50% {
+          opacity: 0;
+      }
+  }
+  </style>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-E6K41V8BHB"></script>
+  <script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-E6K41V8BHB');
+  </script>
+</head>
+
+<body>
+  <!-- 📜 SCRIPT DE FUNCIONALIDAD -->
+  <script src="script.js"></script>
+
+    <!-- Header -->
+    <header id="cab">
+        <div class="cont">
+            <a href="index" class="logo">
+                <img src="llave.png" alt="Dante Propiedades" width="90" height="30" loading="eager">
+                <span class="logo-text">DANTE PROPIEDADES</span>
+            </a>
+            
+            <nav class="menugen">
+                <!-- Banner de construcción oculto por defecto, solo visible en desktop -->
+                <div class="construction-banner desktop-only">
+                    <p>Página en Construcción</p>
+                </div>
+                <ul class="menucab">
+                    <li class="desktop-only"><a href="tel:1166562078"><i class="fas fa-phone"></i> Llamá <span>11 6656 2078</span></a></li>
+                    <li><a href="tasaciones">Tasación</a></li>
+                    <li><a href="propiedades">Propiedades</a></li>
+                </ul>
+
+                <!-- <ul class="redescab">
+                    <li><a href="https://instagram.com/danteprop" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a></li>
+                    <li><a href="https://facebook.com/DantePropiedades" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i></a></li>
+                    <li><a href="https://www.youtube.com/channel/UCclLOUtNIhOYTcJTxVPBrCA" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a></li>
+                </ul> -->
+
+                <button class="menudesp" aria-label="Abrir menú">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </nav>
         </div>
+    </header>
 
-        <div class="search-row">
-          <div class="search-field">
-            <label for="precio_min">Precio mínimo</label>
-            <input type="number" id="precio_min" name="precio_min" placeholder="0">
-          </div>
-
-          <div class="search-field">
-            <label for="precio_max">Precio máximo</label>
-            <input type="number" id="precio_max" name="precio_max" placeholder="Sin límite">
-          </div>
-
-          <div class="search-field">
-            <label for="ambientes">Ambientes</label>
-            <select id="ambientes" name="ambientes">
-              <option value="">Cualquier cantidad</option>
-              <option value="1">1 ambiente</option>
-              <option value="2">2 ambientes</option>
-              <option value="3">3 ambientes</option>
-              <option value="4">4 ambientes</option>
-              <option value="5">5+ ambientes</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="search-row">
-          <div class="search-field search-field-full">
-            <label for="search">Búsqueda general</label>
-            <input type="text" id="search" name="search" placeholder="Buscar por título, descripción, dirección...">
-          </div>
-        </div>
-
-        <div class="search-actions">
-          <button type="submit" class="btn btn-primary search-btn">
-            <i class="fas fa-search"></i>
-            Buscar Propiedades
-          </button>
-          <button type="button" id="clear-filters" class="btn btn-secondary">
-            <i class="fas fa-times"></i>
-            Limpiar Filtros
-          </button>
-        </div>
-      </form>
-
-      <!-- Quick Filters -->
-      <div class="quick-filters">
-        <h3>Filtros rápidos</h3>
-        <div class="quick-filter-tags">
-          <button class="filter-tag active" data-filter="operacion" data-value="">Todas</button>
-          <button class="filter-tag" data-filter="operacion" data-value="venta">Ventas</button>
-          <button class="filter-tag" data-filter="operacion" data-value="alquiler">Alquileres</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Results Section -->
-    <div id="search-results-section" class="search-results-container" style="display: none;">
-      <div id="results-header" class="results-header">
-        <div class="results-count">
-          <span id="results-count">0</span> propiedades encontradas
-        </div>
-        <div class="results-controls">
-          <div class="view-controls">
-            <button class="view-btn active" data-view="grid" title="Vista de tarjetas">
-              <i class="fas fa-th-large"></i>
+    <!-- ****************** Buscador Avanzado ****************-->
+  
+    <form class="buscadorcab" action="#" method="GET" id="advanced-search-form">
+        <input type="hidden" name="ope" value="V" id="ope-input">
+        
+        <div class="cont">
+            <!-- Selector de Operación -->
+            <div class="search-group">
+                <label for="operacion">Operación:</label>
+                <div class="ope" id="operacion">
+                    <span class="activo" data-val="V">Venta</span>
+                    <span data-val="A">Alquiler</span>
+                    <span data-val="T">Alquiler Temporal</span>
+                </div>
+            </div>
+            
+            <!-- Selector de Barrio -->
+            <div class="search-group">
+                <label for="barrio">Barrio:</label>
+                <select name="loc" id="barrio-select" class="form-select">
+                    <option value="">Todos los barrios</option>
+                    <option value="palermo">Palermo</option>
+                    <option value="belgrano">Belgrano</option>
+                    <option value="colegiales">Colegiales</option>
+                    <option value="microcentro">Microcentro</option>
+                    <option value="recoleta">Recoleta</option>
+                    <option value="san isidro">San Isidro</option>
+                    <option value="almagro">Almagro</option>
+                    <option value="villa crespo">Villa Crespo</option>
+                    <option value="caballito">Caballito</option>
+                    <option value="nuñez">Nuñez</option>
+                    <option value="boedo">Boedo</option>
+                    <option value="balvanera">Balvanera</option>
+                    <option value="vicente lopez">Vicente López</option>
+                    <option value="puerto madero">Puerto Madero</option>
+                </select>
+            </div>
+            
+            <!-- Selector de Tipo -->
+            <div class="search-group">
+                <label for="tipo">Tipo de Propiedad:</label>
+                <select name="tipo" id="tipo-select" class="form-select">
+                    <option value="">Todos los tipos</option>
+                    <option value="departamento">Departamento</option>
+                    <option value="casa">Casa</option>
+                    <option value="ph">PH</option>
+                    <option value="oficina">Oficina</option>
+                    <option value="local">Local</option>
+                    <option value="terreno">Terreno</option>
+                </select>
+            </div>
+            
+            <!-- Filtros Adicionales -->
+            <div class="search-group">
+                <label for="precio_max">Precio máximo:</label>
+                <input type="number" name="precio_max" id="precio-input" placeholder="Ej: 300000" class="form-input">
+            </div>
+            
+            <div class="search-group">
+                <label for="ambientes">Mín. ambientes:</label>
+                <input type="number" name="ambientes" id="ambientes-input" placeholder="Ej: 2" class="form-input" min="1" max="10">
+            </div>
+            
+            <button type="submit" class="search-btn" aria-label="Buscar propiedades">
+                <i class="fas fa-search"></i>
+                <span>Buscar</span>
             </button>
-            <button class="view-btn" data-view="list" title="Vista de lista">
-              <i class="fas fa-list"></i>
-            </button>
-          </div>
         </div>
-      </div>
-      <div id="search-results-grid" class="propiedades-grid"></div>
-    </div>
-  </div>
-</section>
+    </form>
 
-<!-- Modal para detalles de propiedad -->
-<div id="property-modal" class="property-modal" style="display: none;">
-  <div class="modal-overlay"></div>
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3 id="modal-property-title"></h3>
-      <button class="modal-close" id="modal-close">
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
-    <div class="modal-body">
-      <div class="modal-gallery" id="modal-gallery">
-        <!-- Imágenes de la propiedad -->
-      </div>
-      <div class="modal-info">
-        <div class="modal-price" id="modal-price"></div>
-        <div class="modal-details" id="modal-details"></div>
-        <div class="modal-description" id="modal-description"></div>
-        <div class="modal-features" id="modal-features"></div>
-        <div class="modal-contact">
-          <button class="btn btn-primary contact-btn" id="contact-property">
-            <i class="fas fa-phone"></i>
-            Contactar sobre esta propiedad
-          </button>
+    <!-- ****************** Sección de Propiedades Destacadas ****************-->
+    <section class="propiedades-destacadas">
+        <div class="cont">
+            <h2 class="section-title">Propiedades Destacadas</h2>
+            <div class="propiedades-grid" id="featured-properties-grid">
+                <!-- Las propiedades destacadas se cargarán aquí dinámicamente -->
+                <div class="loading">
+                    <p>Cargando propiedades destacadas...</p>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  </div>
-</div>
+    </section>
 
-<!-- Services Section -->
-<section id="servicios" class="services-section">
-  <div class="cont">
-    <div class="section-header">
-      <h2 class="section-title">Nuestros Servicios</h2>
-      <p class="section-description">
-        Te acompañamos en todo el proceso inmobiliario
-      </p>
-    </div>
-
-    <div class="services-grid">
-      <div class="service-card">
-        <div class="service-icon">
-          <i class="fas fa-home"></i>
+    <!-- ****************** Modal para Contacto ****************-->
+    <div id="contact-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <button id="modal-close-btn" class="modal-close">&times;</button>
+            <h2>Contactar por esta propiedad</h2>
+            <form id="contact-form">
+                <input type="hidden" id="property-id" name="propiedad">
+                
+                <div class="form-group">
+                    <label for="contact-name">Nombre completo *</label>
+                    <input type="text" id="contact-name" name="nombre" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contact-firma">Firma</label>
+                    <input type="text" id="contact-firma" name="firma" placeholder="Ej: Realtor, Particular">
+                </div>
+                
+                <div class="form-group">
+                    <label for="contact-phone">Teléfono *</label>
+                    <input type="tel" id="contact-phone" name="telefono" required>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancel-contact">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Enviar Consulta</button>
+                </div>
+                
+                <div id="contact-result" class="contact-result"></div>
+            </form>
         </div>
-        <h3 class="service-title">Venta de Propiedades</h3>
-        <p class="service-description">
-          Te ayudamos a vender tu propiedad al mejor precio del mercado
-        </p>
-      </div>
-
-      <div class="service-card">
-        <div class="service-icon">
-          <i class="fas fa-key"></i>
-        </div>
-        <h3 class="service-title">Alquileres</h3>
-        <p class="service-description">
-          Encontramos inquilinos confiables para tu propiedad
-        </p>
-      </div>
-
-      <div class="service-card">
-        <div class="service-icon">
-          <i class="fas fa-handshake"></i>
-        </div>
-        <h3 class="service-title">Asesoría Integral</h3>
-        <p class="service-description">
-          Te guiamos en todos los aspectos legales y financieros
-        </p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Contact Section -->
-<section id="contacto" class="contact-section">
-  <div class="cont">
-    <div class="section-header">
-      <h2 class="section-title">Contactanos</h2>
-      <p class="section-description">
-        Estamos aquí para ayudarte a encontrar tu hogar ideal
-      </p>
     </div>
 
-    <div class="contact-content">
-      <div class="contact-info">
-        <div class="contact-item">
-          <div class="contact-icon">
-            <i class="fas fa-phone"></i>
-          </div>
-          <div class="contact-text">
-            <h3>Teléfono</h3>
-            <p>11 2345-6789</p>
-          </div>
+    <!-- ****************** Footer ****************-->
+    <footer class="footer">
+        <div class="cont">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Contactanos</h3>
+                    <p>📍 Buenos Aires, Argentina</p>
+                    <p>📱 <a href="tel:1166562078">11 6656 2078</a></p>
+                    <p>📧 <a href="mailto:info@dantepropiedades.com.ar">info@dantepropiedades.com.ar</a></p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Servicios</h3>
+                    <ul>
+                        <li><a href="propiedades">Venta</a></li>
+                        <li><a href="propiedades">Alquiler</a></li>
+                        <li><a href="propiedades">Alquiler Temporal</a></li>
+                        <li><a href="tasaciones">Tasaciones</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Zonas</h3>
+                    <ul>
+                        <li><a href="propiedades?loc=palermo">Palermo</a></li>
+                        <li><a href="propiedades?loc=belgrano">Belgrano</a></li>
+                        <li><a href="propiedades?loc=recoleta">Recoleta</a></li>
+                        <li><a href="propiedades?loc=colegiales">Colegiales</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Síguenos</h3>
+                    <div class="social-links">
+                        <a href="https://instagram.com/danteprop" target="_blank" aria-label="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://facebook.com/DantePropiedades" target="_blank" aria-label="Facebook">
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                        <a href="https://www.youtube.com/channel/UCclLOUtNIhOYTcJTxVPBrCA" target="_blank" aria-label="YouTube">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Dante Propiedades. Todos los derechos reservados.</p>
+                <br>
+                <a href="#" target="_blank">by <strong>Arona</strong></a>
+            </div>
         </div>
-
-        <div class="contact-item">
-          <div class="contact-icon">
-            <i class="fas fa-envelope"></i>
-          </div>
-          <div class="contact-text">
-            <h3>Email</h3>
-            <p>info@dantepropiedades.com.ar</p>
-          </div>
-        </div>
-
-        <div class="contact-item">
-          <div class="contact-icon">
-            <i class="fas fa-map-marker-alt"></i>
-          </div>
-          <div class="contact-text">
-            <h3>Ubicación</h3>
-            <p>Capital Federal, Argentina</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="contact-form-container">
-        <form id="contact-form" class="contact-form">
-          <div class="form-group">
-            <label for="contact-nombre">Nombre *</label>
-            <input type="text" id="contact-nombre" name="nombre" required>
-          </div>
-
-          <div class="form-group">
-            <label for="contact-telefono">Teléfono *</label>
-            <input type="tel" id="contact-telefono" name="telefono" required>
-          </div>
-
-          <div class="form-group">
-            <label for="contact-firma">¿Qué tipo de servicio necesitas?</label>
-            <select id="contact-firma" name="firma">
-              <option value="">Seleccionar</option>
-              <option value="Compra">Comprar propiedad</option>
-              <option value="Venta">Vender propiedad</option>
-              <option value="Alquiler">Alquilar propiedad</option>
-              <option value="Asesoria">Asesoría general</option>
-              <option value="Otro">Otro</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="contact-propiedad">Propiedad de interés (opcional)</label>
-            <input type="text" id="contact-propiedad" name="propiedad" placeholder="ID o descripción de la propiedad">
-          </div>
-
-          <button type="submit" class="btn btn-primary">
-            <i class="fas fa-paper-plane"></i>
-            Enviar Consulta
-          </button>
-        </form>
-      </div>
-    </div>
-  </div>
-</section>
-    <div class="footer-section">
-      <h4 class="footer-subtitle">Enlaces rápidos</h4>
-      <ul class="footer-links">
-        <li><a href="#inicio">Inicio</a></li>
-        <li><a href="#propiedades">Propiedades</a></li>
-        <li><a href="#servicios">Servicios</a></li>
-        <li><a href="#contacto">Contacto</a></li>
-      </ul>
     </div>
 
-    <div class="footer-section">
-      <h4 class="footer-subtitle">Contacto</h4>
-      <ul class="footer-contact">
-        <li>
-          <i class="fas fa-phone"></i>
-          11 2345-6789
-        </li>
-        <li>
-          <i class="fas fa-envelope"></i>
-          info@dantepropiedades.com.ar
-        </li>
-      </ul>
-    </div>
-  </div>
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+    <script src="app.js"></script>
 
-  <div class="footer-bottom">
-    <p>&copy; 2024 Dante Propiedades. Todos los derechos reservados.</p>
-  </div>
-</div>
+    <!-- Modal para resultados de búsqueda -->
+    <div id="results-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button id="modal-close-btn" class="modal-close">&times;</button>
+            <h2>Resultados de la Búsqueda</h2>
+            <div id="modal-results-grid" class="propiedades-grid">
+                <!-- Resultados se insertarán aquí -->
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>
