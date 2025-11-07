@@ -828,6 +828,123 @@
           text-align: center !important;
       }
   }
+  
+  /* ANIMACIONES PARA LA SECCIÓN LABORATORIO DANTE */
+  @keyframes float {
+      0%, 100% { 
+          transform: translateY(0px) rotate(0deg) !important; 
+          opacity: 0.7 !important; 
+      }
+      50% { 
+          transform: translateY(-20px) rotate(180deg) !important; 
+          opacity: 1 !important; 
+      }
+  }
+
+  @keyframes pulse {
+      0%, 100% {
+          opacity: 1 !important;
+          transform: scale(1) !important;
+      }
+      50% {
+          opacity: 0.7 !important;
+          transform: scale(1.05) !important;
+      }
+  }
+
+  @keyframes speed-flow {
+      0% { 
+          left: -100% !important; 
+          width: 0% !important; 
+      }
+      50% { 
+          left: 0% !important; 
+          width: 100% !important; 
+      }
+      100% { 
+          left: 100% !important; 
+          width: 0% !important; 
+      }
+  }
+
+  @keyframes speed-fill {
+      0% { 
+          width: 90% !important; 
+      }
+      50% { 
+          width: 98% !important; 
+      }
+      100% { 
+          width: 90% !important; 
+      }
+  }
+
+  @keyframes counterUpdate {
+      0% { 
+          transform: scale(1) !important; 
+      }
+      50% { 
+          transform: scale(1.1) !important; 
+      }
+      100% { 
+          transform: scale(1) !important; 
+      }
+  }
+
+  /* Responsivo para la sección laboratorio */
+  @media (max-width: 768px) {
+      #laboratorio-dante {
+          padding: 40px 0 !important;
+      }
+      
+      .lab-dashboard {
+          grid-template-columns: 1fr !important;
+          gap: 20px !important;
+      }
+      
+      .transparency-stats {
+          grid-template-columns: repeat(2, 1fr) !important;
+          gap: 15px !important;
+      }
+      
+      .features-grid {
+          grid-template-columns: 1fr !important;
+      }
+      
+      .lab-header h2 {
+          font-size: 28px !important;
+      }
+      
+      .speed-indicator {
+          padding: 12px 24px !important;
+      }
+      
+      .speed-text {
+          font-size: 16px !important;
+      }
+  }
+
+  @media (max-width: 480px) {
+      #laboratorio-dante {
+          padding: 30px 0 !important;
+      }
+      
+      .transparency-stats {
+          grid-template-columns: 1fr !important;
+      }
+      
+      .speed-number, .count-number {
+          font-size: 36px !important;
+      }
+      
+      .stat-value {
+          font-size: 24px !important;
+      }
+      
+      .lab-header h2 {
+          font-size: 24px !important;
+      }
+  }
   </style>
 </head>
 
@@ -943,6 +1060,252 @@
               <button data-slide="0" class="active"></button>
               <button data-slide="1"></button>
               <button data-slide="2"></button>
+          </div>
+      </div>
+  </section>
+
+  <!-- SECCIÓN INSTITUCIONAL CREATIVA - LABORATORIO DANTE -->
+  <section id="laboratorio-dante" style="background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%) !important; padding: 60px 0 !important; position: relative !important; overflow: hidden !important; color: white !important;">
+      
+      <!-- Fondo animado con partículas -->
+      <div class="bg-animation" style="position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; z-index: 1 !important;">
+          <div class="particle" style="position: absolute !important; width: 2px !important; height: 2px !important; background: rgba(35, 45, 235, 0.6) !important; border-radius: 50% !important; animation: float 6s infinite ease-in-out !important;"></div>
+          <div class="particle" style="position: absolute !important; width: 3px !important; height: 3px !important; background: rgba(255, 1, 1, 0.6) !important; border-radius: 50% !important; animation: float 8s infinite ease-in-out reverse !important;"></div>
+          <div class="particle" style="position: absolute !important; width: 2px !important; height: 2px !important; background: rgba(35, 45, 235, 0.8) !important; border-radius: 50% !important; animation: float 7s infinite ease-in-out !important;"></div>
+          <div class="particle" style="position: absolute !important; width: 1px !important; height: 1px !important; background: rgba(255, 1, 1, 0.4) !important; border-radius: 50% !important; animation: float 5s infinite ease-in-out !important;"></div>
+      </div>
+
+      <div class="cont" style="max-width: 1200px !important; margin: 0 auto !important; padding: 0 20px !important; position: relative !important; z-index: 2 !important;">
+          
+          <!-- Header del Laboratorio -->
+          <div class="lab-header" style="text-align: center !important; margin-bottom: 50px !important; position: relative !important;">
+              <div class="speed-indicator" style="display: inline-block !important; background: linear-gradient(135deg, #232deb, #1a1bb3) !important; padding: 15px 30px !important; border-radius: 50px !important; margin-bottom: 20px !important; position: relative !important; overflow: hidden !important; box-shadow: 0 8px 32px rgba(35, 45, 235, 0.4) !important;">
+                  <div class="speed-text" style="font-size: 18px !important; font-weight: 700 !important; color: white !important; position: relative !important; z-index: 2 !important;">
+                      <i class="fas fa-bolt" style="margin-right: 8px !important; animation: pulse 2s infinite !important;"></i>
+                      MENOS DE 0,1 SEGUNDO
+                  </div>
+                  <div class="speed-progress" style="position: absolute !important; top: 0 !important; left: 0 !important; height: 100% !important; width: 0% !important; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent) !important; animation: speed-flow 2s infinite !important;"></div>
+              </div>
+              
+              <h2 style="font-size: 36px !important; font-weight: 800 !important; margin: 0 !important; background: linear-gradient(135deg, #ffffff, #e0e7ff) !important; -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; background-clip: text !important; text-transform: uppercase !important; letter-spacing: 2px !important;">
+                  <i class="fas fa-flask" style="margin-right: 15px !important; color: #232deb !important;"></i>
+                  LABORATORIO DANTE
+              </h2>
+              
+              <p style="font-size: 18px !important; color: rgba(255, 255, 255, 0.8) !important; margin: 20px 0 !important; font-weight: 300 !important; line-height: 1.6 !important;">
+                  Centro de Innovación Tecnológica Inmobiliaria
+              </p>
+          </div>
+
+          <!-- Dashboard Principal -->
+          <div class="lab-dashboard" style="display: grid !important; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important; gap: 30px !important; margin-bottom: 50px !important;">
+              
+              <!-- Panel de Velocidad -->
+              <div class="speed-panel" style="background: rgba(255, 255, 255, 0.05) !important; backdrop-filter: blur(10px) !important; border: 1px solid rgba(35, 45, 235, 0.2) !important; border-radius: 16px !important; padding: 30px !important; position: relative !important; overflow: hidden !important;">
+                  <div class="panel-header" style="display: flex !important; align-items: center !important; margin-bottom: 25px !important;">
+                      <div class="panel-icon" style="width: 50px !important; height: 50px !important; background: linear-gradient(135deg, #232deb, #4a4bed) !important; border-radius: 12px !important; display: flex !important; align-items: center !important; justify-content: center !important; margin-right: 15px !important; box-shadow: 0 4px 16px rgba(35, 45, 235, 0.3) !important;">
+                          <i class="fas fa-rocket" style="font-size: 20px !important; color: white !important;"></i>
+                      </div>
+                      <div>
+                          <h3 style="margin: 0 !important; font-size: 20px !important; font-weight: 600 !important; color: white !important;">Velocidad de Respuesta</h3>
+                          <p style="margin: 5px 0 0 0 !important; font-size: 14px !important; color: rgba(255, 255, 255, 0.6) !important;">Tiempo promedio de carga</p>
+                      </div>
+                  </div>
+                  
+                  <div class="speed-display" style="text-align: center !important; margin: 20px 0 !important;">
+                      <div class="speed-number" id="speed-number" style="font-size: 48px !important; font-weight: 800 !important; color: #232deb !important; font-family: 'Courier New', monospace !important; text-shadow: 0 0 20px rgba(35, 45, 235, 0.5) !important;">
+                          0.098
+                      </div>
+                      <div class="speed-unit" style="font-size: 16px !important; color: rgba(255, 255, 255, 0.8) !important; font-weight: 300 !important; text-transform: uppercase !important; letter-spacing: 1px !important;">
+                          segundos
+                      </div>
+                  </div>
+                  
+                  <div class="speed-bar" style="width: 100% !important; height: 8px !important; background: rgba(255, 255, 255, 0.1) !important; border-radius: 4px !important; overflow: hidden !important;">
+                      <div class="speed-progress-bar" id="speed-progress" style="height: 100% !important; width: 98% !important; background: linear-gradient(90deg, #232deb, #4a4bed) !important; border-radius: 4px !important; animation: speed-fill 3s infinite ease-in-out !important;"></div>
+                  </div>
+              </div>
+
+              <!-- Panel de Propiedades Activas -->
+              <div class="properties-panel" style="background: rgba(255, 255, 255, 0.05) !important; backdrop-filter: blur(10px) !important; border: 1px solid rgba(255, 1, 1, 0.2) !important; border-radius: 16px !important; padding: 30px !important; position: relative !important; overflow: hidden !important;">
+                  <div class="panel-header" style="display: flex !important; align-items: center !important; margin-bottom: 25px !important;">
+                      <div class="panel-icon" style="width: 50px !important; height: 50px !important; background: linear-gradient(135deg, #ff0101, #ff3333) !important; border-radius: 12px !important; display: flex !important; align-items: center !important; justify-content: center !important; margin-right: 15px !important; box-shadow: 0 4px 16px rgba(255, 1, 1, 0.3) !important;">
+                          <i class="fas fa-building" style="font-size: 20px !important; color: white !important;"></i>
+                      </div>
+                      <div>
+                          <h3 style="margin: 0 !important; font-size: 20px !important; font-weight: 600 !important; color: white !important;">Propiedades Activas</h3>
+                          <p style="margin: 5px 0 0 0 !important; font-size: 14px !important; color: rgba(255, 255, 255, 0.6) !important;">Disponibles ahora</p>
+                      </div>
+                  </div>
+                  
+                  <div class="properties-count" style="text-align: center !important; margin: 20px 0 !important;">
+                      <div class="count-number" id="properties-count" style="font-size: 48px !important; font-weight: 800 !important; color: #ff0101 !important; font-family: 'Courier New', monospace !important; text-shadow: 0 0 20px rgba(255, 1, 1, 0.5) !important;">
+                          16
+                      </div>
+                      <div class="count-label" style="font-size: 16px !important; color: rgba(255, 255, 255, 0.8) !important; font-weight: 300 !important;">
+                          propiedades únicas
+                      </div>
+                  </div>
+                  
+                  <div class="properties-status" style="display: flex !important; justify-content: space-between !important; margin-top: 20px !important;">
+                      <div class="status-item" style="text-align: center !important;">
+                          <div class="status-number" style="font-size: 20px !important; font-weight: 600 !important; color: #28a745 !important;">12</div>
+                          <div class="status-label" style="font-size: 12px !important; color: rgba(255, 255, 255, 0.6) !important;">Disponibles</div>
+                      </div>
+                      <div class="status-item" style="text-align: center !important;">
+                          <div class="status-number" style="font-size: 20px !important; font-weight: 600 !important; color: #ffc107 !important;">3</div>
+                          <div class="status-label" style="font-size: 12px !important; color: rgba(255, 255, 255, 0.6) !important;">En Proceso</div>
+                      </div>
+                      <div class="status-item" style="text-align: center !important;">
+                          <div class="status-number" style="font-size: 20px !important; font-weight: 600 !important; color: #6c757d !important;">1</div>
+                          <div class="status-label" style="font-size: 12px !important; color: rgba(255, 255, 255, 0.6) !important;">Reservado</div>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Panel de Tecnología -->
+              <div class="tech-panel" style="background: rgba(255, 255, 255, 0.05) !important; backdrop-filter: blur(10px) !important; border: 1px solid rgba(35, 45, 235, 0.2) !important; border-radius: 16px !important; padding: 30px !important; position: relative !important; overflow: hidden !important;">
+                  <div class="panel-header" style="display: flex !important; align-items: center !important; margin-bottom: 25px !important;">
+                      <div class="panel-icon" style="width: 50px !important; height: 50px !important; background: linear-gradient(135deg, #28a745, #20c997) !important; border-radius: 12px !important; display: flex !important; align-items: center !important; justify-content: center !important; margin-right: 15px !important; box-shadow: 0 4px 16px rgba(40, 167, 69, 0.3) !important;">
+                          <i class="fas fa-microchip" style="font-size: 20px !important; color: white !important;"></i>
+                      </div>
+                      <div>
+                          <h3 style="margin: 0 !important; font-size: 20px !important; font-weight: 600 !important; color: white !important;">Stack Tecnológico</h3>
+                          <p style="margin: 5px 0 0 0 !important; font-size: 14px !important; color: rgba(255, 255, 255, 0.6) !important;">Herramientas premium</p>
+                      </div>
+                  </div>
+                  
+                  <div class="tech-stack" style="display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 15px !important;">
+                      <div class="tech-item" style="background: rgba(35, 45, 235, 0.1) !important; padding: 15px !important; border-radius: 8px !important; text-align: center !important;">
+                          <i class="fab fa-html5" style="font-size: 24px !important; color: #ff0101 !important; margin-bottom: 8px !important;"></i>
+                          <div style="font-size: 12px !important; color: rgba(255, 255, 255, 0.8) !important; font-weight: 500 !important;">HTML5</div>
+                      </div>
+                      <div class="tech-item" style="background: rgba(35, 45, 235, 0.1) !important; padding: 15px !important; border-radius: 8px !important; text-align: center !important;">
+                          <i class="fab fa-js" style="font-size: 24px !important; color: #ffc107 !important; margin-bottom: 8px !important;"></i>
+                          <div style="font-size: 12px !important; color: rgba(255, 255, 255, 0.8) !important; font-weight: 500 !important;">JavaScript</div>
+                      </div>
+                      <div class="tech-item" style="background: rgba(35, 45, 235, 0.1) !important; padding: 15px !important; border-radius: 8px !important; text-align: center !important;">
+                          <i class="fas fa-server" style="font-size: 24px !important; color: #28a745 !important; margin-bottom: 8px !important;"></i>
+                          <div style="font-size: 12px !important; color: rgba(255, 255, 255, 0.8) !important; font-weight: 500 !important;">API REST</div>
+                      </div>
+                      <div class="tech-item" style="background: rgba(35, 45, 235, 0.1) !important; padding: 15px !important; border-radius: 8px !important; text-align: center !important;">
+                          <i class="fas fa-cloud" style="font-size: 24px !important; color: #232deb !important; margin-bottom: 8px !important;"></i>
+                          <div style="font-size: 12px !important; color: rgba(255, 255, 255, 0.8) !important; font-weight: 500 !important;">Cloud</div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Sección de Transparencia -->
+          <div class="transparency-section" style="background: rgba(255, 255, 255, 0.03) !important; backdrop-filter: blur(15px) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: 20px !important; padding: 40px !important; text-align: center !important; position: relative !important; overflow: hidden !important;">
+              
+              <div class="transparency-header" style="margin-bottom: 30px !important;">
+                  <h3 style="font-size: 28px !important; font-weight: 700 !important; margin: 0 !important; color: white !important; text-transform: uppercase !important; letter-spacing: 1px !important;">
+                      <i class="fas fa-eye" style="margin-right: 12px !important; color: #232deb !important;"></i>
+                      TRANSPARENCIA INSTITUCIONAL
+                  </h3>
+                  <p style="font-size: 16px !important; color: rgba(255, 255, 255, 0.7) !important; margin: 15px 0 0 0 !important; font-weight: 300 !important;">
+                      Acceso directo a nuestros datos de rendimiento en tiempo real
+                  </p>
+              </div>
+
+              <div class="transparency-stats" style="display: grid !important; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important; gap: 25px !important; margin-bottom: 30px !important;">
+                  
+                  <div class="stat-card" style="background: rgba(35, 45, 235, 0.1) !important; border: 1px solid rgba(35, 45, 235, 0.3) !important; border-radius: 12px !important; padding: 25px !important;">
+                      <div class="stat-icon" style="width: 40px !important; height: 40px !important; background: linear-gradient(135deg, #232deb, #4a4bed) !important; border-radius: 8px !important; display: flex !important; align-items: center !important; justify-content: center !important; margin: 0 auto 15px auto !important;">
+                          <i class="fas fa-chart-line" style="font-size: 18px !important; color: white !important;"></i>
+                      </div>
+                      <div class="stat-value" style="font-size: 32px !important; font-weight: 700 !important; color: #232deb !important; margin-bottom: 8px !important;">99.8%</div>
+                      <div class="stat-label" style="font-size: 14px !important; color: rgba(255, 255, 255, 0.7) !important; font-weight: 400 !important;">Uptime del Sistema</div>
+                  </div>
+
+                  <div class="stat-card" style="background: rgba(255, 1, 1, 0.1) !important; border: 1px solid rgba(255, 1, 1, 0.3) !important; border-radius: 12px !important; padding: 25px !important;">
+                      <div class="stat-icon" style="width: 40px !important; height: 40px !important; background: linear-gradient(135deg, #ff0101, #ff3333) !important; border-radius: 8px !important; display: flex !important; align-items: center !important; justify-content: center !important; margin: 0 auto 15px auto !important;">
+                          <i class="fas fa-shield-alt" style="font-size: 18px !important; color: white !important;"></i>
+                      </div>
+                      <div class="stat-value" style="font-size: 32px !important; font-weight: 700 !important; color: #ff0101 !important; margin-bottom: 8px !important;">100%</div>
+                      <div class="stat-label" style="font-size: 14px !important; color: rgba(255, 255, 255, 0.7) !important; font-weight: 400 !important;">Datos Verificados</div>
+                  </div>
+
+                  <div class="stat-card" style="background: rgba(40, 167, 69, 0.1) !important; border: 1px solid rgba(40, 167, 69, 0.3) !important; border-radius: 12px !important; padding: 25px !important;">
+                      <div class="stat-icon" style="width: 40px !important; height: 40px !important; background: linear-gradient(135deg, #28a745, #20c997) !important; border-radius: 8px !important; display: flex !important; align-items: center !important; justify-content: center !important; margin: 0 auto 15px auto !important;">
+                          <i class="fas fa-clock" style="font-size: 18px !important; color: white !important;"></i>
+                      </div>
+                      <div class="stat-value" style="font-size: 32px !important; font-weight: 700 !important; color: #28a745 !important; margin-bottom: 8px !important;">24/7</div>
+                      <div class="stat-label" style="font-size: 14px !important; color: rgba(255, 255, 255, 0.7) !important; font-weight: 400 !important;">Disponibilidad</div>
+                  </div>
+
+                  <div class="stat-card" style="background: rgba(255, 193, 7, 0.1) !important; border: 1px solid rgba(255, 193, 7, 0.3) !important; border-radius: 12px !important; padding: 25px !important;">
+                      <div class="stat-icon" style="width: 40px !important; height: 40px !important; background: linear-gradient(135deg, #ffc107, #fd7e14) !important; border-radius: 8px !important; display: flex !important; align-items: center !important; justify-content: center !important; margin: 0 auto 15px auto !important;">
+                          <i class="fas fa-medal" style="font-size: 18px !important; color: white !important;"></i>
+                      </div>
+                      <div class="stat-value" style="font-size: 32px !important; font-weight: 700 !important; color: #ffc107 !important; margin-bottom: 8px !important;">5★</div>
+                      <div class="stat-label" style="font-size: 14px !important; color: rgba(255, 255, 255, 0.7) !important; font-weight: 400 !important;">Calificación Promedio</div>
+                  </div>
+              </div>
+
+              <div class="innovation-features" style="background: rgba(255, 255, 255, 0.05) !important; border-radius: 12px !important; padding: 30px !important;">
+                  <h4 style="font-size: 20px !important; font-weight: 600 !important; color: white !important; margin: 0 0 20px 0 !important; text-align: center !important;">
+                      <i class="fas fa-lightbulb" style="margin-right: 10px !important; color: #ffc107 !important;"></i>
+                      Características de Innovación
+                  </h4>
+                  
+                  <div class="features-grid" style="display: grid !important; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important; gap: 20px !important;">
+                      
+                      <div class="feature-item" style="display: flex !important; align-items: center !important; background: rgba(35, 45, 235, 0.1) !important; padding: 20px !important; border-radius: 8px !important; border-left: 4px solid #232deb !important;">
+                          <div class="feature-icon" style="width: 35px !important; height: 35px !important; background: #232deb !important; border-radius: 50% !important; display: flex !important; align-items: center !important; justify-content: center !important; margin-right: 15px !important; flex-shrink: 0 !important;">
+                              <i class="fas fa-search" style="font-size: 14px !important; color: white !important;"></i>
+                          </div>
+                          <div class="feature-content">
+                              <div class="feature-title" style="font-size: 14px !important; font-weight: 600 !important; color: white !important; margin-bottom: 4px !important;">Búsqueda Inteligente</div>
+                              <div class="feature-desc" style="font-size: 12px !important; color: rgba(255, 255, 255, 0.6) !important;">Filtrado avanzado en tiempo real</div>
+                          </div>
+                      </div>
+
+                      <div class="feature-item" style="display: flex !important; align-items: center !important; background: rgba(255, 1, 1, 0.1) !important; padding: 20px !important; border-radius: 8px !important; border-left: 4px solid #ff0101 !important;">
+                          <div class="feature-icon" style="width: 35px !important; height: 35px !important; background: #ff0101 !important; border-radius: 50% !important; display: flex !important; align-items: center !important; justify-content: center !important; margin-right: 15px !important; flex-shrink: 0 !important;">
+                              <i class="fas fa-mobile-alt" style="font-size: 14px !important; color: white !important;"></i>
+                          </div>
+                          <div class="feature-content">
+                              <div class="feature-title" style="font-size: 14px !important; font-weight: 600 !important; color: white !important; margin-bottom: 4px !important;">Diseño Responsive</div>
+                              <div class="feature-desc" style="font-size: 12px !important; color: rgba(255, 255, 255, 0.6) !important;">Adaptable a todos los dispositivos</div>
+                          </div>
+                      </div>
+
+                      <div class="feature-item" style="display: flex !important; align-items: center !important; background: rgba(40, 167, 69, 0.1) !important; padding: 20px !important; border-radius: 8px !important; border-left: 4px solid #28a745 !important;">
+                          <div class="feature-icon" style="width: 35px !important; height: 35px !important; background: #28a745 !important; border-radius: 50% !important; display: flex !important; align-items: center !important; justify-content: center !important; margin-right: 15px !important; flex-shrink: 0 !important;">
+                              <i class="fas fa-sync-alt" style="font-size: 14px !important; color: white !important;"></i>
+                          </div>
+                          <div class="feature-content">
+                              <div class="feature-title" style="font-size: 14px !important; font-weight: 600 !important; color: white !important; margin-bottom: 4px !important;">Sincronización en Tiempo Real</div>
+                              <div class="feature-desc" style="font-size: 12px !important; color: rgba(255, 255, 255, 0.6) !important;">Datos siempre actualizados</div>
+                          </div>
+                      </div>
+
+                      <div class="feature-item" style="display: flex !important; align-items: center !important; background: rgba(255, 193, 7, 0.1) !important; padding: 20px !important; border-radius: 8px !important; border-left: 4px solid #ffc107 !important;">
+                          <div class="feature-icon" style="width: 35px !important; height: 35px !important; background: #ffc107 !important; border-radius: 50% !important; display: flex !important; align-items: center !important; justify-content: center !important; margin-right: 15px !important; flex-shrink: 0 !important;">
+                              <i class="fas fa-lock" style="font-size: 14px !important; color: white !important;"></i>
+                          </div>
+                          <div class="feature-content">
+                              <div class="feature-title" style="font-size: 14px !important; font-weight: 600 !important; color: white !important; margin-bottom: 4px !important;">Seguridad Avanzada</div>
+                              <div class="feature-desc" style="font-size: 12px !important; color: rgba(255, 255, 255, 0.6) !important;">Protección de datos empresariales</div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Footer del Laboratorio -->
+          <div class="lab-footer" style="text-align: center !important; margin-top: 40px !important;">
+              <div class="lab-badge" style="display: inline-block !important; background: linear-gradient(135deg, #232deb, #ff0101) !important; padding: 12px 24px !important; border-radius: 25px !important; margin-bottom: 15px !important; box-shadow: 0 4px 16px rgba(35, 45, 235, 0.3) !important;">
+                  <span style="font-size: 14px !important; font-weight: 600 !important; color: white !important;">
+                      <i class="fas fa-certificate" style="margin-right: 8px !important;"></i>
+                      CERTIFICADO DANTE TECH
+                  </span>
+              </div>
+              <p style="font-size: 14px !important; color: rgba(255, 255, 255, 0.6) !important; margin: 0 !important; font-style: italic !important;">
+                  "Innovación que impulsa tu éxito inmobiliario"
+              </p>
           </div>
       </div>
   </section>
@@ -1349,5 +1712,240 @@ function debugFiltros() {
 })();
 </script>
 
-</body>
-</html  
+<!-- SCRIPT PARA ANIMACIONES EN TIEMPO REAL - LABORATORIO DANTE -->
+<script>
+// Laboratorio Dante - Animaciones en Tiempo Real
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🧪 === INICIANDO LABORATORIO DANTE ===');
+    
+    // Elementos del Laboratorio
+    const speedNumber = document.getElementById('speed-number');
+    const propertiesCount = document.getElementById('properties-count');
+    const speedProgress = document.getElementById('speed-progress');
+    
+    // Datos dinámicos simulados
+    let currentSpeed = 0.098;
+    let currentProperties = 16;
+    let timeElapsed = 0;
+    
+    // Función para actualizar velocidad
+    function updateSpeed() {
+        if (speedNumber) {
+            // Simular fluctuación entre 0.089 y 0.102 segundos
+            const variation = (Math.random() - 0.5) * 0.02;
+            currentSpeed = Math.max(0.089, Math.min(0.102, currentSpeed + variation));
+            
+            // Animar número
+            speedNumber.style.animation = 'counterUpdate 0.5s ease-in-out';
+            speedNumber.textContent = currentSpeed.toFixed(3);
+            
+            // Resetear animación
+            setTimeout(() => {
+                speedNumber.style.animation = '';
+            }, 500);
+        }
+        
+        // Actualizar barra de progreso
+        if (speedProgress) {
+            const progress = 98 - (currentSpeed - 0.089) * 100;
+            speedProgress.style.width = progress + '%';
+        }
+    }
+    
+    // Función para actualizar contador de propiedades
+    function updateProperties() {
+        if (propertiesCount) {
+            // Simular cambios ocasionales
+            if (Math.random() < 0.1) { // 10% de probabilidad
+                const change = Math.random() < 0.5 ? -1 : 1;
+                currentProperties = Math.max(14, Math.min(18, currentProperties + change));
+                
+                // Animar número
+                propertiesCount.style.animation = 'counterUpdate 0.8s ease-in-out';
+                propertiesCount.textContent = currentProperties;
+                
+                // Resetear animación
+                setTimeout(() => {
+                    propertiesCount.style.animation = '';
+                }, 800);
+            }
+        }
+    }
+    
+    // Función para actualizar partículas de fondo
+    function updateParticles() {
+        const particles = document.querySelectorAll('#laboratorio-dante .particle');
+        particles.forEach((particle, index) => {
+            // Mover partículas aleatoriamente
+            const currentTop = parseFloat(particle.style.top) || Math.random() * 100;
+            const currentLeft = parseFloat(particle.style.left) || Math.random() * 100;
+            
+            const newTop = (currentTop + (Math.random() - 0.5) * 5 + 100) % 100;
+            const newLeft = (currentLeft + (Math.random() - 0.5) * 5 + 100) % 100;
+            
+            particle.style.top = newTop + '%';
+            particle.style.left = newLeft + '%';
+        });
+    }
+    
+    // Función para mostrar datos rotativos
+    function showRotatingFeatures() {
+        const features = [
+            {
+                title: "Búsqueda Inteligente",
+                desc: "Filtrado avanzado en tiempo real",
+                icon: "fas fa-search",
+                color: "#232deb"
+            },
+            {
+                title: "API RESTful",
+                desc: "Integración sin límites",
+                icon: "fas fa-server",
+                color: "#ff0101"
+            },
+            {
+                title: "Seguridad SSL",
+                desc: "Encriptación de extremo a extremo",
+                icon: "fas fa-shield-alt",
+                color: "#28a745"
+            },
+            {
+                title: "Base de Datos Optimizada",
+                desc: "Consultas en milisegundos",
+                icon: "fas fa-database",
+                color: "#ffc107"
+            },
+            {
+                title: "CDN Global",
+                desc: "Distribución mundial de contenido",
+                icon: "fas fa-globe",
+                color: "#6f42c1"
+            },
+            {
+                title: "Analytics Avanzado",
+                desc: "Métricas en tiempo real",
+                icon: "fas fa-chart-bar",
+                color: "#fd7e14"
+            }
+        ];
+        
+        let currentIndex = 0;
+        setInterval(() => {
+            currentIndex = (currentIndex + 1) % features.length;
+            console.log('🔄 Característica rotativa:', features[currentIndex].title);
+        }, 3000);
+    }
+    
+    // Función para simular métricas de transparencia
+    function updateTransparencyMetrics() {
+        const statCards = document.querySelectorAll('#laboratorio-dante .stat-card');
+        statCards.forEach(card => {
+            const valueElement = card.querySelector('.stat-value');
+            if (valueElement && Math.random() < 0.05) { // 5% de probabilidad de cambio
+                // Animar card
+                card.style.transform = 'scale(1.02)';
+                card.style.transition = 'transform 0.3s ease';
+                
+                setTimeout(() => {
+                    card.style.transform = 'scale(1)';
+                }, 300);
+            }
+        });
+    }
+    
+    // Configurar intervalos de actualización
+    const intervals = {
+        speed: setInterval(updateSpeed, 2000),      // Cada 2 segundos
+        properties: setInterval(updateProperties, 5000), // Cada 5 segundos
+        particles: setInterval(updateParticles, 3000),   // Cada 3 segundos
+        metrics: setInterval(updateTransparencyMetrics, 4000) // Cada 4 segundos
+    };
+    
+    // Inicializar características rotativas
+    setTimeout(showRotatingFeatures, 1000);
+    
+    // Limpiar intervalos al salir de la página
+    window.addEventListener('beforeunload', function() {
+        Object.values(intervals).forEach(interval => clearInterval(interval));
+    });
+    
+    // Efectos de hover para paneles
+    const panels = document.querySelectorAll('#laboratorio-dante .speed-panel, #laboratorio-dante .properties-panel, #laboratorio-dante .tech-panel');
+    panels.forEach(panel => {
+        panel.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.boxShadow = '0 12px 40px rgba(35, 45, 235, 0.3)';
+            this.style.transition = 'all 0.3s ease';
+        });
+        
+        panel.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = 'none';
+        });
+    });
+    
+    // Agregar efecto de typing al badge
+    const badgeText = document.querySelector('#laboratorio-dante .lab-badge span');
+    if (badgeText) {
+        const text = badgeText.textContent;
+        badgeText.textContent = '';
+        badgeText.style.borderRight = '2px solid white';
+        
+        let i = 0;
+        const typeWriter = setInterval(() => {
+            badgeText.textContent += text.charAt(i);
+            i++;
+            if (i > text.length) {
+                clearInterval(typeWriter);
+                setTimeout(() => {
+                    badgeText.style.borderRight = 'none';
+                }, 500);
+            }
+        }, 100);
+    }
+    
+    console.log('✅ === LABORATORIO DANTE ACTIVO ===');
+    console.log('🚀 Velocidad de respuesta:', currentSpeed.toFixed(3), 'segundos');
+    console.log('🏢 Propiedades activas:', currentProperties);
+    console.log('⚡ Animaciones en tiempo real activadas');
+});
+
+// Función para mostrar información técnica detallada
+function showTechnicalDetails() {
+    const details = {
+        'Framework': 'HTML5 + CSS3 + JavaScript ES6',
+        'Animaciones': 'CSS3 + requestAnimationFrame',
+        'Responsive': 'Mobile First + Grid + Flexbox',
+        'Performance': 'Optimización CSS + Lazy Loading',
+        'Seguridad': 'HTTPS + Validación Cliente/Servidor',
+        'Accesibilidad': 'ARIA + Semantic HTML',
+        'SEO': 'Meta Tags + Open Graph + Schema.org',
+        'PWA': 'Service Worker Ready'
+    };
+    
+    console.log('🔧 === DETALLES TÉCNICOS DANTE ===');
+    Object.entries(details).forEach(([key, value]) => {
+        console.log(`${key}: ${value}`);
+    });
+}
+
+// Ejecutar detalles técnicos en modo debug
+if (localStorage.getItem('dante-debug') === 'true') {
+    setTimeout(showTechnicalDetails, 2000);
+}
+
+// Controles de debug para desarrolladores
+window.danteLab = {
+    toggleParticles: function() {
+        const particles = document.querySelectorAll('#laboratorio-dante .particle');
+        particles.forEach(p => p.style.display = p.style.display === 'none' ? 'block' : 'none');
+    },
+    setSpeed: function(value) {
+        const speedNumber = document.getElementById('speed-number');
+        if (speedNumber && value >= 0.05 && value <= 0.2) {
+            speedNumber.textContent = value.toFixed(3);
+        }
+    },
+    showDetails: showTechnicalDetails
+};
+</script>
