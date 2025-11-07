@@ -22,7 +22,6 @@
   <!-- CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css">
-  <!-- <link rel="stylesheet" href="app.css"> -->
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-E6K41V8BHB"></script>
@@ -885,9 +884,12 @@
                   </select>
               </div>
               
-              <div class="search-button-container" style="display: flex !important; align-items: end !important; position: relative !important;">
+              <div class="search-button-container" style="display: flex !important; gap: 10px !important; align-items: end !important; position: relative !important;">
                   <button type="submit" class="search-btn" style="padding: 12px 24px !important; background: linear-gradient(135deg, #232deb, #1a1bb3) !important; color: white !important; border: none !important; border-radius: 6px !important; cursor: pointer !important; font-weight: 600 !important; font-size: 14px !important; transition: all 0.3s ease !important; box-shadow: 0 4px 8px rgba(35, 45, 235, 0.3) !important; position: relative !important; display: block !important;">
                       🔍 Buscar
+                  </button>
+                  <button type="button" id="test-filters-btn" style="padding: 12px 16px !important; background: linear-gradient(135deg, #ff0101, #cc0000) !important; color: white !important; border: none !important; border-radius: 6px !important; cursor: pointer !important; font-weight: 600 !important; font-size: 12px !important; transition: all 0.3s ease !important; box-shadow: 0 4px 8px rgba(255, 1, 1, 0.3) !important; position: relative !important; display: block !important;">
+                      🧪 Test Filtros
                   </button>
               </div>
           </div>
@@ -962,7 +964,7 @@
   <!-- JavaScript -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
-  <script src="app_SIMPLIFICADO.js"></script>
+  <script src="app_DANTE_ACTUALIZADO.js"></script>
 
   <!-- Menú móvil -->
   <nav id="menuslide">
@@ -1100,5 +1102,101 @@
           </div>
       </div>
   </div>
-    <style> 
-        
+
+  <!-- SCRIPT DE DEBUG TEMPORAL -->
+  <script>
+  // Función para cargar filtros manualmente
+  function manualLoadFilters() {
+      console.log('🧪 Carga manual de filtros solicitada...');
+      
+      // Datos de ejemplo para test
+      const testData = [
+          {
+              "id_temporal": "P001",
+              "barrio": "Palermo",
+              "tipo": "Departamento",
+              "estado": "Excelente"
+          },
+          {
+              "id_temporal": "P002", 
+              "barrio": "Microcentro",
+              "tipo": "Oficina",
+              "estado": "Muy bueno"
+          },
+          {
+              "id_temporal": "P003",
+              "barrio": "San Telmo", 
+              "tipo": "Casa",
+              "estado": "Bueno"
+          }
+      ];
+      
+      // Poblar selects manualmente
+      populateSelectManual('barrio-select-styled', ['Palermo', 'Microcentro', 'San Telmo'], 'Todos los barrios');
+      populateSelectManual('tipo-select-styled', ['Departamento', 'Oficina', 'Casa'], 'Todos los tipos');
+      populateSelectManual('estado-select-styled', ['Excelente', 'Muy bueno', 'Bueno'], 'Todos los estados');
+      
+      console.log('✅ Filtros cargados manualmente');
+  }
+  
+  function populateSelectManual(selectId, options, defaultText) {
+      const selectElement = document.getElementById(selectId);
+      if (selectElement) {
+          selectElement.innerHTML = `<option value="">${defaultText}</option>`;
+          options.forEach(option => {
+              const optionElement = document.createElement('option');
+              optionElement.value = option;
+              optionElement.textContent = option;
+              selectElement.appendChild(optionElement);
+          });
+      }
+  }
+  
+  // Debug para verificar que los filtros funcionen
+  setTimeout(() => {
+      console.log('🔍 DEBUG - Verificando estado de la página...');
+      
+      // Verificar elementos de filtro
+      const barrioSelect = document.getElementById('barrio-select-styled');
+      const tipoSelect = document.getElementById('tipo-select-styled');
+      const estadoSelect = document.getElementById('estado-select-styled');
+      const testBtn = document.getElementById('test-filters-btn');
+      
+      console.log('📍 Barrio select:', barrioSelect ? 'ENCONTRADO' : 'NO ENCONTRADO');
+      console.log('🏠 Tipo select:', tipoSelect ? 'ENCONTRADO' : 'NO ENCONTRADO');
+      console.log('✅ Estado select:', estadoSelect ? 'ENCONTRADO' : 'NO ENCONTRADO');
+      console.log('🧪 Test button:', testBtn ? 'ENCONTRADO' : 'NO ENCONTRADO');
+      
+      // Verificar opciones actuales
+      if (barrioSelect) {
+          console.log('📍 Opciones en barrio:', barrioSelect.options.length);
+      }
+      if (tipoSelect) {
+          console.log('🏠 Opciones en tipo:', tipoSelect.options.length);
+      }
+      if (estadoSelect) {
+          console.log('✅ Opciones en estado:', estadoSelect.options.length);
+      }
+      
+      // Configurar botón de test
+      if (testBtn) {
+          testBtn.addEventListener('click', () => {
+              console.log('🧪 Botón de test clickeado');
+              manualLoadFilters();
+          });
+      }
+      
+      // Agregar event listeners para debug
+      [barrioSelect, tipoSelect, estadoSelect].forEach(select => {
+          if (select) {
+              select.addEventListener('change', (e) => {
+                  console.log('🔄 Filtro cambiado:', e.target.id, '=>', e.target.value);
+              });
+          }
+      });
+      
+  }, 2000);
+  </script>
+
+</body>
+</html>
