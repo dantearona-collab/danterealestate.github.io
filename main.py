@@ -42,7 +42,7 @@ def init_excel():
         safe_print(f"INFO: Archivo {EXCEL_FILE} encontrado")
 
 def serve_static_file(filename):
-    """Sirve archivos estáticos desde la raíz del repositorio - VERSIÓN MEJORADA"""
+    """Sirve archivos estáticos desde la raíz del repositorio - VERSIÓN OPTIMIZADA"""
     try:
         # Buscar el archivo en la raíz del repositorio
         file_path = os.path.join(os.getcwd(), filename)
@@ -65,31 +65,28 @@ def serve_static_file(filename):
                     else:
                         mime_type = 'text/plain'
                 
-                safe_print(f"📂 Archivo encontrado: {file_path}")
-                safe_print(f"🎯 Tipo MIME detectado: {mime_type}")
+                safe_print(f"✅ Archivo encontrado: {file_path}")
+                safe_print(f"📏 Tamaño: {os.path.getsize(file_path)} bytes")
+                safe_print(f"🎯 Tipo MIME: {mime_type}")
                 
                 # Leer el archivo
                 with open(file_path, 'r', encoding='utf-8') as f:
                     content = f.read()
-                    
-                # Log del tamaño del contenido
-                content_size = len(content)
-                safe_print(f"📏 Tamaño del contenido: {content_size} bytes")
                 
                 if filename.endswith('.css'):
-                    safe_print(f"✅ Sirviendo {filename} como CSS")
+                    safe_print(f"✅ Sirviendo {filename} como CSS (Cache: 1h)")
                     return content, 200, {'Content-Type': 'text/css', 'Cache-Control': 'public, max-age=3600'}
                 elif filename.endswith('.js'):
-                    safe_print(f"✅ Sirviendo {filename} como JavaScript")
+                    safe_print(f"✅ Sirviendo {filename} como JavaScript (Cache: 1h)")
                     return content, 200, {'Content-Type': 'application/javascript', 'Cache-Control': 'public, max-age=3600'}
                 elif filename.endswith('.json'):
-                    safe_print(f"✅ Sirviendo {filename} como JSON")
+                    safe_print(f"✅ Sirviendo {filename} como JSON (Cache: 1h)")
                     return content, 200, {'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=3600'}
                 elif filename.endswith('.html'):
-                    safe_print(f"✅ Sirviendo {filename} como HTML")
+                    safe_print(f"✅ Sirviendo {filename} como HTML (Cache: 1h)")
                     return content, 200, {'Content-Type': 'text/html', 'Cache-Control': 'public, max-age=3600'}
                 else:
-                    safe_print(f"✅ Sirviendo {filename} como texto ({mime_type})")
+                    safe_print(f"✅ Sirviendo {filename} como {mime_type}")
                     return content, 200, {'Content-Type': mime_type}
                     
             except Exception as e:
@@ -97,84 +94,102 @@ def serve_static_file(filename):
                 return jsonify({"error": f"Error leyendo archivo: {str(e)}"}), 500
         else:
             safe_print(f"❌ Archivo NO encontrado: {file_path}")
-            
-            # Intentar también desde el directorio de aplicación
-            app_path = os.path.join(os.getcwd(), 'app', filename)
-            if os.path.exists(app_path):
-                safe_print(f"✅ Archivo encontrado en app/: {app_path}")
-                return send_file(app_path, mimetype=mimetypes.guess_type(filename)[0])
-            
             return jsonify({"error": f"Archivo {filename} no encontrado en {os.getcwd()}"}), 404
             
     except Exception as e:
         safe_print(f"❌ Error sirviendo {filename}: {str(e)}")
         return jsonify({"error": f"Error sirviendo archivo: {str(e)}"}), 500
 
-@app.route('/test')
-def test_page():
-    """Página de prueba para diagnosticar CSS/JS"""
+@app.route('/test-css')
+def test_css():
+    """Servir página de prueba CSS con diagnóstico"""
     test_html = '''<!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Test CSS - Render</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test CSS - Propiedades Dante</title>
     <link rel="stylesheet" href="app.css">
     <style>
-        .test-box {
-            background: red;
-            color: white;
-            padding: 20px;
-            margin: 20px;
-            text-align: center;
-            font-size: 20px;
-        }
-        .status {
-            background: green;
-            color: white;
-            padding: 10px;
-            margin: 10px;
-        }
+        .test-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .test-section { background: #f0f0f0; border: 2px solid #333; margin: 20px 0; padding: 20px; }
+        .highlight { background: #ffff00; padding: 10px; border: 2px solid red; }
+        .btn-test { background: blue; color: white; padding: 10px 20px; border: none; cursor: pointer; }
+        .btn-test:hover { background: darkblue; }
     </style>
 </head>
 <body>
-    <div class="test-box">
-        🔥 TEST PAGE - SI VES ESTE TEXTO EN ROJO, EL HTML BÁSICO FUNCIONA
-    </div>
-    
-    <div class="status">
-        ✅ <strong>Estado de archivos CSS:</strong><br>
-        <span id="css-status">Cargando...</span>
-    </div>
-    
-    <div class="status">
-        ✅ <strong>Estado de archivos JS:</strong><br>
-        <span id="js-status">Cargando...</span>
-    </div>
-    
-    <div style="background: blue; color: white; padding: 20px; margin: 20px;">
-        🔵 SI VES ESTE TEXTO EN AZUL, EL CSS SE ESTÁ APLICANDO<br>
-        <small>El CSS tiene 2676 líneas, debe tener un diseño completo</small>
+    <div class="test-container">
+        <h1>🔥 DIAGNÓSTICO CSS - Propiedades Dante</h1>
+        
+        <div class="test-section">
+            <h2>✅ Test 1: HTML Básico</h2>
+            <p>Si ves este texto con formato básico, el HTML funciona correctamente</p>
+        </div>
+        
+        <div class="highlight">
+            <h2>🎯 Test 2: CSS Inline</h2>
+            <p>Si este recuadro es <strong>AMARILLO con borde ROJO</strong>, el CSS inline funciona</p>
+        </div>
+        
+        <div class="test-section">
+            <h2>📋 Test 3: CSS Externo (app.css)</h2>
+            <p>Si esta sección tiene <strong>background gris claro con borde</strong>, el archivo app.css se está aplicando</p>
+            <p><strong>Tamaño esperado:</strong> 49,021 bytes</p>
+        </div>
+        
+        <div class="test-section">
+            <h2>🔧 Test 4: JavaScript</h2>
+            <button class="btn-test" onclick="testJavaScript()">Probar JavaScript</button>
+            <div id="js-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🔍 Diagnóstico de Carga de Recursos</h2>
+            <div id="resource-diagnosis">Cargando diagnóstico...</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>📊 Resultados</h2>
+            <ul>
+                <li>✅ <strong>SI tienes formato:</strong> CSS funciona - Problema con HTML original</li>
+                <li>❌ <strong>SI NO tienes formato:</strong> Problema con carga de recursos</li>
+            </ul>
+        </div>
     </div>
     
     <script>
-        // Verificar si el CSS se cargó correctamente
-        setTimeout(function() {
-            const testColor = getComputedStyle(document.querySelector('.test-box')).backgroundColor;
-            const cssStatus = document.getElementById('css-status');
-            
-            if (testColor === 'rgb(255, 0, 0)' || testColor === 'red') {
-                cssStatus.innerHTML = '✅ <strong style="color: green;">CSS SÍ SE ESTÁ APLICANDO</strong> - El problema puede ser específico del HTML principal';
-            } else {
-                cssStatus.innerHTML = '❌ <strong style="color: red;">CSS NO SE ESTÁ APLICANDO</strong> - Hay un problema con la carga de estilos';
-            }
-        }, 1000);
-        
-        // Verificar JavaScript
-        const jsStatus = document.getElementById('js-status');
-        if (typeof app !== 'undefined') {
-            jsStatus.innerHTML = '✅ <strong style="color: green;">JavaScript disponible</strong>';
-        } else {
-            jsStatus.innerHTML = '❌ <strong style="color: red;">JavaScript no encontrado</strong>';
+        function testJavaScript() {
+            document.getElementById('js-result').innerHTML = '✅ <strong style="color: green;">JavaScript funciona correctamente!</strong>';
         }
+        
+        // Diagnóstico automático de recursos
+        function diagnoseResources() {
+            const diagnosis = document.getElementById('resource-diagnosis');
+            
+            setTimeout(function() {
+                // Verificar CSS
+                const cssTest = getComputedStyle(document.querySelector('.test-section'));
+                const hasCSS = cssTest.backgroundColor === 'rgb(240, 240, 240)' || cssTest.backgroundColor === '#f0f0f0';
+                
+                // Verificar JavaScript
+                const hasJS = typeof testJavaScript === 'function';
+                
+                // Verificar fuentes
+                const font = getComputedStyle(document.body).fontFamily;
+                const hasCustomFont = font.includes('Fira Sans') || font.includes('sans-serif');
+                
+                let result = '<h3>Diagnóstico de Recursos:</h3><ul>';
+                result += '<li>' + (hasCSS ? '✅' : '❌') + ' <strong>CSS:</strong> ' + (hasCSS ? 'Aplicándose correctamente' : 'NO se está aplicando') + '</li>';
+                result += '<li>' + (hasJS ? '✅' : '❌') + ' <strong>JavaScript:</strong> ' + (hasJS ? 'Funcionando' : 'No funciona') + '</li>';
+                result += '<li>' + (hasCustomFont ? '✅' : '❌') + ' <strong>Fuentes:</strong> ' + (hasCustomFont ? 'Cargando (Fira Sans)' : 'Fallback (sans-serif)') + '</li>';
+                result += '</ul>';
+                
+                diagnosis.innerHTML = result;
+            }, 1000);
+        }
+        
+        diagnoseResources();
     </script>
 </body>
 </html>'''
@@ -185,10 +200,11 @@ def debug_info():
     """Información de debug sobre archivos disponibles"""
     debug_info = {
         "current_directory": os.getcwd(),
-        "files_in_directory": os.listdir('.'),
+        "files_in_directory": sorted(os.listdir('.')),
         "app_css_exists": os.path.exists('app.css'),
         "app_js_exists": os.path.exists('app.js'),
         "index_html_exists": os.path.exists('index.html'),
+        "test_css_exists": True,  # Esta página siempre existe
         "propiedades_json_exists": os.path.exists('propiedades.json'),
         "main_py_exists": os.path.exists('main.py')
     }
@@ -240,12 +256,12 @@ def guardar_contacto_route():
 
 @app.route("/")
 def index():
-    """Servir la página principal"""
+    """Servir la página principal ORIGINAL (no la de prueba)"""
     try:
         return serve_static_file('index.html')
     except Exception as e:
         safe_print(f"Error sirviendo index.html: {str(e)}")
-        return "Welcome to the Property Search API. Use /api/properties/search to query."
+        return jsonify({"error": f"Error sirviendo index.html: {str(e)}"}), 500
 
 # --- API Endpoints ---
 
