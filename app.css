@@ -10,6 +10,7 @@
     
     /* Breakpoints */
     --mobile: 768px;
+    --medium: 992px;
     --tablet: 1024px;
     --desktop: 1200px;
 }
@@ -30,7 +31,7 @@ body {
     color: var(--texto);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    padding-top: 130px; /* Re-adjusted for smaller header */
+    padding-top: 140px; /* Adjusted for fixed header and search */
     background-color: var(--azul);
 }
 
@@ -53,12 +54,21 @@ const barrio = document.getElementById("campobusq").value.toLowerCase();
 
 /* Banner de construcción */
 .construction-banner {
-    display: none; /* Hiding this temporarily to diagnose the issue */
+    display: block; /* Mostrar por defecto en desktop */
     text-align: center;
     background: yellow;
-    padding: 10px;
+    padding: 8px;
     position: relative;
-    z-index: 999;
+    z-index: 500;
+    font-size: 0.9rem;
+    line-height: 1.2;
+}
+
+/* Ocultar banner de construcción en dispositivos móviles */
+@media (max-width: 768px) {
+    .construction-banner {
+        display: none !important;
+    }
 }
 
 .blinking {
@@ -91,6 +101,7 @@ const barrio = document.getElementById("campobusq").value.toLowerCase();
     top: 0;
     width: 100%;
     z-index: 1001;
+    height: 70px;
     transition: all 0.3s ease;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
@@ -171,19 +182,92 @@ const barrio = document.getElementById("campobusq").value.toLowerCase();
     display: none;
 }
 
-/* Menú móvil */
+/* Elementos que solo se muestran en desktop */
+.desktop-only {
+    display: block;
+}
+
+.mobile-info {
+    display: none;
+}
+
+.mobile-call-btn,
+.mobile-valuation-btn {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.mobile-call-btn {
+    background: var(--rojo);
+    color: white;
+}
+
+.mobile-call-btn:hover {
+    background: #e00101;
+    transform: translateY(-2px);
+}
+
+.mobile-valuation-btn {
+    background: var(--azul);
+    color: white;
+}
+
+.mobile-valuation-btn:hover {
+    background: #1a23c7;
+    transform: translateY(-2px);
+}
+
+/* Menú principal - Oculto por defecto en móviles */
+.menucab {
+    display: flex;
+    list-style: none;
+    gap: 15px;
+}
+
+.menucab li a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 10px 15px;
+    transition: all 0.3s ease;
+}
+
+.menucab li a:hover {
+    opacity: 0.8;
+}
+
+/* Menú hamburguesa - Visible solo en móviles */
+.menudesp {
+    background: white;
+    color: var(--rojo);
+    border: none;
+    font-size: 1.3rem;
+    padding: 10px 12px;
+    cursor: pointer;
+    display: none; /* Oculto por defecto */
+}
+
+/* Menú móvil desplegable */
 #menuslide {
     position: fixed;
-    top: 70px;
+    top: 60px; /* Ajustado para header móvil */
     right: -100%;
-    width: 100%;
-    max-width: 200px;
-    height: calc(100vh - 70px);
+    width: 85%;
+    max-width: 280px;
+    height: calc(100vh - 60px);
     background: white;
     z-index: 1100;
     transition: right 0.3s ease;
     padding: 20px;
     overflow-y: auto;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.1);
 }
 
 #menuslide.menuabierto {
@@ -316,12 +400,12 @@ const barrio = document.getElementById("campobusq").value.toLowerCase();
 /* Buscador */
 .buscadorcab {
     position: fixed;
-    top: 90px; /* Positioned below the new, smaller header */
+    top: 70px; /* Positioned below the header */
     left: 0;
-    z-index: 1000; /* Final z-index */
-    background: rgba(255,255,255,0.95); /* Final background */
-    padding: 12px 0;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    z-index: 1000;
+    background: rgba(255,255,255,0.95);
+    padding: 10px 0;
+    box-shadow: 0 3px 15px rgba(0,0,0,0.1);
     width: 100%;
     backdrop-filter: blur(5px);
 }
@@ -698,7 +782,16 @@ section {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    z-index: 1000;
+    z-index: 1001; /* Alto para que sea siempre accesible */
+}
+
+/* Ajustes específicos para móviles */
+@media (max-width: 768px) {
+    .whatsapp-fixed {
+        bottom: 15px;
+        right: 15px;
+        z-index: 1001; /* Mantener alto z-index en móviles */
+    }
 }
 
 /* Footer */
@@ -1287,7 +1380,246 @@ button {
     color: var(--texto-claro);
 }
 
-/* ========== MEJORAS PARA MÓVILES ========== */
+/* ========== CORRECCIONES PARA DISPOSITIVOS MÓVILES ========== */
+
+/* Ajustes específicos para móviles (celulares) */
+@media (max-width: 768px) {
+    body {
+        padding-top: 60px; /* Reducido para móviles */
+    }
+    
+    /* Ocultar elementos desktop y mostrar móviles */
+    .desktop-only {
+        display: none !important;
+    }
+    
+    .mobile-info {
+        display: block !important;
+    }
+    
+    .construction-banner.desktop-only {
+        display: none !important;
+    }
+    
+    .menucab {
+        display: none !important;
+    }
+    
+    /* Header más compacto en móviles */
+    #cab {
+        height: 60px;
+        z-index: 1001;
+    }
+    
+    #cab .cont {
+        padding: 6px 10px;
+    }
+    
+    #cab .logo img {
+        width: 45px;
+    }
+    
+    #cab .logo-text {
+        font-size: 0.9rem;
+        max-width: 120px;
+    }
+    
+    /* Buscador completamente adaptado para móviles - SOLUCIÓN PRINCIPAL */
+    .buscadorcab {
+        top: 60px;
+        padding: 8px 0;
+        background: rgba(255,255,255,0.98);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        z-index: 1000;
+    }
+    
+    .buscadorcab .cont {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 0 10px;
+    }
+    
+    /* Operación buttons - SOLUCIÓN PARA "TASACION" vs "ALQUILER TEMPORAL" */
+    .ope {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin: 0;
+    }
+    
+    .ope span {
+        flex: 1;
+        min-width: 0;
+        padding: 6px 4px;
+        font-size: 0.7rem;
+        line-height: 1.1;
+        text-align: center;
+        white-space: normal; /* Permitir salto de línea en móviles */
+        overflow: visible;
+        text-overflow: clip;
+    }
+    
+    /* Ajuste específico para "Alquiler temporal" en móviles muy pequeños */
+    .ope span[data-val="T"] {
+        font-size: 0.65rem;
+        line-height: 1.0;
+    }
+    
+    /* Campos de búsqueda - SOLUCIÓN PARA "LLAMÀ" vs "ALQUILER" */
+    .sel, .buscarsug, .cod {
+        width: 100%;
+        order: unset;
+    }
+    
+    .colini input,
+    .colini select {
+        width: 100%;
+        padding: 8px;
+        font-size: 14px; /* Previene zoom en iOS */
+        border-radius: 4px;
+        border: 1px solid #ddd;
+    }
+    
+    .buscadorcab button[type="submit"] {
+        width: 100%;
+        padding: 10px;
+        font-size: 14px;
+        margin-top: 2px;
+        border-radius: 4px;
+    }
+    
+    /* Ocultar código en móviles para dar más espacio */
+    .cod {
+        display: none;
+    }
+    
+    /* Ocultar completamente el banner de construcción en móviles */
+    .construction-banner {
+        display: none !important;
+    }
+    
+    /* Menú más compacto en móviles */
+    .menucab {
+        display: none; /* Usar menú hamburguesa en móviles */
+    }
+    
+    .menudesp {
+        display: block !important;
+    }
+    
+    /* Slider optimizado para móviles */
+    #sliderini {
+        height: 200px;
+        margin-top: 0;
+    }
+    
+    .slini .slick-slide {
+        height: 200px !important;
+    }
+    
+    .slide, .image-wrapper {
+        height: 200px !important;
+    }
+    
+    .slider-img {
+        max-height: 200px;
+        object-fit: cover;
+    }
+    
+    /* Propiedades en una sola columna en móviles */
+    .propiedades-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .propiedad-item img,
+    .property-image {
+        height: 180px;
+    }
+    
+    /* Footer simplificado en móviles */
+    #pie .cont {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        text-align: center;
+    }
+    
+    /* WhatsApp más accesible en móviles */
+    .whatsapp-fixed {
+        bottom: 15px;
+        right: 15px;
+        z-index: 1001; /* Alto para que sea siempre accesible */
+    }
+    
+    .btn-whatsapp {
+        width: 50px;
+        height: 50px;
+    }
+    
+    /* Mostrar menú hamburguesa y ocultar menú normal en móviles */
+    .menucab {
+        display: none !important;
+    }
+    
+    .menudesp {
+        display: block !important;
+    }
+    
+    /* Ajustes para el menú deslizable en móviles */
+    #menuslide {
+        top: 60px;
+        height: calc(100vh - 60px);
+        width: 85%;
+        max-width: 280px;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+    }
+}
+
+/* Ajustes para pantallas muy pequeñas */
+@media (max-width: 480px) {
+    body {
+        padding-top: 55px;
+    }
+    
+    #cab {
+        height: 55px;
+    }
+    
+    #cab .logo-text {
+        font-size: 0.8rem;
+        max-width: 100px;
+    }
+    
+    /* Menú hamburguesa para pantallas muy pequeñas */
+    #menuslide {
+        top: 55px;
+        height: calc(100vh - 55px);
+    }
+    
+    /* Operación buttons más compactas en pantallas pequeñas */
+    .ope span {
+        padding: 5px 3px;
+        font-size: 0.65rem;
+        line-height: 1.0;
+    }
+    
+    /* Ajuste específico para "Alquiler temporal" en pantallas muy pequeñas */
+    .ope span[data-val="T"] {
+        font-size: 0.6rem;
+        line-height: 0.9;
+    }
+    
+    .buscadorcab {
+        top: 55px;
+    }
+    
+    /* Propiedades aún más pequeñas */
+    .propiedad-item img,
+    .property-image {
+        height: 150px;
+    }
+}
 
 /* Ajustes generales para móviles */
 @media (max-width: 768px) {

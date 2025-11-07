@@ -106,13 +106,14 @@
             </a>
             
             <nav class="menugen">
-                <div class="construction-banner">
+                <!-- Banner de construcción oculto por defecto, solo visible en desktop -->
+                <div class="construction-banner desktop-only">
                     <p>Página en Construcción</p>
                 </div>
                 <ul class="menucab">
-                    <li><a href="tel:1166562078"><i class="fas fa-phone"></i> Llamá <span>11 6656 2078</span></a></li>
+                    <li class="desktop-only"><a href="tel:1166562078"><i class="fas fa-phone"></i> Llamá <span>11 6656 2078</span></a></li>
                     <li><a href="tasaciones">Tasación</a></li>
-                    <li><a href="propiedades">Buscá</a></li>
+                    <li><a href="propiedades">Propiedades</a></li>
                 </ul>
 
                 <!-- <ul class="redescab">
@@ -137,7 +138,7 @@
             <div class="ope">
                 <span class="activo" data-val="V">Venta</span>
                 <span data-val="A">Alquiler</span>
-                <span data-val="T">Alquiler<br>temporal</span>
+                <span data-val="T">Alquiler temporal</span>
             </div>
             
             <div class="sel colini">
@@ -195,8 +196,11 @@
             <i class="fas fa-times"></i>
         </button>
         
-        <div class="btng">
-            <a href="tasaciones">Tasá hoy</a>
+        <div class="btng mobile-info">
+            <a href="tel:1166562078" class="mobile-call-btn">
+                <i class="fas fa-phone"></i> Llamá 11 6656 2078
+            </a>
+            <a href="tasaciones" class="mobile-valuation-btn">Tasación</a>
         </div>
         
         <div class="menu-sections">
@@ -513,6 +517,7 @@
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+    <script src="app.js"></script>
 
     <!-- Modal para resultados de búsqueda -->
     <div id="results-modal" class="modal-overlay">
