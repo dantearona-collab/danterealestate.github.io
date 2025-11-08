@@ -22,6 +22,9 @@
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
     "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+    "fotos": [
+      "imgs/apartment_interior_1_5.webp"
+    ],
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.555370"
   },
@@ -46,7 +49,10 @@
     "pileta": "Sí",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Video tour disponible, Fotos del jardín, Plano de la propiedad",
+    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+    "fotos": [
+      "imgs/apartment_interior_1_5.webp"
+    ],
     "caracteristicas_extraidas": {
       "pileta": true,
       "jardin": true
@@ -75,7 +81,10 @@
     "pileta": "No",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Fotos del PH reciclado, Plano de distribución",
+    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+    "fotos": [
+      "imgs/apartment_interior_1_5.webp"
+    ],
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.555370"
   },
@@ -101,7 +110,10 @@
     "pileta": "No",
     "acepta_mascotas": "No",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Fotos de la unidad, Video del edificio",
+    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+    "fotos": [
+      "imgs/apartment_interior_1_5.webp"
+    ],
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.555370"
   },
@@ -127,7 +139,10 @@
     "pileta": "Sí",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Tour virtual 360°, Fotos profesionales, Video del edificio",
+    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+    "fotos": [
+      "imgs/apartment_interior_1_5.webp"
+    ],
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.555370"
   },
@@ -151,8 +166,10 @@
     "balcon": "Sí",
     "pileta": "Sí",
     "acepta_mascotas": "Sí",
-    "aire_acondicionado": "Sí",
-    "info_multimedia": "Drone video, Fotos del parque, Tour de la propiedad",
+    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+    "fotos": [
+      "imgs/apartment_interior_1_5.webp"
+    ],
     "caracteristicas_extraidas": {
       "pileta": true
     },
@@ -180,7 +197,10 @@
     "pileta": "No",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "No",
-    "info_multimedia": "Fotos de la propiedad, Video del barrio",
+    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+    "fotos": [
+      "imgs/apartment_interior_1_5.webp"
+    ],
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.555370"
   },
@@ -206,7 +226,10 @@
     "pileta": "No",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Fotos del patio, Plano de distribución",
+    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+    "fotos": [
+      "imgs/apartment_interior_1_5.webp"
+    ],
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.555370"
   },
@@ -232,7 +255,10 @@
     "pileta": "No",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "No",
-    "info_multimedia": "Fotos de la propiedad, Mapa de ubicación",
+    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+    "fotos": [
+      "imgs/apartment_interior_1_5.webp"
+    ],
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.555370"
   },
@@ -257,7 +283,10 @@
     "pileta": "No",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Fotos profesionales, Video tour, Plano de la casa",
+    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+    "fotos": [
+      "imgs/apartment_interior_1_5.webp"
+    ],
     "caracteristicas_extraidas": {
       "jardin": true
     },
@@ -285,7 +314,10 @@
     "pileta": "Sí",
     "acepta_mascotas": "No",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Fotos del estudio, Video del edificio",
+    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+    "fotos": [
+      "imgs/apartment_interior_1_5.webp"
+    ],
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.556401"
   },
@@ -311,7 +343,10 @@
     "pileta": "No",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "No",
-    "info_multimedia": "Fotos del PH, Informe técnico",
+    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+    "fotos": [
+      "imgs/apartment_interior_1_5.webp"
+    ],
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.556401"
   },
@@ -337,7 +372,10 @@
     "pileta": "No",
     "acepta_mascotas": "No",
     "aire_acondicionado": "No",
-    "info_multimedia": "Fotos básicas, Información de rentabilidad",
+    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+    "fotos": [
+      "imgs/apartment_interior_1_5.webp"
+    ],
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.556401"
   },
@@ -362,7 +400,10 @@
     "pileta": "Sí",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Drone footage, Fotos del jardín, Tour virtual",
+    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+    "fotos": [
+      "imgs/apartment_interior_1_5.webp"
+    ],
     "caracteristicas_extraidas": {
       "pileta": true,
       "jardin": true
@@ -391,7 +432,10 @@
     "pileta": "Sí",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Tour virtual premium, Fotos con drone, Video del edificio",
+    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+    "fotos": [
+      "imgs/apartment_interior_1_5.webp"
+    ],
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.556401"
   },
@@ -417,7 +461,10 @@
     "pileta": "Sí",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Tour virtual premium, Fotos con drone, Video del edificio",
+    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+    "fotos": [
+      "imgs/apartment_interior_1_5.webp"
+    ],
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.556401"
   }

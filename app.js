@@ -317,7 +317,7 @@ function createPropertyCard(property) {
     `;
     
     // Imagen principal
-    const mainImage = property.fotos && property.fotos.length > 0 ? property.fotos[0] : 'https://via.placeholder.com/300x200?text=Sin+Imagen';
+    const mainImage = property.fotos && property.fotos.length > 0 ? property.fotos[0] : 'INSTITUCIONAL 1.jpg';
     
     card.innerHTML = `
         <div style="position: relative;">
