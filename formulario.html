@@ -33,6 +33,14 @@
             align-items: center;
             justify-content: center;
             gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .header .phone {
+            font-size: 0.6em;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 12px;
         }
         
         .logo-key {
@@ -72,14 +80,6 @@
             text-align: center;
         }
         
-        .google-form-container {
-            width: 100%;
-            min-height: 600px;
-            border: none;
-            border-radius: 8px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-        }
-        
         .back-btn {
             display: inline-block;
             margin: 20px 0;
@@ -94,6 +94,74 @@
         .back-btn:hover {
             background: #1a1db4;
             transform: translateY(-2px);
+        }
+        
+        /* FORMULARIO FUNCIONAL */
+        .contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #232deb;
+            box-shadow: 0 0 0 3px rgba(35, 45, 235, 0.1);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .submit-btn {
+            background: #232deb;
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            display: block;
+            margin: 30px auto 0;
+        }
+        
+        .submit-btn:hover {
+            background: #1a1db4;
+            transform: translateY(-2px);
+        }
+        
+        .submit-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
         }
         
         /* WHATSAPP FLOTANTE */
@@ -146,6 +214,26 @@
             color: #232deb;
             margin-bottom: 10px;
         }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+            .whatsapp-float {
+                width: 50px;
+                height: 50px;
+                font-size: 25px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -155,7 +243,7 @@
                 <img src="llave.png" alt="Logo Dante Propiedades">
             </span>
             Dante Propiedades
-            <span style="font-size: 0.6em; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 12px;">📞 +54 11 4567-8900</span>
+            <span class="phone">📞 +54 11 4567-8900</span>
         </h1>
     </div>
     
@@ -164,19 +252,62 @@
         
         <div class="form-section">
             <h2>📋 Formulario de Contacto</h2>
-            <p style="text-align: center; margin-bottom: 20px; color: #666;">
+            <p style="text-align: center; margin-bottom: 30px; color: #666;">
                 Completa el formulario y nos pondremos en contacto contigo a la brevedad
             </p>
             
-            <!-- Google Form Embed - Reemplaza con tu enlace de Google Forms -->
-            <iframe 
-                class="google-form-container" 
-                src="https://docs.google.com/forms/d/e/1FAIpQLSfY3J5FJXoGVZYw5dKVGaHg8L8GFMlVr8yJoE7vV9VKCJW6A/viewform?embedded=true" 
-                frameborder="0" 
-                marginheight="0" 
-                marginwidth="0">
-                Cargando formulario...
-            </iframe>
+            <div class="success-message" id="successMessage">
+                ✅ ¡Mensaje enviado correctamente! Nos comunicaremos contigo pronto.
+            </div>
+            
+            <form class="contact-form" id="contactForm">
+                <div class="form-group">
+                    <label for="nombre">Nombre completo *</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="telefono">Teléfono</label>
+                    <input type="tel" id="telefono" name="telefono" placeholder="+54 11 XXXX-XXXX">
+                </div>
+                
+                <div class="form-group">
+                    <label for="interes">Interés</label>
+                    <select id="interes" name="interes">
+                        <option value="">Seleccionar...</option>
+                        <option value="compra">Comprar propiedad</option>
+                        <option value="venta">Vender propiedad</option>
+                        <option value="alquiler">Alquilar propiedad</option>
+                        <option value="consulta">Consulta general</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="presupuesto">Presupuesto aproximado</label>
+                    <select id="presupuesto" name="presupuesto">
+                        <option value="">Seleccionar...</option>
+                        <option value="hasta-100k">Hasta $100.000 USD</option>
+                        <option value="100k-200k">$100.000 - $200.000 USD</option>
+                        <option value="200k-300k">$200.000 - $300.000 USD</option>
+                        <option value="300k-500k">$300.000 - $500.000 USD</option>
+                        <option value="mas-500k">Más de $500.000 USD</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="mensaje">Mensaje *</label>
+                    <textarea id="mensaje" name="mensaje" required placeholder="Contanos qué propiedad te interesa o qué consulta tenés..."></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    📧 Enviar Mensaje
+                </button>
+            </form>
         </div>
         
         <div class="contact-info">
@@ -187,11 +318,13 @@
             </div>
             <div class="contact-card">
                 <h3>📧 Email</h3>
-                <p><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="9af3f4fcf5dafefbf4eeffeae8f5eaf3fffefbfeffe9b4f9f5f7b4fbe8">[email&#160;protected]</a></p>
+                <p><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5c35323a331c383d3228392c2e332c3539383d38392f723f3331723d2e">[email&#160;protected]</a></p>
+                <p style="font-size: 0.9em; color: #666;">Respuesta en 24 horas</p>
             </div>
             <div class="contact-card">
                 <h3>📍 Dirección</h3>
                 <p>Capital Federal, Argentina</p>
+                <p style="font-size: 0.9em; color: #666;">Citas con agenda</p>
             </div>
         </div>
     </div>
@@ -204,5 +337,72 @@
         💬
     </a>
     
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        // Formulario de contacto funcional
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Obtener datos del formulario
+            const nombre = document.getElementById('nombre').value;
+            const email = document.getElementById('email').value;
+            const telefono = document.getElementById('telefono').value;
+            const interes = document.getElementById('interes').value;
+            const presupuesto = document.getElementById('presupuesto').value;
+            const mensaje = document.getElementById('mensaje').value;
+            
+            // Validación básica
+            if (!nombre || !email || !mensaje) {
+                alert('Por favor, completá los campos obligatorios (Nombre, Email y Mensaje)');
+                return;
+            }
+            
+            // Crear mensaje para WhatsApp
+            const whatsappMessage = `*NUEVA CONSULTA - DANTE PROPIEDADES*
+
+👤 *Nombre:* ${nombre}
+📧 *Email:* ${email}
+📱 *Teléfono:* ${telefono || 'No especificado'}
+🎯 *Interés:* ${interes || 'No especificado'}
+💰 *Presupuesto:* ${presupuesto || 'No especificado'}
+
+💬 *Mensaje:*
+${mensaje}
+
+---
+Enviado desde: ${window.location.origin}`;
+            
+            // URL de WhatsApp con el mensaje codificado
+            const whatsappURL = `https://wa.me/5491145678900?text=${encodeURIComponent(whatsappMessage)}`;
+            
+            // Mostrar mensaje de éxito
+            document.getElementById('successMessage').style.display = 'block';
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').textContent = '✅ Enviado a WhatsApp';
+            
+            // Abrir WhatsApp
+            window.open(whatsappURL, '_blank');
+            
+            // Reiniciar formulario después de 3 segundos
+            setTimeout(() => {
+                this.reset();
+                document.getElementById('successMessage').style.display = 'none';
+                document.getElementById('submitBtn').disabled = false;
+                document.getElementById('submitBtn').textContent = '📧 Enviar Mensaje';
+            }, 3000);
+        });
+        
+        // Animación de entrada
+        document.addEventListener('DOMContentLoaded', function() {
+            const formSection = document.querySelector('.form-section');
+            formSection.style.opacity = '0';
+            formSection.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                formSection.style.transition = 'all 0.6s ease';
+                formSection.style.opacity = '1';
+                formSection.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
+</body>
 </html>
