@@ -1,4 +1,4 @@
-// Sistema Dante Propiedades - SIN ERRORES + SLIDER FUNCIONAL
+    // Sistema Dante Propiedades - SIN ERRORES + SLIDER FUNCIONAL
 // Versión sin dependencias de Font Awesome + Slider de múltiples fotos - 2025-11-08
 
 // ========================================
@@ -11,7 +11,7 @@ let currentSlides = {};
 // Función para crear el slider de imágenes
 function createImageSlider(property) {
     const fotos = property.fotos || [];
-    
+     
     if (fotos.length === 0) {
         // Sin imágenes - usar imagen por defecto
         return `
