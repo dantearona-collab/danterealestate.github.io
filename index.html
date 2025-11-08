@@ -34,11 +34,52 @@
             font-size: 2.5em;
             margin-bottom: 10px;
             font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .header .logo-key {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
         }
         
         .header p {
             font-size: 1.2em;
             opacity: 0.9;
+        }
+        
+        /* BOTONES DE ACCIÓN */
+        .btn-search, .btn-reset {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .btn-search {
+            background: #232deb;
+            color: white;
+        }
+        
+        .btn-search:hover {
+            background: #1a1db4;
+            transform: translateY(-2px);
+        }
+        
+        .btn-reset:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
         }
         
         /* CONTAINER PRINCIPAL */
@@ -350,7 +391,10 @@
 </head>
 <body>
     <div class="header">
-        <h1>🏠 Dante Propiedades</h1>
+        <h1>
+            <span class="logo-key">🔑</span>
+            Dante Propiedades
+        </h1>
         <p>Sistema sin errores de consola + Slider de múltiples fotos</p>
     </div>
     
@@ -379,6 +423,14 @@
                         <option value="">Todos los tipos</option>
                     </select>
                 </div>
+                <div class="filter-group" style="display: flex; gap: 10px; align-items: end;">
+                    <button id="search-btn-styled" class="btn-search" onclick="searchProperties()">
+                        🔍 Buscar
+                    </button>
+                    <button id="reset-btn-styled" class="btn-reset" onclick="resetFilters()" style="background: #6c757d;">
+                        🏠 Inicio
+                    </button>
+                </div>
             </div>
         </div>
         
@@ -402,6 +454,34 @@
         console.log('🎠 Slider de múltiples fotos incluido');
         console.log('🔧 Sistema de emojis para iconos');
         
+        // Función para buscar propiedades
+        function searchProperties() {
+            const operacion = document.getElementById('operacion-select-styled').value;
+            const barrio = document.getElementById('barrio-select-styled').value;
+            const tipo = document.getElementById('tipo-select-styled').value;
+            
+            console.log('🔍 Buscando propiedades con filtros:', { operacion, barrio, tipo });
+            
+            // Llamar a la función de búsqueda del app.js si existe
+            if (typeof window.loadProperties === 'function') {
+                window.loadProperties();
+            }
+        }
+        
+        // Función para resetear filtros
+        function resetFilters() {
+            document.getElementById('operacion-select-styled').value = '';
+            document.getElementById('barrio-select-styled').value = '';
+            document.getElementById('tipo-select-styled').value = '';
+            
+            console.log('🏠 Filtros reseteados - Mostrando todas las propiedades');
+            
+            // Llamar a la función de mostrar todas las propiedades
+            if (typeof window.loadProperties === 'function') {
+                window.loadProperties();
+            }
+        }
+        
         // Verificación de carga de recursos
         window.addEventListener('load', function() {
             console.log('✅ Todos los recursos cargados correctamente');
@@ -409,4 +489,4 @@
         });
     </script>
 </body>
-</html> 
+</html>         
