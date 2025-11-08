@@ -38,6 +38,21 @@
             align-items: center;
             justify-content: center;
             gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .header .company-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .header .phone {
+            font-size: 0.4em;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
         }
         
         .header .logo-key {
@@ -55,6 +70,25 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .header .phone {
+                font-size: 0.35em;
+                padding: 6px 12px;
+            }
+            
+            .whatsapp-float {
+                width: 50px;
+                height: 50px;
+                font-size: 25px;
+                bottom: 15px;
+                right: 15px;
+            }
         }
         
         .header p {
@@ -86,6 +120,38 @@
         .btn-reset:hover {
             background: #5a6268;
             transform: translateY(-2px);
+        }
+        
+        /* WHATSAPP FLOTANTE */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: #25d366;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: white;
+            font-size: 30px;
+            box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+        
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(37, 211, 102, 0.6);
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
         
         /* CONTAINER PRINCIPAL */
@@ -401,7 +467,10 @@
             <span class="logo-key">
                 <img src="llave.png" alt="Logo Dante Propiedades">
             </span>
-            Dante Propiedades
+            <div class="company-info">
+                <span>Dante Propiedades</span>
+                <span class="phone">📞 +54 11 4567-8900</span>
+            </div>
         </h1>
         <p>Sistema sin errores de consola + Slider de múltiples fotos</p>
     </div>
@@ -461,7 +530,7 @@
                         <strong style="font-size: 18px;">Dante Propiedades</strong>
                     </div>
                     <div style="color: #bdc3c7;">
-                        <strong>Contacto:</strong> +54 11 XXXX-XXXX | <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="afc6c1c9c0efcbcec1dbcadfddc0dfc6cacbcecbcadc81ccc0c281cedd">[email&#160;protected]</a>
+                        <strong>Contacto:</strong> +54 11 XXXX-XXXX | <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="452c2b232a0521242b312035372a352c2021242120366b262a286b2437">[email&#160;protected]</a>
                     </div>
                 </div>
                 
@@ -476,6 +545,14 @@
             </div>
         </footer>
     </div>
+    
+    <!-- WhatsApp Flotante -->
+    <a href="https://wa.me/5491145678900?text=Hola,%20me%20interesa%20obtener%20información%20sobre%20propiedades" 
+       class="whatsapp-float" 
+       target="_blank" 
+       title="Contactar por WhatsApp">
+        💬
+    </a>
     
     <!-- JavaScript del sistema -->
     <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="app.js"></script>
