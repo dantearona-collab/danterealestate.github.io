@@ -23,10 +23,10 @@
     "aire_acondicionado": "Sí",
     "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
     "fotos": [
-      "imgs/apartment_interior_1_5.webp"
-    ],
-    "caracteristicas_extraidas": {},
-    "fecha_procesamiento": "2025-11-06T11:19:37.555370"
+      "imgs/apartment_interior_1_5.webp",
+      "imgs/apartment_interior_2_3.webp",
+      "imgs/apartment_interior_3_1.jpg"
+    ]
   },
   {
     "id_temporal": "UF002",
@@ -49,24 +49,22 @@
     "pileta": "Sí",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+    "info_multimedia": "Video tour disponible, Fotos del jardín, Plano de la propiedad",
     "fotos": [
-      "imgs/apartment_interior_1_5.webp"
-    ],
-    "caracteristicas_extraidas": {
-      "pileta": true,
-      "jardin": true
-    },
-    "fecha_procesamiento": "2025-11-06T11:19:37.555370"
+      "imgs/house_exterior_1_7.jpg",
+      "imgs/house_exterior_2_2.jpg",
+      "imgs/house_pool_1_8.jpg",
+      "imgs/house_pool_2_1.jpg"
+    ]
   },
   {
     "id_temporal": "UF003",
-    "titulo": "PH en Colegiales",
-    "barrio": "Colegiales",
-    "precio": 190000,
-    "ambientes": 1,
-    "metros": 48,
-    "operacion": "alquiler",
+    "titulo": "PH en Villa Crespo",
+    "barrio": "Villa Crespo",
+    "precio": 180000,
+    "ambientes": 2,
+    "metros": 55,
+    "operacion": "venta",
     "tipo": "ph",
     "descripcion": "Acogedor PH ideal para una persona, totalmente reciclado",
     "direccion": "Conesa 876",
@@ -81,12 +79,11 @@
     "pileta": "No",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+    "info_multimedia": "Fotos del PH reciclado, Plano de distribución",
     "fotos": [
-      "imgs/apartment_interior_1_5.webp"
-    ],
-    "caracteristicas_extraidas": {},
-    "fecha_procesamiento": "2025-11-06T11:19:37.555370"
+      "imgs/studio_apartment_1_5.jpg",
+      "imgs/studio_apartment_2_2.webp"
+    ]
   },
   {
     "id_temporal": "UF004",
@@ -103,106 +100,101 @@
     "estado": "bueno",
     "orientacion": "sur",
     "piso": "12",
-    "expensas": 4500,
-    "amenities": "seguridad 24hs, laundry",
+    "expensas": 4200,
+    "amenities": "sum, seguridad 24hs",
     "cochera": "No",
     "balcon": "No",
     "pileta": "No",
     "acepta_mascotas": "No",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
-    "fotos": [
-      "imgs/apartment_interior_1_0.jpg"
-    ],
-    "caracteristicas_extraidas": {},
-    "fecha_procesamiento": "2025-11-06T11:19:37.555370"
+    "info_multimedia": "Fotos disponibles a pedido",
+    "fotos": []
   },
   {
     "id_temporal": "UF005",
-    "titulo": "Departamento en Recoleta",
-    "barrio": "Recoleta",
-    "precio": 420000,
+    "titulo": "Penthouse en Puerto Madero",
+    "barrio": "Puerto Madero",
+    "precio": 1200000,
     "ambientes": 3,
-    "metros": 95,
+    "metros": 120,
     "operacion": "venta",
     "tipo": "departamento",
-    "descripcion": "Lujoso departamento en torre de Recoleta con vistas panorámicas",
-    "direccion": "Ayacucho 1678",
+    "descripcion": "Espectacular penthouse con terraza y vista al río",
+    "direccion": "Alicia Moreau de Justo 1800",
     "antiguedad": 5,
-    "estado": "excelente",
-    "orientacion": "norte",
-    "piso": "15",
-    "expensas": 12000,
-    "amenities": "pileta, gimnasio, sum, seguridad 24hs, salón de fiestas",
+    "estado": "nuevo",
+    "orientacion": "noreste",
+    "piso": "20",
+    "expensas": 15000,
+    "amenities": "pileta, gimnasio, spa, sum, seguridad 24hs, cochera",
     "cochera": "Sí",
     "balcon": "Sí",
     "pileta": "Sí",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+    "info_multimedia": "Tour virtual 360°, Fotos profesionales, Video del edificio",
     "fotos": [
-      "apartment_interior_1_4"
-    ],
-    "caracteristicas_extraidas": {},
-    "fecha_procesamiento": "2025-11-06T11:19:37.555370"
+      "imgs/penthouse_terrace_1_7.jpg",
+      "imgs/penthouse_terrace_2_2.jpg",
+      "imgs/penthouse_terrace_3_1.webp",
+      "imgs/penthouse_terrace_4_1.jpg"
+    ]
   },
   {
     "id_temporal": "UF006",
-    "titulo": "Casaquinta en San Isidro",
-    "barrio": "San Isidro",
+    "titulo": "Casa con Pileta en Tigre",
+    "barrio": "Tigre",
     "precio": 850000,
     "ambientes": 5,
-    "metros": 220,
+    "metros": 250,
     "operacion": "venta",
     "tipo": "casa",
-    "descripcion": "Exclusiva casaquinta con parque arbolado y pileta olímpica",
-    "direccion": "Av. del Libertador 3456",
-    "antiguedad": 15,
-    "estado": "excelente",
-    "orientacion": "norte",
+    "descripcion": "Casa de campo con gran parque y pileta",
+    "direccion": "Barrio Las Cascadas",
+    "antiguedad": 12,
+    "estado": "muy bueno",
+    "orientacion": "noroeste",
     "expensas": 0,
-    "amenities": "pileta, parrilla, quincho, jardín, cochera 3 autos",
+    "amenities": "pileta, parrilla, quincho, garaje para 2 autos",
     "cochera": "Sí",
     "balcon": "Sí",
     "pileta": "Sí",
     "acepta_mascotas": "Sí",
-    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+    "aire_acondicionado": "Sí",
+    "info_multimedia": "Drone video, Fotos del parque, Tour de la propiedad",
     "fotos": [
-      "imgs/apartment_interior_1_5.webp"
-    ],
-    "caracteristicas_extraidas": {
-      "pileta": true
-    },
-    "fecha_procesamiento": "2025-11-06T11:19:37.555370"
+      "imgs/house_pool_1_4.jpg",
+      "imgs/house_pool_2_1.jpg",
+      "imgs/house_pool_3_1.jpg"
+    ]
   },
   {
     "id_temporal": "UF007",
-    "titulo": "Departamento en Almagro",
-    "barrio": "Almagro",
-    "precio": 165000,
-    "ambientes": 2,
-    "metros": 55,
+    "titulo": "Estudio en Recoleta",
+    "barrio": "Recoleta",
+    "precio": 150000,
+    "ambientes": 1,
+    "metros": 40,
     "operacion": "alquiler",
     "tipo": "departamento",
-    "descripcion": "Departamento luminoso cerca del Parque Centenario",
-    "direccion": "Díaz Vélez 2345",
-    "antiguedad": 12,
-    "estado": "bueno",
-    "orientacion": "oeste",
-    "piso": "3",
-    "expensas": 3800,
-    "amenities": "seguridad, lavadero",
+    "descripcion": "Estudio elegante en el corazón de Recoleta",
+    "direccion": "Avenida Alvear 1800",
+    "antiguedad": 15,
+    "estado": "muy bueno",
+    "orientacion": "este",
+    "piso": "8",
+    "expensas": 6800,
+    "amenities": "sum, gimnasio, seguridad 24hs",
     "cochera": "No",
     "balcon": "Sí",
-    "pileta": "No",
+    "pileta": "Sí",
     "acepta_mascotas": "Sí",
-    "aire_acondicionado": "No",
-    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+    "aire_acondicionado": "Sí",
+    "info_multimedia": "Fotos del estudio, Video del edificio",
     "fotos": [
-      "house_exterior_1_7"
-    ],
-    "caracteristicas_extraidas": {},
-    "fecha_procesamiento": "2025-11-06T11:19:37.555370"
+      "imgs/studio_apartment_1_5.jpg",
+      "imgs/apartment_interior_1_5.webp"
+    ]
   },
   {
     "id_temporal": "UF008",
@@ -226,10 +218,7 @@
     "pileta": "No",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
-    "fotos": [
-      "imgs/apartment_interior_1_5.webp"
-    ],
+    "info_multimedia": "Fotos del patio, Plano de distribución",
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.555370"
   },
@@ -255,10 +244,7 @@
     "pileta": "No",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "No",
-    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
-    "fotos": [
-      "penthouse_terrace_1_0"
-    ],
+    "info_multimedia": "Fotos de la propiedad, Mapa de ubicación",
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.555370"
   },
@@ -283,10 +269,7 @@
     "pileta": "No",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
-    "fotos": [
-      "imgs/apartment_interior_1_5.webp"
-    ],
+    "info_multimedia": "Fotos profesionales, Video tour, Plano de la casa",
     "caracteristicas_extraidas": {
       "jardin": true
     },
@@ -314,10 +297,7 @@
     "pileta": "Sí",
     "acepta_mascotas": "No",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
-    "fotos": [
-      "penthouse_terrace_1_5"
-    ],
+    "info_multimedia": "Fotos del estudio, Video del edificio",
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.556401"
   },
@@ -343,10 +323,7 @@
     "pileta": "No",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "No",
-    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
-    "fotos": [
-      "ipenthouse_terrace_1_7"
-    ],
+    "info_multimedia": "Fotos del PH, Informe técnico",
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.556401"
   },
@@ -372,10 +349,7 @@
     "pileta": "No",
     "acepta_mascotas": "No",
     "aire_acondicionado": "No",
-    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
-    "fotos": [
-      "imgs/apartment_interior_1_5.webp"
-    ],
+    "info_multimedia": "Fotos básicas, Información de rentabilidad",
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.556401"
   },
@@ -400,10 +374,7 @@
     "pileta": "Sí",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
-    "fotos": [
-      "imgs/apartment_interior_1_5.webp"
-    ],
+    "info_multimedia": "Drone footage, Fotos del jardín, Tour virtual",
     "caracteristicas_extraidas": {
       "pileta": true,
       "jardin": true
@@ -432,10 +403,7 @@
     "pileta": "Sí",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
-    "fotos": [
-      "imgs/apartment_interior_1_5.webp"
-    ],
+    "info_multimedia": "Tour virtual premium, Fotos con drone, Video del edificio",
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.556401"
   },
@@ -461,10 +429,7 @@
     "pileta": "Sí",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
-    "fotos": [
-      "imgs/apartment_interior_1_5.webp"
-    ],
+    "info_multimedia": "Tour virtual premium, Fotos con drone, Video del edificio",
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.556401"
   }
