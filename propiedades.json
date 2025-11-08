@@ -112,7 +112,7 @@
     "aire_acondicionado": "Sí",
     "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
     "fotos": [
-      "imgs/apartment_interior_1_5.webp"
+      "imgs/apartment_interior_1_0.jpg"
     ],
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.555370"
@@ -141,7 +141,7 @@
     "aire_acondicionado": "Sí",
     "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
     "fotos": [
-      "imgs/apartment_interior_1_5.webp"
+      "apartment_interior_1_4"
     ],
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.555370"
@@ -199,7 +199,7 @@
     "aire_acondicionado": "No",
     "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
     "fotos": [
-      "imgs/apartment_interior_1_5.webp"
+      "house_exterior_1_7"
     ],
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.555370"
@@ -257,7 +257,7 @@
     "aire_acondicionado": "No",
     "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
     "fotos": [
-      "imgs/apartment_interior_1_5.webp"
+      "penthouse_terrace_1_0"
     ],
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.555370"
@@ -316,7 +316,7 @@
     "aire_acondicionado": "Sí",
     "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
     "fotos": [
-      "imgs/apartment_interior_1_5.webp"
+      "penthouse_terrace_1_5"
     ],
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.556401"
@@ -345,7 +345,7 @@
     "aire_acondicionado": "No",
     "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
     "fotos": [
-      "imgs/apartment_interior_1_5.webp"
+      "ipenthouse_terrace_1_7"
     ],
     "caracteristicas_extraidas": {},
     "fecha_procesamiento": "2025-11-06T11:19:37.556401"
