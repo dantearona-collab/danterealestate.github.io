@@ -334,7 +334,13 @@ async function showAllProperties() {
         }
         
         const data = await response.json();
-        const properties = data.properties || data;
+        console.log('📄 Datos cargados:', data.length, 'propiedades');
+        
+        // Para archivo local: data es un array directo
+        // Para API externa: data.properties sería un array
+        const properties = Array.isArray(data) ? data : (data.properties || data);
+        
+        console.log('✅ Propiedades procesadas:', properties.length);
         
         currentResults = properties;
         currentFilters = {};
@@ -388,7 +394,9 @@ async function applyQuickFilter(filterType) {
         }
         
         const data = await response.json();
-        const properties = data.properties || data;
+        // Para archivo local: data es un array directo
+        // Para API externa: data.properties sería un array
+        const properties = Array.isArray(data) ? data : (data.properties || data);
         
         currentResults = properties;
         currentFilters = Object.fromEntries(params);
