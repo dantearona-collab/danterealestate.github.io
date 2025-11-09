@@ -133,8 +133,8 @@ function initSearchForm() {
     const searchForm = document.getElementById('advanced-search-form');
     const opeSpans = document.querySelectorAll('.buscadorcab .ope span');
     const inputOpe = document.getElementById('ope-input');
-    const barrioSelect = document.getElementById('barrio-select');
-    const tipoSelect = document.getElementById('tipo-select');
+    const barrioSelect = document.getElementById('barrio-select-styled');
+    const tipoSelect = document.getElementById('tipo-select-styled');
     
     console.log('📋 Elementos encontrados:', {
         searchForm: !!searchForm,
@@ -295,7 +295,7 @@ async function performSearch() {
         }
         
         const queryString = params.toString();
-        const backendUrl = `https://danterealestate-github-io.onrender.com/api/properties/search?${queryString}`;
+        const backendUrl = `propiedades.json?${queryString}`;
         
         console.log('Searching with URL:', backendUrl);
         
@@ -328,7 +328,7 @@ async function showAllProperties() {
     showLoadingState();
     
     try {
-        const response = await fetch('https://danterealestate-github-io.onrender.com/api/properties/search');
+        const response = await fetch('propiedades.json');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -380,7 +380,7 @@ async function applyQuickFilter(filterType) {
         }
         
         const queryString = params.toString();
-        const backendUrl = `https://danterealestate-github-io.onrender.com/api/properties/search?${queryString}`;
+        const backendUrl = `propiedades.json?${queryString}`;
         
         const response = await fetch(backendUrl);
         if (!response.ok) {
@@ -551,8 +551,8 @@ function checkWhatsAppReturn() {
 
 function resetAllFilters() {
     // Resetear filtros locales
-    const barrioSelect = document.getElementById('barrio-select');
-    const tipoSelect = document.getElementById('tipo-select');
+    const barrioSelect = document.getElementById('barrio-select-styled');
+    const tipoSelect = document.getElementById('tipo-select-styled');
     
     if (barrioSelect) barrioSelect.value = 'todos';
     if (tipoSelect) tipoSelect.value = 'todos';
@@ -1168,8 +1168,8 @@ function initLocalPropertyFilter() {
     console.log('🔍 Iniciando sistema de filtrado local...');
     
     // Agregar event listeners a los filtros
-    const barrioSelect = document.getElementById('barrio-select');
-    const tipoSelect = document.getElementById('tipo-select');
+    const barrioSelect = document.getElementById('barrio-select-styled');
+    const tipoSelect = document.getElementById('tipo-select-styled');
     
     // Event listeners para dropdowns
     if (barrioSelect) {
@@ -1217,8 +1217,8 @@ function initLocalPropertyFilter() {
 function filterPropertiesLocally() {
     console.log('🔍 Iniciando filtrado local de propiedades...');
     
-    const barrioSelect = document.getElementById('barrio-select');
-    const tipoSelect = document.getElementById('tipo-select');
+    const barrioSelect = document.getElementById('barrio-select-styled');
+    const tipoSelect = document.getElementById('tipo-select-styled');
     const opeInput = document.getElementById('ope-input');
     
     const selectedBarrio = barrioSelect ? barrioSelect.value.toLowerCase() : '';
