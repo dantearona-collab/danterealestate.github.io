@@ -308,7 +308,7 @@ async function performSearch() {
         console.log('Search results:', data);
         
         // Handle both old and new API response formats
-        const properties = data.properties || data;
+        const properties = Array.isArray(data) ? data : (data.properties || data);
         currentResults = properties;
         currentFilters = Object.fromEntries(params);
         
