@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Servidor Flask CORREGIDO - Sin errores de sintaxis
-Dante Propiedades - Sistema de Registro Automático
+PARCHE URGENTE - Corregir error 'Fecha' en API de estadísticas
+Dante Propiedades - Solución para problema "desconectado"
 """
 
 from flask import Flask, request, jsonify, send_file
@@ -21,8 +21,11 @@ LOG_FILE = 'registro_contactos.log'
 def log_contacto(mensaje):
     """Registra actividad en archivo de log"""
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    with open(LOG_FILE, 'a', encoding='utf-8') as f:
-        f.write(f"[{timestamp}] {mensaje}\n")
+    try:
+        with open(LOG_FILE, 'a', encoding='utf-8') as f:
+            f.write(f"[{timestamp}] {mensaje}\n")
+    except:
+        pass  # Si no puede escribir al log, continuar
 
 def guardar_contacto_excel(datos):
     """
@@ -48,9 +51,14 @@ def guardar_contacto_excel(datos):
         # Verificar si el archivo existe
         if os.path.exists(EXCEL_FILE):
             # Leer archivo existente y agregar nuevo registro
-            df = pd.read_excel(EXCEL_FILE)
-            df_nuevo = pd.DataFrame([nuevo_registro])
-            df_completo = pd.concat([df, df_nuevo], ignore_index=True)
+            try:
+                df = pd.read_excel(EXCEL_FILE)
+                df_nuevo = pd.DataFrame([nuevo_registro])
+                df_completo = pd.concat([df, df_nuevo], ignore_index=True)
+            except Exception as e:
+                # Si hay error, crear nuevo archivo
+                log_contacto(f"⚠️ Error leyendo Excel: {str(e)}. Creando nuevo archivo.")
+                df_completo = pd.DataFrame([nuevo_registro])
         else:
             # Crear nuevo archivo con encabezados
             df_completo = pd.DataFrame([nuevo_registro])
@@ -80,8 +88,17 @@ def obtener_contactos():
                 'mensaje': 'No hay contactos registrados aún'
             })
         
-        # Leer el archivo Excel
-        df = pd.read_excel(EXCEL_FILE)
+        try:
+            # Leer el archivo Excel
+            df = pd.read_excel(EXCEL_FILE)
+        except Exception as e:
+            log_contacto(f"⚠️ Error leyendo Excel en obtener_contactos: {str(e)}")
+            return jsonify({
+                'success': True,
+                'contactos': [],
+                'total': 0,
+                'mensaje': f'Error leyendo datos: {str(e)}'
+            })
         
         if df.empty:
             return jsonify({
@@ -94,14 +111,18 @@ def obtener_contactos():
         # Convertir DataFrame a lista de diccionarios
         contactos = []
         for _, row in df.iterrows():
-            contacto = {
-                'nombre': str(row.get('Nombre', 'N/A')),
-                'email': str(row.get('Email', 'N/A')),
-                'telefono': str(row.get('Teléfono', 'N/A')),
-                'mensaje': str(row.get('Mensaje', 'N/A')),
-                'fecha': str(row.get('Fecha', 'N/A'))
-            }
-            contactos.append(contacto)
+            try:
+                contacto = {
+                    'nombre': str(row.get('Nombre', 'N/A')),
+                    'email': str(row.get('Email', 'N/A')),
+                    'telefono': str(row.get('Teléfono', 'N/A')),
+                    'mensaje': str(row.get('Mensaje', 'N/A')),
+                    'fecha': str(row.get('Fecha', 'N/A'))
+                }
+                contactos.append(contacto)
+            except Exception as e:
+                log_contacto(f"⚠️ Error procesando fila: {str(e)}")
+                continue
         
         return jsonify({
             'success': True,
@@ -178,38 +199,94 @@ def guardar_contacto():
             'message': 'Error interno del servidor'
         }), 500
 
+# API ESTADÍSTICAS CORREGIDA - SIN ERROR DE 'FECHA'
 @app.route('/api/estadisticas', methods=['GET'])
 def obtener_estadisticas():
     """
-    Endpoint para obtener estadísticas de contactos
+    Endpoint para obtener estadísticas de contactos - VERSIÓN CORREGIDA
     """
     try:
         if not os.path.exists(EXCEL_FILE):
             return jsonify({
                 'total_contactos': 0,
+                'contactos_hoy': 0,
                 'mensaje': 'No hay datos registrados aún'
             })
         
-        df = pd.read_excel(EXCEL_FILE)
+        try:
+            # Leer archivo Excel
+            df = pd.read_excel(EXCEL_FILE)
+        except Exception as e:
+            log_contacto(f"⚠️ Error leyendo Excel en estadísticas: {str(e)}")
+            return jsonify({
+                'total_contactos': 0,
+                'contactos_hoy': 0,
+                'mensaje': f'Error leyendo datos: {str(e)}'
+            })
         
-        # Estadísticas básicas
+        if df.empty:
+            return jsonify({
+                'total_contactos': 0,
+                'contactos_hoy': 0,
+                'mensaje': 'No hay datos registrados aún'
+            })
+        
+        # Estadísticas básicas - CON MANEJO SEGURO DE ERRORES
         total = len(df)
         hoy = datetime.now().date()
-        contactos_hoy = len(df[df['Fecha'].str.startswith(str(hoy))])
+        contactos_hoy = 0
+        ultimo_contacto = None
+        
+        try:
+            # Verificar si existe la columna 'Fecha' con manejo de errores
+            columnas = df.columns.tolist()
+            fecha_col = None
+            
+            # Buscar columna de fecha con diferentes variaciones
+            for col in columnas:
+                if 'fecha' in col.lower() or col == 'Fecha':
+                    fecha_col = col
+                    break
+            
+            if fecha_col and fecha_col in df.columns:
+                # Contar contactos de hoy
+                try:
+                    contactos_hoy = len(df[df[fecha_col].astype(str).str.startswith(str(hoy), na=False)])
+                    ultimo_contacto = str(df[fecha_col].iloc[-1]) if len(df) > 0 else None
+                except Exception as e:
+                    log_contacto(f"⚠️ Error procesando fechas: {str(e)}")
+                    contactos_hoy = 0
+                    ultimo_contacto = None
+            else:
+                log_contacto(f"⚠️ No se encontró columna 'Fecha'. Columnas disponibles: {columnas}")
+                contactos_hoy = 0
+                ultimo_contacto = None
+                
+        except Exception as e:
+            log_contacto(f"⚠️ Error en cálculo de estadísticas: {str(e)}")
+            contactos_hoy = 0
+            ultimo_contacto = None
         
         return jsonify({
             'total_contactos': total,
             'contactos_hoy': contactos_hoy,
-            'ultimo_contacto': df['Fecha'].iloc[-1] if total > 0 else None
+            'ultimo_contacto': ultimo_contacto,
+            'mensaje': f'Total: {total}, Hoy: {contactos_hoy}'
         })
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        log_contacto(f"❌ Error crítico en estadísticas: {str(e)}")
+        return jsonify({
+            'total_contactos': 0,
+            'contactos_hoy': 0,
+            'error': str(e),
+            'mensaje': 'Error interno del servidor'
+        }), 500
 
-# RUTA ADMIN CORREGIDA - SINTAXIS CORRECTA
+# RUTA ADMIN - VERSIÓN MEJORADA
 @app.route('/admin')
 def admin_panel():
-    """Panel de administración embebido - SINTAXIS CORREGIDA"""
+    """Panel de administración embebido - VERSIÓN CORREGIDA"""
     return '''<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -224,10 +301,13 @@ def admin_panel():
         .stat-card { background: white; padding: 20px; border-radius: 10px; text-align: center; flex: 1; }
         .btn { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; margin: 5px; }
         .btn:hover { background: #0056b3; }
+        .btn.connected { background: #28a745; }
+        .btn.disconnected { background: #dc3545; }
         table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #f8f9fa; }
         .loading { text-align: center; padding: 20px; color: #666; }
+        .error { color: #dc3545; background: #f8d7da; padding: 10px; border-radius: 5px; margin: 10px 0; }
     </style>
 </head>
 <body>
@@ -235,6 +315,7 @@ def admin_panel():
         <div class="header">
             <h1>🏢 Panel de Administración</h1>
             <p>Dante Propiedades - Gestión de Contactos</p>
+            <div id="conexionStatus" class="loading">Verificando conexión...</div>
         </div>
         
         <div class="stats">
@@ -256,6 +337,7 @@ def admin_panel():
             <a href="/api/descargar-excel" class="btn">📊 Descargar Excel</a>
             <button class="btn" onclick="actualizarDatos()">🔄 Actualizar</button>
             <a href="/" class="btn">🏠 Sitio Principal</a>
+            <button class="btn" onclick="testearConexion()">🔍 Probar Conexión</button>
         </div>
         
         <div id="contactosContainer">
@@ -264,31 +346,93 @@ def admin_panel():
     </div>
     
     <script>
-        function cargarEstadisticas() {
-            fetch('/api/estadisticas')
+        let conectado = false;
+        
+        function actualizarStatusConexion(status, mensaje) {
+            const statusDiv = document.getElementById('conexionStatus');
+            const botonProbar = document.querySelector('button[onclick="testearConexion()"]');
+            
+            if (status) {
+                statusDiv.innerHTML = '✅ Conectado - ' + mensaje;
+                statusDiv.style.color = '#28a745';
+                botonProbar.className = 'btn connected';
+                botonProbar.innerHTML = '✅ Conectado';
+            } else {
+                statusDiv.innerHTML = '❌ Desconectado - ' + mensaje;
+                statusDiv.style.color = '#dc3545';
+                botonProbar.className = 'btn disconnected';
+                botonProbar.innerHTML = '❌ Desconectado';
+            }
+        }
+        
+        function testearConexion() {
+            console.log('🔍 Probando conexión...');
+            actualizarStatusConexion(false, 'Probando...');
+            
+            fetch('/debug')
                 .then(response => response.json())
                 .then(data => {
+                    console.log('✅ Conexión OK:', data);
+                    actualizarStatusConexion(true, 'Backend funcionando');
+                    conectado = true;
+                })
+                .catch(error => {
+                    console.error('❌ Error de conexión:', error);
+                    actualizarStatusConexion(false, 'Error de conexión');
+                    conectado = false;
+                });
+        }
+        
+        function cargarEstadisticas() {
+            console.log('📊 Cargando estadísticas...');
+            fetch('/api/estadisticas')
+                .then(response => {
+                    console.log('📊 Status respuesta:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('📊 Datos recibidos:', data);
                     document.getElementById('totalContactos').textContent = data.total_contactos || 0;
                     document.getElementById('contactosHoy').textContent = data.contactos_hoy || 0;
-                    if (data.ultimo_contacto) {
-                        const fecha = new Date(data.ultimo_contacto);
-                        document.getElementById('ultimoContacto').textContent = 
-                            fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
+                    if (data.ultimo_contacto && data.ultimo_contacto !== 'None') {
+                        try {
+                            const fecha = new Date(data.ultimo_contacto);
+                            document.getElementById('ultimoContacto').textContent = 
+                                fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
+                        } catch (e) {
+                            document.getElementById('ultimoContacto').textContent = 
+                                String(data.ultimo_contacto).substring(0, 10);
+                        }
                     } else {
                         document.getElementById('ultimoContacto').textContent = 'Sin datos';
                     }
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    console.error('❌ Error cargando estadísticas:', error);
+                    document.getElementById('totalContactos').textContent = 'Error';
+                    document.getElementById('contactosHoy').textContent = 'Error';
+                    document.getElementById('ultimoContacto').textContent = 'Error';
+                });
         }
         
         function cargarContactos() {
+            console.log('📋 Cargando contactos...');
             fetch('/api/guardar-contacto')
-                .then(response => response.json())
+                .then(response => {
+                    console.log('📋 Status respuesta:', response.status);
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('📋 Datos recibidos:', data);
                     const container = document.getElementById('contactosContainer');
                     
-                    if (data.contactos.length === 0) {
+                    if (data.contactos && data.contactos.length === 0) {
                         container.innerHTML = '<div class="loading">📭 No hay contactos registrados</div>';
+                        return;
+                    }
+                    
+                    if (!data.contactos || data.contactos.length === undefined) {
+                        container.innerHTML = '<div class="error">❌ Error en respuesta del servidor</div>';
                         return;
                     }
                     
@@ -296,11 +440,11 @@ def admin_panel():
                     
                     data.contactos.slice(-10).reverse().forEach(contacto => {
                         html += '<tr>' +
-                            '<td>' + contacto.fecha + '</td>' +
-                            '<td>' + contacto.nombre + '</td>' +
-                            '<td>' + contacto.email + '</td>' +
-                            '<td>' + contacto.telefono + '</td>' +
-                            '<td>' + (contacto.mensaje.substring(0, 30) + (contacto.mensaje.length > 30 ? '...' : '')) + '</td>' +
+                            '<td>' + (contacto.fecha || 'N/A') + '</td>' +
+                            '<td>' + (contacto.nombre || 'N/A') + '</td>' +
+                            '<td>' + (contacto.email || 'N/A') + '</td>' +
+                            '<td>' + (contacto.telefono || 'N/A') + '</td>' +
+                            '<td>' + ((contacto.mensaje || '').substring(0, 30) + ((contacto.mensaje || '').length > 30 ? '...' : '')) + '</td>' +
                         '</tr>';
                     });
                     
@@ -308,40 +452,58 @@ def admin_panel():
                     container.innerHTML = html;
                 })
                 .catch(error => {
-                    console.error('Error:', error);
+                    console.error('❌ Error cargando contactos:', error);
                     document.getElementById('contactosContainer').innerHTML = 
-                        '<div class="loading">❌ Error cargando contactos</div>';
+                        '<div class="error">❌ Error cargando contactos: ' + error.message + '</div>';
                 });
         }
         
         function actualizarDatos() {
             document.getElementById('contactosContainer').innerHTML = '<div class="loading">Actualizando...</div>';
-            cargarEstadisticas();
-            cargarContactos();
+            testearConexion();
+            setTimeout(() => {
+                cargarEstadisticas();
+                cargarContactos();
+            }, 1000);
         }
         
         // Cargar datos al iniciar
         document.addEventListener('DOMContentLoaded', function() {
-            cargarEstadisticas();
-            cargarContactos();
+            console.log('🚀 Inicializando admin panel...');
+            testearConexion();
+            setTimeout(() => {
+                cargarEstadisticas();
+                cargarContactos();
+            }, 1000);
+            
+            // Actualizar cada 30 segundos
             setInterval(actualizarDatos, 30000);
         });
     </script>
 </body>
 </html>'''
 
-# RUTA DEBUG CORREGIDA
+# RUTA DEBUG - VERSIÓN MEJORADA
 @app.route('/debug', methods=['GET'])
 def debug():
-    """Ruta de diagnóstico - SINTAXIS CORREGIDA"""
+    """Ruta de diagnóstico - VERSIÓN CORREGIDA"""
     try:
+        excel_existe = os.path.exists(EXCEL_FILE)
+        archivos = []
+        try:
+            if os.path.exists('.'):
+                archivos = os.listdir('.')[:10]  # Solo primeros 10 archivos
+        except:
+            archivos = ['Error listando archivos']
+            
         return jsonify({
             'status': 'ok',
             'message': 'Flask funcionando correctamente',
             'timestamp': datetime.now().isoformat(),
-            'directorio': os.getcwd(),
-            'archivos': os.listdir('.') if os.path.exists('.') else [],
-            'excel_existe': os.path.exists(EXCEL_FILE)
+            'directorio': os.getcwd() if os.path.exists('.') else 'No accesible',
+            'archivos_disponibles': archivos,
+            'excel_existe': excel_existe,
+            'excel_path': EXCEL_FILE if excel_existe else 'No existe'
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -349,39 +511,53 @@ def debug():
 @app.route('/api/descargar-excel', methods=['GET'])
 def api_descargar_excel():
     """API para descargar archivo Excel"""
-    if os.path.exists(EXCEL_FILE):
-        return send_file(EXCEL_FILE, as_attachment=True, download_name='contactos_dante_propiedades.xlsx')
-    else:
-        return jsonify({'error': 'Archivo no encontrado'}), 404
+    try:
+        if os.path.exists(EXCEL_FILE):
+            return send_file(EXCEL_FILE, as_attachment=True, download_name='contactos_dante_propiedades.xlsx')
+        else:
+            return jsonify({'error': 'Archivo no encontrado'}), 404
+    except Exception as e:
+        log_contacto(f"Error en descarga Excel: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 # RUTAS PARA ARCHIVOS
 @app.route('/', methods=['GET'])
 def index():
     """Página principal"""
-    return send_file('index.html')
+    try:
+        return send_file('index.html')
+    except:
+        return "Página principal no disponible", 404
 
 @app.route('/formulario', methods=['GET'])
 def formulario():
     """Página del formulario"""
-    return send_file('formulario.html')
+    try:
+        return send_file('formulario.html')
+    except:
+        return "Formulario no disponible", 404
 
 if __name__ == '__main__':
-    print("🏢 Dante Propiedades - Servidor CORREGIDO")
-    print("=" * 50)
+    print("🏢 Dante Propiedades - Servidor PARCHE CORREGIDO")
+    print("=" * 60)
     print(f"📁 Archivo Excel: {EXCEL_FILE}")
     print(f"📋 Archivo Log: {LOG_FILE}")
     print("🚀 Iniciando servidor...")
     
-    log_contacto("🎉 Servidor iniciado correctamente")
+    log_contacto("🎉 Servidor iniciado correctamente con parche de 'Fecha'")
     
     # Crear archivo Excel inicial si no existe
     if not os.path.exists(EXCEL_FILE):
-        df_inicial = pd.DataFrame(columns=[
-            'Fecha', 'Nombre', 'Email', 'Teléfono', 'Interés', 
-            'Presupuesto', 'Mensaje', 'Página_Origen', 'IP_Cliente', 'User_Agent'
-        ])
-        df_inicial.to_excel(EXCEL_FILE, index=False, engine='openpyxl')
-        print("📄 Archivo Excel inicializado")
+        try:
+            df_inicial = pd.DataFrame(columns=[
+                'Fecha', 'Nombre', 'Email', 'Teléfono', 'Interés', 
+                'Presupuesto', 'Mensaje', 'Página_Origen', 'IP_Cliente', 'User_Agent'
+            ])
+            df_inicial.to_excel(EXCEL_FILE, index=False, engine='openpyxl')
+            print("📄 Archivo Excel inicializado")
+            log_contacto("📄 Archivo Excel creado inicialmente")
+        except Exception as e:
+            print(f"⚠️ Error inicializando Excel: {str(e)}")
     
     # Configuración para Render (puerto dinámico)
     port = int(os.environ.get('PORT', 5000))
@@ -394,10 +570,10 @@ if __name__ == '__main__':
     print()
     print("📡 APIs disponibles:")
     print("   POST /api/guardar-contacto - Guardar nuevo contacto")
-    print("   GET  /api/estadisticas - Ver estadísticas")
+    print("   GET  /api/estadisticas - Ver estadísticas (CORREGIDA)")
     print("   GET  /api/descargar-excel - Descargar archivo Excel")
-    print("   GET  /debug - Diagnóstico del sistema")
-    print("=" * 50)
+    print("   GET  /debug - Diagnóstico del sistema (MEJORADO)")
+    print("=" * 60)
     
     # Configuración para Render (sin debug en producción)
     debug_mode = os.environ.get('FLASK_ENV') != 'production'
