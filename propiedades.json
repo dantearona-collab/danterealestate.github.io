@@ -22,6 +22,10 @@
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
     "info_multimedia": "Galeria completa con 5 fotos profesionales, Fotos de interiores, Fotos panorámicas",
+    "documentos": [
+      "imgs/ENTORNOS.PDF",
+      "imgs/DATOS PARCELA.PDF"
+    ],
     "fotos": [
       "imgs/apartment_interior_1_4.jpg",
       "imgs/studio_apartment_1_1.jpg",
@@ -31,7 +35,7 @@
     ],
     "moneda_precio": "USD",
     "moneda_expensas": "ARS",
-    "fecha_procesamiento": "2025-11-08T14:22:12.193375"
+    "fecha_procesamiento": "2025-11-08T22:06:46.441621"
   },
   {
     "id_temporal": "UF002",
@@ -63,7 +67,7 @@
     ],
     "moneda_precio": "USD",
     "moneda_expensas": "ARS",
-    "fecha_procesamiento": "2025-11-08T14:22:12.207952"
+    "fecha_procesamiento": "2025-11-08T22:06:46.441621"
   },
   {
     "id_temporal": "UF003",
@@ -96,7 +100,7 @@
     ],
     "moneda_precio": "USD",
     "moneda_expensas": "ARS",
-    "fecha_procesamiento": "2025-11-08T14:22:12.207952"
+    "fecha_procesamiento": "2025-11-08T22:06:46.441621"
   },
   {
     "id_temporal": "UF004",
@@ -129,7 +133,7 @@
     ],
     "moneda_precio": "USD",
     "moneda_expensas": "ARS",
-    "fecha_procesamiento": "2025-11-08T14:22:12.207952"
+    "fecha_procesamiento": "2025-11-08T22:06:46.441621"
   },
   {
     "id_temporal": "UF005",
@@ -161,7 +165,7 @@
     ],
     "moneda_precio": "USD",
     "moneda_expensas": "ARS",
-    "fecha_procesamiento": "2025-11-08T14:22:12.208960"
+    "fecha_procesamiento": "2025-11-08T22:06:46.442621"
   },
   {
     "id_temporal": "UF006",
@@ -194,7 +198,7 @@
     ],
     "moneda_precio": "USD",
     "moneda_expensas": "ARS",
-    "fecha_procesamiento": "2025-11-08T14:22:12.208960"
+    "fecha_procesamiento": "2025-11-08T22:06:46.442621"
   },
   {
     "id_temporal": "UF007",
@@ -226,7 +230,7 @@
     ],
     "moneda_precio": "USD",
     "moneda_expensas": "ARS",
-    "fecha_procesamiento": "2025-11-08T14:22:12.208960"
+    "fecha_procesamiento": "2025-11-08T22:06:46.442621"
   },
   {
     "id_temporal": "UF008",
@@ -257,6 +261,6 @@
     ],
     "moneda_precio": "USD",
     "moneda_expensas": "ARS",
-    "fecha_procesamiento": "2025-11-08T14:22:12.210011"
+    "fecha_procesamiento": "2025-11-08T22:06:46.442621"
   }
 ]

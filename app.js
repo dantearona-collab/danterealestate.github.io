@@ -1,603 +1,1303 @@
-// Sistema Dante Propiedades - SIN ERRORES + SLIDER FUNCIONAL
-// Versión sin dependencias de Font Awesome + Slider de múltiples fotos - 2025-11-08
-
-// ========================================
-// SISTEMA DE SLIDER DE MÚLTIPLES FOTOS
-// ========================================
-
-// Variables globales para el slider
-let currentSlides = {};
-
-// Función para crear el slider de imágenes
-function createImageSlider(property) {
-    const fotos = property.fotos || [];
+// Script avanzado con sistema completo de gestión de propiedades
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== INICIANDO SISTEMA AVANZADO DANTE PROPIEDADES ===');
     
-    if (fotos.length === 0) {
-        // Sin imágenes - usar imagen por defecto
-        return `
-            <div style="position: relative;">
-                <img src="INSTITUCIONAL 1.jpg" 
-                     alt="${property.titulo}" 
-                     style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
-                     onerror="this.src='INSTITUCIONAL 3.png'">
-        `;
+    // Inicializar funciones en orden de importancia
+    initMenu();
+    initSlider();
+    initAdvancedSearch(); // Sistema de búsqueda avanzado
+    initWhatsApp();
+    
+    // **INDEPENDIENTE: Cargar opciones de filtros sin API**
+    loadFilterOptionsOffline();
+    
+    // **INICIALIZAR FILTRADO LOCAL - FIX APLICADO**
+    // Dar tiempo para que los elementos se carguen
+    setTimeout(function() {
+        console.log('🔍 Inicializando sistema de filtros locales...');
+        initLocalPropertyFilter();
+        showAllPropertiesLocally();
+        console.log('✅ Sistema de filtros locales inicializado');
+    }, 200);
+    
+    // Mostrar todas las propiedades por defecto
+    showAllProperties();
+    
+    console.log('✅ Sistema iniciado correctamente');
+});
+
+function initMenu() {
+    const menuBtn = document.querySelector('.menudesp');
+    const closeBtn = document.querySelector('.cerrarmenu');
+    const menuSlide = document.getElementById('menuslide');
+    
+    if (menuBtn && closeBtn && menuSlide) {
+        menuBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            menuSlide.classList.add('menuabierto');
+            console.log('Menú abierto');
+        });
+        
+        closeBtn.addEventListener('click', () => {
+            menuSlide.classList.remove('menuabierto');
+            console.log('Menú cerrado');
+        });
+        
+        // Cerrar menú al hacer clic fuera en dispositivos táctiles
+        document.addEventListener('click', (e) => {
+            if (menuSlide.classList.contains('menuabierto') && 
+                !menuSlide.contains(e.target) && 
+                !menuBtn.contains(e.target)) {
+                menuSlide.classList.remove('menuabierto');
+            }
+        });
     }
-    
-    if (fotos.length === 1) {
-        // Una sola imagen - mostrar normalmente
-        return `
-            <div style="position: relative;">
-                <img src="${fotos[0]}" 
-                     alt="${property.titulo}" 
-                     style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
-                     onerror="this.src='INSTITUCIONAL 3.png'">
-        `;
-    }
-    
-    // Múltiples imágenes - crear slider
-    const imageSlides = fotos.map((foto, index) => `
-        <div class="property-slide ${index === 0 ? 'active' : ''}" data-slide="${index}">
-            <img src="${foto}" 
-                 alt="${property.titulo} - Foto ${index + 1}" 
-                 style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
-                 onerror="this.src='INSTITUCIONAL 3.png'">
-        </div>
-    `).join('');
-    
-    const navigationDots = fotos.map((_, index) => `
-        <span class="property-nav-dot ${index === 0 ? 'active' : ''}" onclick="showSlide('${property.id_temporal}', ${index})"></span>
-    `).join('');
-    
-    return `
-        <div class="property-slider" data-property="${property.id_temporal}" style="position: relative;">
-            <div class="property-slides-container" style="position: relative; overflow: hidden; width: 100%; height: 200px;">
-                ${imageSlides}
-            </div>
-            
-            <!-- Controles de navegación (EMOJIS) -->
-            ${fotos.length > 1 ? `
-                <!-- Flecha anterior -->
-                <button class="property-slider-btn property-prev" 
-                        onclick="prevSlide('${property.id_temporal}')"
-                        style="position: absolute; top: 50%; left: 8px; transform: translateY(-50%); 
-                               background: rgba(35, 45, 235, 0.8); color: white; border: none; 
-                               width: 32px; height: 32px; border-radius: 50%; cursor: pointer; 
-                               display: flex; align-items: center; justify-content: center;
-                               font-size: 16px; z-index: 2; transition: all 0.3s ease;">
-                    ◀
-                </button>
-                
-                <!-- Flecha siguiente -->
-                <button class="property-slider-btn property-next" 
-                        onclick="nextSlide('${property.id_temporal}')"
-                        style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); 
-                               background: rgba(35, 45, 235, 0.8); color: white; border: none; 
-                               width: 32px; height: 32px; border-radius: 50%; cursor: pointer; 
-                               display: flex; align-items: center; justify-content: center;
-                               font-size: 16px; z-index: 2; transition: all 0.3s ease;">
-                    ▶
-                </button>
-                
-                <!-- Dots de navegación -->
-                <div class="property-nav-dots" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); 
-                                                     display: flex; gap: 6px; z-index: 2;">
-                    ${navigationDots}
-                </div>
-            ` : ''}
-        </div>
-    `;
 }
 
-// Función para mostrar slide específico
-function showSlide(propertyId, slideIndex) {
-    const slider = document.querySelector(`[data-property="${propertyId}"]`);
-    if (!slider) return;
+function initSlider() {
+    if (typeof $ !== 'undefined' && $('.slini').length) {
+        console.log('Inicializando slider...');
+        
+        $('.slini').slick({
+            dots: false,
+            arrows: false,
+            infinite: true,
+            speed: 500,
+            fade: true,
+            autoplay: true,
+            autoplaySpeed: 4000,
+            cssEase: 'linear',
+            adaptiveHeight: false
+        });
+
+        // Navegación
+        const navButtons = document.querySelectorAll('.slider-nav button');
+        navButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const slideIndex = parseInt(this.dataset.slide);
+                $('.slini').slick('slickGoTo', slideIndex);
+            });
+        });
+
+        $('.slini').on('afterChange', function(event, slick, currentSlide) {
+            navButtons.forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.querySelector(`[data-slide="${currentSlide}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+        });
+        
+        console.log('Slider inicializado correctamente');
+    }
+}
+
+// ====================================
+// SISTEMA AVANZADO DE BÚSQUEDA DE PROPIEDADES
+// ====================================
+
+let currentViewMode = 'grid';
+let currentResults = [];
+let currentFilters = {};
+
+/**
+ * Inicializar el sistema de búsqueda avanzada
+ */
+function initAdvancedSearch() {
+    console.log('Inicializando búsqueda avanzada...');
     
-    const slides = slider.querySelectorAll('.property-slide');
-    const dots = slider.querySelectorAll('.property-nav-dot');
+    initSearchForm();
+    initQuickFilters();
+    initViewControls();
+    initModal();
+    initNoResultsActions();
+}
+
+/**
+ * Cargar opciones de filtros de forma OFFLINE (sin API)
+ */
+function loadFilterOptionsOffline() {
+    console.log('🔄 Cargando opciones de filtros de forma offline...');
     
-    slides.forEach((slide, index) => {
-        slide.classList.remove('active');
-        if (index === slideIndex) {
-            slide.classList.add('active');
-        }
+    // Los datos hardcodeados (los mismos que están en el HTML)
+    const barrios = ['palermo', 'belgrano', 'colegiales', 'microcentro', 'recoleta', 'san isidro', 'almagro', 'villa crespo', 'caballito', 'nuñez', 'boedo', 'balvanera', 'vicente lopez', 'puerto madero'];
+    const tipos = ['departamento', 'casa', 'ph', 'oficina', 'local', 'terreno'];
+    
+    console.log('✅ Opciones de filtros cargadas offline - Listo para event listeners');
+    console.log('📊 Barrios:', barrios.length, 'Tipos:', tipos.length);
+}
+
+/**
+ * Inicializar formulario de búsqueda
+ */
+function initSearchForm() {
+    console.log('🔍 initSearchForm() - Iniciando...');
+    
+    const searchForm = document.getElementById('advanced-search-form');
+    const opeSpans = document.querySelectorAll('.buscadorcab .ope span');
+    const inputOpe = document.getElementById('ope-input');
+    const barrioSelect = document.getElementById('barrio-select');
+    const tipoSelect = document.getElementById('tipo-select');
+    
+    console.log('📋 Elementos encontrados:', {
+        searchForm: !!searchForm,
+        barrioSelect: !!barrioSelect,
+        tipoSelect: !!tipoSelect,
+        opeSpans: opeSpans.length
     });
     
-    dots.forEach((dot, index) => {
-        dot.classList.remove('active');
-        if (index === slideIndex) {
-            dot.classList.add('active');
-        }
+    // Handle operation type selection
+    opeSpans.forEach(opcion => {
+        opcion.addEventListener('click', function() {
+            opeSpans.forEach(o => o.classList.remove('activo'));
+            this.classList.add('activo');
+            if (inputOpe) inputOpe.value = this.dataset.val;
+            console.log('🔸 Operación seleccionada:', this.dataset.val);
+        });
     });
     
-    currentSlides[propertyId] = slideIndex;
-}
-
-// Función para slide anterior
-function prevSlide(propertyId) {
-    const slider = document.querySelector(`[data-property="${propertyId}"]`);
-    if (!slider) return;
-    
-    const current = currentSlides[propertyId] || 0;
-    const totalSlides = slider.querySelectorAll('.property-slide').length;
-    const newIndex = current > 0 ? current - 1 : totalSlides - 1;
-    
-    showSlide(propertyId, newIndex);
-}
-
-// Función para slide siguiente
-function nextSlide(propertyId) {
-    const slider = document.querySelector(`[data-property="${propertyId}"]`);
-    if (!slider) return;
-    
-    const current = currentSlides[propertyId] || 0;
-    const totalSlides = slider.querySelectorAll('.property-slide').length;
-    const newIndex = current < totalSlides - 1 ? current + 1 : 0;
-    
-    showSlide(propertyId, newIndex);
-}
-
-// CSS para el slider (agregar al head)
-function addSliderStyles() {
-    const style = document.createElement('style');
-    style.textContent = `
-        .property-slider {
-            position: relative;
-        }
-        
-        .property-slides-container {
-            position: relative;
-        }
-        
-        .property-slide {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-        }
-        
-        .property-slide.active {
-            opacity: 1;
-        }
-        
-        .property-slider-btn:hover {
-            background: rgba(35, 45, 235, 1) !important;
-            transform: translateY(-50%) scale(1.1) !important;
-        }
-        
-        .property-nav-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.6);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-        }
-        
-        .property-nav-dot.active {
-            background: #232deb;
-            transform: scale(1.2);
-        }
-        
-        .property-nav-dot:hover {
-            background: rgba(255, 255, 255, 0.9);
-            transform: scale(1.1);
-        }
-    `;
-    document.head.appendChild(style);
-}
-
-// ========================================
-// SISTEMA DE PROPIEDADES
-// ========================================
-
-let globalData = {
-    properties: [],
-    filteredProperties: [],
-    filters: {
-        operacion: '',
-        barrio: '',
-        tipo: '',
-        precioMin: 0,
-        precioMax: 999999999
-    }
-};
-
-// Cargar propiedades
-async function loadProperties() {
-    try {
-        console.log('📂 Cargando datos de propiedades...');
-        
-        const response = await fetch('propiedades.json');
-        if (!response.ok) {
-            throw new Error(`Error HTTP! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        globalData.properties = data;
-        globalData.filteredProperties = data;
-        
-        console.log('✅ Datos cargados:', data.length, 'propiedades');
-        
-        // Llenar filtros
-        populateFilters(data);
-        
-        // Mostrar propiedades
-        displayProperties(data);
-        
-    } catch (error) {
-        console.log('⚠️ No se pudo cargar propiedades.json, usando datos embebidos');
-        loadEmbeddedProperties();
-    }
-}
-
-// Propiedades embebidas como fallback
-function loadEmbeddedProperties() {
-    const sampleData = [
-        {
-            "id_temporal": "UF001",
-            "titulo": "Departamento en Palermo SoHo",
-            "barrio": "Palermo",
-            "precio": 280000,
-            "ambientes": 2,
-            "metros_cuadrados": 68,
-            "operacion": "alquiler",
-            "tipo": "departamento",
-            "descripcion": "Excelente departamento en el corazón de Palermo SoHo",
-            "direccion": "Honduras 1450",
-            "antiguedad": 3,
-            "estado": "excelente",
-            "orientacion": "norte",
-            "piso": "5",
-            "expensas": 8500,
-            "moneda_precio": "USD",
-            "moneda_expensas": "ARS",
-            "amenities": "pileta, gimnasio, sum, seguridad 24hs",
-            "cochera": "Sí",
-            "balcon": "Sí",
-            "pileta": "Sí",
-            "acepta_mascotas": "Sí",
-            "aire_acondicionado": "Sí",
-            "info_multimedia": "Fotos profesionales disponibles",
-            "fotos": ["imgs/apartment_interior_1_5.webp", "imgs/apartment_interior_1_0.jpg"]
-        },
-        {
-            "id_temporal": "UF002",
-            "titulo": "Casa en Belgrano R",
-            "barrio": "Belgrano",
-            "precio": 650000,
-            "ambientes": 4,
-            "metros_cuadrados": 180,
-            "operacion": "venta",
-            "tipo": "casa",
-            "descripcion": "Magnífica casa familiar con jardín y pileta",
-            "direccion": "Juramento 2345",
-            "antiguedad": 8,
-            "estado": "excelente",
-            "orientacion": "norte",
-            "expensas": 0,
-            "moneda_precio": "USD",
-            "moneda_expensas": "ARS",
-            "amenities": "pileta, parrilla, jardín, cochera cubierta",
-            "cochera": "Sí",
-            "balcon": "Sí",
-            "pileta": "Sí",
-            "acepta_mascotas": "Sí",
-            "aire_acondicionado": "Sí",
-            "info_multimedia": "Fotos panorámicas disponibles",
-            "fotos": ["imgs/house_pool_1_0.jpg", "imgs/house_exterior_1_7.jpg", "imgs/house_pool_1_4.jpg"]
-        }
-    ];
-    
-    globalData.properties = sampleData;
-    globalData.filteredProperties = sampleData;
-    
-    console.log('✅ Propiedades de ejemplo cargadas:', sampleData.length);
-    populateFilters(sampleData);
-    displayProperties(sampleData);
-}
-
-// Llenar filtros con datos únicos
-function populateFilters(properties) {
-    const barrios = [...new Set(properties.map(p => p.barrio).filter(Boolean))].sort();
-    const tipos = [...new Set(properties.map(p => p.tipo).filter(Boolean))].sort();
-    
-    const barrioSelect = document.getElementById('barrio-select-styled');
-    const tipoSelect = document.getElementById('tipo-select-styled');
-    
+    // **CRÍTICO: Event listeners para mantener valores de filtros**
     if (barrioSelect) {
-        barrioSelect.innerHTML = '<option value="">Todos los barrios</option>' + 
-            barrios.map(barrio => `<option value="${barrio}">${barrio}</option>`).join('');
+        barrioSelect.addEventListener('change', function() {
+            console.log('🎯 BARRIO CAMBIADO A:', this.value);
+            // El valor se mantiene automáticamente, solo registramos el cambio
+        });
+        console.log('✅ Event listener agregado a barrio-select');
+    } else {
+        console.error('❌ NO se encontró barrio-select');
     }
     
     if (tipoSelect) {
-        tipoSelect.innerHTML = '<option value="">Todos los tipos</option>' + 
-            tipos.map(tipo => `<option value="${tipo}">${tipo}</option>`).join('');
+        tipoSelect.addEventListener('change', function() {
+            console.log('🎯 TIPO CAMBIADO A:', this.value);
+            // El valor se mantiene automáticamente, solo registramos el cambio
+        });
+        console.log('✅ Event listener agregado a tipo-select');
+    } else {
+        console.error('❌ NO se encontró tipo-select');
     }
     
-    console.log('🔧 Filtros poblados - Barrios:', barrios.length, 'Tipos:', tipos.length);
+    // Handle form submission (ya no se usa con type="button")
+    if (searchForm) {
+        searchForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            await performSearch();
+        });
+    }
+    
+    console.log('✅ initSearchForm() completado');
+    
+    // **FILTRADO LOCAL DE PROPIEDADES**
+    // Inicializar filtrado local
+    console.log('🔍 Configurando filtrado local de propiedades...');
+    initLocalPropertyFilter();
 }
 
-// Crear tarjeta de propiedad con slider
+/**
+ * Inicializar filtros rápidos
+ */
+function initQuickFilters() {
+    const filterTabs = document.querySelectorAll('.filter-tab');
+    
+    filterTabs.forEach(tab => {
+        tab.addEventListener('click', async function() {
+            // Remover clase active de todos
+            filterTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Aplicar filtro
+            const filterType = this.dataset.filter;
+            await applyQuickFilter(filterType);
+        });
+    });
+}
+
+/**
+ * Inicializar controles de vista
+ */
+function initViewControls() {
+    const gridBtn = document.getElementById('grid-view');
+    const listBtn = document.getElementById('list-view');
+    const mapBtn = document.getElementById('map-view');
+    
+    if (gridBtn) {
+        gridBtn.addEventListener('click', () => changeViewMode('grid'));
+    }
+    if (listBtn) {
+        listBtn.addEventListener('click', () => changeViewMode('list'));
+    }
+    if (mapBtn) {
+        mapBtn.addEventListener('click', () => changeViewMode('map'));
+    }
+}
+
+/**
+ * Inicializar modal de propiedades
+ */
+function initModal() {
+    const modal = document.getElementById('property-modal');
+    const closeBtn = modal?.querySelector('.modal-close');
+    const overlay = modal?.querySelector('.modal-overlay');
+    
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closePropertyModal);
+    }
+    if (overlay) {
+        overlay.addEventListener('click', closePropertyModal);
+    }
+    
+    // Cerrar con ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+            closePropertyModal();
+        }
+    });
+}
+
+/**
+ * Inicializar acciones para casos sin resultados
+ */
+function initNoResultsActions() {
+    const clearFiltersBtn = document.getElementById('clear-filters');
+    const showAllBtn = document.getElementById('show-all-properties');
+    const retryBtn = document.getElementById('retry-search');
+    
+    if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener('click', clearAllFilters);
+    }
+    if (showAllBtn) {
+        showAllBtn.addEventListener('click', showAllProperties);
+    }
+    if (retryBtn) {
+        retryBtn.addEventListener('click', performSearch);
+    }
+}
+
+/**
+ * Realizar búsqueda de propiedades
+ */
+async function performSearch() {
+    showLoadingState();
+    
+    try {
+        const searchForm = document.getElementById('advanced-search-form');
+        const formData = new FormData(searchForm);
+        
+        // Build query parameters
+        const params = new URLSearchParams();
+        for (const [key, value] of formData.entries()) {
+            if (value.trim()) {
+                params.append(key, value);
+            }
+        }
+        
+        // Add operation from active tab
+        const activeOpe = document.querySelector('.buscadorcab .ope span.activo');
+        if (activeOpe && activeOpe.dataset.val) {
+            params.set('ope', activeOpe.dataset.val);
+        }
+        
+        const queryString = params.toString();
+        const backendUrl = `https://danterealestate-github-io.onrender.com/api/properties/search?${queryString}`;
+        
+        console.log('Searching with URL:', backendUrl);
+        
+        const response = await fetch(backendUrl);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Search results:', data);
+        
+        // Handle both old and new API response formats
+        const properties = data.properties || data;
+        currentResults = properties;
+        currentFilters = Object.fromEntries(params);
+        
+        displayResults(properties);
+        updateResultsInfo(properties);
+        
+    } catch (error) {
+        console.error('Error fetching properties:', error);
+        showErrorState(error.message);
+    }
+}
+
+/**
+ * Mostrar todas las propiedades
+ */
+async function showAllProperties() {
+    showLoadingState();
+    
+    try {
+        const response = await fetch('https://danterealestate-github-io.onrender.com/api/properties/search');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const properties = data.properties || data;
+        
+        currentResults = properties;
+        currentFilters = {};
+        
+        displayResults(properties);
+        updateResultsInfo(properties);
+        
+        // Reset form
+        resetSearchForm();
+        
+    } catch (error) {
+        console.error('Error loading all properties:', error);
+        showErrorState(error.message);
+    }
+}
+
+/**
+ * Aplicar filtro rápido
+ */
+async function applyQuickFilter(filterType) {
+    showLoadingState();
+    
+    try {
+        let params = new URLSearchParams();
+        
+        switch (filterType) {
+            case 'venta':
+                params.set('ope', 'V');
+                break;
+            case 'alquiler':
+                params.set('ope', 'A');
+                break;
+            case 'departamentos':
+                params.set('tipo', 'departamento');
+                break;
+            case 'casas':
+                params.set('tipo', 'casa');
+                break;
+            case 'todas':
+            default:
+                // No filters, just load all
+                break;
+        }
+        
+        const queryString = params.toString();
+        const backendUrl = `https://danterealestate-github-io.onrender.com/api/properties/search?${queryString}`;
+        
+        const response = await fetch(backendUrl);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const properties = data.properties || data;
+        
+        currentResults = properties;
+        currentFilters = Object.fromEntries(params);
+        
+        displayResults(properties);
+        updateResultsInfo(properties);
+        
+    } catch (error) {
+        console.error('Error applying quick filter:', error);
+        showErrorState(error.message);
+    }
+}
+
+function displayResultsInModal(properties) {
+    const modal = document.getElementById('results-modal');
+    const modalResultsGrid = document.getElementById('modal-results-grid');
+
+    if (!modal || !modalResultsGrid) {
+        console.error('Modal elements not found');
+        return;
+    }
+
+    modalResultsGrid.innerHTML = ''; // Clear previous results
+
+    console.log('Properties received:', properties);
+
+    if (properties.length === 0) {
+        modalResultsGrid.innerHTML = '<p>No se encontraron propiedades que coincidan con su búsqueda.</p>';
+    } else {
+        properties.forEach(prop => {
+            console.log('Processing property:', prop);
+            console.log('Full property object (JSON):', JSON.stringify(prop));
+            const imageUrl = 'llave.png'; // Default image as 'images' array is not in JSON
+            const titleText = prop.titulo || 'Propiedad sin título';
+            const priceText = prop.precio ? `USD ${prop.precio.toLocaleString('es-AR')}` : 'Consultar precio'; // Assuming USD as currency
+            const locationText = prop.barrio || '';
+            const typeOpText = `${prop.tipo || ''} en ${prop.operacion || ''}`;
+            const codeText = prop.id_temporal ? `Código: ${prop.id_temporal}` : '';
+
+            const propertyElement = document.createElement('div');
+            propertyElement.className = 'propiedad-item';
+            propertyElement.innerHTML = `
+                <a href="details.html?id=${prop.id_temporal}" target="_blank">
+                    <img src="${imageUrl}" alt="${titleText}" loading="lazy" style="width:100%">
+                </a>
+                <div class="image-description">
+                    <h3>${titleText}</h3>
+                    <p>${locationText}</p>
+                    <p>${typeOpText}</p>
+                    <p>${priceText}</p>
+                    <p>${codeText}</p>
+                </div>
+            `;
+            console.log('Generated HTML for property:', propertyElement.innerHTML);
+            modalResultsGrid.appendChild(propertyElement);
+        });
+    }
+
+    modal.classList.add('active');
+}
+
+
+function initWhatsApp() {
+    const whatsappLink = document.getElementById('whatsappLink');
+    if (whatsappLink) {
+        // Agregar evento para mostrar botón de regreso después del clic
+        whatsappLink.addEventListener('click', function() {
+            // Esperar un momento y mostrar botón de regreso
+            setTimeout(function() {
+                showBackToHomeButton();
+            }, 1000);
+        });
+        
+        // Configurar URL por defecto
+        whatsappLink.href = 'https://wa.me/5491125368595';
+    }
+    
+    // Verificar si el usuario regresó de WhatsApp
+    checkWhatsAppReturn();
+}
+
+function showBackToHomeButton() {
+    // Crear botón de regreso si no existe
+    let backButton = document.getElementById('backToHomeBtn');
+    if (!backButton) {
+        backButton = document.createElement('button');
+        backButton.id = 'backToHomeBtn';
+        backButton.innerHTML = '🏠 Volver al Inicio';
+        backButton.className = 'btn-back-home';
+        
+        // Estilos para el botón
+        backButton.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            font-family: Arial, sans-serif;
+            animation: slideInRight 0.5s ease;
+        `;
+        
+        // Animación CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            .btn-back-home:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Evento click
+        backButton.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            
+            // También resetear filtros si existen
+            resetAllFilters();
+            
+            // Ocultar el botón
+            this.style.animation = 'slideInRight 0.5s ease reverse';
+            setTimeout(() => {
+                this.remove();
+            }, 500);
+            
+            console.log('🏠 Usuario regresó al inicio');
+        });
+        
+        // Agregar al DOM
+        document.body.appendChild(backButton);
+    }
+}
+
+function checkWhatsAppReturn() {
+    // Detectar cuando el usuario regresa de WhatsApp
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+            // Pequeño delay para asegurar que la página esté completamente cargada
+            setTimeout(function() {
+                showBackToHomeButton();
+            }, 500);
+        }
+    });
+}
+
+function resetAllFilters() {
+    // Resetear filtros locales
+    const barrioSelect = document.getElementById('barrio-select');
+    const tipoSelect = document.getElementById('tipo-select');
+    
+    if (barrioSelect) barrioSelect.value = 'todos';
+    if (tipoSelect) tipoSelect.value = 'todos';
+    
+    // Mostrar todas las propiedades
+    showAllPropertiesLocally();
+    
+    console.log('🔄 Filtros reseteados');
+}
+
+// Header sticky con mejoras para móviles
+window.addEventListener('scroll', function() {
+    const header = document.getElementById('cab');
+    if (header) {
+        // En móviles, activar el sticky más pronto para evitar problemas
+        const isMobile = window.innerWidth <= 768;
+        const threshold = isMobile ? 30 : 100;
+        header.classList.toggle('cabfix', window.scrollY > threshold);
+    }
+});
+
+// Mejorar la responsividad del buscador específicamente para móviles
+function adjustSearchForMobile() {
+    const buscador = document.querySelector('.buscadorcab');
+    if (buscador) {
+        const isMobile = window.innerWidth <= 768;
+        
+        if (isMobile) {
+            // En móviles, asegurar layout vertical y evitar superposiciones
+            buscador.style.position = 'fixed';
+            buscador.style.top = '60px';
+            buscador.style.zIndex = '1000';
+            buscador.style.background = 'rgba(255,255,255,0.98)';
+            buscador.style.width = '100%';
+            buscador.style.left = '0';
+        }
+    }
+}
+
+// Ocultar/mostrar elementos según el dispositivo
+function optimizeForMobile() {
+    const isMobile = window.innerWidth <= 768;
+    const constructionBanner = document.querySelector('.construction-banner');
+    const codField = document.querySelector('.cod');
+    const menuCab = document.querySelector('.menucab');
+    const menuDesp = document.querySelector('.menudesp');
+    
+    if (isMobile) {
+        // Ocultar banner de construcción en móviles
+        if (constructionBanner) {
+            constructionBanner.style.display = 'none';
+        }
+        
+        // Ocultar campo código para dar más espacio al buscador
+        if (codField) {
+            codField.style.display = 'none';
+        }
+        
+        // Mostrar menú hamburguesa
+        if (menuCab && menuDesp) {
+            menuCab.style.display = 'none';
+            menuDesp.style.display = 'block';
+        }
+    }
+}
+
+// Ajustar cuando se cambia el tamaño de la ventana
+window.addEventListener('resize', function() {
+    adjustSearchForMobile();
+    optimizeForMobile();
+});
+
+// Ajustar cuando se carga la página
+document.addEventListener('DOMContentLoaded', function() {
+    adjustSearchForMobile();
+    optimizeForMobile();
+});
+
+// Mejorar la experiencia táctil en móviles
+function improveTouchExperience() {
+    const isMobile = window.innerWidth <= 768;
+    
+    if (isMobile) {
+        // Mejorar la responsividad de los botones de operación
+        const opeButtons = document.querySelectorAll('.ope span');
+        opeButtons.forEach(button => {
+            button.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.95)';
+            });
+            
+            button.addEventListener('touchend', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+        
+        // Mejorar la experiencia del menú móvil
+        const menuBtn = document.querySelector('.menudesp');
+        const menuSlide = document.getElementById('menuslide');
+        
+        if (menuBtn && menuSlide) {
+            menuBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                menuSlide.classList.toggle('menuabierto');
+            });
+        }
+    }
+}
+
+// ====================================
+// FUNCIONES DE VISUALIZACIÓN Y ESTADOS
+// ====================================
+
+/**
+ * Cambiar modo de vista
+ */
+function changeViewMode(mode) {
+    currentViewMode = mode;
+    
+    // Update button states
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.getElementById(`${mode}-view`)?.classList.add('active');
+    
+    // Re-render current results
+    if (currentResults.length > 0) {
+        displayResults(currentResults);
+    }
+}
+
+/**
+ * Mostrar estado de carga
+ */
+function showLoadingState() {
+    hideAllStates();
+    document.getElementById('loading-indicator')?.classList.remove('hidden');
+    document.getElementById('results-controls')?.classList.add('hidden');
+}
+
+/**
+ * Mostrar estado de error
+ */
+function showErrorState(message) {
+    hideAllStates();
+    document.getElementById('error-state')?.classList.remove('hidden');
+    document.getElementById('results-controls')?.classList.add('hidden');
+    
+    console.error('Error state shown:', message);
+}
+
+/**
+ * Mostrar estado de no resultados
+ */
+function showNoResultsState() {
+    hideAllStates();
+    document.getElementById('no-results')?.classList.remove('hidden');
+    document.getElementById('results-controls')?.classList.add('hidden');
+}
+
+/**
+ * Ocultar todos los estados
+ */
+function hideAllStates() {
+    document.getElementById('loading-indicator')?.classList.add('hidden');
+    document.getElementById('error-state')?.classList.add('hidden');
+    document.getElementById('no-results')?.classList.add('hidden');
+    document.getElementById('results-controls')?.classList.remove('hidden');
+}
+
+/**
+ * Mostrar resultados de propiedades
+ */
+function displayResults(properties) {
+    const resultsGrid = document.getElementById('search-results-grid');
+    if (!resultsGrid) return;
+    
+    if (properties.length === 0) {
+        showNoResultsState();
+        return;
+    }
+    
+    hideAllStates();
+    
+    // Clear previous results
+    resultsGrid.innerHTML = '';
+    
+    // Apply current view mode
+    if (currentViewMode === 'grid') {
+        displayGridView(resultsGrid, properties);
+    } else if (currentViewMode === 'list') {
+        displayListView(resultsGrid, properties);
+    } else if (currentViewMode === 'map') {
+        displayMapView(resultsGrid, properties);
+    }
+}
+
+/**
+ * Mostrar vista de cuadrícula
+ */
+function displayGridView(container, properties) {
+    properties.forEach(property => {
+        const card = createPropertyCard(property);
+        container.appendChild(card);
+    });
+}
+
+/**
+ * Mostrar vista de lista
+ */
+function displayListView(container, properties) {
+    properties.forEach(property => {
+        const listItem = createPropertyListItem(property);
+        container.appendChild(listItem);
+    });
+}
+
+/**
+ * Mostrar vista de mapa (placeholder)
+ */
+function displayMapView(container, properties) {
+    container.innerHTML = `
+        <div class="map-placeholder">
+            <i class="fas fa-map" style="font-size: 3rem; color: #d1d5db; margin-bottom: 1rem;"></i>
+            <h3>Vista de mapa</h3>
+            <p>La vista de mapa estará disponible próximamente</p>
+        </div>
+    `;
+}
+
+/**
+ * Crear tarjeta de propiedad
+ */
 function createPropertyCard(property) {
     const card = document.createElement('div');
     card.className = 'property-card';
-    card.style.cssText = `
-        background: white !important;
-        border-radius: 8px !important;
-        overflow: hidden !important;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
-        transition: transform 0.3s ease !important;
-        border: 1px solid #e1e5e9 !important;
-    `;
+    card.onclick = () => openPropertyModal(property);
     
-    // Crear slider de imágenes
-    const imageSection = createImageSlider(property);
+    const formatPrice = (price) => {
+        if (!price) return 'Consultar';
+        return new Intl.NumberFormat('es-AR', {
+            style: 'currency',
+            currency: 'ARS',
+            minimumFractionDigits: 0
+        }).format(price);
+    };
+    
+    const formatAmenities = (amenities) => {
+        if (!amenities) return [];
+        return amenities.split(',').map(a => a.trim()).slice(0, 3);
+    };
     
     card.innerHTML = `
-        ${imageSection}
-        <div style="position: absolute; top: 10px; left: 10px;">
-            <span style="background: #232deb !important; color: white !important; padding: 4px 8px !important; border-radius: 4px !important; font-size: 12px !important; font-weight: 600 !important;">
-                ${property.operacion}
-            </span>
+        <div class="property-card-image">
+            <div class="property-card-badge">${property.operacion || 'Venta'}</div>
+            <img src="https://via.placeholder.com/300x200/f3f4f6/6b7280?text=Sin+Imagen" 
+                 alt="${property.titulo || 'Propiedad'}" 
+                 onerror="this.src='https://via.placeholder.com/300x200/f3f4f6/6b7280?text=Sin+Imagen'">
         </div>
-        <div style="position: absolute; top: 10px; right: 10px;">
-            <span style="background: ${property.operacion === 'Venta' ? '#232deb' : '#ff0101'} !important; color: white !important; padding: 4px 8px !important; border-radius: 4px !important; font-size: 12px !important; font-weight: 600 !important;">
-                ${property.tipo}
-            </span>
-        </div>
-        
-        <div style="padding: 20px !important;">
-            <h3 style="margin: 0 0 10px 0 !important; color: #495057 !important; font-size: 18px !important; font-weight: 600 !important; line-height: 1.3 !important;">
-                ${property.titulo}
-            </h3>
-            
-            <div style="color: #6c757d !important; font-size: 14px !important; margin-bottom: 10px !important;">
-                📍 ${property.direccion} - ${property.barrio}
+        <div class="property-card-content">
+            <h3 class="property-card-title">${property.titulo || 'Propiedad'}</h3>
+            <div class="property-card-price">${formatPrice(property.precio)}</div>
+            <div class="property-card-details">
+                <div class="property-card-detail">
+                    <i class="fas fa-home"></i>
+                    <span>${property.ambientes || 0} amb.</span>
+                </div>
+                <div class="property-card-detail">
+                    <i class="fas fa-ruler-combined"></i>
+                    <span>${property.metros || 0} m²</span>
+                </div>
+                <div class="property-card-detail">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>${property.barrio || 'Ubicación'}</span>
+                </div>
+                <div class="property-card-detail">
+                    <i class="fas fa-building"></i>
+                    <span>${property.tipo || 'Propiedad'}</span>
+                </div>
             </div>
-            
-            <div style="margin-bottom: 15px !important;">
-                <span style="font-size: 24px !important; font-weight: 700 !important; color: #232deb !important;">
-                    ${property.moneda_precio || 'USD'} ${property.precio?.toLocaleString() || '0'}
-                </span>
-                ${property.expensas > 0 ? `<div style="font-size: 12px !important; color: #6c757d !important;">+ ${property.moneda_expensas || 'ARS'} ${property.expensas.toLocaleString()} expensas</div>` : ''}
+            <div class="property-card-amenities">
+                ${formatAmenities(property.amenities).map(amenity => 
+                    `<span class="property-amenity">${amenity}</span>`
+                ).join('')}
             </div>
-            
-            <div style="display: flex !important; justify-content: space-between !important; margin-bottom: 15px !important; font-size: 14px !important; color: #495057 !important;">
-                <span>🏠 ${property.ambientes} amb.</span>
-                <span>📏 ${property.metros_cuadrados} m²</span>
-                <span>📅 ${property.estado}</span>
+            ${property.documentos && property.documentos.length > 0 ? `
+            <div class="property-card-documents">
+                <i class="fas fa-file-pdf"></i>
+                <span>${property.documentos.length} documento${property.documentos.length > 1 ? 's' : ''} disponible${property.documentos.length > 1 ? 's' : ''}</span>
             </div>
-            
-            <div style="margin-bottom: 15px !important;">
-                <span style="color: #232deb !important; font-size: 14px !important; font-weight: 600 !important;">
-                    ${property.info_multimedia || 'Fotos disponibles'}
-                </span>
+            ` : ''}
+            <div class="property-card-actions">
+                <button class="property-card-btn">Ver detalles</button>
+                <button class="property-card-btn primary">Contactar</button>
             </div>
-            
-            <button onclick="showPropertyDetails('${property.id_temporal}')" 
-                    style="width: 100% !important; background: #232deb !important; color: white !important; 
-                           border: none !important; padding: 12px !important; border-radius: 6px !important; 
-                           font-size: 14px !important; font-weight: 600 !important; cursor: pointer !important; 
-                           transition: all 0.3s ease !important;"
-                    onmouseover="this.style.background='#1a1db4'" 
-                    onmouseout="this.style.background='#232deb'">
-                Ver Detalles
-            </button>
         </div>
     `;
     
     return card;
 }
 
-function displayProperties(properties) {
-    const container = document.getElementById('properties-container');
-    if (!container) return;
+/**
+ * Crear elemento de lista de propiedad
+ */
+function createPropertyListItem(property) {
+    const item = document.createElement('div');
+    item.className = 'property-list-item';
+    item.onclick = () => openPropertyModal(property);
     
-    container.innerHTML = '';
+    const formatPrice = (price) => {
+        if (!price) return 'Consultar';
+        return new Intl.NumberFormat('es-AR', {
+            style: 'currency',
+            currency: 'ARS',
+            minimumFractionDigits: 0
+        }).format(price);
+    };
     
-    if (properties.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #666;">No se encontraron propiedades con los filtros seleccionados</p>';
-    } else {
-        properties.forEach(property => {
-            const card = createPropertyCard(property);
-            container.appendChild(card);
+    const formatAmenities = (amenities) => {
+        if (!amenities) return [];
+        return amenities.split(',').map(a => a.trim()).slice(0, 4);
+    };
+    
+    item.innerHTML = `
+        <div class="property-list-image">
+            <img src="https://via.placeholder.com/200x150/f3f4f6/6b7280?text=Sin+Imagen" 
+                 alt="${property.titulo || 'Propiedad'}"
+                 onerror="this.src='https://via.placeholder.com/200x150/f3f4f6/6b7280?text=Sin+Imagen'">
+        </div>
+        <div class="property-list-content">
+            <div class="property-list-header">
+                <h3 class="property-list-title">${property.titulo || 'Propiedad'}</h3>
+                <div class="property-list-price">${formatPrice(property.precio)}</div>
+            </div>
+            <div class="property-list-details">
+                <div class="property-card-detail">
+                    <i class="fas fa-home"></i>
+                    <span>${property.ambientes || 0} ambientes</span>
+                </div>
+                <div class="property-card-detail">
+                    <i class="fas fa-ruler-combined"></i>
+                    <span>${property.metros || 0} m²</span>
+                </div>
+                <div class="property-card-detail">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>${property.barrio || 'Ubicación'}</span>
+                </div>
+                <div class="property-card-detail">
+                    <i class="fas fa-building"></i>
+                    <span>${property.tipo || 'Propiedad'}</span>
+                </div>
+            </div>
+            <div class="property-list-amenities">
+                ${formatAmenities(property.amenities).map(amenity => 
+                    `<span class="property-amenity">${amenity}</span>`
+                ).join('')}
+            </div>
+            ${property.documentos && property.documentos.length > 0 ? `
+            <div class="property-list-documents">
+                <i class="fas fa-file-pdf"></i>
+                <span>${property.documentos.length} documento${property.documentos.length > 1 ? 's' : ''}</span>
+            </div>
+            ` : ''}
+        </div>
+    `;
+    
+    return item;
+}
+
+/**
+ * Abrir modal de propiedad
+ */
+function openPropertyModal(property) {
+    const modal = document.getElementById('property-modal');
+    const title = document.getElementById('modal-property-title');
+    const body = modal?.querySelector('.modal-body');
+    
+    if (!modal || !title || !body) return;
+    
+    // Set title
+    title.textContent = property.titulo || 'Propiedad';
+    
+    // Populate content
+    body.innerHTML = createPropertyDetailContent(property);
+    
+    // Show modal
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+/**
+ * Cerrar modal de propiedad
+ */
+function closePropertyModal() {
+    const modal = document.getElementById('property-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+}
+
+/**
+ * Crear contenido detallado de propiedad
+ */
+function createPropertyDetailContent(property) {
+    const formatPrice = (price) => {
+        if (!price) return 'Consultar precio';
+        return new Intl.NumberFormat('es-AR', {
+            style: 'currency',
+            currency: 'ARS',
+            minimumFractionDigits: 0
+        }).format(price);
+    };
+    
+    const formatBoolean = (value) => {
+        if (value === 'Sí' || value === 'si' || value === true) return 'Sí';
+        if (value === 'No' || value === 'no' || value === false) return 'No';
+        return value || 'No especificado';
+    };
+    
+    return `
+        <div class="property-detail">
+            <div class="property-detail-gallery">
+                <div class="property-detail-images">
+                    <img src="https://via.placeholder.com/200x150/f3f4f6/6b7280?text=Imagen+1" 
+                         alt="Imagen 1" class="property-detail-image">
+                    <img src="https://via.placeholder.com/200x150/f3f4f6/6b7280?text=Imagen+2" 
+                         alt="Imagen 2" class="property-detail-image">
+                    <img src="https://via.placeholder.com/200x150/f3f4f6/6b7280?text=Imagen+3" 
+                         alt="Imagen 3" class="property-detail-image">
+                </div>
+                ${property.info_multimedia ? `
+                    <div class="multimedia-info">
+                        <h4>Multimedia</h4>
+                        <p>${property.info_multimedia}</p>
+                    </div>
+                ` : ''}
+            </div>
+            
+            <div class="property-detail-info">
+                <div class="property-detail-header">
+                    <h1 class="property-detail-title">${property.titulo || 'Propiedad'}</h1>
+                    <div class="property-detail-price">${formatPrice(property.precio)}</div>
+                </div>
+                
+                <div class="property-detail-specs">
+                    <div class="property-spec-item">
+                        <i class="fas fa-home"></i>
+                        <span>${property.ambientes || 0} ambientes</span>
+                    </div>
+                    <div class="property-spec-item">
+                        <i class="fas fa-ruler-combined"></i>
+                        <span>${property.metros || 0} m²</span>
+                    </div>
+                    <div class="property-spec-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>${property.barrio || 'Ubicación'}</span>
+                    </div>
+                    <div class="property-spec-item">
+                        <i class="fas fa-building"></i>
+                        <span>${property.tipo || 'Propiedad'}</span>
+                    </div>
+                    <div class="property-spec-item">
+                        <i class="fas fa-calendar"></i>
+                        <span>${property.antiguedad || 'N/A'} años</span>
+                    </div>
+                    <div class="property-spec-item">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>${property.estado || 'Estado'}</span>
+                    </div>
+                    <div class="property-spec-item">
+                        <i class="fas fa-compass"></i>
+                        <span>${property.orientacion || 'N/A'}</span>
+                    </div>
+                    <div class="property-spec-item">
+                        <i class="fas fa-stairs"></i>
+                        <span>Piso ${property.piso || 'N/A'}</span>
+                    </div>
+                    <div class="property-spec-item">
+                        <i class="fas fa-dollar-sign"></i>
+                        <span>Expensas: ${formatPrice(property.expensas)}</span>
+                    </div>
+                    <div class="property-spec-item">
+                        <i class="fas fa-map"></i>
+                        <span>${property.direccion || 'Dirección no disponible'}</span>
+                    </div>
+                </div>
+                
+                <div class="property-detail-description">
+                    <h4>Descripción</h4>
+                    <p>${property.descripcion || 'Descripción no disponible.'}</p>
+                </div>
+                
+                ${property.documentos && property.documentos.length > 0 ? `
+                <div class="property-detail-documents">
+                    <h4><i class="fas fa-file-pdf"></i> Documentos</h4>
+                    <div class="property-documents-list">
+                        ${property.documentos.map(doc => {
+                            const fileName = doc.split('/').pop();
+                            return `
+                                <div class="property-document-item">
+                                    <i class="fas fa-file-pdf"></i>
+                                    <a href="${doc}" target="_blank" class="document-link">
+                                        ${fileName.replace(/\.pdf$/i, '').replace(/_/g, ' ')}
+                                    </a>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+                ` : ''}
+                
+                <div class="property-detail-amenities-grid">
+                    <div class="property-amenity-item">
+                        <i class="fas fa-parking"></i>
+                        <span>Cochera: ${formatBoolean(property.cochera)}</span>
+                    </div>
+                    <div class="property-amenity-item">
+                        <i class="fas fa-balcony"></i>
+                        <span>Balcón: ${formatBoolean(property.balcon)}</span>
+                    </div>
+                    <div class="property-amenity-item">
+                        <i class="fas fa-swimming-pool"></i>
+                        <span>Pileta: ${formatBoolean(property.pileta)}</span>
+                    </div>
+                    <div class="property-amenity-item">
+                        <i class="fas fa-dog"></i>
+                        <span>Acepta mascotas: ${formatBoolean(property.acepta_mascotas)}</span>
+                    </div>
+                    <div class="property-amenity-item">
+                        <i class="fas fa-snowflake"></i>
+                        <span>Aire acondicionado: ${formatBoolean(property.aire_acondicionado)}</span>
+                    </div>
+                </div>
+                
+                <div class="property-detail-actions">
+                    <button class="property-detail-action primary" onclick="window.open('tel:1166562078')">
+                        <i class="fas fa-phone"></i>
+                        Llamar
+                    </button>
+                    <button class="property-detail-action secondary" onclick="window.open('https://wa.me/5491166562078?text=Interesado%20en%20${encodeURIComponent(property.titulo)}', '_blank')">
+                        <i class="fab fa-whatsapp"></i>
+                        WhatsApp
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Actualizar información de resultados
+ */
+function updateResultsInfo(properties) {
+    const countElement = document.getElementById('results-count');
+    const titleElement = document.getElementById('results-title');
+    
+    if (countElement) {
+        countElement.textContent = `${properties.length} ${properties.length === 1 ? 'propiedad encontrada' : 'propiedades encontradas'}`;
+    }
+    
+    if (titleElement) {
+        let title = 'Resultados de búsqueda';
+        if (currentFilters.ope) {
+            const opMap = { 'V': 'venta', 'A': 'alquiler', 'T': 'alquiler temporal' };
+            title += ` - ${opMap[currentFilters.ope] || currentFilters.ope}`;
+        }
+        if (currentFilters.loc) {
+            title += ` - ${currentFilters.loc}`;
+        }
+        if (currentFilters.tipo) {
+            title += ` - ${currentFilters.tipo}`;
+        }
+        titleElement.textContent = title;
+    }
+}
+
+/**
+ * Limpiar todos los filtros
+ */
+function clearAllFilters() {
+    resetSearchForm();
+    showAllProperties();
+}
+
+/**
+ * Resetear formulario de búsqueda
+ */
+function resetSearchForm() {
+    const form = document.getElementById('advanced-search-form');
+    if (form) {
+        form.reset();
+        
+        // Reset operation to Venta
+        const ventaOption = document.querySelector('.buscadorcab .ope span[data-val="V"]');
+        if (ventaOption) {
+            document.querySelectorAll('.buscadorcab .ope span').forEach(s => s.classList.remove('activo'));
+            ventaOption.classList.add('activo');
+            document.getElementById('ope-input').value = 'V';
+        }
+        
+        // Reset filter tabs
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.classList.remove('active');
         });
-    }
-    
-    // Actualizar contador
-    updateResultsCounter(properties.length);
-    
-    console.log('📋 Mostrando', properties.length, 'propiedades');
-}
-
-// ========================================
-// EVENTOS DE FILTROS - CORREGIDO
-// ========================================
-
-// Función principal para aplicar filtros
-function applyFilters() {
-    const operacionSelect = document.getElementById('operacion-select-styled');
-    const barrioSelect = document.getElementById('barrio-select-styled');
-    const tipoSelect = document.getElementById('tipo-select-styled');
-    
-    const selectedOperacion = operacionSelect ? operacionSelect.value : '';
-    const selectedBarrio = barrioSelect ? barrioSelect.value : '';
-    const selectedTipo = tipoSelect ? tipoSelect.value : '';
-    
-    console.log('🔍 Aplicando filtros:', { selectedOperacion, selectedBarrio, selectedTipo });
-    
-    const filtered = globalData.properties.filter(property => {
-        if (selectedOperacion && property.operacion !== selectedOperacion) return false;
-        if (selectedBarrio && property.barrio !== selectedBarrio) return false;
-        if (selectedTipo && property.tipo !== selectedTipo) return false;
-        return true;
-    });
-    
-    globalData.filteredProperties = filtered;
-    displayProperties(filtered);
-    
-    // Actualizar contador de resultados
-    updateResultsCounter(filtered.length);
-}
-
-// Función para buscar (llamada por el botón)
-function searchProperties() {
-    console.log('🔍 Buscando propiedades...');
-    applyFilters();
-}
-
-// Función para resetear filtros
-function resetFilters() {
-    console.log('🔄 Reseteando filtros...');
-    
-    const operacionSelect = document.getElementById('operacion-select-styled');
-    const barrioSelect = document.getElementById('barrio-select-styled');
-    const tipoSelect = document.getElementById('tipo-select-styled');
-    
-    if (operacionSelect) operacionSelect.value = '';
-    if (barrioSelect) barrioSelect.value = '';
-    if (tipoSelect) tipoSelect.value = '';
-    
-    // Mostrar todas las propiedades
-    globalData.filteredProperties = globalData.properties;
-    displayProperties(globalData.properties);
-    updateResultsCounter(globalData.properties.length);
-}
-
-// Actualizar contador de resultados
-function updateResultsCounter(count) {
-    const counterElement = document.getElementById('results-counter-styled');
-    if (counterElement) {
-        counterElement.innerHTML = `<div>Se encontraron ${count} propiedad${count !== 1 ? 'es' : ''}</div>`;
+        document.querySelector('.filter-tab[data-filter="todas"]')?.classList.add('active');
     }
 }
 
-// Configurar eventos de filtros - VERSIÓN ROBUSTA
-function setupFilterEvents() {
-    console.log('🔧 Configurando eventos de filtros...');
+/**
+ * INICIALIZAR FILTRADO LOCAL DE PROPIEDADES
+ */
+function initLocalPropertyFilter() {
+    console.log('🔍 Iniciando sistema de filtrado local...');
     
-    // Método 1: Event listeners en los select
-    const operacionSelect = document.getElementById('operacion-select-styled');
-    const barrioSelect = document.getElementById('barrio-select-styled');
-    const tipoSelect = document.getElementById('tipo-select-styled');
+    // Agregar event listeners a los filtros
+    const barrioSelect = document.getElementById('barrio-select');
+    const tipoSelect = document.getElementById('tipo-select');
     
-    if (operacionSelect) {
-        operacionSelect.addEventListener('change', function() {
-            console.log('📋 Operación cambiada a:', this.value);
-            applyFilters();
-        });
-    }
-    
+    // Event listeners para dropdowns
     if (barrioSelect) {
-        barrioSelect.addEventListener('change', function() {
-            console.log('📍 Barrio cambiado a:', this.value);
-            applyFilters();
-        });
+        barrioSelect.addEventListener('change', filterPropertiesLocally);
+        console.log('✅ Listener de barrio configurado para filtrado local');
     }
     
     if (tipoSelect) {
-        tipoSelect.addEventListener('change', function() {
-            console.log('🏠 Tipo cambiado a:', this.value);
-            applyFilters();
-        });
+        tipoSelect.addEventListener('change', filterPropertiesLocally);
+        console.log('✅ Listener de tipo configurado para filtrado local');
     }
     
-    // Método 2: También configuramos los botones
-    const searchBtn = document.getElementById('search-btn-styled');
-    const resetBtn = document.getElementById('reset-btn-styled');
-    
-    if (searchBtn) {
-        searchBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            searchProperties();
+    // Event listener para los spans de operación
+    const operacionSpans = document.querySelectorAll('.ope span');
+    if (operacionSpans.length > 0) {
+        operacionSpans.forEach(span => {
+            span.addEventListener('click', function() {
+                // Actualizar clase activo
+                operacionSpans.forEach(s => s.classList.remove('activo'));
+                this.classList.add('activo');
+                
+                // Actualizar valor del input hidden
+                const opeInput = document.getElementById('ope-input');
+                if (opeInput) {
+                    opeInput.value = this.getAttribute('data-val');
+                }
+                
+                console.log('📊 Operación seleccionada:', this.getAttribute('data-val'));
+                
+                // Ejecutar filtrado automáticamente
+                filterPropertiesLocally();
+            });
         });
+        console.log('✅ Event listeners de operación configurados');
     }
     
-    if (resetBtn) {
-        resetBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            resetFilters();
-        });
-    }
-    
-    console.log('✅ Eventos de filtros configurados correctamente');
+    // Mostrar todas las propiedades al inicio
+    showAllPropertiesLocally();
+    console.log('✅ Sistema de filtrado local inicializado');
 }
 
-// ========================================
-// FUNCIONES AUXILIARES
-// ========================================
-
-function showPropertyDetails(propertyId) {
-    const property = globalData.properties.find(p => p.id_temporal === propertyId);
-    if (property) {
-        alert(`Detalles de ${property.titulo}\n\nPrecio: USD ${property.precio.toLocaleString()}\nBarrio: ${property.barrio}\nAmbientes: ${property.ambientes}\nDirección: ${property.direccion}\n\nFotos disponibles: ${property.fotos?.length || 0}`);
-    }
-}
-
-// ========================================
-// INICIALIZACIÓN
-// ========================================
-
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🏠 Sistema Dante Propiedades - Sin errores + Slider cargando...');
-    console.log('🎯 Sistema de slider de múltiples fotos incluido');
-    console.log('✅ Sin dependencias de Font Awesome');
+/**
+ * FILTRAR PROPIEDADES LOCALMENTE
+ */
+function filterPropertiesLocally() {
+    console.log('🔍 Iniciando filtrado local de propiedades...');
     
-    // Cargar CSS del slider
-    addSliderStyles();
+    const barrioSelect = document.getElementById('barrio-select');
+    const tipoSelect = document.getElementById('tipo-select');
+    const opeInput = document.getElementById('ope-input');
     
-    // Cargar propiedades
-    loadProperties();
+    const selectedBarrio = barrioSelect ? barrioSelect.value.toLowerCase() : '';
+    const selectedTipo = tipoSelect ? tipoSelect.value.toLowerCase() : '';
+    const selectedOperacion = opeInput ? opeInput.value.toLowerCase() : 'v';
     
-    // Configurar eventos de filtros con múltiples intentos
-    // para asegurar que los elementos estén disponibles
-    setupFilterEvents();
-    
-    // Backup: configurar eventos nuevamente después de un delay
-    setTimeout(setupFilterEvents, 500);
-    
-    // Backup final: también después de que todo esté cargado
-    window.addEventListener('load', function() {
-        setTimeout(setupFilterEvents, 1000);
+    console.log('📊 Filtros seleccionados:', { 
+        operacion: selectedOperacion, 
+        barrio: selectedBarrio, 
+        tipo: selectedTipo 
     });
     
-    console.log('✅ Sistema inicializado sin errores de consola');
-    console.log('🎠 Slider de múltiples fotos disponible');
-    console.log('🔍 Sistema de filtros configurado');
-});
-
-// ========================================
-// VERIFICACIÓN DE RECURSOS
-// ========================================
-
-function checkResourceErrors() {
-    const imageErrors = [];
+    // Obtener todas las propiedades
+    const allProperties = document.querySelectorAll('.propiedad-item');
+    let visibleCount = 0;
     
-    // Verificar imágenes que no cargan
-    document.querySelectorAll('img').forEach(img => {
-        img.addEventListener('error', function() {
-            imageErrors.push(this.src);
-            console.warn('⚠️ Imagen no encontrada:', this.src);
-        });
-    });
-    
-    return imageErrors;
-}
-
-// Verificar errores al cargar
-window.addEventListener('load', function() {
-    setTimeout(() => {
-        const errors = checkResourceErrors();
-        if (errors.length === 0) {
-            console.log('✅ Todos los recursos cargados correctamente');
-            console.log('🎯 Sistema completamente funcional');
+    allProperties.forEach(property => {
+        const propertyBarrio = property.getAttribute('data-barrio') || '';
+        const propertyTipo = property.getAttribute('data-tipo') || '';
+        const propertyOperacion = property.getAttribute('data-operacion') || 'v';
+        
+        // Verificar si la propiedad coincide con los filtros
+        const matchesOperacion = !selectedOperacion || propertyOperacion === selectedOperacion;
+        const matchesBarrio = !selectedBarrio || propertyBarrio === selectedBarrio;
+        const matchesTipo = !selectedTipo || propertyTipo === selectedTipo;
+        
+        if (matchesOperacion && matchesBarrio && matchesTipo) {
+            property.style.display = 'block';
+            visibleCount++;
+            console.log('✅ Propiedad visible:', propertyOperacion, propertyBarrio, propertyTipo);
         } else {
-            console.log('⚠️ Errores de recursos:', errors.length);
+            property.style.display = 'none';
+            console.log('❌ Propiedad ocultada:', propertyOperacion, propertyBarrio, propertyTipo);
         }
-    }, 1000);
+    });
+    
+    // Actualizar contador de resultados
+    updateFilterResults(visibleCount);
+    
+    console.log(`🎯 Filtrado completado: ${visibleCount} propiedades visibles`);
+}
+
+/**
+ * MOSTRAR TODAS LAS PROPIEDADES LOCALMENTE
+ */
+function showAllPropertiesLocally() {
+    const allProperties = document.querySelectorAll('.propiedad-item');
+    allProperties.forEach(property => {
+        property.style.display = 'block';
+    });
+    updateFilterResults(allProperties.length);
+    console.log(`📊 Mostrando todas las propiedades: ${allProperties.length}`);
+}
+
+/**
+ * ACTUALIZAR CONTADOR DE RESULTADOS
+ */
+function updateFilterResults(count) {
+    const resultsInfo = document.getElementById('results-info');
+    const countElement = document.getElementById('results-count');
+    
+    if (countElement) {
+        countElement.textContent = `${count} ${count === 1 ? 'propiedad encontrada' : 'propiedades encontradas'}`;
+    }
+    
+    // Mostrar/ocultar mensaje de "no resultados"
+    const noResultsMsg = document.getElementById('no-results-message');
+    if (noResultsMsg) {
+        noResultsMsg.style.display = count === 0 ? 'block' : 'none';
+    }
+    
+    console.log(`📊 Contador actualizado: ${count} propiedades`);
+}
+
+// Inicializar mejoras táctiles
+document.addEventListener('DOMContentLoaded', improveTouchExperience);
+
+// Debug: Mostrar información de carga
+window.addEventListener('load', function() {
+    console.log('=== PÁGINA COMPLETAMENTE CARGADA ===');
+    console.log('Todas las imágenes deberían estar cargadas');
 });
