@@ -1,34 +1,38 @@
 [
   {
     "id_temporal": "UF001",
-    "titulo": "Departamento en Palermo SoHo",
-    "barrio": "Palermo",
-    "precio": 280000,
-    "ambientes": 2,
-    "metros_cuadrados": 68,
-    "operacion": "alquiler",
-    "tipo": "departamento",
-    "descripcion": "Excelente departamento en el corazón de Palermo SoHo",
-    "direccion": "Honduras 1450",
-    "antiguedad": 3,
-    "estado": "excelente",
+    "titulo": "Terreno en Boedo",
+    "barrio": "Boedo",
+    "precio": 600000,
+    "ambientes": 0,
+    "metros_cuadrados": 306,
+    "operacion": "venta",
+    "tipo": "terreno",
+    "descripcion": "Amplia casa familiar con múltiples ambientes, patio parrillero y cochera. Excelente estado de conservación en zona residencial.",
+    "direccion": "Avda. La Plata 1300",
+    "antiguedad": 15,
+    "estado": "bueno",
     "orientacion": "norte",
-    "piso": "5",
-    "expensas": 8500,
-    "moneda_precio": "USD",
-    "moneda_expensas": "ARS",
-    "amenities": "pileta, gimnasio, sum, seguridad 24hs",
+    "expensas": 0,
+    "amenities": "casa",
     "cochera": "Sí",
     "balcon": "Sí",
-    "pileta": "Sí",
+    "pileta": "No",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+    "info_multimedia": "Set de 3 fotos de alta calidad, Fotos de exteriores, Recorrido visual completo",
+    "documentos": [
+      "imgs/ENTORNOS.PDF",
+      "imgs/DATOS PARCELA.PDF"
+    ],
     "fotos": [
-      "imgs/apartment_interior_1_5.webp",
-      "imgs/apartment_interior_1_0.jpg",
-      "imgs/studio_apartment_1_0.jpg"
-    ]
+      "imgs/UF001-1.jpg",
+      "imgs/UF001-2.jpg",
+      "imgs/UF001-3.jpg"
+    ],
+    "moneda_precio": "USD",
+    "moneda_expensas": "ARS",
+    "fecha_procesamiento": "2025-11-09T08:33:51.258324"
   },
   {
     "id_temporal": "UF002",
@@ -39,27 +43,32 @@
     "metros_cuadrados": 180,
     "operacion": "venta",
     "tipo": "casa",
-    "descripcion": "Magnífica casa familiar con jardín y pileta",
+    "descripcion": "Magnífica casa familiar con jardín y pileta en zona residencial. Perfecta para familia, con múltiples ambientes y cochera cubierta.",
     "direccion": "Juramento 2345",
     "antiguedad": 8,
     "estado": "excelente",
     "orientacion": "norte",
     "expensas": 0,
-    "moneda_precio": "USD",
-    "moneda_expensas": "ARS",
-    "amenities": "pileta, parrilla, jardín, cochera cubierta",
+    "amenities": "pileta, pileta, parrilla, jardín, cochera cubierta",
     "cochera": "Sí",
     "balcon": "Sí",
     "pileta": "Sí",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Fotos panorámicas disponibles",
+    "info_multimedia": "Set de 4 fotos de alta calidad, Fotos de exteriores, Área de pileta, Recorrido visual completo",
+    "documentos": [
+      "imgs/ENTORNOS.PDF",
+      "imgs/DATOS PARCELA.PDF"
+    ],
     "fotos": [
       "imgs/house_pool_1_0.jpg",
-      "imgs/house_exterior_1_7.jpg",
+      "imgs/house_pool_1_8.jpg",
       "imgs/house_pool_1_4.jpg",
-      "imgs/house_exterior_1_8.jpg"
-    ]
+      "imgs/house_exterior_1_7.jpg"
+    ],
+    "moneda_precio": "USD",
+    "moneda_expensas": "ARS",
+    "fecha_procesamiento": "2025-11-09T08:33:51.259324"
   },
   {
     "id_temporal": "UF003",
@@ -69,27 +78,34 @@
     "ambientes": 3,
     "metros_cuadrados": 120,
     "operacion": "venta",
-    "tipo": "penthouse",
-    "descripcion": "Espectacular penthouse con vista al río y terraza privada",
+    "tipo": "casa",
+    "descripcion": "Espectacular penthouse con vista al río y terraza privada. Terminaciones de lujo y amenities exclusivos. Oportunidad única en Puerto Madero.",
     "direccion": "Av. Alicia Moreau de Justo 380",
     "antiguedad": 2,
     "estado": "a nuevo",
     "orientacion": "sur",
+    "piso": "15.0",
     "expensas": 15000,
-    "moneda_precio": "USD",
-    "moneda_expensas": "ARS",
-    "amenities": "terraza, solárium, parrilla, seguridad 24hs, pileta",
+    "amenities": "pileta, terraza, solárium, parrilla, seguridad 24hs, pileta",
     "cochera": "Sí",
     "balcon": "Sí",
     "pileta": "Sí",
     "acepta_mascotas": "No",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Fotos 4K disponibles, Video profesional",
+    "info_multimedia": "Set de 4 fotos de alta calidad, Fotos de exteriores, Área de pileta, Recorrido visual completo",
+    "documentos": [
+      "imgs/ENTORNOS.PDF",
+      "imgs/DATOS PARCELA.PDF"
+    ],
     "fotos": [
-      "imgs/penthouse_terrace_1_0.jpg",
-      "imgs/penthouse_terrace_1_5.jpg",
-      "imgs/penthouse_terrace_1_7.jpg"
-    ]
+      "imgs/house_pool_1_4.jpg",
+      "imgs/house_exterior_1_7.jpg",
+      "imgs/house_pool_1_0.jpg",
+      "imgs/house_pool_1_8.jpg"
+    ],
+    "moneda_precio": "USD",
+    "moneda_expensas": "ARS",
+    "fecha_procesamiento": "2025-11-09T08:33:51.259324"
   },
   {
     "id_temporal": "UF004",
@@ -100,26 +116,33 @@
     "metros_cuadrados": 35,
     "operacion": "alquiler",
     "tipo": "estudio",
-    "descripcion": "Estudio moderno en el corazón del microcentro",
+    "descripcion": "Estudio moderno en el corazón del microcentro, ideal para profesionales. Muy bien ubicado cerca de transporte y servicios.",
     "direccion": "San Martín 234",
     "antiguedad": 5,
     "estado": "muy bueno",
     "orientacion": "este",
+    "piso": "8.0",
     "expensas": 4500,
-    "moneda_precio": "USD",
-    "moneda_expensas": "ARS",
     "amenities": "balcón francés, laundry, recepción",
     "cochera": "No",
     "balcon": "Sí",
     "pileta": "No",
     "acepta_mascotas": "No",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Fotos arquitectónicas",
+    "info_multimedia": "Set de 4 fotos de alta calidad, Fotos de interiores, Fotos panorámicas",
+    "documentos": [
+      "imgs/ENTORNOS.PDF",
+      "imgs/DATOS PARCELA.PDF"
+    ],
     "fotos": [
       "imgs/studio_apartment_1_1.jpg",
-      "imgs/studio_apartment_1_5.jpg",
-      "imgs/apartment_interior_1_4.jpg"
-    ]
+      "imgs/apartment_interior_1_0.jpg",
+      "imgs/studio_apartment_1_0.jpg",
+      "imgs/studio_apartment_1_5.jpg"
+    ],
+    "moneda_precio": "USD",
+    "moneda_expensas": "ARS",
+    "fecha_procesamiento": "2025-11-09T08:33:51.259324"
   },
   {
     "id_temporal": "UF005",
@@ -130,26 +153,32 @@
     "metros_cuadrados": 95,
     "operacion": "venta",
     "tipo": "casa",
-    "descripcion": "Hermosa casa con jardín y pileta en zona tranquila",
+    "descripcion": "Hermosa casa con jardín y pileta en zona tranquila de Palermo. Perfecta equilibrio entre ubicación y tranquilidad.",
     "direccion": "Fitz Roy 1456",
     "antiguedad": 12,
     "estado": "bueno",
     "orientacion": "norte",
     "expensas": 0,
-    "moneda_precio": "USD",
-    "moneda_expensas": "ARS",
-    "amenities": "pileta, jardín, parrilla, depósito",
+    "amenities": "pileta, pileta, jardín, parrilla, depósito",
     "cochera": "Sí",
     "balcon": "Sí",
     "pileta": "Sí",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Fotos de temporada disponibles",
+    "info_multimedia": "Set de 4 fotos de alta calidad, Fotos de exteriores, Área de pileta, Recorrido visual completo",
+    "documentos": [
+      "imgs/ENTORNOS.PDF",
+      "imgs/DATOS PARCELA.PDF"
+    ],
     "fotos": [
       "imgs/house_pool_1_8.jpg",
-      "imgs/house_exterior_1_9.jpg",
-      "imgs/house_pool_1_0.jpg"
-    ]
+      "imgs/house_exterior_1_7.jpg",
+      "imgs/house_pool_1_0.jpg",
+      "imgs/house_pool_1_4.jpg"
+    ],
+    "moneda_precio": "USD",
+    "moneda_expensas": "ARS",
+    "fecha_procesamiento": "2025-11-09T08:33:51.259324"
   },
   {
     "id_temporal": "UF006",
@@ -159,26 +188,34 @@
     "ambientes": 1,
     "metros_cuadrados": 40,
     "operacion": "alquiler",
-    "tipo": "monoambiente",
-    "descripcion": "Monoambiente moderno en Recoleta",
+    "tipo": "estudio",
+    "descripcion": "Monoambiente moderno en Recoleta, excelente estado. Ideal para inversión o primera vivienda. Balcón francés.",
     "direccion": "Av. Santa Fe 1820",
     "antiguedad": 6,
     "estado": "muy bueno",
-    "orientacion": "oeste",
+    "orientacion": "este",
+    "piso": "3.0",
     "expensas": 5200,
-    "moneda_precio": "USD",
-    "moneda_expensas": "ARS",
     "amenities": "balcón, laundry, concierge",
     "cochera": "No",
     "balcon": "Sí",
     "pileta": "No",
     "acepta_mascotas": "No",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Fotos interiores disponibles",
+    "info_multimedia": "Set de 4 fotos de alta calidad, Fotos de interiores, Fotos panorámicas",
+    "documentos": [
+      "imgs/ENTORNOS.PDF",
+      "imgs/DATOS PARCELA.PDF"
+    ],
     "fotos": [
-      "imgs/studio_apartment_1_0.jpg",
-      "imgs/studio_apartment_1_1.jpg"
-    ]
+      "imgs/apartment_interior_1_0.jpg",
+      "imgs/studio_apartment_1_1.jpg",
+      "imgs/studio_apartment_1_5.jpg",
+      "imgs/studio_apartment_1_0.jpg"
+    ],
+    "moneda_precio": "USD",
+    "moneda_expensas": "ARS",
+    "fecha_procesamiento": "2025-11-09T08:33:51.260324"
   },
   {
     "id_temporal": "UF007",
@@ -189,25 +226,69 @@
     "metros_cuadrados": 200,
     "operacion": "venta",
     "tipo": "casa",
-    "descripcion": "Amplia casa familiar con múltiples ambientes",
+    "descripcion": "Amplia casa familiar con múltiples ambientes, patio parrillero y cochera. Excelente estado de conservación en zona residencial.",
     "direccion": "Cramer 1780",
     "antiguedad": 15,
     "estado": "bueno",
     "orientacion": "norte",
     "expensas": 0,
-    "moneda_precio": "USD",
-    "moneda_expensas": "ARS",
     "amenities": "patio, parrilla, garage, depósito",
     "cochera": "Sí",
     "balcon": "Sí",
     "pileta": "No",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Fotos familiares disponibles",
+    "info_multimedia": "Set de 4 fotos de alta calidad, Fotos de exteriores, Recorrido visual completo",
+    "documentos": [
+      "imgs/ENTORNOS.PDF",
+      "imgs/DATOS PARCELA.PDF"
+    ],
     "fotos": [
       "imgs/house_exterior_1_7.jpg",
+      "imgs/house_exterior_1_9.jpg",
       "imgs/house_exterior_1_8.jpg",
-      "imgs/house_exterior_1_9.jpg"
-    ]
+      "imgs/house_exterior_1_7.jpg"
+    ],
+    "moneda_precio": "USD",
+    "moneda_expensas": "ARS",
+    "fecha_procesamiento": "2025-11-09T08:33:51.260324"
+  },
+  {
+    "id_temporal": "UF008",
+    "titulo": "Departamento en Palermo SoHo",
+    "barrio": "Palermo",
+    "precio": 280000,
+    "ambientes": 2,
+    "metros_cuadrados": 68,
+    "operacion": "alquiler",
+    "tipo": "departamento",
+    "descripcion": "Excelente departamento en el corazón de Palermo SoHo, con amplios ambientes y excelente luminosidad. Edificio con amenities de primer nivel.",
+    "direccion": "Honduras 1450",
+    "antiguedad": 3,
+    "estado": "excelente",
+    "orientacion": "norte",
+    "piso": "5.0",
+    "expensas": 8500,
+    "amenities": "pileta, pileta, gimnasio, sum, seguridad 24hs",
+    "cochera": "Sí",
+    "balcon": "Sí",
+    "pileta": "Sí",
+    "acepta_mascotas": "Sí",
+    "aire_acondicionado": "Sí",
+    "info_multimedia": "Galeria completa con 5 fotos profesionales, Fotos de interiores, Fotos panorámicas",
+    "documentos": [
+      "imgs/ENTORNOS.PDF",
+      "imgs/DATOS PARCELA.PDF"
+    ],
+    "fotos": [
+      "imgs/apartment_interior_1_4.jpg",
+      "imgs/studio_apartment_1_1.jpg",
+      "imgs/apartment_interior_1_0.jpg",
+      "imgs/studio_apartment_1_0.jpg",
+      "imgs/apartment_interior_1_5.jpg"
+    ],
+    "moneda_precio": "USD",
+    "moneda_expensas": "ARS",
+    "fecha_procesamiento": "2025-11-09T08:33:51.260324"
   }
 ]
