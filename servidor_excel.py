@@ -67,11 +67,17 @@ def guardar_contacto_excel(datos):
         log_contacto(error_msg)
         return False, error_msg
 
-@app.route('/api/guardar-contacto', methods=['POST'])
+@app.route('/api/guardar-contacto', methods=['GET', 'POST'])
 def guardar_contacto():
     """
-    Endpoint para recibir y guardar datos del formulario
+    Endpoint para recibir y guardar datos del formulario (POST)
+    o obtener la lista de contactos (GET)
     """
+    if request.method == 'GET':
+        return obtener_contactos()
+    
+    # POST: Guardar contacto
+    try:
     try:
         # Obtener datos JSON
         datos = request.get_json()
@@ -170,6 +176,68 @@ def obtener_estadisticas():
         return jsonify({
             'error': str(e)
         }), 500
+
+def obtener_contactos():
+    """
+    Función para obtener la lista de contactos guardados
+    """
+    try:
+        if not os.path.exists(EXCEL_FILE):
+            return jsonify({
+                'success': True,
+                'contactos': [],
+                'total': 0,
+                'mensaje': 'No hay contactos registrados aún'
+            })
+        
+        # Leer el archivo Excel
+        df = pd.read_excel(EXCEL_FILE)
+        
+        if df.empty:
+            return jsonify({
+                'success': True,
+                'contactos': [],
+                'total': 0,
+                'mensaje': 'No hay contactos registrados aún'
+            })
+        
+        # Convertir DataFrame a lista de diccionarios
+        contactos = []
+        for _, row in df.iterrows():
+            contacto = {
+                'nombre': str(row.get('Nombre', 'N/A')),
+                'email': str(row.get('Email', 'N/A')),
+                'telefono': str(row.get('Teléfono', 'N/A')),
+                'mensaje': str(row.get('Mensaje', 'N/A')),
+                'fecha': str(row.get('Fecha', 'N/A'))
+            }
+            contactos.append(contacto)
+        
+        return jsonify({
+            'success': True,
+            'contactos': contactos,
+            'total': len(contactos),
+            'mensaje': f'Total de contactos: {len(contactos)}'
+        })
+        
+    except Exception as e:
+        error_msg = f"❌ Error al obtener contactos: {str(e)}"
+        log_contacto(error_msg)
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'mensaje': 'Error al obtener la lista de contactos'
+        }), 500
+
+@app.route('/admin')
+def admin_panel():
+    """
+    Página de administración para ver y gestionar contactos
+    """
+    try:
+        return send_from_directory('.', 'admin.html')
+    except Exception as e:
+        return f"Error cargando panel de administración: {str(e)}", 500
 
 @app.route('/health', methods=['GET'])
 def health_check():
