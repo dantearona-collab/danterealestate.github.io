@@ -231,6 +231,7 @@ def obtener_contactos():
         }), 500
 
 # NUEVA RUTA /admin CON HTML EMBEBIDO
+
 @app.route('/admin')
 def admin_panel():
     """Panel de administración embebido"""
@@ -355,6 +356,22 @@ def admin_panel():
 </body>
 </html>
     '''
+
+# AGREGAR ESTA NUEVA FUNCIÓN DEBUG (después de admin_panel):
+@app.route('/debug', methods=['GET'])
+def debug():
+    """Ruta de diagnóstico"""
+    try:
+        return jsonify({
+            'directorio_actual': os.getcwd(),
+            'archivos_disponibles': os.listdir('.'),
+            'admin_funciona': True,
+            'excel_existe': os.path.exists(EXCEL_FILE)
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+    
 
 @app.route('/health', methods=['GET'])
 def health_check():
