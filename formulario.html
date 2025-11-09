@@ -224,6 +224,36 @@
             display: none;
         }
         
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .server-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 1001;
+        }
+
+        .server-connected {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .server-disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 1.5em;
@@ -237,6 +267,11 @@
     </style>
 </head>
 <body>
+    <!-- Indicador de estado del servidor -->
+    <div class="server-status server-disconnected" id="serverStatus">
+        🔴 Desconectado
+    </div>
+
     <div class="header">
         <h1>
             <span class="logo-key">
@@ -257,7 +292,11 @@
             </p>
             
             <div class="success-message" id="successMessage">
-                ✅ ¡Mensaje enviado correctamente! Nos comunicaremos contigo pronto.
+                ✅ ¡Datos guardados en Excel automáticamente! WhatsApp se abrirá ahora...
+            </div>
+
+            <div class="error-message" id="errorMessage">
+                ❌ Error al guardar. Intenta nuevamente.
             </div>
             
             <form class="contact-form" id="contactForm">
@@ -318,7 +357,7 @@
             </div>
             <div class="contact-card">
                 <h3>📧 Email</h3>
-                <p><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="741d1a121b3410151a001104061b041d1110151011075a171b195a1506">[email&#160;protected]</a></p>
+                <p><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="345d5a525b7450555a405144465b445d5150555051471a575b591a5546">[email&#160;protected]</a></p>
                 <p style="font-size: 0.9em; color: #666;">Respuesta en 24 horas</p>
             </div>
             <div class="contact-card">
@@ -338,46 +377,35 @@
     </a>
     
     <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-        // Función para guardar en Excel
-        function guardarEnExcel(datos) {
-            // Crear datos para Excel
-            const fecha = new Date().toLocaleString('es-AR');
-            const fila = [fecha, datos.nombre, datos.email, datos.telefono, datos.interes, datos.presupuesto, datos.mensaje, window.location.origin];
-            
-            // Convertir a CSV (compatible con Excel)
-            let csvContent = "data:text/csv;charset=utf-8," 
-                + "Fecha,Hora,Nombre,Email,Teléfono,Interés,Presupuesto,Mensaje,Página\n";
-            
-            // Leer datos existentes del localStorage o crear nuevo
-            let datosExistentes = localStorage.getItem('consultas_dante') || 'no hay datos';
-            
-            if (datosExistentes === 'no hay datos') {
-                // Primera vez, crear el archivo con encabezados
-                csvContent += fila.join(',') + '\n';
-            } else {
-                // Agregar nueva fila
-                csvContent = datosExistentes + fila.join(',') + '\n';
+        // URL del servidor
+        const SERVER_URL = window.location.origin;
+
+        // Verificar estado del servidor
+        async function verificarServidor() {
+            try {
+                const response = await fetch(`${SERVER_URL}/health`, {
+                    method: 'GET',
+                    timeout: 3000
+                });
+                
+                if (response.ok) {
+                    document.getElementById('serverStatus').textContent = '🟢 Conectado';
+                    document.getElementById('serverStatus').className = 'server-status server-connected';
+                    return true;
+                } else {
+                    throw new Error('Servidor no responde');
+                }
+            } catch (error) {
+                document.getElementById('serverStatus').textContent = '🔴 Desconectado';
+                document.getElementById('serverStatus').className = 'server-status server-disconnected';
+                return false;
             }
-            
-            // Guardar en localStorage
-            localStorage.setItem('consultas_dante', csvContent);
-            
-            // Crear y descargar archivo
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `contactos_dante_${new Date().toISOString().split('T')[0]}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            alert('✅ Datos guardados en Excel. El archivo se ha descargado.');
         }
 
         // Función para enviar datos al servidor Python
         async function enviarAlServidor(datos) {
             try {
-                const response = await fetch('http://localhost:5000/api/guardar-contacto', {
+                const response = await fetch(`${SERVER_URL}/api/guardar-contacto`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -385,96 +413,79 @@
                     body: JSON.stringify(datos)
                 });
                 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const result = await response.json();
                 return result;
             } catch (error) {
                 console.error('Error al enviar al servidor:', error);
-                return { success: false, message: 'Error de conexión' };
+                throw error;
             }
-        }
-
-        // Función para guardar en Excel (fallback local)
-        function guardarEnExcel(datos) {
-            // Crear datos para Excel
-            const fecha = new Date().toLocaleString('es-AR');
-            const fila = [fecha, datos.nombre, datos.email, datos.telefono, datos.interes, datos.presupuesto, datos.mensaje, window.location.origin];
-            
-            // Convertir a CSV (compatible con Excel)
-            let csvContent = "data:text/csv;charset=utf-8," 
-                + "Fecha,Hora,Nombre,Email,Teléfono,Interés,Presupuesto,Mensaje,Página\n";
-            
-            // Leer datos existentes del localStorage o crear nuevo
-            let datosExistentes = localStorage.getItem('consultas_dante') || 'no hay datos';
-            
-            if (datosExistentes === 'no hay datos') {
-                // Primera vez, crear el archivo con encabezados
-                csvContent += fila.join(',') + '\n';
-            } else {
-                // Agregar nueva fila
-                csvContent = datosExistentes + fila.join(',') + '\n';
-            }
-            
-            // Guardar en localStorage
-            localStorage.setItem('consultas_dante', csvContent);
-            
-            // Crear y descargar archivo
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `contactos_dante_${new Date().toISOString().split('T')[0]}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
         }
 
         // Formulario de contacto funcional
         document.getElementById('contactForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            // Verificar servidor primero
+            const servidorActivo = await verificarServidor();
+            
+            if (!servidorActivo) {
+                document.getElementById('errorMessage').innerHTML = 
+                    '❌ Servidor no disponible. Asegúrate de que el servidor esté corriendo en el puerto 5000.';
+                document.getElementById('errorMessage').style.display = 'block';
+                return;
+            }
+            
             // Obtener datos del formulario
-            const nombre = document.getElementById('nombre').value;
-            const email = document.getElementById('email').value;
-            const telefono = document.getElementById('telefono').value;
+            const nombre = document.getElementById('nombre').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const telefono = document.getElementById('telefono').value.trim();
             const interes = document.getElementById('interes').value;
             const presupuesto = document.getElementById('presupuesto').value;
-            const mensaje = document.getElementById('mensaje').value;
+            const mensaje = document.getElementById('mensaje').value.trim();
             
             // Validación básica
             if (!nombre || !email || !mensaje) {
-                alert('Por favor, completá los campos obligatorios (Nombre, Email y Mensaje)');
+                document.getElementById('errorMessage').innerHTML = 
+                    'Por favor, completá los campos obligatorios (Nombre, Email y Mensaje)';
+                document.getElementById('errorMessage').style.display = 'block';
                 return;
             }
+            
+            // Ocultar mensajes de error
+            document.getElementById('errorMessage').style.display = 'none';
             
             // Mostrar carga
             const submitBtn = document.getElementById('submitBtn');
             const successMessage = document.getElementById('successMessage');
-            submitBtn.textContent = '⏳ Guardando...';
+            submitBtn.textContent = '⏳ Guardando en Excel...';
             submitBtn.disabled = true;
             
             // Preparar datos
             const datosFormulario = { nombre, email, telefono, interes, presupuesto, mensaje };
             
             try {
-                // 1. Intentar enviar al servidor Python
+                // Enviar al servidor Python
                 const resultado = await enviarAlServidor(datosFormulario);
                 
                 if (resultado.success) {
-                    successMessage.innerHTML = '✅ ¡Datos guardados en Excel automáticamente! WhatsApp se abrirá ahora...';
+                    successMessage.innerHTML = `✅ ¡Datos guardados en Excel automáticamente! (${resultado.message}) WhatsApp se abrirá ahora...`;
                     successMessage.style.display = 'block';
                     console.log('✅ Guardado en Excel:', resultado);
                 } else {
-                    // 2. Si falla, usar método local
-                    console.warn('⚠️ Servidor no disponible, usando método local');
-                    guardarEnExcel(datosFormulario);
-                    successMessage.innerHTML = '⚠️ Servidor no disponible. Datos guardados localmente. WhatsApp se abrirá...';
-                    successMessage.style.display = 'block';
+                    throw new Error(resultado.message || 'Error desconocido');
                 }
             } catch (error) {
-                // 3. En caso de error, usar método local
-                console.error('Error:', error);
-                guardarEnExcel(datosFormulario);
-                successMessage.innerHTML = '⚠️ Usando modo offline. Datos guardados localmente. WhatsApp se abrirá...';
-                successMessage.style.display = 'block';
+                console.error('Error al guardar:', error);
+                document.getElementById('errorMessage').innerHTML = 
+                    `❌ Error al guardar: ${error.message}. Verifica que el servidor esté corriendo.`;
+                document.getElementById('errorMessage').style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = '📧 Enviar Mensaje';
+                return;
             }
             
             // Crear mensaje para WhatsApp
@@ -492,8 +503,8 @@ ${mensaje}
 ---
 Enviado desde: ${window.location.origin}`;
             
-            // URL de WhatsApp con el mensaje codificado
-            const whatsappURL = `https://wa.me/5491166562078?text=${encodeURIComponent(whatsappMessage)}`;
+            // URL de WhatsApp con el mensaje codificado (NÚMERO CORREGIDO)
+            const whatsappURL = `https://wa.me/5491125368595?text=${encodeURIComponent(whatsappMessage)}`;
             
             // Mostrar mensaje de éxito
             document.getElementById('successMessage').style.display = 'block';
@@ -503,17 +514,20 @@ Enviado desde: ${window.location.origin}`;
             // Abrir WhatsApp
             window.open(whatsappURL, '_blank');
             
-            // Reiniciar formulario después de 3 segundos
+            // Reiniciar formulario después de 5 segundos
             setTimeout(() => {
                 this.reset();
                 document.getElementById('successMessage').style.display = 'none';
                 document.getElementById('submitBtn').disabled = false;
                 document.getElementById('submitBtn').textContent = '📧 Enviar Mensaje';
-            }, 3000);
+            }, 5000);
         });
         
-        // Animación de entrada
+        // Verificar servidor al cargar la página
         document.addEventListener('DOMContentLoaded', function() {
+            verificarServidor();
+            
+            // Animación de entrada
             const formSection = document.querySelector('.form-section');
             formSection.style.opacity = '0';
             formSection.style.transform = 'translateY(20px)';
@@ -524,6 +538,7 @@ Enviado desde: ${window.location.origin}`;
                 formSection.style.transform = 'translateY(0)';
             }, 100);
         });
+
+        // Verificar servidor cada 30 segundos
+        setInterval(verificarServidor, 30000);
     </script>
-</body>
-</html>
