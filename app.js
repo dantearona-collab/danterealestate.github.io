@@ -734,7 +734,7 @@ function hideAllStates() {
  * Mostrar resultados de propiedades
  */
 function displayResults(properties) {
-    const resultsGrid = document.getElementById('search-results-grid');
+    const resultsGrid = document.getElementById('properties-container');
     if (!resultsGrid) return;
     
     if (properties.length === 0) {
@@ -1114,7 +1114,7 @@ function createPropertyDetailContent(property) {
  * Actualizar información de resultados
  */
 function updateResultsInfo(properties) {
-    const countElement = document.getElementById('results-count');
+    const countElement = document.getElementById('results-counter-styled');
     const titleElement = document.getElementById('results-title');
     
     if (countElement) {
