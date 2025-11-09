@@ -530,13 +530,13 @@
                         <strong style="font-size: 18px;">Dante Propiedades</strong>
                     </div>
                     <div style="color: #bdc3c7;">
-                        <strong>Contacto:</strong> +54 11 XXXX-XXXX | <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d0b9beb6bf90b4b1bea4b5a0a2bfa0b9b5b4b1b4b5a3feb3bfbdfeb1a2">[email&#160;protected]</a>
+                        <strong>Contacto:</strong> +54 11 XXXX-XXXX | <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4821262e27082c29263c2d383a2738212d2c292c2d3b662b272566293a">[email&#160;protected]</a>
                     </div>
                 </div>
                 
                 <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
                     <a href="formulario.html" style="color: #3498db; text-decoration: none; padding: 8px 15px; border: 1px solid #3498db; border-radius: 5px; transition: all 0.3s ease;">📋 Formulario de Contacto</a>
-                    <a href="notas-legales.html" style="color: #3498db; text-decoration: none; padding: 8px 15px; border: 1px solid #3498db; border-radius: 5px; transition: all 0.3s ease;">📜 Términos y Condiciones</a>
+                    <a href="#" onclick="mostrarTerminos(); return false;" style="color: #3498db; text-decoration: none; padding: 8px 15px; border: 1px solid #3498db; border-radius: 5px; transition: all 0.3s ease;">📜 Términos y Condiciones</a>
                 </div>
                 
                 <div style="border-top: 1px solid #34495e; padding-top: 15px; color: #95a5a6; font-size: 14px;">
@@ -597,5 +597,195 @@
             console.log('🎯 Sistema completamente funcional');
         });
     </script>
+    
+    <!-- Modal de Términos y Condiciones -->
+    <div id="modal-terminos" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📜 Términos y Condiciones</h2>
+                <span class="close" onclick="cerrarModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="last-updated">
+                    <strong>Última actualización:</strong> 10 de Noviembre de 2025
+                </div>
+                
+                <h3>1. Información General</h3>
+                <p>Dante Propiedades es una empresa inmobiliaria con sede en Capital Federal, Argentina, dedicada a la intermediación en operaciones de compra, venta y alquiler de propiedades inmuebles.</p>
+                
+                <h3>2. Aceptación de Términos</h3>
+                <p>Al utilizar nuestros servicios y sitio web, usted acepta estar sujeto a estos Términos y Condiciones. Si no está de acuerdo con alguna parte de estos términos, no utilice nuestros servicios.</p>
+                
+                <h3>3. Servicios Ofrecidos</h3>
+                <ul>
+                    <li>Intermediación en compra y venta de propiedades</li>
+                    <li>Gestión de alquileres residenciales y comerciales</li>
+                    <li>Asesoramiento inmobiliario personalizado</li>
+                    <li>Evaluación y tasación de propiedades</li>
+                </ul>
+                
+                <h3>4. Uso del Sitio Web</h3>
+                <p>Este sitio web está destinado exclusivamente para fines informativos y de contacto. La información publicada es de carácter general y puede estar sujeta a cambios sin previo aviso.</p>
+                
+                <h3>5. Protección de Datos</h3>
+                <p>La información personal que nos proporcione será utilizada únicamente para contactarlo y brindarle nuestros servicios. No compartimos su información con terceros sin su consentimiento explícito.</p>
+                
+                <h3>6. Limitación de Responsabilidad</h3>
+                <p>Dante Propiedades no se hace responsable por daños directos, indirectos, incidentales o consecuentes derivados del uso de este sitio web o de la información contenida en él.</p>
+                
+                <h3>7. Contacto</h3>
+                <p>Para consultas sobre estos términos, puede contactarnos a través de nuestro formulario de contacto o WhatsApp: +54 9 11 2536-8595</p>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button onclick="cerrarModal()" class="btn btn-primary">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+    .modal {
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.4);
+        backdrop-filter: blur(5px);
+    }
+    
+    .modal-content {
+        background-color: white;
+        margin: 5% auto;
+        padding: 0;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 800px;
+        max-height: 80vh;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        animation: modalAppear 0.3s ease;
+    }
+    
+    @keyframes modalAppear {
+        from { opacity: 0; transform: scale(0.7); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    
+    .modal-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .modal-header h2 {
+        margin: 0;
+        font-size: 1.8em;
+    }
+    
+    .close {
+        color: white;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        line-height: 1;
+    }
+    
+    .close:hover {
+        opacity: 0.8;
+    }
+    
+    .modal-body {
+        padding: 30px;
+        max-height: 60vh;
+        overflow-y: auto;
+        line-height: 1.6;
+    }
+    
+    .last-updated {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        text-align: center;
+        border-left: 4px solid #667eea;
+    }
+    
+    .modal-body h3 {
+        color: #333;
+        margin-top: 25px;
+        margin-bottom: 10px;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 5px;
+    }
+    
+    .modal-body p {
+        margin-bottom: 15px;
+        color: #555;
+    }
+    
+    .modal-body ul {
+        margin-bottom: 15px;
+        padding-left: 20px;
+    }
+    
+    .modal-body li {
+        margin-bottom: 5px;
+        color: #555;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: bold;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    </style>
+    
+    <script>
+    function mostrarTerminos() {
+        document.getElementById('modal-terminos').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function cerrarModal() {
+        document.getElementById('modal-terminos').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+    
+    // Cerrar modal al hacer clic fuera de él
+    window.onclick = function(event) {
+        const modal = document.getElementById('modal-terminos');
+        if (event.target == modal) {
+            cerrarModal();
+        }
+    }
+    
+    // Cerrar modal con tecla Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            cerrarModal();
+        }
+    });
+    </script>
 </body>
-</html>     
+</html>
