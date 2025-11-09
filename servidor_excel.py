@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Servidor Flask para guardar contactos del formulario en Excel
+Servidor Flask CORREGIDO - Sin errores de sintaxis
 Dante Propiedades - Sistema de Registro Automático
-VERSIÓN CORREGIDA - Panel Admin Embebido
 """
 
-from flask import Flask, request, jsonify, send_from_directory, send_file
+from flask import Flask, request, jsonify, send_file
 import pandas as pd
 from datetime import datetime
 import os
@@ -68,6 +67,58 @@ def guardar_contacto_excel(datos):
         log_contacto(error_msg)
         return False, error_msg
 
+def obtener_contactos():
+    """
+    Función para obtener la lista de contactos guardados
+    """
+    try:
+        if not os.path.exists(EXCEL_FILE):
+            return jsonify({
+                'success': True,
+                'contactos': [],
+                'total': 0,
+                'mensaje': 'No hay contactos registrados aún'
+            })
+        
+        # Leer el archivo Excel
+        df = pd.read_excel(EXCEL_FILE)
+        
+        if df.empty:
+            return jsonify({
+                'success': True,
+                'contactos': [],
+                'total': 0,
+                'mensaje': 'No hay contactos registrados aún'
+            })
+        
+        # Convertir DataFrame a lista de diccionarios
+        contactos = []
+        for _, row in df.iterrows():
+            contacto = {
+                'nombre': str(row.get('Nombre', 'N/A')),
+                'email': str(row.get('Email', 'N/A')),
+                'telefono': str(row.get('Teléfono', 'N/A')),
+                'mensaje': str(row.get('Mensaje', 'N/A')),
+                'fecha': str(row.get('Fecha', 'N/A'))
+            }
+            contactos.append(contacto)
+        
+        return jsonify({
+            'success': True,
+            'contactos': contactos,
+            'total': len(contactos),
+            'mensaje': f'Total de contactos: {len(contactos)}'
+        })
+        
+    except Exception as e:
+        error_msg = f"❌ Error al obtener contactos: {str(e)}"
+        log_contacto(error_msg)
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'mensaje': 'Error al obtener la lista de contactos'
+        }), 500
+
 @app.route('/api/guardar-contacto', methods=['GET', 'POST'])
 def guardar_contacto():
     """
@@ -78,7 +129,6 @@ def guardar_contacto():
         return obtener_contactos()
     
     # POST: Guardar contacto
-    try:
     try:
         # Obtener datos JSON
         datos = request.get_json()
@@ -147,96 +197,20 @@ def obtener_estadisticas():
         hoy = datetime.now().date()
         contactos_hoy = len(df[df['Fecha'].str.startswith(str(hoy))])
         
-        # Contar por tipo de interés
-        intereses = df['Interés'].value_counts().to_dict()
-        
-        # Últimos 5 contactos
-        ultimos_contactos = []
-        if total > 0:
-            ultimos = df.tail(5)
-            for _, row in ultimos.iterrows():
-                ultimos_contactos.append({
-                    'fecha': row['Fecha'],
-                    'nombre': row['Nombre'],
-                    'email': row['Email'],
-                    'telefono': row['Teléfono'],
-                    'interes': row['Interés'],
-                    'mensaje': row['Mensaje'][:50] + '...' if len(str(row['Mensaje'])) > 50 else row['Mensaje']
-                })
-        
         return jsonify({
             'total_contactos': total,
             'contactos_hoy': contactos_hoy,
-            'tipos_interes': intereses,
-            'ultimo_contacto': df['Fecha'].iloc[-1] if total > 0 else None,
-            'ultimos_contactos': ultimos_contactos,
-            'archivo_excel': EXCEL_FILE
+            'ultimo_contacto': df['Fecha'].iloc[-1] if total > 0 else None
         })
         
     except Exception as e:
-        return jsonify({
-            'error': str(e)
-        }), 500
+        return jsonify({'error': str(e)}), 500
 
-def obtener_contactos():
-    """
-    Función para obtener la lista de contactos guardados
-    """
-    try:
-        if not os.path.exists(EXCEL_FILE):
-            return jsonify({
-                'success': True,
-                'contactos': [],
-                'total': 0,
-                'mensaje': 'No hay contactos registrados aún'
-            })
-        
-        # Leer el archivo Excel
-        df = pd.read_excel(EXCEL_FILE)
-        
-        if df.empty:
-            return jsonify({
-                'success': True,
-                'contactos': [],
-                'total': 0,
-                'mensaje': 'No hay contactos registrados aún'
-            })
-        
-        # Convertir DataFrame a lista de diccionarios
-        contactos = []
-        for _, row in df.iterrows():
-            contacto = {
-                'nombre': str(row.get('Nombre', 'N/A')),
-                'email': str(row.get('Email', 'N/A')),
-                'telefono': str(row.get('Teléfono', 'N/A')),
-                'mensaje': str(row.get('Mensaje', 'N/A')),
-                'fecha': str(row.get('Fecha', 'N/A'))
-            }
-            contactos.append(contacto)
-        
-        return jsonify({
-            'success': True,
-            'contactos': contactos,
-            'total': len(contactos),
-            'mensaje': f'Total de contactos: {len(contactos)}'
-        })
-        
-    except Exception as e:
-        error_msg = f"❌ Error al obtener contactos: {str(e)}"
-        log_contacto(error_msg)
-        return jsonify({
-            'success': False,
-            'error': str(e),
-            'mensaje': 'Error al obtener la lista de contactos'
-        }), 500
-
-# NUEVA RUTA /admin CON HTML EMBEBIDO
-
+# RUTA ADMIN CORREGIDA - SINTAXIS CORRECTA
 @app.route('/admin')
 def admin_panel():
-    """Panel de administración embebido"""
-    return '''
-<!DOCTYPE html>
+    """Panel de administración embebido - SINTAXIS CORREGIDA"""
+    return '''<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -321,13 +295,13 @@ def admin_panel():
                     let html = '<table><tr><th>Fecha</th><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Mensaje</th></tr>';
                     
                     data.contactos.slice(-10).reverse().forEach(contacto => {
-                        html += `<tr>
-                            <td>${contacto.fecha}</td>
-                            <td>${contacto.nombre}</td>
-                            <td>${contacto.email}</td>
-                            <td>${contacto.telefono}</td>
-                            <td>${contacto.mensaje.substring(0, 30)}${contacto.mensaje.length > 30 ? '...' : ''}</td>
-                        </tr>`;
+                        html += '<tr>' +
+                            '<td>' + contacto.fecha + '</td>' +
+                            '<td>' + contacto.nombre + '</td>' +
+                            '<td>' + contacto.email + '</td>' +
+                            '<td>' + contacto.telefono + '</td>' +
+                            '<td>' + (contacto.mensaje.substring(0, 30) + (contacto.mensaje.length > 30 ? '...' : '')) + '</td>' +
+                        '</tr>';
                     });
                     
                     html += '</table>';
@@ -354,48 +328,33 @@ def admin_panel():
         });
     </script>
 </body>
-</html>
-    '''
+</html>'''
 
-# AGREGAR ESTA NUEVA FUNCIÓN DEBUG (después de admin_panel):
+# RUTA DEBUG CORREGIDA
 @app.route('/debug', methods=['GET'])
 def debug():
-    """Ruta de diagnóstico"""
+    """Ruta de diagnóstico - SINTAXIS CORREGIDA"""
     try:
         return jsonify({
-            'directorio_actual': os.getcwd(),
-            'archivos_disponibles': os.listdir('.'),
-            'admin_funciona': True,
+            'status': 'ok',
+            'message': 'Flask funcionando correctamente',
+            'timestamp': datetime.now().isoformat(),
+            'directorio': os.getcwd(),
+            'archivos': os.listdir('.') if os.path.exists('.') else [],
             'excel_existe': os.path.exists(EXCEL_FILE)
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-    
+@app.route('/api/descargar-excel', methods=['GET'])
+def api_descargar_excel():
+    """API para descargar archivo Excel"""
+    if os.path.exists(EXCEL_FILE):
+        return send_file(EXCEL_FILE, as_attachment=True, download_name='contactos_dante_propiedades.xlsx')
+    else:
+        return jsonify({'error': 'Archivo no encontrado'}), 404
 
-@app.route('/health', methods=['GET'])
-def health_check():
-    """Endpoint de salud del servidor"""
-    return jsonify({
-        'status': 'OK',
-        'timestamp': datetime.now().isoformat(),
-        'excel_file_exists': os.path.exists(EXCEL_FILE)
-    })
-
-@app.route('/debug', methods=['GET'])
-def debug():
-    """Ruta de diagnóstico"""
-    try:
-        return jsonify({
-            'directorio_actual': os.getcwd(),
-            'archivos_disponibles': os.listdir('.'),
-            'admin_funciona': True,
-            'excel_existe': os.path.exists(EXCEL_FILE)
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-# Rutas para servir archivos HTML
+# RUTAS PARA ARCHIVOS
 @app.route('/', methods=['GET'])
 def index():
     """Página principal"""
@@ -406,28 +365,11 @@ def formulario():
     """Página del formulario"""
     return send_file('formulario.html')
 
-@app.route('/formulario.html', methods=['GET'])
-def formulario_html():
-    """Página del formulario (con extensión .html)"""
-    return send_file('formulario.html')
-
-@app.route('/contactos_dante_propiedades.xlsx', methods=['GET'])
-def descargar_excel():
-    """Permitir descargar el archivo Excel de contactos"""
-    if os.path.exists(EXCEL_FILE):
-        return send_file(EXCEL_FILE, as_attachment=True, download_name='contactos_dante_propiedades.xlsx')
-    else:
-        return jsonify({'error': 'Archivo no encontrado'}), 404
-
-@app.route('/api/descargar-excel', methods=['GET'])
-def api_descargar_excel():
-    """API para descargar archivo Excel"""
-    return descargar_excel()
-
 if __name__ == '__main__':
-    print("🏢 Dante Propiedades - Servidor de Contactos")
+    print("🏢 Dante Propiedades - Servidor CORREGIDO")
     print("=" * 50)
     print(f"📁 Archivo Excel: {EXCEL_FILE}")
+    print(f"📋 Archivo Log: {LOG_FILE}")
     print("🚀 Iniciando servidor...")
     
     log_contacto("🎉 Servidor iniciado correctamente")
@@ -448,12 +390,11 @@ if __name__ == '__main__':
     print("   / - Página principal")
     print("   /formulario - Formulario de contacto")
     print("   /admin - Panel de administración")
-    print("   /contactos_dante_propiedades.xlsx - Descargar Excel")
+    print("   /api/descargar-excel - Descargar Excel")
     print()
     print("📡 APIs disponibles:")
     print("   POST /api/guardar-contacto - Guardar nuevo contacto")
     print("   GET  /api/estadisticas - Ver estadísticas")
-    print("   GET  /health - Estado del servidor")
     print("   GET  /api/descargar-excel - Descargar archivo Excel")
     print("   GET  /debug - Diagnóstico del sistema")
     print("=" * 50)
