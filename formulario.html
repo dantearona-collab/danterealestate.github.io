@@ -357,7 +357,7 @@
             </div>
             <div class="contact-card">
                 <h3>📧 Email</h3>
-                <p><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d7beb9b1b897b3b6b9a3b2a7a5b8a7beb2b3b6b3b2a4f9b4b8baf9b6a5">[email&#160;protected]</a></p>
+                <p><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="9bf2f5fdf4dbfffaf5effeebe9f4ebf2fefffafffee8b5f8f4f6b5fae9">[email&#160;protected]</a></p>
                 <p style="font-size: 0.9em; color: #666;">Respuesta en 24 horas</p>
             </div>
             <div class="contact-card">
@@ -377,13 +377,13 @@
     </a>
     
     <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-        // URL del servidor
+        // URL del servidor (Render)
         const SERVER_URL = 'https://danterealestate-github-io.onrender.com';
 
         // Verificar estado del servidor
         async function verificarServidor() {
             try {
-                const response = await fetch(`${SERVER_URL}/health`, {
+                const response = await fetch(`${SERVER_URL}/debug`, {
                     method: 'GET',
                     timeout: 3000
                 });
@@ -543,4 +543,4 @@ Enviado desde: ${window.location.origin}`;
         setInterval(verificarServidor, 30000);
     </script>
 </body>
-</html  
+</html>
