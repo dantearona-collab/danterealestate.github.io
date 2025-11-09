@@ -235,9 +235,34 @@ def admin_panel():
     Página de administración para ver y gestionar contactos
     """
     try:
-        return send_from_directory('.', 'admin.html')
+        log_contacto(f"Accediendo a /admin - Directorio actual: {os.getcwd()}")
+        
+        # Lista de posibles ubicaciones del archivo
+        posibles_rutas = [
+            'admin.html',
+            './admin.html',
+            os.path.join(os.getcwd(), 'admin.html'),
+            '/workspace/admin.html'
+        ]
+        
+        archivo_encontrado = None
+        for ruta in posibles_rutas:
+            if os.path.exists(ruta):
+                archivo_encontrado = ruta
+                log_contacto(f"Archivo admin.html encontrado en: {ruta}")
+                break
+        
+        if archivo_encontrado:
+            return send_file(archivo_encontrado)
+        else:
+            error_msg = f"Archivo admin.html no encontrado. Directorio actual: {os.getcwd()}. Archivos disponibles: {os.listdir('.') if os.path.exists('.') else 'No se puede listar'}"
+            log_contacto(f"❌ {error_msg}")
+            return f"Error: {error_msg}", 500
+            
     except Exception as e:
-        return f"Error cargando panel de administración: {str(e)}", 500
+        error_msg = f"Error cargando panel de administración: {str(e)}"
+        log_contacto(f"❌ {error_msg}")
+        return error_msg, 500
 
 @app.route('/health', methods=['GET'])
 def health_check():
@@ -247,6 +272,27 @@ def health_check():
         'timestamp': datetime.now().isoformat(),
         'excel_file_exists': os.path.exists(EXCEL_FILE)
     })
+
+@app.route('/debug-archivos', methods=['GET'])
+def debug_archivos():
+    """Ruta de diagnóstico para ver archivos disponibles"""
+    try:
+        directorio_actual = os.getcwd()
+        archivos_disponibles = os.listdir('.') if os.path.exists('.') else []
+        
+        admin_html_existe = os.path.exists('admin.html')
+        excel_existe = os.path.exists(EXCEL_FILE)
+        
+        return jsonify({
+            'directorio_actual': directorio_actual,
+            'archivos_disponibles': archivos_disponibles,
+            'admin_html_existe': admin_html_existe,
+            'excel_file_exists': excel_existe,
+            'archivo_excel': EXCEL_FILE,
+            'log_file': LOG_FILE
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # Rutas para servir archivos HTML
 @app.route('/', methods=['GET'])
