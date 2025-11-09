@@ -401,39 +401,25 @@ function displayProperties(properties) {
     container.innerHTML = '';
     
     if (properties.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #666;">No se encontraron propiedades</p>';
-        return;
+        container.innerHTML = '<p style="text-align: center; color: #666;">No se encontraron propiedades con los filtros seleccionados</p>';
+    } else {
+        properties.forEach(property => {
+            const card = createPropertyCard(property);
+            container.appendChild(card);
+        });
     }
     
-    properties.forEach(property => {
-        const card = createPropertyCard(property);
-        container.appendChild(card);
-    });
+    // Actualizar contador
+    updateResultsCounter(properties.length);
     
     console.log('📋 Mostrando', properties.length, 'propiedades');
 }
 
 // ========================================
-// EVENTOS DE FILTROS
+// EVENTOS DE FILTROS - CORREGIDO
 // ========================================
 
-function setupFilterEvents() {
-    // Event listeners para filtros
-    const operacionSelect = document.getElementById('operacion-select-styled');
-    const barrioSelect = document.getElementById('barrio-select-styled');
-    const tipoSelect = document.getElementById('tipo-select-styled');
-    
-    if (operacionSelect) {
-        operacionSelect.addEventListener('change', applyFilters);
-    }
-    if (barrioSelect) {
-        barrioSelect.addEventListener('change', applyFilters);
-    }
-    if (tipoSelect) {
-        tipoSelect.addEventListener('change', applyFilters);
-    }
-}
-
+// Función principal para aplicar filtros
 function applyFilters() {
     const operacionSelect = document.getElementById('operacion-select-styled');
     const barrioSelect = document.getElementById('barrio-select-styled');
@@ -454,6 +440,92 @@ function applyFilters() {
     
     globalData.filteredProperties = filtered;
     displayProperties(filtered);
+    
+    // Actualizar contador de resultados
+    updateResultsCounter(filtered.length);
+}
+
+// Función para buscar (llamada por el botón)
+function searchProperties() {
+    console.log('🔍 Buscando propiedades...');
+    applyFilters();
+}
+
+// Función para resetear filtros
+function resetFilters() {
+    console.log('🔄 Reseteando filtros...');
+    
+    const operacionSelect = document.getElementById('operacion-select-styled');
+    const barrioSelect = document.getElementById('barrio-select-styled');
+    const tipoSelect = document.getElementById('tipo-select-styled');
+    
+    if (operacionSelect) operacionSelect.value = '';
+    if (barrioSelect) barrioSelect.value = '';
+    if (tipoSelect) tipoSelect.value = '';
+    
+    // Mostrar todas las propiedades
+    globalData.filteredProperties = globalData.properties;
+    displayProperties(globalData.properties);
+    updateResultsCounter(globalData.properties.length);
+}
+
+// Actualizar contador de resultados
+function updateResultsCounter(count) {
+    const counterElement = document.getElementById('results-counter-styled');
+    if (counterElement) {
+        counterElement.innerHTML = `<div>Se encontraron ${count} propiedad${count !== 1 ? 'es' : ''}</div>`;
+    }
+}
+
+// Configurar eventos de filtros - VERSIÓN ROBUSTA
+function setupFilterEvents() {
+    console.log('🔧 Configurando eventos de filtros...');
+    
+    // Método 1: Event listeners en los select
+    const operacionSelect = document.getElementById('operacion-select-styled');
+    const barrioSelect = document.getElementById('barrio-select-styled');
+    const tipoSelect = document.getElementById('tipo-select-styled');
+    
+    if (operacionSelect) {
+        operacionSelect.addEventListener('change', function() {
+            console.log('📋 Operación cambiada a:', this.value);
+            applyFilters();
+        });
+    }
+    
+    if (barrioSelect) {
+        barrioSelect.addEventListener('change', function() {
+            console.log('📍 Barrio cambiado a:', this.value);
+            applyFilters();
+        });
+    }
+    
+    if (tipoSelect) {
+        tipoSelect.addEventListener('change', function() {
+            console.log('🏠 Tipo cambiado a:', this.value);
+            applyFilters();
+        });
+    }
+    
+    // Método 2: También configuramos los botones
+    const searchBtn = document.getElementById('search-btn-styled');
+    const resetBtn = document.getElementById('reset-btn-styled');
+    
+    if (searchBtn) {
+        searchBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            searchProperties();
+        });
+    }
+    
+    if (resetBtn) {
+        resetBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            resetFilters();
+        });
+    }
+    
+    console.log('✅ Eventos de filtros configurados correctamente');
 }
 
 // ========================================
@@ -482,11 +554,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // Cargar propiedades
     loadProperties();
     
-    // Configurar eventos de filtros
-    setTimeout(setupFilterEvents, 100);
+    // Configurar eventos de filtros con múltiples intentos
+    // para asegurar que los elementos estén disponibles
+    setupFilterEvents();
+    
+    // Backup: configurar eventos nuevamente después de un delay
+    setTimeout(setupFilterEvents, 500);
+    
+    // Backup final: también después de que todo esté cargado
+    window.addEventListener('load', function() {
+        setTimeout(setupFilterEvents, 1000);
+    });
     
     console.log('✅ Sistema inicializado sin errores de consola');
     console.log('🎠 Slider de múltiples fotos disponible');
+    console.log('🔍 Sistema de filtros configurado');
 });
 
 // ========================================
