@@ -1246,30 +1246,14 @@ function createPropertyCard(property) {
         return amenities.split(',').map(a => a.trim()).slice(0, 3);
     };
     
-    // ✅ CORRECCIÓN: Obtener TODAS las imágenes de la propiedad
-    const todasLasImagenes = property.fotos && property.fotos.length > 0 ? property.fotos : [];
+    // Obtener la primera imagen de la propiedad
+    const firstImage = property.fotos && property.fotos.length > 0 ? property.fotos[0] : null;
     
     card.innerHTML = `
         <div class="property-card-image">
             <div class="property-card-badge">${property.operacion || 'Venta'}</div>
-            ${todasLasImagenes.length > 0 ? 
-                // ✅ RENDERIZAR TODAS LAS IMÁGENES EN UN SLIDER
-                `<div class="slider-container" style="position: relative; width: 100%; height: 200px; overflow: hidden;">
-                    ${todasLasImagenes.map((imagen, index) => `
-                        <img src="${imagen}" 
-                             alt="${property.titulo} - Imagen ${index + 1}" 
-                             class="property-image" 
-                             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; display: ${index === 0 ? 'block' : 'none'};"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                    `).join('')}
-                    <div class="property-image-placeholder" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #f5f5f5; align-items: center; justify-content: center;">
-                        <div class="placeholder-content">
-                            <span class="placeholder-icon">🏠</span>
-                            <span class="placeholder-text">Sin imagen</span>
-                        </div>
-                    </div>
-                </div>` :
-                // ✅ PLACEHOLDER SI NO HAY IMÁGENES
+            ${firstImage ? 
+                `<img src="${firstImage}" alt="${property.titulo}" class="property-image" onerror="this.parentNode.innerHTML='<div class=property-image-placeholder><div class=placeholder-content><span class=placeholder-icon>🏠</span><span class=placeholder-text>Sin imagen</span></div></div>'">` :
                 `<div class="property-image-placeholder">
                     <div class="placeholder-content">
                         <span class="placeholder-icon">🏠</span>
@@ -1316,16 +1300,6 @@ function createPropertyCard(property) {
             </div>
         </div>
     `;
-    
-    // ✅ INICIALIZAR CURSORES DESPUÉS DE CREAR LA TARJETA
-    setTimeout(() => {
-        const imagenesEnEstaCard = card.querySelectorAll('.property-image');
-        if (imagenesEnEstaCard.length > 0) {
-            console.log(`🖼️ Inicializando cursores para tarjeta con ${imagenesEnEstaCard.length} imágenes`);
-            // Crear cursores para la primera imagen de esta tarjeta
-            crearCursorIndividual(card.querySelector('.slider-container') || card, imagenesEnEstaCard[0]);
-        }
-    }, 100);
     
     return card;
 }
@@ -2284,8 +2258,8 @@ function crearCursoresNavegacion() {
     let cursoresCreados = 0;
     
     imgs.forEach((img, index) => {
-        // ✅ CORRECCIÓN: Usar filtro más permisivo para procesar más imágenes
-        if (img.offsetWidth >= 10 && img.offsetHeight >= 10 && img.complete) {
+        // Solo procesar imágenes con tamaño suficiente
+        if (img.offsetWidth >= 30 && img.offsetHeight >= 30) {
             console.log(`🖼️ Creando cursores para imagen ${index + 1}`);
             
             // Crear contenedor de navegación
@@ -2355,15 +2329,15 @@ function crearCursoresNavegacion() {
                 user-select: none;
             `;
             
-            // ✅ NAVEGACIÓN INDIVIDUAL POR SLIDER
+            // Funcionalidad de navegación
             cursorIzq.onclick = function() {
-                console.log(`🔙 Navegando anterior en slider individual - Imagen ${index + 1}`);
-                navegarSliderIndividual(img.parentNode, -1);
+                console.log(`🔙 Navegando imagen anterior - Imagen ${index + 1}`);
+                navegarImagen(img, -1);
             };
             
             cursorDer.onclick = function() {
-                console.log(`🔜 Navegando siguiente en slider individual - Imagen ${index + 1}`);
-                navegarSliderIndividual(img.parentNode, 1);
+                console.log(`🔜 Navegando imagen siguiente - Imagen ${index + 1}`);
+                navegarImagen(img, 1);
             };
             
             // Efectos hover mejorados
@@ -2380,8 +2354,11 @@ function crearCursoresNavegacion() {
                 };
             });
             
-            // ✅ USAR FUNCIÓN INDIVIDUAL PARA CONSISTENCIA
-            crearCursorIndividual(img.parentNode, img);
+            // Integrar al DOM
+            img.parentNode.style.position = 'relative';
+            navContainer.appendChild(cursorIzq);
+            navContainer.appendChild(cursorDer);
+            img.parentNode.appendChild(navContainer);
             
             cursoresCreados += 2;
             console.log(`✅ Cursores creados para imagen ${index + 1} (izquierda y derecha)`);
@@ -2392,391 +2369,11 @@ function crearCursoresNavegacion() {
     return cursoresCreados;
 }
 
-// ✅ NAVEGACIÓN SIMPLE IMPLEMENTADA
+// Función de navegación (se puede expandir para lógica real)
 function navegarImagen(img, direccion) {
     console.log(`🔄 Navegando ${direccion === -1 ? 'anterior' : 'siguiente'} en imagen`);
-    
-    // Obtener todas las imágenes en la página
-    const todasLasImagenes = Array.from(document.querySelectorAll('img'));
-    
-    // Encontrar el índice de la imagen actual
-    const indiceActual = todasLasImagenes.indexOf(img);
-    
-    if (indiceActual === -1) {
-        console.log('❌ Imagen no encontrada en el array');
-        return;
-    }
-    
-    // Calcular el nuevo índice
-    const nuevoIndice = indiceActual + direccion;
-    
-    // Verificar límites
-    if (nuevoIndice < 0) {
-        console.log('🛑 Ya estás en la primera imagen');
-        return;
-    }
-    
-    if (nuevoIndice >= todasLasImagenes.length) {
-        console.log('🛑 Ya estás en la última imagen');
-        return;
-    }
-    
-    // ✅ NAVEGACIÓN VISUAL MEJORADA
-    
-    // Resetear todas las imágenes
-    todasLasImagenes.forEach((imagen, index) => {
-        imagen.style.opacity = '0.3';
-        imagen.style.filter = 'grayscale(50%)';
-        imagen.style.transform = 'scale(0.9)';
-        imagen.style.transition = 'all 0.5s ease';
-    });
-    
-    // Resaltar la imagen actual con efecto visual
-    const imagenActual = todasLasImagenes[nuevoIndice];
-    imagenActual.style.opacity = '1';
-    imagenActual.style.filter = 'grayscale(0%)';
-    imagenActual.style.transform = 'scale(1)';
-    imagenActual.style.zIndex = '100';
-    imagenActual.style.boxShadow = '0 0 20px 5px #4CAF50';
-    
-    // Crear indicador visual de navegación
-    crearIndicadorNavegacion(nuevoIndice + 1, todasLasImagenes.length);
-    
-    // Mostrar mensaje de navegación
-    const direccionTexto = direccion === -1 ? 'anterior' : 'siguiente';
-    console.log(`✅ Mostrando imagen ${nuevoIndice + 1} de ${todasLasImagenes.length} (${direccionTexto})`);
-    
-    // Re-crear cursores para la nueva imagen visible
-    setTimeout(() => {
-        crearCursoresNavegacion();
-    }, 100);
-}
-
-// ✅ NAVEGACIÓN INDIVIDUAL POR SLIDER - CORRECCIÓN DEFINITIVA
-function navegarSliderIndividual(sliderPadre, direccion) {
-    console.log(`🎯 Navegando slider individual - Dirección: ${direccion === -1 ? 'anterior' : 'siguiente'}`);
-    
-    // ✅ VERIFICAR QUE EL SLIDER EXISTA
-    if (!sliderPadre) {
-        console.log('❌ Error: sliderPadre no existe');
-        return;
-    }
-    
-    // ✅ ENCONTRAR TODAS LAS IMÁGENES EN ESTE SLIDER ESPECÍFICO
-    const imagenesDelSlider = sliderPadre.querySelectorAll('img');
-    // ✅ CORRECCIÓN: Filtro más permisivo para contar todas las imágenes válidas
-    const imagenesVisibles = Array.from(imagenesDelSlider).filter(img => {
-        const esValida = img.offsetWidth >= 10 && 
-                        img.offsetHeight >= 10 && 
-                        img.offsetWidth > 0 && 
-                        img.offsetHeight > 0 &&
-                        img.complete &&
-                        !img.classList.contains('cursor-nav-btn') &&
-                        !img.closest('.cursor-nav-container');
-        return esValida;
-    });
-    
-    if (imagenesVisibles.length === 0) {
-        console.log('❌ No hay imágenes válidas en este slider');
-        return;
-    }
-    
-    console.log(`🖼️ Slider tiene ${imagenesVisibles.length} imágenes válidas`);
-    
-    // ✅ ENCONTRAR LA IMAGEN ACTUAL CON MEJOR LÓGICA
-    let imagenActual = imagenesVisibles.find(img => {
-        const opacidad = parseFloat(img.style.opacity) || 1;
-        const display = img.style.display !== 'none';
-        const zIndex = parseInt(img.style.zIndex) || 0;
-        return opacidad >= 0.8 || display || zIndex > 50;
-    });
-    
-    // Si ninguna está marcada como activa, tomar la primera
-    if (!imagenActual) {
-        imagenActual = imagenesVisibles[0];
-        console.log('🎯 No había imagen activa, usando la primera');
-    }
-    
-    // ✅ DETERMINAR EL ÍNDICE ACTUAL
-    const indiceActual = imagenesVisibles.indexOf(imagenActual);
-    if (indiceActual === -1) {
-        console.log('❌ No se pudo determinar el índice de la imagen actual');
-        return;
-    }
-    
-    // ✅ CALCULAR EL NUEVO ÍNDICE CON NAVEGACIÓN CIRCULAR
-    let nuevoIndice = indiceActual + direccion;
-    
-    // ✅ NAVEGACIÓN CIRCULAR (WRAP AROUND)
-    if (nuevoIndice < 0) {
-        nuevoIndice = imagenesVisibles.length - 1; // Ir a la última imagen
-        console.log('🔄 Navegación circular: saltando a la última imagen');
-    } else if (nuevoIndice >= imagenesVisibles.length) {
-        nuevoIndice = 0; // Ir a la primera imagen
-        console.log('🔄 Navegación circular: saltando a la primera imagen');
-    }
-    
-    console.log(`🧭 Navegando: imagen ${indiceActual + 1} -> ${nuevoIndice + 1}`);
-    
-    // ✅ SIMPLE: OCULTAR TODAS LAS IMÁGENES DEL SLIDER
-    imagenesVisibles.forEach((imagen, index) => {
-        imagen.style.display = 'none';
-        imagen.style.opacity = '';
-        imagen.style.filter = '';
-        imagen.style.transform = '';
-        imagen.style.zIndex = '';
-        imagen.style.boxShadow = '';
-    });
-    
-    // ✅ SIMPLE: MOSTRAR SOLO LA IMAGEN NUEVA
-    const imagenNueva = imagenesVisibles[nuevoIndice];
-    imagenNueva.style.display = 'block';
-    imagenNueva.style.opacity = '1';
-    
-    // ✅ CREAR INDICADOR SIMPLE ESPECÍFICO DEL SLIDER
-    crearIndicadorNavegacionSlider(nuevoIndice + 1, imagenesVisibles.length, sliderPadre);
-    
-    // ✅ CONFIRMACIÓN SIMPLE
-    const direccionTexto = direccion === -1 ? 'anterior' : 'siguiente';
-    console.log(`✅ SLIDER NAVEGADO: imagen ${nuevoIndice + 1} de ${imagenesVisibles.length} (${direccionTexto})`);
-    
-    // ✅ FORZAR RE-FLUJO DEL DOM
-    sliderPadre.offsetHeight;
-}
-
-// ✅ FUNCIÓN PARA CREAR INDICADOR VISUAL DE NAVEGACIÓN
-function crearIndicadorNavegacion(numeroActual, total) {
-    // Remover indicador anterior si existe
-    const indicadorAnterior = document.getElementById('indicador-navegacion');
-    if (indicadorAnterior) {
-        indicadorAnterior.remove();
-    }
-    
-    // Crear nuevo indicador
-    const indicador = document.createElement('div');
-    indicador.id = 'indicador-navegacion';
-    indicador.innerHTML = `
-        <div style="
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-            font-weight: bold;
-            z-index: 9999;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            animation: slideIn 0.3s ease;
-        ">
-            📷 Imagen ${numeroActual} de ${total}
-        </div>
-    `;
-    
-    // Agregar animación CSS si no existe
-    if (!document.getElementById('navegacion-animations')) {
-        const style = document.createElement('style');
-        style.id = 'navegacion-animations';
-        style.textContent = `
-            @keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-        `;
-        document.head.appendChild(style);
-    }
-    
-    document.body.appendChild(indicador);
-    
-    // Remover el indicador después de 3 segundos
-    setTimeout(() => {
-        if (indicador.parentNode) {
-            indicador.style.animation = 'slideIn 0.3s ease reverse';
-            setTimeout(() => {
-                if (indicador.parentNode) {
-                    indicador.remove();
-                }
-            }, 300);
-        }
-    }, 3000);
-}
-
-// ✅ INDICADOR ESPECÍFICO POR SLIDER
-function crearIndicadorNavegacionSlider(numeroActual, total, sliderPadre) {
-    // ✅ REMOVER INDICADORES ANTERIORES
-    const indicadoresAnteriores = sliderPadre.querySelectorAll('.nav-indicator-slider');
-    indicadoresAnteriores.forEach(indicador => indicador.remove());
-    
-    // ✅ CREAR INDICADOR SIMPLE
-    const indicador = document.createElement('div');
-    indicador.className = 'nav-indicator-slider';
-    indicador.innerHTML = `${numeroActual}/${total}`;
-    
-    // ✅ ESTILOS SENCILLOS
-    indicador.style.cssText = `
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        background: rgba(0, 0, 0, 0.7);
-        color: white;
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-family: Arial, sans-serif;
-        font-size: 11px;
-        font-weight: bold;
-        z-index: 10000;
-        pointer-events: none;
-    `;
-    
-    // ✅ ASEGURAR POSICIÓN RELATIVA
-    if (window.getComputedStyle(sliderPadre).position === 'static') {
-        sliderPadre.style.position = 'relative';
-    }
-    
-    // ✅ AGREGAR AL SLIDER
-    sliderPadre.appendChild(indicador);
-}
-
-
-// ✅ RE-CREAR CURSORES SOLO EN UN SLIDER ESPECÍFICO
-function reCrearCursoresSlider(sliderPadre) {
-    // Remover cursores anteriores de este slider
-    const cursoresAnteriores = sliderPadre.querySelectorAll('.cursor-nav-container');
-    cursoresAnteriores.forEach(cursor => cursor.remove());
-    
-    // Encontrar imágenes en este slider
-    const imagenesSlider = sliderPadre.querySelectorAll('img');
-    
-    // Crear cursores solo para imágenes válidas
-    imagenesSlider.forEach(img => {
-        if (img.offsetWidth >= 30 && img.offsetHeight >= 30) {
-            // ✅ CREAR CURSORES SOLO PARA ESTE SLIDER
-            crearCursorIndividual(sliderPadre, img);
-        }
-    });
-}
-
-// ✅ CREAR UN CURSOR INDIVIDUAL PARA UNA IMAGEN
-function crearCursorIndividual(sliderPadre, img) {
-    // ✅ CORRECCIÓN: Verificar si ya existe un contenedor de navegación en este slider
-    let navContainer = sliderPadre.querySelector('.cursor-nav-container');
-    if (navContainer) {
-        // Si ya existe, no crear otro - solo salir
-        return;
-    }
-    
-    // ✅ INICIALIZAR: Mostrar solo la primera imagen válida
-    // ✅ CORRECCIÓN: Filtro más permisivo para permitir imágenes más pequeñas
-    const imagenesSlider = Array.from(sliderPadre.querySelectorAll('img')).filter(img => 
-        img.offsetWidth >= 10 && img.offsetHeight >= 10 && img.complete
-    );
-    
-    // Ocultar todas excepto la primera
-    imagenesSlider.forEach((imagen, index) => {
-        if (index === 0) {
-            imagen.style.display = 'block';
-            imagen.style.opacity = '1';
-        } else {
-            imagen.style.display = 'none';
-        }
-    });
-    
-    // Solo crear cursores si no existe uno previamente
-    navContainer = document.createElement('div');
-    navContainer.className = 'cursor-nav-container';
-    navContainer.style.cssText = `
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 999999;
-        pointer-events: none;
-    `;
-    
-    // Cursor izquierda
-    const cursorIzq = document.createElement('div');
-    cursorIzq.innerHTML = '◀';
-    cursorIzq.className = 'cursor-nav-btn cursor-nav-prev';
-    cursorIzq.style.cssText = `
-        position: absolute;
-        top: 50%;
-        left: 15px;
-        transform: translateY(-50%);
-        background: rgba(0, 0, 0, 0.9);
-        color: #00ff00;
-        border: 3px solid #00ff00;
-        border-radius: 50%;
-        width: 55px;
-        height: 55px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 22px;
-        font-weight: bold;
-        cursor: pointer;
-        pointer-events: auto;
-        box-shadow: 0 0 20px #00ff00, inset 0 0 10px rgba(0,255,0,0.3);
-        transition: all 0.3s ease;
-        user-select: none;
-    `;
-    
-    // Cursor derecha
-    const cursorDer = document.createElement('div');
-    cursorDer.innerHTML = '▶';
-    cursorDer.className = 'cursor-nav-btn cursor-nav-next';
-    cursorDer.style.cssText = `
-        position: absolute;
-        top: 50%;
-        right: 15px;
-        transform: translateY(-50%);
-        background: rgba(0, 0, 0, 0.9);
-        color: #00ff00;
-        border: 3px solid #00ff00;
-        border-radius: 50%;
-        width: 55px;
-        height: 55px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 22px;
-        font-weight: bold;
-        cursor: pointer;
-        pointer-events: auto;
-        box-shadow: 0 0 20px #00ff00, inset 0 0 10px rgba(0,255,0,0.3);
-        transition: all 0.3s ease;
-        user-select: none;
-    `;
-    
-    // ✅ EVENT LISTENERS ESPECÍFICOS DEL SLIDER
-    cursorIzq.onclick = function() {
-        navegarSliderIndividual(sliderPadre, -1);
-    };
-    
-    cursorDer.onclick = function() {
-        navegarSliderIndividual(sliderPadre, 1);
-    };
-    
-    // Efectos hover
-    [cursorIzq, cursorDer].forEach(cursor => {
-        cursor.onmouseenter = function() {
-            this.style.transform = this.classList.contains('cursor-nav-prev') ? 'translateY(-50%) scale(1.15)' : 'translateY(-50%) scale(1.15)';
-            this.style.boxShadow = '0 0 30px #00ff00, inset 0 0 15px rgba(0,255,0,0.5)';
-            this.style.background = 'rgba(0, 50, 0, 0.9)';
-        };
-        cursor.onmouseleave = function() {
-            this.style.transform = this.classList.contains('cursor-nav-prev') ? 'translateY(-50%) scale(1)' : 'translateY(-50%) scale(1)';
-            this.style.boxShadow = '0 0 20px #00ff00, inset 0 0 10px rgba(0,255,0,0.3)';
-            this.style.background = 'rgba(0, 0, 0, 0.9)';
-        };
-    });
-    
-    // Integrar al DOM
-    navContainer.appendChild(cursorIzq);
-    navContainer.appendChild(cursorDer);
-    sliderPadre.appendChild(navContainer);
+    // Aquí se puede implementar la lógica real de navegación de galería
+    // Por ejemplo: cambiar a imagen anterior/siguiente en una galería
 }
 
 // También ejecutar cuando se carguen nuevas imágenes dinámicamente
@@ -2802,18 +2399,7 @@ observer.observe(document.body, {
 });
 
 // Inicializar cursores después de que el sistema principal esté listo
-setTimeout(() => {
-    console.log('⏰ EJECUTANDO: Crear cursores después del timeout');
-    crearCursoresNavegacion();
-}, 2000); // Esperar 2 segundos para asegurar que todo esté cargado
-
-// ✅ EJECUTAR TAMBIÉN CUANDO SE RENDERICEN LAS PROPIEDADES
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        console.log('🏠 EJECUTANDO: Crear cursores después de DOM cargado');
-        crearCursoresNavegacion();
-    }, 3000); // 3 segundos para asegurar que las propiedades se carguen
-});
+setTimeout(crearCursoresNavegacion, 2000); // Esperar 2 segundos para asegurar que todo esté cargado
 
 // Función de debug para verificar estado de cursores
 window.debugCursores = function() {
