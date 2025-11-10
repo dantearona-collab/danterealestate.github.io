@@ -1871,8 +1871,9 @@ function addAdvancedStyles() {
         display: flex;
         justify-content: space-between;
         transform: translateY(-50%);
-        pointer-events: none;
+        pointer-events: auto;
         padding: 0 15px;
+        z-index: 10;
     }
     
     .slider-nav-btn {
