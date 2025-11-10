@@ -2369,11 +2369,52 @@ function crearCursoresNavegacion() {
     return cursoresCreados;
 }
 
-// Función de navegación (se puede expandir para lógica real)
+// ✅ NAVEGACIÓN SIMPLE IMPLEMENTADA
 function navegarImagen(img, direccion) {
     console.log(`🔄 Navegando ${direccion === -1 ? 'anterior' : 'siguiente'} en imagen`);
-    // Aquí se puede implementar la lógica real de navegación de galería
-    // Por ejemplo: cambiar a imagen anterior/siguiente en una galería
+    
+    // Obtener todas las imágenes en la página
+    const todasLasImagenes = Array.from(document.querySelectorAll('img'));
+    
+    // Encontrar el índice de la imagen actual
+    const indiceActual = todasLasImagenes.indexOf(img);
+    
+    if (indiceActual === -1) {
+        console.log('❌ Imagen no encontrada en el array');
+        return;
+    }
+    
+    // Calcular el nuevo índice
+    const nuevoIndice = indiceActual + direccion;
+    
+    // Verificar límites
+    if (nuevoIndice < 0) {
+        console.log('🛑 Ya estás en la primera imagen');
+        return;
+    }
+    
+    if (nuevoIndice >= todasLasImagenes.length) {
+        console.log('🛑 Ya estás en la última imagen');
+        return;
+    }
+    
+    // Ocultar todas las imágenes
+    todasLasImagenes.forEach((imagen, index) => {
+        if (index !== nuevoIndice) {
+            imagen.style.display = 'none';
+        } else {
+            imagen.style.display = 'block';
+        }
+    });
+    
+    // Mostrar mensaje de navegación
+    const direccionTexto = direccion === -1 ? 'anterior' : 'siguiente';
+    console.log(`✅ Mostrando imagen ${nuevoIndice + 1} de ${todasLasImagenes.length} (${direccionTexto})`);
+    
+    // Re-crear cursores para la nueva imagen visible
+    setTimeout(() => {
+        crearCursoresNavegacion();
+    }, 100);
 }
 
 // También ejecutar cuando se carguen nuevas imágenes dinámicamente
