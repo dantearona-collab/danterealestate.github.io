@@ -84,17 +84,29 @@ function crearCursoresEnTodasLasImagenes() {
     const imgs = document.querySelectorAll('img');
     console.log(`📸 Procesando ${imgs.length} imágenes`);
     
+    let cursoresCreados = 0;
+    
     imgs.forEach((img, index) => {
-        // Solo crear cursores en imágenes razonablemente grandes
-        if (img.offsetWidth > 80 && img.offsetHeight > 80 && img.src) {
+        console.log(`📷 Imagen ${index + 1}: ${img.offsetWidth}x${img.offsetHeight}, src: ${img.src ? 'SÍ' : 'NO'}`);
+        // Crear cursores en cualquier imagen que tenga src
+        if (img.src && img.offsetWidth > 50 && img.offsetHeight > 50) {
             crearCursoresParaImagen(img, index);
+            cursoresCreados++;
+        } else {
+            console.log(`❌ Imagen ${index + 1} no cumple condiciones: offsetWidth=${img.offsetWidth}, offsetHeight=${img.offsetHeight}, src=${img.src ? 'SÍ' : 'NO'}`);
         }
     });
+    
+    const totalCursores = document.querySelectorAll('.cursor-nav-container').length;
+    console.log(`🎯 RESUMEN: ${cursoresCreados} imágenes procesadas, ${totalCursores} contenedores de cursores creados`);
 }
 
 function crearCursoresParaImagen(img, index) {
+    console.log(`🔍 Revisando imagen ${index + 1}: ${img.offsetWidth}x${img.offsetHeight}, src: ${img.src.substring(0,30)}...`);
+    
     // Verificar si ya tiene cursores
-    if (img.parentNode.querySelector('.cursor-nav-container')) {
+    if (img.parentNode && img.parentNode.querySelector('.cursor-nav-container')) {
+        console.log(`⏭️ Imagen ${index + 1} ya tiene cursores`);
         return;
     }
     
@@ -216,7 +228,14 @@ function crearCursoresParaImagen(img, index) {
     container.appendChild(cursorDer);
     img.parentNode.appendChild(container);
     
-    console.log(`✅ Cursores creados para imagen ${index + 1}`);
+    console.log(`✅ Cursores creados para imagen ${index + 1} en parent:`, img.parentNode.tagName);
+    
+    // Forzar creación del contenedor
+    const contenedor = img.parentNode.querySelector('.cursor-nav-container');
+    console.log(`🔍 Verificación final: contenedor existe = ${!!contenedor}`);
+    if (contenedor) {
+        console.log(`🖱️ Cursores encontrados: ${contenedor.querySelectorAll('.cursor-nav-btn').length}`);
+    }
 }
 
 function navegarImagenSimple(img, direccion) {
@@ -440,4 +459,4 @@ function showAllProperties() {
     console.log('Mostrando todas las propiedades');
 }
 
-// ... [resto del código original preservado] ...
+// ... [resto del código original si es necesario] ...
