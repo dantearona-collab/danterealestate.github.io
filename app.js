@@ -267,6 +267,10 @@ function previousSlide() {
     }
 }
 
+// Hacer funciones accesibles globalmente
+window.nextSlide = nextSlide;
+window.previousSlide = previousSlide;
+
 function goToSlide(index) {
     const track = document.getElementById('advanced-slider-track');
     if (track) {
@@ -413,6 +417,10 @@ function previousImage() {
     }
 }
 
+// Hacer funciones accesibles globalmente
+window.nextImage = nextImage;
+window.previousImage = previousImage;
+
 // Mostrar imagen actual en modal
 function showCurrentImageInModal() {
     const currentItem = currentMediaItems[currentImageIndex];
@@ -461,18 +469,42 @@ function initAdvancedSearch() {
 /**
  * Cargar opciones de filtros de forma OFFLINE (sin API)
  */
-function loadFilterOptionsOffline() {
+async function loadFilterOptionsOffline() {
     console.log('🔄 Cargando opciones de filtros de forma offline...');
     
-    // Los datos hardcodeados (los mismos que están en el HTML)
-    const barrios = ['palermo', 'belgrano', 'colegiales', 'microcentro', 'recoleta', 'san isidro', 'almagro', 'villa crespo', 'caballito', 'nuñez', 'boedo', 'balvanera', 'vicente lopez', 'puerto madero'];
-    const tipos = ['departamento', 'casa', 'ph', 'oficina', 'local', 'terreno'];
-    
-    // Poblar los selectores con los datos
-    populateFilterSelectors(barrios, tipos);
-    
-    console.log('✅ Opciones de filtros cargadas offline - Selectores poblados');
-    console.log('📊 Barrios:', barrios.length, 'Tipos:', tipos.length);
+    try {
+        // Cargar propiedades desde el archivo JSON
+        const response = await fetch('propiedades.json');
+        if (!response.ok) {
+            throw new Error(`Error al cargar propiedades: ${response.status}`);
+        }
+        
+        const properties = await response.json();
+        console.log(`✅ ${properties.length} propiedades cargadas para filtros`);
+        
+        // Extraer barrios y tipos únicos del JSON
+        const barrios = [...new Set(properties.map(p => p.barrio).filter(b => b))].sort();
+        const tipos = [...new Set(properties.map(p => p.tipo).filter(t => t))].sort();
+        
+        console.log('📊 Barrios únicos encontrados:', barrios);
+        console.log('📊 Tipos únicos encontrados:', tipos);
+        
+        // Poblar los selectores con los datos reales
+        populateFilterSelectors(barrios, tipos);
+        
+        console.log('✅ Opciones de filtros cargadas offline - Selectores poblados');
+        console.log('📊 Barrios:', barrios.length, 'Tipos:', tipos.length);
+        
+    } catch (error) {
+        console.error('❌ Error al cargar filtros offline:', error);
+        
+        // Fallback: datos mínimos
+        const barrios = ['Boedo', 'Palermo'];
+        const tipos = ['departamento', 'terreno'];
+        populateFilterSelectors(barrios, tipos);
+        
+        console.log('⚠️ Usando datos de fallback para filtros');
+    }
 }
 
 function populateFiltersFromJSON(properties) {
