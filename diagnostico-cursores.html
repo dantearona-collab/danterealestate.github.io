@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Completo de Cursores</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
+        .diagnosis { background: white; padding: 20px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .success { color: #27ae60; font-weight: bold; }
+        .error { color: #e74c3c; font-weight: bold; }
+        .warning { color: #f39c12; font-weight: bold; }
+        .code { background: #2c3e50; color: white; padding: 10px; border-radius: 4px; font-family: monospace; margin: 10px 0; }
+        .section { margin: 20px 0; }
+        .test { background: #ecf0f1; padding: 15px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Diagnóstico Completo de Cursores de Navegación</h1>
+    
+    <div class="diagnosis">
+        <h2>📊 Estado General</h2>
+        <div id="general-status">🔄 Analizando...</div>
+    </div>
+
+    <div class="diagnosis">
+        <h2>🎯 Contenedores Encontrados</h2>
+        <div id="container-analysis">🔄 Buscando contenedores...</div>
+    </div>
+
+    <div class="diagnosis">
+        <h2>⬅️➡️ Botones de Navegación</h2>
+        <div id="button-analysis">🔄 Analizando botones...</div>
+    </div>
+
+    <div class="diagnosis">
+        <h2>🎨 Análisis de Estilos Computados</h2>
+        <div id="style-analysis">🔄 Revisando estilos...</div>
+    </div>
+
+    <div class="diagnosis">
+        <h2>🚨 Problemas Detectados</h2>
+        <div id="issues">🔄 Identificando problemas...</div>
+    </div>
+
+    <div class="diagnosis">
+        <h2>🔧 Soluciones Propuestas</h2>
+        <div id="solutions">🔄 Generando soluciones...</div>
+    </div>
+
+    <script>
+        function runCompleteDiagnosis() {
+            console.log('🔍 === DIAGNÓSTICO COMPLETO DE CURSORES ===');
+            
+            // 1. ANÁLISIS GENERAL
+            const containers = document.querySelectorAll('.slider-nav-buttons');
+            const buttons = document.querySelectorAll('.slider-nav-btn');
+            
+            let generalStatus = `📊 <strong>Propiedades encontradas:</strong><br>
+                • Contenedores: ${containers.length}<br>
+                • Botones: ${buttons.length}<br>`;
+            
+            if (containers.length === 0 && buttons.length === 0) {
+                generalStatus += '<div class="error">❌ NO se encontraron cursores en el DOM</div>';
+                document.getElementById('general-status').innerHTML = generalStatus;
+                return;
+            } else {
+                generalStatus += '<div class="success">✅ Elementos encontrados en el DOM</div>';
+            }
+            document.getElementById('general-status').innerHTML = generalStatus;
+
+            // 2. ANÁLISIS DE CONTENEDORES
+            let containerAnalysis = '';
+            containers.forEach((container, index) => {
+                const styles = window.getComputedStyle(container);
+                containerAnalysis += `<div class="test">
+                    <strong>Contenedor ${index + 1}:</strong><br>
+                    • Display: ${styles.display}<br>
+                    • Visibility: ${styles.visibility}<br>
+                    • Opacity: ${styles.opacity}<br>
+                    • Pointer-events: ${styles.pointerEvents}<br>
+                    • Position: ${styles.position}<br>
+                    • Z-index: ${styles.zIndex}<br>
+                </div>`;
+            });
+            document.getElementById('container-analysis').innerHTML = containerAnalysis || '<div class="warning">⚠️ No hay contenedores de navegación</div>';
+
+            // 3. ANÁLISIS DE BOTONES
+            let buttonAnalysis = '';
+            buttons.forEach((button, index) => {
+                const styles = window.getComputedStyle(button);
+                const rect = button.getBoundingClientRect();
+                
+                buttonAnalysis += `<div class="test">
+                    <strong>Botón ${index + 1} (${button.textContent.trim() || 'N/A'}):</strong><br>
+                    • Display: ${styles.display}<br>
+                    • Visibility: ${styles.visibility}<br>
+                    • Opacity: ${styles.opacity}<br>
+                    • Pointer-events: ${styles.pointerEvents}<br>
+                    • Color: ${styles.color}<br>
+                    • Background: ${styles.background}<br>
+                    • Posición: (${rect.left}, ${rect.top}, ${rect.width}x${rect.height})<br>
+                    • Visible en pantalla: ${rect.top >= 0 && rect.left >= 0 ? '✅' : '❌'}<br>
+                </div>`;
+            });
+            document.getElementById('button-analysis').innerHTML = buttonAnalysis || '<div class="warning">⚠️ No hay botones de navegación</div>';
+
+            // 4. ANÁLISIS DE ESTILOS COMPUTADOS
+            let styleAnalysis = '';
+            
+            // Verificar si hay estilos inline que los oculten
+            containers.forEach((container, index) => {
+                const inlineStyles = container.getAttribute('style') || 'Ninguno';
+                styleAnalysis += `<div class="test">
+                    <strong>Estilos inline Contenedor ${index + 1}:</strong><br>
+                    <div class="code">${inlineStyles}</div>
+                </div>`;
+            });
+            
+            buttons.forEach((button, index) => {
+                const inlineStyles = button.getAttribute('style') || 'Ninguno';
+                styleAnalysis += `<div class="test">
+                    <strong>Estilos inline Botón ${index + 1}:</strong><br>
+                    <div class="code">${inlineStyles}</div>
+                </div>`;
+            });
+            
+            document.getElementById('style-analysis').innerHTML = styleAnalysis || '<div class="warning">⚠️ No se encontraron estilos inline</div>';
+
+            // 5. IDENTIFICACIÓN DE PROBLEMAS
+            let issues = [];
+            
+            // Verificar si están ocultos
+            containers.forEach((container, index) => {
+                const styles = window.getComputedStyle(container);
+                if (styles.display === 'none') {
+                    issues.push(`❌ Contenedor ${index + 1} tiene display: none`);
+                }
+                if (styles.visibility === 'hidden') {
+                    issues.push(`❌ Contenedor ${index + 1} tiene visibility: hidden`);
+                }
+                if (styles.opacity === '0') {
+                    issues.push(`❌ Contenedor ${index + 1} tiene opacity: 0`);
+                }
+            });
+            
+            buttons.forEach((button, index) => {
+                const styles = window.getComputedStyle(button);
+                if (styles.display === 'none') {
+                    issues.push(`❌ Botón ${index + 1} tiene display: none`);
+                }
+                if (styles.visibility === 'hidden') {
+                    issues.push(`❌ Botón ${index + 1} tiene visibility: hidden`);
+                }
+                if (styles.opacity === '0') {
+                    issues.push(`❌ Botón ${index + 1} tiene opacity: 0`);
+                }
+                
+                // Verificar visibilidad en pantalla
+                const rect = button.getBoundingClientRect();
+                if (rect.top < 0 || rect.left < 0) {
+                    issues.push(`❌ Botón ${index + 1} está fuera de la pantalla`);
+                }
+            });
+            
+            document.getElementById('issues').innerHTML = issues.length > 0 ? 
+                issues.map(issue => `<div>${issue}</div>`).join('') :
+                '<div class="success">✅ No se detectaron problemas de visibilidad obvios</div>';
+
+            // 6. SOLUCIONES PROPUESTAS
+            let solutions = '';
+            
+            if (containers.length === 0) {
+                solutions += '<div class="test">🔧 <strong>Problema:</strong> No hay contenedores de navegación<br><strong>Solución:</strong> Verificar que la galería de imágenes se haya cargado correctamente</div>';
+            }
+            
+            if (buttons.length === 0) {
+                solutions += '<div class="test">🔧 <strong>Problema:</strong> No hay botones de navegación<br><strong>Solución:</strong> Los botones deben crearse dinámicamente cuando hay múltiples imágenes</div>';
+            }
+            
+            if (issues.length > 0) {
+                solutions += '<div class="test">🔧 <strong>Problema:</strong> Elementos ocultos<br><strong>Solución:</strong> Ejecutar fix CSS que fuerce la visibilidad</div>';
+                solutions += '<div class="code">// CSS para forzar visibilidad:\n.slider-nav-buttons { display: flex !important; }\n.slider-nav-btn { opacity: 1 !important; visibility: visible !important; }</div>';
+            }
+            
+            solutions += '<div class="test">🔧 <strong>Para hacerlos más visibles:</strong><br>Cambiar colores de los botones para que contrasten mejor con el fondo</div>';
+            
+            document.getElementById('solutions').innerHTML = solutions;
+
+            console.log('🔍 === DIAGNÓSTICO COMPLETADO ===');
+            console.log('Contenedores:', containers.length);
+            console.log('Botones:', buttons.length);
+        }
+
+        // Ejecutar diagnóstico al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(runCompleteDiagnosis, 1000);
+            
+            // También ejecutar cuando se hace clic en botones
+            setTimeout(runCompleteDiagnosis, 3000);
+            setTimeout(runCompleteDiagnosis, 5000);
+        });
+        
+        // Ejecutar al hacer clic en el botón
+        document.addEventListener('click', function() {
+            setTimeout(runCompleteDiagnosis, 500);
+        });
+    </script>
+</body>
+</html>
