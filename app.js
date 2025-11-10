@@ -272,12 +272,42 @@ window.nextSlide = nextSlide;
 window.previousSlide = previousSlide;
 
 function goToSlide(index) {
+    console.log(`🎯 Ir a slide: ${index}`);
+    
     const track = document.getElementById('advanced-slider-track');
-    if (track) {
-        const slideWidth = track.querySelector('.media-slide').offsetWidth;
-        track.style.transform = `translateX(-${index * slideWidth}px)`;
-        track.dataset.currentIndex = index;
+    if (!track) {
+        console.log('❌ No se encontró el slider track');
+        return false;
     }
+    
+    const slides = track.querySelectorAll('.media-slide');
+    if (!slides || slides.length === 0) {
+        console.log('❌ No se encontraron slides');
+        return false;
+    }
+    
+    if (index < 0 || index >= slides.length) {
+        console.log(`❌ Índice ${index} fuera de rango (0-${slides.length - 1})`);
+        return false;
+    }
+    
+    // Calcular ancho del slide
+    const slideWidth = slides[0].offsetWidth || 400;
+    const translateX = -index * slideWidth;
+    
+    // Aplicar transformación
+    track.style.transition = 'transform 0.3s ease';
+    track.style.transform = `translateX(${translateX}px)`;
+    track.dataset.currentIndex = index;
+    
+    // Actualizar estado de las miniaturas si existen
+    const thumbnails = document.querySelectorAll('.media-thumbnail');
+    thumbnails.forEach((thumb, i) => {
+        thumb.classList.toggle('active', i === index);
+    });
+    
+    console.log(`✅ Slide ${index} activado - translateX(${translateX}px)`);
+    return true;
 }
 
 // Abrir documento en nueva pestaña
@@ -2258,9 +2288,15 @@ function crearCursoresNavegacion() {
     let cursoresCreados = 0;
     
     imgs.forEach((img, index) => {
-        // Solo procesar imágenes con tamaño suficiente
-        if (img.offsetWidth > 100) {
-            console.log(`🖼️ Creando cursores para imagen ${index + 1}`);
+        // Solo procesar imágenes con tamaño suficiente y visibles
+        if (img.offsetWidth > 100 && img.offsetHeight > 100 && img.style.display !== 'none') {
+            console.log(`🖼️ Creando cursores para imagen ${index + 1} (${img.offsetWidth}x${img.offsetHeight})`);
+            
+            // Verificar si ya tiene cursores
+            if (img.parentNode.querySelector('.cursor-nav-container')) {
+                console.log(`⏭️ Imagen ${index + 1} ya tiene cursores, saltando`);
+                return;
+            }
             
             // Crear contenedor de navegación
             const navContainer = document.createElement('div');
@@ -2329,26 +2365,40 @@ function crearCursoresNavegacion() {
                 user-select: none;
             `;
             
-            // Funcionalidad de navegación MEJORADA - Conectar con sistema real
-            cursorIzq.onclick = function() {
-                console.log(`🔙 Navegando imagen anterior - Imagen ${index + 1}`);
-                if (typeof previousSlide === 'function') {
-                    previousSlide();
-                }
-                if (typeof navigateImage !== 'undefined' && navigateImage) {
-                    navigateImage(-1);
-                }
-            };
+            // Sistema de navegación INTELIGENTE que detecta el contexto correcto
+            const isInSliderContext = img.closest('.advanced-media-slider, .property-modal, .media-slide');
             
-            cursorDer.onclick = function() {
-                console.log(`🔜 Navegando imagen siguiente - Imagen ${index + 1}`);
-                if (typeof nextSlide === 'function') {
-                    nextSlide();
-                }
-                if (typeof navigateImage !== 'undefined' && navigateImage) {
-                    navigateImage(1);
-                }
-            };
+            if (isInSliderContext) {
+                // Contexto de slider avanzado - usar funciones nativas
+                cursorIzq.onclick = function() {
+                    console.log(`🎮 Navegación en slider avanzado - Anterior`);
+                    if (typeof previousSlide === 'function') {
+                        previousSlide();
+                    } else {
+                        console.log('❌ previousSlide no disponible');
+                    }
+                };
+                
+                cursorDer.onclick = function() {
+                    console.log(`🎮 Navegación en slider avanzado - Siguiente`);
+                    if (typeof nextSlide === 'function') {
+                        nextSlide();
+                    } else {
+                        console.log('❌ nextSlide no disponible');
+                    }
+                };
+            } else {
+                // Contexto general - navegación básica entre imágenes
+                cursorIzq.onclick = function() {
+                    console.log(`🌐 Navegación general - Anterior`);
+                    navegarImagenGeneral(img, -1);
+                };
+                
+                cursorDer.onclick = function() {
+                    console.log(`🌐 Navegación general - Siguiente`);
+                    navegarImagenGeneral(img, 1);
+                };
+            }
             
             // Efectos hover mejorados
             [cursorIzq, cursorDer].forEach(cursor => {
@@ -2375,7 +2425,24 @@ function crearCursoresNavegacion() {
         }
     });
     
-    console.log(`🎉 SISTEMA COMPLETADO: ${cursoresCreados} cursores creados en ${imgs.length} imágenes`);
+    const imgsConCursores = document.querySelectorAll('.cursor-nav-container').length;
+    const contextosDetectados = {
+        sliders: document.querySelectorAll('.advanced-media-slider').length,
+        modales: document.querySelectorAll('.property-modal').length,
+        cards: document.querySelectorAll('.property-card').length
+    };
+    
+    console.log(`🎉 SISTEMA COMPLETADO:`);
+    console.log(`   📊 Cursores creados: ${cursoresCreados} (${imgsConCursores} contenedores)`);
+    console.log(`   🖼️ Imágenes procesadas: ${imgs.length}`);
+    console.log(`   📍 Contextos detectados:`, contextosDetectados);
+    console.log(`   ✅ Cursores funcionando en contextos:`, 
+        Object.entries(contextosDetectados)
+            .filter(([_, count]) => count > 0)
+            .map(([nombre, _]) => nombre)
+            .join(', ') || 'ninguno'
+    );
+    
     return cursoresCreados;
 }
 
@@ -2393,14 +2460,105 @@ function navegarImagen(img, direccion) {
         return;
     }
     
-    // Fallback: navegación genérica para imágenes individuales
-    if (img && img.src) {
-        const imageContainer = img.closest('.property-card, .media-slide, .image-container');
-        if (imageContainer) {
-            // Para implementaciones futuras de navegación entre imágenes
-            console.log(`🎯 Navegación específica en contenedor de imagen`);
-        }
+    // Fallback: usar navegación general
+    navegarImagenGeneral(img, direccion);
+}
+
+// NUEVA FUNCIÓN: Navegación general entre imágenes
+function navegarImagenGeneral(img, direccion) {
+    console.log(`🌐 Navegación general iniciada con dirección: ${direccion}`);
+    
+    if (!img || !img.src) {
+        console.log('❌ No hay imagen válida para navegar');
+        return;
     }
+    
+    // Intentar encontrar un contenedor de galería
+    const galeria = img.closest('.property-card, .property-card-image, .media-slide, .image-gallery, .slider-main');
+    if (!galeria) {
+        console.log('❌ No se encontró contenedor de galería');
+        return;
+    }
+    
+    // Encontrar todas las imágenes en el mismo contenedor
+    const imagenes = galeria.querySelectorAll('img');
+    console.log(`📸 Encontradas ${imagenes.length} imágenes en el contenedor`);
+    
+    if (imagenes.length <= 1) {
+        console.log('❌ Solo hay una imagen, no se puede navegar');
+        return;
+    }
+    
+    // Encontrar índice de la imagen actual
+    const indiceActual = Array.from(imagenes).indexOf(img);
+    console.log(`📍 Imagen actual en índice: ${indiceActual}`);
+    
+    if (indiceActual === -1) {
+        console.log('❌ No se pudo encontrar la imagen actual');
+        return;
+    }
+    
+    // Calcular nuevo índice
+    let nuevoIndice;
+    if (direccion === -1) {
+        nuevoIndice = (indiceActual - 1 + imagenes.length) % imagenes.length;
+    } else {
+        nuevoIndice = (indiceActual + 1) % imagenes.length;
+    }
+    
+    console.log(`➡️ Navegando de imagen ${indiceActual} a ${nuevoIndice}`);
+    
+    // Implementar navegación visual
+    implementarNavegacionVisual(galeria, imagenes, indiceActual, nuevoIndice);
+}
+
+// Nueva función para implementar navegación visual
+function implementarNavegacionVisual(galeria, imagenes, indiceActual, nuevoIndice) {
+    const imgActual = imagenes[indiceActual];
+    const imgNueva = imagenes[nuevoIndice];
+    
+    if (!imgNueva) {
+        console.log('❌ No se encontró la imagen nueva');
+        return;
+    }
+    
+    // Método 1: Si las imágenes están en un slider, usar transform
+    const track = galeria.querySelector('.slider-track');
+    if (track) {
+        const slideWidth = imgNueva.offsetWidth || 400;
+        const translateX = -nuevoIndice * slideWidth;
+        track.style.transform = `translateX(${translateX}px)`;
+        console.log(`🎠 Navegación por slider: translateX(${translateX}px)`);
+        return;
+    }
+    
+    // Método 2: Si están en cards separados, cambiar la imagen directamente
+    if (galeria.classList.contains('property-card-image') || galeria.classList.contains('media-slide')) {
+        // Para imágenes individuales, mostrar un efecto de transición
+        imgActual.style.opacity = '0.3';
+        imgActual.style.transition = 'opacity 0.3s ease';
+        
+        setTimeout(() => {
+            if (imgNueva.src) {
+                imgActual.src = imgNueva.src;
+                imgActual.alt = imgNueva.alt || 'Imagen';
+                console.log(`🖼️ Imagen cambiada a: ${imgNueva.src}`);
+            }
+            imgActual.style.opacity = '1';
+        }, 150);
+        return;
+    }
+    
+    // Método 3: Resaltar imagen nueva
+    imgNueva.style.outline = '4px solid #00ff00';
+    imgNueva.style.outlineOffset = '4px';
+    imgNueva.style.transition = 'outline 0.5s ease';
+    
+    setTimeout(() => {
+        imgNueva.style.outline = 'none';
+    }, 2000);
+    
+    console.log(`✨ Imagen ${nuevoIndice} resaltada temporalmente`);
 }
 
 // Función global para navegación específica de sliders
@@ -2415,6 +2573,36 @@ function navigateImage(direction) {
 
 // Hacer funciones accesibles globalmente
 window.navigateImage = navigateImage;
+window.navegarImagenGeneral = navegarImagenGeneral;
+window.goToSlideImproved = goToSlide;
+
+// Sistema de DEBUG para cursores
+function debugCursors() {
+    console.log('🔍 === DEBUG DE SISTEMA DE CURSORES ===');
+    console.log('📊 Funciones disponibles:', {
+        nextSlide: typeof nextSlide,
+        previousSlide: typeof previousSlide,
+        goToSlide: typeof goToSlide,
+        navigateImage: typeof navigateImage,
+        navegarImagenGeneral: typeof navegarImagenGeneral
+    });
+    
+    const track = document.getElementById('advanced-slider-track');
+    console.log('🎠 Estado del slider:', {
+        track: !!track,
+        currentIndex: track?.dataset?.currentIndex,
+        mediaItems: currentMediaItems?.length || 0
+    });
+    
+    const cursores = document.querySelectorAll('.cursor-nav-btn');
+    console.log('🖱️ Cursores encontrados:', cursores.length);
+    
+    console.log('🖼️ Imágenes en página:', document.querySelectorAll('img').length);
+    console.log('✅ Debug completado');
+}
+
+// Debug inicial
+setTimeout(debugCursors, 3000);
 
 // También ejecutar cuando se carguen nuevas imágenes dinámicamente
 let observer = new MutationObserver(function(mutations) {
