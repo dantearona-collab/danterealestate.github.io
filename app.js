@@ -2417,70 +2417,160 @@ applyDefinitveCursorsFix();
 // Aplicar cuando se carga la página
 document.addEventListener('DOMContentLoaded', applyDefinitveCursorsFix);
 
-// 🚨 FIX SIMPLE Y DIRECTO PARA CURSORES
-// Este código es más simple y debe agregarse al final de tu app.js
 
-function fixCursoresSimples() {
-    // 1. FORZAR ESTILOS INMEDIATAMENTE
+
+/ 🚨 FIX AGRESIVO PARA CURSORES - VERSIÓN ULTRA-EFECTIVA
+// AGREGAR AL FINAL DE TU APP.JS
+
+function fixCursoresUltra() {
+    console.log('🔥 Iniciando fix ultra-agresivo de cursores...');
+    
+    // 1. CREAR ESTILOS CON MÁXIMA AGRESIVIDAD
     const style = document.createElement('style');
+    style.id = 'cursores-ultra-fix';
     style.innerHTML = `
-        .advanced-media-slider .slider-nav-buttons {
+        /* FORZAR TODO DESDE TODOS LOS SELECTORES POSIBLES */
+        * .advanced-media-slider .slider-nav-buttons {
             pointer-events: auto !important;
             display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
-        .advanced-media-slider .slider-nav-btn {
+        * .advanced-media-slider .slider-nav-btn {
             display: flex !important;
             opacity: 1 !important;
             visibility: visible !important;
             background: white !important;
-            border: 3px solid #ff6b35 !important;
+            border: 4px solid #ff6b35 !important;
             border-radius: 50% !important;
-            width: 50px !important;
-            height: 50px !important;
+            width: 60px !important;
+            height: 60px !important;
             color: #ff6b35 !important;
-            font-size: 20px !important;
+            font-size: 24px !important;
             font-weight: bold !important;
+            cursor: pointer !important;
+            z-index: 999999 !important;
+            position: relative !important;
+        }
+        * .advanced-media-slider .slider-nav-btn:hover {
+            background: #ff6b35 !important;
+            color: white !important;
+            transform: scale(1.1) !important;
+        }
+        
+        /* OVERRIDES ESPECÍFICOS */
+        .advanced-media-slider [style*="pointer-events: none"] {
+            pointer-events: auto !important;
+        }
+        .advanced-media-slider [style*="display: none"] {
+            display: flex !important;
+        }
+        .advanced-media-slider [style*="opacity: 0"] {
+            opacity: 1 !important;
+        }
+        .advanced-media-slider [style*="visibility: hidden"] {
+            visibility: visible !important;
         }
     `;
+    
+    // REMOVER ESTILOS ANTERIORES
+    const oldStyle = document.getElementById('definitve-cursors-fix');
+    const oldSimpleStyle = document.querySelector('style[style*="cursores-ultra-fix"]');
+    if (oldStyle) oldStyle.remove();
+    if (oldSimpleStyle) oldSimpleStyle.remove();
+    
     document.head.appendChild(style);
     
-    // 2. FORZAR CADA 1 SEGUNDO POR 5 SEGUNDOS
-    let attempts = 0;
-    const interval = setInterval(() => {
-        const buttons = document.querySelectorAll('.advanced-media-slider .slider-nav-btn');
-        const containers = document.querySelectorAll('.advanced-media-slider .slider-nav-buttons');
+    // 2. FORZAR ELEMENTOS HTML DIRECTAMENTE
+    function forzarElementos() {
+        console.log('🔧 Forzando elementos HTML...');
         
-        buttons.forEach(btn => {
+        // Buscar y forzar contenedores
+        document.querySelectorAll('.slider-nav-buttons').forEach(container => {
+            container.style.pointerEvents = 'auto';
+            container.style.display = 'flex';
+            container.style.visibility = 'visible';
+            container.style.opacity = '1';
+            console.log('✅ Contenedor forzado:', container);
+        });
+        
+        // Buscar y forzar botones
+        document.querySelectorAll('.slider-nav-btn').forEach(btn => {
             btn.style.display = 'flex';
             btn.style.opacity = '1';
             btn.style.visibility = 'visible';
+            btn.style.background = 'white';
+            btn.style.border = '4px solid #ff6b35';
+            btn.style.borderRadius = '50%';
+            btn.style.width = '60px';
+            btn.style.height = '60px';
+            btn.style.color = '#ff6b35';
+            btn.style.fontSize = '24px';
+            btn.style.fontWeight = 'bold';
+            btn.style.cursor = 'pointer';
+            btn.style.zIndex = '999999';
+            console.log('✅ Botón forzado:', btn);
         });
         
-        containers.forEach(container => {
-            container.style.pointerEvents = 'auto';
-        });
-        
-        attempts++;
-        if (attempts >= 5) {
-            clearInterval(interval);
-            console.log('🎯 Fix cursores aplicado ' + attempts + ' veces');
-        }
-    }, 1000);
+        // Verificar si existen elementos
+        const botones = document.querySelectorAll('.slider-nav-btn');
+        const contenedores = document.querySelectorAll('.slider-nav-buttons');
+        console.log(`📊 Elementos encontrados: ${contenedores.length} contenedores, ${botones.length} botones`);
+    }
     
-    console.log('🚨 Fix cursores simples iniciado');
+    // 3. EJECUTAR MÚLTIPLES VECES
+    forzarElementos();
+    
+    let attempts = 0;
+    const maxAttempts = 10;
+    const interval = setInterval(() => {
+        attempts++;
+        forzarElementos();
+        
+        if (attempts >= maxAttempts) {
+            clearInterval(interval);
+            console.log(`🎯 Fix ultra aplicado ${maxAttempts} veces`);
+        }
+    }, 500);
+    
+    // 4. MONITOREAR CAMBIOS EN EL DOM
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'childList') {
+                // Si se agregan nuevos elementos, forzar estilos
+                setTimeout(forzarElementos, 100);
+            }
+        });
+    });
+    
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+    
+    console.log('🔥 Fix ultra-agresivo iniciado - ' + new Date().toLocaleTimeString());
 }
 
 // EJECUTAR INMEDIATAMENTE
-fixCursoresSimples();
+fixCursoresUltra();
 
-// EJECUTAR CUANDO SE CARGA LA PÁGINA
-document.addEventListener('DOMContentLoaded', fixCursoresSimples);
+// EJECUTAR EN DIFERENTES MOMENTOS
+document.addEventListener('DOMContentLoaded', fixCursoresUltra);
+window.addEventListener('load', fixCursoresUltra);
 
-// EJECUTAR CADA VEZ QUE SE ABRE UN MODAL
-setTimeout(fixCursoresSimples, 2000);
-setTimeout(fixCursoresSimples, 5000);
+// EJECUTAR CADA VEZ QUE SE ABRE UN MODAL O CAMBIA EL CONTENIDO
+setTimeout(fixCursoresUltra, 1000);
+setTimeout(fixCursoresUltra, 3000);
+setTimeout(fixCursoresUltra, 5000);
 
-
+// EJECUTAR CUANDO SE HACE SCROLL (algunos sliders se cargan dinámicamente)
+let lastScrollY = window.scrollY;
+window.addEventListener('scroll', () => {
+    if (Math.abs(window.scrollY - lastScrollY) > 100) {
+        lastScrollY = window.scrollY;
+        setTimeout(fixCursoresUltra, 500);
+    }
+});
 
 // Aplicar cada 2 segundos durante los primeros 10 segundos (para modales que se abren dinámicamente)
 let fixInterval = setInterval(applyDefinitveCursorsFix, 2000);
