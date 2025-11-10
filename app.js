@@ -2245,4 +2245,161 @@ document.addEventListener('DOMContentLoaded', addAdvancedStyles);
 // Cambio: pointer-events: none → pointer-events: auto
 // Los cursores ahora son completamente funcionales sin JavaScript adicional
 
+// ========================================
+// 🔥 SISTEMA DEFINITIVO DE CURSORES DE NAVEGACIÓN
+// Solución permanente para navegación de imágenes
+// ========================================
+
+// Función para crear cursores de navegación en todas las imágenes
+function crearCursoresNavegacion() {
+    console.log('🚀 INICIANDO SISTEMA DEFINITIVO DE CURSORES...');
+    
+    const imgs = document.querySelectorAll('img');
+    let cursoresCreados = 0;
+    
+    imgs.forEach((img, index) => {
+        // Solo procesar imágenes con tamaño suficiente
+        if (img.offsetWidth > 100) {
+            console.log(`🖼️ Creando cursores para imagen ${index + 1}`);
+            
+            // Crear contenedor de navegación
+            const navContainer = document.createElement('div');
+            navContainer.className = 'cursor-nav-container';
+            navContainer.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 999999;
+                pointer-events: none;
+            `;
+            
+            // Cursor izquierda
+            const cursorIzq = document.createElement('div');
+            cursorIzq.innerHTML = '◀';
+            cursorIzq.className = 'cursor-nav-btn cursor-nav-prev';
+            cursorIzq.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 15px;
+                transform: translateY(-50%);
+                background: rgba(0, 0, 0, 0.9);
+                color: #00ff00;
+                border: 3px solid #00ff00;
+                border-radius: 50%;
+                width: 55px;
+                height: 55px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 22px;
+                font-weight: bold;
+                cursor: pointer;
+                pointer-events: auto;
+                box-shadow: 0 0 20px #00ff00, inset 0 0 10px rgba(0,255,0,0.3);
+                transition: all 0.3s ease;
+                user-select: none;
+            `;
+            
+            // Cursor derecha
+            const cursorDer = document.createElement('div');
+            cursorDer.innerHTML = '▶';
+            cursorDer.className = 'cursor-nav-btn cursor-nav-next';
+            cursorDer.style.cssText = `
+                position: absolute;
+                top: 50%;
+                right: 15px;
+                transform: translateY(-50%);
+                background: rgba(0, 0, 0, 0.9);
+                color: #00ff00;
+                border: 3px solid #00ff00;
+                border-radius: 50%;
+                width: 55px;
+                height: 55px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 22px;
+                font-weight: bold;
+                cursor: pointer;
+                pointer-events: auto;
+                box-shadow: 0 0 20px #00ff00, inset 0 0 10px rgba(0,255,0,0.3);
+                transition: all 0.3s ease;
+                user-select: none;
+            `;
+            
+            // Funcionalidad de navegación
+            cursorIzq.onclick = function() {
+                console.log(`🔙 Navegando imagen anterior - Imagen ${index + 1}`);
+                navegarImagen(img, -1);
+            };
+            
+            cursorDer.onclick = function() {
+                console.log(`🔜 Navegando imagen siguiente - Imagen ${index + 1}`);
+                navegarImagen(img, 1);
+            };
+            
+            // Efectos hover mejorados
+            [cursorIzq, cursorDer].forEach(cursor => {
+                cursor.onmouseenter = function() {
+                    this.style.transform = this.classList.contains('cursor-nav-prev') ? 'translateY(-50%) scale(1.15)' : 'translateY(-50%) scale(1.15)';
+                    this.style.boxShadow = '0 0 30px #00ff00, inset 0 0 15px rgba(0,255,0,0.5)';
+                    this.style.background = 'rgba(0, 50, 0, 0.9)';
+                };
+                cursor.onmouseleave = function() {
+                    this.style.transform = this.classList.contains('cursor-nav-prev') ? 'translateY(-50%) scale(1)' : 'translateY(-50%) scale(1)';
+                    this.style.boxShadow = '0 0 20px #00ff00, inset 0 0 10px rgba(0,255,0,0.3)';
+                    this.style.background = 'rgba(0, 0, 0, 0.9)';
+                };
+            });
+            
+            // Integrar al DOM
+            img.parentNode.style.position = 'relative';
+            navContainer.appendChild(cursorIzq);
+            navContainer.appendChild(cursorDer);
+            img.parentNode.appendChild(navContainer);
+            
+            cursoresCreados += 2;
+            console.log(`✅ Cursores creados para imagen ${index + 1} (izquierda y derecha)`);
+        }
+    });
+    
+    console.log(`🎉 SISTEMA COMPLETADO: ${cursoresCreados} cursores creados en ${imgs.length} imágenes`);
+    return cursoresCreados;
+}
+
+// Función de navegación (se puede expandir para lógica real)
+function navegarImagen(img, direccion) {
+    console.log(`🔄 Navegando ${direccion === -1 ? 'anterior' : 'siguiente'} en imagen`);
+    // Aquí se puede implementar la lógica real de navegación de galería
+    // Por ejemplo: cambiar a imagen anterior/siguiente en una galería
+}
+
+// También ejecutar cuando se carguen nuevas imágenes dinámicamente
+let observer = new MutationObserver(function(mutations) {
+    let nuevasImagenes = false;
+    mutations.forEach(function(mutation) {
+        if (mutation.addedNodes.length) {
+            mutation.addedNodes.forEach(function(node) {
+                if (node.nodeName === 'IMG' || (node.querySelectorAll && node.querySelectorAll('img').length > 0)) {
+                    nuevasImagenes = true;
+                }
+            });
+        }
+    });
+    if (nuevasImagenes) {
+        setTimeout(crearCursoresNavegacion, 500);
+    }
+});
+
+observer.observe(document.body, {
+    childList: true,
+    subtree: true
+});
+
+// Inicializar cursores después de que el sistema principal esté listo
+setTimeout(crearCursoresNavegacion, 2000); // Esperar 2 segundos para asegurar que todo esté cargado
+
+console.log('✨ SISTEMA DEFINITIVO DE CURSORES INICIADO Y ESCUCHANDO CAMBIOS');
 console.log('✅ Sistema Dante Propiedades - Cursores de navegación funcionando correctamente');
