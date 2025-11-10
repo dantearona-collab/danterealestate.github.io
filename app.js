@@ -2272,7 +2272,7 @@ function crearCursoresNavegacion() {
                 right: 0;
                 bottom: 0;
                 z-index: 999999;
-                pointer-events: none;
+                pointer-events: auto;
             `;
             
             // Cursor izquierda
@@ -2369,11 +2369,77 @@ function crearCursoresNavegacion() {
     return cursoresCreados;
 }
 
-// Función de navegación (se puede expandir para lógica real)
+// Función de navegación real implementada
 function navegarImagen(img, direccion) {
     console.log(`🔄 Navegando ${direccion === -1 ? 'anterior' : 'siguiente'} en imagen`);
-    // Aquí se puede implementar la lógica real de navegación de galería
-    // Por ejemplo: cambiar a imagen anterior/siguiente en una galería
+    
+    // Buscar el contenedor del slider
+    let sliderContainer = img.closest('.property-slider');
+    if (!sliderContainer) {
+        sliderContainer = img.closest('.slider-main') || img.closest('.slick-slider');
+    }
+    
+    if (!sliderContainer) {
+        console.log('⚠️ No se encontró contenedor de slider');
+        return;
+    }
+    
+    // ✅ VERSIÓN CORREGIDA - NAVEGACIÓN BIDIRECCIONAL
+    console.log(`🔍 Buscando slides en contenedor: ${sliderContainer.getAttribute('data-property') || 'Desconocido'}`);
+    
+    // Buscar elementos property-slide (estructura real del sistema)
+    const slides = sliderContainer.querySelectorAll('.property-slide');
+    console.log(`📊 Encontrados ${slides.length} slides totales`);
+    
+    if (slides.length <= 1) {
+        console.log(`⚠️ Solo hay ${slides.length} slide(s), no hay navegación`);
+        return;
+    }
+    
+    // ✅ MÉTODO MEJORADO: Encontrar slide ACTIVO actual
+    const slideActivoActual = sliderContainer.querySelector('.property-slide.active');
+    if (!slideActivoActual) {
+        console.log('⚠️ No se encontró slide activo, activando primero');
+        slides[0].classList.add('active');
+        return;
+    }
+    
+    // Obtener índice del slide activo
+    const slidesArray = Array.from(slides);
+    const indiceActual = slidesArray.indexOf(slideActivoActual);
+    console.log(`📍 Slide activo actual: ${indiceActual + 1} de ${slidesArray.length}`);
+    
+    // Calcular nuevo índice con navegación circular mejorada
+    let nuevoIndice = indiceActual + direccion;
+    if (nuevoIndice < 0) {
+        nuevoIndice = slidesArray.length - 1; // Ir al último
+        console.log('🔄 Navegación circular hacia atrás');
+    }
+    if (nuevoIndice >= slidesArray.length) {
+        nuevoIndice = 0; // Ir al primero
+        console.log('🔄 Navegación circular hacia adelante');
+    }
+    
+    // Obtener slide siguiente
+    const slideSiguiente = slidesArray[nuevoIndice];
+    console.log(`🎯 Navegando de ${indiceActual + 1} → ${nuevoIndice + 1}`);
+    
+    // ✅ NAVEGACIÓN CORREGIDA - Usando slide activo y siguiente directamente
+    console.log(`📍 Navegación: Slide ${indiceActual + 1} → ${nuevoIndice + 1} de ${slidesArray.length}`);
+    
+    // Ocultar slide actual
+    slideActivoActual.classList.remove('active');
+    
+    // Mostrar slide siguiente con transición
+    setTimeout(() => {
+        slideSiguiente.classList.add('active');
+        console.log(`✅ Navegación exitosa: Slide ${indiceActual + 1} → ${nuevoIndice + 1}`);
+    }, 200);
+    
+    // Actualizar navegación por si hay eventos de imagen nueva
+    setTimeout(() => {
+        crearCursoresNavegacion();
+    }, 500);
 }
 
 // También ejecutar cuando se carguen nuevas imágenes dinámicamente
