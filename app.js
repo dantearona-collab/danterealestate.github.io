@@ -89,7 +89,7 @@ function crearCursoresEnTodasLasImagenes() {
     imgs.forEach((img, index) => {
         console.log(`📷 Imagen ${index + 1}: ${img.offsetWidth}x${img.offsetHeight}, src: ${img.src ? 'SÍ' : 'NO'}`);
         // Crear cursores en cualquier imagen que tenga src
-        if (img.src && img.offsetWidth > 50 && img.offsetHeight > 50) {
+        if (img.src && img.offsetWidth >= 30 && img.offsetHeight >= 30) {
             crearCursoresParaImagen(img, index);
             cursoresCreados++;
         } else {
