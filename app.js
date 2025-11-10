@@ -2638,7 +2638,7 @@ function crearIndicadorNavegacionSlider(numeroActual, total, sliderPadre) {
     // ✅ AGREGAR AL SLIDER
     sliderPadre.appendChild(indicador);
 }
-}
+
 
 // ✅ RE-CREAR CURSORES SOLO EN UN SLIDER ESPECÍFICO
 function reCrearCursoresSlider(sliderPadre) {
