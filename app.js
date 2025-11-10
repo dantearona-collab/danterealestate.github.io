@@ -2373,15 +2373,28 @@ function crearCursoresNavegacion() {
 function navegarImagen(img, direccion) {
     console.log(`🔄 Navegando ${direccion === -1 ? 'anterior' : 'siguiente'} en imagen`);
     
-    // Buscar el contenedor del slider
-    let sliderContainer = img.closest('.property-slider');
+    // ✅ BÚSQUEDA MEJORADA - Encontrar contenedor del slider
+    let sliderContainer = img.closest('.property-slider, .slider-main, .slick-slider, [data-property]');
     if (!sliderContainer) {
-        sliderContainer = img.closest('.slider-main') || img.closest('.slick-slider');
+        // Buscar contenedor padre más cercano que contenga slides
+        sliderContainer = img.closest('.property-card, .slider-container, .gallery-container') || 
+                         document.querySelector('[data-property="PROPIEDAD_RESTORE"]') ||
+                         img.parentElement;
     }
     
     if (!sliderContainer) {
         console.log('⚠️ No se encontró contenedor de slider');
         return;
+    }
+    
+    // 🔧 IMPROVADO: También buscar por el contenedor que contenga property-slide
+    if (!sliderContainer.querySelector('.property-slide')) {
+        // Buscar contenedor que contenga slides
+        const posibleSlider = sliderContainer.closest('[data-property]') || 
+                             document.querySelector('[data-property="PROPIEDAD_RESTORE"]');
+        if (posibleSlider && posibleSlider.querySelector('.property-slide')) {
+            sliderContainer = posibleSlider;
+        }
     }
     
     // ✅ VERSIÓN CORREGIDA - NAVEGACIÓN BIDIRECCIONAL
