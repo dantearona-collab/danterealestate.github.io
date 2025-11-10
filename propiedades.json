@@ -61,8 +61,8 @@
     "documentos": [
     ],
     "fotos": [
-      "imgs/UF002-1.jpg",
-      "imgs/UF002-2.jpg"
+      "imgs/UF001-3.jpg",
+      "imgs/UF001-4.jpg"
     ],
     "moneda_precio": "USD",
     "moneda_expensas": "ARS",
@@ -95,8 +95,9 @@
     "documentos": [
     ],
     "fotos": [
-      "imgs/UF003-1.jpg",
-      "imgs/UF003-2.jpg"
+      "imgs/UF001-1.jpg",
+      "imgs/UF001-2.jpg",
+      "imgs/UF001-4.jpg"
     ],
     "moneda_precio": "USD",
     "moneda_expensas": "ARS",
