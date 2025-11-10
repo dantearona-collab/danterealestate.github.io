@@ -1214,15 +1214,21 @@ function createPropertyCard(property) {
         return amenities.split(',').map(a => a.trim()).slice(0, 3);
     };
     
+    // Obtener la primera imagen de la propiedad
+    const firstImage = property.fotos && property.fotos.length > 0 ? property.fotos[0] : null;
+    
     card.innerHTML = `
         <div class="property-card-image">
             <div class="property-card-badge">${property.operacion || 'Venta'}</div>
-            <div class="property-image-placeholder">
-                <div class="placeholder-content">
-                    <span class="placeholder-icon">🏠</span>
-                    <span class="placeholder-text">Sin imagen</span>
-                </div>
-            </div>
+            ${firstImage ? 
+                `<img src="${firstImage}" alt="${property.titulo}" class="property-image" onerror="this.parentNode.innerHTML='<div class=property-image-placeholder><div class=placeholder-content><span class=placeholder-icon>🏠</span><span class=placeholder-text>Sin imagen</span></div></div>'">` :
+                `<div class="property-image-placeholder">
+                    <div class="placeholder-content">
+                        <span class="placeholder-icon">🏠</span>
+                        <span class="placeholder-text">Sin imagen</span>
+                    </div>
+                </div>`
+            }
         </div>
         <div class="property-card-content">
             <h3 class="property-card-title">${property.titulo || 'Propiedad'}</h3>
@@ -1288,9 +1294,12 @@ function createPropertyListItem(property) {
         return amenities.split(',').map(a => a.trim()).slice(0, 4);
     };
     
+    // Obtener la primera imagen de la propiedad
+    const firstImage = property.fotos && property.fotos.length > 0 ? property.fotos[0] : 'https://via.placeholder.com/200x150/f3f4f6/6b7280?text=Sin+Imagen';
+    
     item.innerHTML = `
         <div class="property-list-image">
-            <img src="https://via.placeholder.com/200x150/f3f4f6/6b7280?text=Sin+Imagen" 
+            <img src="${firstImage}" 
                  alt="${property.titulo || 'Propiedad'}"
                  onerror="this.src='https://via.placeholder.com/200x150/f3f4f6/6b7280?text=Sin+Imagen'">
         </div>
@@ -2080,10 +2089,10 @@ function addAdvancedStyles() {
     document.head.insertAdjacentHTML('beforeend', styles);
 }
 
-// Función global para cargar propiedades (llamada desde HTML)
-window.loadProperties = async function() {
+// Función global para cargar propiedades con filtros (llamada desde HTML)
+window.loadProperties = async function(operacion = null, barrio = null, tipo = null) {
     try {
-        console.log('🔄 Cargando propiedades...');
+        console.log('🔄 Cargando propiedades con filtros:', { operacion, barrio, tipo });
         
         // Cargar propiedades desde el archivo JSON
         const response = await fetch('propiedades.json');
@@ -2091,19 +2100,32 @@ window.loadProperties = async function() {
             throw new Error(`Error al cargar propiedades: ${response.status}`);
         }
         
-        const properties = await response.json();
-        console.log(`✅ ${properties.length} propiedades cargadas`);
+        const allProperties = await response.json();
+        console.log(`✅ ${allProperties.length} propiedades cargadas desde archivo`);
+        
+        // Aplicar filtros si se especifican
+        let filteredProperties = allProperties;
+        if (operacion || barrio || tipo) {
+            filteredProperties = allProperties.filter(property => {
+                const matchesOperacion = !operacion || property.operacion === operacion;
+                const matchesBarrio = !barrio || property.barrio === barrio;
+                const matchesTipo = !tipo || property.tipo === tipo;
+                return matchesOperacion && matchesBarrio && matchesTipo;
+            });
+            console.log(`🔍 Filtros aplicados: ${filteredProperties.length} propiedades encontradas`);
+        }
         
         // Verificar si existe la función para mostrar las propiedades
         if (typeof window.renderProperties === 'function') {
-            window.renderProperties(properties);
+            window.renderProperties(filteredProperties);
         } else {
-            // Función alternativa si renderProperties no existe
-            console.log('⚠️ Función renderProperties no encontrada, usando fallback');
-            showPropertiesFallback(properties);
+            // Usar la función displayResults del sistema principal
+            currentResults = filteredProperties;
+            displayResults(filteredProperties);
+            updateResultsInfo(filteredProperties);
         }
         
-        return properties;
+        return filteredProperties;
         
     } catch (error) {
         console.error('❌ Error al cargar propiedades:', error);

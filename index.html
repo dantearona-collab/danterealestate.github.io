@@ -623,9 +623,9 @@
             
             console.log('🔍 Buscando propiedades con filtros:', { operacion, barrio, tipo });
             
-            // Llamar a la función de búsqueda del app.js si existe
+            // Llamar a la función de búsqueda del app.js con parámetros
             if (typeof window.loadProperties === 'function') {
-                window.loadProperties();
+                window.loadProperties(operacion, barrio, tipo);
             }
         }
         
