@@ -2240,60 +2240,68 @@ function showPropertiesFallback(properties) {
 // Inicializar estilos cuando se carga la página
 document.addEventListener('DOMContentLoaded', addAdvancedStyles);
 
-// PRODUCTION MODE: Cursores de navegación elegantes y funcionales
-const productionStyle = document.createElement('style');
-productionStyle.textContent = `
-    .slider-nav-btn {
-        background: rgba(255, 255, 255, 0.95) !important;
-        border: 2px solid rgba(0, 0, 0, 0.1) !important;
-        width: 48px !important;
-        height: 48px !important;
-        font-size: 18px !important;
-        color: #333 !important;
-        font-weight: 500 !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+// CURSORS FIX: Sistema avanzado de slider - máxima visibilidad
+const advancedSliderFix = document.createElement('style');
+advancedSliderFix.textContent = `
+    /* ARREGLAR POINTER EVENTS DEL CONTENEDOR */
+    .slider-nav-buttons {
+        pointer-events: auto !important;
         z-index: 9999 !important;
-        position: absolute !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
+    }
+    
+    /* ESTILOS DE MÁXIMA VISIBILIDAD PARA EL SISTEMA AVANZADO */
+    .advanced-media-slider .slider-nav-btn {
+        background: rgba(255, 255, 255, 0.98) !important;
+        border: 3px solid #3b82f6 !important;
+        width: 52px !important;
+        height: 52px !important;
+        font-size: 22px !important;
+        color: #1e40af !important;
+        font-weight: bold !important;
+        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4) !important;
+        z-index: 10000 !important;
         opacity: 1 !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         cursor: pointer !important;
         border-radius: 50% !important;
-        backdrop-filter: blur(10px) !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    }
-    
-    .slider-nav-btn:hover {
-        background: rgba(255, 255, 255, 1) !important;
-        transform: translateY(-50%) scale(1.05) !important;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
-        border-color: rgba(0, 0, 0, 0.2) !important;
-    }
-    
-    .slider-nav-btn:active {
-        transform: translateY(-50%) scale(0.95) !important;
-    }
-    
-    .slider-nav-prev {
-        left: 15px !important;
-    }
-    
-    .slider-nav-next {
-        right: 15px !important;
-    }
-    
-    .slider-main {
+        pointer-events: all !important;
+        transition: all 0.3s ease !important;
         position: relative !important;
-        overflow: visible !important;
     }
     
-    /* Asegurar que los botones aparezcan solo cuando hay múltiples imágenes */
-    .slider-nav-btn[style*="display: none"] {
-        display: none !important;
+    .advanced-media-slider .slider-nav-btn:hover {
+        background: white !important;
+        transform: scale(1.1) !important;
+        box-shadow: 0 6px 25px rgba(59, 130, 246, 0.6) !important;
+        border-color: #1d4ed8 !important;
+    }
+    
+    .advanced-media-slider .slider-nav-btn:active {
+        transform: scale(0.95) !important;
+    }
+    
+    /* ASEGURAR VISIBILIDAD EN TODAS LAS SITUACIONES */
+    .advanced-media-slider .slider-nav-buttons {
+        visibility: visible !important;
+        display: flex !important;
+        position: absolute !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        width: 100% !important;
+        justify-content: space-between !important;
+        padding: 0 15px !important;
+        z-index: 9999 !important;
+    }
+    
+    /* FORZAR VISIBILIDAD DE BOTONES ESPECÍFICOS */
+    .advanced-media-slider .slider-nav-btn[style*="display: none"],
+    .advanced-media-slider .slider-nav-btn[style*="visibility: hidden"] {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
     }
 `;
-document.head.appendChild(productionStyle);
-console.log('✅ CURSORS FIX APLICADO: Navegación de sliders funcionando correctamente');
+document.head.appendChild(advancedSliderFix);
+console.log('🎯 CURSORS FIX: Sistema avanzado de slider - máxima visibilidad aplicada');
