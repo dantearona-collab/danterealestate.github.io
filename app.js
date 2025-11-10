@@ -1872,27 +1872,46 @@ function addAdvancedStyles() {
         justify-content: space-between;
         transform: translateY(-50%);
         pointer-events: auto;
-        padding: 0 15px;
-        z-index: 10;
+        padding: 0 20px;
+        z-index: 999;
     }
     
     .slider-nav-btn {
-        background: rgba(255,255,255,0.9);
-        border: none;
+        background: rgba(255,255,255,0.95);
+        border: 3px solid #007bff;
         border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        font-size: 20px;
-        color: #2d3748;
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+        color: #007bff;
+        font-weight: bold;
         cursor: pointer;
         transition: all 0.2s ease;
         pointer-events: all;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     
     .slider-nav-btn:hover {
-        background: white;
-        transform: scale(1.1);
+        background: #007bff;
+        color: white;
+        transform: scale(1.15);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+    }
+    
+    /* DEBUG: Hacer botones muy visibles */
+    .slider-nav-buttons {
+        background: rgba(255, 0, 0, 0.1) !important;
+        border: 2px dashed red !important;
+    }
+    .slider-nav-btn {
+        background: yellow !important;
+        border: 3px solid red !important;
+        box-shadow: 0 0 20px red !important;
+        min-width: 50px !important;
+        min-height: 50px !important;
     }
     
     /* MINIATURAS */
@@ -2220,3 +2239,61 @@ function showPropertiesFallback(properties) {
 
 // Inicializar estilos cuando se carga la página
 document.addEventListener('DOMContentLoaded', addAdvancedStyles);
+
+// PRODUCTION MODE: Cursores de navegación elegantes y funcionales
+const productionStyle = document.createElement('style');
+productionStyle.textContent = `
+    .slider-nav-btn {
+        background: rgba(255, 255, 255, 0.95) !important;
+        border: 2px solid rgba(0, 0, 0, 0.1) !important;
+        width: 48px !important;
+        height: 48px !important;
+        font-size: 18px !important;
+        color: #333 !important;
+        font-weight: 500 !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        z-index: 9999 !important;
+        position: absolute !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        opacity: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        border-radius: 50% !important;
+        backdrop-filter: blur(10px) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    
+    .slider-nav-btn:hover {
+        background: rgba(255, 255, 255, 1) !important;
+        transform: translateY(-50%) scale(1.05) !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
+        border-color: rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    .slider-nav-btn:active {
+        transform: translateY(-50%) scale(0.95) !important;
+    }
+    
+    .slider-nav-prev {
+        left: 15px !important;
+    }
+    
+    .slider-nav-next {
+        right: 15px !important;
+    }
+    
+    .slider-main {
+        position: relative !important;
+        overflow: visible !important;
+    }
+    
+    /* Asegurar que los botones aparezcan solo cuando hay múltiples imágenes */
+    .slider-nav-btn[style*="display: none"] {
+        display: none !important;
+    }
+`;
+document.head.appendChild(productionStyle);
+console.log('✅ CURSORS FIX APLICADO: Navegación de sliders funcionando correctamente');
