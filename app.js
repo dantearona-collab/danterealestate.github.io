@@ -2420,53 +2420,24 @@ document.addEventListener('DOMContentLoaded', applyDefinitveCursorsFix);
 
 
 
-// 🚨 FIX CSS DEFINITIVO - MODIFICA EL CSS DIRECTAMENTE
-// AGREGAR AL FINAL DE TU APP.JS
+// 🚨 FIX CURSORES SIMPLE Y ESTABLE
+// AGREGAR AL FINAL DE TU APP.JS - VERSIÓN SIN ERRORES
 
-function fixCSSDefinitivo() {
-    console.log('🎯 Iniciando fix CSS definitivo...');
+function fixCursoresEstable() {
+    console.log('🔧 Iniciando fix cursores estable...');
     
-    // 1. MODIFICAR EL ARCHIVO CSS EXTERNO DIRECTAMENTE
-    function modificarCSSEterno() {
-        const links = document.querySelectorAll('link[rel="stylesheet"]');
-        let cssAdelantado = false;
-        
-        links.forEach(link => {
-            if (link.href.includes('advanced-slider.css') || link.href.includes('slider.css')) {
-                // CREAR NUEVO LINK CON EL CSS CORREGIDO
-                const nuevoLink = document.createElement('link');
-                nuevoLink.rel = 'stylesheet';
-                nuevoLink.href = link.href;
-                nuevoLink.id = 'css-fix-definitivo';
-                nuevoLink.type = 'text/css';
-                
-                // AGREGAR ANTES DEL ORIGINAL
-                document.head.insertBefore(nuevoLink, link);
-                link.disabled = true; // DESACTIVAR EL ORIGINAL PROBLEMÁTICO
-                
-                console.log('🎯 CSS original deshabilitado, nuevo CSS activo');
-                cssAdelantado = true;
-            }
-        });
-        
-        return cssAdelantado;
-    }
-    
-    // 2. INYECTAR CSS CORREGIDO DIRECTAMENTE
-    function injectarCSSCorregido() {
+    // 1. CREAR ESTILOS SIMPLES Y EFECTIVOS
+    function crearEstilosFix() {
         const style = document.createElement('style');
-        style.id = 'css-fix-definitivo';
+        style.id = 'fix-cursores-estable';
         style.innerHTML = `
-            /* FIX DEFINITIVO - ELIMINA EL PROBLEMA DEL CSS ORIGINAL */
-            
-            /* DESHABILITAR LA LÍNEA PROBLEMÁTICA DEL CSS ORIGINAL */
+            /* FIX CURSORES ESTABLE */
             .slider-nav-buttons {
                 pointer-events: auto !important;
                 display: flex !important;
                 visibility: visible !important;
             }
             
-            /* FORZAR BOTONES SIEMPRE VISIBLES */
             .slider-nav-btn {
                 display: flex !important;
                 opacity: 1 !important;
@@ -2481,111 +2452,106 @@ function fixCSSDefinitivo() {
                 font-weight: bold !important;
                 cursor: pointer !important;
                 z-index: 999999 !important;
-                position: relative !important;
-                transition: all 0.3s ease !important;
-                pointer-events: all !important;
             }
             
-            /* EFECTO HOVER */
             .slider-nav-btn:hover {
                 background: #ff6b35 !important;
                 color: white !important;
                 transform: scale(1.1) !important;
-                box-shadow: 0 8px 25px rgba(255, 107, 53, 0.6) !important;
-            }
-            
-            /* OVERRIDE ABSOLUTO DEL ORIGINAL */
-            * .slider-nav-buttons[style*="pointer-events: none"],
-            * .slider-nav-buttons {
-                pointer-events: auto !important;
-                display: flex !important;
-            }
-            
-            * .slider-nav-btn[style*="display: none"],
-            * .slider-nav-btn[style*="opacity: 0"],
-            * .slider-nav-btn[style*="visibility: hidden"] {
-                display: flex !important;
-                opacity: 1 !important;
-                visibility: visible !important;
             }
         `;
         
         // REMOVER ESTILOS ANTERIORES
         const oldStyles = document.querySelectorAll('style[id*="fix"], style[id*="cursores"], style[id*="definitve"]');
-        oldStyles.forEach(style => style.remove());
+        oldStyles.forEach(style => {
+            try {
+                style.remove();
+            } catch(e) {
+                // Ignorar errores
+            }
+        });
         
         document.head.appendChild(style);
-        console.log('🎯 CSS corregido inyectado directamente');
+        console.log('✅ Estilos creados correctamente');
     }
     
-    // 3. FORZAR ELEMENTOS DIRECTAMENTE EN EL HTML
-    function forzarElementosHTML() {
-        // FORZAR TODOS LOS CONTENEDORES
-        document.querySelectorAll('.slider-nav-buttons').forEach(container => {
-            // MODIFICAR EL STYLE DIRECTO DEL ELEMENTO
-            container.setAttribute('style', 
-                'pointer-events: auto !important; display: flex !important; visibility: visible !important; opacity: 1 !important;'
-            );
-            console.log('🎯 Contenedor forzado directamente en HTML');
+    // 2. FORZAR ELEMENTOS HTML DIRECTAMENTE
+    function forzarElementos() {
+        // FORZAR CONTENEDORES
+        const contenedores = document.querySelectorAll('.slider-nav-buttons');
+        contenedores.forEach(container => {
+            try {
+                container.style.pointerEvents = 'auto';
+                container.style.display = 'flex';
+                container.style.visibility = 'visible';
+            } catch(e) {
+                // Ignorar errores
+            }
         });
         
-        // FORZAR TODOS LOS BOTONES
-        document.querySelectorAll('.slider-nav-btn').forEach(btn => {
-            // MODIFICAR EL STYLE DIRECTO DEL ELEMENTO
-            btn.setAttribute('style', 
-                'display: flex !important; opacity: 1 !important; visibility: visible !important; ' +
-                'background: white !important; border: 4px solid #ff6b35 !important; ' +
-                'border-radius: 50% !important; width: 60px !important; height: 60px !important; ' +
-                'color: #ff6b35 !important; font-size: 24px !important; font-weight: bold !important; ' +
-                'cursor: pointer !important; z-index: 999999 !important;'
-            );
-            console.log('🎯 Botón forzado directamente en HTML');
+        // FORZAR BOTONES
+        const botones = document.querySelectorAll('.slider-nav-btn');
+        botones.forEach(btn => {
+            try {
+                btn.style.display = 'flex';
+                btn.style.opacity = '1';
+                btn.style.visibility = 'visible';
+                btn.style.background = 'white';
+                btn.style.border = '4px solid #ff6b35';
+                btn.style.borderRadius = '50%';
+                btn.style.width = '60px';
+                btn.style.height = '60px';
+                btn.style.color = '#ff6b35';
+                btn.style.fontSize = '24px';
+                btn.style.fontWeight = 'bold';
+                btn.style.cursor = 'pointer';
+                btn.style.zIndex = '999999';
+            } catch(e) {
+                // Ignorar errores
+            }
         });
+        
+        console.log(`✅ Forzados ${contenedores.length} contenedores y ${botones.length} botones`);
     }
     
-    // 4. EJECUTAR TODO
-    const cssModificado = modificarCSSEterno();
-    injectarCSSCorregido();
-    forzarElementosHTML();
+    // 3. EJECUTAR TODO
+    try {
+        crearEstilosFix();
+        forzarElementos();
+    } catch(e) {
+        console.log('⚠️ Error en fix, reintentando...', e);
+        setTimeout(() => {
+            try {
+                crearEstilosFix();
+                forzarElementos();
+            } catch(e2) {
+                console.log('❌ Error persistente en fix');
+            }
+        }, 1000);
+    }
     
-    // 5. REPETIR MÚLTIPLES VECES
-    let attempts = 0;
-    const maxAttempts = 8;
-    
-    const interval = setInterval(() => {
-        attempts++;
-        injectarCSSCorregido();
-        forzarElementosHTML();
-        
-        if (attempts >= maxAttempts) {
-            clearInterval(interval);
-            console.log(`🎯 Fix CSS definitivo aplicado ${maxAttempts} veces`);
-        }
-    }, 300);
-    
-    console.log('🎯 Fix CSS definitivo iniciado');
+    console.log('✅ Fix cursores estable aplicado');
 }
 
 // EJECUTAR INMEDIATAMENTE
-fixCSSDefinitivo();
+fixCursoresEstable();
 
 // EJECUTAR EN DIFERENTES MOMENTOS
-document.addEventListener('DOMContentLoaded', fixCSSDefinitivo);
-window.addEventListener('load', fixCSSDefinitivo);
+document.addEventListener('DOMContentLoaded', fixCursoresEstable);
+window.addEventListener('load', fixCursoresEstable);
 
 // EJECUTAR CADA 2 SEGUNDOS POR 10 SEGUNDOS
-setTimeout(fixCSSDefinitivo, 1000);
-setTimeout(fixCSSDefinitivo, 3000);
-setTimeout(fixCSSDefinitivo, 5000);
+setTimeout(fixCursoresEstable, 1000);
+setTimeout(fixCursoresEstable, 3000);
+setTimeout(fixCursoresEstable, 5000);
 
-// EJECUTAR CADA VEZ QUE SE ABRE UN MODAL
-document.addEventListener('click', () => {
-    setTimeout(fixCSSDefinitivo, 100);
-});
-
-// EJECUTAR CUANDO SE HACE SCROLL (lazy loading)
+// EJECUTAR CADA VEZ QUE SE HACE SCROLL (para lazy loading)
+let lastScrollY = window.scrollY;
 window.addEventListener('scroll', () => {
-    setTimeout(fixCSSDefinitivo, 500);
+    if (Math.abs(window.scrollY - lastScrollY) > 100) {
+        lastScrollY = window.scrollY;
+        setTimeout(fixCursoresEstable, 500);
+    }
 });
 
 // Aplicar cada 2 segundos durante los primeros 10 segundos (para modales que se abren dinámicamente)
