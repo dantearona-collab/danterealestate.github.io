@@ -2398,14 +2398,26 @@ function navegarImagen(img, direccion) {
         return;
     }
     
-    // Ocultar todas las imágenes
+    // ✅ NAVEGACIÓN VISUAL MEJORADA
+    
+    // Resetear todas las imágenes
     todasLasImagenes.forEach((imagen, index) => {
-        if (index !== nuevoIndice) {
-            imagen.style.display = 'none';
-        } else {
-            imagen.style.display = 'block';
-        }
+        imagen.style.opacity = '0.3';
+        imagen.style.filter = 'grayscale(50%)';
+        imagen.style.transform = 'scale(0.9)';
+        imagen.style.transition = 'all 0.5s ease';
     });
+    
+    // Resaltar la imagen actual con efecto visual
+    const imagenActual = todasLasImagenes[nuevoIndice];
+    imagenActual.style.opacity = '1';
+    imagenActual.style.filter = 'grayscale(0%)';
+    imagenActual.style.transform = 'scale(1)';
+    imagenActual.style.zIndex = '100';
+    imagenActual.style.boxShadow = '0 0 20px 5px #4CAF50';
+    
+    // Crear indicador visual de navegación
+    crearIndicadorNavegacion(nuevoIndice + 1, todasLasImagenes.length);
     
     // Mostrar mensaje de navegación
     const direccionTexto = direccion === -1 ? 'anterior' : 'siguiente';
@@ -2415,6 +2427,65 @@ function navegarImagen(img, direccion) {
     setTimeout(() => {
         crearCursoresNavegacion();
     }, 100);
+}
+
+// ✅ FUNCIÓN PARA CREAR INDICADOR VISUAL DE NAVEGACIÓN
+function crearIndicadorNavegacion(numeroActual, total) {
+    // Remover indicador anterior si existe
+    const indicadorAnterior = document.getElementById('indicador-navegacion');
+    if (indicadorAnterior) {
+        indicadorAnterior.remove();
+    }
+    
+    // Crear nuevo indicador
+    const indicador = document.createElement('div');
+    indicador.id = 'indicador-navegacion';
+    indicador.innerHTML = `
+        <div style="
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease;
+        ">
+            📷 Imagen ${numeroActual} de ${total}
+        </div>
+    `;
+    
+    // Agregar animación CSS si no existe
+    if (!document.getElementById('navegacion-animations')) {
+        const style = document.createElement('style');
+        style.id = 'navegacion-animations';
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(indicador);
+    
+    // Remover el indicador después de 3 segundos
+    setTimeout(() => {
+        if (indicador.parentNode) {
+            indicador.style.animation = 'slideIn 0.3s ease reverse';
+            setTimeout(() => {
+                if (indicador.parentNode) {
+                    indicador.remove();
+                }
+            }, 300);
+        }
+    }, 3000);
 }
 
 // También ejecutar cuando se carguen nuevas imágenes dinámicamente
