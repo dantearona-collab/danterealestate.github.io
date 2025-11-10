@@ -2417,6 +2417,71 @@ applyDefinitveCursorsFix();
 // Aplicar cuando se carga la página
 document.addEventListener('DOMContentLoaded', applyDefinitveCursorsFix);
 
+// 🚨 FIX SIMPLE Y DIRECTO PARA CURSORES
+// Este código es más simple y debe agregarse al final de tu app.js
+
+function fixCursoresSimples() {
+    // 1. FORZAR ESTILOS INMEDIATAMENTE
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .advanced-media-slider .slider-nav-buttons {
+            pointer-events: auto !important;
+            display: flex !important;
+        }
+        .advanced-media-slider .slider-nav-btn {
+            display: flex !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            background: white !important;
+            border: 3px solid #ff6b35 !important;
+            border-radius: 50% !important;
+            width: 50px !important;
+            height: 50px !important;
+            color: #ff6b35 !important;
+            font-size: 20px !important;
+            font-weight: bold !important;
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // 2. FORZAR CADA 1 SEGUNDO POR 5 SEGUNDOS
+    let attempts = 0;
+    const interval = setInterval(() => {
+        const buttons = document.querySelectorAll('.advanced-media-slider .slider-nav-btn');
+        const containers = document.querySelectorAll('.advanced-media-slider .slider-nav-buttons');
+        
+        buttons.forEach(btn => {
+            btn.style.display = 'flex';
+            btn.style.opacity = '1';
+            btn.style.visibility = 'visible';
+        });
+        
+        containers.forEach(container => {
+            container.style.pointerEvents = 'auto';
+        });
+        
+        attempts++;
+        if (attempts >= 5) {
+            clearInterval(interval);
+            console.log('🎯 Fix cursores aplicado ' + attempts + ' veces');
+        }
+    }, 1000);
+    
+    console.log('🚨 Fix cursores simples iniciado');
+}
+
+// EJECUTAR INMEDIATAMENTE
+fixCursoresSimples();
+
+// EJECUTAR CUANDO SE CARGA LA PÁGINA
+document.addEventListener('DOMContentLoaded', fixCursoresSimples);
+
+// EJECUTAR CADA VEZ QUE SE ABRE UN MODAL
+setTimeout(fixCursoresSimples, 2000);
+setTimeout(fixCursoresSimples, 5000);
+
+
+
 // Aplicar cada 2 segundos durante los primeros 10 segundos (para modales que se abren dinámicamente)
 let fixInterval = setInterval(applyDefinitveCursorsFix, 2000);
 setTimeout(() => clearInterval(fixInterval), 10000);
