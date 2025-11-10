@@ -373,72 +373,80 @@
 .image-modal {
     animation: fadeIn 0.2s ease;
 }
+
+
 /* ============================================ */
-/* CURSORES DE NAVEGACIÓN MEJORADOS - COLORES VISIBLES */
+/* 🔥 FIX DEFINITIVO: CURSORES DE ALTO CONTRASTE */
 /* ============================================ */
 
-/* Contenedor de navegación - Asegurar que sea visible */
+/* Contenedor de navegación - FORZAR VISIBILIDAD COMPLETA */
 .slider-nav-buttons {
     display: flex !important;
     justify-content: space-between !important;
     transform: translateY(-50%) !important;
     pointer-events: auto !important;
     padding: 0 15px !important;
-    z-index: 1000 !important; /* Asegurar que esté encima */
+    z-index: 9999 !important; /* Máximo z-index para estar encima */
     position: absolute !important;
     top: 50% !important;
     left: 0 !important;
     right: 0 !important;
     opacity: 1 !important;
     visibility: visible !important;
+    width: 100% !important;
 }
 
-/* Botones de navegación - Colores muy contrastantes */
+/* Botones de navegación - COLORES EXTREMADAMENTE VISIBLES */
 .slider-nav-btn {
-    background: rgba(52, 152, 219, 0.9) !important; /* Azul brillante con transparencia */
-    border: 3px solid white !important; /* Borde blanco para mejor contraste */
+    background: rgba(52, 152, 219, 0.95) !important; /* Azul brillante máximo */
+    border: 4px solid #ffffff !important; /* Borde blanco grueso */
     border-radius: 50% !important;
-    width: 50px !important;
-    height: 50px !important;
-    font-size: 24px !important;
-    color: white !important; /* Texto blanco */
+    width: 55px !important;
+    height: 55px !important;
+    font-size: 28px !important;
+    font-weight: bold !important;
+    color: #ffffff !important; /* Texto blanco puro */
     cursor: pointer !important;
     transition: all 0.3s ease !important;
     pointer-events: all !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important; /* Sombra para destacar */
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4) !important; /* Sombra muy marcada */
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    font-weight: bold !important;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.7) !important; /* Sombra en texto */
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8) !important; /* Sombra de texto fuerte */
+    position: relative !important;
 }
 
-/* Botón anterior */
-.slider-nav-btn:nth-child(1):before {
+/* Iconos muy grandes y visibles */
+.slider-nav-btn::before {
     content: "◀" !important;
-    font-family: Arial, sans-serif !important;
+    position: absolute !important;
+    font-size: 30px !important;
+    font-weight: bold !important;
+    color: white !important;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8) !important;
 }
 
-/* Botón siguiente */
-.slider-nav-btn:nth-child(2):after {
+.slider-nav-btn:last-child::before {
     content: "▶" !important;
-    font-family: Arial, sans-serif !important;
 }
 
-/* Estados hover mejorados */
+/* Estados hover - AÚN MÁS VISIBLES */
 .slider-nav-btn:hover {
-    background: #2980b9 !important; /* Azul más oscuro al pasar el mouse */
-    transform: scale(1.15) !important; /* Más grande al hover */
-    box-shadow: 0 6px 20px rgba(0,0,0,0.4) !important;
+    background: #2980b9 !important; /* Azul más intenso */
+    transform: scale(1.2) !important; /* Crecer al hover */
+    box-shadow: 0 8px 25px rgba(0,0,0,0.6) !important;
+    border-color: #f0f0f0 !important; /* Borde más claro al hover */
 }
 
-/* Asegurar que sean visibles en móviles */
+/* Responsive - Mejor visibilidad en móvil */
 @media (max-width: 768px) {
     .slider-nav-btn {
-        width: 45px !important;
-        height: 45px !important;
-        font-size: 20px !important;
-        background: rgba(231, 76, 60, 0.9) !important; /* Rojo en móvil para mejor visibilidad */
+        width: 50px !important;
+        height: 50px !important;
+        font-size: 24px !important;
+        background: rgba(231, 76, 60, 0.95) !important; /* Rojo en móvil */
+        border: 3px solid white !important;
     }
     
     .slider-nav-btn:hover {
@@ -446,46 +454,24 @@
     }
 }
 
-/* Alternativa: Botones con fondo negro y texto blanco (más universal) */
-.slider-nav-btn.alt-style {
-    background: rgba(0, 0, 0, 0.8) !important;
-    border: 2px solid white !important;
-    color: white !important;
-}
-
-.slider-nav-btn.alt-style:hover {
-    background: rgba(0, 0, 0, 1) !important;
-}
-
-/* Hacer que aparezcan siempre (incluso con una sola imagen) */
+/* FORZAR APARICIÓN EN TODOS LOS CASOS */
 .media-slide {
     position: relative !important;
 }
 
-.media-slide .slider-nav-buttons {
-    display: flex !important;
+.media-slide:hover .slider-nav-buttons {
     opacity: 1 !important;
     visibility: visible !important;
 }
 
-/* Estilos para alternar entre ambos estilos si es necesario */
-.toggle-cursor-style {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    z-index: 9999;
-    background: #27ae60;
-    color: white;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 12px;
+/* Alternativa: Fondo negro con texto blanco para máximo contraste */
+.slider-nav-btn.black-style {
+    background: rgba(0, 0, 0, 0.9) !important;
+    border: 4px solid #00ff00 !important; /* Borde verde neón */
+    color: #ffffff !important;
 }
 
-/* Instrucciones de uso:
-   1. Aplicar solo UNO de los estilos de color a la vez
-   2. Agregar a advanced-slider.css o como <style> en la página
-   3. Los botones tendrán colores muy visibles que se destacan
-   4. También funcionan con una sola imagen
-*/
+.slider-nav-btn.black-style:hover {
+    background: rgba(0, 0, 0, 1) !important;
+    border-color: #ffff00 !important;
+}
