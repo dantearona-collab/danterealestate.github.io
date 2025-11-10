@@ -468,8 +468,59 @@ function loadFilterOptionsOffline() {
     const barrios = ['palermo', 'belgrano', 'colegiales', 'microcentro', 'recoleta', 'san isidro', 'almagro', 'villa crespo', 'caballito', 'nuñez', 'boedo', 'balvanera', 'vicente lopez', 'puerto madero'];
     const tipos = ['departamento', 'casa', 'ph', 'oficina', 'local', 'terreno'];
     
-    console.log('✅ Opciones de filtros cargadas offline - Listo para event listeners');
+    // Poblar los selectores con los datos
+    populateFilterSelectors(barrios, tipos);
+    
+    console.log('✅ Opciones de filtros cargadas offline - Selectores poblados');
     console.log('📊 Barrios:', barrios.length, 'Tipos:', tipos.length);
+}
+
+function populateFiltersFromJSON(properties) {
+    // Extraer barrios únicos
+    const uniqueBarrios = [...new Set(properties.map(p => p.barrio).filter(b => b))].sort();
+    
+    // Extraer tipos únicos
+    const uniqueTipos = [...new Set(properties.map(p => p.tipo).filter(t => t))].sort();
+    
+    console.log('📊 Barrios únicos encontrados:', uniqueBarrios);
+    console.log('📊 Tipos únicos encontrados:', uniqueTipos);
+    
+    // Poblar selectores con datos reales del JSON
+    populateFilterSelectors(uniqueBarrios, uniqueTipos);
+}
+
+function populateFilterSelectors(barrios, tipos) {
+    const barrioSelect = document.getElementById('barrio-select-styled');
+    const tipoSelect = document.getElementById('tipo-select-styled');
+    
+    // Limpiar opciones existentes excepto la primera
+    if (barrioSelect) {
+        while (barrioSelect.children.length > 1) {
+            barrioSelect.removeChild(barrioSelect.lastChild);
+        }
+        // Agregar opciones de barrios
+        barrios.forEach(barrio => {
+            const option = document.createElement('option');
+            option.value = barrio;
+            option.textContent = barrio.charAt(0).toUpperCase() + barrio.slice(1);
+            barrioSelect.appendChild(option);
+        });
+        console.log('✅ Selectores de barrio poblados:', barrios.length);
+    }
+    
+    if (tipoSelect) {
+        while (tipoSelect.children.length > 1) {
+            tipoSelect.removeChild(tipoSelect.lastChild);
+        }
+        // Agregar opciones de tipos
+        tipos.forEach(tipo => {
+            const option = document.createElement('option');
+            option.value = tipo;
+            option.textContent = tipo.charAt(0).toUpperCase() + tipo.slice(1);
+            tipoSelect.appendChild(option);
+        });
+        console.log('✅ Selectores de tipo poblados:', tipos.length);
+    }
 }
 
 /**
@@ -692,6 +743,9 @@ async function showAllProperties() {
         
         currentResults = properties;
         currentFilters = {};
+        
+        // Extraer y poblar filtros reales del JSON
+        populateFiltersFromJSON(properties);
         
         displayResults(properties);
         updateResultsInfo(properties);
