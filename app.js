@@ -2329,15 +2329,25 @@ function crearCursoresNavegacion() {
                 user-select: none;
             `;
             
-            // Funcionalidad de navegación
+            // Funcionalidad de navegación MEJORADA - Conectar con sistema real
             cursorIzq.onclick = function() {
                 console.log(`🔙 Navegando imagen anterior - Imagen ${index + 1}`);
-                navegarImagen(img, -1);
+                if (typeof previousSlide === 'function') {
+                    previousSlide();
+                }
+                if (typeof navigateImage !== 'undefined' && navigateImage) {
+                    navigateImage(-1);
+                }
             };
             
             cursorDer.onclick = function() {
                 console.log(`🔜 Navegando imagen siguiente - Imagen ${index + 1}`);
-                navegarImagen(img, 1);
+                if (typeof nextSlide === 'function') {
+                    nextSlide();
+                }
+                if (typeof navigateImage !== 'undefined' && navigateImage) {
+                    navigateImage(1);
+                }
             };
             
             // Efectos hover mejorados
@@ -2369,12 +2379,42 @@ function crearCursoresNavegacion() {
     return cursoresCreados;
 }
 
-// Función de navegación (se puede expandir para lógica real)
+// Función de navegación MEJORADA - Compatible con ambos sistemas
 function navegarImagen(img, direccion) {
     console.log(`🔄 Navegando ${direccion === -1 ? 'anterior' : 'siguiente'} en imagen`);
-    // Aquí se puede implementar la lógica real de navegación de galería
-    // Por ejemplo: cambiar a imagen anterior/siguiente en una galería
+    
+    // Intentar navegación específica del slider avanzado
+    if (direccion === -1 && typeof previousSlide === 'function') {
+        previousSlide();
+        return;
+    }
+    if (direccion === 1 && typeof nextSlide === 'function') {
+        nextSlide();
+        return;
+    }
+    
+    // Fallback: navegación genérica para imágenes individuales
+    if (img && img.src) {
+        const imageContainer = img.closest('.property-card, .media-slide, .image-container');
+        if (imageContainer) {
+            // Para implementaciones futuras de navegación entre imágenes
+            console.log(`🎯 Navegación específica en contenedor de imagen`);
+        }
+    }
 }
+
+// Función global para navegación específica de sliders
+function navigateImage(direction) {
+    console.log(`🎮 Función global navigateImage llamada con dirección: ${direction}`);
+    if (direction === -1 && typeof previousSlide === 'function') {
+        previousSlide();
+    } else if (direction === 1 && typeof nextSlide === 'function') {
+        nextSlide();
+    }
+}
+
+// Hacer funciones accesibles globalmente
+window.navigateImage = navigateImage;
 
 // También ejecutar cuando se carguen nuevas imágenes dinámicamente
 let observer = new MutationObserver(function(mutations) {
