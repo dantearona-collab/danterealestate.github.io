@@ -2328,6 +2328,96 @@ applyDefinitveCursorsFix();
 // Aplicar cuando se carga la página
 document.addEventListener('DOMContentLoaded', applyDefinitveCursorsFix);
 
+
+// 🚨 CURSORS FIX DEFINITIVO
+function applyDefinitveCursorsFix() {
+    const definitiveStyle = document.createElement('style');
+    definitiveStyle.id = 'definitve-cursors-fix';
+    definitiveStyle.textContent = `
+        /* FUERZA DESPUÉS DEL CSS EXTERNO - MÁXIMA ESPECIFICIDAD */
+        html body .advanced-media-slider .slider-nav-buttons {
+            pointer-events: auto !important;
+            visibility: visible !important;
+            z-index: 99999 !important;
+        }
+        
+        html body .advanced-media-slider .slider-nav-btn {
+            background: rgba(255, 255, 255, 0.98) !important;
+            border: 4px solid #ff6b35 !important;
+            width: 56px !important;
+            height: 56px !important;
+            font-size: 24px !important;
+            color: #ff6b35 !important;
+            font-weight: bold !important;
+            box-shadow: 0 4px 25px rgba(255, 107, 53, 0.5) !important;
+            z-index: 100000 !important;
+            opacity: 1 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            cursor: pointer !important;
+            border-radius: 50% !important;
+            pointer-events: all !important;
+            transition: all 0.3s ease !important;
+            position: relative !important;
+        }
+        
+        html body .advanced-media-slider .slider-nav-btn:hover {
+            background: white !important;
+            transform: scale(1.15) !important;
+            box-shadow: 0 8px 30px rgba(255, 107, 53, 0.7) !important;
+            border-color: #e55a30 !important;
+        }
+        
+        html body .advanced-media-slider .slider-nav-btn:active {
+            transform: scale(0.9) !important;
+        }
+        
+        /* FORZAR CONTENEDOR COMPLETO */
+        html body div .advanced-media-slider .slider-nav-buttons {
+            display: flex !important;
+            position: absolute !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            width: 100% !important;
+            justify-content: space-between !important;
+            padding: 0 20px !important;
+        }
+        
+        /* FORZAR BOTONES ESPECÍFICOS */
+        html body .advanced-media-slider .slider-nav-btn[style*="display: none"],
+        html body .advanced-media-slider .slider-nav-btn[style*="visibility: hidden"],
+        html body .advanced-media-slider .slider-nav-btn[style*="opacity: 0"] {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+    `;
+    
+    // Aplicar inmediatamente
+    document.head.appendChild(definitiveStyle);
+    
+    // Aplicar cada vez que se abre un modal
+    const originalCreateAdvancedSlider = window.createAdvancedSlider;
+    if (originalCreateAdvancedSlider) {
+        window.createAdvancedSlider = function(...args) {
+            setTimeout(() => {
+                applyDefinitveCursorsFix();
+            }, 100);
+            return originalCreateAdvancedSlider.apply(this, args);
+        };
+    }
+    
+    console.log('🚨 CURSORS FIX DEFINITIVO: Estilos naranjas ultra-visibles aplicados');
+}
+
+// Aplicar inmediatamente
+applyDefinitveCursorsFix();
+
+// Aplicar cuando se carga la página
+document.addEventListener('DOMContentLoaded', applyDefinitveCursorsFix);
+
 // Aplicar cada 2 segundos durante los primeros 10 segundos (para modales que se abren dinámicamente)
 let fixInterval = setInterval(applyDefinitveCursorsFix, 2000);
 setTimeout(() => clearInterval(fixInterval), 10000);
+
