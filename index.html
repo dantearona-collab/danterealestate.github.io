@@ -478,7 +478,7 @@
 </head>
 <body>
     <div class="header">
-        <h1><img src="imgs/llave.png" alt="Dante Propiedades" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 10px;"> Dante Propiedades</h1>
+        <h1><img src="imgs/llave.png" alt="Dante Propiedades" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 10px;"> </h1>
         <p>Sistema sin errores de consola + Slider de múltiples fotos + Formulario de contacto</p>
     </div>
     
@@ -548,7 +548,9 @@
                             </select>
                         </div>
                         <textarea name="mensaje" placeholder="Tu mensaje" rows="4" required></textarea>
-                        <button type="submit" class="btn-send">📧 Enviar Consulta</button>
+                        <button type="submit" class="btn-send">
+                        <img src="img/whatsapp.png" alt="WhatsApp" style="height: 1em; vertical-align: middle; margin-right: 0.3em;">
+                        Enviar Consulta </button>
                     </form>
                     <div id="form-status" class="form-status"></div>
                 </div>
@@ -560,7 +562,9 @@
     <script src="app.js"></script>
     
     <script>
-        console.log('🏠 Sistema Dante Propiedades - Versión Con Formulario cargando...');
+        console.log( '%c Sistema Dante Propiedades - Versión Con Formulario cargando...',
+        'background: url("img/llave.png") no-repeat left center; background-size: contain; padding-left: 40px; line-height: 24px; font-size: 16px;'
+        );
         console.log('✅ Sin dependencias de Font Awesome');
         console.log('🎠 Slider de múltiples fotos incluido');
         console.log('📋 Formulario de contacto integrado');
