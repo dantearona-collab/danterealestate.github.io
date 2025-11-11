@@ -483,7 +483,7 @@ const CONFIGURACION_FORMULARIO = {
     // Configuración WhatsApp (CONFIGURAR)
     whatsapp: {
         enabled: true,
-        number: '+549XXXXXXXX', // ← REEMPLAZAR CON TU NÚMERO
+        number: '+5491125368595', // ← REEMPLAZAR CON TU NÚMERO
         messageTemplate: 'Hola, tengo una consulta desde Dante Propiedades:'
     },
     
