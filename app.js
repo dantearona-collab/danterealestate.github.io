@@ -2329,15 +2329,27 @@ function crearCursoresNavegacion() {
                 user-select: none;
             `;
             
-            // Funcionalidad de navegación
+            // ✅ FUNCIONALIDAD DE NAVEGACIÓN MEJORADA PARA SISTEMA DE RESTAURACIÓN
             cursorIzq.onclick = function() {
                 console.log(`🔙 Navegando imagen anterior - Imagen ${index + 1}`);
-                navegarImagen(img, -1);
+                
+                // NUEVA FUNCIÓN ESPECÍFICA PARA SISTEMA DE RESTAURACIÓN
+                if (navegacionSistemaRestauracion) {
+                    navegacionSistemaRestauracion(-1);
+                } else {
+                    navegarImagen(img, -1);
+                }
             };
             
             cursorDer.onclick = function() {
                 console.log(`🔜 Navegando imagen siguiente - Imagen ${index + 1}`);
-                navegarImagen(img, 1);
+                
+                // NUEVA FUNCIÓN ESPECÍFICA PARA SISTEMA DE RESTAURACIÓN
+                if (navegacionSistemaRestauracion) {
+                    navegacionSistemaRestauracion(1);
+                } else {
+                    navegarImagen(img, 1);
+                }
             };
             
             // Efectos hover mejorados
@@ -2367,6 +2379,61 @@ function crearCursoresNavegacion() {
     
     console.log(`🎉 SISTEMA COMPLETADO: ${cursoresCreados} cursores creados en ${imgs.length} imágenes`);
     return cursoresCreados;
+}
+
+// ✅ FUNCIÓN ESPECÍFICA PARA SISTEMA DE RESTAURACIÓN
+function navegacionSistemaRestauracion(direccion) {
+    console.log(`🔄 Navegación Sistema Restauración: ${direccion === -1 ? 'ANTERIOR' : 'SIGUIENTE'}`);
+    
+    // Buscar el contenedor del sistema de restauración
+    const sliderContainer = document.querySelector('[data-property="PROPIEDAD_RESTORE"]');
+    if (!sliderContainer) {
+        console.log('❌ ERROR: No se encontró el contenedor PROPIEDAD_RESTORE');
+        return;
+    }
+    
+    console.log('✅ Contenedor del sistema de restauración encontrado');
+    
+    // Obtener todos los slides
+    const slides = sliderContainer.querySelectorAll('.property-slide');
+    if (slides.length <= 1) {
+        console.log(`⚠️ Solo hay ${slides.length} slide(s), no hay navegación`);
+        return;
+    }
+    
+    // Obtener slide activo actual
+    const slideActivo = sliderContainer.querySelector('.property-slide.active');
+    if (!slideActivo) {
+        console.log('⚠️ No se encontró slide activo, activando primero');
+        slides[0].classList.add('active');
+        return;
+    }
+    
+    // Obtener índice del slide activo
+    const slidesArray = Array.from(slides);
+    const indiceActual = slidesArray.indexOf(slideActivo);
+    console.log(`📍 Slide activo actual: ${indiceActual + 1} de ${slidesArray.length}`);
+    
+    // Calcular nuevo índice con navegación circular
+    let nuevoIndice = indiceActual + direccion;
+    if (nuevoIndice < 0) {
+        nuevoIndice = slidesArray.length - 1;
+        console.log('🔄 Navegación circular hacia atrás');
+    }
+    if (nuevoIndice >= slidesArray.length) {
+        nuevoIndice = 0;
+        console.log('🔄 Navegación circular hacia adelante');
+    }
+    
+    const slideSiguiente = slidesArray[nuevoIndice];
+    console.log(`🎯 Navegando: ${indiceActual + 1} → ${nuevoIndice + 1}`);
+    
+    // Realizar navegación
+    slideActivo.classList.remove('active');
+    setTimeout(() => {
+        slideSiguiente.classList.add('active');
+        console.log('✅ Navegación del sistema de restauración completada');
+    }, 200);
 }
 
 // Función de navegación real implementada
