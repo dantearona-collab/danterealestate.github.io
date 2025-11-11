@@ -263,7 +263,7 @@ function loadEmbeddedProperties() {
             "acepta_mascotas": "Sí",
             "aire_acondicionado": "Sí",
             "info_multimedia": "Fotos profesionales disponibles",
-            "fotos": ["imgs/apartment_interior_1_5.webp", "imgs/apartment_interior_1_0.jpg"]
+            "fotos": ["imgs/UF002-1.jpg", "imgs/UF002-2.jpg"]
         },
         {
             "id_temporal": "UF002",
