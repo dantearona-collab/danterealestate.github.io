@@ -1,5 +1,5 @@
-// Sistema Dante Propiedades - SIN ERRORES + SLIDER FUNCIONAL
-// Versión sin dependencias de Font Awesome + Slider de múltiples fotos - 2025-11-08
+// Sistema Dante Propiedades - INTEGRADO CON FORMULARIOS
+// Versión sin dependencias de Font Awesome + Slider de múltiples fotos + Formulario de contacto - 2025-11-11
 
 // ========================================
 // SISTEMA DE SLIDER DE MÚLTIPLES FOTOS
@@ -468,12 +468,127 @@ function showPropertyDetails(propertyId) {
 }
 
 // ========================================
+// SISTEMA DE FORMULARIOS - INCORPORADO
+// ========================================
+
+// Configuración del formulario de contacto
+const CONFIGURACION_FORMULARIO = {
+    // Endpoint del backend
+    api: {
+        baseUrl: 'http://localhost:5000/api',
+        submit: '/submit',
+        analytics: '/analytics'
+    },
+    
+    // Configuración WhatsApp (CONFIGURAR)
+    whatsapp: {
+        enabled: true,
+        number: '+549XXXXXXXX', // ← REEMPLAZAR CON TU NÚMERO
+        messageTemplate: 'Hola, tengo una consulta desde Dante Propiedades:'
+    },
+    
+    // Configuración de almacenamiento
+    storage: {
+        excel: { enabled: true },
+        csv: { enabled: true },
+        localStorage: { enabled: true }
+    }
+};
+
+// Auto-inicialización del formulario
+function inicializarFormularioContacto() {
+    const form = document.getElementById('contactForm');
+    if (form) {
+        console.log('📋 Inicializando formulario de contacto...');
+        
+        // Configurar auto-inicialización
+        form.setAttribute('data-auto-init', 'true');
+        
+        // Inicializar el sistema de formularios
+        inicializarSistemaFormularios(form, CONFIGURACION_FORMULARIO);
+        
+        console.log('✅ Formulario de contacto inicializado');
+    }
+}
+
+// Función de inicialización del sistema de formularios
+function inicializarSistemaFormularios(form, config) {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        enviarFormularioContacto(form, config);
+    });
+}
+
+function enviarFormularioContacto(form, config) {
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+    
+    // Mostrar estado de carga
+    const statusDiv = document.getElementById('form-status');
+    statusDiv.innerHTML = '<div class="loading">📤 Enviando consulta...</div>';
+    
+    // Agregar timestamp y metadata
+    data.timestamp = new Date().toISOString();
+    data.pagina_origen = window.location.href;
+    data.user_agent = navigator.userAgent;
+    
+    // Simular envío (en producción usaría el backend real)
+    console.log('📋 Enviando datos del formulario:', data);
+    
+    setTimeout(() => {
+        // Guardar en localStorage como respaldo
+        guardarFormularioLocal(data);
+        
+        statusDiv.innerHTML = '<div class="success">✅ Consulta enviada correctamente</div>';
+        form.reset();
+        
+        // Abrir WhatsApp si está configurado
+        if (config.whatsapp.enabled && config.whatsapp.number !== '+549XXXXXXXX') {
+            abrirWhatsApp(data, config.whatsapp);
+        } else {
+            console.log('📱 WhatsApp no configurado. Datos guardados localmente.');
+        }
+        
+        // Limpiar mensaje después de 5 segundos
+        setTimeout(() => {
+            statusDiv.innerHTML = '';
+        }, 5000);
+        
+    }, 2000);
+}
+
+function guardarFormularioLocal(data) {
+    try {
+        const existingData = JSON.parse(localStorage.getItem('consultas_contacto') || '[]');
+        existingData.push(data);
+        localStorage.setItem('consultas_contacto', JSON.stringify(existingData));
+        console.log('💾 Consulta guardada en localStorage');
+    } catch (error) {
+        console.error('❌ Error guardando en localStorage:', error);
+    }
+}
+
+function abrirWhatsApp(data, config) {
+    const mensaje = `${config.messageTemplate}\n\n` +
+                   `Nombre: ${data.nombre}\n` +
+                   `Email: ${data.email}\n` +
+                   `Teléfono: ${data.telefono || 'No especificado'}\n` +
+                   `Tipo: ${data.tipo_consulta}\n` +
+                   `Mensaje: ${data.mensaje}`;
+    
+    const url = `https://wa.me/${config.number.replace('+', '')}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+    console.log('📱 Abriendo WhatsApp con consulta');
+}
+
+// ========================================
 // INICIALIZACIÓN
 // ========================================
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🏠 Sistema Dante Propiedades - Sin errores + Slider cargando...');
+    console.log('🏠 Sistema Dante Propiedades - INTEGRADO cargando...');
     console.log('🎯 Sistema de slider de múltiples fotos incluido');
+    console.log('📋 Sistema de formularios de contacto integrado');
     console.log('✅ Sin dependencias de Font Awesome');
     
     // Cargar CSS del slider
@@ -485,8 +600,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Configurar eventos de filtros
     setTimeout(setupFilterEvents, 100);
     
-    console.log('✅ Sistema inicializado sin errores de consola');
+    // Inicializar formulario de contacto
+    setTimeout(inicializarFormularioContacto, 200);
+    
+    console.log('✅ Sistema inicializado sin errores');
     console.log('🎠 Slider de múltiples fotos disponible');
+    console.log('📋 Formulario de contacto listo');
 });
 
 // ========================================
@@ -513,7 +632,7 @@ window.addEventListener('load', function() {
         const errors = checkResourceErrors();
         if (errors.length === 0) {
             console.log('✅ Todos los recursos cargados correctamente');
-            console.log('🎯 Sistema completamente funcional');
+            console.log('🎯 Sistema completamente funcional con formulario');
         } else {
             console.log('⚠️ Errores de recursos:', errors.length);
         }

@@ -1,4 +1,4 @@
-// Script mejorado con manejo robusto de errores y optimizaciones móviles
+// Script mejorado  manejo robusto de errores y optimizaciones móviles
 document.addEventListener('DOMContentLoaded', function() {
     console.log('=== INICIANDO DANTE PROPIEDADES ===');
     
