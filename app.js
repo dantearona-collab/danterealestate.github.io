@@ -480,10 +480,10 @@ const CONFIGURACION_FORMULARIO = {
         analytics: '/analytics'
     },
     
-    // Configuración WhatsApp (CONFIGURAR)
+    // Configuración WhatsApp
     whatsapp: {
         enabled: true,
-        number: '+5491125368595', // ← REEMPLAZAR CON TU NÚMERO
+        number: '+5491125368595', // ← Número real configurado
         messageTemplate: 'Hola, tengo una consulta desde Dante Propiedades:'
     },
     
@@ -532,29 +532,28 @@ function enviarFormularioContacto(form, config) {
     data.pagina_origen = window.location.href;
     data.user_agent = navigator.userAgent;
     
-    // Simular envío (en producción usaría el backend real)
-    console.log('📋 Enviando datos del formulario:', data);
+    // Envío automático REAL al backend + localStorage + WhatsApp
+    console.log('📋 Enviando datos del formulario automáticamente:', data);
     
+    // Envío REAL al backend (automático)
+    enviarAlBackend(data, config);
+    
+    // Guardar en localStorage como respaldo (automático)
+    guardarFormularioLocal(data);
+    
+    // Abrir WhatsApp automáticamente
+    if (config.whatsapp.enabled && config.whatsapp.number !== '+549XXXXXXXX') {
+        abrirWhatsApp(data, config.whatsapp);
+    }
+    
+    // Mostrar estado de envío
+    statusDiv.innerHTML = '<div class="success">✅ Consulta enviada automáticamente</div>';
+    form.reset();
+    
+    // Limpiar mensaje después de 5 segundos
     setTimeout(() => {
-        // Guardar en localStorage como respaldo
-        guardarFormularioLocal(data);
-        
-        statusDiv.innerHTML = '<div class="success">✅ Consulta enviada correctamente</div>';
-        form.reset();
-        
-        // Abrir WhatsApp si está configurado
-        if (config.whatsapp.enabled && config.whatsapp.number !== '+549XXXXXXXX') {
-            abrirWhatsApp(data, config.whatsapp);
-        } else {
-            console.log('📱 WhatsApp no configurado. Datos guardados localmente.');
-        }
-        
-        // Limpiar mensaje después de 5 segundos
-        setTimeout(() => {
-            statusDiv.innerHTML = '';
-        }, 5000);
-        
-    }, 2000);
+        statusDiv.innerHTML = '';
+    }, 5000);
 }
 
 function guardarFormularioLocal(data) {
@@ -624,6 +623,33 @@ function checkResourceErrors() {
     });
     
     return imageErrors;
+}
+
+// Función para enviar al backend automáticamente
+function enviarAlBackend(data, config) {
+    try {
+        fetch(config.api.baseUrl + config.api.submit, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                console.log('✅ Datos guardados automáticamente en Excel/CSV');
+            } else {
+                console.warn('⚠️ Error guardando en Excel:', result.error);
+            }
+        })
+        .catch(error => {
+            console.warn('⚠️ Backend no disponible:', error.message);
+            // Los datos siguen en localStorage como respaldo
+        });
+    } catch (error) {
+        console.warn('⚠️ Error enviando al backend:', error.message);
+    }
 }
 
 // Verificar errores al cargar
