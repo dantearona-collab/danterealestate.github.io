@@ -106,6 +106,11 @@
             color: white;
         }
         
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+            color: white;
+        }
+        
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
@@ -128,6 +133,8 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             font-weight: bold;
+            position: sticky;
+            top: 0;
         }
         
         .contacts-table tr:hover {
@@ -156,6 +163,14 @@
             margin: 20px 0;
         }
         
+        .warning {
+            background: #fff3e0;
+            color: #f57c00;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
         .refresh-btn {
             background: #2196f3;
             color: white;
@@ -164,6 +179,16 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 0.9em;
+        }
+        
+        .export-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
         }
         
         @media (max-width: 768px) {
@@ -179,6 +204,15 @@
             .stats-grid {
                 grid-template-columns: 1fr;
             }
+            
+            .contacts-table {
+                font-size: 0.9em;
+            }
+            
+            .contacts-table th,
+            .contacts-table td {
+                padding: 8px 6px;
+            }
         }
     </style>
 </head>
@@ -186,7 +220,8 @@
     <div class="container">
         <div class="header">
             <h1>🏢 Panel de Administración</h1>
-            <p>Dante Propiedades - Sistema de Contactos</p>
+            <p>Dante Propiedades - Sistema de Contactos Dual</p>
+            <p style="font-size: 0.9em; margin-top: 5px;">localStorage + Backend Local</p>
         </div>
         
         <div class="panel">
@@ -198,11 +233,14 @@
                 <button class="btn btn-primary" onclick="cargarDatos()">
                     🔄 Actualizar Datos
                 </button>
-                <a href="https://danterealestate-github-io.onrender.com/api/descargar-excel" class="btn btn-success" download>
-                    📥 Descargar Excel
-                </a>
+                <button class="btn btn-success" onclick="iniciarBackend()">
+                    🚀 Iniciar Backend Local
+                </button>
+                <button class="btn btn-danger" onclick="limpiarDatos()">
+                    🗑️ Limpiar LocalStorage
+                </button>
                 <button class="btn refresh-btn" onclick="verificarConexion()">
-                    🔍 Verificar Servidor
+                    🔍 Verificar Estado
                 </button>
             </div>
             
@@ -218,142 +256,301 @@
     </div>
 
     <script>
-        const SERVER_URL = 'https://danterealestate-github-io.onrender.com';
+        // ========================================
+        // SISTEMA DUAL: localStorage + Backend Opcional
+        // ========================================
         
-        async function verificarConexion() {
-            const statusDiv = document.getElementById('status');
-            statusDiv.innerHTML = '<div class="loading">Verificando conexión...</div>';
-            
+        // Configuración de fuentes de datos
+        const CONFIG = {
+            localStorage: {
+                key: 'consultas_contacto',
+                enabled: true
+            },
+            backend: {
+                url: 'http://localhost:5000',
+                enabled: false  // Se activa si el backend está disponible
+            }
+        };
+        
+        // Verificar disponibilidad de datos localStorage
+        function verificarDatosLocal() {
             try {
-                const response = await fetch(`${SERVER_URL}/health`);
-                const data = await response.json();
-                
-                if (response.ok && data.status === 'OK') {
-                    statusDiv.innerHTML = `
-                        <div class="success">
-                            ✅ Servidor funcionando correctamente<br>
-                            📅 Última verificación: ${new Date(data.timestamp).toLocaleString('es-AR')}
-                        </div>
-                    `;
-                } else {
-                    statusDiv.innerHTML = `
-                        <div class="error">
-                            ❌ Problema con el servidor: ${data.message || 'Error desconocido'}
-                        </div>
-                    `;
-                }
+                const data = localStorage.getItem(CONFIG.localStorage.key);
+                return data ? JSON.parse(data) : [];
             } catch (error) {
-                statusDiv.innerHTML = `
-                    <div class="error">
-                        ❌ Error de conexión: ${error.message}
-                    </div>
-                `;
+                console.error('Error leyendo localStorage:', error);
+                return [];
             }
         }
         
+        // Verificar disponibilidad de backend
+        async function verificarBackend() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '<div class="loading">Verificando backend local...</div>';
+            
+            try {
+                const response = await fetch(`${CONFIG.backend.url}/health`);
+                if (response.ok) {
+                    CONFIG.backend.enabled = true;
+                    statusDiv.innerHTML = `
+                        <div class="success">
+                            ✅ Backend local disponible<br>
+                            📍 Usando servidor: ${CONFIG.backend.url}<br>
+                            📅 Verificado: ${new Date().toLocaleString('es-AR')}
+                        </div>
+                    `;
+                    return true;
+                }
+            } catch (error) {
+                // Backend no disponible
+                CONFIG.backend.enabled = false;
+                statusDiv.innerHTML = `
+                    <div class="warning">
+                        ⚠️ Backend no disponible<br>
+                        📍 Usando datos locales (localStorage)<br>
+                        💡 Para usar backend: ejecutar sistema-formularios-backend-app.py
+                    </div>
+                `;
+                return false;
+            }
+        }
+        
+        // Verificar conexión con localStorage (para ver si funciona)
+        function verificarConexion() {
+            const localData = verificarDatosLocal();
+            const statusDiv = document.getElementById('status');
+            
+            if (localData.length > 0) {
+                statusDiv.innerHTML = `
+                    <div class="success">
+                        ✅ Sistema funcionando correctamente<br>
+                        📊 Datos locales: ${localData.length} contactos<br>
+                        📅 Verificado: ${new Date().toLocaleString('es-AR')}
+                    </div>
+                `;
+            } else {
+                statusDiv.innerHTML = `
+                    <div class="warning">
+                        ⚠️ Sin datos locales aún<br>
+                        📋 El formulario creará datos al usarse
+                    </div>
+                `;
+            }
+            
+            // Intentar verificar backend en paralelo
+            setTimeout(verificarBackend, 500);
+        }
+        
+        // Calcular estadísticas desde localStorage
+        function calcularEstadisticas(contactos) {
+            const hoy = new Date().toDateString();
+            const hoyContactos = contactos.filter(c => new Date(c.timestamp).toDateString() === hoy);
+            const ultimoContacto = contactos.length > 0 ? 
+                new Date(Math.max(...contactos.map(c => new Date(c.timestamp)))) : null;
+            
+            return {
+                total_contactos: contactos.length,
+                contactos_hoy: hoyContactos.length,
+                ultimo_contacto: ultimoContacto ? ultimoContacto.toLocaleDateString('es-AR') : 'N/A',
+                formularios_recibidos: contactos.length,
+                fuente: CONFIG.backend.enabled ? 'Backend' : 'localStorage'
+            };
+        }
+        
+        // Cargar datos (localStorage + Backend si disponible)
         async function cargarDatos() {
             const statsGrid = document.getElementById('statsGrid');
             const contactsContainer = document.getElementById('contactsContainer');
             
-            // Cargar estadísticas
-            try {
-                const response = await fetch(`${SERVER_URL}/api/estadisticas`);
-                const data = await response.json();
-                
-                if (response.ok) {
-                    statsGrid.innerHTML = `
-                        <div class="stat-card">
-                            <h3>${data.total_contactos || 0}</h3>
-                            <p>📊 Total Contactos</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>${data.contactos_hoy || 0}</h3>
-                            <p>📅 Hoy</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>${data.ultimo_contacto || 'N/A'}</h3>
-                            <p>🕒 Último</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>${data.formularios_recibidos || 0}</h3>
-                            <p>📝 Formularios</p>
-                        </div>
-                    `;
-                } else {
-                    statsGrid.innerHTML = '<div class="error">Error cargando estadísticas</div>';
+            // Siempre cargar desde localStorage
+            const contactosLocal = verificarDatosLocal();
+            const statsLocal = calcularEstadisticas(contactosLocal);
+            
+            // Intentar cargar desde backend si está disponible
+            if (CONFIG.backend.enabled) {
+                try {
+                    const response = await fetch(`${CONFIG.backend.url}/api/estadisticas`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        // Usar datos del backend
+                        statsLocal.total_contactos = Math.max(statsLocal.total_contactos, data.total_contactos || 0);
+                        statsLocal.formularios_recibidos = Math.max(statsLocal.formularios_recibidos, data.formularios_recibidos || 0);
+                        statsLocal.fuente = 'Backend + localStorage';
+                    }
+                } catch (error) {
+                    console.log('Error con backend, usando solo localStorage:', error);
                 }
-            } catch (error) {
-                statsGrid.innerHTML = `<div class="error">Error: ${error.message}</div>`;
             }
+            
+            // Mostrar estadísticas
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <h3>${statsLocal.total_contactos}</h3>
+                    <p>📊 Total Contactos</p>
+                </div>
+                <div class="stat-card">
+                    <h3>${statsLocal.contactos_hoy}</h3>
+                    <p>📅 Hoy</p>
+                </div>
+                <div class="stat-card">
+                    <h3>${statsLocal.ultimo_contacto}</h3>
+                    <p>🕒 Último</p>
+                </div>
+                <div class="stat-card">
+                    <h3>${statsLocal.fuente}</h3>
+                    <p>📡 Fuente</p>
+                </div>
+            `;
             
             // Cargar contactos
             cargarContactos();
         }
         
-        async function cargarContactos() {
+        // Cargar y mostrar contactos (prioridad: localStorage)
+        function cargarContactos() {
             const contactsContainer = document.getElementById('contactsContainer');
-            contactsContainer.innerHTML = '<div class="loading">Cargando contactos...</div>';
             
-            try {
-                const response = await fetch(`${SERVER_URL}/api/guardar-contacto`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok && data.contactos && data.contactos.length > 0) {
-                    let tableHTML = `
-                        <table class="contacts-table">
-                            <thead>
-                                <tr>
-                                    <th>📅 Fecha</th>
-                                    <th>👤 Nombre</th>
-                                    <th>📧 Email</th>
-                                    <th>📱 Teléfono</th>
-                                    <th>💬 Mensaje</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                    `;
-                    
-                    data.contactos.forEach(contacto => {
-                        tableHTML += `
+            // Cargar desde localStorage (siempre funciona)
+            const contactosLocal = verificarDatosLocal();
+            
+            if (contactosLocal.length > 0) {
+                let tableHTML = `
+                    <div style="margin-bottom: 15px; padding: 15px; background: #f0f8ff; border-radius: 8px; font-size: 0.9em; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                        <span>📊 Mostrando ${contactosLocal.length} contactos desde localStorage</span>
+                        <div>
+                            <button onclick="exportarDatos()" class="export-btn">
+                                📥 Exportar a JSON
+                            </button>
+                            <button onclick="limpiarDatos()" style="background: #ff6b6b; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-left: 10px;">
+                                🗑️ Limpiar
+                            </button>
+                        </div>
+                    </div>
+                    <table class="contacts-table">
+                        <thead>
                             <tr>
-                                <td>${new Date(contacto.fecha).toLocaleString('es-AR')}</td>
-                                <td>${contacto.nombre || 'N/A'}</td>
-                                <td>${contacto.email || 'N/A'}</td>
-                                <td>${contacto.telefono || 'N/A'}</td>
-                                <td>${(contacto.mensaje || '').substring(0, 100)}...</td>
+                                <th>📅 Fecha</th>
+                                <th>👤 Nombre</th>
+                                <th>📧 Email</th>
+                                <th>📱 Teléfono</th>
+                                <th>💬 Tipo</th>
+                                <th>📝 Mensaje</th>
+                                <th>🌐 Origen</th>
                             </tr>
-                        `;
-                    });
+                        </thead>
+                        <tbody>
+                `;
+                
+                contactosLocal.forEach((contacto, index) => {
+                    const fecha = new Date(contacto.timestamp).toLocaleString('es-AR');
+                    const mensajeCorto = (contacto.mensaje || '').substring(0, 50) + '...';
+                    const origen = contacto.pagina_origen || 'Dante Propiedades';
+                    const tipo = (contacto.tipo_consulta || 'general').toUpperCase();
                     
                     tableHTML += `
-                            </tbody>
-                        </table>
+                        <tr>
+                            <td style="font-size: 0.85em;">${fecha}</td>
+                            <td><strong>${contacto.nombre || 'N/A'}</strong></td>
+                            <td style="font-size: 0.85em;">${contacto.email || 'N/A'}</td>
+                            <td style="font-size: 0.85em;">${contacto.telefono || 'N/A'}</td>
+                            <td><span style="background: #e3f2fd; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">${tipo}</span></td>
+                            <td title="${contacto.mensaje || ''}" style="font-size: 0.85em;">${mensajeCorto}</td>
+                            <td style="font-size: 0.8em; color: #666;">${origen}</td>
+                        </tr>
                     `;
-                    
-                    contactsContainer.innerHTML = tableHTML;
-                } else {
-                    contactsContainer.innerHTML = '<p>📭 No hay contactos registrados aún.</p>';
-                }
-            } catch (error) {
-                contactsContainer.innerHTML = `<div class="error">Error cargando contactos: ${error.message}</div>`;
+                });
+                
+                tableHTML += `
+                        </tbody>
+                    </table>
+                `;
+                
+                contactsContainer.innerHTML = tableHTML;
+            } else {
+                contactsContainer.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <p>📭 No hay contactos registrados aún.</p>
+                        <p style="font-size: 0.9em; margin-top: 10px;">
+                            Los datos aparecerán aquí después de usar el formulario de contacto.
+                        </p>
+                        <div style="margin-top: 20px;">
+                            <button onclick="limpiarDatos()" style="background: #ff6b6b; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
+                                🗑️ Forzar Limpieza
+                            </button>
+                        </div>
+                    </div>
+                `;
             }
+        }
+        
+        // Función para limpiar datos
+        function limpiarDatos() {
+            if (confirm('¿Estás seguro de que quieres eliminar todos los datos locales? Esta acción no se puede deshacer.')) {
+                localStorage.removeItem(CONFIG.localStorage.key);
+                cargarContactos();
+                document.getElementById('status').innerHTML = `
+                    <div class="success">✅ Datos locales eliminados</div>
+                `;
+            }
+        }
+        
+        // Función para exportar datos
+        function exportarDatos() {
+            const datos = verificarDatosLocal();
+            const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `contactos-dante-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Función para iniciar backend
+        function iniciarBackend() {
+            const instrucciones = `
+🚀 INSTRUCCIONES PARA INICIAR EL BACKEND:
+
+1️⃣ Prerrequisitos:
+   • Python instalado en tu sistema
+   • Acceso a terminal/línea de comandos
+
+2️⃣ Ejecutar servidor:
+   python sistema-formularios-backend-app.py
+   (o: python3 sistema-formularios-backend-app.py)
+
+3️⃣ El servidor se ejecutará en:
+   http://localhost:5000
+
+4️⃣ Funciones del backend:
+   • Almacena datos en Excel/CSV
+   • Respaldos automáticos
+   • Estadísticas en tiempo real
+   • Exportación de archivos
+
+5️⃣ Para conectar con el formulario:
+   El sistema integrado ya está configurado para usar el backend si está disponible.
+
+💡 NOTA: Si el backend no está corriendo, el sistema usará localStorage automáticamente.
+            `;
+            alert(instrucciones);
         }
         
         // Verificar conexión al cargar la página
         window.addEventListener('load', () => {
+            console.log('🏢 Panel de Administración - Sistema Dual cargando...');
             verificarConexion();
             cargarDatos();
         });
         
-        // Actualizar cada 30 segundos
+        // Actualizar cada 30 segundos (solo si hay datos)
         setInterval(() => {
-            cargarDatos();
+            const datos = verificarDatosLocal();
+            if (datos.length > 0) {
+                cargarDatos();
+            }
         }, 30000);
     </script>
 </body>
