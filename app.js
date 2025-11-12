@@ -235,8 +235,8 @@ async function loadProperties() {
     }
 }
 
-// Propiedades embebidas como fallback
-function loadEmbeddedProperties() {
+// // Propiedades embebidas como fallback
+function loadEmbeddedProperties() { 
     const sampleData = [
         {
             "id_temporal": "UF001",
@@ -291,7 +291,7 @@ function loadEmbeddedProperties() {
             "info_multimedia": "Fotos panorámicas disponibles",
             "fotos": ["imgs/house_pool_1_0.jpg", "imgs/house_exterior_1_7.jpg", "imgs/house_pool_1_4.jpg"]
         }
-    ];
+    ]; 
     
     globalData.properties = sampleData;
     globalData.filteredProperties = sampleData;
