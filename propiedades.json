@@ -53,7 +53,7 @@
     "estado": "excelente",
     "orientacion": "norte",
     "piso": "9",
-    "expensas": 9500,
+    "expensas": 95000,
     "moneda_precio": "ARS",
     "moneda_expensas": "ARS",
     "amenities": "seguridad 24hs",
@@ -73,9 +73,9 @@
       "imgs/UF023-3.jpg",
       "imgs/UF023-4jpg",
       "imgs/UF023-5.jpg",
-      "imgs/UF001-6.jpg"
+      "imgs/UF023-6.jpg"
     ],
-    "moneda_precio": "USD",
+    "moneda_precio": "ARS",
     "moneda_expensas": "ARS",
     "fecha_procesamiento": "2025-11-08T15:22:30.123456"
   },
