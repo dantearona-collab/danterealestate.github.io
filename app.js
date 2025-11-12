@@ -235,8 +235,8 @@ async function loadProperties() {
     }
 }
 
-// // Propiedades embebidas como fallback
-function loadEmbeddedProperties() { 
+// Propiedades embebidas como fallback
+function loadEmbeddedProperties() {
     const sampleData = [
         {
             "id_temporal": "UF001",
@@ -261,64 +261,132 @@ function loadEmbeddedProperties() {
             "aire_acondicionado": "Sí",
             "info_multimedia": "Set de 3 fotos de alta calidad, Fotos de exteriores, Recorrido visual completo",
             "documentos": [
-            "imgs/ENTORNOS.PDF",
-            "imgs/DATOS PARCELA.PDF"
+                "imgs/ENTORNOS.PDF",
+                "imgs/DATOS PARCELA.PDF"
             ],
             "fotos": [
-            "imgs/UF001-1.jpg",
-            "imgs/UF001-2.jpg",
-            "imgs/UF001-3.jpg",
-            "imgs/UF001-4.jpg",
-            "imgs/UF001-5.jpg",
-            "imgs/UF001-6.jpg",
-            "imgs/UF001-7.jpg"
+                "imgs/UF001-1.jpg",
+                "imgs/UF001-2.jpg",
+                "imgs/UF001-3.jpg"
             ],
             "moneda_precio": "USD",
             "moneda_expensas": "ARS",
             "fecha_procesamiento": "2025-11-09T08:33:51.258324"
-     },
-
-
+        },
         {
-        "id_temporal": "UF002",
-        "titulo": "Departamento en Palermo SoHo",
-        "barrio": "Palermo",
-        "precio": 280000,
-        "ambientes": 2,
-        "metros_cuadrados": 68,
-        "operacion": "alquiler",
-        "tipo": "departamento",
-        "descripcion": "Excelente departamento en el corazón de Palermo SoHo",
-        "direccion": "",
-        "antiguedad": 3,
-        "estado": "excelente",
-        "orientacion": "norte",
-        "piso": "5",
-        "expensas": 8500,
-        "moneda_precio": "USD",
-        "moneda_expensas": "ARS",
-        "amenities": "pileta, gimnasio, sum, seguridad 24hs",
-        "cochera": "Sí",
-        "balcon": "Sí",
-        "pileta": "Sí",
-        "acepta_mascotas": "Sí",
-        "aire_acondicionado": "Sí",
-        "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
-        "documentos": [
-        "imgs/PLANO_DEPARTAMENTO.PDF",
-        "imgs/EXPENSAS_DETALLE.PDF"
-        ],
-        "fotos": [
-        "imgs/UF001-4.jpg",
-        "imgs/UF001-5.jpg",
-        "imgs/UF001-6.jpg",
-        "imgs/UF001-1.jpg"
-        ],
-        "moneda_precio": "USD",
-        "moneda_expensas": "ARS",
-        "fecha_procesamiento": "2025-11-08T15:22:30.123456"
-    },
-    ]; 
+            "id_temporal": "UF002",
+            "titulo": "Departamento en Palermo SoHo",
+            "barrio": "Palermo",
+            "precio": 280000,
+            "ambientes": 2,
+            "metros_cuadrados": 68,
+            "operacion": "alquiler",
+            "tipo": "departamento",
+            "descripcion": "Excelente departamento en el corazón de Palermo SoHo",
+            "direccion": "",
+            "antiguedad": 3,
+            "estado": "excelente",
+            "orientacion": "norte",
+            "piso": "5",
+            "expensas": 8500,
+            "moneda_precio": "USD",
+            "moneda_expensas": "ARS",
+            "amenities": "pileta, gimnasio, sum, seguridad 24hs",
+            "cochera": "Sí",
+            "balcon": "Sí",
+            "pileta": "Sí",
+            "acepta_mascotas": "Sí",
+            "aire_acondicionado": "Sí",
+            "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+            "documentos": [
+                "imgs/PLANO_DEPARTAMENTO.PDF",
+                "imgs/EXPENSAS_DETALLE.PDF"
+            ],
+            "fotos": [
+                "imgs/UF001-1.jpg",
+                "imgs/UF001-2.jpg",
+                "imgs/UF001-3.jpg",
+                "imgs/UF004.jpg"
+            ],
+            "moneda_precio": "USD",
+            "moneda_expensas": "ARS",
+            "fecha_procesamiento": "2025-11-08T15:22:30.123456"
+        },
+        {
+            "id_temporal": "UF003",
+            "titulo": "Casa en Belgrano R",
+            "barrio": "Belgrano",
+            "precio": 650000,
+            "ambientes": 4,
+            "metros_cuadrados": 180,
+            "operacion": "venta",
+            "tipo": "casa",
+            "descripcion": "Magnífica casa familiar con jardín y pileta",
+            "direccion": "",
+            "antiguedad": 8,
+            "estado": "excelente",
+            "orientacion": "norte",
+            "expensas": 0,
+            "moneda_precio": "USD",
+            "moneda_expensas": "ARS",
+            "amenities": "pileta, parrilla, jardín, cochera cubierta",
+            "cochera": "Sí",
+            "balcon": "Sí",
+            "pileta": "Sí",
+            "acepta_mascotas": "Sí",
+            "aire_acondicionado": "Sí",
+            "info_multimedia": "Fotos panorámicas disponibles, Video recorrido",
+            "documentos": [
+                "imgs/TITULO_PROPIEDAD.PDF",
+                "imgs/PLANO_CASA.PDF",
+                "imgs/AVALUO_2025.PDF"
+            ],
+            "fotos": [
+                "imgs/house_pool_1_0.jpg",
+                "imgs/house_exterior_1_7.jpg",
+                "imgs/house_pool_1_4.jpg",
+                "imgs/house_exterior_1_8.jpg",
+                "imgs/house_pool_1_8.jpg"
+            ],
+            "moneda_precio": "USD",
+            "moneda_expensas": "ARS",
+            "fecha_procesamiento": "2025-11-07T10:45:20.789123"
+        },
+        {
+            "id_temporal": "UF004",
+            "titulo": "PH en Almagro",
+            "barrio": "Almagro",
+            "precio": 120000,
+            "ambientes": 3,
+            "metros_cuadrados": 85,
+            "operacion": "venta",
+            "tipo": "ph",
+            "descripcion": "PH con terraza propia y entrada independiente",
+            "direccion": "",
+            "antiguedad": 12,
+            "estado": "bueno",
+            "orientacion": "sur",
+            "expensas": 3500,
+            "moneda_precio": "USD",
+            "moneda_expensas": "ARS",
+            "amenities": "terraza, entrada independiente",
+            "cochera": "No",
+            "balcon": "No",
+            "pileta": "No",
+            "acepta_mascotas": "Sí",
+            "aire_acondicionado": "No",
+            "info_multimedia": "Fotos de la propiedad y terraza",
+            "documentos": [
+                "imgs/TITULO_PH.PDF"
+            ],
+            "fotos": [
+                "imgs/UF004.jpg"
+            ],
+            "moneda_precio": "USD",
+            "moneda_expensas": "ARS",
+            "fecha_procesamiento": "2025-11-06T14:30:15.456789"
+        }
+    ];
     
     globalData.properties = sampleData;
     globalData.filteredProperties = sampleData;
