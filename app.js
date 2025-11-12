@@ -80,7 +80,7 @@ function createImageSlider(property) {
                 
                 <!-- Botón de visualización ampliada -->
                 <button class="property-expand-btn" 
-                        onclick="abrirModalImagenesComplete(${JSON.stringify(property).replace(/"/g, '&quot;')})"
+                        onclick="abrirModalImagenesComplete('${property.id_temporal}')"
                         style="position: absolute; top: 8px; right: 8px; 
                                background: rgba(0, 0, 0, 0.7); color: white; border: none; 
                                width: 32px; height: 32px; border-radius: 6px; cursor: pointer; 
@@ -489,7 +489,7 @@ function createPropertyCard(property) {
             </div>
             
             <div style="display: flex !important; gap: 10px !important; margin-bottom: 15px !important;">
-                <button onclick="abrirModalImagenesComplete(${JSON.stringify(property).replace(/"/g, '&quot;')})" 
+                <button onclick="abrirModalImagenesComplete('${property.id_temporal}')" 
                         style="flex: 1 !important; background: #25d366 !important; color: white !important; 
                                border: none !important; padding: 10px !important; border-radius: 6px !important; 
                                font-size: 13px !important; font-weight: 600 !important; cursor: pointer !important; 
@@ -777,21 +777,70 @@ function enviarAlBackend(data, config) {
 // ========================================
 
 // Función helper para abrir modal de imágenes desde las tarjetas
-function abrirModalImagenesComplete(property) {
+function abrirModalImagenesComplete(propertyId) {
     try {
+        console.log('📸 Iniciando apertura de modal para propiedad:', propertyId);
+        
+        // Buscar la propiedad en los datos globales
+        let property = null;
+        
+        // Primero intentar con globalData si existe
+        if (typeof globalData !== 'undefined' && globalData.properties) {
+            property = globalData.properties.find(p => p.id_temporal === propertyId);
+        }
+        
+        // Si no se encuentra, intentar con sampleData
+        if (!property && typeof sampleData !== 'undefined') {
+            property = sampleData.find(p => p.id_temporal === propertyId);
+        }
+        
+        // Si aún no se encuentra, intentar buscando en el DOM
+        if (!property) {
+            console.log('🔍 Buscando propiedad en DOM...');
+            const propertyCards = document.querySelectorAll('[data-property-id]');
+            for (let card of propertyCards) {
+                if (card.dataset.propertyId === propertyId) {
+                    // Extraer datos del card si es necesario
+                    const titleElement = card.querySelector('h3');
+                    if (titleElement) {
+                        property = {
+                            id_temporal: propertyId,
+                            titulo: titleElement.textContent,
+                            fotos: [] // Se llenará si encontramos imágenes
+                        };
+                        
+                        // Buscar imágenes en el card
+                        const images = card.querySelectorAll('img');
+                        property.fotos = Array.from(images).map(img => img.src).filter(src => src && !src.includes('placeholder'));
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Validar que encontramos la propiedad
+        if (!property) {
+            console.error('❌ No se encontró la propiedad:', propertyId);
+            alert('Error: No se pudo encontrar la información de la propiedad.');
+            return;
+        }
+        
         // Validar que la propiedad tiene imágenes
         if (!property.fotos || property.fotos.length === 0) {
+            console.warn('⚠️ La propiedad no tiene imágenes:', propertyId);
             alert('Esta propiedad no tiene imágenes disponibles.');
             return;
         }
         
-        console.log('📸 Abriendo modal de imágenes para:', property.titulo);
+        console.log('✅ Propiedad encontrada:', property.titulo, 'con', property.fotos.length, 'imágenes');
         
-        // Llamar a la función del modal definida en el HTML
+        // Llamar a la función del modal
         if (typeof abrirModalImagenes === 'function') {
             abrirModalImagenes(property);
+            console.log('✅ Función del modal ejecutada correctamente');
         } else {
-            console.warn('❌ Función abrirModalImagenes no encontrada');
+            console.error('❌ Función abrirModalImagenes no encontrada');
+            console.log('🔍 Verificando funciones disponibles:', Object.keys(window).filter(k => k.includes('abrir')));
             alert('Error: Sistema de imágenes no disponible.');
         }
         
