@@ -78,6 +78,20 @@ function createImageSlider(property) {
                     ▶
                 </button>
                 
+                <!-- Botón de visualización ampliada -->
+                <button class="property-expand-btn" 
+                        onclick="abrirModalImagenesComplete(${JSON.stringify(property).replace(/"/g, '&quot;')})"
+                        style="position: absolute; top: 8px; right: 8px; 
+                               background: rgba(0, 0, 0, 0.7); color: white; border: none; 
+                               width: 32px; height: 32px; border-radius: 6px; cursor: pointer; 
+                               display: flex; align-items: center; justify-content: center;
+                               font-size: 14px; z-index: 3; transition: all 0.3s ease;"
+                        onmouseover="this.style.background='rgba(35, 45, 235, 0.9)'" 
+                        onmouseout="this.style.background='rgba(0, 0, 0, 0.7)'"
+                        title="Ver imágenes en tamaño grande">
+                    🔍
+                </button>
+                
                 <!-- Dots de navegación -->
                 <div class="property-nav-dots" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); 
                                                      display: flex; gap: 6px; z-index: 2;">
@@ -474,15 +488,26 @@ function createPropertyCard(property) {
                 </span>
             </div>
             
-            <button onclick="showPropertyDetails('${property.id_temporal}')" 
-                    style="width: 100% !important; background: #232deb !important; color: white !important; 
-                           border: none !important; padding: 12px !important; border-radius: 6px !important; 
-                           font-size: 14px !important; font-weight: 600 !important; cursor: pointer !important; 
-                           transition: all 0.3s ease !important;"
-                    onmouseover="this.style.background='#1a1db4'" 
-                    onmouseout="this.style.background='#232deb'">
-                Ver Detalles
-            </button>
+            <div style="display: flex !important; gap: 10px !important; margin-bottom: 15px !important;">
+                <button onclick="abrirModalImagenesComplete(${JSON.stringify(property).replace(/"/g, '&quot;')})" 
+                        style="flex: 1 !important; background: #25d366 !important; color: white !important; 
+                               border: none !important; padding: 10px !important; border-radius: 6px !important; 
+                               font-size: 13px !important; font-weight: 600 !important; cursor: pointer !important; 
+                               transition: all 0.3s ease !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 5px !important;"
+                        onmouseover="this.style.background='#128c7e'" 
+                        onmouseout="this.style.background='#25d366'">
+                    🖼️ Ver Imágenes
+                </button>
+                <button onclick="showPropertyDetails('${property.id_temporal}')" 
+                        style="flex: 1 !important; background: #232deb !important; color: white !important; 
+                               border: none !important; padding: 10px !important; border-radius: 6px !important; 
+                               font-size: 13px !important; font-weight: 600 !important; cursor: pointer !important; 
+                               transition: all 0.3s ease !important;"
+                        onmouseover="this.style.background='#1a1db4'" 
+                        onmouseout="this.style.background='#232deb'">
+                    📋 Ver Detalles
+                </button>
+            </div>
         </div>
     `;
     
@@ -744,6 +769,35 @@ function enviarAlBackend(data, config) {
         });
     } catch (error) {
         console.warn('⚠️ Error enviando al backend:', error.message);
+    }
+}
+
+// ========================================
+// FUNCIONES DE VISUALIZACIÓN AMPLIADA DE IMÁGENES
+// ========================================
+
+// Función helper para abrir modal de imágenes desde las tarjetas
+function abrirModalImagenesComplete(property) {
+    try {
+        // Validar que la propiedad tiene imágenes
+        if (!property.fotos || property.fotos.length === 0) {
+            alert('Esta propiedad no tiene imágenes disponibles.');
+            return;
+        }
+        
+        console.log('📸 Abriendo modal de imágenes para:', property.titulo);
+        
+        // Llamar a la función del modal definida en el HTML
+        if (typeof abrirModalImagenes === 'function') {
+            abrirModalImagenes(property);
+        } else {
+            console.warn('❌ Función abrirModalImagenes no encontrada');
+            alert('Error: Sistema de imágenes no disponible.');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error al abrir modal de imágenes:', error);
+        alert('Error al abrir la visualización de imágenes. Por favor, inténtelo nuevamente.');
     }
 }
 
