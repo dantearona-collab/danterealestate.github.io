@@ -297,38 +297,21 @@
                 return [];
             }
         }
+
         
-        // Verificar disponibilidad de backend (silencioso)
-        async function verificarBackendSilencioso() {
-            try {
-                const response = await fetch(`${CONFIG.backend.url}/health`, {
-                    timeout: 3000 // Timeout de 3 segundos
-                });
-                if (response.ok) {
-                    CONFIG.backend.enabled = true;
-                    console.log('✅ Backend disponible:', CONFIG.backend.url);
-                    return true;
-                }
-            } catch (error) {
-                // Backend no disponible - no mostrar error al usuario automáticamente
-                CONFIG.backend.enabled = false;
-                console.log('ℹ️ Backend no disponible, usando localStorage');
-                return false;
-            }
-        }
-        
-        // Verificar conexión completa (localStorage + Backend si disponible)
-        async function verificarConexion() {
+        // Verificar conexión (solo localStorage - sin backend automático)
+        function verificarConexion() {
             const localData = verificarDatosLocal();
             const statusDiv = document.getElementById('status');
             
-            // Siempre verificar localStorage primero
+            // Solo verificar localStorage (sin backend automático)
             if (localData.length > 0) {
                 statusDiv.innerHTML = `
                     <div class="success">
                         ✅ Sistema funcionando correctamente<br>
                         📊 Datos locales: ${localData.length} contactos<br>
                         📡 Fuente: localStorage<br>
+                        💡 Para verificar backend: usa el botón "🔍 Verificar Estado"<br>
                         📅 Verificado: ${new Date().toLocaleString('es-AR')}
                     </div>
                 `;
@@ -337,24 +320,11 @@
                     <div class="warning">
                         ⚠️ Sin datos locales aún<br>
                         📋 El formulario creará datos al usarse<br>
-                        💡 Sistema preparado para recibir contactos
+                        💡 Sistema preparado para recibir contactos<br>
+                        🔧 Para usar backend: ejecutar sistema-formularios-backend-app.py
                     </div>
                 `;
             }
-            
-            // Verificar backend en paralelo sin mostrar errores al usuario
-            verificarBackendSilencioso().then(backendDisponible => {
-                if (backendDisponible) {
-                    statusDiv.innerHTML = `
-                        <div class="success">
-                            ✅ Sistema funcionando correctamente<br>
-                            📊 Datos locales: ${localData.length} contactos<br>
-                            🚀 Backend disponible: ${CONFIG.backend.url}<br>
-                            📅 Verificado: ${new Date().toLocaleString('es-AR')}
-                        </div>
-                    `;
-                }
-            });
         }
         
         // Calcular estadísticas desde localStorage
@@ -613,8 +583,13 @@
             const statusDiv = document.getElementById('status');
             statusDiv.innerHTML = '<div class="loading">Verificando backend local...</div>';
             
-            verificarBackendSilencioso().then(backendDisponible => {
-                if (backendDisponible) {
+            // Verificar backend manualmente (solo cuando el usuario lo solicita)
+            fetch(`${CONFIG.backend.url}/health`, {
+                timeout: 5000 // Timeout de 5 segundos para verificación manual
+            })
+            .then(response => {
+                if (response.ok) {
+                    CONFIG.backend.enabled = true;
                     statusDiv.innerHTML = `
                         <div class="success">
                             ✅ Backend local disponible<br>
@@ -624,26 +599,27 @@
                         </div>
                     `;
                 } else {
-                    statusDiv.innerHTML = `
-                        <div class="warning">
-                            ⚠️ Backend no disponible<br>
-                            📍 Usando datos locales (localStorage)<br>
-                            💡 Para usar backend: ejecutar sistema-formularios-backend-app.py
-                        </div>
-                    `;
+                    throw new Error('Backend no responde');
                 }
+            })
+            .catch(error => {
+                CONFIG.backend.enabled = false;
+                statusDiv.innerHTML = `
+                    <div class="warning">
+                        ⚠️ Backend no disponible<br>
+                        📍 Usando datos locales (localStorage)<br>
+                        💡 Para usar backend: ejecutar sistema-formularios-backend-app.py
+                    </div>
+                `;
             });
         }
 
-        // Verificar conexión al cargar la página (sin errores de backend)
+        // Verificar conexión al cargar la página (solo localStorage)
         window.addEventListener('load', () => {
             console.log('🏢 Panel de Administración - Sistema Dual cargando...');
-            // Cargar datos localStorage inmediatamente
+            // Cargar datos localStorage inmediatamente (sin backend automático)
             cargarDatos();
-            // Verificar backend silenciosamente en segundo plano
-            setTimeout(() => {
-                verificarBackendSilencioso();
-            }, 1000);
+            verificarConexion();
         });
         
         // Actualizar cada 30 segundos (solo si hay datos)
