@@ -638,6 +638,34 @@
                 right: 10px;
             }
         }
+        
+        /* ========================================
+           ESTILOS PARA SLIDER CLICKEABLE
+           ======================================== */
+        
+        /* Efecto hover para slider clickeable */
+        .modal-trigger:hover .modal-overlay,
+        .property-slider:hover .modal-overlay {
+            opacity: 1 !important;
+        }
+        
+        .modal-trigger:hover,
+        .property-slider:hover {
+            filter: brightness(0.9);
+        }
+        
+        /* Asegurar que los controles del slider no interfieran con el clic del modal */
+        .property-slider-btn {
+            z-index: 3 !important;
+        }
+        
+        .property-nav-dots {
+            z-index: 3 !important;
+        }
+        
+        .property-nav-dot {
+            z-index: 3 !important;
+        }
     </style>
 </head>
 <body>
