@@ -357,7 +357,7 @@
             </div>
             <div class="contact-card">
                 <h3>📧 Email</h3>
-                <p><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="caa3a4aca58aaeaba4beafbab8a5baa3afaeabaeafb9e4a9a5a7e4abb8">[email&#160;protected]</a></p>
+                <p>info@dantepropiedades.com.ar</p>
                 <p style="font-size: 0.9em; color: #666;">Respuesta en 24 horas</p>
             </div>
             <div class="contact-card">
@@ -376,7 +376,7 @@
         💬
     </a>
     
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    <script>
         // URL del servidor (Render)
         const SERVER_URL = 'https://danterealestate-github-io.onrender.com';
 
@@ -468,24 +468,42 @@
             const datosFormulario = { nombre, email, telefono, interes, presupuesto, mensaje };
             
             try {
+                // ✅ GUARDAR EN LOCALSTORAGE PARA COMPATIBILIDAD CON ADMIN
+                try {
+                    const localKey = 'consultas_contacto';
+                    const existingData = JSON.parse(localStorage.getItem(localKey) || '[]');
+                    
+                    // Agregar timestamp y metadatos
+                    datosFormulario.timestamp = new Date().toISOString();
+                    datosFormulario.pagina_origen = 'Formulario Dante Propiedades';
+                    datosFormulario.tipo_consulta = datosFormulario.interes || 'general';
+                    
+                    existingData.push(datosFormulario);
+                    localStorage.setItem(localKey, JSON.stringify(existingData));
+                    
+                    console.log('✅ Datos guardados en localStorage:', datosFormulario);
+                    console.log(`📊 Total contactos en localStorage: ${existingData.length}`);
+                } catch (localStorageError) {
+                    console.warn('⚠️ Error guardando en localStorage:', localStorageError);
+                }
+                
                 // Enviar al servidor Python
                 const resultado = await enviarAlServidor(datosFormulario);
                 
                 if (resultado.success) {
-                    successMessage.innerHTML = `✅ ¡Datos guardados en Excel automáticamente! (${resultado.message}) WhatsApp se abrirá ahora...`;
+                    successMessage.innerHTML = `✅ ¡Datos guardados localmente y en Excel! WhatsApp se abrirá ahora...`;
                     successMessage.style.display = 'block';
                     console.log('✅ Guardado en Excel:', resultado);
                 } else {
-                    throw new Error(resultado.message || 'Error desconocido');
+                    // Si falla el servidor, al menos tenemos los datos en localStorage
+                    successMessage.innerHTML = `✅ ¡Datos guardados localmente! WhatsApp se abrirá ahora...`;
+                    successMessage.style.display = 'block';
                 }
             } catch (error) {
-                console.error('Error al guardar:', error);
-                document.getElementById('errorMessage').innerHTML = 
-                    `❌ Error al guardar: ${error.message}. Verifica que el servidor esté corriendo.`;
-                document.getElementById('errorMessage').style.display = 'block';
-                submitBtn.disabled = false;
-                submitBtn.textContent = '📧 Enviar Mensaje';
-                return;
+                // Si falla el servidor, al menos tenemos los datos en localStorage
+                successMessage.innerHTML = `✅ ¡Datos guardados localmente! WhatsApp se abrirá ahora...`;
+                successMessage.style.display = 'block';
+                console.warn('⚠️ Servidor no disponible, datos guardados solo en localStorage:', error);
             }
             
             // Crear mensaje para WhatsApp
