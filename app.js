@@ -27,11 +27,6 @@ function createImageSlider(property) {
                      alt="${property.titulo}" 
                      style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
                      onerror="this.src='INSTITUCIONAL 3.png'">
-                <div class="modal-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;">
-                    <div style="background: rgba(35,45,235,0.9); color: white; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;">
-                        🔍 Ver Galería
-                    </div>
-                </div>
             </div>
         `;
     }
@@ -44,11 +39,6 @@ function createImageSlider(property) {
                      alt="${property.titulo}" 
                      style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
                      onerror="this.src='INSTITUCIONAL 3.png'">
-                <div class="modal-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;">
-                    <div style="background: rgba(35,45,235,0.9); color: white; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;">
-                        🔍 Ver Galería
-                    </div>
-                </div>
             </div>
         `;
     }
@@ -72,13 +62,6 @@ function createImageSlider(property) {
              onclick="abrirModalImagenesComplete('${property.id_temporal}')">
             <div class="property-slides-container" style="position: relative; overflow: hidden; width: 100%; height: 200px;">
                 ${imageSlides}
-            </div>
-            
-            <!-- Overlay para indicar que es clickeable -->
-            <div class="modal-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;">
-                <div style="background: rgba(35,45,235,0.9); color: white; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;">
-                    🔍 Ver Galería Completa (${fotos.length} fotos)
-                </div>
             </div>
             
             <!-- Controles de navegación (EMOJIS) -->
@@ -405,20 +388,6 @@ function createPropertyCard(property) {
                     ${property.info_multimedia || 'Fotos disponibles'}
                 </span>
             </div>
-            
-            <div style="margin-bottom: 10px !important; font-size: 12px !important; color: #6c757d !important; text-align: center !important; font-style: italic !important;">
-                💡 Tip: Haz clic en cualquier imagen para ver la galería completa
-            </div>
-            
-            <button onclick="abrirModalImagenesComplete('${property.id_temporal}')" 
-                    style="width: 100% !important; background: #6c757d !important; color: white !important; 
-                           border: none !important; padding: 8px !important; border-radius: 4px !important; 
-                           font-size: 12px !important; font-weight: 500 !important; cursor: pointer !important; 
-                           transition: all 0.3s ease !important; margin-bottom: 10px !important;"
-                    onmouseover="this.style.background='#5a6268'" 
-                    onmouseout="this.style.background='#6c757d'">
-                🔍 Ver Galería Completa
-            </button>
             
             <button onclick="showPropertyDetails('${property.id_temporal}')" 
                     style="width: 100% !important; background: #232deb !important; color: white !important; 
