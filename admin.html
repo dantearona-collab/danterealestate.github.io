@@ -298,48 +298,37 @@
             }
         }
         
-        // Verificar disponibilidad de backend
-        async function verificarBackend() {
-            const statusDiv = document.getElementById('status');
-            statusDiv.innerHTML = '<div class="loading">Verificando backend local...</div>';
-            
+        // Verificar disponibilidad de backend (silencioso)
+        async function verificarBackendSilencioso() {
             try {
-                const response = await fetch(`${CONFIG.backend.url}/health`);
+                const response = await fetch(`${CONFIG.backend.url}/health`, {
+                    timeout: 3000 // Timeout de 3 segundos
+                });
                 if (response.ok) {
                     CONFIG.backend.enabled = true;
-                    statusDiv.innerHTML = `
-                        <div class="success">
-                            ✅ Backend local disponible<br>
-                            📍 Usando servidor: ${CONFIG.backend.url}<br>
-                            📅 Verificado: ${new Date().toLocaleString('es-AR')}
-                        </div>
-                    `;
+                    console.log('✅ Backend disponible:', CONFIG.backend.url);
                     return true;
                 }
             } catch (error) {
-                // Backend no disponible
+                // Backend no disponible - no mostrar error al usuario automáticamente
                 CONFIG.backend.enabled = false;
-                statusDiv.innerHTML = `
-                    <div class="warning">
-                        ⚠️ Backend no disponible<br>
-                        📍 Usando datos locales (localStorage)<br>
-                        💡 Para usar backend: ejecutar sistema-formularios-backend-app.py
-                    </div>
-                `;
+                console.log('ℹ️ Backend no disponible, usando localStorage');
                 return false;
             }
         }
         
-        // Verificar conexión con localStorage (para ver si funciona)
-        function verificarConexion() {
+        // Verificar conexión completa (localStorage + Backend si disponible)
+        async function verificarConexion() {
             const localData = verificarDatosLocal();
             const statusDiv = document.getElementById('status');
             
+            // Siempre verificar localStorage primero
             if (localData.length > 0) {
                 statusDiv.innerHTML = `
                     <div class="success">
                         ✅ Sistema funcionando correctamente<br>
                         📊 Datos locales: ${localData.length} contactos<br>
+                        📡 Fuente: localStorage<br>
                         📅 Verificado: ${new Date().toLocaleString('es-AR')}
                     </div>
                 `;
@@ -347,13 +336,25 @@
                 statusDiv.innerHTML = `
                     <div class="warning">
                         ⚠️ Sin datos locales aún<br>
-                        📋 El formulario creará datos al usarse
+                        📋 El formulario creará datos al usarse<br>
+                        💡 Sistema preparado para recibir contactos
                     </div>
                 `;
             }
             
-            // Intentar verificar backend en paralelo
-            setTimeout(verificarBackend, 500);
+            // Verificar backend en paralelo sin mostrar errores al usuario
+            verificarBackendSilencioso().then(backendDisponible => {
+                if (backendDisponible) {
+                    statusDiv.innerHTML = `
+                        <div class="success">
+                            ✅ Sistema funcionando correctamente<br>
+                            📊 Datos locales: ${localData.length} contactos<br>
+                            🚀 Backend disponible: ${CONFIG.backend.url}<br>
+                            📅 Verificado: ${new Date().toLocaleString('es-AR')}
+                        </div>
+                    `;
+                }
+            });
         }
         
         // Calcular estadísticas desde localStorage
@@ -607,11 +608,42 @@
             alert(instrucciones);
         }
         
-        // Verificar conexión al cargar la página
+        // Verificar conexión específica del backend (para botones)
+        function verificarBackend() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '<div class="loading">Verificando backend local...</div>';
+            
+            verificarBackendSilencioso().then(backendDisponible => {
+                if (backendDisponible) {
+                    statusDiv.innerHTML = `
+                        <div class="success">
+                            ✅ Backend local disponible<br>
+                            📍 Usando servidor: ${CONFIG.backend.url}<br>
+                            📅 Verificado: ${new Date().toLocaleString('es-AR')}<br>
+                            💡 Ahora el sistema puede usar el backend para estadísticas avanzadas
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="warning">
+                            ⚠️ Backend no disponible<br>
+                            📍 Usando datos locales (localStorage)<br>
+                            💡 Para usar backend: ejecutar sistema-formularios-backend-app.py
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        // Verificar conexión al cargar la página (sin errores de backend)
         window.addEventListener('load', () => {
             console.log('🏢 Panel de Administración - Sistema Dual cargando...');
-            verificarConexion();
+            // Cargar datos localStorage inmediatamente
             cargarDatos();
+            // Verificar backend silenciosamente en segundo plano
+            setTimeout(() => {
+                verificarBackendSilencioso();
+            }, 1000);
         });
         
         // Actualizar cada 30 segundos (solo si hay datos)
