@@ -222,16 +222,27 @@ let globalData = {
 // Función para cargar propiedades desde JSON o datos embebidos
 async function loadProperties() {
     try {
-        const response = await fetch('propiedades.json');
-        if (!response.ok) {
-            throw new Error('No se pudo cargar propiedades.json');
+        // Intenta cargar desde el archivo local primero (para desarrollo)
+        let response;
+        try {
+            response = await fetch('propiedades.json');
+            if (!response.ok) {
+                throw new Error('No se pudo cargar propiedades.json');
+            }
+        } catch (corsError) {
+            // Si falla por CORS, intenta desde la raíz del sitio (para GitHub Pages)
+            console.log('🔄 Intentando cargar desde GitHub Pages...');
+            response = await fetch('./propiedades.json');
+            if (!response.ok) {
+                throw new Error('No se pudo cargar propiedades.json desde GitHub Pages');
+            }
         }
         
         const data = await response.json();
         globalData.properties = data;
         globalData.filteredProperties = data;
         
-        console.log('✅ Datos cargados desde propiedades.json:', data.length, 'propiedades');
+        console.log('✅ Datos cargados desde propiedades.json (GitHub Pages):', data.length, 'propiedades');
         
         // Poblar filtros
         populateFilters(data);
