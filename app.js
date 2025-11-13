@@ -1,5 +1,16 @@
-// Sistema Dante Propiedades - SIN ERRORES + SLIDER FUNCIONAL
-// Versión sin dependencias de Font Awesome + Slider de múltiples fotos - 2025-11-08
+// Sistema Dante Propiedades - SIN ERRORES + SLIDER FUNCIONAL + MODAL
+// Versión sin dependencias de Font Awesome + Slider de múltiples fotos - 2025-11-13
+
+// ========================================
+// VARIABLES GLOBALES PARA EL MODAL
+// ========================================
+
+// Variables globales para el modal
+let imagenesModal = [];
+let imagenActual = 0;
+let tituloPropiedad = '';
+
+console.log('🖼️ Variables del modal inicializadas');
 
 // ========================================
 // SISTEMA DE SLIDER DE MÚLTIPLES FOTOS
@@ -7,10 +18,6 @@
 
 // Variables globales para el slider
 let currentSlides = {};
-
-// Variables globales para el modal de imágenes
-let imagenesModal = [];
-let imagenActual = 0;
 
 // Función para crear el slider de imágenes
 function createImageSlider(property) {
@@ -113,121 +120,120 @@ function showSlide(propertyId, slideIndex) {
             dot.classList.add('active');
         }
     });
-    
-    currentSlides[propertyId] = slideIndex;
 }
 
-// Función para slide anterior
+// Funciones de navegación del slider
 function prevSlide(propertyId) {
+    if (!currentSlides[propertyId]) {
+        currentSlides[propertyId] = 0;
+    }
+    
     const slider = document.querySelector(`[data-property="${propertyId}"]`);
     if (!slider) return;
     
-    const current = currentSlides[propertyId] || 0;
     const totalSlides = slider.querySelectorAll('.property-slide').length;
-    const newIndex = current > 0 ? current - 1 : totalSlides - 1;
     
-    showSlide(propertyId, newIndex);
+    currentSlides[propertyId] = currentSlides[propertyId] > 0 
+        ? currentSlides[propertyId] - 1 
+        : totalSlides - 1;
+    
+    showSlide(propertyId, currentSlides[propertyId]);
 }
 
-// Función para slide siguiente
 function nextSlide(propertyId) {
+    if (!currentSlides[propertyId]) {
+        currentSlides[propertyId] = 0;
+    }
+    
     const slider = document.querySelector(`[data-property="${propertyId}"]`);
     if (!slider) return;
     
-    const current = currentSlides[propertyId] || 0;
     const totalSlides = slider.querySelectorAll('.property-slide').length;
-    const newIndex = current < totalSlides - 1 ? current + 1 : 0;
     
-    showSlide(propertyId, newIndex);
-}
-
-// CSS para el slider (agregar al head)
-function addSliderStyles() {
-    const style = document.createElement('style');
-    style.textContent = `
-        .property-slider {
-            position: relative;
-        }
-        
-        .property-slides-container {
-            position: relative;
-        }
-        
-        .property-slide {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-        }
-        
-        .property-slide.active {
-            opacity: 1;
-        }
-        
-        .property-slider-btn:hover {
-            background: rgba(35, 45, 235, 1) !important;
-            transform: translateY(-50%) scale(1.1) !important;
-        }
-        
-        .property-nav-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.6);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-        }
-        
-        .property-nav-dot.active {
-            background: #232deb;
-            transform: scale(1.2);
-        }
-        
-        .property-nav-dot:hover {
-            background: rgba(255, 255, 255, 0.9);
-            transform: scale(1.1);
-        }
-    `;
-    document.head.appendChild(style);
+    currentSlides[propertyId] = currentSlides[propertyId] < totalSlides - 1 
+        ? currentSlides[propertyId] + 1 
+        : 0;
+    
+    showSlide(propertyId, currentSlides[propertyId]);
 }
 
 // ========================================
-// SISTEMA DE PROPIEDADES
+// CARGA DE DATOS DE PROPIEDADES
 // ========================================
 
+// Datos embebidos de ejemplo
+const sampleData = [
+    {
+        "id_temporal": "UF001",
+        "titulo": "Terreno en Boedo",
+        "barrio": "Boedo",
+        "tipo": "Terreno",
+        "operacion": "venta",
+        "moneda_precio": "USD",
+        "precio": 45000,
+        "expensas": 0,
+        "ambientes": 0,
+        "dormitorios": 0,
+        "banos": 0,
+        "metros_cuadrados": 120,
+        "estado": "Disponible",
+        "direccion": "Carlos Galles 3200",
+        "descripcion": "Terreno con todos los servicios.",
+        "fotos": [
+            "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
+            "https://images.unsplash.com/photo-1560448075-bb4caa6c8e81?w=800",
+            "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800"
+        ],
+        "info_multimedia": "7 fotos disponibles"
+    },
+    {
+        "id_temporal": "UF002",
+        "titulo": "Monoambiente microcentro",
+        "barrio": "Microcentro",
+        "tipo": "Departamento",
+        "operacion": "alquiler",
+        "moneda_precio": "ARS",
+        "precio": 250000,
+        "moneda_expensas": "ARS",
+        "expensas": 35000,
+        "ambientes": 1,
+        "dormitorios": 1,
+        "banos": 1,
+        "metros_cuadrados": 35,
+        "estado": "Disponible",
+        "direccion": "San Martín 120",
+        "descripcion": "Monoambiente con excelente ubicación.",
+        "fotos": [
+            "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800",
+            "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800",
+            "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800",
+            "https://images.unsplash.com/photo-1600585154154-1e4ce9a0ddf2?w=800"
+        ],
+        "info_multimedia": "6 fotos disponibles"
+    }
+];
+
+// Datos globales
 let globalData = {
     properties: [],
-    filteredProperties: [],
-    filters: {
-        operacion: '',
-        barrio: '',
-        tipo: '',
-        precioMin: 0,
-        precioMax: 999999999
-    }
+    filteredProperties: []
 };
 
-// Cargar propiedades
+// Función para cargar propiedades desde JSON o datos embebidos
 async function loadProperties() {
     try {
-        console.log('📂 Cargando datos de propiedades...');
-        
         const response = await fetch('propiedades.json');
         if (!response.ok) {
-            throw new Error(`Error HTTP! status: ${response.status}`);
+            throw new Error('No se pudo cargar propiedades.json');
         }
         
         const data = await response.json();
         globalData.properties = data;
         globalData.filteredProperties = data;
         
-        console.log('✅ Datos cargados:', data.length, 'propiedades');
+        console.log('✅ Datos cargados desde propiedades.json:', data.length, 'propiedades');
         
-        // Llenar filtros
+        // Poblar filtros
         populateFilters(data);
         
         // Mostrar propiedades
@@ -239,172 +245,132 @@ async function loadProperties() {
     }
 }
 
-// Propiedades embebidas como fallback
+// Función para cargar datos embebidos
 function loadEmbeddedProperties() {
-    const sampleData = [
-        {
-            "id_temporal": "UF001",
-            "titulo": "Departamento en Palermo SoHo",
-            "barrio": "Palermo",
-            "precio": 280000,
-            "ambientes": 2,
-            "metros_cuadrados": 68,
-            "operacion": "alquiler",
-            "tipo": "departamento",
-            "descripcion": "Excelente departamento en el corazón de Palermo SoHo",
-            "direccion": "Honduras 1450",
-            "antiguedad": 3,
-            "estado": "excelente",
-            "orientacion": "norte",
-            "piso": "5",
-            "expensas": 8500,
-            "moneda_precio": "USD",
-            "moneda_expensas": "ARS",
-            "amenities": "pileta, gimnasio, sum, seguridad 24hs",
-            "cochera": "Sí",
-            "balcon": "Sí",
-            "pileta": "Sí",
-            "acepta_mascotas": "Sí",
-            "aire_acondicionado": "Sí",
-            "info_multimedia": "Fotos profesionales disponibles",
-            "fotos": [
-                "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
-                "https://images.unsplash.com/photo-1560448075-bb4caa6c8e81?w=800",
-                "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800"
-            ]
-        },
-        {
-            "id_temporal": "UF002",
-            "titulo": "Casa en Belgrano R",
-            "barrio": "Belgrano",
-            "precio": 650000,
-            "ambientes": 4,
-            "metros_cuadrados": 180,
-            "operacion": "venta",
-            "tipo": "casa",
-            "descripcion": "Magnífica casa familiar con jardín y pileta",
-            "direccion": "Juramento 2345",
-            "antiguedad": 8,
-            "estado": "excelente",
-            "orientacion": "norte",
-            "expensas": 0,
-            "moneda_precio": "USD",
-            "moneda_expensas": "ARS",
-            "amenities": "pileta, parrilla, jardín, cochera cubierta",
-            "cochera": "Sí",
-            "balcon": "Sí",
-            "pileta": "Sí",
-            "acepta_mascotas": "Sí",
-            "aire_acondicionado": "Sí",
-            "info_multimedia": "Fotos panorámicas disponibles",
-            "fotos": [
-                "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800",
-                "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800",
-                "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800",
-                "https://images.unsplash.com/photo-1600585154154-1e4ce9a0ddf2?w=800"
-            ]
-        }
-    ];
+    console.log('📂 Cargando datos de propiedades embebidos...');
     
     globalData.properties = sampleData;
     globalData.filteredProperties = sampleData;
     
-    console.log('✅ Propiedades de ejemplo cargadas:', sampleData.length);
+    console.log('✅ Datos cargados:', globalData.properties.length, 'propiedades');
+    
+    // Poblar filtros
     populateFilters(sampleData);
+    
+    // Mostrar propiedades
     displayProperties(sampleData);
 }
 
-// Llenar filtros con datos únicos
-function populateFilters(properties) {
-    const barrios = [...new Set(properties.map(p => p.barrio).filter(Boolean))].sort();
-    const tipos = [...new Set(properties.map(p => p.tipo).filter(Boolean))].sort();
+// Función para poblar filtros
+function populateFilters(data) {
+    const barrios = [...new Set(data.map(p => p.barrio))];
+    const tipos = [...new Set(data.map(p => p.tipo))];
+    const operaciones = [...new Set(data.map(p => p.operacion))];
     
     const barrioSelect = document.getElementById('barrio-select-styled');
     const tipoSelect = document.getElementById('tipo-select-styled');
+    const operacionSelect = document.getElementById('operacion-select-styled');
     
-    if (barrioSelect) {
-        barrioSelect.innerHTML = '<option value="">Todos los barrios</option>' + 
-            barrios.map(barrio => `<option value="${barrio}">${barrio}</option>`).join('');
-    }
+    // Limpiar opciones existentes excepto la primera
+    barrioSelect.innerHTML = '<option value="">Todos los barrios</option>';
+    tipoSelect.innerHTML = '<option value="">Todos los tipos</option>';
     
-    if (tipoSelect) {
-        tipoSelect.innerHTML = '<option value="">Todos los tipos</option>' + 
-            tipos.map(tipo => `<option value="${tipo}">${tipo}</option>`).join('');
-    }
+    // Agregar opciones de barrio
+    barrios.forEach(barrio => {
+        const option = document.createElement('option');
+        option.value = barrio;
+        option.textContent = barrio;
+        barrioSelect.appendChild(option);
+    });
     
-    console.log('🔧 Filtros poblados - Barrios:', barrios.length, 'Tipos:', tipos.length);
+    // Agregar opciones de tipo
+    tipos.forEach(tipo => {
+        const option = document.createElement('option');
+        option.value = tipo;
+        option.textContent = tipo;
+        tipoSelect.appendChild(option);
+    });
+    
+    console.log('🔧 Filtros poblados - Barrios:', barrios.length, 'Tipos:', tipos.length, 'Operaciones:', operaciones.length);
 }
 
-// Crear tarjeta de propiedad con slider
+// ========================================
+// CREACIÓN DE TARJETAS DE PROPIEDADES
+// ========================================
+
+// Función para crear tarjeta de propiedad
 function createPropertyCard(property) {
-    const card = document.createElement('div');
-    card.className = 'property-card';
-    card.style.cssText = `
-        background: white !important;
-        border-radius: 8px !important;
-        overflow: hidden !important;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
-        transition: transform 0.3s ease !important;
-        border: 1px solid #e1e5e9 !important;
-    `;
+    const slider = createImageSlider(property);
     
-    // Crear slider de imágenes
-    const imageSection = createImageSlider(property);
+    // Badges para tipo y operación
+    const tipoBadge = `<span class="property-badge ${property.operacion}" style="background: ${property.operacion === 'venta' ? '#232deb' : '#ff0101'}">${property.tipo} - ${property.operacion}</span>`;
     
-    card.innerHTML = `
-        ${imageSection}
-        <!-- Botón de visualización de imágenes -->
-        <button class="property-expand-btn" onclick="abrirModalImagenesComplete('${property.id_temporal}')" title="Ver imágenes en grande">
-            🔍
-        </button>
-        <div style="position: absolute; top: 10px; left: 10px;">
-            <span style="background: #232deb !important; color: white !important; padding: 4px 8px !important; border-radius: 4px !important; font-size: 12px !important; font-weight: 600 !important;">
-                ${property.operacion}
-            </span>
-        </div>
-        <div style="position: absolute; top: 10px; right: 10px;">
-            <span style="background: ${property.operacion === 'Venta' ? '#232deb' : '#ff0101'} !important; color: white !important; padding: 4px 8px !important; border-radius: 4px !important; font-size: 12px !important; font-weight: 600 !important;">
-                ${property.tipo}
-            </span>
-        </div>
-        
-        <div style="padding: 20px !important;">
-            <h3 style="margin: 0 0 10px 0 !important; color: #495057 !important; font-size: 18px !important; font-weight: 600 !important; line-height: 1.3 !important;">
-                ${property.titulo}
-            </h3>
-            
-            <div style="color: #6c757d !important; font-size: 14px !important; margin-bottom: 10px !important;">
-                📍 ${property.direccion} - ${property.barrio}
+    return `
+        <div class="property-card">
+            <!-- Badges -->
+            <div class="badges badge-left">
+                ${tipoBadge}
             </div>
             
-            <div style="margin-bottom: 15px !important;">
-                <span style="font-size: 24px !important; font-weight: 700 !important; color: #232deb !important;">
-                    ${property.moneda_precio || 'USD'} ${property.precio?.toLocaleString() || '0'}
-                </span>
-                ${property.expensas > 0 ? `<div style="font-size: 12px !important; color: #6c757d !important;">+ ${property.moneda_expensas || 'ARS'} ${property.expensas.toLocaleString()} expensas</div>` : ''}
-            </div>
+            <!-- Slider de imágenes -->
+            ${slider}
             
-            <div style="display: flex !important; justify-content: space-between !important; margin-bottom: 15px !important; font-size: 14px !important; color: #495057 !important;">
-                <span>🏠 ${property.ambientes} amb.</span>
-                <span>📏 ${property.metros_cuadrados} m²</span>
-                <span>📅 ${property.estado}</span>
+            <!-- Contenido de la tarjeta -->
+            <div class="property-content" style="padding: 20px !important;">
+                <div class="badges badge-right">
+                    <span class="property-badge">
+                        ${property.estado}
+                    </span>
+                </div>
+                
+                <h3 style="margin: 0 0 10px 0 !important; color: #495057 !important; font-size: 18px !important; font-weight: 600 !important; line-height: 1.3 !important;">
+                    ${property.titulo}
+                </h3>
+                
+                <div style="color: #6c757d !important; font-size: 14px !important; margin-bottom: 10px !important;">
+                    📍 ${property.direccion} - ${property.barrio}
+                </div>
+                
+                <div style="margin-bottom: 15px !important;">
+                    <span style="font-size: 24px !important; font-weight: 700 !important; color: #232deb !important;">
+                        ${property.moneda_precio || 'USD'} ${property.precio?.toLocaleString() || '0'}
+                    </span>
+                    ${property.expensas > 0 ? `<div style="font-size: 12px !important; color: #6c757d !important;">+ ${property.moneda_expensas || 'ARS'} ${property.expensas.toLocaleString()} expensas</div>` : ''}
+                </div>
+                
+                <div style="display: flex !important; justify-content: space-between !important; margin-bottom: 15px !important; font-size: 14px !important; color: #495057 !important;">
+                    <span>🏠 ${property.ambientes} amb.</span>
+                    <span>📏 ${property.metros_cuadrados} m²</span>
+                    <span>📅 ${property.estado}</span>
+                </div>
+                
+                <div style="margin-bottom: 15px !important;">
+                    <span style="color: #232deb !important; font-size: 14px !important; font-weight: 600 !important;">
+                        ${property.info_multimedia || 'Fotos disponibles'}
+                    </span>
+                </div>
+                
+                <!-- Botón del Modal - NUEVO -->
+                <button onclick="abrirModalImagenesComplete('${property.id_temporal}')" 
+                        style="width: 100% !important; background: #e74c3c !important; color: white !important; 
+                               border: none !important; padding: 10px !important; border-radius: 6px !important; 
+                               font-size: 14px !important; font-weight: 600 !important; cursor: pointer !important; 
+                               transition: all 0.3s ease !important; margin-bottom: 8px !important;"
+                        onmouseover="this.style.background='#c0392b'" 
+                        onmouseout="this.style.background='#e74c3c'">
+                    🔍 Ver Todas las Imágenes
+                </button>
+                
+                <button onclick="showPropertyDetails('${property.id_temporal}')" 
+                        style="width: 100% !important; background: #232deb !important; color: white !important; 
+                               border: none !important; padding: 12px !important; border-radius: 6px !important; 
+                               font-size: 14px !important; font-weight: 600 !important; cursor: pointer !important; 
+                               transition: all 0.3s ease !important;"
+                        onmouseover="this.style.background='#1a1db4'" 
+                        onmouseout="this.style.background='#232deb'">
+                    Ver Detalles
+                </button>
             </div>
-            
-            <div style="margin-bottom: 15px !important;">
-                <span style="color: #232deb !important; font-size: 14px !important; font-weight: 600 !important;">
-                    ${property.info_multimedia || 'Fotos disponibles'}
-                </span>
-            </div>
-            
-            <button onclick="showPropertyDetails('${property.id_temporal}')" 
-                    style="width: 100% !important; background: #232deb !important; color: white !important; 
-                           border: none !important; padding: 12px !important; border-radius: 6px !important; 
-                           font-size: 14px !important; font-weight: 600 !important; cursor: pointer !important; 
-                           transition: all 0.3s ease !important;"
-                    onmouseover="this.style.background='#1a1db4'" 
-                    onmouseout="this.style.background='#232deb'">
-                Ver Detalles
-            </button>
         </div>
     `;
     
@@ -419,120 +385,54 @@ function displayProperties(properties) {
     
     if (properties.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #666;">No se encontraron propiedades</p>';
+        document.getElementById('results-counter-styled').textContent = '0 propiedades encontradas';
         return;
     }
     
-    properties.forEach(property => {
-        const card = createPropertyCard(property);
-        container.appendChild(card);
-    });
+    const propertyCards = properties.map(property => createPropertyCard(property)).join('');
+    container.innerHTML = propertyCards;
+    
+    // Actualizar contador
+    document.getElementById('results-counter-styled').textContent = `${properties.length} propiedad${properties.length !== 1 ? 'es' : ''} encontrada${properties.length !== 1 ? 's' : ''}`;
     
     console.log('📋 Mostrando', properties.length, 'propiedades');
 }
 
 // ========================================
-// EVENTOS DE FILTROS
+// FUNCIONES DE BÚSQUEDA Y FILTROS
 // ========================================
 
-function setupFilterEvents() {
-    // Event listeners para filtros
-    const operacionSelect = document.getElementById('operacion-select-styled');
-    const barrioSelect = document.getElementById('barrio-select-styled');
-    const tipoSelect = document.getElementById('tipo-select-styled');
+// Función para buscar y filtrar propiedades
+function searchAndFilter() {
+    const operacion = document.getElementById('operacion-select-styled').value;
+    const barrio = document.getElementById('barrio-select-styled').value;
+    const tipo = document.getElementById('tipo-select-styled').value;
     
-    if (operacionSelect) {
-        operacionSelect.addEventListener('change', applyFilters);
-    }
-    if (barrioSelect) {
-        barrioSelect.addEventListener('change', applyFilters);
-    }
-    if (tipoSelect) {
-        tipoSelect.addEventListener('change', applyFilters);
-    }
-}
-
-function applyFilters() {
-    const operacionSelect = document.getElementById('operacion-select-styled');
-    const barrioSelect = document.getElementById('barrio-select-styled');
-    const tipoSelect = document.getElementById('tipo-select-styled');
-    
-    const selectedOperacion = operacionSelect ? operacionSelect.value : '';
-    const selectedBarrio = barrioSelect ? barrioSelect.value : '';
-    const selectedTipo = tipoSelect ? tipoSelect.value : '';
-    
-    console.log('🔍 Aplicando filtros:', { selectedOperacion, selectedBarrio, selectedTipo });
-    
-    const filtered = globalData.properties.filter(property => {
-        if (selectedOperacion && property.operacion !== selectedOperacion) return false;
-        if (selectedBarrio && property.barrio !== selectedBarrio) return false;
-        if (selectedTipo && property.tipo !== selectedTipo) return false;
-        return true;
+    let filtered = globalData.properties.filter(property => {
+        const matchesOperacion = !operacion || property.operacion === operacion;
+        const matchesBarrio = !barrio || property.barrio === barrio;
+        const matchesTipo = !tipo || property.tipo === tipo;
+        
+        return matchesOperacion && matchesBarrio && matchesTipo;
     });
     
     globalData.filteredProperties = filtered;
     displayProperties(filtered);
 }
 
-// ========================================
-// FUNCIONES AUXILIARES
-// ========================================
-
-function showPropertyDetails(propertyId) {
-    const property = globalData.properties.find(p => p.id_temporal === propertyId);
-    if (property) {
-        alert(`Detalles de ${property.titulo}\n\nPrecio: USD ${property.precio.toLocaleString()}\nBarrio: ${property.barrio}\nAmbientes: ${property.ambientes}\nDirección: ${property.direccion}\n\nFotos disponibles: ${property.fotos?.length || 0}`);
-    }
+// Función para aplicar filtros (wrapper)
+function applyFilters() {
+    searchAndFilter();
 }
 
 // ========================================
-// INICIALIZACIÓN
-// ========================================
-
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🏠 Sistema Dante Propiedades - Sin errores + Slider cargando...');
-    console.log('🎯 Sistema de slider de múltiples fotos incluido');
-    console.log('✅ Sin dependencias de Font Awesome');
-    
-    // Cargar CSS del slider
-    addSliderStyles();
-    
-    // Cargar propiedades
-    loadProperties();
-    
-    // Configurar eventos de filtros
-    setTimeout(setupFilterEvents, 100);
-    
-    console.log('✅ Sistema inicializado sin errores de consola');
-    console.log('🎠 Slider de múltiples fotos disponible');
-});
-
-// ========================================
-// VERIFICACIÓN DE RECURSOS
-// ========================================
-
-function checkResourceErrors() {
-    const imageErrors = [];
-    
-    // Verificar imágenes que no cargan
-    document.querySelectorAll('img').forEach(img => {
-        img.addEventListener('error', function() {
-            imageErrors.push(this.src);
-            console.warn('⚠️ Imagen no encontrada:', this.src);
-        });
-    });
-    
-    return imageErrors;
-}
-
-// ========================================
-// SISTEMA DE MODAL DE IMÁGENES
+// FUNCIONES DEL MODAL
 // ========================================
 
 function abrirModalImagenesComplete(propertyId) {
     try {
         console.log('📸 Iniciando apertura de modal para propiedad:', propertyId);
         
-        // Buscar propiedad en globalData
         const property = globalData.properties.find(p => p.id_temporal === propertyId);
         
         if (!property) {
@@ -548,30 +448,10 @@ function abrirModalImagenesComplete(propertyId) {
         }
         
         console.log('✅ Propiedad encontrada:', property.titulo, 'con', property.fotos.length, 'imágenes');
-        
-        // Función auxiliar para abrir el modal con retry
-        const abrirConRetry = (intentos = 0) => {
-            const maxIntentos = 3;
-            const delay = 100; // 100ms entre intentos
-            
-            try {
-                abrirModalImagenes(property);
-            } catch (error) {
-                if (intentos < maxIntentos) {
-                    console.log(`🔄 Retry ${intentos + 1}/${maxIntentos} en ${delay}ms...`);
-                    setTimeout(() => abrirConRetry(intentos + 1), delay);
-                } else {
-                    console.error('❌ Error al abrir modal después de todos los intentos:', error);
-                    alert('Error al abrir la galería de imágenes. Por favor, recarga la página e intenta nuevamente.');
-                }
-            }
-        };
-        
-        // Intentar abrir el modal
-        abrirConRetry();
+        abrirModalImagenes(property);
         
     } catch (error) {
-        console.error('❌ Error general al abrir modal de imágenes:', error);
+        console.error('❌ Error al abrir modal de imágenes:', error);
         alert('Error al abrir la galería de imágenes.');
     }
 }
@@ -580,12 +460,13 @@ function abrirModalImagenes(property) {
     try {
         imagenesModal = property.fotos;
         imagenActual = 0;
+        tituloPropiedad = property.titulo;
         
         // Verificar que el modal existe
         const modalElement = document.getElementById('modal-imagenes');
         if (!modalElement) {
             console.error('❌ Error: Elemento modal-imagenes no encontrado en el DOM');
-            alert('Error: No se pudo encontrar el elemento del modal. Verifica que el HTML esté cargado correctamente.');
+            alert('Error: No se pudo encontrar el elemento del modal. Recarga la página e intenta nuevamente.');
             return;
         }
         
@@ -593,7 +474,7 @@ function abrirModalImagenes(property) {
         const tituloElement = document.getElementById('imagen-titulo');
         if (!tituloElement) {
             console.error('❌ Error: Elemento imagen-titulo no encontrado en el DOM');
-            alert('Error: No se pudo encontrar el elemento del título. Verifica que el HTML esté cargado correctamente.');
+            alert('Error: No se pudo encontrar el elemento del título. Recarga la página e intenta nuevamente.');
             return;
         }
         
@@ -614,7 +495,8 @@ function abrirModalImagenes(property) {
         console.log('✅ Modal abierto para:', property.titulo);
         
     } catch (error) {
-        console.error('❌ Error al abrir modal:', error);
+        console.error('❌ Error en abrirModalImagenes:', error);
+        throw error;
     }
 }
 
@@ -666,67 +548,132 @@ function actualizarContadorImagen() {
 }
 
 function configurarEventosModal() {
-    // Remover listeners anteriores si existen
+    // Remover listener anterior si existe
     document.removeEventListener('keydown', modalKeyHandler);
     
     // Agregar nuevo listener
     document.addEventListener('keydown', modalKeyHandler);
-    
-    // Cerrar al hacer clic fuera del modal
-    document.getElementById('modal-imagenes').addEventListener('click', function(e) {
-        if (e.target === this) {
-            cerrarModalImagenes();
-        }
-    });
 }
 
-function modalKeyHandler(e) {
+function modalKeyHandler(event) {
+    // Solo procesar teclas si el modal está abierto
     const modal = document.getElementById('modal-imagenes');
-    if (modal.style.display !== 'block') return;
+    if (!modal || modal.style.display !== 'block') return;
     
-    switch(e.key) {
+    switch (event.key) {
         case 'Escape':
-            e.preventDefault();
+            event.preventDefault();
             cerrarModalImagenes();
             break;
         case 'ArrowLeft':
-            e.preventDefault();
+            event.preventDefault();
             imagenAnterior();
             break;
         case 'ArrowRight':
-            e.preventDefault();
+            event.preventDefault();
             imagenSiguiente();
             break;
     }
 }
 
-// Función para verificar el estado del modal
-function verificarEstadoModal() {
-    const elementos = [
-        { id: 'modal-imagenes', nombre: 'Modal Principal' },
-        { id: 'imagen-principal', nombre: 'Imagen Principal' },
-        { id: 'imagen-contador', nombre: 'Contador' },
-        { id: 'imagen-titulo', nombre: 'Título' }
-    ];
+// ========================================
+// FUNCIONES AUXILIARES
+// ========================================
+
+function showPropertyDetails(propertyId) {
+    const property = globalData.properties.find(p => p.id_temporal === propertyId);
+    if (property) {
+        alert(`Detalles de ${property.titulo}\n\nPrecio: USD ${property.precio.toLocaleString()}\nBarrio: ${property.barrio}\nAmbientes: ${property.ambientes}\nDirección: ${property.direccion}\n\nFotos disponibles: ${property.fotos?.length || 0}`);
+    }
+}
+
+// Función de búsqueda en tiempo real
+function setupRealTimeSearch() {
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        let searchTimeout;
+        
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const searchTerm = this.value.toLowerCase();
+                
+                let filtered = globalData.properties.filter(property => {
+                    return property.titulo.toLowerCase().includes(searchTerm) ||
+                           property.barrio.toLowerCase().includes(searchTerm) ||
+                           property.direccion.toLowerCase().includes(searchTerm) ||
+                           property.descripcion.toLowerCase().includes(searchTerm);
+                });
+                
+                // Aplicar también los filtros de selects
+                const operacion = document.getElementById('operacion-select-styled').value;
+                const barrio = document.getElementById('barrio-select-styled').value;
+                const tipo = document.getElementById('tipo-select-styled').value;
+                
+                if (operacion) {
+                    filtered = filtered.filter(p => p.operacion === operacion);
+                }
+                if (barrio) {
+                    filtered = filtered.filter(p => p.barrio === barrio);
+                }
+                if (tipo) {
+                    filtered = filtered.filter(p => p.tipo === tipo);
+                }
+                
+                globalData.filteredProperties = filtered;
+                displayProperties(filtered);
+            }, 300);
+        });
+    }
+}
+
+// ========================================
+// INICIALIZACIÓN DEL SISTEMA
+// ========================================
+
+// Configurar filtros en botones
+document.addEventListener('DOMContentLoaded', function() {
+    // Configurar eventos de filtros
+    const searchBtn = document.getElementById('search-btn-styled');
+    const resetBtn = document.getElementById('reset-btn-styled');
     
-    const resultados = [];
+    if (searchBtn) {
+        searchBtn.addEventListener('click', searchAndFilter);
+    }
     
-    elementos.forEach(elemento => {
-        const existe = document.getElementById(elemento.id) !== null;
-        resultados.push({
-            elemento: elemento.nombre,
-            id: elemento.id,
-            existe: existe
+    if (resetBtn) {
+        resetBtn.addEventListener('click', function() {
+            document.getElementById('operacion-select-styled').value = '';
+            document.getElementById('barrio-select-styled').value = '';
+            document.getElementById('tipo-select-styled').value = '';
+            
+            globalData.filteredProperties = globalData.properties;
+            displayProperties(globalData.properties);
+        });
+    }
+    
+    // Cargar propiedades
+    loadProperties();
+    
+    // Configurar búsqueda en tiempo real
+    setupRealTimeSearch();
+});
+
+// Función de carga inicial (sincronizada)
+window.loadProperties = loadProperties;
+
+// Función para verificar errores de recursos
+function checkResourceErrors() {
+    const imageErrors = [];
+    
+    document.querySelectorAll('img').forEach(img => {
+        img.addEventListener('error', function() {
+            imageErrors.push(this.src);
+            console.warn('⚠️ Imagen no encontrada:', this.src);
         });
     });
     
-    console.log('🔍 Verificación del estado del modal:');
-    resultados.forEach(resultado => {
-        const status = resultado.existe ? '✅' : '❌';
-        console.log(`${status} ${resultado.elemento} (${resultado.id}): ${resultado.existe ? 'Existe' : 'No existe'}`);
-    });
-    
-    return resultados.every(r => r.existe);
+    return imageErrors;
 }
 
 // Verificar errores al cargar
@@ -736,18 +683,12 @@ window.addEventListener('load', function() {
         if (errors.length === 0) {
             console.log('✅ Todos los recursos cargados correctamente');
             console.log('🎯 Sistema completamente funcional');
-            
-            // Verificar estado del modal
-            setTimeout(() => {
-                const modalOK = verificarEstadoModal();
-                if (modalOK) {
-                    console.log('🖼️ Sistema de modal de imágenes listo');
-                } else {
-                    console.error('❌ Elementos del modal no encontrados');
-                }
-            }, 500);
         } else {
             console.log('⚠️ Errores de recursos:', errors.length);
         }
     }, 1000);
 });
+
+console.log('🏠 Sistema Dante Propiedades - Sin errores + Slider cargando...');
+console.log('🎯 Sistema de slider de múltiples fotos incluido');
+console.log('✅ Sin dependencias de Font Awesome');
