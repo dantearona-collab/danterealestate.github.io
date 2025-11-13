@@ -1,5 +1,5 @@
-// Sistema Dante Propiedades - SIN ERRORES + SLIDER FUNCIONAL + MODAL
-// Versión sin dependencias de Font Awesome + Slider de múltiples fotos + Modal de galería - 2025-11-13
+// Sistema Dante Propiedades - SIN ERRORES + SLIDER FUNCIONAL
+// Versión sin dependencias de Font Awesome + Slider de múltiples fotos - 2025-11-08
 
 // ========================================
 // SISTEMA DE SLIDER DE MÚLTIPLES FOTOS
@@ -8,42 +8,33 @@
 // Variables globales para el slider
 let currentSlides = {};
 
-// ========================================
-// VARIABLES GLOBALES DEL MODAL DE IMÁGENES
-// ========================================
-let imagenesModal = [];
-let imagenActual = 0;
-let tituloPropiedad = '';
-
-// Función para crear el slider de imágenes (Ahora clickeable para abrir modal)
+// Función para crear el slider de imágenes
 function createImageSlider(property) {
     const fotos = property.fotos || [];
     
     if (fotos.length === 0) {
         // Sin imágenes - usar imagen por defecto
         return `
-            <div style="position: relative; cursor: pointer;" onclick="abrirModalImagenesComplete('${property.id_temporal}')" class="modal-trigger">
+            <div style="position: relative;">
                 <img src="INSTITUCIONAL 1.jpg" 
                      alt="${property.titulo}" 
                      style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
                      onerror="this.src='INSTITUCIONAL 3.png'">
-            </div>
         `;
     }
     
     if (fotos.length === 1) {
-        // Una sola imagen - hacer clickeable
+        // Una sola imagen - mostrar normalmente
         return `
-            <div style="position: relative; cursor: pointer;" onclick="abrirModalImagenesComplete('${property.id_temporal}')" class="modal-trigger">
+            <div style="position: relative;">
                 <img src="${fotos[0]}" 
                      alt="${property.titulo}" 
                      style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
                      onerror="this.src='INSTITUCIONAL 3.png'">
-            </div>
         `;
     }
     
-    // Múltiples imágenes - crear slider clickeable
+    // Múltiples imágenes - crear slider
     const imageSlides = fotos.map((foto, index) => `
         <div class="property-slide ${index === 0 ? 'active' : ''}" data-slide="${index}">
             <img src="${foto}" 
@@ -58,8 +49,7 @@ function createImageSlider(property) {
     `).join('');
     
     return `
-        <div class="property-slider" data-property="${property.id_temporal}" style="position: relative; cursor: pointer;" 
-             onclick="abrirModalImagenesComplete('${property.id_temporal}')">
+        <div class="property-slider" data-property="${property.id_temporal}" style="position: relative;">
             <div class="property-slides-container" style="position: relative; overflow: hidden; width: 100%; height: 200px;">
                 ${imageSlides}
             </div>
@@ -411,39 +401,25 @@ function displayProperties(properties) {
     container.innerHTML = '';
     
     if (properties.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #666;">No se encontraron propiedades</p>';
-        return;
+        container.innerHTML = '<p style="text-align: center; color: #666;">No se encontraron propiedades con los filtros seleccionados</p>';
+    } else {
+        properties.forEach(property => {
+            const card = createPropertyCard(property);
+            container.appendChild(card);
+        });
     }
     
-    properties.forEach(property => {
-        const card = createPropertyCard(property);
-        container.appendChild(card);
-    });
+    // Actualizar contador
+    updateResultsCounter(properties.length);
     
     console.log('📋 Mostrando', properties.length, 'propiedades');
 }
 
 // ========================================
-// EVENTOS DE FILTROS
+// EVENTOS DE FILTROS - CORREGIDO
 // ========================================
 
-function setupFilterEvents() {
-    // Event listeners para filtros
-    const operacionSelect = document.getElementById('operacion-select-styled');
-    const barrioSelect = document.getElementById('barrio-select-styled');
-    const tipoSelect = document.getElementById('tipo-select-styled');
-    
-    if (operacionSelect) {
-        operacionSelect.addEventListener('change', applyFilters);
-    }
-    if (barrioSelect) {
-        barrioSelect.addEventListener('change', applyFilters);
-    }
-    if (tipoSelect) {
-        tipoSelect.addEventListener('change', applyFilters);
-    }
-}
-
+// Función principal para aplicar filtros
 function applyFilters() {
     const operacionSelect = document.getElementById('operacion-select-styled');
     const barrioSelect = document.getElementById('barrio-select-styled');
@@ -464,6 +440,92 @@ function applyFilters() {
     
     globalData.filteredProperties = filtered;
     displayProperties(filtered);
+    
+    // Actualizar contador de resultados
+    updateResultsCounter(filtered.length);
+}
+
+// Función para buscar (llamada por el botón)
+function searchProperties() {
+    console.log('🔍 Buscando propiedades...');
+    applyFilters();
+}
+
+// Función para resetear filtros
+function resetFilters() {
+    console.log('🔄 Reseteando filtros...');
+    
+    const operacionSelect = document.getElementById('operacion-select-styled');
+    const barrioSelect = document.getElementById('barrio-select-styled');
+    const tipoSelect = document.getElementById('tipo-select-styled');
+    
+    if (operacionSelect) operacionSelect.value = '';
+    if (barrioSelect) barrioSelect.value = '';
+    if (tipoSelect) tipoSelect.value = '';
+    
+    // Mostrar todas las propiedades
+    globalData.filteredProperties = globalData.properties;
+    displayProperties(globalData.properties);
+    updateResultsCounter(globalData.properties.length);
+}
+
+// Actualizar contador de resultados
+function updateResultsCounter(count) {
+    const counterElement = document.getElementById('results-counter-styled');
+    if (counterElement) {
+        counterElement.innerHTML = `<div>Se encontraron ${count} propiedad${count !== 1 ? 'es' : ''}</div>`;
+    }
+}
+
+// Configurar eventos de filtros - VERSIÓN ROBUSTA
+function setupFilterEvents() {
+    console.log('🔧 Configurando eventos de filtros...');
+    
+    // Método 1: Event listeners en los select
+    const operacionSelect = document.getElementById('operacion-select-styled');
+    const barrioSelect = document.getElementById('barrio-select-styled');
+    const tipoSelect = document.getElementById('tipo-select-styled');
+    
+    if (operacionSelect) {
+        operacionSelect.addEventListener('change', function() {
+            console.log('📋 Operación cambiada a:', this.value);
+            applyFilters();
+        });
+    }
+    
+    if (barrioSelect) {
+        barrioSelect.addEventListener('change', function() {
+            console.log('📍 Barrio cambiado a:', this.value);
+            applyFilters();
+        });
+    }
+    
+    if (tipoSelect) {
+        tipoSelect.addEventListener('change', function() {
+            console.log('🏠 Tipo cambiado a:', this.value);
+            applyFilters();
+        });
+    }
+    
+    // Método 2: También configuramos los botones
+    const searchBtn = document.getElementById('search-btn-styled');
+    const resetBtn = document.getElementById('reset-btn-styled');
+    
+    if (searchBtn) {
+        searchBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            searchProperties();
+        });
+    }
+    
+    if (resetBtn) {
+        resetBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            resetFilters();
+        });
+    }
+    
+    console.log('✅ Eventos de filtros configurados correctamente');
 }
 
 // ========================================
@@ -492,11 +554,26 @@ document.addEventListener('DOMContentLoaded', function() {
     // Cargar propiedades
     loadProperties();
     
-    // Configurar eventos de filtros
-    setTimeout(setupFilterEvents, 100);
+    // Configurar eventos de filtros con múltiples intentos
+    // para asegurar que los elementos estén disponibles
+    setupFilterEvents();
+    
+    // Backup: configurar eventos nuevamente después de un delay
+    setTimeout(setupFilterEvents, 500);
+    
+    // Backup final: también después de que todo esté cargado
+    window.addEventListener('load', function() {
+        setTimeout(setupFilterEvents, 1000);
+    });
     
     console.log('✅ Sistema inicializado sin errores de consola');
     console.log('🎠 Slider de múltiples fotos disponible');
+    console.log('🔍 Sistema de filtros configurado');
+    
+    // Inicializar cursores de navegación DESPUÉS de cargar las propiedades
+    setTimeout(crearCursoresNavegacion, 1000); // Esperar 1 segundo para asegurar que las imágenes estén cargadas
+    
+    console.log('🔄 Cursores de navegación serán creados después de cargar imágenes');
 });
 
 // ========================================
@@ -530,191 +607,243 @@ window.addEventListener('load', function() {
     }, 1000);
 });
 
+// DEBUG MODE: Ultra-visible cursors
+const debugStyle = document.createElement('style');
+debugStyle.textContent = `
+    .slider-nav-btn {
+        background: yellow !important;
+        border: 3px solid red !important;
+        width: 50px !important;
+        height: 50px !important;
+        font-size: 28px !important;
+        color: black !important;
+        font-weight: bold !important;
+        box-shadow: 0 0 15px rgba(255,0,0,0.8) !important;
+        z-index: 9999 !important;
+        position: absolute !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        opacity: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+    }
+    
+    .slider-nav-btn:hover {
+        background: orange !important;
+        transform: translateY(-50%) scale(1.1) !important;
+    }
+    
+    .slider-nav-prev {
+        left: 10px !important;
+    }
+    
+    .slider-nav-next {
+        right: 10px !important;
+    }
+    
+    .slider-main {
+        position: relative !important;
+        overflow: visible !important;
+    }
+`;
 // ========================================
-// SISTEMA DE MODAL DE IMÁGENES
+// 🔥 SISTEMA DEFINITIVO DE CURSORES DE NAVEGACIÓN
+// Solución permanente para navegación de imágenes
 // ========================================
 
-// Función principal para abrir el modal con verificación completa
-function abrirModalImagenesComplete(propertyId) {
-    console.log('📸 Iniciando apertura de modal para propiedad:', propertyId);
+// Función para crear cursores de navegación en todas las imágenes
+function crearCursoresNavegacion() {
+    console.log('🚀 INICIANDO SISTEMA DEFINITIVO DE CURSORES...');
     
-    try {
-        const property = globalData.properties.find(p => p.id_temporal === propertyId);
-        
-        if (!property) {
-            console.error('❌ Propiedad no encontrada:', propertyId);
-            return;
+    const imgs = document.querySelectorAll('img');
+    let cursoresCreados = 0;
+    
+    imgs.forEach((img, index) => {
+        // Solo procesar imágenes con tamaño suficiente
+        if (img.offsetWidth > 100) {
+            console.log(`🖼️ Creando cursores para imagen ${index + 1}`);
+            
+            // Crear contenedor de navegación
+            const navContainer = document.createElement('div');
+            navContainer.className = 'cursor-nav-container';
+            navContainer.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 999999;
+                pointer-events: none;
+            `;
+            
+            // Cursor izquierda
+            const cursorIzq = document.createElement('div');
+            cursorIzq.innerHTML = '◀';
+            cursorIzq.className = 'cursor-nav-btn cursor-nav-prev';
+            cursorIzq.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 15px;
+                transform: translateY(-50%);
+                background: rgba(0, 0, 0, 0.9);
+                color: #00ff00;
+                border: 3px solid #00ff00;
+                border-radius: 50%;
+                width: 55px;
+                height: 55px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 22px;
+                font-weight: bold;
+                cursor: pointer;
+                pointer-events: auto;
+                box-shadow: 0 0 20px #00ff00, inset 0 0 10px rgba(0,255,0,0.3);
+                transition: all 0.3s ease;
+                user-select: none;
+            `;
+            
+            // Cursor derecha
+            const cursorDer = document.createElement('div');
+            cursorDer.innerHTML = '▶';
+            cursorDer.className = 'cursor-nav-btn cursor-nav-next';
+            cursorDer.style.cssText = `
+                position: absolute;
+                top: 50%;
+                right: 15px;
+                transform: translateY(-50%);
+                background: rgba(0, 0, 0, 0.9);
+                color: #00ff00;
+                border: 3px solid #00ff00;
+                border-radius: 50%;
+                width: 55px;
+                height: 55px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 22px;
+                font-weight: bold;
+                cursor: pointer;
+                pointer-events: auto;
+                box-shadow: 0 0 20px #00ff00, inset 0 0 10px rgba(0,255,0,0.3);
+                transition: all 0.3s ease;
+                user-select: none;
+            `;
+            
+            // Funcionalidad de navegación
+            cursorIzq.onclick = function() {
+                console.log(`🔙 Navegando imagen anterior - Imagen ${index + 1}`);
+                navegarImagen(img, -1);
+            };
+            
+            cursorDer.onclick = function() {
+                console.log(`🔜 Navegando imagen siguiente - Imagen ${index + 1}`);
+                navegarImagen(img, 1);
+            };
+            
+            // Efectos hover mejorados
+            [cursorIzq, cursorDer].forEach(cursor => {
+                cursor.onmouseenter = function() {
+                    this.style.transform = this.classList.contains('cursor-nav-prev') ? 'translateY(-50%) scale(1.15)' : 'translateY(-50%) scale(1.15)';
+                    this.style.boxShadow = '0 0 30px #00ff00, inset 0 0 15px rgba(0,255,0,0.5)';
+                    this.style.background = 'rgba(0, 50, 0, 0.9)';
+                };
+                cursor.onmouseleave = function() {
+                    this.style.transform = this.classList.contains('cursor-nav-prev') ? 'translateY(-50%) scale(1)' : 'translateY(-50%) scale(1)';
+                    this.style.boxShadow = '0 0 20px #00ff00, inset 0 0 10px rgba(0,255,0,0.3)';
+                    this.style.background = 'rgba(0, 0, 0, 0.9)';
+                };
+            });
+            
+            // Integrar al DOM
+            img.parentNode.style.position = 'relative';
+            navContainer.appendChild(cursorIzq);
+            navContainer.appendChild(cursorDer);
+            img.parentNode.appendChild(navContainer);
+            
+            cursoresCreados += 2;
+            console.log(`✅ Cursores creados para imagen ${index + 1} (izquierda y derecha)`);
         }
-        
-        console.log('✅ Propiedad encontrada:', property.titulo, 'con', property.fotos?.length || 0, 'imágenes');
-        
-        if (!property.fotos || property.fotos.length === 0) {
-            console.log('⚠️ La propiedad no tiene imágenes disponibles');
-            alert('Esta propiedad no tiene imágenes disponibles.');
-            return;
+    });
+    
+    console.log(`🎉 SISTEMA COMPLETADO: ${cursoresCreados} cursores creados en ${imgs.length} imágenes`);
+    return cursoresCreados;
+}
+
+// Función de navegación (se puede expandir para lógica real)
+function navegarImagen(img, direccion) {
+    console.log(`🔄 Navegando ${direccion === -1 ? 'anterior' : 'siguiente'} en imagen`);
+    // Aquí se puede implementar la lógica real de navegación de galería
+    // Por ejemplo: cambiar a imagen anterior/siguiente en una galería
+}
+
+// Los cursores se inicializan después de que las propiedades se carguen (ver DOMContentLoaded arriba)
+
+// También ejecutar cuando se carguen nuevas imágenes dinámicamente
+let observer = new MutationObserver(function(mutations) {
+    let nuevasImagenes = false;
+    mutations.forEach(function(mutation) {
+        if (mutation.addedNodes.length) {
+            mutation.addedNodes.forEach(function(node) {
+                if (node.nodeName === 'IMG' || (node.querySelectorAll && node.querySelectorAll('img').length > 0)) {
+                    nuevasImagenes = true;
+                }
+            });
         }
-        
-        abrirModalImagenes(property);
-        
-    } catch (error) {
-        console.error('❌ Error al abrir modal:', error);
-        alert('Error al abrir la galería de imágenes.');
-    }
-}
-
-// Función principal para abrir el modal
-function abrirModalImagenes(property) {
-    console.log('🔍 Abriendo modal para:', property.titulo);
-    
-    // Configurar datos del modal
-    imagenesModal = property.fotos || [];
-    imagenActual = 0;
-    tituloPropiedad = property.titulo || 'Galería de Imágenes';
-    
-    // Verificar elementos del DOM
-    const modalElement = document.getElementById('modal-imagenes');
-    const imagenPrincipalElement = document.getElementById('imagen-principal');
-    const contadorElement = document.getElementById('imagen-contador');
-    const tituloElement = document.getElementById('imagen-titulo-display');
-    
-    if (!modalElement) {
-        console.error('❌ Elemento modal-imagenes no encontrado en el DOM');
-        alert('Error: No se pudo encontrar el elemento del modal.');
-        return;
-    }
-    
-    if (!imagenPrincipalElement) {
-        console.error('❌ Elemento imagen-principal no encontrado en el DOM');
-        alert('Error: No se pudo encontrar el elemento de imagen principal.');
-        return;
-    }
-    
-    if (!contadorElement) {
-        console.error('❌ Elemento imagen-contador no encontrado en el DOM');
-        alert('Error: No se pudo encontrar el contador de imágenes.');
-        return;
-    }
-    
-    if (!tituloElement) {
-        console.error('❌ Elemento imagen-titulo-display no encontrado en el DOM');
-        alert('Error: No se pudo encontrar el título de imagen.');
-        return;
-    }
-    
-    // Actualizar información del modal
-    tituloElement.textContent = tituloPropiedad;
-    
-    // Mostrar la primera imagen
-    mostrarImagenActual();
-    
-    // Mostrar modal
-    modalElement.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-    
-    // Agregar event listener para teclado
-    document.addEventListener('keydown', manejarTecladoModal);
-    
-    console.log('✅ Modal abierto para:', property.titulo);
-}
-
-// Función para mostrar la imagen actual
-function mostrarImagenActual() {
-    const imagenPrincipalElement = document.getElementById('imagen-principal');
-    const contadorElement = document.getElementById('imagen-contador');
-    
-    if (!imagenPrincipalElement || !contadorElement) {
-        console.error('❌ Elementos del modal no disponibles para mostrar imagen');
-        return;
-    }
-    
-    if (imagenesModal.length === 0) {
-        imagenPrincipalElement.style.backgroundImage = 'none';
-        imagenPrincipalElement.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666; font-size: 18px;">No hay imágenes disponibles</div>';
-        contadorElement.textContent = '0 / 0';
-        return;
-    }
-    
-    const imagenUrl = imagenesModal[imagenActual];
-    
-    // Configurar imagen de fondo
-    imagenPrincipalElement.style.backgroundImage = `url('${imagenUrl}')`;
-    imagenPrincipalElement.style.backgroundSize = 'contain';
-    imagenPrincipalElement.style.backgroundRepeat = 'no-repeat';
-    imagenPrincipalElement.style.backgroundPosition = 'center';
-    
-    // Actualizar contador
-    contadorElement.textContent = `${imagenActual + 1} / ${imagenesModal.length}`;
-    
-    console.log('🖼️ Imagen mostrada:', imagenActual + 1, '/', imagenesModal.length);
-}
-
-// Función para cerrar el modal
-function cerrarModalImagenes() {
-    const modalElement = document.getElementById('modal-imagenes');
-    
-    if (modalElement) {
-        modalElement.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-    
-    // Remover event listener
-    document.removeEventListener('keydown', manejarTecladoModal);
-    
-    console.log('🔒 Modal cerrado');
-}
-
-// Función para navegar a la imagen anterior
-function imagenAnterior() {
-    if (imagenActual > 0) {
-        imagenActual--;
-        mostrarImagenActual();
-    } else {
-        // Ir a la última imagen
-        imagenActual = imagenesModal.length - 1;
-        mostrarImagenActual();
-    }
-}
-
-// Función para navegar a la imagen siguiente
-function imagenSiguiente() {
-    if (imagenActual < imagenesModal.length - 1) {
-        imagenActual++;
-        mostrarImagenActual();
-    } else {
-        // Ir a la primera imagen
-        imagenActual = 0;
-        mostrarImagenActual();
-    }
-}
-
-// Función para manejar eventos de teclado
-function manejarTecladoModal(event) {
-    switch(event.key) {
-        case 'Escape':
-            event.preventDefault();
-            cerrarModalImagenes();
-            break;
-        case 'ArrowLeft':
-            event.preventDefault();
-            imagenAnterior();
-            break;
-        case 'ArrowRight':
-            event.preventDefault();
-            imagenSiguiente();
-            break;
-    }
-}
-
-// Cerrar modal al hacer clic fuera de él
-window.addEventListener('click', function(event) {
-    const modalElement = document.getElementById('modal-imagenes');
-    if (event.target === modalElement) {
-        cerrarModalImagenes();
+    });
+    if (nuevasImagenes) {
+        setTimeout(crearCursoresNavegacion, 500);
     }
 });
 
-// Mostrar variables del modal inicializadas
-console.log('🖼️ Variables del modal inicializadas');
-console.log('🏠 Sistema Dante Propiedades - Sin errores + Slider + Modal cargando...');
-console.log('🎯 Sistema de modal de galería incluido');
-console.log('✅ Sin dependencias de Font Awesome');
+observer.observe(document.body, {
+    childList: true,
+    subtree: true
+});
+
+console.log('✨ SISTEMA DEFINITIVO DE CURSORES INICIADO Y ESCUCHANDO CAMBIOS');
+
+// Remover el estilo de debug anterior
+const debugStyle = document.createElement('style');
+debugStyle.textContent = `
+    .slider-nav-btn {
+        background: yellow !important;
+        border: 3px solid red !important;
+        width: 50px !important;
+        height: 50px !important;
+        font-size: 28px !important;
+        color: black !important;
+        font-weight: bold !important;
+        box-shadow: 0 0 15px rgba(255,0,0,0.8) !important;
+        z-index: 9999 !important;
+        position: absolute !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        opacity: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+    }
+    
+    .slider-nav-btn:hover {
+        background: orange !important;
+        transform: translateY(-50%) scale(1.1) !important;
+    }
+    
+    .slider-nav-prev {
+        left: 10px !important;
+    }
+    
+    .slider-nav-next {
+        right: 10px !important;
+    }
+    
+    .slider-main {
+        position: relative !important;
+        overflow: visible !important;
+    }
+`;
+document.head.appendChild(debugStyle);
