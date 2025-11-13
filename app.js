@@ -548,10 +548,30 @@ function abrirModalImagenesComplete(propertyId) {
         }
         
         console.log('✅ Propiedad encontrada:', property.titulo, 'con', property.fotos.length, 'imágenes');
-        abrirModalImagenes(property);
+        
+        // Función auxiliar para abrir el modal con retry
+        const abrirConRetry = (intentos = 0) => {
+            const maxIntentos = 3;
+            const delay = 100; // 100ms entre intentos
+            
+            try {
+                abrirModalImagenes(property);
+            } catch (error) {
+                if (intentos < maxIntentos) {
+                    console.log(`🔄 Retry ${intentos + 1}/${maxIntentos} en ${delay}ms...`);
+                    setTimeout(() => abrirConRetry(intentos + 1), delay);
+                } else {
+                    console.error('❌ Error al abrir modal después de todos los intentos:', error);
+                    alert('Error al abrir la galería de imágenes. Por favor, recarga la página e intenta nuevamente.');
+                }
+            }
+        };
+        
+        // Intentar abrir el modal
+        abrirConRetry();
         
     } catch (error) {
-        console.error('❌ Error al abrir modal de imágenes:', error);
+        console.error('❌ Error general al abrir modal de imágenes:', error);
         alert('Error al abrir la galería de imágenes.');
     }
 }
@@ -561,12 +581,28 @@ function abrirModalImagenes(property) {
         imagenesModal = property.fotos;
         imagenActual = 0;
         
+        // Verificar que el modal existe
+        const modalElement = document.getElementById('modal-imagenes');
+        if (!modalElement) {
+            console.error('❌ Error: Elemento modal-imagenes no encontrado en el DOM');
+            alert('Error: No se pudo encontrar el elemento del modal. Verifica que el HTML esté cargado correctamente.');
+            return;
+        }
+        
+        // Verificar que el título existe
+        const tituloElement = document.getElementById('imagen-titulo');
+        if (!tituloElement) {
+            console.error('❌ Error: Elemento imagen-titulo no encontrado en el DOM');
+            alert('Error: No se pudo encontrar el elemento del título. Verifica que el HTML esté cargado correctamente.');
+            return;
+        }
+        
         // Mostrar modal
-        document.getElementById('modal-imagenes').style.display = 'block';
+        modalElement.style.display = 'block';
         document.body.style.overflow = 'hidden';
         
         // Configurar información
-        document.getElementById('imagen-titulo').textContent = property.titulo;
+        tituloElement.textContent = property.titulo;
         actualizarContadorImagen();
         
         // Mostrar primera imagen
@@ -583,16 +619,26 @@ function abrirModalImagenes(property) {
 }
 
 function cerrarModalImagenes() {
-    document.getElementById('modal-imagenes').style.display = 'none';
-    document.body.style.overflow = 'auto';
-    console.log('🔒 Modal cerrado');
+    const modalElement = document.getElementById('modal-imagenes');
+    if (modalElement) {
+        modalElement.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        console.log('🔒 Modal cerrado');
+    } else {
+        console.warn('⚠️ Elemento modal-imagenes no encontrado para cerrar');
+    }
 }
 
 function mostrarImagenActual() {
     if (imagenActual >= 0 && imagenActual < imagenesModal.length) {
         const imagen = imagenesModal[imagenActual];
-        document.getElementById('imagen-principal').style.backgroundImage = `url('${imagen}')`;
-        actualizarContadorImagen();
+        const imagenPrincipalElement = document.getElementById('imagen-principal');
+        if (imagenPrincipalElement) {
+            imagenPrincipalElement.style.backgroundImage = `url('${imagen}')`;
+            actualizarContadorImagen();
+        } else {
+            console.warn('⚠️ Elemento imagen-principal no encontrado');
+        }
     }
 }
 
@@ -611,7 +657,12 @@ function imagenSiguiente() {
 }
 
 function actualizarContadorImagen() {
-    document.getElementById('imagen-contador').textContent = `${imagenActual + 1} / ${imagenesModal.length}`;
+    const contadorElement = document.getElementById('imagen-contador');
+    if (contadorElement) {
+        contadorElement.textContent = `${imagenActual + 1} / ${imagenesModal.length}`;
+    } else {
+        console.warn('⚠️ Elemento imagen-contador no encontrado');
+    }
 }
 
 function configurarEventosModal() {
@@ -649,6 +700,35 @@ function modalKeyHandler(e) {
     }
 }
 
+// Función para verificar el estado del modal
+function verificarEstadoModal() {
+    const elementos = [
+        { id: 'modal-imagenes', nombre: 'Modal Principal' },
+        { id: 'imagen-principal', nombre: 'Imagen Principal' },
+        { id: 'imagen-contador', nombre: 'Contador' },
+        { id: 'imagen-titulo', nombre: 'Título' }
+    ];
+    
+    const resultados = [];
+    
+    elementos.forEach(elemento => {
+        const existe = document.getElementById(elemento.id) !== null;
+        resultados.push({
+            elemento: elemento.nombre,
+            id: elemento.id,
+            existe: existe
+        });
+    });
+    
+    console.log('🔍 Verificación del estado del modal:');
+    resultados.forEach(resultado => {
+        const status = resultado.existe ? '✅' : '❌';
+        console.log(`${status} ${resultado.elemento} (${resultado.id}): ${resultado.existe ? 'Existe' : 'No existe'}`);
+    });
+    
+    return resultados.every(r => r.existe);
+}
+
 // Verificar errores al cargar
 window.addEventListener('load', function() {
     setTimeout(() => {
@@ -656,6 +736,16 @@ window.addEventListener('load', function() {
         if (errors.length === 0) {
             console.log('✅ Todos los recursos cargados correctamente');
             console.log('🎯 Sistema completamente funcional');
+            
+            // Verificar estado del modal
+            setTimeout(() => {
+                const modalOK = verificarEstadoModal();
+                if (modalOK) {
+                    console.log('🖼️ Sistema de modal de imágenes listo');
+                } else {
+                    console.error('❌ Elementos del modal no encontrados');
+                }
+            }, 500);
         } else {
             console.log('⚠️ Errores de recursos:', errors.length);
         }
