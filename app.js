@@ -532,8 +532,8 @@ function abrirModalImagenesComplete(propertyId) {
     try {
         console.log('📸 Iniciando apertura de modal para propiedad:', propertyId);
         
-        // Buscar propiedad en sampleData
-        const property = sampleData.find(p => p.id_temporal === propertyId);
+        // Buscar propiedad en globalData
+        const property = globalData.properties.find(p => p.id_temporal === propertyId);
         
         if (!property) {
             console.error('❌ No se encontró la propiedad:', propertyId);
