@@ -222,7 +222,7 @@ async function loadProperties() {
     try {
         console.log('📂 Cargando datos de propiedades...');
         
-        const response = await fetch('user_input_files/propiedades.json');
+        const response = await fetch('imgs/propiedades.json');
         if (!response.ok) {
             throw new Error(`Error HTTP! status: ${response.status}`);
         }
