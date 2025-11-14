@@ -217,15 +217,42 @@ let globalData = {
     }
 };
 
-// Cargar propiedades (usando datos embebidos para evitar errores 404)
+// Cargar propiedades - Sistema Híbrido (Servidor + Fallback Embebido)
 async function loadProperties() {
-    console.log('📂 Cargando propiedades desde datos embebidos...');
-    loadEmbeddedProperties();
+    console.log('🔄 Iniciando carga de propiedades (modo híbrido)...');
+    
+    try {
+        // INTENTO 1: Cargar desde servidor/archivo externo
+        console.log('📂 Intentando cargar propiedades.json desde servidor...');
+        
+        const response = await fetch('propiedades.json');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('✅ Datos cargados desde servidor:', data.length, 'propiedades');
+        
+        // Datos cargados exitosamente desde servidor
+        globalData.properties = data;
+        globalData.filteredProperties = data;
+        
+        // Llenar filtros y mostrar
+        populateFilters(data);
+        displayProperties(data);
+        
+    } catch (error) {
+        // FALLBACK: Usar datos embebidos (funciona offline)
+        console.log('⚠️ Archivo externo no disponible, usando datos embebidos');
+        console.log('💡 Error capturado:', error.message);
+        loadEmbeddedProperties();
+    }
 }
 
-// Propiedades embebidas como fallback
+// Propiedades embebidas como fallback (modo offline)
 function loadEmbeddedProperties() {
-    console.log('💾 Usando datos embebidos - propiedades reales cargadas');
+    console.log('💾 📱 MODO OFFLINE: Cargando propiedades desde datos embebidos');
+    console.log('🔄 Sistema híbrido activo - listo para modo servidor cuando esté disponible');
     
     const sampleData = [
         {
@@ -395,7 +422,8 @@ function loadEmbeddedProperties() {
     globalData.properties = sampleData;
     globalData.filteredProperties = sampleData;
     
-    console.log('✅ Propiedades de ejemplo cargadas:', sampleData.length);
+    console.log('✅ 🏠 Propiedades embebidas cargadas:', sampleData.length);
+    console.log('🔧 Sistema híbrido configurado - offline activo');
     populateFilters(sampleData);
     displayProperties(sampleData);
 }
