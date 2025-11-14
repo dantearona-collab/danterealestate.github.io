@@ -217,13 +217,12 @@ let globalData = {
     }
 };
 
-// Cargar propiedades - Sistema Híbrido (Servidor + Fallback Embebido)
+// Cargar propiedades - Solo desde archivo externo propiedades.json
 async function loadProperties() {
-    console.log('🔄 Iniciando carga de propiedades (modo híbrido)...');
+    console.log('🔄 Iniciando carga de propiedades desde propiedades.json...');
     
     try {
-        // INTENTO 1: Cargar desde servidor/archivo externo
-        console.log('📂 Intentando cargar propiedades.json desde servidor...');
+        console.log('📂 Cargando propiedades.json desde servidor...');
         
         const response = await fetch('propiedades.json');
         if (!response.ok) {
@@ -231,9 +230,9 @@ async function loadProperties() {
         }
         
         const data = await response.json();
-        console.log('✅ Datos cargados desde servidor:', data.length, 'propiedades');
+        console.log('✅ Datos cargados exitosamente:', data.length, 'propiedades');
         
-        // Datos cargados exitosamente desde servidor
+        // Datos cargados exitosamente
         globalData.properties = data;
         globalData.filteredProperties = data;
         
@@ -242,190 +241,50 @@ async function loadProperties() {
         displayProperties(data);
         
     } catch (error) {
-        // FALLBACK: Usar datos embebidos (funciona offline)
-        console.log('⚠️ Archivo externo no disponible, usando datos embebidos');
-        console.log('💡 Error capturado:', error.message);
-        loadEmbeddedProperties();
+        // Error - archivo no encontrado o no accesible
+        console.error('❌ Error al cargar propiedades.json:', error.message);
+        console.log('💡 Asegúrate de que el archivo propiedades.json esté disponible');
+        
+        // Mostrar mensaje de error en la interfaz
+        showErrorMessage();
     }
 }
 
-// Propiedades embebidas como fallback (modo offline)
-function loadEmbeddedProperties() {
-    console.log('💾 📱 MODO OFFLINE: Cargando propiedades desde datos embebidos');
-    console.log('🔄 Sistema híbrido activo - listo para modo servidor cuando esté disponible');
+// Mostrar mensaje de error cuando no se puede cargar el archivo
+function showErrorMessage() {
+    console.log('🔧 Mostrando mensaje de error en la interfaz...');
     
-    const sampleData = [
-        {
-            "id_temporal": "UF001",
-            "titulo": "Terreno en Boedo",
-            "barrio": "Boedo",
-            "precio": 0,
-            "ambientes": 0,
-            "metros_cuadrados": 306,
-            "operacion": "venta",
-            "tipo": "terreno",
-            "descripcion": "Amplia casa familiar con múltiples ambientes, patio parrillero y cochera. Excelente estado de conservación en zona residencial.",
-            "direccion": "Avda. La Plata 1300",
-            "antiguedad": 15,
-            "estado": "bueno",
-            "orientacion": "norte",
-            "expensas": 0,
-            "amenities": "casa",
-            "cochera": "Sí",
-            "balcon": "Sí",
-            "pileta": "No",
-            "acepta_mascotas": "Sí",
-            "aire_acondicionado": "Sí",
-            "info_multimedia": "Set de 3 fotos de alta calidad, Fotos de exteriores, Recorrido visual completo",
-            "documentos": [
-                "imgs/ENTORNOS.PDF",
-                "imgs/DATOS PARCELA.PDF"
-            ],
-            "fotos": [
-                "imgs/UF001-1.jpg",
-                "imgs/UF001-2.jpg",
-                "imgs/UF001-3.jpg",
-                "imgs/UF001-4.jpg",
-                "imgs/UF001-5.jpg",
-                "imgs/UF001-6.jpg",
-                "imgs/UF001-7.jpg"
-            ],
-            "moneda_precio": "USD",
-            "moneda_expensas": "ARS",
-            "fecha_procesamiento": "2025-11-09T08:33:51.258324"
-        },
-        {
-            "id_temporal": "UF002",
-            "titulo": "Monoambiente microcentro",
-            "barrio": "Microcentro",
-            "precio": 400000,
-            "ambientes": 1,
-            "metros_cuadrados": 23,
-            "operacion": "alquiler",
-            "tipo": "departamento",
-            "descripcion": "Excelente ubicacio Obelisco",
-            "direccion": "",
-            "antiguedad": 3,
-            "estado": "excelente",
-            "orientacion": "norte",
-            "piso": "9",
-            "expensas": 95000,
-            "moneda_precio": "ARS",
-            "moneda_expensas": "ARS",
-            "amenities": "seguridad 24hs",
-            "cochera": "No",
-            "balcon": "No",
-            "pileta": "No",
-            "acepta_mascotas": "Sí",
-            "aire_acondicionado": "Sí",
-            "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
-            "documentos": [
-                "imgs/PLANO_DEPARTAMENTO.PDF",
-                "imgs/EXPENSAS_DETALLE.PDF"
-            ],
-            "fotos": [
-                "imgs/UF023-1.jpg",
-                "imgs/UF023-2.jpg",
-                "imgs/UF023-3.jpg",
-                "imgs/UF023-4.jpg",
-                "imgs/UF023-5.jpg",
-                "imgs/UF023-6.jpg"
-            ],
-            "moneda_precio": "ARS",
-            "moneda_expensas": "ARS",
-            "fecha_procesamiento": "2025-11-08T15:22:30.123456"
-        },
-        {
-            "id_temporal": "UF003",
-            "titulo": "Casa en Belgrano R",
-            "barrio": "Belgrano",
-            "precio": 650000,
-            "ambientes": 4,
-            "metros_cuadrados": 180,
-            "operacion": "venta",
-            "tipo": "casa",
-            "descripcion": "Magnífica casa familiar con jardín y pileta",
-            "direccion": "",
-            "antiguedad": 8,
-            "estado": "excelente",
-            "orientacion": "norte",
-            "expensas": 0,
-            "moneda_precio": "USD",
-            "moneda_expensas": "ARS",
-            "amenities": "pileta, parrilla, jardín, cochera cubierta",
-            "cochera": "Sí",
-            "balcon": "Sí",
-            "pileta": "Sí",
-            "acepta_mascotas": "Sí",
-            "aire_acondicionado": "Sí",
-            "info_multimedia": "Fotos panorámicas disponibles, Video recorrido",
-            "documentos": [
-                "imgs/TITULO_PROPIEDAD.PDF",
-                "imgs/PLANO_CASA.PDF",
-                "imgs/AVALUO_2025.PDF"
-            ],
-            "fotos": [
-                "imgs/UF002-1.jpg",
-                "imgs/UF002-2.jpg",
-                "imgs/UF002-3.jpg",
-                "imgs/UF001-1.jpg",
-                "imgs/UF001-2.jpg"
-            ],
-            "moneda_precio": "USD",
-            "moneda_expensas": "ARS",
-            "fecha_procesamiento": "2025-11-07T10:45:20.789123"
-        },
-        {
-            "id_temporal": "UF004",
-            "titulo": "Barrio Privado",
-            "barrio": "Pilar",
-            "precio": 1200,
-            "ambientes": 8,
-            "metros_cuadrados": 200,
-            "operacion": "alquiler",
-            "tipo": "ph",
-            "descripcion": "Casa sobre terreno de 2000 con pileta, Km- 50 Pilar",
-            "direccion": "",
-            "antiguedad": 20,
-            "estado": "bueno",
-            "orientacion": "sur",
-            "expensas": 40000,
-            "moneda_precio": "USD",
-            "moneda_expensas": "ARS",
-            "amenities": "Pileta enorme terreno",
-            "cochera": "Si",
-            "balcon": "Si",
-            "pileta": "Si",
-            "acepta_mascotas": "Sí",
-            "aire_acondicionado": "Si",
-            "info_multimedia": "Fotos de la propiedad y terraza",
-            "documentos": [
-                "imgs/TITULO_PH.PDF"
-            ],
-            "fotos": [
-                "imgs/UF004-1.jpg",
-                "imgs/UF004-2.jpg",
-                "imgs/UF004-3.jpg",
-                "imgs/UF004-4.jpg",
-                "imgs/UF004-5.jpg",
-                "imgs/UF004-6.jpg",
-                "imgs/UF004-7.jpg",
-                "imgs/UF004-8.jpg",
-                "imgs/UF004-9.jpg"
-            ],
-            "moneda_precio": "USD",
-            "moneda_expensas": "ARS",
-            "fecha_procesamiento": "2025-11-06T14:30:15.456789"
-        }
-    ];
+    // Ocultar spinner de carga
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    if (loadingSpinner) {
+        loadingSpinner.style.display = 'none';
+    }
     
-    globalData.properties = sampleData;
-    globalData.filteredProperties = sampleData;
+    // Mostrar mensaje de error en la interfaz
+    const errorDiv = document.createElement('div');
+    errorDiv.id = 'errorMessage';
+    errorDiv.style.cssText = `
+        background: #ff0101;
+        color: white;
+        padding: 20px;
+        margin: 20px;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: bold;
+    `;
+    errorDiv.innerHTML = `
+        <h3>❌ Error al cargar propiedades</h3>
+        <p>No se pudo cargar el archivo <strong>propiedades.json</strong></p>
+        <p>Verifica que el archivo esté disponible en el servidor</p>
+    `;
     
-    console.log('✅ 🏠 Propiedades embebidas cargadas:', sampleData.length);
-    console.log('🔧 Sistema híbrido configurado - offline activo');
-    populateFilters(sampleData);
-    displayProperties(sampleData);
+    // Insertar después del header
+    const header = document.querySelector('header');
+    if (header && header.nextSibling) {
+        header.parentNode.insertBefore(errorDiv, header.nextSibling);
+    } else {
+        document.body.insertBefore(errorDiv, document.body.firstChild);
+    }
 }
 
 // Llenar filtros con datos únicos
