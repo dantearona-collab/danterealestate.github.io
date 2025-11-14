@@ -222,7 +222,7 @@ async function loadProperties() {
     try {
         console.log('📂 Cargando datos de propiedades...');
         
-        const response = await fetch('propiedades.json');
+        const response = await fetch('user_input_files/propiedades.json');
         if (!response.ok) {
             throw new Error(`Error HTTP! status: ${response.status}`);
         }
@@ -240,7 +240,7 @@ async function loadProperties() {
         displayProperties(data);
         
     } catch (error) {
-        console.log('⚠️ No se pudo cargar propiedades.json, usando datos embebidos');
+        console.log('⚠️ No se pudo cargar propied.json, usando datos embebidos');
         loadEmbeddedProperties();
     }
 }
