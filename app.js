@@ -609,6 +609,14 @@ function abrirModalImagenes(property) {
     
     // Mostrar modal
     modalElement.style.display = 'block';
+    
+    // Aplicar layout específico para móviles
+    if (window.innerWidth <= 480) {
+        modalElement.style.display = 'flex';
+        modalElement.style.alignItems = 'center';
+        modalElement.style.justifyContent = 'center';
+    }
+    
     document.body.style.overflow = 'hidden';
     
     // Agregar event listener para teclado
@@ -654,6 +662,11 @@ function cerrarModalImagenes() {
     
     if (modalElement) {
         modalElement.style.display = 'none';
+        // Resetear estilos específicos de móviles
+        if (window.innerWidth <= 480) {
+            modalElement.style.alignItems = '';
+            modalElement.style.justifyContent = '';
+        }
         document.body.style.overflow = 'auto';
     }
     
