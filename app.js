@@ -412,6 +412,7 @@ function displayProperties(properties) {
     
     if (properties.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #666;">No se encontraron propiedades</p>';
+        updateResultsCount(0);
         return;
     }
     
@@ -420,7 +421,19 @@ function displayProperties(properties) {
         container.appendChild(card);
     });
     
+    updateResultsCount(properties.length);
     console.log('📋 Mostrando', properties.length, 'propiedades');
+}
+
+function updateResultsCount(count) {
+    const counter = document.getElementById('results-counter-styled');
+    if (!counter) return;
+    
+    if (count === 0) {
+        counter.innerHTML = '<div>No se encontraron propiedades</div>';
+    } else {
+        counter.innerHTML = `<div><strong>${count}</strong> propiedades encontradas</div>`;
+    }
 }
 
 // ========================================
