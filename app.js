@@ -1002,6 +1002,11 @@ function expandPropertyImages(propertyId) {
                 <strong>🏗️ ULTRA-COMPACTO:</strong> ${distribucionInteligente.balance} | ${distribucionInteligente.columnas} columnas | Gap: ${distribucionInteligente.gap}px | Compacidad: ${distribucionInteligente.factorCompacidad}%
             </div>
             
+            <!-- Botón de prueba temporal -->
+            <div onclick="alert('¡Clic detectado en botón de prueba!')" style="position: fixed; top: 10px; left: 10px; background: red; color: white; padding: 10px; z-index: 10003; cursor: pointer;">
+                🧪 BOTÓN DE PRUEBA
+            </div>
+            
             ${fotos.map((foto, index) => {
                 const patron = distribucionInteligente.patrones[index] || distribucionInteligente.patrones[0];
                 const ancho = patron.ancho;
@@ -1029,7 +1034,7 @@ function expandPropertyImages(propertyId) {
                         padding: 0;
                         border: 2px solid transparent;
                     "
-                    onclick="expandirFotoEnGaleria('${propertyId}', ${index})"
+                    onclick="alert('¡CLIC DETECTADO en foto ${index}! PropertyId: ${propertyId}'); console.log('🖱️ Clic en foto', ${index}, 'propertyId:', '${propertyId}'); expandirFotoEnGaleria('${propertyId}', ${index})"
                     onmouseenter="this.style.transform='scale(1.02)'; this.style.boxShadow='0 8px 32px rgba(0,0,0,0.15)'; this.style.borderColor='#232deb'"
                     onmouseleave="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'; this.style.borderColor='transparent'; this.querySelector('.masonry-overlay').style.opacity = '0'"
                     title="📸 Foto ${index + 1}/${totalPhotos} - Columna ${patron.columna + 1} (${ancho}x${alto}px, factor ${patron.factorAncho}) - Toca para expandir">
@@ -1221,15 +1226,29 @@ function expandPropertyImages(propertyId) {
 
 // Función para expandir una foto dentro de la misma galería
 function expandirFotoEnGaleria(propertyId, fotoIndex) {
+    console.log('🔍 DEBUG: expandirFotoEnGaleria llamada con propertyId:', propertyId, 'fotoIndex:', fotoIndex);
+    
     const property = globalData.properties.find(p => p.id_temporal === propertyId);
-    if (!property || !property.fotos) return;
+    if (!property || !property.fotos) {
+        console.log('❌ DEBUG: Propiedad no encontrada o sin fotos', { property: !!property, fotos: property?.fotos?.length });
+        return;
+    }
+    console.log('✅ DEBUG: Propiedad encontrada:', property.titulo, 'Fotos:', property.fotos.length);
     
     const fotoSeleccionada = property.fotos[fotoIndex];
-    if (!fotoSeleccionada) return;
+    if (!fotoSeleccionada) {
+        console.log('❌ DEBUG: Foto no encontrada en índice', fotoIndex);
+        return;
+    }
+    console.log('✅ DEBUG: Foto seleccionada:', fotoSeleccionada);
     
     // Obtener la galería actual
     const galeriaOverlay = document.getElementById(`image-expansion-${propertyId}`);
-    if (!galeriaOverlay) return;
+    if (!galeriaOverlay) {
+        console.log('❌ DEBUG: Overlay de galería no encontrado:', `image-expansion-${propertyId}`);
+        return;
+    }
+    console.log('✅ DEBUG: Overlay de galería encontrado');
     
     // Limpiar cualquier vista expandida anterior
     const vistaExpandidaAnterior = galeriaOverlay.querySelector('.vista-foto-expandida');
