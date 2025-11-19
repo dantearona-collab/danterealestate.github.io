@@ -22,7 +22,7 @@ function createImageSlider(property) {
     if (fotos.length === 0) {
         // Sin imágenes - usar imagen por defecto
         return `
-            <div style="position: relative; cursor: pointer;" onclick="toggleCollageView('${property.id_temporal}')" class="modal-trigger">
+            <div style="position: relative; cursor: pointer;" onclick="expandPropertyImages('${property.id_temporal}')" class="modal-trigger">
                 <img src="INSTITUCIONAL 1.jpg" 
                      alt="${property.titulo}" 
                      style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
@@ -39,7 +39,7 @@ function createImageSlider(property) {
     if (fotos.length === 1) {
         // Una sola imagen - hacer clickeable
         return `
-            <div style="position: relative; cursor: pointer;" onclick="toggleCollageView('${property.id_temporal}')" class="modal-trigger">
+            <div style="position: relative; cursor: pointer;" onclick="expandPropertyImages('${property.id_temporal}')" class="modal-trigger">
                 <img src="${fotos[0]}" 
                      alt="${property.titulo}" 
                      style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
@@ -69,7 +69,7 @@ function createImageSlider(property) {
     
     return `
         <div class="property-slider" data-property="${property.id_temporal}" style="position: relative; cursor: pointer;" 
-             onclick="toggleCollageView('${property.id_temporal}')">
+             onclick="expandPropertyImages('${property.id_temporal}')">
             <div class="property-slides-container" style="position: relative; overflow: hidden; width: 100%; height: 200px;">
                 ${imageSlides}
             </div>
@@ -1698,7 +1698,7 @@ function createImageCollage(property) {
     }
 
     return `
-        <div class="property-gallery" onclick="toggleCollageView('${property.id_temporal}')">
+        <div class="property-gallery" onclick="expandPropertyImages('${property.id_temporal}')">
             ${collageHtml}
             <div class="gallery-overlay">
                 <span>Ver ${totalFotos} foto${totalFotos > 1 ? 's' : ''}</span>
