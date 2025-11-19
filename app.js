@@ -844,7 +844,7 @@ function expandPropertyImages(propertyId) {
                     min-height: 80px;
                     touch-action: manipulation;
                 " 
-                onclick="openImageModal('${propertyId}', ${index})"
+                onclick="mostrarFotoPantallaCompleta('${propertyId}', ${index})"
                 onmouseover="this.style.transform='scale(1.05)'"
                 onmouseout="this.style.transform='scale(1)'"
                 title="Toca para ver en pantalla completa">
@@ -918,15 +918,273 @@ function expandPropertyImages(propertyId) {
     });
 }
 
-// Función para cerrar expansión
+// Función para mostrar una foto específica en pantalla completa
+function mostrarFotoPantallaCompleta(propertyId, fotoIndex) {
+    const property = globalData.properties.find(p => p.id_temporal === propertyId);
+    if (!property || !property.fotos) return;
+    
+    const fotoSeleccionada = property.fotos[fotoIndex];
+    if (!fotoSeleccionada) return;
+    
+    // Ocultar la galería expandida actual
+    const galeriaActual = document.getElementById(`image-expansion-${propertyId}`);
+    if (galeriaActual) {
+        galeriaActual.style.display = 'none';
+    }
+    
+    // Crear overlay para la imagen en pantalla completa
+    const fotoOverlay = document.createElement('div');
+    fotoOverlay.id = `foto-pantalla-completa-${propertyId}-${fotoIndex}`;
+    fotoOverlay.className = 'foto-pantalla-completa-overlay';
+    fotoOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.98);
+        z-index: 10001;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(10px);
+    `;
+    
+    fotoOverlay.innerHTML = `
+        <!-- Header con título y controles -->
+        <div style="
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10002;
+        ">
+            <div style="
+                background: rgba(35, 45, 235, 0.9);
+                color: white;
+                padding: 10px 20px;
+                border-radius: 25px;
+                font-size: 14px;
+                font-weight: 600;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            ">
+                ${property.titulo}
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <!-- Botón volver a galería -->
+                <button onclick="volverAGaleria('${propertyId}', ${fotoIndex})" 
+                        style="
+                            background: rgba(255, 255, 255, 0.2);
+                            color: white;
+                            border: none;
+                            border-radius: 25px;
+                            padding: 10px 16px;
+                            cursor: pointer;
+                            font-size: 14px;
+                            font-weight: 600;
+                            transition: all 0.3s;
+                            display: flex;
+                            align-items: center;
+                            gap: 6px;
+                        "
+                        onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='scale(1.05)'"
+                        onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='scale(1)'"
+                        title="Volver a la galería">
+                    ← Volver a galería
+                </button>
+                
+                <!-- Botón cerrar completamente -->
+                <button onclick="cerrarFotoCompleta('${propertyId}', ${fotoIndex})" 
+                        style="
+                            background: rgba(255, 255, 255, 0.2);
+                            color: white;
+                            border: none;
+                            border-radius: 50%;
+                            width: 40px;
+                            height: 40px;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 20px;
+                            font-weight: bold;
+                            transition: all 0.3s;
+                            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+                        "
+                        onmouseover="this.style.background='rgba(255, 71, 87, 0.8)'; this.style.transform='scale(1.1)'"
+                        onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='scale(1)'"
+                        title="Cerrar (Esc)">
+                    ✕
+                </button>
+            </div>
+        </div>
+        
+        <!-- Imagen en pantalla completa -->
+        <div style="
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px 120px;
+            box-sizing: border-box;
+        ">
+            <img src="${fotoSeleccionada}" 
+                 alt="${property.titulo} - Foto ${fotoIndex + 1}"
+                 style="
+                     max-width: 95vw;
+                     max-height: 85vh;
+                     object-fit: contain;
+                     border-radius: 12px;
+                     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                     transition: transform 0.3s ease;
+                     cursor: zoom-out;
+                 "
+                 onclick="cerrarFotoCompleta('${propertyId}', ${fotoIndex})"
+                 onerror="this.src='INSTITUCIONAL 3.png'"
+                 title="Haz clic para cerrar">
+        </div>
+        
+        <!-- Footer con controles de navegación -->
+        <div style="
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: rgba(35, 45, 235, 0.9);
+            padding: 12px 24px;
+            border-radius: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        ">
+            ${fotoIndex > 0 ? `
+                <button onclick="mostrarFotoPantallaCompleta('${propertyId}', ${fotoIndex - 1})" 
+                        style="
+                            background: rgba(255, 255, 255, 0.2);
+                            color: white;
+                            border: none;
+                            border-radius: 20px;
+                            padding: 8px 12px;
+                            cursor: pointer;
+                            font-size: 16px;
+                            transition: background 0.3s;
+                        "
+                        onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'"
+                        onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'"
+                        title="Foto anterior">
+                    ←
+                </button>
+            ` : ''}
+            
+            <div style="
+                color: white;
+                font-size: 14px;
+                font-weight: 600;
+                padding: 4px 12px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 15px;
+            ">
+                ${fotoIndex + 1} / ${property.fotos.length}
+            </div>
+            
+            ${fotoIndex < property.fotos.length - 1 ? `
+                <button onclick="mostrarFotoPantallaCompleta('${propertyId}', ${fotoIndex + 1})" 
+                        style="
+                            background: rgba(255, 255, 255, 0.2);
+                            color: white;
+                            border: none;
+                            border-radius: 20px;
+                            padding: 8px 12px;
+                            cursor: pointer;
+                            font-size: 16px;
+                            transition: background 0.3s;
+                        "
+                        onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'"
+                        onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'"
+                        title="Foto siguiente">
+                    →
+                </button>
+            ` : ''}
+        </div>
+    `;
+    
+    document.body.appendChild(fotoOverlay);
+    
+    // Evento para cerrar con Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            cerrarFotoCompleta(propertyId, fotoIndex);
+        }
+    });
+    
+    // Evento para cerrar al hacer clic en el fondo
+    fotoOverlay.addEventListener('click', function(e) {
+        if (e.target === fotoOverlay) {
+            cerrarFotoCompleta(propertyId, fotoIndex);
+        }
+    });
+    
+    console.log(`📸 Mostrando foto ${fotoIndex + 1} en pantalla completa`);
+}
+
+// Función para volver a la galería expandida
+function volverAGaleria(propertyId, fotoIndex) {
+    // Cerrar la imagen en pantalla completa
+    cerrarFotoCompleta(propertyId, fotoIndex, false);
+    
+    // Mostrar nuevamente la galería expandida
+    const galeriaActual = document.getElementById(`image-expansion-${propertyId}`);
+    if (galeriaActual) {
+        galeriaActual.style.display = 'flex';
+    }
+    
+    console.log('🔄 Volviendo a la galería expandida');
+}
+
+// Función para cerrar la imagen en pantalla completa
+function cerrarFotoCompleta(propertyId, fotoIndex, cerrarGaleria = false) {
+    const fotoOverlay = document.getElementById(`foto-pantalla-completa-${propertyId}-${fotoIndex}`);
+    if (fotoOverlay) {
+        fotoOverlay.remove();
+    }
+    
+    // Si se especifica cerrar también la galería, cerrarla
+    if (cerrarGaleria) {
+        closeImageExpansion(propertyId);
+    }
+    
+    // Remover el listener de teclado específico
+    document.removeEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            cerrarFotoCompleta(propertyId, fotoIndex);
+        }
+    });
+    
+    console.log('🔒 Cerrada imagen en pantalla completa');
+}
+
+// Función para cerrar expansión (modificada para manejar el nuevo sistema)
 function closeImageExpansion(propertyId) {
     const overlay = document.getElementById(`image-expansion-${propertyId}`);
     if (overlay) {
         overlay.remove();
     }
     
+    // También cerrar cualquier imagen en pantalla completa de esta propiedad
+    const imagenesPantallaCompleta = document.querySelectorAll(`[id^="foto-pantalla-completa-${propertyId}"]`);
+    imagenesPantallaCompleta.forEach(img => img.remove());
+    
     // Restaurar scroll del body
     document.body.style.overflow = 'auto';
+    
+    console.log('🔒 Galería expandida cerrada completamente');
 }
 
 // Sistema de galería expandible - Una imagen que se expande al hacer clic
