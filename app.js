@@ -821,14 +821,14 @@ function expandPropertyImages(propertyId) {
         </div>
     `;
     
-    // Grid de imágenes que ocupa casi toda la pantalla
+    // Grid de imágenes que APROVECHA TODO EL ESPACIO - DISTRIBUCIÓN UNIFORME
     const imageGrid = `
         <div style="
             flex: 1;
-            padding: 20px;
+            padding: 15px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 8px;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 6px;
             overflow-y: auto;
             max-height: calc(100vh - 120px);
             touch-action: pan-y pinch-zoom;
@@ -837,16 +837,20 @@ function expandPropertyImages(propertyId) {
                 <div style="
                     position: relative;
                     cursor: pointer;
-                    border-radius: 8px;
+                    border-radius: 6px;
                     overflow: hidden;
                     transition: transform 0.3s;
-                    aspect-ratio: 4/3;
-                    min-height: 80px;
+                    min-height: 120px;
+                    background: #f8f9fa;
                     touch-action: manipulation;
+                    /* Distribución uniforme sin importar el tamaño original */
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                 " 
                 onclick="expandirFotoEnGaleria('${propertyId}', ${index})"
-                onmouseover="this.style.transform='scale(1.05)'"
-                onmouseout="this.style.transform='scale(1)'"
+                onmouseover="this.style.transform='scale(1.05)'; this.querySelector('.grid-image-overlay').style.opacity = '1'"
+                onmouseout="this.style.transform='scale(1)'; this.querySelector('.grid-image-overlay').style.opacity = '0'"
                 title="Toca para expandir en la galería">
                     <img src="${foto}" 
                          alt="${property.titulo} - Foto ${index + 1}"
@@ -855,9 +859,20 @@ function expandPropertyImages(propertyId) {
                              height: 100%;
                              object-fit: cover;
                              display: block;
+                             transition: all 0.3s ease;
                          "
                          onerror="this.src='INSTITUCIONAL 3.png'">
-                    <!-- Sin etiquetas de número - solo imagen limpia -->
+                    <!-- Overlay dinámico para mejor visualización -->
+                    <div class="grid-image-overlay" style="
+                        position: absolute;
+                        bottom: 0;
+                        left: 0;
+                        right: 0;
+                        background: linear-gradient(transparent, rgba(35, 45, 235, 0.8));
+                        height: 25px;
+                        opacity: 0;
+                        transition: opacity 0.3s;
+                    "></div>
                 </div>
             `).join('')}
         </div>
@@ -1013,91 +1028,97 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
             </div>
         </div>
         
-        <!-- Imagen expandida -->
+        <!-- Imagen expandida MÁXIMO ESPACIO -->
         <div style="
             flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 10px;
             position: relative;
+            background: radial-gradient(circle at center, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%);
         ">
             <img src="${fotoSeleccionada}" 
                  alt="${property.titulo} - Foto ${fotoIndex + 1}"
                  style="
-                     max-width: 90vw;
-                     max-height: 80vh;
+                     max-width: 98vw;
+                     max-height: 90vh;
+                     width: auto;
+                     height: auto;
                      object-fit: contain;
-                     border-radius: 12px;
-                     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                     border-radius: 8px;
+                     box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6);
                      cursor: zoom-out;
+                     transition: transform 0.3s ease;
                  "
                  onclick="volverAGaleriaGrid('${propertyId}')"
                  onerror="this.src='INSTITUCIONAL 3.png'"
+                 onmouseover="this.style.transform='scale(1.01)'"
+                 onmouseout="this.style.transform='scale(1)'"
                  title="Haz clic para volver al grid">
                  
-            <!-- Controles de navegación en la imagen -->
-            <div style="
-                position: absolute;
-                top: 50%;
-                left: 20px;
-                transform: translateY(-50%);
-            ">
-                ${fotoIndex > 0 ? `
-                    <button onclick="expandirFotoEnGaleria('${propertyId}', ${fotoIndex - 1})" 
-                            style="
-                                background: rgba(255, 255, 255, 0.2);
-                                color: white;
-                                border: none;
-                                border-radius: 50%;
-                                width: 40px;
-                                height: 40px;
-                                cursor: pointer;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                font-size: 18px;
-                                transition: background 0.3s;
-                                backdrop-filter: blur(10px);
-                            "
-                            onmouseover="this.style.background='rgba(255, 255, 255, 0.4)'"
-                            onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'"
-                            title="Foto anterior">
-                        ←
-                    </button>
-                ` : ''}
-            </div>
+            <!-- Controles de navegación INTEGRADOS en la imagen - APROVECHANDO ESPACIO -->
+            ${fotoIndex > 0 ? `
+                <button onclick="expandirFotoEnGaleria('${propertyId}', ${fotoIndex - 1})" 
+                        style="
+                            position: absolute;
+                            top: 50%;
+                            left: 15px;
+                            transform: translateY(-50%);
+                            background: rgba(35, 45, 235, 0.8);
+                            color: white;
+                            border: none;
+                            border-radius: 50%;
+                            width: 45px;
+                            height: 45px;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 20px;
+                            font-weight: bold;
+                            transition: all 0.3s;
+                            backdrop-filter: blur(15px);
+                            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+                            z-index: 10003;
+                        "
+                        onmouseover="this.style.background='rgba(35, 45, 235, 1)'; this.style.transform='translateY(-50%) scale(1.1)'"
+                        onmouseout="this.style.background='rgba(35, 45, 235, 0.8)'; this.style.transform='translateY(-50%) scale(1)'"
+                        title="Foto anterior">
+                    ←
+                </button>
+            ` : ''}
             
-            <div style="
-                position: absolute;
-                top: 50%;
-                right: 20px;
-                transform: translateY(-50%);
-            ">
-                ${fotoIndex < property.fotos.length - 1 ? `
-                    <button onclick="expandirFotoEnGaleria('${propertyId}', ${fotoIndex + 1})" 
-                            style="
-                                background: rgba(255, 255, 255, 0.2);
-                                color: white;
-                                border: none;
-                                border-radius: 50%;
-                                width: 40px;
-                                height: 40px;
-                                cursor: pointer;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                font-size: 18px;
-                                transition: background 0.3s;
-                                backdrop-filter: blur(10px);
-                            "
-                            onmouseover="this.style.background='rgba(255, 255, 255, 0.4)'"
-                            onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'"
-                            title="Foto siguiente">
-                        →
-                    </button>
-                ` : ''}
-            </div>
+            ${fotoIndex < property.fotos.length - 1 ? `
+                <button onclick="expandirFotoEnGaleria('${propertyId}', ${fotoIndex + 1})" 
+                        style="
+                            position: absolute;
+                            top: 50%;
+                            right: 15px;
+                            transform: translateY(-50%);
+                            background: rgba(35, 45, 235, 0.8);
+                            color: white;
+                            border: none;
+                            border-radius: 50%;
+                            width: 45px;
+                            height: 45px;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 20px;
+                            font-weight: bold;
+                            transition: all 0.3s;
+                            backdrop-filter: blur(15px);
+                            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+                            z-index: 10003;
+                        "
+                        onmouseover="this.style.background='rgba(35, 45, 235, 1)'; this.style.transform='translateY(-50%) scale(1.1)'"
+                        onmouseout="this.style.background='rgba(35, 45, 235, 0.8)'; this.style.transform='translateY(-50%) scale(1)'"
+                        title="Foto siguiente">
+                    →
+                </button>
+            ` : ''}
         </div>
         
         <!-- Footer con información -->
