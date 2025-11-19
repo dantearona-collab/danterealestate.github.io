@@ -22,11 +22,16 @@ function createImageSlider(property) {
     if (fotos.length === 0) {
         // Sin imágenes - usar imagen por defecto
         return `
-            <div style="position: relative; cursor: pointer;" onclick="abrirModalImagenesComplete('${property.id_temporal}')" class="modal-trigger">
+            <div style="position: relative; cursor: pointer;" onclick="toggleCollageView('${property.id_temporal}')" class="modal-trigger">
                 <img src="INSTITUCIONAL 1.jpg" 
                      alt="${property.titulo}" 
                      style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
                      onerror="this.src='INSTITUCIONAL 3.png'">
+                <!-- Botón para ver modal completo -->
+                <div style="position: absolute; top: 5px; right: 5px; background: rgba(35, 45, 235, 0.8); color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer;" 
+                     onclick="event.stopPropagation(); abrirModalImagenesComplete('${property.id_temporal}')">
+                    🔍 Ver todas
+                </div>
             </div>
         `;
     }
@@ -34,11 +39,16 @@ function createImageSlider(property) {
     if (fotos.length === 1) {
         // Una sola imagen - hacer clickeable
         return `
-            <div style="position: relative; cursor: pointer;" onclick="abrirModalImagenesComplete('${property.id_temporal}')" class="modal-trigger">
+            <div style="position: relative; cursor: pointer;" onclick="toggleCollageView('${property.id_temporal}')" class="modal-trigger">
                 <img src="${fotos[0]}" 
                      alt="${property.titulo}" 
                      style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
                      onerror="this.src='INSTITUCIONAL 3.png'">
+                <!-- Botón para ver modal completo -->
+                <div style="position: absolute; top: 5px; right: 5px; background: rgba(35, 45, 235, 0.8); color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer;" 
+                     onclick="event.stopPropagation(); abrirModalImagenesComplete('${property.id_temporal}')">
+                    🔍 Ver todas
+                </div>
             </div>
         `;
     }
@@ -59,7 +69,7 @@ function createImageSlider(property) {
     
     return `
         <div class="property-slider" data-property="${property.id_temporal}" style="position: relative; cursor: pointer;" 
-             onclick="abrirModalImagenesComplete('${property.id_temporal}')">
+             onclick="toggleCollageView('${property.id_temporal}')">
             <div class="property-slides-container" style="position: relative; overflow: hidden; width: 100%; height: 200px;">
                 ${imageSlides}
             </div>
@@ -68,7 +78,7 @@ function createImageSlider(property) {
             ${fotos.length > 1 ? `
                 <!-- Flecha anterior -->
                 <button class="property-slider-btn property-prev" 
-                        onclick="prevSlide('${property.id_temporal}')"
+                        onclick="event.stopPropagation(); prevSlide('${property.id_temporal}')"
                         style="position: absolute; top: 50%; left: 8px; transform: translateY(-50%); 
                                background: rgba(35, 45, 235, 0.8); color: white; border: none; 
                                width: 32px; height: 32px; border-radius: 50%; cursor: pointer; 
@@ -79,7 +89,7 @@ function createImageSlider(property) {
                 
                 <!-- Flecha siguiente -->
                 <button class="property-slider-btn property-next" 
-                        onclick="nextSlide('${property.id_temporal}')"
+                        onclick="event.stopPropagation(); nextSlide('${property.id_temporal}')"
                         style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); 
                                background: rgba(35, 45, 235, 0.8); color: white; border: none; 
                                width: 32px; height: 32px; border-radius: 50%; cursor: pointer; 
@@ -94,6 +104,12 @@ function createImageSlider(property) {
                     ${navigationDots}
                 </div>
             ` : ''}
+            
+            <!-- Botón para ver modal completo -->
+            <div style="position: absolute; top: 5px; right: 5px; background: rgba(35, 45, 235, 0.8); color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; z-index: 3;" 
+                 onclick="event.stopPropagation(); abrirModalImagenesComplete('${property.id_temporal}')">
+                🔍 Ver todas
+            </div>
         </div>
     `;
 }
@@ -312,6 +328,7 @@ function populateFilters(properties) {
 function createPropertyCard(property) {
     const card = document.createElement('div');
     card.className = 'property-card';
+    card.setAttribute('data-property-card', property.id_temporal);
     card.style.cssText = `
         background: white !important;
         border-radius: 8px !important;
@@ -321,8 +338,8 @@ function createPropertyCard(property) {
         border: 1px solid #e1e5e9 !important;
     `;
     
-    // Crear galería de imágenes tipo collage
-    const imageSection = createImageCollage(property);
+    // Crear galería de imágenes tipo slider (vista inicial)
+    const imageSection = createImageSlider(property);
     
     card.innerHTML = `
         ${imageSection}
@@ -689,6 +706,46 @@ function imagenSiguiente() {
     }
 }
 
+// Variable global para rastrear qué propiedades están en modo collage
+let propiedadesEnModoCollage = new Set();
+
+// Función para cambiar una propiedad específica de slider a collage
+function toggleCollageView(propertyId) {
+    const property = globalData.properties.find(p => p.id_temporal === propertyId);
+    if (!property) return;
+    
+    const cardElement = document.querySelector(`[data-property-card="${propertyId}"]`);
+    if (!cardElement) return;
+    
+    // Verificar si ya está en modo collage
+    if (propiedadesEnModoCollage.has(propertyId)) {
+        // Cambiar de vuelta a slider
+        const newImageSection = createImageSlider(property);
+        propiedadesEnModoCollage.delete(propertyId);
+        
+        // Reemplazar solo la sección de imágenes manteniendo el resto del card
+        const currentCardHTML = cardElement.innerHTML;
+        const oldImageSectionMatch = currentCardHTML.match(/<div class="property-gallery-collage"[^>]*>[\s\S]*?<\/div>(?:\s*<div style="position: absolute; top: 10px)/);
+        if (oldImageSectionMatch) {
+            const newHTML = currentCardHTML.replace(oldImageSectionMatch[0], newImageSection);
+            cardElement.innerHTML = newHTML;
+        }
+    } else {
+        // Cambiar a collage
+        const newImageSection = createImageCollage(property);
+        propiedadesEnModoCollage.add(propertyId);
+        
+        // Reemplazar solo la sección de imágenes
+        const currentCardHTML = cardElement.innerHTML;
+        const oldImageSectionMatch = currentCardHTML.match(/<div class="property-slider"[^>]*>[\s\S]*?<\/div>(?:\s*<div style="position: absolute; top: 10px)/) ||
+                                     currentCardHTML.match(/<div style="position: relative; cursor: pointer;"[^>]*>[\s\S]*?<\/div>(?:\s*<div style="position: absolute; top: 10px)/);
+        if (oldImageSectionMatch) {
+            const newHTML = currentCardHTML.replace(oldImageSectionMatch[0], newImageSection);
+            cardElement.innerHTML = newHTML;
+        }
+    }
+}
+
 // Función para manejar eventos de teclado
 function manejarTecladoModal(event) {
     switch(event.key) {
@@ -745,21 +802,42 @@ function createImageCollage(property) {
             <div class="property-gallery-collage">
                 <div class="collage-top-row">
                     <div class="collage-thumbnail">
-                        <img src="${fotos[0]}" alt="${property.titulo}" class="collage-image" onclick="openImageModal('${property.id_temporal}', 0)" loading="lazy">
+                        <img src="${fotos[0]}" alt="${property.titulo}" class="collage-image" onclick="event.stopPropagation(); openImageModal('${property.id_temporal}', 0)" loading="lazy">
                     </div>
                     <div class="collage-thumbnail">
-                        <img src="${fotos[1]}" alt="${property.titulo}" class="collage-image" onclick="openImageModal('${property.id_temporal}', 1)" loading="lazy">
+                        <img src="${fotos[1]}" alt="${property.titulo}" class="collage-image" onclick="event.stopPropagation(); openImageModal('${property.id_temporal}', 1)" loading="lazy">
                     </div>
                 </div>
-                <div class="collage-main">
-                    <img src="${fotos[2]}" alt="${property.titulo}" class="collage-image" onclick="openImageModal('${property.id_temporal}', 2)" loading="lazy">
+                <div class="collage-main" style="position: relative;">
+                    <img src="${fotos[2]}" alt="${property.titulo}" class="collage-image" onclick="event.stopPropagation(); openImageModal('${property.id_temporal}', 2)" loading="lazy">
+                    ${totalFotos > 5 ? `
+                        <button onclick="event.stopPropagation(); prevCollageImage('${property.id_temporal}')" 
+                                style="position: absolute; left: 5px; top: 50%; transform: translateY(-50%); 
+                                       background: rgba(35, 45, 235, 0.8); color: white; border: none; 
+                                       width: 24px; height: 24px; border-radius: 50%; cursor: pointer; 
+                                       display: flex; align-items: center; justify-content: center;
+                                       font-size: 12px;">
+                            ◀
+                        </button>
+                        <button onclick="event.stopPropagation(); nextCollageImage('${property.id_temporal}')" 
+                                style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); 
+                                       background: rgba(35, 45, 235, 0.8); color: white; border: none; 
+                                       width: 24px; height: 24px; border-radius: 50%; cursor: pointer; 
+                                       display: flex; align-items: center; justify-content: center;
+                                       font-size: 12px;">
+                            ▶
+                        </button>
+                        <div style="position: absolute; bottom: 5px; right: 5px; background: rgba(35, 45, 235, 0.8); color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px;">
+                            ${currentCollageImageIndex + 1}/${totalFotos}
+                        </div>
+                    ` : ''}
                 </div>
                 <div class="collage-bottom-row">
                     <div class="collage-thumbnail">
-                        <img src="${fotos[3]}" alt="${property.titulo}" class="collage-image" onclick="openImageModal('${property.id_temporal}', 3)" loading="lazy">
+                        <img src="${fotos[3]}" alt="${property.titulo}" class="collage-image" onclick="event.stopPropagation(); openImageModal('${property.id_temporal}', 3)" loading="lazy">
                     </div>
                     <div class="collage-thumbnail">
-                        <img src="${fotos[4]}" alt="${property.titulo}" class="collage-image" onclick="openImageModal('${property.id_temporal}', 4)" loading="lazy">
+                        <img src="${fotos[4]}" alt="${property.titulo}" class="collage-image" onclick="event.stopPropagation(); openImageModal('${property.id_temporal}', 4)" loading="lazy">
                     </div>
                 </div>
             </div>
@@ -770,14 +848,35 @@ function createImageCollage(property) {
             <div class="property-gallery-collage">
                 <div class="collage-top-row">
                     <div class="collage-thumbnail">
-                        <img src="${fotos[0]}" alt="${property.titulo}" class="collage-image" onclick="openImageModal('${property.id_temporal}', 0)" loading="lazy">
+                        <img src="${fotos[0]}" alt="${property.titulo}" class="collage-image" onclick="event.stopPropagation(); openImageModal('${property.id_temporal}', 0)" loading="lazy">
                     </div>
                     <div class="collage-thumbnail">
-                        <img src="${fotos[1]}" alt="${property.titulo}" class="collage-image" onclick="openImageModal('${property.id_temporal}', 1)" loading="lazy">
+                        <img src="${fotos[1]}" alt="${property.titulo}" class="collage-image" onclick="event.stopPropagation(); openImageModal('${property.id_temporal}', 1)" loading="lazy">
                     </div>
                 </div>
-                <div class="collage-main">
-                    <img src="${fotos[2]}" alt="${property.titulo}" class="collage-image" onclick="openImageModal('${property.id_temporal}', 2)" loading="lazy">
+                <div class="collage-main" style="position: relative;">
+                    <img src="${fotos[2]}" alt="${property.titulo}" class="collage-image" onclick="event.stopPropagation(); openImageModal('${property.id_temporal}', 2)" loading="lazy">
+                    ${totalFotos > 3 ? `
+                        <button onclick="event.stopPropagation(); prevCollageImage('${property.id_temporal}')" 
+                                style="position: absolute; left: 5px; top: 50%; transform: translateY(-50%); 
+                                       background: rgba(35, 45, 235, 0.8); color: white; border: none; 
+                                       width: 24px; height: 24px; border-radius: 50%; cursor: pointer; 
+                                       display: flex; align-items: center; justify-content: center;
+                                       font-size: 12px;">
+                            ◀
+                        </button>
+                        <button onclick="event.stopPropagation(); nextCollageImage('${property.id_temporal}')" 
+                                style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); 
+                                       background: rgba(35, 45, 235, 0.8); color: white; border: none; 
+                                       width: 24px; height: 24px; border-radius: 50%; cursor: pointer; 
+                                       display: flex; align-items: center; justify-content: center;
+                                       font-size: 12px;">
+                            ▶
+                        </button>
+                        <div style="position: absolute; bottom: 5px; right: 5px; background: rgba(35, 45, 235, 0.8); color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px;">
+                            ${currentCollageImageIndex + 1}/${totalFotos}
+                        </div>
+                    ` : ''}
                 </div>
             </div>
         `;
@@ -785,18 +884,44 @@ function createImageCollage(property) {
         // Para 1-2 fotos: mostrar en tamaño completo
         collageHtml = `
             <div class="property-gallery-collage">
-                <div class="collage-main">
-                    <img src="${fotos[0]}" alt="${property.titulo}" class="collage-image" onclick="openImageModal('${property.id_temporal}', 0)" loading="lazy">
+                <div class="collage-main" style="position: relative;">
+                    <img src="${fotos[0]}" alt="${property.titulo}" class="collage-image" onclick="event.stopPropagation(); openImageModal('${property.id_temporal}', 0)" loading="lazy">
+                    ${totalFotos > 1 ? `
+                        <button onclick="event.stopPropagation(); prevCollageImage('${property.id_temporal}')" 
+                                style="position: absolute; left: 5px; top: 50%; transform: translateY(-50%); 
+                                       background: rgba(35, 45, 235, 0.8); color: white; border: none; 
+                                       width: 24px; height: 24px; border-radius: 50%; cursor: pointer; 
+                                       display: flex; align-items: center; justify-content: center;
+                                       font-size: 12px;">
+                            ◀
+                        </button>
+                        <button onclick="event.stopPropagation(); nextCollageImage('${property.id_temporal}')" 
+                                style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); 
+                                       background: rgba(35, 45, 235, 0.8); color: white; border: none; 
+                                       width: 24px; height: 24px; border-radius: 50%; cursor: pointer; 
+                                       display: flex; align-items: center; justify-content: center;
+                                       font-size: 12px;">
+                            ▶
+                        </button>
+                        <div style="position: absolute; bottom: 5px; right: 5px; background: rgba(35, 45, 235, 0.8); color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px;">
+                            ${currentCollageImageIndex + 1}/${totalFotos}
+                        </div>
+                    ` : ''}
                 </div>
             </div>
         `;
     }
 
     return `
-        <div class="property-gallery" onclick="openImageGallery('${property.id_temporal}')">
+        <div class="property-gallery" onclick="toggleCollageView('${property.id_temporal}')">
             ${collageHtml}
             <div class="gallery-overlay">
                 <span>Ver ${totalFotos} foto${totalFotos > 1 ? 's' : ''}</span>
+            </div>
+            <!-- Botón para ver modal completo -->
+            <div style="position: absolute; top: 5px; right: 5px; background: rgba(35, 45, 235, 0.8); color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; z-index: 3;" 
+                 onclick="event.stopPropagation(); abrirModalImagenesComplete('${property.id_temporal}')">
+                🔍 Ver todas
             </div>
         </div>
     `;
@@ -894,6 +1019,50 @@ document.addEventListener('keydown', function(event) {
         }
     }
 });
+
+// Variables para manejo de navegación en collage
+let currentCollageProperty = null;
+let currentCollageImageIndex = 0;
+
+// Función para navegar a la siguiente imagen en collage
+function nextCollageImage(propertyId) {
+    event.stopPropagation();
+    const property = globalData.properties.find(p => p.id_temporal === propertyId);
+    if (!property || !property.fotos) return;
+    
+    const maxIndex = property.fotos.length - 1;
+    if (currentCollageImageIndex < maxIndex) {
+        currentCollageImageIndex++;
+        updateCollageImage(propertyId);
+    }
+}
+
+// Función para navegar a la imagen anterior en collage
+function prevCollageImage(propertyId) {
+    event.stopPropagation();
+    if (currentCollageImageIndex > 0) {
+        currentCollageImageIndex--;
+        updateCollageImage(propertyId);
+    }
+}
+
+// Función para actualizar la imagen visible en collage
+function updateCollageImage(propertyId) {
+    const property = globalData.properties.find(p => p.id_temporal === propertyId);
+    if (!property) return;
+    
+    const collageContainer = document.querySelector(`[data-property-card="${propertyId}"] .property-gallery`);
+    if (!collageContainer) return;
+    
+    // Actualizar solo la imagen principal visible
+    const mainImage = collageContainer.querySelector('.collage-main img');
+    if (mainImage) {
+        mainImage.src = property.fotos[currentCollageImageIndex];
+        mainImage.onclick = function() {
+            openImageModal(propertyId, currentCollageImageIndex);
+        };
+    }
+}
 
 // Cerrar modal al hacer clic fuera de la imagen
 document.addEventListener('click', function(event) {
