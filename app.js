@@ -758,56 +758,43 @@ function createExpandableGallery(property) {
     `;
 }
 
-// ALGORITMO ULTRA-COMPACTO: Masonry sin espacios + Tamaño variable
+// ALGORITMO PINTEREST MASONRY CORRECTO: Distribución ultra-compacta
 function calcularDistribucionInteligente(totalFotos, anchoDisponible, altoDisponible) {
-    console.log('🏗️ Calculando distribución ULTRA-COMPACTA para', totalFotos, 'fotos');
+    console.log('🏗️ Calculando distribución PINTEREST MASONRY para', totalFotos, 'fotos');
     console.log('📐 Espacio disponible:', anchoDisponible, 'x', altoDisponible, 'px');
     
-    // PASO 1: Configuración ULTRA-COMPACTA
+    // PASO 1: Configuración Pinterest Masonry
     const esMobile = anchoDisponible < 768;
     const columnas = esMobile ? 2 : Math.max(3, Math.min(4, Math.floor(anchoDisponible / 300)));
-    const gap = 2; // GAP MÍNIMO: Solo 2px entre imágenes
+    const gap = 2; // GAP ULTRA-COMPACTO: Solo 2px entre imágenes
     const anchoColumna = (anchoDisponible - (columnas - 1) * gap) / columnas;
     
-    // PASO 2: Inicializar columnas ultra-compactas
+    // PASO 2: Inicializar alturas de columnas (principio Pinterest Masonry)
     const alturaColumnas = new Array(columnas).fill(0);
-    const mejorEspacioLibre = anchoColumna; // Para optimización
     
-    console.log('🔧 Configuración ultra-compacta: ' + columnas + ' columnas, gap de ' + gap + 'px, ancho columna: ' + Math.floor(anchoColumna) + 'px');
+    console.log('🔧 Configuración Masonry: ' + columnas + ' columnas, gap de ' + gap + 'px, ancho columna: ' + Math.floor(anchoColumna) + 'px');
     
-    // PASO 3: Algoritmo de distribución ULTRA-COMPACTO
+    // PASO 3: Algoritmo Pinterest Masonry CORRECTO
     const patrones = [];
     
     for (let i = 0; i < totalFotos; i++) {
-        // PASO 3A: Encontrar la MEJOR posición (columna + espacio específico)
+        // PASO 3A: ENCONTRAR COLUMNA MÁS CORTA (principio Pinterest Masonry)
         let mejorColumna = 0;
-        let mejorTop = 0;
-        let menorEspacioLibre = Infinity;
-        
-        for (let col = 0; col < columnas; col++) {
-            const alturaActual = alturaColumnas[col];
-            const espacioLibre = (col === 0) ? 0 : 
-                (alturaColumnas[col] - alturaColumnas[col-1]);
-            
-            // Priorizar columnas con menor altura Y menor espacio libre
-            const prioridad = alturaActual + Math.abs(espacioLibre);
-            
-            if (prioridad < menorEspacioLibre) {
-                menorEspacioLibre = prioridad;
+        for (let col = 1; col < columnas; col++) {
+            if (alturaColumnas[col] < alturaColumnas[mejorColumna]) {
                 mejorColumna = col;
-                mejorTop = alturaActual;
             }
         }
         
-        // PASO 3B: Calcular posición exacta
+        // PASO 3B: Calcular posición en la columna más corta
         const left = mejorColumna * (anchoColumna + gap);
-        const top = mejorTop;
+        const top = alturaColumnas[mejorColumna];
         
-        // PASO 3C: Algoritmo de tamaños ULTRA-VARIABLE (sin limitaciones rígidas)
+        // PASO 3C: Algoritmo de tamaños VARIABLES
         const goldenRatio = 1.618;
         const posicion = i + 1;
         
-        // Distribución matemática sin espacios mínimos
+        // Distribución inteligente de tamaños
         let factorAncho;
         if (posicion % 7 === 1) {
             // Destacadas cada 7ma: muy anchas
@@ -826,36 +813,23 @@ function calcularDistribucionInteligente(totalFotos, anchoDisponible, altoDispon
             factorAncho = 0.5 + Math.random() * 0.2;
         } else {
             // Variables para el resto
-            factorAncho = 0.8 + Math.random() * 0.8; // Amplio rango: 0.8 - 1.6
+            factorAncho = 0.8 + Math.random() * 0.8;
         }
         
-        // PASO 3D: Tamaños sin restricciones estrictas (permitir variaciones más amplias)
+        // PASO 3D: Calcular tamaño final
         let anchoFinal = anchoColumna * factorAncho;
-        
-        // PASO 3E: Proporciones ultra-variables (sin límites restrictivos)
-        const proporcion = 0.4 + Math.random() * 1.8; // 0.4 - 2.2 (mucho más amplio)
+        const proporcion = 0.4 + Math.random() * 1.8; // Proporción variable
         let altoFinal = anchoFinal * proporcion;
         
-        // PASO 3F: Validación ULTRA-LIBRE (solo evitar desbordamiento extremo)
+        // PASO 3E: Validación con límites razonables
         const maxAncho = Math.min(anchoColumna * 1.5, anchoDisponible * 0.7);
-        const maxAlto = Math.min(500, altoDisponible * 0.8);
+        const maxAlto = Math.min(400, altoDisponible * 0.6);
         
-        anchoFinal = Math.max(60, Math.min(anchoFinal, maxAncho));
-        altoFinal = Math.max(40, Math.min(altoFinal, maxAlto));
+        anchoFinal = Math.max(80, Math.min(anchoFinal, maxAncho));
+        altoFinal = Math.max(60, Math.min(altoFinal, maxAlto));
         
-        
-        // PASO 3G: Actualización inteligente de columnas (optimización ULTRA)
+        // PASO 3F: PRINCIPIO PINTEREST MASONRY - Actualizar altura de la columna usada
         alturaColumnas[mejorColumna] = top + altoFinal + gap;
-        
-        // PASO 3H: Optimización adicional - intentar nivelar columnas
-        for (let col = 0; col < columnas; col++) {
-            if (col !== mejorColumna && alturaColumnas[col] > alturaColumnas[mejorColumna]) {
-                // Ajustar si hay mucha diferencia
-                if (alturaColumnas[col] - alturaColumnas[mejorColumna] > 100) {
-                    alturaColumnas[col] = alturaColumnas[mejorColumna] + Math.random() * 50;
-                }
-            }
-        }
         
         // PASO 3I: Agregar patrón ultra-compacto
         patrones.push({
