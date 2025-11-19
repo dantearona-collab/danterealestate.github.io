@@ -714,7 +714,7 @@ function createExpandableGallery(property) {
         // Sin imágenes - usar imagen por defecto
         return `
             <div class="expandable-gallery" style="position: relative; cursor: pointer; height: 200px;" 
-                 onclick="togglePropertyExpansion('${property.id_temporal}', '${property.id_temporal}')">
+                 onclick="expandPropertyImages('${property.id_temporal}')">
                 <img src="INSTITUCIONAL 1.jpg" 
                      alt="${property.titulo}" 
                      style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
@@ -734,11 +734,11 @@ function createExpandableGallery(property) {
     
     return `
         <div class="expandable-gallery-container" style="position: relative; cursor: pointer;" 
-             onclick="togglePropertyExpansion('${property.id_temporal}', '${property.id_temporal}')" 
+             onclick="expandPropertyImages('${property.id_temporal}')" 
              data-property-id="${property.id_temporal}">
             
             <!-- Vista inicial: Una sola imagen -->
-            <div class="gallery-initial-view" data-expanded="false">
+            <div class="gallery-initial-view">
                 <img src="${firstImage}" 
                      alt="${property.titulo}" 
                      style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
@@ -754,82 +754,182 @@ function createExpandableGallery(property) {
                     </div>
                 ` : ''}
             </div>
-            
-            <!-- Vista expandida: Todas las imágenes (inicialmente oculta) -->
-            <div class="gallery-expanded-view" style="display: none;" data-expanded="false">
-                <div class="expanded-images-grid" style="
-                    display: grid; 
-                    grid-template-columns: repeat(2, 1fr); 
-                    gap: 4px; 
-                    height: 200px;
-                ">
-                    ${fotos.map((foto, index) => `
-                        <div class="expanded-image-item" style="position: relative; cursor: pointer;" 
-                             onclick="event.stopPropagation(); openImageModal('${property.id_temporal}', ${index})">
-                            <img src="${foto}" 
-                                 alt="${property.titulo} - Foto ${index + 1}" 
-                                 style="width: 100% !important; height: 100% !important; object-fit: cover !important;"
-                                 onerror="this.src='INSTITUCIONAL 3.png'">
-                            <div class="image-hover-overlay" style="
-                                position: absolute; 
-                                top: 0; left: 0; right: 0; bottom: 0; 
-                                background: rgba(35, 45, 235, 0.7); 
-                                opacity: 0; 
-                                transition: opacity 0.3s;
-                                display: flex; 
-                                align-items: center; 
-                                justify-content: center;
-                                color: white;
-                                font-size: 14px;
-                                font-weight: 600;
-                            ">
-                                Ver foto ${index + 1}
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-                
-                <!-- Controles de navegación -->
-                <div class="expanded-controls" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); 
-                        display: flex; gap: 8px; align-items: center;">
-                    <button onclick="event.stopPropagation(); openImageModal('${property.id_temporal}', 0)" 
-                            style="background: rgba(35, 45, 235, 0.8); color: white; border: none; 
-                                   padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 10px;">
-                        🔍 Ver todas (${totalPhotos})
-                    </button>
-                    <button onclick="event.stopPropagation(); togglePropertyExpansion('${property.id_temporal}', '${property.id_temporal}')" 
-                            style="background: rgba(108, 117, 125, 0.8); color: white; border: none; 
-                                   padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 10px;">
-                        ⬆️ Contraer
-                    </button>
-                </div>
-            </div>
         </div>
     `;
 }
 
 // Función para expandir/contraer propiedad específica
-function togglePropertyExpansion(propertyId, propertyTemporalId) {
-    event.stopPropagation();
+// Función para expandir imágenes a toda la pantalla
+function expandPropertyImages(propertyId) {
+    const property = globalData.properties.find(p => p.id_temporal === propertyId);
+    if (!property || !property.fotos) return;
     
-    const container = document.querySelector(`[data-property-id="${propertyId}"]`);
-    if (!container) return;
+    const fotos = property.fotos;
+    const totalPhotos = fotos.length;
     
-    const initialView = container.querySelector('.gallery-initial-view');
-    const expandedView = container.querySelector('.gallery-expanded-view');
-    const isExpanded = initialView.dataset.expanded === 'true';
+    // Crear overlay de expansión a toda la pantalla
+    const overlay = document.createElement('div');
+    overlay.id = `image-expansion-${propertyId}`;
+    overlay.className = 'image-expansion-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 10000;
+        display: flex;
+        flex-direction: column;
+        backdrop-filter: blur(10px);
+    `;
     
-    if (isExpanded) {
-        // Contraer
-        initialView.style.display = 'block';
-        expandedView.style.display = 'none';
-        initialView.dataset.expanded = 'false';
-    } else {
-        // Expandir
-        initialView.style.display = 'none';
-        expandedView.style.display = 'block';
-        initialView.dataset.expanded = 'true';
+    // Header con botón cerrar
+    const header = `
+        <div style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(35, 45, 235, 0.9);
+            color: white;
+            font-weight: 600;
+        ">
+            <div style="font-size: 16px;">${property.titulo}</div>
+            <button onclick="closeImageExpansion('${propertyId}')" 
+                    style="
+                        background: rgba(255, 255, 255, 0.2);
+                        color: white;
+                        border: none;
+                        border-radius: 50%;
+                        width: 32px;
+                        height: 32px;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 18px;
+                        transition: background 0.3s;
+                    "
+                    onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'"
+                    onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'">
+                ✕
+            </button>
+        </div>
+    `;
+    
+    // Grid de imágenes que ocupa casi toda la pantalla
+    const imageGrid = `
+        <div style="
+            flex: 1;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            overflow-y: auto;
+            max-height: calc(100vh - 120px);
+        ">
+            ${fotos.map((foto, index) => `
+                <div style="
+                    position: relative;
+                    cursor: pointer;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    transition: transform 0.3s;
+                    aspect-ratio: 4/3;
+                " 
+                onclick="openImageModal('${propertyId}', ${index})"
+                onmouseover="this.style.transform='scale(1.05)'"
+                onmouseout="this.style.transform='scale(1)'">
+                    <img src="${foto}" 
+                         alt="${property.titulo} - Foto ${index + 1}"
+                         style="
+                             width: 100%;
+                             height: 100%;
+                             object-fit: cover;
+                             display: block;
+                         "
+                         onerror="this.src='INSTITUCIONAL 3.png'">
+                    <div style="
+                        position: absolute;
+                        bottom: 0;
+                        left: 0;
+                        right: 0;
+                        background: linear-gradient(transparent, rgba(35, 45, 235, 0.8));
+                        color: white;
+                        padding: 20px 10px 8px;
+                        font-size: 12px;
+                        font-weight: 600;
+                        text-align: center;
+                    ">
+                        Foto ${index + 1}
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+    
+    // Footer con contador
+    const footer = `
+        <div style="
+            padding: 15px 20px;
+            background: rgba(35, 45, 235, 0.9);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        ">
+            <div style="font-size: 14px; font-weight: 600;">Total: ${totalPhotos} foto${totalPhotos > 1 ? 's' : ''}</div>
+            <button onclick="openImageModal('${propertyId}', 0)" 
+                    style="
+                        background: rgba(255, 255, 255, 0.2);
+                        color: white;
+                        border: none;
+                        padding: 8px 16px;
+                        border-radius: 20px;
+                        cursor: pointer;
+                        font-size: 12px;
+                        font-weight: 600;
+                        transition: background 0.3s;
+                    "
+                    onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'"
+                    onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'">
+                🔍 Ver modal completo
+            </button>
+        </div>
+    `;
+    
+    overlay.innerHTML = header + imageGrid + footer;
+    document.body.appendChild(overlay);
+    
+    // Prevenir scroll del body
+    document.body.style.overflow = 'hidden';
+    
+    // Evento para cerrar al hacer clic fuera
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) {
+            closeImageExpansion(propertyId);
+        }
+    });
+    
+    // Evento para cerrar con Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeImageExpansion(propertyId);
+        }
+    });
+}
+
+// Función para cerrar expansión
+function closeImageExpansion(propertyId) {
+    const overlay = document.getElementById(`image-expansion-${propertyId}`);
+    if (overlay) {
+        overlay.remove();
     }
+    
+    // Restaurar scroll del body
+    document.body.style.overflow = 'auto';
 }
 
 // Sistema de galería expandible - Una imagen que se expande al hacer clic
