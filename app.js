@@ -758,112 +758,82 @@ function createExpandableGallery(property) {
     `;
 }
 
-// ALGORITMO PINTEREST MASONRY CORRECTO: Distribución ultra-compacta
+// ALGORITMO GRID SIMPLE (BACKUP SI MASONRY FALLA)
 function calcularDistribucionInteligente(totalFotos, anchoDisponible, altoDisponible) {
-    console.log('🏗️ Calculando distribución PINTEREST MASONRY para', totalFotos, 'fotos');
+    console.log('🏗️ Calculando distribución GRID SIMPLE para', totalFotos, 'fotos');
     console.log('📐 Espacio disponible:', anchoDisponible, 'x', altoDisponible, 'px');
     
-    // PASO 1: Configuración Pinterest Masonry
+    // CONFIGURACIÓN GRID SIMPLE Y SEGURO
     const esMobile = anchoDisponible < 768;
-    const columnas = esMobile ? 2 : Math.max(3, Math.min(4, Math.floor(anchoDisponible / 300)));
-    const gap = 2; // GAP ULTRA-COMPACTO: Solo 2px entre imágenes
-    const anchoColumna = (anchoDisponible - (columnas - 1) * gap) / columnas;
+    const columnas = esMobile ? 2 : 4;
+    const gap = 2;
+    const anchoColumna = Math.floor((anchoDisponible - (columnas - 1) * gap) / columnas);
+    const alturaMaximaFoto = 140; // FIJO Y SEGURO
     
-    // PASO 2: Inicializar alturas de columnas (principio Pinterest Masonry)
-    const alturaColumnas = new Array(columnas).fill(0);
+    console.log('🔧 Grid simple: ' + columnas + ' columnas, gap: ' + gap + 'px, ancho columna: ' + anchoColumna + 'px');
     
-    console.log('🔧 Configuración Masonry: ' + columnas + ' columnas, gap de ' + gap + 'px, ancho columna: ' + Math.floor(anchoColumna) + 'px');
-    
-    // PASO 3: Algoritmo Pinterest Masonry CORRECTO
+    // GENERACIÓN PREDECIBLE SIN ALEATORIEDAD
     const patrones = [];
     
     for (let i = 0; i < totalFotos; i++) {
-        // PASO 3A: ENCONTRAR COLUMNA MÁS CORTA (principio Pinterest Masonry)
-        let mejorColumna = 0;
-        for (let col = 1; col < columnas; col++) {
-            if (alturaColumnas[col] < alturaColumnas[mejorColumna]) {
-                mejorColumna = col;
-            }
-        }
-        
-        // PASO 3B: Calcular posición en la columna más corta
-        const left = mejorColumna * (anchoColumna + gap);
-        const top = alturaColumnas[mejorColumna];
-        
-        // PASO 3C: Algoritmo de tamaños VARIABLES
-        const goldenRatio = 1.618;
         const posicion = i + 1;
+        const columna = i % columnas;
+        const fila = Math.floor(i / columnas);
         
-        // Distribución ultra-compacta de tamaños (más pequeños)
-        let factorAncho;
-        if (posicion % 7 === 1) {
-            // Destacadas cada 7ma: moderadamente anchas
-            factorAncho = 1.0 + Math.random() * 0.3;
-        } else if (posicion % 6 === 1) {
-            // Grandes cada 6ta: medianas
-            factorAncho = 0.9 + Math.random() * 0.2;
-        } else if (posicion % 5 === 1) {
-            // Medianas cada 5ta: medianas-pequeñas
-            factorAncho = 0.8 + Math.random() * 0.2;
-        } else if (posicion % 4 === 1) {
-            // Pequeñas cada 4ta: pequeñas
-            factorAncho = 0.6 + Math.random() * 0.2;
-        } else if (posicion % 3 === 1) {
-            // Compactas cada 3ra: muy compactas
-            factorAncho = 0.4 + Math.random() * 0.2;
+        // POSICIÓN GRID SIMPLE
+        const left = columna * (anchoColumna + gap);
+        const top = fila * (alturaMaximaFoto + gap);
+        
+        // TAMAÑOS PREDECIBLES POR POSICIÓN
+        let anchoFinal;
+        if (posicion % 8 === 1 || posicion % 8 === 5) {
+            // Destacadas: ancho completo
+            anchoFinal = anchoColumna;
+        } else if (posicion % 8 === 2 || posicion % 8 === 6) {
+            // Grandes: 80% del ancho
+            anchoFinal = Math.floor(anchoColumna * 0.8);
+        } else if (posicion % 8 === 3 || posicion % 8 === 7) {
+            // Medianas: 60% del ancho
+            anchoFinal = Math.floor(anchoColumna * 0.6);
         } else {
-            // Variables para el resto (pequeñas)
-            factorAncho = 0.5 + Math.random() * 0.4; // Rango: 0.5 - 0.9
+            // Pequeñas: 70% del ancho
+            anchoFinal = Math.floor(anchoColumna * 0.7);
         }
         
-        // PASO 3D: Calcular tamaño final con proporciones más estables
-        let anchoFinal = anchoColumna * factorAncho;
-        const proporcion = 0.8 + Math.random() * 0.6; // Rango: 0.8 - 1.4 (más estable)
-        let altoFinal = anchoFinal * proporcion;
+        const altoFinal = alturaMaximaFoto;
         
-        // PASO 3E: Validación ULTRA-ESTRICTA con límites más pequeños
-        const maxAncho = Math.min(anchoColumna * 1.2, anchoDisponible * 0.6);
-        const maxAlto = Math.min(250, altoDisponible * 0.4);
+        // VALIDACIÓN EXTREMA
+        anchoFinal = Math.max(50, Math.min(anchoFinal, anchoColumna));
         
-        anchoFinal = Math.max(120, Math.min(anchoFinal, maxAncho));
-        altoFinal = Math.max(80, Math.min(altoFinal, maxAlto));
-        
-        // PASO 3F: PRINCIPIO PINTEREST MASONRY - Actualizar altura de la columna usada
-        alturaColumnas[mejorColumna] = top + altoFinal + gap;
-        
-        // PASO 3I: Agregar patrón ultra-compacto
+        // PATRÓN CON VALORES EXACTOS
         patrones.push({
-            ancho: Math.floor(anchoFinal),
-            alto: Math.floor(altoFinal),
-            left: Math.floor(left),
-            top: Math.floor(top),
-            columna: mejorColumna,
-            proporcion: parseFloat(proporcion.toFixed(2)),
-            factorAncho: parseFloat(factorAncho.toFixed(2))
+            ancho: anchoFinal,
+            alto: altoFinal,
+            left: left,
+            top: top,
+            columna: columna,
+            fila: fila,
+            proporcion: parseFloat((altoFinal / anchoFinal).toFixed(2)),
+            factorAncho: parseFloat((anchoFinal / anchoColumna).toFixed(2))
         });
         
-        // DEBUG ULTRA-DETALLADO
-        console.log('🔍 FOTO ' + posicion + ':');
-        console.log('  - Columna seleccionada: ' + mejorColumna);
-        console.log('  - Posición: left=' + Math.floor(left) + 'px, top=' + Math.floor(top) + 'px');
-        console.log('  - Tamaño: ' + Math.floor(anchoFinal) + 'x' + Math.floor(altoFinal) + 'px');
-        console.log('  - Factor ancho: ' + factorAncho.toFixed(2) + ', Proporción: ' + proporcion.toFixed(2));
-        console.log('  - Alturas de columnas: [' + alturaColumnas.map(h => Math.floor(h)).join(', ') + ']');
-        console.log('  - Nueva altura columna ' + mejorColumna + ': ' + Math.floor(alturaColumnas[mejorColumna]) + 'px');
+        // DEBUG DETALLADO
+        console.log('📐 FOTO ' + posicion + ':');
+        console.log('  - Grid: col=' + columna + ', row=' + fila + ' | Pos: (' + left + ',' + top + ')');
+        console.log('  - Tamaño: ' + anchoFinal + 'x' + altoFinal + ' | Factor: ' + (anchoFinal / anchoColumna).toFixed(2));
     }
     
-    // PASO 4: Análisis ULTRA-COMPACTO
+    // PASO 4: Análisis de distribución
     const alturaMaxima = Math.max(...alturaColumnas);
     const alturaPromedio = alturaColumnas.reduce((a, b) => a + b, 0) / columnas;
-    const diferenciaAlturas = alturaMaxima - Math.min(...alturaColumnas);
     const factorCompacidad = ((alturaPromedio / alturaMaxima) * 100);
     
-    console.log('✅ Distribución ULTRA-COMPACTA completa:');
+    console.log('✅ Distribución MASONRY SEGURA completa:');
     console.log('- Altura máxima: ' + Math.floor(alturaMaxima) + 'px');
     console.log('- Altura promedio: ' + Math.floor(alturaPromedio) + 'px');
     console.log('- Factor de compacidad: ' + factorCompacidad.toFixed(1) + '%');
-    console.log('- Equilibrio: ' + (factorCompacidad > 85 ? 'EXCELENTE' : factorCompacidad > 70 ? 'BUENO' : 'MEJORABLE'));
-    console.log('- Gap aplicado: ' + gap + 'px (ULTRA-COMPACTO)');
+    console.log('- Balance: ' + (factorCompacidad > 85 ? 'EXCELENTE' : factorCompacidad > 70 ? 'BUENO' : 'MEJORABLE'));
+    console.log('- Patrones generados: ' + patrones.length + ' de ' + totalFotos + ' requeridos');
     
     return {
         patrones: patrones,
@@ -872,6 +842,28 @@ function calcularDistribucionInteligente(totalFotos, anchoDisponible, altoDispon
         alturaColumnas: alturaColumnas,
         gap: gap,
         balance: factorCompacidad > 85 ? 'EXCELENTE' : factorCompacidad > 70 ? 'BUENO' : 'MEJORABLE',
+        factorCompacidad: factorCompacidad.toFixed(1)
+    };
+    
+    // ANÁLISIS GRID SIMPLE
+    const totalFilas = Math.ceil(totalFotos / columnas);
+    const alturaTotalGrid = totalFilas * (alturaMaximaFoto + gap) - gap;
+    const factorCompacidad = 100; // Grid perfecto = 100%
+    
+    console.log('✅ Distribución GRID SIMPLE completa:');
+    console.log('- Total filas: ' + totalFilas);
+    console.log('- Altura total: ' + alturaTotalGrid + 'px');
+    console.log('- Factor de compacidad: ' + factorCompacidad.toFixed(1) + '%');
+    console.log('- Balance: PERFECTO');
+    console.log('- Patrones generados: ' + patrones.length + ' de ' + totalFotos + ' requeridos');
+    
+    return {
+        patrones: patrones,
+        columnas: columnas,
+        alturaTotal: alturaTotalGrid,
+        alturaColumnas: [], // No relevante para grid
+        gap: gap,
+        balance: 'PERFECTO',
         factorCompacidad: factorCompacidad.toFixed(1)
     };
 }
@@ -1004,6 +996,15 @@ function expandPropertyImages(propertyId) {
                 const top = patron.top || 0;
                 const proporcion = patron.proporcion || 1;
                 
+                // DEBUG ULTRA-ESPECÍFICO EN LA GENERACIÓN HTML
+                setTimeout(() => {
+                    console.log('🎯 IMAGEN ' + (index + 1) + ' GENERADA:');
+                    console.log('  - Posición: left=' + left + 'px, top=' + top + 'px');
+                    console.log('  - Tamaño: width=' + ancho + 'px, height=' + alto + 'px');
+                    console.log('  - Columna: ' + patron.columna + ', Factor: ' + patron.factorAncho);
+                    console.log('  - Área ocupada: (' + left + ',' + top + ') -> (' + (left + ancho) + ',' + (top + alto) + ')');
+                }, index * 50); // Stagger para que se vean en orden
+                
                 return `
                     <div style="
                         position: absolute;
@@ -1023,7 +1024,7 @@ function expandPropertyImages(propertyId) {
                         padding: 0;
                         border: 2px solid transparent;
                     "
-                    onclick="console.log('🖱️ Clic en foto', ${index}, 'propertyId:', '${propertyId}'); expandirFotoEnGaleria('${propertyId}', ${index})"
+                    onclick="console.log('🖱️ Clic en foto', ${index}, 'propertyId:', '${propertyId}'); verificarSuperposiciones('${propertyId}'); expandirFotoEnGaleria('${propertyId}', ${index})"
                     onmouseenter="this.style.transform='scale(1.02)'; this.style.boxShadow='0 8px 32px rgba(0,0,0,0.15)'; this.style.borderColor='#232deb'"
                     onmouseleave="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'; this.style.borderColor='transparent'; this.querySelector('.masonry-overlay').style.opacity = '0'"
                     title="📸 Foto ${index + 1}/${totalPhotos} - Columna ${patron.columna + 1} (${ancho}x${alto}px, factor ${patron.factorAncho}) - Toca para expandir">
@@ -1837,3 +1838,73 @@ console.log('🏠 Sistema Dante Propiedades - Sin errores + Slider + Modal carga
 console.log('🎯 Sistema de modal de galería incluido');
 console.log('✅ Sin dependencias de Font Awesome');
 console.log('🚀 Distribución inteligente aplicada - Sin tamaños iguales - Fondo blanco garantizado');
+
+// FUNCIÓN DE VERIFICACIÓN DE SUPERPOSICIONES
+function verificarSuperposiciones(propertyId) {
+    console.log('🔍 VERIFICANDO SUPERPOSICIONES para ' + propertyId);
+    
+    setTimeout(() => {
+        const gallery = document.querySelector(`[id^="galeria-ultra-compacta-${propertyId}"]`);
+        if (!gallery) {
+            console.log('❌ No se encontró la galería para verificar');
+            return;
+        }
+        
+        const images = gallery.querySelectorAll('div[style*="position: absolute"]');
+        console.log('📸 Imágenes encontradas: ' + images.length);
+        
+        let superposiciones = 0;
+        const areasOcupadas = [];
+        
+        images.forEach((img, index) => {
+            const style = img.style;
+            const left = parseInt(style.left) || 0;
+            const top = parseInt(style.top) || 0;
+            const width = parseInt(style.width) || 0;
+            const height = parseInt(style.height) || 0;
+            
+            const area = {
+                left: left,
+                top: top,
+                right: left + width,
+                bottom: top + height,
+                index: index,
+                element: img
+            };
+            
+            areasOcupadas.push(area);
+            
+            console.log('📐 Imagen ' + index + ': pos(' + left + ',' + top + ') size(' + width + 'x' + height + ')');
+        });
+        
+        // Verificar superposiciones
+        for (let i = 0; i < areasOcupadas.length; i++) {
+            for (let j = i + 1; j < areasOcupadas.length; j++) {
+                const area1 = areasOcupadas[i];
+                const area2 = areasOcupadas[j];
+                
+                const overlap = !(area1.right <= area2.left || 
+                                area2.right <= area1.left || 
+                                area1.bottom <= area2.top || 
+                                area2.bottom <= area1.top);
+                
+                if (overlap) {
+                    superposiciones++;
+                    console.log('⚠️ SUPERPOSICIÓN detectada entre imágenes ' + area1.index + ' y ' + area2.index);
+                    console.log('   - Área 1: (' + area1.left + ',' + area1.top + ') a (' + area1.right + ',' + area1.bottom + ')');
+                    console.log('   - Área 2: (' + area2.left + ',' + area2.top + ') a (' + area2.right + ',' + area2.bottom + ')');
+                    
+                    // Marcar imagen con superposición
+                    area1.element.style.border = '3px solid red !important';
+                    area2.element.style.border = '3px solid red !important';
+                }
+            }
+        }
+        
+        if (superposiciones === 0) {
+            console.log('✅ NO HAY SUPERPOSICIONES - Distribución correcta');
+        } else {
+            console.log('❌ SE DETECTARON ' + superposiciones + ' SUPERPOSICIONES');
+        }
+    }, 500);
+}
