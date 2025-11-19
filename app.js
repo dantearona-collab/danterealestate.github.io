@@ -802,17 +802,20 @@ function expandPropertyImages(propertyId) {
                         color: white;
                         border: none;
                         border-radius: 50%;
-                        width: 32px;
-                        height: 32px;
+                        width: 40px;
+                        height: 40px;
                         cursor: pointer;
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        font-size: 18px;
-                        transition: background 0.3s;
+                        font-size: 20px;
+                        font-weight: bold;
+                        transition: all 0.3s;
+                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
                     "
-                    onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'"
-                    onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'">
+                    onmouseover="this.style.background='rgba(255, 255, 255, 0.4)'; this.style.transform='scale(1.1)'"
+                    onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='scale(1)'"
+                    title="Cerrar (Esc)">
                 ✕
             </button>
         </div>
@@ -824,10 +827,11 @@ function expandPropertyImages(propertyId) {
             flex: 1;
             padding: 20px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
             overflow-y: auto;
             max-height: calc(100vh - 120px);
+            touch-action: pan-y pinch-zoom;
         ">
             ${fotos.map((foto, index) => `
                 <div style="
@@ -837,10 +841,13 @@ function expandPropertyImages(propertyId) {
                     overflow: hidden;
                     transition: transform 0.3s;
                     aspect-ratio: 4/3;
+                    min-height: 80px;
+                    touch-action: manipulation;
                 " 
                 onclick="openImageModal('${propertyId}', ${index})"
                 onmouseover="this.style.transform='scale(1.05)'"
-                onmouseout="this.style.transform='scale(1)'">
+                onmouseout="this.style.transform='scale(1)'"
+                title="Toca para ver en pantalla completa">
                     <img src="${foto}" 
                          alt="${property.titulo} - Foto ${index + 1}"
                          style="
@@ -850,20 +857,7 @@ function expandPropertyImages(propertyId) {
                              display: block;
                          "
                          onerror="this.src='INSTITUCIONAL 3.png'">
-                    <div style="
-                        position: absolute;
-                        bottom: 0;
-                        left: 0;
-                        right: 0;
-                        background: linear-gradient(transparent, rgba(35, 45, 235, 0.8));
-                        color: white;
-                        padding: 20px 10px 8px;
-                        font-size: 12px;
-                        font-weight: 600;
-                        text-align: center;
-                    ">
-                        Foto ${index + 1}
-                    </div>
+                    <!-- Sin etiquetas de número - solo imagen limpia -->
                 </div>
             `).join('')}
         </div>
@@ -886,16 +880,19 @@ function expandPropertyImages(propertyId) {
                         background: rgba(255, 255, 255, 0.2);
                         color: white;
                         border: none;
-                        padding: 8px 16px;
-                        border-radius: 20px;
+                        padding: 10px 20px;
+                        border-radius: 25px;
                         cursor: pointer;
-                        font-size: 12px;
+                        font-size: 14px;
                         font-weight: 600;
-                        transition: background 0.3s;
+                        transition: all 0.3s;
+                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                        touch-action: manipulation;
                     "
-                    onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'"
-                    onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'">
-                🔍 Ver modal completo
+                    onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='scale(1.05)'"
+                    onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='scale(1)'"
+                    title="Abrir galería completa">
+                🔍 Ver todas las fotos
             </button>
         </div>
     `;
