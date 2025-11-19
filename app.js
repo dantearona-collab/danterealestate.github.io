@@ -758,7 +758,112 @@ function createExpandableGallery(property) {
     `;
 }
 
-// Función para calcular dinámicamente el tamaño óptimo de imágenes en la galería
+// Función para calcular distribución inteligente tipo "masonry" que elimina espacios libres
+function calcularDistribucionInteligente(totalFotos, anchoDisponible, altoDisponible) {
+    // Determinar columnas dinámicas basadas en el ancho
+    const columnas = Math.max(3, Math.min(6, Math.floor(anchoDisponible / 300)));
+    
+    // Ancho base por columna
+    const anchoColumna = (anchoDisponible - (columnas - 1) * 6) / columnas;
+    
+    // Crear patrones de distribución para diferentes cantidades
+    const patrones = [];
+    
+    if (totalFotos <= 4) {
+        // 1-4 fotos: tamaños grandes diversos
+        for (let i = 0; i < totalFotos; i++) {
+            if (i === 0) {
+                // Primera imagen más grande (2 columnas)
+                patrones.push({
+                    ancho: anchoColumna * 2 + 6,
+                    alto: Math.min(altoDisponible * 0.4, anchoColumna * 1.2),
+                    spanColumnas: 2,
+                    spanFilas: 1
+                });
+            } else {
+                // Resto tamaño normal
+                patrones.push({
+                    ancho: anchoColumna,
+                    alto: anchoColumna * 0.75,
+                    spanColumnas: 1,
+                    spanFilas: 1
+                });
+            }
+        }
+    } else if (totalFotos <= 8) {
+        // 5-8 fotos: mix de tamaños
+        for (let i = 0; i < totalFotos; i++) {
+            if (i === 0 || i === 1) {
+                // Primeras dos más grandes
+                patrones.push({
+                    ancho: anchoColumna * (i === 0 ? 2 : 1.5) + (i === 0 ? 6 : 3),
+                    alto: anchoColumna * 0.8,
+                    spanColumnas: i === 0 ? 2 : 1.5,
+                    spanFilas: 1
+                });
+            } else {
+                // Resto tamaño pequeño
+                patrones.push({
+                    ancho: anchoColumna * 0.8,
+                    alto: anchoColumna * 0.6,
+                    spanColumnas: 1,
+                    spanFilas: 0.8
+                });
+            }
+        }
+    } else if (totalFotos <= 15) {
+        // 9-15 fotos: distribución balanceada
+        for (let i = 0; i < totalFotos; i++) {
+            if (i % 4 === 0) {
+                // Cada 4ta imagen más grande
+                patrones.push({
+                    ancho: anchoColumna * 1.5 + 3,
+                    alto: anchoColumna * 0.9,
+                    spanColumnas: 1.5,
+                    spanFilas: 1
+                });
+            } else {
+                // Resto tamaño uniforme
+                patrones.push({
+                    ancho: anchoColumna,
+                    alto: anchoColumna * 0.7,
+                    spanColumnas: 1,
+                    spanFilas: 1
+                });
+            }
+        }
+    } else {
+        // 16+ fotos: optimización para muchas imágenes
+        for (let i = 0; i < totalFotos; i++) {
+            if (i % 6 === 0) {
+                // Cada 6ta imagen destacada
+                patrones.push({
+                    ancho: anchoColumna * 1.2,
+                    alto: anchoColumna * 0.8,
+                    spanColumnas: 1.2,
+                    spanFilas: 1
+                });
+            } else {
+                // Resto compacto
+                patrones.push({
+                    ancho: anchoColumna * 0.9,
+                    alto: anchoColumna * 0.6,
+                    spanColumnas: 1,
+                    spanFilas: 0.9
+                });
+            }
+        }
+    }
+    
+    return {
+        patrones,
+        columnas,
+        anchoColumna,
+        anchoDisponible
+    };
+}
+
+// Función para calcular dinámicamente el tamaño óptimo de imágenes en la galería (deprecated)
 function calcularTamañoOptimoImagenes(totalFotos, anchoDisponible, altoDisponible) {
     // Configuraciones para diferentes cantidades de fotos
     if (totalFotos <= 6) {
@@ -786,7 +891,7 @@ function calcularTamañoOptimoImagenes(totalFotos, anchoDisponible, altoDisponib
 }
 
 // Función para expandir/contraer propiedad específica
-// Función para expandir imágenes a toda la pantalla
+// Función para expandir imágenes a toda la pantalla con distribución inteligente
 function expandPropertyImages(propertyId) {
     const property = globalData.properties.find(p => p.id_temporal === propertyId);
     if (!property || !property.fotos) return;
@@ -800,10 +905,10 @@ function expandPropertyImages(propertyId) {
     const anchoDisponible = anchoVentana - 60; // Restar padding y margen
     const altoDisponible = altoVentana - 180; // Restar header y margen
     
-    // Calcular tamaño óptimo dinámicamente
-    const dimensionesOptimas = calcularTamañoOptimoImagenes(totalPhotos, anchoDisponible, altoDisponible);
+    // Calcular distribución inteligente tipo masonry
+    const distribucionInteligente = calcularDistribucionInteligente(totalPhotos, anchoDisponible, altoDisponible);
     
-    // Crear overlay de expansión a toda la pantalla
+    // Crear overlay de expansión a toda la pantalla con FONDO BLANCO
     const overlay = document.createElement('div');
     overlay.id = `image-expansion-${propertyId}`;
     overlay.className = 'image-expansion-overlay';
@@ -813,23 +918,24 @@ function expandPropertyImages(propertyId) {
         left: 0;
         width: 100vw;
         height: 100vh;
-        background: rgba(0, 0, 0, 0.95);
+        background: white;
         z-index: 10000;
         display: flex;
         flex-direction: column;
         backdrop-filter: blur(10px);
     `;
     
-    // Header con botón cerrar
+    // Header con botón cerrar (adaptado para fondo blanco)
     const header = `
         <div style="
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 15px 20px;
-            background: rgba(35, 45, 235, 0.9);
+            background: #232deb;
             color: white;
             font-weight: 600;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         ">
             <div style="display: flex; align-items: center; gap: 15px;">
                 <img src="llave.png" alt="Dante Propiedades" style="width: 40px; height: 40px; object-fit: contain;">
@@ -860,61 +966,72 @@ function expandPropertyImages(propertyId) {
         </div>
     `;
     
-    // Grid de imágenes con cálculo dinámico para APROVECHAR MÁXIMAMENTE EL ESPACIO
+    // Grid de imágenes con distribución inteligente tipo "MASONRY" para ELIMINAR ESPACIOS LIBRES
     const imageGrid = `
         <div style="
             flex: 1;
-            padding: 15px;
-            display: grid;
-            grid-template-columns: repeat(${dimensionesOptimas.columnas}, 1fr);
-            gap: 6px;
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
             overflow-y: auto;
             max-height: calc(100vh - 120px);
             touch-action: pan-y pinch-zoom;
+            background: white;
+            justify-content: flex-start;
+            align-content: flex-start;
         ">
-            ${fotos.map((foto, index) => `
-                <div style="
-                    position: relative;
-                    cursor: pointer;
-                    border-radius: 6px;
-                    overflow: hidden;
-                    transition: transform 0.3s;
-                    width: ${dimensionesOptimas.anchoImagen}px;
-                    height: ${dimensionesOptimas.altoImagen}px;
-                    background: #f8f9fa;
-                    touch-action: manipulation;
-                    /* Dimensiones calculadas dinámicamente para llenar el espacio */
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                " 
-                onclick="expandirFotoEnGaleria('${propertyId}', ${index})"
-                onmouseover="this.style.transform='scale(1.05)'; this.querySelector('.grid-image-overlay').style.opacity = '1'"
-                onmouseout="this.style.transform='scale(1)'; this.querySelector('.grid-image-overlay').style.opacity = '0'"
-                title="Toca para expandir en la galería">
-                    <img src="${foto}" 
-                         alt="${property.titulo} - Foto ${index + 1}"
-                         style="
-                             width: 100%;
-                             height: 100%;
-                             object-fit: cover;
-                             display: block;
-                             transition: all 0.3s ease;
-                         "
-                         onerror="this.src='INSTITUCIONAL 3.png'">
-                    <!-- Overlay dinámico para mejor visualización -->
-                    <div class="grid-image-overlay" style="
-                        position: absolute;
-                        bottom: 0;
-                        left: 0;
-                        right: 0;
-                        background: linear-gradient(transparent, rgba(35, 45, 235, 0.8));
-                        height: 25px;
-                        opacity: 0;
-                        transition: opacity 0.3s;
-                    "></div>
-                </div>
-            `).join('')}
+            ${fotos.map((foto, index) => {
+                const patron = distribucionInteligente.patrones[index] || distribucionInteligente.patrones[0];
+                return `
+                    <div style="
+                        position: relative;
+                        cursor: pointer;
+                        border-radius: 8px;
+                        overflow: hidden;
+                        transition: transform 0.3s, box-shadow 0.3s;
+                        width: ${patron.ancho}px;
+                        height: ${patron.alto}px;
+                        background: #f0f2f5;
+                        touch-action: manipulation;
+                        /* Distribución inteligente para llenar todo el espacio */
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                        border: 1px solid #e0e6ed;
+                    " 
+                    onclick="expandirFotoEnGaleria('${propertyId}', ${index})"
+                    onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 4px 16px rgba(35,45,235,0.2)'; this.querySelector('.grid-image-overlay').style.opacity = '1'"
+                    onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'; this.querySelector('.grid-image-overlay').style.opacity = '0'"
+                    title="Toca para expandir en la galería">
+                        <img src="${foto}" 
+                             alt="${property.titulo} - Foto ${index + 1}"
+                             style="
+                                 width: 100%;
+                                 height: 100%;
+                                 object-fit: cover;
+                                 display: block;
+                                 transition: all 0.3s ease;
+                             "
+                             onerror="this.src='INSTITUCIONAL 3.png'">
+                        <!-- Overlay dinámico para mejor visualización -->
+                        <div class="grid-image-overlay" style="
+                            position: absolute;
+                            bottom: 0;
+                            left: 0;
+                            right: 0;
+                            background: linear-gradient(transparent, rgba(35, 45, 235, 0.9));
+                            height: 30px;
+                            opacity: 0;
+                            transition: opacity 0.3s;
+                            display: flex;
+                            align-items: flex-end;
+                            justify-content: center;
+                            padding-bottom: 8px;
+                        ">
+                            <span style="color: white; font-size: 12px; font-weight: 600;">${index + 1}/${totalPhotos}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('')}
         </div>
     `;
     
@@ -968,11 +1085,11 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.95);
+        background: rgba(255, 255, 255, 0.98);
         z-index: 10002;
         display: flex;
         flex-direction: column;
-        backdrop-filter: blur(10px);
+        backdrop-filter: blur(15px);
     `;
     
     vistaExpandida.innerHTML = `
@@ -982,9 +1099,10 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
             justify-content: space-between;
             align-items: center;
             padding: 15px 20px;
-            background: rgba(35, 45, 235, 0.9);
+            background: #232deb;
             color: white;
             font-weight: 600;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         ">
             <div style="font-size: 16px;">${property.titulo} - Foto ${fotoIndex + 1}</div>
             <div style="display: flex; gap: 10px; align-items: center;">
@@ -1042,9 +1160,9 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 10px;
+            padding: 15px;
             position: relative;
-            background: radial-gradient(circle at center, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%);
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         ">
             <img src="${fotoSeleccionada}" 
                  alt="${property.titulo} - Foto ${fotoIndex + 1}"
@@ -1132,12 +1250,13 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
         <!-- Footer con información -->
         <div style="
             padding: 15px 20px;
-            background: rgba(35, 45, 235, 0.9);
+            background: #232deb;
             color: white;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 20px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
         ">
             <div style="font-size: 14px; font-weight: 600;">Foto ${fotoIndex + 1} de ${property.fotos.length}</div>
             <button onclick="openImageModal('${propertyId}', ${fotoIndex})" 
