@@ -823,37 +823,14 @@ function calcularDistribucionInteligente(totalFotos, anchoDisponible, altoDispon
         console.log('  - Tamaño: ' + anchoFinal + 'x' + altoFinal + ' | Factor: ' + (anchoFinal / anchoColumna).toFixed(2));
     }
     
-    // PASO 4: Análisis de distribución
-    const alturaMaxima = Math.max(...alturaColumnas);
-    const alturaPromedio = alturaColumnas.reduce((a, b) => a + b, 0) / columnas;
-    const factorCompacidad = ((alturaPromedio / alturaMaxima) * 100);
-    
-    console.log('✅ Distribución MASONRY SEGURA completa:');
-    console.log('- Altura máxima: ' + Math.floor(alturaMaxima) + 'px');
-    console.log('- Altura promedio: ' + Math.floor(alturaPromedio) + 'px');
-    console.log('- Factor de compacidad: ' + factorCompacidad.toFixed(1) + '%');
-    console.log('- Balance: ' + (factorCompacidad > 85 ? 'EXCELENTE' : factorCompacidad > 70 ? 'BUENO' : 'MEJORABLE'));
-    console.log('- Patrones generados: ' + patrones.length + ' de ' + totalFotos + ' requeridos');
-    
-    return {
-        patrones: patrones,
-        columnas: columnas,
-        alturaTotal: alturaMaxima,
-        alturaColumnas: alturaColumnas,
-        gap: gap,
-        balance: factorCompacidad > 85 ? 'EXCELENTE' : factorCompacidad > 70 ? 'BUENO' : 'MEJORABLE',
-        factorCompacidad: factorCompacidad.toFixed(1)
-    };
-    
-    // ANÁLISIS GRID SIMPLE
+    // ANÁLISIS GRID SIMPLE - DISTRIBUCIÓN PERFECTA
     const totalFilas = Math.ceil(totalFotos / columnas);
     const alturaTotalGrid = totalFilas * (alturaMaximaFoto + gap) - gap;
-    const factorCompacidad = 100; // Grid perfecto = 100%
     
     console.log('✅ Distribución GRID SIMPLE completa:');
     console.log('- Total filas: ' + totalFilas);
     console.log('- Altura total: ' + alturaTotalGrid + 'px');
-    console.log('- Factor de compacidad: ' + factorCompacidad.toFixed(1) + '%');
+    console.log('- Factor de compacidad: 100.0%');
     console.log('- Balance: PERFECTO');
     console.log('- Patrones generados: ' + patrones.length + ' de ' + totalFotos + ' requeridos');
     
@@ -864,7 +841,7 @@ function calcularDistribucionInteligente(totalFotos, anchoDisponible, altoDispon
         alturaColumnas: [], // No relevante para grid
         gap: gap,
         balance: 'PERFECTO',
-        factorCompacidad: factorCompacidad.toFixed(1)
+        factorCompacidad: '100.0'
     };
 }
 
