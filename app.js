@@ -967,23 +967,7 @@ function expandPropertyImages(propertyId) {
             height: ${Math.max(altoDisponible, distribucionInteligente.alturaTotal + 40)}px;
         ">
             <!-- Info de distribución ULTRA-COMPACTA -->
-            <div style="
-                position: sticky;
-                top: 0;
-                background: rgba(35,45,235,0.1);
-                padding: 8px 12px;
-                border-radius: 6px;
-                font-size: 12px;
-                color: #232deb;
-                z-index: 100;
-                margin-bottom: 10px;
-                box-shadow: 0 2px 8px rgba(35,45,235,0.1);
-                border: 1px solid rgba(35,45,235,0.2);
-                backdrop-filter: blur(10px);
-            ">
-                <strong>🏗️ ULTRA-COMPACTO:</strong> ${distribucionInteligente.balance} | ${distribucionInteligente.columnas} columnas | Gap: ${distribucionInteligente.gap}px | Compacidad: ${distribucionInteligente.factorCompacidad}%
-            </div>
-            
+
             ${fotos.map((foto, index) => {
                 // DEBUG: Verificar que el patrón existe
                 if (!distribucionInteligente.patrones[index]) {
@@ -1097,23 +1081,7 @@ function expandPropertyImages(propertyId) {
                 `;
             }).join('')}
         </div>
-        
-        <!-- Información de algoritmo aplicado -->
-        <div style="
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(35, 45, 235, 0.9);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 11px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        ">
-            <strong>🎯 Algoritmo Activo:</strong> Distribución Inteligente
-        </div>
-        
+
         <script>
             console.log('🚀 APLICANDO ALGORITMO INTELIGENTE DE DISTRIBUCIÓN...');
             
