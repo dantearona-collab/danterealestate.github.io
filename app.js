@@ -827,7 +827,7 @@ function expandPropertyImages(propertyId) {
             flex: 1;
             padding: 15px;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 6px;
             overflow-y: auto;
             max-height: calc(100vh - 120px);
@@ -840,7 +840,7 @@ function expandPropertyImages(propertyId) {
                     border-radius: 6px;
                     overflow: hidden;
                     transition: transform 0.3s;
-                    min-height: 120px;
+                    min-height: 100px;
                     background: #f8f9fa;
                     touch-action: manipulation;
                     /* Distribución uniforme sin importar el tamaño original */
