@@ -831,7 +831,10 @@ function expandPropertyImages(propertyId) {
             color: white;
             font-weight: 600;
         ">
-            <div style="font-size: 16px;">${property.titulo}</div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <img src="llave.png" alt="Dante Propiedades" style="width: 40px; height: 40px; object-fit: contain;">
+                <div style="font-size: 16px;">${property.titulo}</div>
+            </div>
             <button onclick="closeImageExpansion('${propertyId}')" 
                     style="
                         background: rgba(255, 255, 255, 0.2);
@@ -915,41 +918,9 @@ function expandPropertyImages(propertyId) {
         </div>
     `;
     
-    // Footer con contador
-    const footer = `
-        <div style="
-            padding: 15px 20px;
-            background: rgba(35, 45, 235, 0.9);
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-        ">
-            <div style="font-size: 14px; font-weight: 600;">Total: ${totalPhotos} foto${totalPhotos > 1 ? 's' : ''}</div>
-            <button onclick="openImageModal('${propertyId}', 0)" 
-                    style="
-                        background: rgba(255, 255, 255, 0.2);
-                        color: white;
-                        border: none;
-                        padding: 10px 20px;
-                        border-radius: 25px;
-                        cursor: pointer;
-                        font-size: 14px;
-                        font-weight: 600;
-                        transition: all 0.3s;
-                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-                        touch-action: manipulation;
-                    "
-                    onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='scale(1.05)'"
-                    onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='scale(1)'"
-                    title="Abrir galería completa">
-                🔍 Ver todas las fotos
-            </button>
-        </div>
-    `;
+
     
-    overlay.innerHTML = header + imageGrid + footer;
+    overlay.innerHTML = header + imageGrid;
     document.body.appendChild(overlay);
     
     // Prevenir scroll del body
