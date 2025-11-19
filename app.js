@@ -321,8 +321,8 @@ function createPropertyCard(property) {
         border: 1px solid #e1e5e9 !important;
     `;
     
-    // Crear slider de imágenes
-    const imageSection = createImageSlider(property);
+    // Crear galería de imágenes tipo collage
+    const imageSection = createImageCollage(property);
     
     card.innerHTML = `
         ${imageSection}
@@ -717,6 +717,195 @@ window.addEventListener('click', function(event) {
 
 // Mostrar variables del modal inicializadas
 console.log('🖼️ Variables del modal inicializadas');
+
+// ========================================
+// SISTEMA DE GALERÍA TIPO COLLAGAGE
+// ========================================
+
+// Crear galería de imágenes tipo collage
+function createImageCollage(property) {
+    if (!property.fotos || property.fotos.length === 0) {
+        return `<div class="property-gallery" style="background: #f8f9fa; height: 200px; display: flex; align-items: center; justify-content: center; color: #6c757d;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">📷</div>
+                        <div>Sin imágenes disponibles</div>
+                    </div>
+                </div>`;
+    }
+
+    const fotos = property.fotos;
+    const totalFotos = fotos.length;
+    
+    // Seleccionar imágenes para el collage
+    let collageHtml = '';
+    
+    if (totalFotos >= 5) {
+        // Para 5+ fotos: 2 arriba, 1 grande en medio, 2 abajo
+        collageHtml = `
+            <div class="property-gallery-collage">
+                <div class="collage-top-row">
+                    <div class="collage-thumbnail">
+                        <img src="${fotos[0]}" alt="${property.titulo}" class="collage-image" onclick="openImageModal('${property.id_temporal}', 0)" loading="lazy">
+                    </div>
+                    <div class="collage-thumbnail">
+                        <img src="${fotos[1]}" alt="${property.titulo}" class="collage-image" onclick="openImageModal('${property.id_temporal}', 1)" loading="lazy">
+                    </div>
+                </div>
+                <div class="collage-main">
+                    <img src="${fotos[2]}" alt="${property.titulo}" class="collage-image" onclick="openImageModal('${property.id_temporal}', 2)" loading="lazy">
+                </div>
+                <div class="collage-bottom-row">
+                    <div class="collage-thumbnail">
+                        <img src="${fotos[3]}" alt="${property.titulo}" class="collage-image" onclick="openImageModal('${property.id_temporal}', 3)" loading="lazy">
+                    </div>
+                    <div class="collage-thumbnail">
+                        <img src="${fotos[4]}" alt="${property.titulo}" class="collage-image" onclick="openImageModal('${property.id_temporal}', 4)" loading="lazy">
+                    </div>
+                </div>
+            </div>
+        `;
+    } else if (totalFotos >= 3) {
+        // Para 3-4 fotos: adaptar layout
+        collageHtml = `
+            <div class="property-gallery-collage">
+                <div class="collage-top-row">
+                    <div class="collage-thumbnail">
+                        <img src="${fotos[0]}" alt="${property.titulo}" class="collage-image" onclick="openImageModal('${property.id_temporal}', 0)" loading="lazy">
+                    </div>
+                    <div class="collage-thumbnail">
+                        <img src="${fotos[1]}" alt="${property.titulo}" class="collage-image" onclick="openImageModal('${property.id_temporal}', 1)" loading="lazy">
+                    </div>
+                </div>
+                <div class="collage-main">
+                    <img src="${fotos[2]}" alt="${property.titulo}" class="collage-image" onclick="openImageModal('${property.id_temporal}', 2)" loading="lazy">
+                </div>
+            </div>
+        `;
+    } else {
+        // Para 1-2 fotos: mostrar en tamaño completo
+        collageHtml = `
+            <div class="property-gallery-collage">
+                <div class="collage-main">
+                    <img src="${fotos[0]}" alt="${property.titulo}" class="collage-image" onclick="openImageModal('${property.id_temporal}', 0)" loading="lazy">
+                </div>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="property-gallery" onclick="openImageGallery('${property.id_temporal}')">
+            ${collageHtml}
+            <div class="gallery-overlay">
+                <span>Ver ${totalFotos} foto${totalFotos > 1 ? 's' : ''}</span>
+            </div>
+        </div>
+    `;
+}
+
+// Variables globales para el modal de imágenes
+let currentImageIndex = 0;
+let currentPropertyId = '';
+let currentPropertyPhotos = [];
+
+// Abrir modal con imagen específica
+function openImageModal(propertyId, imageIndex) {
+    const property = globalData.properties.find(p => p.id_temporal === propertyId);
+    if (!property || !property.fotos) return;
+
+    currentPropertyId = propertyId;
+    currentPropertyPhotos = property.fotos;
+    currentImageIndex = imageIndex;
+
+    showImageInModal();
+    
+    // Mostrar modal
+    const modal = document.getElementById('imageModal');
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+// Abrir galería desde collage
+function openImageGallery(propertyId) {
+    openImageModal(propertyId, 0);
+}
+
+// Mostrar imagen en el modal
+function showImageInModal() {
+    const modalImage = document.getElementById('modalImage');
+    const modalCounter = document.getElementById('modalCounter');
+    const modalInfo = document.getElementById('modalInfo');
+
+    if (modalImage && currentPropertyPhotos[currentImageIndex]) {
+        modalImage.src = currentPropertyPhotos[currentImageIndex];
+        modalImage.alt = `Imagen ${currentImageIndex + 1} de ${currentPropertyPhotos.length}`;
+    }
+
+    if (modalCounter) {
+        modalCounter.textContent = `${currentImageIndex + 1} / ${currentPropertyPhotos.length}`;
+    }
+
+    if (modalInfo) {
+        const property = globalData.properties.find(p => p.id_temporal === currentPropertyId);
+        modalInfo.textContent = property ? property.titulo : '';
+    }
+}
+
+// Navegación en modal
+function nextImage() {
+    if (currentPropertyPhotos.length > 0) {
+        currentImageIndex = (currentImageIndex + 1) % currentPropertyPhotos.length;
+        showImageInModal();
+    }
+}
+
+function previousImage() {
+    if (currentPropertyPhotos.length > 0) {
+        currentImageIndex = currentImageIndex === 0 ? currentPropertyPhotos.length - 1 : currentImageIndex - 1;
+        showImageInModal();
+    }
+}
+
+// Cerrar modal
+function closeImageModal() {
+    const modal = document.getElementById('imageModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+    
+    // Limpiar variables
+    currentImageIndex = 0;
+    currentPropertyId = '';
+    currentPropertyPhotos = [];
+}
+
+// Event listeners para modal
+document.addEventListener('keydown', function(event) {
+    const modal = document.getElementById('imageModal');
+    if (modal.style.display === 'block') {
+        switch(event.key) {
+            case 'Escape':
+                closeImageModal();
+                break;
+            case 'ArrowLeft':
+                previousImage();
+                break;
+            case 'ArrowRight':
+                nextImage();
+                break;
+        }
+    }
+});
+
+// Cerrar modal al hacer clic fuera de la imagen
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('imageModal');
+    const modalContent = document.querySelector('.modal-content');
+    
+    if (event.target === modal && !modalContent.contains(event.target)) {
+        closeImageModal();
+    }
+});
+
+console.log('🖼️ Sistema de galería collage cargado correctamente');
 console.log('🏠 Sistema Dante Propiedades - Sin errores + Slider + Modal cargando...');
 console.log('🎯 Sistema de modal de galería incluido');
 console.log('✅ Sin dependencias de Font Awesome');
