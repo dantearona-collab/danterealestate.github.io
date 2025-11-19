@@ -794,39 +794,39 @@ function calcularDistribucionInteligente(totalFotos, anchoDisponible, altoDispon
         const goldenRatio = 1.618;
         const posicion = i + 1;
         
-        // Distribución inteligente de tamaños
+        // Distribución ultra-compacta de tamaños (más pequeños)
         let factorAncho;
         if (posicion % 7 === 1) {
-            // Destacadas cada 7ma: muy anchas
-            factorAncho = goldenRatio * (1.3 + Math.random() * 0.4);
+            // Destacadas cada 7ma: moderadamente anchas
+            factorAncho = 1.0 + Math.random() * 0.3;
         } else if (posicion % 6 === 1) {
-            // Grandes cada 6ta: anchas
-            factorAncho = 1.4 + Math.random() * 0.6;
+            // Grandes cada 6ta: medianas
+            factorAncho = 0.9 + Math.random() * 0.2;
         } else if (posicion % 5 === 1) {
-            // Medianas cada 5ta: medianas-grandes
-            factorAncho = 1.0 + Math.random() * 0.5;
+            // Medianas cada 5ta: medianas-pequeñas
+            factorAncho = 0.8 + Math.random() * 0.2;
         } else if (posicion % 4 === 1) {
-            // Pequeñas cada 4ta: pequeñas-medianas
-            factorAncho = 0.7 + Math.random() * 0.3;
+            // Pequeñas cada 4ta: pequeñas
+            factorAncho = 0.6 + Math.random() * 0.2;
         } else if (posicion % 3 === 1) {
-            // Compactas cada 3ra: compactas
-            factorAncho = 0.5 + Math.random() * 0.2;
+            // Compactas cada 3ra: muy compactas
+            factorAncho = 0.4 + Math.random() * 0.2;
         } else {
-            // Variables para el resto
-            factorAncho = 0.8 + Math.random() * 0.8;
+            // Variables para el resto (pequeñas)
+            factorAncho = 0.5 + Math.random() * 0.4; // Rango: 0.5 - 0.9
         }
         
-        // PASO 3D: Calcular tamaño final
+        // PASO 3D: Calcular tamaño final con proporciones más estables
         let anchoFinal = anchoColumna * factorAncho;
-        const proporcion = 0.4 + Math.random() * 1.8; // Proporción variable
+        const proporcion = 0.8 + Math.random() * 0.6; // Rango: 0.8 - 1.4 (más estable)
         let altoFinal = anchoFinal * proporcion;
         
-        // PASO 3E: Validación con límites razonables
-        const maxAncho = Math.min(anchoColumna * 1.5, anchoDisponible * 0.7);
-        const maxAlto = Math.min(400, altoDisponible * 0.6);
+        // PASO 3E: Validación ULTRA-ESTRICTA con límites más pequeños
+        const maxAncho = Math.min(anchoColumna * 1.2, anchoDisponible * 0.6);
+        const maxAlto = Math.min(250, altoDisponible * 0.4);
         
-        anchoFinal = Math.max(80, Math.min(anchoFinal, maxAncho));
-        altoFinal = Math.max(60, Math.min(altoFinal, maxAlto));
+        anchoFinal = Math.max(120, Math.min(anchoFinal, maxAncho));
+        altoFinal = Math.max(80, Math.min(altoFinal, maxAlto));
         
         // PASO 3F: PRINCIPIO PINTEREST MASONRY - Actualizar altura de la columna usada
         alturaColumnas[mejorColumna] = top + altoFinal + gap;
@@ -842,7 +842,14 @@ function calcularDistribucionInteligente(totalFotos, anchoDisponible, altoDispon
             factorAncho: parseFloat(factorAncho.toFixed(2))
         });
         
-        console.log('Foto ' + posicion + ': Columna ' + mejorColumna + ' - ' + Math.floor(anchoFinal) + 'x' + Math.floor(altoFinal) + 'px (top: ' + Math.floor(top) + 'px, factor: ' + factorAncho.toFixed(2) + ')');
+        // DEBUG ULTRA-DETALLADO
+        console.log('🔍 FOTO ' + posicion + ':');
+        console.log('  - Columna seleccionada: ' + mejorColumna);
+        console.log('  - Posición: left=' + Math.floor(left) + 'px, top=' + Math.floor(top) + 'px');
+        console.log('  - Tamaño: ' + Math.floor(anchoFinal) + 'x' + Math.floor(altoFinal) + 'px');
+        console.log('  - Factor ancho: ' + factorAncho.toFixed(2) + ', Proporción: ' + proporcion.toFixed(2));
+        console.log('  - Alturas de columnas: [' + alturaColumnas.map(h => Math.floor(h)).join(', ') + ']');
+        console.log('  - Nueva altura columna ' + mejorColumna + ': ' + Math.floor(alturaColumnas[mejorColumna]) + 'px');
     }
     
     // PASO 4: Análisis ULTRA-COMPACTO
@@ -886,6 +893,15 @@ function expandPropertyImages(propertyId) {
     
     // ALGORITMO INTELIGENTE: Calcular distribución dinámica
     const distribucionInteligente = calcularDistribucionInteligente(totalPhotos, anchoDisponible, altoDisponible);
+    
+    // DEBUG: Verificar resultado de distribución
+    console.log('📊 RESULTADO DISTRIBUCIÓN:');
+    console.log('- Altura total calculada: ' + distribucionInteligente.alturaTotal + 'px');
+    console.log('- Alto disponible: ' + altoDisponible + 'px');
+    console.log('- Altura contenedor final: ' + Math.max(altoDisponible, distribucionInteligente.alturaTotal + 40) + 'px');
+    console.log('- Patrones generados: ' + distribucionInteligente.patrones.length + ' de ' + totalPhotos + ' fotos');
+    console.log('- Columnas: ' + distribucionInteligente.columnas + ', Gap: ' + distribucionInteligente.gap + 'px');
+    console.log('- Alturas finales de columnas: [' + distribucionInteligente.alturaColumnas.map(h => Math.floor(h)).join(', ') + ']');
     
     // Crear overlay de expansión a toda la pantalla con FONDO BLANCO
     const overlay = document.createElement('div');
@@ -976,13 +992,12 @@ function expandPropertyImages(propertyId) {
                 <strong>🏗️ ULTRA-COMPACTO:</strong> ${distribucionInteligente.balance} | ${distribucionInteligente.columnas} columnas | Gap: ${distribucionInteligente.gap}px | Compacidad: ${distribucionInteligente.factorCompacidad}%
             </div>
             
-            <!-- Botón de prueba temporal -->
-            <div onclick="alert('¡Clic detectado en botón de prueba!')" style="position: fixed; top: 10px; left: 10px; background: red; color: white; padding: 10px; z-index: 10003; cursor: pointer;">
-                🧪 BOTÓN DE PRUEBA
-            </div>
-            
             ${fotos.map((foto, index) => {
-                const patron = distribucionInteligente.patrones[index] || distribucionInteligente.patrones[0];
+                // DEBUG: Verificar que el patrón existe
+                if (!distribucionInteligente.patrones[index]) {
+                    console.error('❌ FALTA PATRÓN para índice ' + index + ' de ' + totalPhotos);
+                }
+                const patron = distribucionInteligente.patrones[index] || distribucionInteligente.patrones[distribucionInteligente.patrones.length - 1];
                 const ancho = patron.ancho;
                 const alto = patron.alto;
                 const left = patron.left || 0;
@@ -1008,7 +1023,7 @@ function expandPropertyImages(propertyId) {
                         padding: 0;
                         border: 2px solid transparent;
                     "
-                    onclick="alert('¡CLIC DETECTADO en foto ${index}! PropertyId: ${propertyId}'); console.log('🖱️ Clic en foto', ${index}, 'propertyId:', '${propertyId}'); expandirFotoEnGaleria('${propertyId}', ${index})"
+                    onclick="console.log('🖱️ Clic en foto', ${index}, 'propertyId:', '${propertyId}'); expandirFotoEnGaleria('${propertyId}', ${index})"
                     onmouseenter="this.style.transform='scale(1.02)'; this.style.boxShadow='0 8px 32px rgba(0,0,0,0.15)'; this.style.borderColor='#232deb'"
                     onmouseleave="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'; this.style.borderColor='transparent'; this.querySelector('.masonry-overlay').style.opacity = '0'"
                     title="📸 Foto ${index + 1}/${totalPhotos} - Columna ${patron.columna + 1} (${ancho}x${alto}px, factor ${patron.factorAncho}) - Toca para expandir">
