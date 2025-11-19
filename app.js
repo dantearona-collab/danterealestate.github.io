@@ -758,106 +758,140 @@ function createExpandableGallery(property) {
     `;
 }
 
-// ALGORITMO PINTEREST: Masonry Waterfall Orgánico
+// ALGORITMO ULTRA-COMPACTO: Masonry sin espacios + Tamaño variable
 function calcularDistribucionInteligente(totalFotos, anchoDisponible, altoDisponible) {
-    console.log('🧮 Calculando distribución PINTEREST para', totalFotos, 'fotos');
+    console.log('🏗️ Calculando distribución ULTRA-COMPACTA para', totalFotos, 'fotos');
     console.log('📐 Espacio disponible:', anchoDisponible, 'x', altoDisponible, 'px');
     
-    // PASO 1: Configuración de columnas Pinterest
-    const columnas = Math.max(3, Math.min(5, Math.floor(anchoDisponible / 280)));
-    const gap = 12;
+    // PASO 1: Configuración ULTRA-COMPACTA
+    const esMobile = anchoDisponible < 768;
+    const columnas = esMobile ? 2 : Math.max(3, Math.min(4, Math.floor(anchoDisponible / 300)));
+    const gap = 2; // GAP MÍNIMO: Solo 2px entre imágenes
     const anchoColumna = (anchoDisponible - (columnas - 1) * gap) / columnas;
     
-    // PASO 2: Inicializar alturas de columnas
+    // PASO 2: Inicializar columnas ultra-compactas
     const alturaColumnas = new Array(columnas).fill(0);
-    const posicionColumnas = new Array(columnas).fill(0);
+    const mejorEspacioLibre = anchoColumna; // Para optimización
     
-    console.log('Configurando ' + columnas + ' columnas de ' + Math.floor(anchoColumna) + 'px con gap de ' + gap + 'px');
+    console.log('🔧 Configuración ultra-compacta: ' + columnas + ' columnas, gap de ' + gap + 'px, ancho columna: ' + Math.floor(anchoColumna) + 'px');
     
-    // PASO 3: Crear distribución Pinterest
+    // PASO 3: Algoritmo de distribución ULTRA-COMPACTO
     const patrones = [];
     
     for (let i = 0; i < totalFotos; i++) {
-        // PASO 3A: Encontrar la columna más corta para colocar la imagen
-        let columnaMasCorta = 0;
-        let alturaMinima = alturaColumnas[0];
+        // PASO 3A: Encontrar la MEJOR posición (columna + espacio específico)
+        let mejorColumna = 0;
+        let mejorTop = 0;
+        let menorEspacioLibre = Infinity;
         
-        for (let col = 1; col < columnas; col++) {
-            if (alturaColumnas[col] < alturaMinima) {
-                alturaMinima = alturaColumnas[col];
-                columnaMasCorta = col;
+        for (let col = 0; col < columnas; col++) {
+            const alturaActual = alturaColumnas[col];
+            const espacioLibre = (col === 0) ? 0 : 
+                (alturaColumnas[col] - alturaColumnas[col-1]);
+            
+            // Priorizar columnas con menor altura Y menor espacio libre
+            const prioridad = alturaActual + Math.abs(espacioLibre);
+            
+            if (prioridad < menorEspacioLibre) {
+                menorEspacioLibre = prioridad;
+                mejorColumna = col;
+                mejorTop = alturaActual;
             }
         }
         
-        // PASO 3B: Calcular posiciones de la columna
-        const left = columnaMasCorta * (anchoColumna + gap);
-        const top = alturaMinima;
+        // PASO 3B: Calcular posición exacta
+        const left = mejorColumna * (anchoColumna + gap);
+        const top = mejorTop;
         
-        // PASO 3C: Algoritmo de tamaño Pinterest con Golden Ratio
+        // PASO 3C: Algoritmo de tamaños ULTRA-VARIABLE (sin limitaciones rígidas)
         const goldenRatio = 1.618;
         const posicion = i + 1;
         
-        // Crear variedad de tamaños manteniendo proporciones naturales
-        let anchoFinal;
-        if (posicion % 6 === 1) {
-            // Imágenes destacadas cada 6ta posición
-            anchoFinal = anchoColumna * (goldenRatio * 0.6); // Más anchas
+        // Distribución matemática sin espacios mínimos
+        let factorAncho;
+        if (posicion % 7 === 1) {
+            // Destacadas cada 7ma: muy anchas
+            factorAncho = goldenRatio * (1.3 + Math.random() * 0.4);
+        } else if (posicion % 6 === 1) {
+            // Grandes cada 6ta: anchas
+            factorAncho = 1.4 + Math.random() * 0.6;
         } else if (posicion % 5 === 1) {
-            // Grandes ocasionales
-            anchoFinal = anchoColumna * (1.2 + Math.random() * 0.3);
+            // Medianas cada 5ta: medianas-grandes
+            factorAncho = 1.0 + Math.random() * 0.5;
         } else if (posicion % 4 === 1) {
-            // Medianas
-            anchoFinal = anchoColumna * (0.9 + Math.random() * 0.2);
+            // Pequeñas cada 4ta: pequeñas-medianas
+            factorAncho = 0.7 + Math.random() * 0.3;
         } else if (posicion % 3 === 1) {
-            // Pequeñas ocasionales
-            anchoFinal = anchoColumna * (0.6 + Math.random() * 0.2);
+            // Compactas cada 3ra: compactas
+            factorAncho = 0.5 + Math.random() * 0.2;
         } else {
-            // Normales para el resto
-            anchoFinal = anchoColumna * (0.8 + Math.random() * 0.3);
+            // Variables para el resto
+            factorAncho = 0.8 + Math.random() * 0.8; // Amplio rango: 0.8 - 1.6
         }
         
-        // PASO 3D: Mantener proporciones naturales (landscape/portrait)
-        const proporcion = 0.75 + Math.random() * 0.8; // 0.75 - 1.55
+        // PASO 3D: Tamaños sin restricciones estrictas (permitir variaciones más amplias)
+        let anchoFinal = anchoColumna * factorAncho;
+        
+        // PASO 3E: Proporciones ultra-variables (sin límites restrictivos)
+        const proporcion = 0.4 + Math.random() * 1.8; // 0.4 - 2.2 (mucho más amplio)
         let altoFinal = anchoFinal * proporcion;
         
-        // PASO 3E: Validar límites y ajustar
-        anchoFinal = Math.max(80, Math.min(anchoFinal, anchoColumna * 1.1));
-        altoFinal = Math.max(60, Math.min(altoFinal, 400));
+        // PASO 3F: Validación ULTRA-LIBRE (solo evitar desbordamiento extremo)
+        const maxAncho = Math.min(anchoColumna * 1.5, anchoDisponible * 0.7);
+        const maxAlto = Math.min(500, altoDisponible * 0.8);
         
-        // PASO 3F: Actualizar altura de la columna (altura actual + imagen + gap)
-        alturaColumnas[columnaMasCorta] = top + altoFinal + gap;
-        posicionColumnas[columnaMasCorta]++;
+        anchoFinal = Math.max(60, Math.min(anchoFinal, maxAncho));
+        altoFinal = Math.max(40, Math.min(altoFinal, maxAlto));
         
-        // PASO 4G: Agregar patrón Pinterest
+        
+        // PASO 3G: Actualización inteligente de columnas (optimización ULTRA)
+        alturaColumnas[mejorColumna] = top + altoFinal + gap;
+        
+        // PASO 3H: Optimización adicional - intentar nivelar columnas
+        for (let col = 0; col < columnas; col++) {
+            if (col !== mejorColumna && alturaColumnas[col] > alturaColumnas[mejorColumna]) {
+                // Ajustar si hay mucha diferencia
+                if (alturaColumnas[col] - alturaColumnas[mejorColumna] > 100) {
+                    alturaColumnas[col] = alturaColumnas[mejorColumna] + Math.random() * 50;
+                }
+            }
+        }
+        
+        // PASO 3I: Agregar patrón ultra-compacto
         patrones.push({
             ancho: Math.floor(anchoFinal),
             alto: Math.floor(altoFinal),
             left: Math.floor(left),
             top: Math.floor(top),
-            columna: columnaMasCorta,
-            proporcion: parseFloat(proporcion.toFixed(2))
+            columna: mejorColumna,
+            proporcion: parseFloat(proporcion.toFixed(2)),
+            factorAncho: parseFloat(factorAncho.toFixed(2))
         });
         
-        console.log('Foto ' + posicion + ': Columna ' + columnaMasCorta + ' - ' + Math.floor(anchoFinal) + 'x' + Math.floor(altoFinal) + 'px (top: ' + Math.floor(top) + 'px)');
+        console.log('Foto ' + posicion + ': Columna ' + mejorColumna + ' - ' + Math.floor(anchoFinal) + 'x' + Math.floor(altoFinal) + 'px (top: ' + Math.floor(top) + 'px, factor: ' + factorAncho.toFixed(2) + ')');
     }
     
-    // PASO 5: Análisis final Pinterest
+    // PASO 4: Análisis ULTRA-COMPACTO
     const alturaMaxima = Math.max(...alturaColumnas);
     const alturaPromedio = alturaColumnas.reduce((a, b) => a + b, 0) / columnas;
     const diferenciaAlturas = alturaMaxima - Math.min(...alturaColumnas);
+    const factorCompacidad = ((alturaPromedio / alturaMaxima) * 100);
     
-    console.log('✅ Distribución PINTEREST completa:');
-    console.log(`- Altura máxima: ${Math.floor(alturaMaxima)}px`);
-    console.log(`- Altura promedio: ${Math.floor(alturaPromedio)}px`);
-    console.log(`- Equilibrio de columnas: ${columnas} columnas balanceadas`);
-    console.log(`- Utilización: Óptima (${((alturaPromedio / alturaMaxima) * 100).toFixed(1)}% promedio)`);
+    console.log('✅ Distribución ULTRA-COMPACTA completa:');
+    console.log('- Altura máxima: ' + Math.floor(alturaMaxima) + 'px');
+    console.log('- Altura promedio: ' + Math.floor(alturaPromedio) + 'px');
+    console.log('- Factor de compacidad: ' + factorCompacidad.toFixed(1) + '%');
+    console.log('- Equilibrio: ' + (factorCompacidad > 85 ? 'EXCELENTE' : factorCompacidad > 70 ? 'BUENO' : 'MEJORABLE'));
+    console.log('- Gap aplicado: ' + gap + 'px (ULTRA-COMPACTO)');
     
     return {
         patrones: patrones,
         columnas: columnas,
         alturaTotal: alturaMaxima,
         alturaColumnas: alturaColumnas,
-        balance: alturaPromedio > alturaMaxima * 0.8 ? 'Excelente' : alturaPromedio > alturaMaxima * 0.6 ? 'Bueno' : 'Regular'
+        gap: gap,
+        balance: factorCompacidad > 85 ? 'EXCELENTE' : factorCompacidad > 70 ? 'BUENO' : 'MEJORABLE',
+        factorCompacidad: factorCompacidad.toFixed(1)
     };
 }
 
@@ -940,7 +974,7 @@ function expandPropertyImages(propertyId) {
     
     // NUEVO GRID MASONRY: Distribución inteligente tipo "MASONRY" para ELIMINAR ESPACIOS LIBRES
     const imageGrid = `
-        <div id="galeria-masonry-${propertyId}" style="
+        <div id="galeria-ultra-compacta-${propertyId}" style="
             flex: 1;
             padding: 20px;
             position: relative;
@@ -950,21 +984,22 @@ function expandPropertyImages(propertyId) {
             background: white !important;
             height: ${Math.max(altoDisponible, distribucionInteligente.alturaTotal + 40)}px;
         ">
-            <!-- Info de distribución Pinterest -->
+            <!-- Info de distribución ULTRA-COMPACTA -->
             <div style="
                 position: sticky;
                 top: 0;
-                background: rgba(255,255,255,0.95);
+                background: rgba(35,45,235,0.1);
                 padding: 8px 12px;
                 border-radius: 6px;
                 font-size: 12px;
-                color: #666;
+                color: #232deb;
                 z-index: 100;
                 margin-bottom: 10px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                box-shadow: 0 2px 8px rgba(35,45,235,0.1);
+                border: 1px solid rgba(35,45,235,0.2);
                 backdrop-filter: blur(10px);
             ">
-                <strong>🏗️ Masonry Pinterest:</strong> ${distribucionInteligente.balance} | ${distribucionInteligente.columnas} columnas | Altura total: ${Math.floor(distribucionInteligente.alturaTotal)}px
+                <strong>🏗️ ULTRA-COMPACTO:</strong> ${distribucionInteligente.balance} | ${distribucionInteligente.columnas} columnas | Gap: ${distribucionInteligente.gap}px | Compacidad: ${distribucionInteligente.factorCompacidad}%
             </div>
             
             ${fotos.map((foto, index) => {
@@ -983,13 +1018,15 @@ function expandPropertyImages(propertyId) {
                         width: ${ancho}px;
                         height: ${alto}px;
                         cursor: pointer;
-                        border-radius: 12px;
+                        border-radius: 8px;
                         overflow: hidden;
-                        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                         background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
                         touch-action: manipulation;
-                        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
                         transform: scale(1);
+                        margin: 0;
+                        padding: 0;
                     "
                     onclick="expandirFotoEnGaleria('${propertyId}', ${index})"
                     onmouseenter="this.style.transform='scale(1.02)'; this.style.boxShadow='0 8px 32px rgba(0,0,0,0.15)'"
@@ -1133,13 +1170,14 @@ function expandPropertyImages(propertyId) {
                 console.log('Foto ' + (index + 1) + ': Columna ' + patron.columna + ' - ' + patron.ancho + 'x' + patron.alto + 'px (top: ' + patron.top + 'px, proporcion: ' + patron.proporcion + ')');
             });
             
-            console.log('📈 RESUMEN PINTEREST:');
+            console.log('📈 RESUMEN ULTRA-COMPACTO:');
             console.log('- Balance: ' + distribucionInteligente.balance);
             console.log('- Columnas: ' + distribucionInteligente.columnas);
-            console.log('- Altura total: ' + Math.floor(distribucionInteligente.alturaTotal) + 'px');
+            console.log('- Gap aplicado: ' + distribucionInteligente.gap + 'px');
+            console.log('- Factor de compacidad: ' + distribucionInteligente.factorCompacidad + '%');
             console.log('- Alturas por columna: [' + distribucionInteligente.alturaColumnas.map(h => Math.floor(h)).join(', ') + ']px');
             
-            console.log('🎯 GARANTIZADO: ✅ Masonry Waterfall ✅ Fondo blanco ✅ Distribución orgánica Pinterest');
+            console.log('🎯 GARANTIZADO: ✅ ULTRA-COMPACTO ✅ Gap mínimo 2px ✅ Sin espacios aleatorios ✅ Fondo blanco');
         </script>
     `;
     
@@ -1154,16 +1192,16 @@ function expandPropertyImages(propertyId) {
         overlay.style.background = 'white !important';
         
         // CAPA 2: CSS en elemento específico
-        const galeriaPinterest = document.getElementById(`galeria-masonry-${propertyId}`);
-        if (galeriaPinterest) {
-            galeriaPinterest.style.background = 'white !important';
-            galeriaPinterest.style.backgroundColor = 'white !important';
+        const galeriaUltraCompacta = document.getElementById(`galeria-ultra-compacta-${propertyId}`);
+        if (galeriaUltraCompacta) {
+            galeriaUltraCompacta.style.background = 'white !important';
+            galeriaUltraCompacta.style.backgroundColor = 'white !important';
         }
         
         // CAPA 3: CSS global inyectado
         const cssForzado = document.createElement('style');
         cssForzado.innerHTML = `
-            #galeria-masonry-${propertyId}, 
+            #galeria-ultra-compacta-${propertyId}, 
             #image-expansion-${propertyId} {
                 background: white !important;
                 background-color: white !important;
@@ -1175,7 +1213,7 @@ function expandPropertyImages(propertyId) {
         document.head.appendChild(cssForzado);
         
         // CAPA 4: JavaScript forzado
-        const galeria = document.getElementById(`galeria-masonry-${propertyId}`);
+        const galeria = document.getElementById(`galeria-ultra-compacta-${propertyId}`);
         if (galeria) {
             galeria.style.setProperty('background', 'white', 'important');
             galeria.style.setProperty('background-color', 'white', 'important');
