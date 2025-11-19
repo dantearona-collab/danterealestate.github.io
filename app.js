@@ -1027,13 +1027,12 @@ function expandPropertyImages(propertyId) {
                         transform: scale(1);
                         margin: 0;
                         padding: 0;
+                        border: 2px solid transparent;
                     "
                     onclick="expandirFotoEnGaleria('${propertyId}', ${index})"
-                    onmouseenter="this.style.transform='scale(1.02)'; this.style.boxShadow='0 8px 32px rgba(0,0,0,0.15)'"
-                    onmouseleave="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.1)'"
-                    data-foto-index="${index}"
-                    data-proporcion="${proporcion}"
-                    >
+                    onmouseenter="this.style.transform='scale(1.02)'; this.style.boxShadow='0 8px 32px rgba(0,0,0,0.15)'; this.style.borderColor='#232deb'"
+                    onmouseleave="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'; this.style.borderColor='transparent'; this.querySelector('.masonry-overlay').style.opacity = '0'"
+                    title="📸 Foto ${index + 1}/${totalPhotos} - Columna ${patron.columna + 1} (${ancho}x${alto}px, factor ${patron.factorAncho}) - Toca para expandir">
                         <img 
                             src="${foto}" 
                             alt="Foto ${index + 1} - ${property.titulo}"
@@ -1041,31 +1040,11 @@ function expandPropertyImages(propertyId) {
                                 width: 100%;
                                 height: 100%;
                                 object-fit: cover;
+                                display: block;
                                 transition: transform 0.4s ease;
                             "
-                            onmouseenter="this.style.transform='scale(1.05)'"
-                            onmouseleave="this.style.transform='scale(1)'"
-                            loading="lazy"
-                        >
-                        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-                        border: 2px solid transparent;
-                        background-clip: padding-box;
-                        margin: 3px;
-                    " 
-                    onclick="expandirFotoEnGaleria('${propertyId}', ${index})"
-                    onmouseover="this.style.transform='scale(1.04) translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(35,45,235,0.2)'; this.style.borderColor='#232deb'; this.querySelector('.masonry-overlay').style.opacity = '1'"
-                    onmouseout="this.style.transform='scale(1) translateY(0)'; this.style.boxShadow='0 4px 16px rgba(0,0,0,0.12)'; this.style.borderColor='transparent'; this.querySelector('.masonry-overlay').style.opacity = '0'"
-                    title="📸 Foto ${index + 1}/${totalPhotos} - ${patron.clase.toUpperCase()} (${ancho}x${alto}px, ratio ${ratio}%) - Toca para expandir">
-                        <img src="${foto}" 
-                             alt="${property.titulo} - Foto ${index + 1}"
-                             style="
-                                 width: 100%;
-                                 height: 100%;
-                                 object-fit: cover;
-                                 display: block;
-                                 transition: all 0.4s ease;
-                             "
-                             onerror="this.src='INSTITUCIONAL 3.png'">
+                            onerror="this.src='INSTITUCIONAL 3.png'">
+                        
                         <!-- Overlay dinámico con información -->
                         <div class="masonry-overlay" style="
                             position: absolute;
@@ -1085,7 +1064,8 @@ function expandPropertyImages(propertyId) {
                                 ${index + 1}/${totalPhotos}
                             </span>
                         </div>
-                        <!-- Indicador de clase mejorado -->
+                        
+                        <!-- Indicador de columna mejorado -->
                         <div style="
                             position: absolute;
                             top: 10px;
@@ -1100,8 +1080,9 @@ function expandPropertyImages(propertyId) {
                             letter-spacing: 0.5px;
                             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
                         ">
-                            ${patron.clase.replace('-', ' ')}
+                            C${patron.columna + 1}
                         </div>
+                        
                         <!-- Indicador de dimensiones -->
                         <div style="
                             position: absolute;
