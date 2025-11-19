@@ -758,6 +758,33 @@ function createExpandableGallery(property) {
     `;
 }
 
+// Función para calcular dinámicamente el tamaño óptimo de imágenes en la galería
+function calcularTamañoOptimoImagenes(totalFotos, anchoDisponible, altoDisponible) {
+    // Configuraciones para diferentes cantidades de fotos
+    if (totalFotos <= 6) {
+        // Para pocas fotos, mostrar en menos columnas para que sean más grandes
+        const columnas = Math.min(3, totalFotos);
+        const filas = Math.ceil(totalFotos / columnas);
+        const anchoImagen = (anchoDisponible - (columnas - 1) * 6) / columnas;
+        const altoImagen = (altoDisponible - (filas - 1) * 6) / filas;
+        return { anchoImagen, altoImagen, columnas, filas };
+    } else if (totalFotos <= 12) {
+        // Para cantidad media de fotos
+        const columnas = Math.min(4, Math.ceil(Math.sqrt(totalFotos)));
+        const filas = Math.ceil(totalFotos / columnas);
+        const anchoImagen = (anchoDisponible - (columnas - 1) * 6) / columnas;
+        const altoImagen = (altoDisponible - (filas - 1) * 6) / filas;
+        return { anchoImagen, altoImagen, columnas, filas };
+    } else {
+        // Para muchas fotos, optimizar para visualización rápida
+        const columnas = Math.min(5, Math.ceil(Math.sqrt(totalFotos)));
+        const filas = Math.ceil(totalFotos / columnas);
+        const anchoImagen = (anchoDisponible - (columnas - 1) * 6) / columnas;
+        const altoImagen = (altoDisponible - (filas - 1) * 6) / filas;
+        return { anchoImagen, altoImagen, columnas, filas };
+    }
+}
+
 // Función para expandir/contraer propiedad específica
 // Función para expandir imágenes a toda la pantalla
 function expandPropertyImages(propertyId) {
@@ -766,6 +793,15 @@ function expandPropertyImages(propertyId) {
     
     const fotos = property.fotos;
     const totalPhotos = fotos.length;
+    
+    // Calcular dimensiones disponibles de la galería
+    const anchoVentana = window.innerWidth;
+    const altoVentana = window.innerHeight;
+    const anchoDisponible = anchoVentana - 60; // Restar padding y margen
+    const altoDisponible = altoVentana - 180; // Restar header y margen
+    
+    // Calcular tamaño óptimo dinámicamente
+    const dimensionesOptimas = calcularTamañoOptimoImagenes(totalPhotos, anchoDisponible, altoDisponible);
     
     // Crear overlay de expansión a toda la pantalla
     const overlay = document.createElement('div');
@@ -821,13 +857,13 @@ function expandPropertyImages(propertyId) {
         </div>
     `;
     
-    // Grid de imágenes que APROVECHA TODO EL ESPACIO - DISTRIBUCIÓN UNIFORME
+    // Grid de imágenes con cálculo dinámico para APROVECHAR MÁXIMAMENTE EL ESPACIO
     const imageGrid = `
         <div style="
             flex: 1;
             padding: 15px;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            grid-template-columns: repeat(${dimensionesOptimas.columnas}, 1fr);
             gap: 6px;
             overflow-y: auto;
             max-height: calc(100vh - 120px);
@@ -840,10 +876,11 @@ function expandPropertyImages(propertyId) {
                     border-radius: 6px;
                     overflow: hidden;
                     transition: transform 0.3s;
-                    min-height: 100px;
+                    width: ${dimensionesOptimas.anchoImagen}px;
+                    height: ${dimensionesOptimas.altoImagen}px;
                     background: #f8f9fa;
                     touch-action: manipulation;
-                    /* Distribución uniforme sin importar el tamaño original */
+                    /* Dimensiones calculadas dinámicamente para llenar el espacio */
                     display: flex;
                     align-items: center;
                     justify-content: center;
