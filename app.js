@@ -338,8 +338,8 @@ function createPropertyCard(property) {
         border: 1px solid #e1e5e9 !important;
     `;
     
-    // Crear galería de imágenes tipo slider (vista inicial)
-    const imageSection = createImageSlider(property);
+    // Crear galería de imágenes inicial (una sola imagen expandible)
+    const imageSection = createExpandableGallery(property);
     
     card.innerHTML = `
         ${imageSection}
@@ -706,45 +706,133 @@ function imagenSiguiente() {
     }
 }
 
-// Variable global para rastrear qué propiedades están en modo collage
-let propiedadesEnModoCollage = new Set();
+// Función para crear galería expandible (una imagen que se expande al hacer clic)
+function createExpandableGallery(property) {
+    const fotos = property.fotos || [];
+    
+    if (fotos.length === 0) {
+        // Sin imágenes - usar imagen por defecto
+        return `
+            <div class="expandable-gallery" style="position: relative; cursor: pointer; height: 200px;" 
+                 onclick="togglePropertyExpansion('${property.id_temporal}', '${property.id_temporal}')">
+                <img src="INSTITUCIONAL 1.jpg" 
+                     alt="${property.titulo}" 
+                     style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
+                     onerror="this.src='INSTITUCIONAL 3.png'">
+                <div class="gallery-expand-indicator" style="position: absolute; bottom: 10px; right: 10px; 
+                        background: rgba(35, 45, 235, 0.8); color: white; padding: 4px 8px; border-radius: 4px; 
+                        font-size: 10px; opacity: 0.8;">
+                    Click para expandir
+                </div>
+            </div>
+        `;
+    }
+    
+    // Mostrar la primera imagen como vista inicial
+    const firstImage = fotos[0];
+    const totalPhotos = fotos.length;
+    
+    return `
+        <div class="expandable-gallery-container" style="position: relative; cursor: pointer;" 
+             onclick="togglePropertyExpansion('${property.id_temporal}', '${property.id_temporal}')" 
+             data-property-id="${property.id_temporal}">
+            
+            <!-- Vista inicial: Una sola imagen -->
+            <div class="gallery-initial-view" data-expanded="false">
+                <img src="${firstImage}" 
+                     alt="${property.titulo}" 
+                     style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
+                     onerror="this.src='INSTITUCIONAL 3.png'">
+                <div class="gallery-overlay">
+                    <span>🔍 Click para ver ${totalPhotos} foto${totalPhotos > 1 ? 's' : ''}</span>
+                </div>
+                ${totalPhotos > 1 ? `
+                    <div class="photo-count" style="position: absolute; bottom: 8px; right: 8px; 
+                            background: rgba(35, 45, 235, 0.8); color: white; padding: 4px 8px; border-radius: 4px; 
+                            font-size: 12px; font-weight: 600;">
+                        1/${totalPhotos}
+                    </div>
+                ` : ''}
+            </div>
+            
+            <!-- Vista expandida: Todas las imágenes (inicialmente oculta) -->
+            <div class="gallery-expanded-view" style="display: none;" data-expanded="false">
+                <div class="expanded-images-grid" style="
+                    display: grid; 
+                    grid-template-columns: repeat(2, 1fr); 
+                    gap: 4px; 
+                    height: 200px;
+                ">
+                    ${fotos.map((foto, index) => `
+                        <div class="expanded-image-item" style="position: relative; cursor: pointer;" 
+                             onclick="event.stopPropagation(); openImageModal('${property.id_temporal}', ${index})">
+                            <img src="${foto}" 
+                                 alt="${property.titulo} - Foto ${index + 1}" 
+                                 style="width: 100% !important; height: 100% !important; object-fit: cover !important;"
+                                 onerror="this.src='INSTITUCIONAL 3.png'">
+                            <div class="image-hover-overlay" style="
+                                position: absolute; 
+                                top: 0; left: 0; right: 0; bottom: 0; 
+                                background: rgba(35, 45, 235, 0.7); 
+                                opacity: 0; 
+                                transition: opacity 0.3s;
+                                display: flex; 
+                                align-items: center; 
+                                justify-content: center;
+                                color: white;
+                                font-size: 14px;
+                                font-weight: 600;
+                            ">
+                                Ver foto ${index + 1}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <!-- Controles de navegación -->
+                <div class="expanded-controls" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); 
+                        display: flex; gap: 8px; align-items: center;">
+                    <button onclick="event.stopPropagation(); openImageModal('${property.id_temporal}', 0)" 
+                            style="background: rgba(35, 45, 235, 0.8); color: white; border: none; 
+                                   padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 10px;">
+                        🔍 Ver todas (${totalPhotos})
+                    </button>
+                    <button onclick="event.stopPropagation(); togglePropertyExpansion('${property.id_temporal}', '${property.id_temporal}')" 
+                            style="background: rgba(108, 117, 125, 0.8); color: white; border: none; 
+                                   padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 10px;">
+                        ⬆️ Contraer
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
 
-// Función para cambiar una propiedad específica de slider a collage
-function toggleCollageView(propertyId) {
-    const property = globalData.properties.find(p => p.id_temporal === propertyId);
-    if (!property) return;
+// Función para expandir/contraer propiedad específica
+function togglePropertyExpansion(propertyId, propertyTemporalId) {
+    event.stopPropagation();
     
-    const cardElement = document.querySelector(`[data-property-card="${propertyId}"]`);
-    if (!cardElement) return;
+    const container = document.querySelector(`[data-property-id="${propertyId}"]`);
+    if (!container) return;
     
-    // Verificar si ya está en modo collage
-    if (propiedadesEnModoCollage.has(propertyId)) {
-        // Cambiar de vuelta a slider
-        const newImageSection = createImageSlider(property);
-        propiedadesEnModoCollage.delete(propertyId);
-        
-        // Reemplazar solo la sección de imágenes manteniendo el resto del card
-        const currentCardHTML = cardElement.innerHTML;
-        const oldImageSectionMatch = currentCardHTML.match(/<div class="property-gallery-collage"[^>]*>[\s\S]*?<\/div>(?:\s*<div style="position: absolute; top: 10px)/);
-        if (oldImageSectionMatch) {
-            const newHTML = currentCardHTML.replace(oldImageSectionMatch[0], newImageSection);
-            cardElement.innerHTML = newHTML;
-        }
+    const initialView = container.querySelector('.gallery-initial-view');
+    const expandedView = container.querySelector('.gallery-expanded-view');
+    const isExpanded = initialView.dataset.expanded === 'true';
+    
+    if (isExpanded) {
+        // Contraer
+        initialView.style.display = 'block';
+        expandedView.style.display = 'none';
+        initialView.dataset.expanded = 'false';
     } else {
-        // Cambiar a collage
-        const newImageSection = createImageCollage(property);
-        propiedadesEnModoCollage.add(propertyId);
-        
-        // Reemplazar solo la sección de imágenes
-        const currentCardHTML = cardElement.innerHTML;
-        const oldImageSectionMatch = currentCardHTML.match(/<div class="property-slider"[^>]*>[\s\S]*?<\/div>(?:\s*<div style="position: absolute; top: 10px)/) ||
-                                     currentCardHTML.match(/<div style="position: relative; cursor: pointer;"[^>]*>[\s\S]*?<\/div>(?:\s*<div style="position: absolute; top: 10px)/);
-        if (oldImageSectionMatch) {
-            const newHTML = currentCardHTML.replace(oldImageSectionMatch[0], newImageSection);
-            cardElement.innerHTML = newHTML;
-        }
+        // Expandir
+        initialView.style.display = 'none';
+        expandedView.style.display = 'block';
+        initialView.dataset.expanded = 'true';
     }
 }
+
+// Sistema de galería expandible - Una imagen que se expande al hacer clic
 
 // Función para manejar eventos de teclado
 function manejarTecladoModal(event) {
@@ -1020,49 +1108,7 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-// Variables para manejo de navegación en collage
-let currentCollageProperty = null;
-let currentCollageImageIndex = 0;
-
-// Función para navegar a la siguiente imagen en collage
-function nextCollageImage(propertyId) {
-    event.stopPropagation();
-    const property = globalData.properties.find(p => p.id_temporal === propertyId);
-    if (!property || !property.fotos) return;
-    
-    const maxIndex = property.fotos.length - 1;
-    if (currentCollageImageIndex < maxIndex) {
-        currentCollageImageIndex++;
-        updateCollageImage(propertyId);
-    }
-}
-
-// Función para navegar a la imagen anterior en collage
-function prevCollageImage(propertyId) {
-    event.stopPropagation();
-    if (currentCollageImageIndex > 0) {
-        currentCollageImageIndex--;
-        updateCollageImage(propertyId);
-    }
-}
-
-// Función para actualizar la imagen visible en collage
-function updateCollageImage(propertyId) {
-    const property = globalData.properties.find(p => p.id_temporal === propertyId);
-    if (!property) return;
-    
-    const collageContainer = document.querySelector(`[data-property-card="${propertyId}"] .property-gallery`);
-    if (!collageContainer) return;
-    
-    // Actualizar solo la imagen principal visible
-    const mainImage = collageContainer.querySelector('.collage-main img');
-    if (mainImage) {
-        mainImage.src = property.fotos[currentCollageImageIndex];
-        mainImage.onclick = function() {
-            openImageModal(propertyId, currentCollageImageIndex);
-        };
-    }
-}
+// Sistema de galería expandible - Una imagen que se expande al hacer clic
 
 // Cerrar modal al hacer clic fuera de la imagen
 document.addEventListener('click', function(event) {

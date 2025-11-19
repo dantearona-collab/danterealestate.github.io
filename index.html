@@ -349,6 +349,32 @@
             border-radius: 20px;
         }
         
+        /* GALERÍA EXPANDIBLE */
+        .expandable-gallery-container:hover .gallery-initial-view .gallery-overlay {
+            opacity: 1;
+        }
+        
+        .expanded-image-item:hover .image-hover-overlay {
+            opacity: 1 !important;
+        }
+        
+        .expanded-images-grid .expanded-image-item {
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .expanded-controls button {
+            transition: background-color 0.3s ease;
+        }
+        
+        .expanded-controls button:hover {
+            background: rgba(35, 45, 235, 1) !important;
+        }
+        
+        .gallery-expand-indicator {
+            pointer-events: none;
+        }
+        
         /* MODAL PARA IMAGEN INDIVIDUAL */
         .image-modal {
             display: none;
