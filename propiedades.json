@@ -84,7 +84,7 @@
     "titulo": "Oficina en Microcentro Superluminoso",
     "barrio": "Microcentro",
     "precio": 660000,
-    "ambientes": 4,
+    "ambientes": 6,
     "metros_cuadrados": 135,
     "operacion": "alquiler",
     "tipo": "oficina",
@@ -164,7 +164,10 @@
       "imgs/UF004-6.jpg",
       "imgs/UF004-7.jpg",
       "imgs/UF004-8.jpg",
-      "imgs/UF004-9.jpg"
+      "imgs/UF004-9.jpg",
+      "imgs/UF004-10.jpg",
+      "imgs/UF004-11.jpg",
+      "imgs/UF004-12.jpg"
     ],
     "moneda_precio": "USD",
     "moneda_expensas": "ARS",
