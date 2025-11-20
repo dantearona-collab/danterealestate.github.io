@@ -870,6 +870,98 @@ function calcularDistribucionInteligente(totalFotos, anchoDisponible, altoDispon
 
 // Función para expandir/contraer propiedad específica
 // Función para expandir imágenes a toda la pantalla con distribución inteligente
+
+
+
+// ========================================
+// ALGORITMO DE DISTRIBUCIÓN MASONRY MEJORADO
+// ========================================
+
+function calcularDistribucionMasonry(totalFotos, anchoDisponible, altoDisponible) {
+    console.log('🏗️ Calculando distribución MASONRY para', totalFotos, 'fotos');
+    console.log('📐 Espacio disponible:', anchoDisponible, 'x', altoDisponible, 'px');
+    
+    // CONFIGURACIÓN MASONRY OPTIMIZADA
+    const esMobile = anchoDisponible < 768;
+    const columnas = esMobile ? 2 : 4;
+    const gap = 8;
+    const anchoColumna = Math.floor((anchoDisponible - (columnas - 1) * gap) / columnas);
+    
+    console.log('🔧 Masonry: ' + columnas + ' columnas, gap: ' + gap + 'px, ancho columna: ' + anchoColumna + 'px');
+    
+    // ALTURAS VARIADAS PARA EFECTO MASONRY
+    const alturasPosibles = [
+        Math.floor(anchoColumna * 0.8),   // Pequeña
+        Math.floor(anchoColumna * 1.2),   // Mediana
+        Math.floor(anchoColumna * 1.6),   // Grande
+        Math.floor(anchoColumna * 2.0)    // Extra grande
+    ];
+    
+    // INICIALIZAR COLUMNAS
+    const alturasColumnas = new Array(columnas).fill(0);
+    const patrones = [];
+    
+    // GENERAR PATRONES MASONRY
+    for (let i = 0; i < totalFotos; i++) {
+        // Encontrar la columna con menor altura
+        const columnaMasBaja = alturasColumnas.indexOf(Math.min(...alturasColumnas));
+        
+        // VARIEDAD DE TAMAÑOS - distribución 30% pequeñas, 40% medianas, 20% grandes, 10% extra grandes
+        let alturaFoto;
+        const random = Math.random();
+        
+        if (random < 0.3) {
+            alturaFoto = alturasPosibles[0]; // Pequeña
+        } else if (random < 0.7) {
+            alturaFoto = alturasPosibles[1]; // Mediana
+        } else if (random < 0.9) {
+            alturaFoto = alturasPosibles[2]; // Grande
+        } else {
+            alturaFoto = alturasPosibles[3]; // Extra grande
+        }
+        
+        // POSICIÓN EN LA COLUMNA SELECCIONADA
+        const left = columnaMasBaja * (anchoColumna + gap);
+        const top = alturasColumnas[columnaMasBaja];
+        
+        // ACTUALIZAR ALTURA DE LA COLUMNA
+        alturasColumnas[columnaMasBaja] += alturaFoto + gap;
+        
+        patrones.push({
+            ancho: anchoColumna,
+            alto: alturaFoto,
+            left: left,
+            top: top,
+            columna: columnaMasBaja,
+            fila: Math.floor(top / (alturaFoto + gap)),
+            proporcion: parseFloat((alturaFoto / anchoColumna).toFixed(2))
+        });
+        
+        console.log('📐 FOTO ' + (i + 1) + ': Columna ' + columnaMasBaja + ' - ' + anchoColumna + 'x' + alturaFoto + 'px (top: ' + top + 'px)');
+    }
+    
+    // CALCULAR ALTURA TOTAL
+    const alturaTotal = Math.max(...alturasColumnas) - gap;
+    
+    console.log('✅ Distribución MASONRY completa:');
+    console.log('- Alturas finales columnas: [' + alturasColumnas.map(h => Math.floor(h)).join(', ') + ']px');
+    console.log('- Altura total: ' + alturaTotal + 'px');
+    console.log('- Variedad de tamaños aplicada');
+    
+    return {
+        patrones: patrones,
+        columnas: columnas,
+        alturaTotal: alturaTotal,
+        alturaColumnas: alturasColumnas,
+        gap: gap,
+        balance: 'MASONRY_OPTIMIZADO'
+    };
+}
+
+// ========================================
+// FUNCIÓN PRINCIPAL MODIFICADA - GALERÍA MASONRY
+// ========================================
+
 function expandPropertyImages(propertyId) {
     const property = globalData.properties.find(p => p.id_temporal === propertyId);
     if (!property || !property.fotos) return;
@@ -877,25 +969,16 @@ function expandPropertyImages(propertyId) {
     const fotos = property.fotos;
     const totalPhotos = fotos.length;
     
-    // Calcular dimensiones disponibles de la galería
+    // Calcular dimensiones disponibles
     const anchoVentana = window.innerWidth;
     const altoVentana = window.innerHeight;
-    const anchoDisponible = anchoVentana - 60; // Restar padding y margen
-    const altoDisponible = altoVentana - 180; // Restar header y margen
+    const anchoDisponible = anchoVentana - 40;
+    const altoDisponible = altoVentana - 120;
     
-    // ALGORITMO INTELIGENTE: Calcular distribución dinámica
-    const distribucionInteligente = calcularDistribucionInteligente(totalPhotos, anchoDisponible, altoDisponible);
+    // USAR ALGORITMO MASONRY MEJORADO
+    const distribucionMasonry = calcularDistribucionMasonry(totalPhotos, anchoDisponible, altoDisponible);
     
-    // DEBUG: Verificar resultado de distribución
-    console.log('📊 RESULTADO DISTRIBUCIÓN:');
-    console.log('- Altura total calculada: ' + distribucionInteligente.alturaTotal + 'px');
-    console.log('- Alto disponible: ' + altoDisponible + 'px');
-    console.log('- Altura contenedor final: ' + Math.max(altoDisponible, distribucionInteligente.alturaTotal + 40) + 'px');
-    console.log('- Patrones generados: ' + distribucionInteligente.patrones.length + ' de ' + totalPhotos + ' fotos');
-    console.log('- Columnas: ' + distribucionInteligente.columnas + ', Gap: ' + distribucionInteligente.gap + 'px');
-    console.log('- Alturas finales de columnas: [' + distribucionInteligente.alturaColumnas.map(h => Math.floor(h)).join(', ') + ']');
-    
-    // Crear overlay de expansión a toda la pantalla con FONDO BLANCO
+    // Crear overlay
     const overlay = document.createElement('div');
     overlay.id = `image-expansion-${propertyId}`;
     overlay.className = 'image-expansion-overlay';
@@ -909,11 +992,10 @@ function expandPropertyImages(propertyId) {
         z-index: 10000;
         display: flex;
         flex-direction: column;
-        backdrop-filter: blur(10px);
         overflow: hidden;
     `;
     
-    // Header con botón cerrar (adaptado para fondo blanco)
+    // Header
     const header = `
         <div style="
             display: flex;
@@ -924,10 +1006,11 @@ function expandPropertyImages(propertyId) {
             color: white;
             font-weight: 600;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            flex-shrink: 0;
         ">
             <div style="display: flex; align-items: center; gap: 15px;">
                 <img src="llave.png" alt="Dante Propiedades" style="width: 40px; height: 40px; object-fit: contain;">
-                <div style="font-size: 16px;">${property.titulo}</div>
+                <div style="font-size: 16px;">${property.titulo} - ${totalPhotos} fotos</div>
             </div>
             <button onclick="closeImageExpansion('${propertyId}')" 
                     style="
@@ -944,230 +1027,133 @@ function expandPropertyImages(propertyId) {
                         font-size: 20px;
                         font-weight: bold;
                         transition: all 0.3s;
-                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
                     "
                     onmouseover="this.style.background='rgba(255, 255, 255, 0.4)'; this.style.transform='scale(1.1)'"
-                    onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='scale(1)'"
-                    title="Cerrar (Esc)">
+                    onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='scale(1)'">
                 ✕
             </button>
         </div>
     `;
     
-    // NUEVO GRID MASONRY: Distribución inteligente tipo "MASONRY" para ELIMINAR ESPACIOS LIBRES
-    const imageGrid = `
-        <div id="galeria-ultra-compacta-${propertyId}" style="
+    // Contenedor Masonry
+    const masonryContainer = `
+        <div id="masonry-gallery-${propertyId}" style="
             flex: 1;
             padding: 20px;
             position: relative;
             overflow-y: auto;
-            max-height: calc(100vh - 120px);
-            touch-action: pan-y pinch-zoom;
             background: white !important;
-            height: ${Math.max(altoDisponible, distribucionInteligente.alturaTotal + 40)}px;
+            height: ${distribucionMasonry.alturaTotal + 100}px;
         ">
-            <!-- Info de distribución ULTRA-COMPACTA -->
-
-            ${fotos.map((foto, index) => {
-                // DEBUG: Verificar que el patrón existe
-                if (!distribucionInteligente.patrones[index]) {
-                    console.error('❌ FALTA PATRÓN para índice ' + index + ' de ' + totalPhotos);
-                }
-                const patron = distribucionInteligente.patrones[index] || distribucionInteligente.patrones[distribucionInteligente.patrones.length - 1];
-                const ancho = patron.ancho;
-                const alto = patron.alto;
-                const left = patron.left || 0;
-                const top = patron.top || 0;
-                const proporcion = patron.proporcion || 1;
-                
-                // DEBUG ULTRA-ESPECÍFICO EN LA GENERACIÓN HTML
-                setTimeout(() => {
-                    console.log('🎯 IMAGEN ' + (index + 1) + ' GENERADA:');
-                    console.log('  - Posición: left=' + left + 'px, top=' + top + 'px');
-                    console.log('  - Tamaño: width=' + ancho + 'px, height=' + alto + 'px');
-                    console.log('  - Columna: ' + patron.columna + ', Factor: ' + patron.factorAncho);
-                    console.log('  - Área ocupada: (' + left + ',' + top + ') -> (' + (left + ancho) + ',' + (top + alto) + ')');
-                }, index * 50); // Stagger para que se vean en orden
-                
-                return `
-                    <div style="
-                        position: absolute;
-                        left: ${left}px;
-                        top: ${top}px;
-                        width: ${ancho}px;
-                        height: ${alto}px;
-                        cursor: pointer;
-                        border-radius: 8px;
-                        overflow: hidden;
-                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-                        touch-action: manipulation;
-                        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-                        transform: scale(1);
-                        margin: 0;
-                        padding: 0;
-                        border: 2px solid transparent;
-                    "
-                    onclick="console.log('🖱️ Clic en foto', ${index}, 'propertyId:', '${propertyId}'); verificarSuperposiciones('${propertyId}'); expandirFotoEnGaleria('${propertyId}', ${index})"
-                    onmouseenter="this.style.transform='scale(1.02)'; this.style.boxShadow='0 8px 32px rgba(0,0,0,0.15)'; this.style.borderColor='#232deb'"
-                    onmouseleave="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'; this.style.borderColor='transparent'; this.querySelector('.masonry-overlay').style.opacity = '0'"
-                    title="📸 Foto ${index + 1}/${totalPhotos} - Columna ${patron.columna + 1} (${ancho}x${alto}px, factor ${patron.factorAncho}) - Toca para expandir">
-                        <img 
-                            src="${foto}" 
-                            alt="Foto ${index + 1} - ${property.titulo}"
-                            style="
-                                width: 100%;
-                                height: 100%;
-                                object-fit: cover;
-                                display: block;
-                                transition: transform 0.4s ease;
-                            "
-                            onerror="this.src='INSTITUCIONAL 3.png'">
-                        
-                        <!-- Overlay dinámico con información -->
-                        <div class="masonry-overlay" style="
-                            position: absolute;
-                            bottom: 0;
-                            left: 0;
-                            right: 0;
-                            background: linear-gradient(transparent, rgba(35, 45, 235, 0.95));
-                            height: 40px;
-                            opacity: 0;
-                            transition: opacity 0.3s;
-                            display: flex;
-                            align-items: flex-end;
-                            justify-content: center;
-                            padding-bottom: 12px;
-                        ">
-                            <span style="color: white; font-size: 14px; font-weight: 700; text-shadow: 2px 2px 4px rgba(0,0,0,0.7);">
-                                ${index + 1}/${totalPhotos}
-                            </span>
+            <!-- Información de la distribución -->
+            <div style="
+                position: sticky;
+                top: 0;
+                background: rgba(35,45,235,0.1);
+                padding: 8px 12px;
+                border-radius: 6px;
+                font-size: 12px;
+                color: #232deb;
+                z-index: 100;
+                margin-bottom: 15px;
+                backdrop-filter: blur(10px);
+            ">
+                <strong>🏗️ GALERÍA MASONRY:</strong> ${distribucionMasonry.columnas} columnas | 
+                ${totalPhotos} fotos | Altura total: ${Math.floor(distribucionMasonry.alturaTotal)}px
+            </div>
+            
+            <!-- Contenedor de imágenes masonry -->
+            <div style="
+                position: relative;
+                width: 100%;
+                height: ${distribucionMasonry.alturaTotal}px;
+            ">
+                ${fotos.map((foto, index) => {
+                    const patron = distribucionMasonry.patrones[index];
+                    const ancho = patron.ancho;
+                    const alto = patron.alto;
+                    const left = patron.left;
+                    const top = patron.top;
+                    
+                    // Determinar clase de tamaño para estilos CSS
+                    let claseTamaño = 'masonry-small';
+                    if (alto > ancho * 1.5) claseTamaño = 'masonry-large';
+                    else if (alto > ancho * 1.2) claseTamaño = 'masonry-medium';
+                    
+                    return `
+                        <div class="masonry-item ${claseTamaño}" 
+                             style="
+                                 position: absolute;
+                                 left: ${left}px;
+                                 top: ${top}px;
+                                 width: ${ancho}px;
+                                 height: ${alto}px;
+                                 cursor: pointer;
+                                 border-radius: 12px;
+                                 overflow: hidden;
+                                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                                 background: #f8f9fa;
+                                 box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                                 border: 3px solid transparent;
+                             "
+                             onclick="expandirFotoEnGaleria('${propertyId}', ${index})"
+                             onmouseenter="this.style.transform='scale(1.02)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)'; this.style.borderColor='#232deb'"
+                             onmouseleave="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'; this.style.borderColor='transparent'">
+                            
+                            <img src="${foto}" 
+                                 alt="Foto ${index + 1} - ${property.titulo}"
+                                 style="
+                                     width: 100%;
+                                     height: 100%;
+                                     object-fit: cover;
+                                     display: block;
+                                 "
+                                 onerror="this.src='INSTITUCIONAL 3.png'">
+                            
+                            <!-- Overlay informativo -->
+                            <div style="
+                                position: absolute;
+                                bottom: 0;
+                                left: 0;
+                                right: 0;
+                                background: linear-gradient(transparent, rgba(0,0,0,0.7));
+                                padding: 12px 8px 8px 8px;
+                                color: white;
+                                font-size: 11px;
+                                opacity: 0;
+                                transition: opacity 0.3s;
+                            " class="masonry-overlay">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span>📸 Foto ${index + 1}</span>
+                                    <span>${ancho}x${alto}px</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Indicador de columna -->
+                            <div style="
+                                position: absolute;
+                                top: 8px;
+                                right: 8px;
+                                background: rgba(35, 45, 235, 0.9);
+                                color: white;
+                                padding: 4px 8px;
+                                border-radius: 6px;
+                                font-size: 10px;
+                                font-weight: 700;
+                            ">
+                                C${patron.columna + 1}
+                            </div>
                         </div>
-                        
-                        <!-- Indicador de columna mejorado -->
-                        <div style="
-                            position: absolute;
-                            top: 10px;
-                            right: 10px;
-                            background: linear-gradient(135deg, rgba(35, 45, 235, 0.9), rgba(35, 45, 235, 0.7));
-                            color: white;
-                            padding: 4px 8px;
-                            border-radius: 6px;
-                            font-size: 11px;
-                            font-weight: 700;
-                            text-transform: uppercase;
-                            letter-spacing: 0.5px;
-                            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-                        ">
-                            C${patron.columna + 1}
-                        </div>
-                        
-                        <!-- Indicador de dimensiones -->
-                        <div style="
-                            position: absolute;
-                            top: 10px;
-                            left: 10px;
-                            background: rgba(0,0,0,0.7);
-                            color: white;
-                            padding: 2px 6px;
-                            border-radius: 4px;
-                            font-size: 10px;
-                            font-weight: 600;
-                            backdrop-filter: blur(5px);
-                        ">
-                            ${ancho}×${alto}px
-                        </div>
-                    </div>
-                `;
-            }).join('')}
+                    `;
+                }).join('')}
+            </div>
         </div>
-
-        <script>
-            console.log('🚀 APLICANDO ALGORITMO INTELIGENTE DE DISTRIBUCIÓN...');
-            
-            const galeria = document.getElementById('galeria-inteligente-${propertyId}');
-            const overlay = document.getElementById('image-expansion-${propertyId}');
-            
-            // Forzar fondo blanco
-            if (galeria) {
-                galeria.style.background = 'white';
-                galeria.style.backgroundColor = 'white';
-                console.log('✅ Galería con fondo blanco aplicada');
-            }
-            if (overlay) {
-                overlay.style.background = 'white';
-                overlay.style.backgroundColor = 'white';
-                console.log('✅ Overlay con fondo blanco aplicado');
-            }
-            
-            // Verificar distribución de imágenes
-            console.log('📊 ANÁLISIS DE DISTRIBUCIÓN:');
-            console.log('- Total de fotos:', totalPhotos);
-            console.log('- Utilización del espacio:', distribucionInteligente.areaUtilizacion + '%');
-            console.log('- Área total ocupada:', distribucionInteligente.areaOcupada.toLocaleString(), 'px²');
-            console.log('- Área disponible:', distribucionInteligente.areaDisponible.toLocaleString(), 'px²');
-            
-            // Mostrar distribución detallada
-            const clases = {};
-            // Información de distribución Pinterest en consola
-            distribucionInteligente.patrones.forEach((patron, index) => {
-                console.log('Foto ' + (index + 1) + ': Columna ' + patron.columna + ' - ' + patron.ancho + 'x' + patron.alto + 'px (top: ' + patron.top + 'px, proporcion: ' + patron.proporcion + ')');
-            });
-            
-            console.log('📈 RESUMEN ULTRA-COMPACTO:');
-            console.log('- Balance: ' + distribucionInteligente.balance);
-            console.log('- Columnas: ' + distribucionInteligente.columnas);
-            console.log('- Gap aplicado: ' + distribucionInteligente.gap + 'px');
-            console.log('- Factor de compacidad: ' + distribucionInteligente.factorCompacidad + '%');
-            console.log('- Alturas por columna: [' + distribucionInteligente.alturaColumnas.map(h => Math.floor(h)).join(', ') + ']px');
-            
-            console.log('🎯 GARANTIZADO: ✅ ULTRA-COMPACTO ✅ Gap mínimo 2px ✅ Sin espacios aleatorios ✅ Fondo blanco');
-        </script>
     `;
     
-
-    
-    overlay.innerHTML = header + imageGrid;
+    overlay.innerHTML = header + masonryContainer;
     document.body.appendChild(overlay);
     
-    // CSS FORZADO POR 4 CAPAS PARA SISTEMA PINTEREST - GARANTÍA DE FONDO BLANCO
-    setTimeout(() => {
-        // CAPA 1: Estilo inline directo
-        overlay.style.background = 'white !important';
-        
-        // CAPA 2: CSS en elemento específico
-        const galeriaUltraCompacta = document.getElementById(`galeria-ultra-compacta-${propertyId}`);
-        if (galeriaUltraCompacta) {
-            galeriaUltraCompacta.style.background = 'white !important';
-            galeriaUltraCompacta.style.backgroundColor = 'white !important';
-        }
-        
-        // CAPA 3: CSS global inyectado
-        const cssForzado = document.createElement('style');
-        cssForzado.innerHTML = `
-            #galeria-ultra-compacta-${propertyId}, 
-            #image-expansion-${propertyId} {
-                background: white !important;
-                background-color: white !important;
-            }
-            .image-expansion-overlay {
-                background: white !important;
-            }
-        `;
-        document.head.appendChild(cssForzado);
-        
-        // CAPA 4: JavaScript forzado
-        const galeria = document.getElementById(`galeria-ultra-compacta-${propertyId}`);
-        if (galeria) {
-            galeria.style.setProperty('background', 'white', 'important');
-            galeria.style.setProperty('background-color', 'white', 'important');
-        }
-    }, 100);
-    
-    // Prevenir scroll del body
-    document.body.style.overflow = 'hidden';
-    
-    // Evento para cerrar al hacer clic fuera
+    // Agregar event listeners para overlay
     overlay.addEventListener('click', function(e) {
         if (e.target === overlay) {
             closeImageExpansion(propertyId);
@@ -1180,7 +1166,27 @@ function expandPropertyImages(propertyId) {
             closeImageExpansion(propertyId);
         }
     });
+    
+    // Mostrar overlays al hacer hover
+    setTimeout(() => {
+        const items = overlay.querySelectorAll('.masonry-item');
+        items.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.querySelector('.masonry-overlay').style.opacity = '1';
+            });
+            item.addEventListener('mouseleave', function() {
+                this.querySelector('.masonry-overlay').style.opacity = '0';
+            });
+        });
+    }, 100);
+    
+    document.body.style.overflow = 'hidden';
+    
+    console.log('🎨 Galería Masonry creada para', property.titulo);
 }
+
+
+
 
 // Función para expandir una foto dentro de la misma galería
 function expandirFotoEnGaleria(propertyId, fotoIndex) {
