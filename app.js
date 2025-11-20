@@ -1094,24 +1094,7 @@ function expandPropertyImages(propertyId) {
                                      display: block;
                                  "
                                  onerror="this.src='INSTITUCIONAL 3.png'">
-                            
-                            <!-- Overlay informativo -->
-                            <div style="
-                                position: absolute;
-                                bottom: 0;
-                                left: 0;
-                                right: 0;
-                                background: linear-gradient(transparent, rgba(0,0,0,0.7));
-                                padding: 12px 8px 8px 8px;
-                                color: white;
-                                font-size: 11px;
-                                opacity: 0;
-                                transition: opacity 0.3s;
-                            " class="masonry-overlay">
-                                <div style="display: flex; justify-content: center; align-items: center;">
-                                    <span>📸 Foto ${index + 1}</span>
-                                </div>
-                            </div>
+
                             
 
                         </div>
@@ -1141,14 +1124,7 @@ function expandPropertyImages(propertyId) {
     // Mostrar overlays al hacer hover
     setTimeout(() => {
         const items = overlay.querySelectorAll('.masonry-item');
-        items.forEach(item => {
-            item.addEventListener('mouseenter', function() {
-                this.querySelector('.masonry-overlay').style.opacity = '1';
-            });
-            item.addEventListener('mouseleave', function() {
-                this.querySelector('.masonry-overlay').style.opacity = '0';
-            });
-        });
+
     }, 100);
     
     document.body.style.overflow = 'hidden';
