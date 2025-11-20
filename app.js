@@ -1010,7 +1010,7 @@ function expandPropertyImages(propertyId) {
         ">
             <div style="display: flex; align-items: center; gap: 15px;">
                 <img src="llave.png" alt="Dante Propiedades" style="width: 40px; height: 40px; object-fit: contain;">
-                <div style="font-size: 16px;">${property.titulo} - ${totalPhotos} fotos</div>
+                <div style="font-size: 16px;">${property.titulo}</div>
             </div>
             <button onclick="closeImageExpansion('${propertyId}')" 
                     style="
@@ -1045,22 +1045,7 @@ function expandPropertyImages(propertyId) {
             background: white !important;
             height: ${distribucionMasonry.alturaTotal + 100}px;
         ">
-            <!-- Información de la distribución -->
-            <div style="
-                position: sticky;
-                top: 0;
-                background: rgba(35,45,235,0.1);
-                padding: 8px 12px;
-                border-radius: 6px;
-                font-size: 12px;
-                color: #232deb;
-                z-index: 100;
-                margin-bottom: 15px;
-                backdrop-filter: blur(10px);
-            ">
-                <strong>🏗️ GALERÍA MASONRY:</strong> ${distribucionMasonry.columnas} columnas | 
-                ${totalPhotos} fotos | Altura total: ${Math.floor(distribucionMasonry.alturaTotal)}px
-            </div>
+
             
             <!-- Contenedor de imágenes masonry -->
             <div style="
@@ -1123,26 +1108,12 @@ function expandPropertyImages(propertyId) {
                                 opacity: 0;
                                 transition: opacity 0.3s;
                             " class="masonry-overlay">
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; justify-content: center; align-items: center;">
                                     <span>📸 Foto ${index + 1}</span>
-                                    <span>${ancho}x${alto}px</span>
                                 </div>
                             </div>
                             
-                            <!-- Indicador de columna -->
-                            <div style="
-                                position: absolute;
-                                top: 8px;
-                                right: 8px;
-                                background: rgba(35, 45, 235, 0.9);
-                                color: white;
-                                padding: 4px 8px;
-                                border-radius: 6px;
-                                font-size: 10px;
-                                font-weight: 700;
-                            ">
-                                C${patron.columna + 1}
-                            </div>
+
                         </div>
                     `;
                 }).join('')}
