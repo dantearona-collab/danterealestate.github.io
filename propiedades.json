@@ -25,6 +25,10 @@
       "imgs/ENTORNOS.PDF",
       "imgs/DATOS PARCELA.PDF"
     ],
+    "videos": [
+      "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "imgs/recorrido-terreno-uf001.mp4"
+    ],
     "fotos": [
       "imgs/UF000-1.jpeg",
       "imgs/UF000-2.jpeg",
@@ -78,6 +82,10 @@
       "imgs/ENTORNOS.PDF",
       "imgs/DATOS PARCELA.PDF"
     ],
+    "videos": [
+      "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "imgs/recorrido-terreno-uf001.mp4"
+    ],
     "fotos": [
       "imgs/UF001-1.jpg",
       "imgs/UF001-2.jpg",
@@ -120,9 +128,9 @@
       "imgs/PLANO_DEPARTAMENTO.PDF",
       "imgs/EXPENSAS_DETALLE.PDF"
     ],
-      "videos": [
-    "imgs/UF003-VIDEO.MP4",
-    "imgs/UF003-VIDEO1.MP4"
+    "videos": [
+      "https://www.youtube.com/watch?v=9bZkp7q19f0",
+      "imgs/tour-monoambiente.mp4"
     ],
     "fotos": [
       "imgs/UF023-1.jpg",
@@ -166,8 +174,8 @@
       "imgs/AVALUO_2025.PDF"
     ],
     "videos": [
-    "imgs/UF003-VIDEO.MP4",
-    "imgs/UF003-VIDEO1.MP4"
+      "https://www.youtube.com/watch?v=ZbZSe6N_BXs",
+      "imgs/recorrido-casa-uf003.mp4"
     ],
     "fotos": [
       "imgs/OFI-1.jpg",
@@ -214,6 +222,10 @@
     "info_multimedia": "Fotos de la propiedad y terraza",
     "documentos": [
       "imgs/TITULO_PH.PDF"
+    ],
+    "videos": [
+      "https://www.youtube.com/watch?v=9bZkp7q19f0",
+      "imgs/tour-pilar-uf004.mp4"
     ],
 
     "fotos": [
