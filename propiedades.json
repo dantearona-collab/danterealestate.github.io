@@ -22,7 +22,7 @@
     "aire_acondicionado": "Si",
     "info_multimedia": "Set de 10 fotos de alta calidad, Fotos de exteriores, Recorrido visual completo",
     "documentos": [
-      "imgs/ENTORNOS.PDF",
+      "imgs/ENTORNO.PDF",
       "imgs/DATOS PARCELA.PDF"
     ],
     "fotos": [
@@ -78,7 +78,7 @@
     "aire_acondicionado": "Sí",
     "info_multimedia": "Set de 3 fotos de alta calidad, Fotos de exteriores, Recorrido visual completo",
     "documentos": [
-      "imgs/ENTORNOS.PDF",
+      "imgs/ENTORNO.PDF",
       "imgs/DATOS PARCELA.PDF"
     ],
     "fotos": [
@@ -122,10 +122,7 @@
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
     "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
-    "documentos": [
-      "imgs/PLANO_DEPARTAMENTO.PDF",
-      "imgs/EXPENSAS_DETALLE.PDF"
-    ],
+    "documentos": [],
     "videos": [
       "imgs/tour-monoambiente.mp4"
     ],
@@ -165,11 +162,7 @@
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
     "info_multimedia": "Fotos panorámicas disponibles, Video recorrido",
-    "documentos": [
-      "imgs/TITULO_PROPIEDAD.PDF",
-      "imgs/PLANO_CASA.PDF",
-      "imgs/AVALUO_2025.PDF"
-    ],
+    "documentos": [],
     "videos": [
       "imgs/recorrido-casa-uf003.mp4"
     ],
@@ -216,9 +209,7 @@
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Si",
     "info_multimedia": "Fotos de la propiedad y terraza",
-    "documentos": [
-      "imgs/TITULO_PH.PDF"
-    ],
+    "documentos": [],
     "videos": [
       "imgs/tour-pilar-uf004.mp4"
     ],
