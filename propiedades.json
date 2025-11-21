@@ -50,7 +50,10 @@
     ],
     "moneda_precio": "x",
     "moneda_expensas": "ARS",
-    "fecha_procesamiento": "2025-11-09T08:33:51.258324"
+    "fecha_procesamiento": "2025-11-09T08:33:51.258324",
+    "videos": [
+      "imgs/recorrido-terreno-uf001.mp4"
+    ]
   },
   {
     "id_temporal": "UF001",
@@ -89,7 +92,10 @@
     ],
     "moneda_precio": "USD",
     "moneda_expensas": "ARS",
-    "fecha_procesamiento": "2025-11-09T08:33:51.258324"
+    "fecha_procesamiento": "2025-11-09T08:33:51.258324",
+    "videos": [
+      "imgs/recorrido-terreno-uf001.mp4"
+    ]
   },
   {
     "id_temporal": "UF002",
@@ -120,9 +126,8 @@
       "imgs/PLANO_DEPARTAMENTO.PDF",
       "imgs/EXPENSAS_DETALLE.PDF"
     ],
-      "videos": [
-    "imgs/UF003-VIDEO.MP4",
-    "imgs/UF003-VIDEO1.MP4"
+    "videos": [
+      "imgs/tour-monoambiente.mp4"
     ],
     "fotos": [
       "imgs/UF023-1.jpg",
@@ -166,8 +171,7 @@
       "imgs/AVALUO_2025.PDF"
     ],
     "videos": [
-    "imgs/UF003-VIDEO.MP4",
-    "imgs/UF003-VIDEO1.MP4"
+      "imgs/recorrido-casa-uf003.mp4"
     ],
     "fotos": [
       "imgs/OFI-1.jpg",
@@ -214,6 +218,9 @@
     "info_multimedia": "Fotos de la propiedad y terraza",
     "documentos": [
       "imgs/TITULO_PH.PDF"
+    ],
+    "videos": [
+      "imgs/tour-pilar-uf004.mp4"
     ],
 
     "fotos": [
