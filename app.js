@@ -9,6 +9,248 @@
 let currentSlides = {};
 
 // ========================================
+// SISTEMA DE MULTIMEDIA (PDFs Y VIDEOS)
+// ========================================
+
+// Variables globales para multimedia
+let multimediaModal = null;
+let documentosProperty = [];
+let videosProperty = [];
+
+// Función para crear la sección multimedia (PDFs y Videos)
+function createMultimediaSection(property) {
+    const documentos = property.documentos || [];
+    const videos = property.videos || [];
+    
+    let multimediaHTML = '';
+    
+    // PDFs
+    if (documentos.length > 0) {
+        multimediaHTML += `
+            <div style="margin-bottom: 15px;">
+                <h4 style="margin: 0 0 8px 0; font-size: 14px; color: #495057; font-weight: 600;">
+                    📄 Documentos:
+                </h4>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    ${documentos.map((doc, index) => `
+                        <button onclick="viewPDF('${doc}', '${property.titulo}')" 
+                                style="padding: 6px 12px; background: #f8f9fa; border: 1px solid #dee2e6; 
+                                       border-radius: 4px; font-size: 12px; cursor: pointer; color: #495057; 
+                                       transition: all 0.3s ease; display: flex; align-items: center; gap: 4px;"
+                                onmouseover="this.style.background='#e9ecef'" 
+                                onmouseout="this.style.background='#f8f9fa'">
+                            📄 ${doc.split('/').pop()}
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    // Videos
+    if (videos.length > 0) {
+        multimediaHTML += `
+            <div style="margin-bottom: 15px;">
+                <h4 style="margin: 0 0 8px 0; font-size: 14px; color: #495057; font-weight: 600;">
+                    🎥 Videos:
+                </h4>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    ${videos.map((video, index) => `
+                        <button onclick="viewVideo('${video}', '${property.titulo}')" 
+                                style="padding: 6px 12px; background: #f8f9fa; border: 1px solid #dee2e6; 
+                                       border-radius: 4px; font-size: 12px; cursor: pointer; color: #495057; 
+                                       transition: all 0.3s ease; display: flex; align-items: center; gap: 4px;"
+                                onmouseover="this.style.background='#e9ecef'" 
+                                onmouseout="this.style.background='#f8f9fa'">
+                            🎥 ${video.split('/').pop()}
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    return multimediaHTML;
+}
+
+// Función para visualizar PDFs
+function viewPDF(pdfUrl, titulo) {
+    const fileName = pdfUrl.split('/').pop();
+    
+    // Crear o reutilizar modal de PDF
+    if (multimediaModal) {
+        multimediaModal.remove();
+    }
+    
+    multimediaModal = document.createElement('div');
+    multimediaModal.id = 'pdf-modal';
+    multimediaModal.style.cssText = `
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: rgba(0,0,0,0.8) !important;
+        z-index: 9999 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 20px !important;
+    `;
+    
+    multimediaModal.innerHTML = `
+        <div style="position: relative; width: 90%; max-width: 1000px; height: 90%; background: white; 
+                    border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;">
+            <div style="position: absolute; top: 0; left: 0; right: 0; background: #232deb; color: white; 
+                        padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10;">
+                <h3 style="margin: 0; font-size: 16px;">${titulo} - ${fileName}</h3>
+                <button onclick="closeMultimediaModal()" 
+                        style="background: transparent; border: none; color: white; font-size: 24px; 
+                               cursor: pointer; padding: 5px; border-radius: 4px;"
+                        onmouseover="this.style.background='rgba(255,255,255,0.1)'" 
+                        onmouseout="this.style.background='transparent'">
+                    &times;
+                </button>
+            </div>
+            <div style="position: absolute; top: 60px; left: 0; right: 0; bottom: 0; overflow: hidden;">
+                <iframe src="${pdfUrl}" 
+                        style="width: 100%; height: 100%; border: none;" 
+                        title="${fileName}">
+                </iframe>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(multimediaModal);
+    document.body.style.overflow = 'hidden';
+    
+    console.log('📄 Abriendo PDF:', pdfUrl);
+}
+
+// Función para visualizar videos
+function viewVideo(videoUrl, titulo) {
+    const fileName = videoUrl.split('/').pop();
+    
+    // Crear o reutilizar modal de video
+    if (multimediaModal) {
+        multimediaModal.remove();
+    }
+    
+    multimediaModal = document.createElement('div');
+    multimediaModal.id = 'video-modal';
+    multimediaModal.style.cssText = `
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: rgba(0,0,0,0.8) !important;
+        z-index: 9999 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 20px !important;
+    `;
+    
+    // Determinar tipo de video (YouTube, Vimeo, o archivo local)
+    let videoEmbed = '';
+    
+    if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+        // YouTube
+        const videoId = extractYouTubeId(videoUrl);
+        videoEmbed = `
+            <iframe src="https://www.youtube.com/embed/${videoId}" 
+                    style="width: 100%; height: 100%; border: none;" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+            </iframe>
+        `;
+    } else if (videoUrl.includes('vimeo.com')) {
+        // Vimeo
+        const videoId = extractVimeoId(videoUrl);
+        videoEmbed = `
+            <iframe src="https://player.vimeo.com/video/${videoId}" 
+                    style="width: 100%; height: 100%; border: none;" 
+                    allow="autoplay; fullscreen; picture-in-picture" 
+                    allowfullscreen>
+            </iframe>
+        `;
+    } else {
+        // Archivo de video local
+        videoEmbed = `
+            <video controls style="width: 100%; height: 100%; object-fit: contain; background: black;">
+                <source src="${videoUrl}" type="video/mp4">
+                <source src="${videoUrl}" type="video/webm">
+                <source src="${videoUrl}" type="video/ogg">
+                Tu navegador no soporta el elemento de video.
+            </video>
+        `;
+    }
+    
+    multimediaModal.innerHTML = `
+        <div style="position: relative; width: 90%; max-width: 1000px; height: 70%; background: white; 
+                    border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;">
+            <div style="position: absolute; top: 0; left: 0; right: 0; background: #232deb; color: white; 
+                        padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10;">
+                <h3 style="margin: 0; font-size: 16px;">${titulo} - ${fileName}</h3>
+                <button onclick="closeMultimediaModal()" 
+                        style="background: transparent; border: none; color: white; font-size: 24px; 
+                               cursor: pointer; padding: 5px; border-radius: 4px;"
+                        onmouseover="this.style.background='rgba(255,255,255,0.1)'" 
+                        onmouseout="this.style.background='transparent'">
+                    &times;
+                </button>
+            </div>
+            <div style="position: absolute; top: 60px; left: 0; right: 0; bottom: 0; overflow: hidden;">
+                ${videoEmbed}
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(multimediaModal);
+    document.body.style.overflow = 'hidden';
+    
+    console.log('🎥 Abriendo video:', videoUrl);
+}
+
+// Función para extraer ID de YouTube
+function extractYouTubeId(url) {
+    const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/;
+    const match = url.match(regex);
+    return match ? match[1] : '';
+}
+
+// Función para extraer ID de Vimeo
+function extractVimeoId(url) {
+    const regex = /vimeo\.com\/(\d+)/;
+    const match = url.match(regex);
+    return match ? match[1] : '';
+}
+
+// Función para cerrar modal multimedia
+function closeMultimediaModal() {
+    if (multimediaModal) {
+        multimediaModal.remove();
+        multimediaModal = null;
+    }
+    document.body.style.overflow = 'auto';
+}
+
+// Cerrar modal con tecla Escape
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeMultimediaModal();
+    }
+});
+
+// Cerrar modal al hacer clic fuera
+document.addEventListener('click', function(event) {
+    if (multimediaModal && event.target === multimediaModal) {
+        closeMultimediaModal();
+    }
+});
+
+// ========================================
 // VARIABLES GLOBALES DEL MODAL DE IMÁGENES
 // ========================================
 let imagenesModal = [];
@@ -380,6 +622,11 @@ function createPropertyCard(property) {
                 <span style="color: #232deb !important; font-size: 14px !important; font-weight: 600 !important;">
                     ${property.info_multimedia || 'Fotos disponibles'}
                 </span>
+            </div>
+            
+            <!-- Sección de multimedia (PDFs y Videos) -->
+            <div id="multimedia-section-${property.id_temporal}">
+                ${createMultimediaSection(property)}
             </div>
             
             <button onclick="showPropertyDetails('${property.id_temporal}')" 

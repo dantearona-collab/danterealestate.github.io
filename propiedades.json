@@ -120,6 +120,10 @@
       "imgs/PLANO_DEPARTAMENTO.PDF",
       "imgs/EXPENSAS_DETALLE.PDF"
     ],
+      "videos": [
+    "UF003-VIDEO.MP4",
+    "UF003-VIDEO1.MP4"
+    ],
     "fotos": [
       "imgs/UF023-1.jpg",
       "imgs/UF023-2.jpg",
@@ -161,6 +165,10 @@
       "imgs/PLANO_CASA.PDF",
       "imgs/AVALUO_2025.PDF"
     ],
+    "videos": [
+    "UF003-VIDEO.MP4",
+    "UF003-VIDEO1.MP4"
+    ],
     "fotos": [
       "imgs/OFI-1.jpg",
       "imgs/OFI-2.jpg",
@@ -182,7 +190,7 @@
   },
   {
     "id_temporal": "UF004",
-    "titulo": "Barrio Privado, Km- 50 Pilar",
+    "titulo": "Barrio Privado, Km- 50 Pilar, 2.000 m2 de terreno propios",
     "barrio": "Pilar",
     "precio": 1100,
     "ambientes": 8,
