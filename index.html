@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dante Propiedades - Galería con Múltiples Imágenes</title>
+    <link rel="icon" href="/logo.png" type="image/png">
     
     <style>
         /* RESET Y BASE */
@@ -1112,18 +1113,14 @@
             
             
             
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+            
+            
+            
+            
+            
+            
+            
+            
     </style>
 </head>
 <body>
@@ -1207,6 +1204,7 @@
                 
                 <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
                     <a href="formulario.html" style="color: #3498db; text-decoration: none; padding: 8px 15px; border: 1px solid #3498db; border-radius: 5px; transition: all 0.3s ease;">📋 Formulario de Contacto</a>
+                    <a href="#" onclick="mostrarTerminos(); return false;" style="color: #3498db; text-decoration: none; padding: 8px 15px; border: 1px solid #3498db; border-radius: 5px; transition: all 0.3s ease;">📜 Términos y Condiciones</a>
                 </div>
                 
                 <div style="border-top: 1px solid #34495e; padding-top: 15px; color: #95a5a6; font-size: 14px;">
@@ -1288,6 +1286,51 @@
             console.log('🎯 Sistema completamente funcional');
         });
     </script>
+    
+    <!-- Modal de Términos y Condiciones -->
+    <div id="modal-terminos" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📜 Términos y Condiciones</h2>
+                <span class="close" onclick="cerrarModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="last-updated">
+                    <strong>Última actualización:</strong> 10 de Noviembre de 2025
+                </div>
+                
+                <h3>1. Información General</h3>
+                <p>Dante Propiedades es una empresa inmobiliaria con sede en Capital Federal, Argentina, dedicada a la intermediación en operaciones de compra, venta y alquiler de propiedades inmuebles.</p>
+                
+                <h3>2. Aceptación de Términos</h3>
+                <p>Al utilizar nuestros servicios y sitio web, usted acepta estar sujeto a estos Términos y Condiciones. Si no está de acuerdo con alguna parte de estos términos, no utilice nuestros servicios.</p>
+                
+                <h3>3. Servicios Ofrecidos</h3>
+                <ul>
+                    <li>Intermediación en compra y venta de propiedades</li>
+                    <li>Gestión de alquileres residenciales y comerciales</li>
+                    <li>Asesoramiento inmobiliario personalizado</li>
+                    <li>Evaluación y tasación de propiedades</li>
+                </ul>
+                
+                <h3>4. Uso del Sitio Web</h3>
+                <p>Este sitio web está destinado exclusivamente para fines informativos y de contacto. La información publicada es de carácter general y puede estar sujeta a cambios sin previo aviso.</p>
+                
+                <h3>5. Protección de Datos</h3>
+                <p>La información personal que nos proporcione será utilizada únicamente para contactarlo y brindarle nuestros servicios. No compartimos su información con terceros sin su consentimiento explícito.</p>
+                
+                <h3>6. Limitación de Responsabilidad</h3>
+                <p>Dante Propiedades no se hace responsable por daños directos, indirectos, incidentales o consecuentes derivados del uso de este sitio web o de la información contenida en él.</p>
+                
+                <h3>7. Contacto</h3>
+                <p>Para consultas sobre estos términos, puede contactarnos a través de nuestro formulario de contacto o WhatsApp: +54 9 11 2536-8595</p>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button onclick="cerrarModal()" class="btn btn-primary">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <!-- Modal de Galería de Imágenes -->
     <div id="modal-imagenes" class="modal-imagenes">
@@ -1431,6 +1474,33 @@
     </style>
     
     <script>
+    function mostrarTerminos() {
+        document.getElementById('modal-terminos').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function cerrarModal() {
+        document.getElementById('modal-terminos').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+    
+    // Cerrar modal al hacer clic fuera de él
+    window.onclick = function(event) {
+        const modal = document.getElementById('modal-terminos');
+        if (event.target == modal) {
+            cerrarModal();
+        }
+    }
+    
+    // Cerrar modal con tecla Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            cerrarModal();
+        }
+    });
+    </script>
+    
+    <script>
     // Función para WhatsApp flotante
     function setupWhatsAppFloat() {
         const whatsappBtn = document.querySelector('.whatsapp-float');
@@ -1469,6 +1539,32 @@
         console.log('💬 Botón WhatsApp flotante configurado correctamente');
     });
     
+    function mostrarTerminos() {
+        document.getElementById('modal-terminos').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function cerrarModal() {
+        document.getElementById('modal-terminos').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+    
+    // Cerrar modal al hacer clic fuera de él
+    window.onclick = function(event) {
+        const modal = document.getElementById('modal-terminos');
+        if (event.target == modal) {
+            cerrarModal();
+        }
+    }
+    
+    // Cerrar modal con tecla Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            cerrarModal();
+        }
+    });
+    </script>
+    
     <!-- MODAL PARA GALERÍA DE IMÁGENES -->
     <div class="image-modal" id="imageModal">
         <div class="modal-content">
@@ -1481,3 +1577,5 @@
         </div>
     </div>
     
+</body>
+</html>
