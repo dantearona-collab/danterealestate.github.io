@@ -1201,6 +1201,52 @@ function expandPropertyImages(propertyId) {
     overlay.innerHTML = header + masonryContainer;
     document.body.appendChild(overlay);
     
+    // === EN TU ARCHIVO JAVASCRIPT - Donde están los event listeners ===
+
+    // Eventos para los PDFs individuales (AGREGA ESTOS NUEVOS)
+    if (planoPdf) {
+        planoPdf.addEventListener('click', function(e) {
+            e.stopPropagation();
+            openPdf('plano', 'Plano del Departamento');
+        });
+    }
+
+    // --- AGREGAR AQUÍ LOS NUEVOS EVENT LISTENERS ---
+    if (document.getElementById('entornosPdf')) {
+        document.getElementById('entornosPdf').addEventListener('click', function(e) {
+            e.stopPropagation();
+            openPdf('entornos', 'Estudio de Entornos');
+        });
+    }
+
+    if (document.getElementById('datosParcelaPdf')) {
+        document.getElementById('datosParcelaPdf').addEventListener('click', function(e) {
+            e.stopPropagation();
+            openPdf('datos_parcela', 'Datos de la Parcela');
+        });
+    }
+    // --- FIN DE NUEVOS EVENT LISTENERS ---
+
+    if (reglamentoPdf) {
+        reglamentoPdf.addEventListener('click', function(e) {
+            e.stopPropagation();
+            openPdf('reglamento', 'Reglamento de Copropiedad');
+        });
+    }
+
+    if (expensasPdf) {
+        expensasPdf.addEventListener('click', function(e) {
+            e.stopPropagation();
+            openPdf('expensas', 'Detalle de Expensas');
+        });
+    }
+    
+    
+    
+    
+    
+    
+    
     // Agregar event listeners para overlay
     overlay.addEventListener('click', function(e) {
         if (e.target === overlay) {
@@ -1857,26 +1903,65 @@ function initPropertyInteractive() {
         return;
     }
 
+
     // Función para abrir PDF
     function openPdf(pdfName, title) {
-        // En un caso real, aquí cargaríamos el PDF desde propiedadesJSON.archivos.pdfs[pdfName]
-        // Para esta demo, usamos un PDF de ejemplo online
+    console.log('📂 Buscando PDF:', pdfName);
+    
+    // Buscar en el array de documentos de tu JSON
+    const documentos = propiedadesJSON.documentos || [];
+    console.log('📄 Documentos disponibles:', documentos);
+    
+    let rutaArchivo = '';
+    
+    // Buscar inteligentemente en el array de documentos
+    if (pdfName === 'entornos') {
+        rutaArchivo = documentos.find(doc => doc.includes('ENTORNOS'));
+    } else if (pdfName === 'datos_parcela') {
+        rutaArchivo = documentos.find(doc => doc.includes('DATOS PARCELA') || doc.includes('DATOS_PARCELA'));
+    } else if (pdfName === 'plano') {
+        rutaArchivo = documentos.find(doc => doc.includes('PLANO') || doc.includes('plano'));
+    } else if (pdfName === 'reglamento') {
+        rutaArchivo = documentos.find(doc => doc.includes('REGLAMENTO') || doc.includes('reglamento'));
+    } else {
+        // Búsqueda genérica
+        rutaArchivo = documentos.find(doc => 
+            doc.toLowerCase().includes(pdfName.toLowerCase())
+        );
+    }
+    
+    console.log('🔍 Ruta encontrada:', rutaArchivo);
+    
+    if (rutaArchivo) {
+        // Asegurar que la ruta sea correcta
+        const rutaFinal = rutaArchivo.startsWith('./') ? rutaArchivo : './' + rutaArchivo;
+        console.log('🚀 Abriendo PDF:', rutaFinal);
+        
+        pdfViewer.src = rutaFinal;
+        modalTitle.textContent = title;
+        pdfModal.style.display = 'flex';
+    } else {
+        console.warn('⚠️ PDF no encontrado en documentos:', pdfName);
+        console.log('📋 Documentos disponibles:', documentos);
+        
+        // Fallback a PDF de prueba
         const pdfUrls = {
             plano: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-            reglamento: 'https://www.africau.edu/images/default/sample.pdf',
-            expensas: 'https://www.orimi.com/pdf-test.pdf'
+            entornos: 'https://www.africau.edu/images/default/sample.pdf',
+            datos_parcela: 'https://www.orimi.com/pdf-test.pdf',
+            reglamento: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
         };
         
-        if (pdfViewer) {
-            pdfViewer.src = pdfUrls[pdfName] || '';
-        }
-        if (modalTitle) {
-            modalTitle.textContent = title;
-        }
-        if (pdfModal) {
-            pdfModal.style.display = 'flex';
+        pdfViewer.src = pdfUrls[pdfName] || pdfUrls.plano;
+        modalTitle.textContent = title + ' (Vista Previa)';
+        pdfModal.style.display = 'flex';
+        
+        // Opcional: mostrar alerta solo en desarrollo
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            alert('Documento no encontrado. Mostrando vista previa.\nArchivo buscado: ' + pdfName);
         }
     }
+}
 
     // Evento para hacer clic en cualquier parte de la tarjeta
     if (propertyCard) {
