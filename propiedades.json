@@ -71,10 +71,11 @@
     "pileta": "No",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Set de 3 fotos de alta calidad, Fotos de exteriores, Recorrido visual completo",
+    "info_multimedia": "Set de 7 fotos de alta calidad, Fotos de exteriores",
     "documentos": [
       "imgs/ENTORNO.pdf",
       "imgs/PREFACTIBILIDAD.pdf",
+      "imgs/MANZANA.pdf",
       "imgs/DATOS PARCELA.pdf"
     ],
     "fotos": [

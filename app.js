@@ -2072,20 +2072,20 @@ function debugPDFs() {
     });
     
     // Verificar archivos específicos
-    const testFiles = [
-        'imgs/ENTORNOS.pdf',
-        'imgs/ENTORNOS.PDF'
-    ];
+    // const testFiles = [
+    //     'imgs/ENTORNOS.pdf',
+    //     'imgs/ENTORNOS.PDF'
+    // ];
     
-    testFiles.forEach(file => {
-        fetch(file, { method: 'HEAD' })
-            .then(response => {
-                console.log(`📄 ${file}: ${response.ok ? '✅ EXISTE' : '❌ NO EXISTE'}`);
-            })
-            .catch(() => {
-                console.log(`📄 ${file}: ❌ ERROR`);
-            });
-    });
+    // testFiles.forEach(file => {
+    //     fetch(file, { method: 'HEAD' })
+    //         .then(response => {
+    //             console.log(`📄 ${file}: ${response.ok ? '✅ EXISTE' : '❌ NO EXISTE'}`);
+    //         })
+    //         .catch(() => {
+    //             console.log(`📄 ${file}: ❌ ERROR`);
+    //         });
+    // });
 }
 
 // Ejecutar después de cargar las propiedades
