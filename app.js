@@ -1992,7 +1992,7 @@ const propiedadesJSON = {
             alert('Documento no encontrado. Mostrando vista previa.\nArchivo buscado: ' + pdfName);
         }
     }
-
+}
 
     // Evento para hacer clic en cualquier parte de la tarjeta
     // if (propertyCard) {
