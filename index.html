@@ -1280,6 +1280,113 @@
         <p>Sistema sin errores de consola + Slider de múltiples fotos</p>
     </div>
     
+
+    <!-- === SECCIÓN PROPIEDAD INTERACTIVA === -->
+    <div class="property-interactive-container">
+        <div class="property-card" id="propertyCard">
+            <div class="property-header">
+                <h1 class="property-title">Monoambiente Microcentro</h1>
+                <div class="property-address">
+                    <span>📍</span> Avda. Corrientes 848 - Microcentro
+                </div>
+                <div class="property-price">ARS 400.000</div>
+                <div class="expenses">+ ARS 95.000 expensas</div>
+            </div>
+            
+            <div class="property-details">
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <div class="detail-value">1</div>
+                        <div class="detail-label">Ambiente</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-value">23 m²</div>
+                        <div class="detail-label">Superficie</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-value">4°</div>
+                        <div class="detail-label">Piso</div>
+                    </div>
+                </div>
+                
+                <div class="property-condition">
+                    <span>✓</span> Estado: Bueno
+                </div>
+            </div>
+            
+            <div class="media-section">
+                <div class="section-title">
+                    <span>📸</span> Multimedia Disponible
+                </div>
+                <div class="media-icons">
+                    <div class="media-icon" id="photosIcon">
+                        <div class="icon icon-camera">📷</div>
+                        <div class="icon-label">Fotos Profesionales</div>
+                    </div>
+                    <div class="media-icon" id="tourIcon">
+                        <div class="icon icon-tour">🔄</div>
+                        <div class="icon-label">Tour 360°</div>
+                    </div>
+                    <div class="media-icon" id="videoIcon">
+                        <div class="icon icon-video">🎥</div>
+                        <div class="icon-label">Video</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pdf-section">
+                <div class="section-title">
+                    <span>📄</span> Documentos PDF
+                </div>
+                <div class="pdf-item" id="planoPdf">
+                    <div class="pdf-icon">📐</div>
+                    <div class="pdf-info">
+                        <div class="pdf-title">Plano del Departamento</div>
+                        <div class="pdf-size">Tamaño: 1.2 MB</div>
+                    </div>
+                </div>
+                <div class="pdf-item" id="reglamentoPdf">
+                    <div class="pdf-icon">📋</div>
+                    <div class="pdf-info">
+                        <div class="pdf-title">Reglamento de Copropiedad</div>
+                        <div class="pdf-size">Tamaño: 850 KB</div>
+                    </div>
+                </div>
+                <div class="pdf-item" id="expensasPdf">
+                    <div class="pdf-icon">💰</div>
+                    <div class="pdf-info">
+                        <div class="pdf-title">Detalle de Expensas</div>
+                        <div class="pdf-size">Tamaño: 720 KB</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="property-details">
+                <button class="action-button" id="contactButton">Contactar para más información</button>
+            </div>
+        </div>
+        
+        <div class="json-display">
+            <div class="json-title">
+                <span>⚙️</span> Archivo propiedades.json (simulado)
+            </div>
+            <pre class="json-pre" id="jsonData"></pre>
+        </div>
+    </div>
+
+    <!-- Modal para PDFs -->
+    <div class="property-modal" id="pdfModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Documento PDF</h2>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            <iframe class="pdf-viewer" id="pdfViewer" frameborder="0"></iframe>
+        </div>
+    </div>
+
+
+    
     <div class="container">
         <!-- Filtros de búsqueda -->
         <div class="filters">

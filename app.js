@@ -1796,6 +1796,180 @@ document.addEventListener('click', function(event) {
     }
 });
 
+// === JAVASCRIPT PARA PROPIEDAD INTERACTIVA ===
+
+// Simulación del archivo propiedades.json
+const propiedadesJSON = {
+    propiedad: {
+        id: "UF003",
+        titulo: "Monoambiente Microcentro",
+        direccion: "Avda. Corrientes 848 - Microcentro",
+        precio: 400000,
+        expensas: 95000,
+        detalles: {
+            ambientes: 1,
+            superficie: 23,
+            piso: 4,
+            estado: "Bueno"
+        },
+        archivos: {
+            fotos: "fotos-profesionales-uf003.zip",
+            tour: "tour-virtual-360-uf003.html",
+            video: "UF003-VIDEO.MP4",
+            pdfs: {
+                plano: "plano-departamento-uf003.pdf",
+                reglamento: "reglamento-consorcio-uf003.pdf",
+                expensas: "detalle-expensas-uf003.pdf"
+            }
+        }
+    }
+};
+
+// Inicialización cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    initPropertyInteractive();
+});
+
+function initPropertyInteractive() {
+    // Mostrar el JSON en la página
+    const jsonDataElement = document.getElementById('jsonData');
+    if (jsonDataElement) {
+        jsonDataElement.textContent = JSON.stringify(propiedadesJSON, null, 2);
+    }
+
+    // Elementos del DOM
+    const propertyCard = document.getElementById('propertyCard');
+    const pdfModal = document.getElementById('pdfModal');
+    const pdfViewer = document.getElementById('pdfViewer');
+    const modalTitle = document.getElementById('modalTitle');
+    const closeModal = document.getElementById('closeModal');
+    const planoPdf = document.getElementById('planoPdf');
+    const reglamentoPdf = document.getElementById('reglamentoPdf');
+    const expensasPdf = document.getElementById('expensasPdf');
+    const contactButton = document.getElementById('contactButton');
+    const photosIcon = document.getElementById('photosIcon');
+    const tourIcon = document.getElementById('tourIcon');
+    const videoIcon = document.getElementById('videoIcon');
+
+    // Verificar que todos los elementos existen
+    if (!propertyCard || !pdfModal) {
+        console.error('No se encontraron todos los elementos necesarios');
+        return;
+    }
+
+    // Función para abrir PDF
+    function openPdf(pdfName, title) {
+        // En un caso real, aquí cargaríamos el PDF desde propiedadesJSON.archivos.pdfs[pdfName]
+        // Para esta demo, usamos un PDF de ejemplo online
+        const pdfUrls = {
+            plano: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+            reglamento: 'https://www.africau.edu/images/default/sample.pdf',
+            expensas: 'https://www.orimi.com/pdf-test.pdf'
+        };
+        
+        if (pdfViewer) {
+            pdfViewer.src = pdfUrls[pdfName] || '';
+        }
+        if (modalTitle) {
+            modalTitle.textContent = title;
+        }
+        if (pdfModal) {
+            pdfModal.style.display = 'flex';
+        }
+    }
+
+    // Evento para hacer clic en cualquier parte de la tarjeta
+    if (propertyCard) {
+        propertyCard.addEventListener('click', function(e) {
+            // Evitar que se active cuando se hace clic en elementos específicos
+            if (!e.target.closest('.media-icon') && 
+                !e.target.closest('.pdf-item') && 
+                !e.target.closest('.action-button')) {
+                openPdf('plano', 'Plano del Departamento');
+            }
+        });
+    }
+
+    // Eventos para los PDFs individuales
+    if (planoPdf) {
+        planoPdf.addEventListener('click', function(e) {
+            e.stopPropagation();
+            openPdf('plano', 'Plano del Departamento');
+        });
+    }
+
+    if (reglamentoPdf) {
+        reglamentoPdf.addEventListener('click', function(e) {
+            e.stopPropagation();
+            openPdf('reglamento', 'Reglamento de Copropiedad');
+        });
+    }
+
+    if (expensasPdf) {
+        expensasPdf.addEventListener('click', function(e) {
+            e.stopPropagation();
+            openPdf('expensas', 'Detalle de Expensas');
+        });
+    }
+
+    // Eventos para los iconos de multimedia
+    if (photosIcon) {
+        photosIcon.addEventListener('click', function(e) {
+            e.stopPropagation();
+            alert('Mostrando: ' + propiedadesJSON.propiedad.archivos.fotos);
+        });
+    }
+
+    if (tourIcon) {
+        tourIcon.addEventListener('click', function(e) {
+            e.stopPropagation();
+            alert('Abriendo: ' + propiedadesJSON.propiedad.archivos.tour);
+        });
+    }
+
+    if (videoIcon) {
+        videoIcon.addEventListener('click', function(e) {
+            e.stopPropagation();
+            alert('Reproduciendo: ' + propiedadesJSON.propiedad.archivos.video);
+        });
+    }
+
+    // Evento para el botón de contacto
+    if (contactButton) {
+        contactButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            alert('Redirigiendo al formulario de contacto...');
+        });
+    }
+
+    // Cerrar modal
+    if (closeModal) {
+        closeModal.addEventListener('click', function() {
+            if (pdfModal) {
+                pdfModal.style.display = 'none';
+            }
+            if (pdfViewer) {
+                pdfViewer.src = '';
+            }
+        });
+    }
+
+    // Cerrar modal al hacer clic fuera del contenido
+    if (pdfModal) {
+        pdfModal.addEventListener('click', function(e) {
+            if (e.target === pdfModal) {
+                pdfModal.style.display = 'none';
+                if (pdfViewer) {
+                    pdfViewer.src = '';
+                }
+            }
+        });
+    }
+}
+
+
+
+
 // CSS FORZADO: Asegurar fondo blanco en todas las galerías
 const cssInteligenteForzado = document.createElement('style');
 cssInteligenteForzado.textContent = `
