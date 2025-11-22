@@ -40,16 +40,16 @@ const propertiesDataEmbedded = [
         "tipo": "Casa",
         "descripcion": "Casa moderna con acabados de lujo, gran patio y cochera para 2 autos.",
         "fotos": [
-            "imgs/house_pool_1_0.jpg",
-            "imgs/house_pool_1_4.jpg", 
-            "imgs/house_pool_1_8.jpg"
+            "/imgs/house_pool_1_0.jpg",
+            "/imgs/house_pool_1_4.jpg", 
+            "/imgs/house_pool_1_8.jpg"
         ],
         "documentos": [
-            "imgs/ENTORNOS.PDF",
-            "imgs/DATOS PARCELA.PDF"
+            "/imgs/ENTORNOS.PDF",
+            "/imgs/DATOS PARCELA.PDF"
         ],
         "videos": [
-            "imgs/recorrido-terreno-uf001.mp4"
+            "/imgs/recorrido-terreno-uf001.mp4"
         ]
     },
     {
@@ -64,16 +64,16 @@ const propertiesDataEmbedded = [
         "tipo": "Departamento",
         "descripcion": "Departamento moderno en el corazón de la ciudad, totalmente renovado.",
         "fotos": [
-            "imgs/apartment_interior_1_0.jpg",
-            "imgs/apartment_interior_1_4.jpg",
-            "imgs/apartment_interior_1_5.webp"
+            "/imgs/apartment_interior_1_0.jpg",
+            "/imgs/apartment_interior_1_4.jpg",
+            "/imgs/apartment_interior_1_5.webp"
         ],
         "documentos": [
-            "imgs/ENTORNOS.PDF",
-            "imgs/DATOS PARCELA.PDF"
+            "/imgs/ENTORNOS.PDF",
+            "/imgs/DATOS PARCELA.PDF"
         ],
         "videos": [
-            "imgs/recorrido-terreno-uf001.mp4"
+            "/imgs/recorrido-terreno-uf001.mp4"
         ]
     },
     {
@@ -88,13 +88,13 @@ const propertiesDataEmbedded = [
         "tipo": "Monoambiente",
         "descripcion": "Monoambiente perfecto para estudiantes, cerca de universidades.",
         "fotos": [
-            "imgs/institucional_2_1.jpg",
-            "imgs/institucional_2_8.jpg",
-            "imgs/institucional_2_9.jpg"
+            "/imgs/institucional_2_1.jpg",
+            "/imgs/institucional_2_8.jpg",
+            "/imgs/institucional_2_9.jpg"
         ],
         "documentos": [],
         "videos": [
-            "imgs/tour-monoambiente.mp4"
+            "/imgs/tour-monoambiente.mp4"
         ]
     },
     {
@@ -109,13 +109,13 @@ const propertiesDataEmbedded = [
         "tipo": "Casa",
         "descripcion": "Casa familiar con gran pileta, quincho y amplio jardín.",
         "fotos": [
-            "imgs/UF003-1.jpg",
-            "imgs/UF003-2.jpg",
-            "imgs/house_exterior_1_7.jpg"
+            "/imgs/UF003-1.jpg",
+            "/imgs/UF003-2.jpg",
+            "/imgs/house_exterior_1_7.jpg"
         ],
         "documentos": [],
         "videos": [
-            "imgs/recorrido-casa-uf003.mp4"
+            "/imgs/recorrido-casa-uf003.mp4"
         ]
     },
     {
@@ -130,13 +130,13 @@ const propertiesDataEmbedded = [
         "tipo": "PH",
         "descripcion": "Penthouse con terraza privada de 40m² y vista panorámica.",
         "fotos": [
-            "imgs/UF004.jpg",
-            "imgs/house_pool_1_0.jpg",
-            "imgs/house_pool_1_4.jpg"
+            "/imgs/UF004.jpg",
+            "/imgs/house_pool_1_0.jpg",
+            "/imgs/house_pool_1_4.jpg"
         ],
         "documentos": [],
         "videos": [
-            "imgs/tour-pilar-uf004.mp4"
+            "/imgs/tour-pilar-uf004.mp4"
         ]
     }
 ];
@@ -175,8 +175,22 @@ function initializeFilters() {
     const barrios = [...new Set(propertiesData.map(p => p.ubicacion))].sort();
     const tipos = [...new Set(propertiesData.map(p => p.tipo))].sort();
     
+    // Verificar que los elementos existen
+    const operacionSelect = document.getElementById('operacion-select-styled');
     const barrioSelect = document.getElementById('barrio-select-styled');
     const tipoSelect = document.getElementById('tipo-select-styled');
+    
+    if (!operacionSelect || !barrioSelect || !tipoSelect) {
+        console.error('❌ Elementos de filtro no encontrados en el DOM');
+        debugLog('❌ Error: Elementos de filtro no encontrados', 'error');
+        return;
+    }
+    
+    // Poblar dropdown de operación
+    operacionSelect.innerHTML = '<option value="">Todas las operaciones</option>';
+    ['Venta', 'Alquiler'].forEach(opcion => {
+        operacionSelect.innerHTML += `<option value="${opcion}">${opcion}</option>`;
+    });
     
     // Poblar dropdown de barrios
     barrioSelect.innerHTML = '<option value="">Todos los barrios</option>';
@@ -191,9 +205,9 @@ function initializeFilters() {
     });
     
     // Agregar event listeners
-    document.getElementById('operacion-select-styled').addEventListener('change', applyFilters);
-    document.getElementById('barrio-select-styled').addEventListener('change', applyFilters);
-    document.getElementById('tipo-select-styled').addEventListener('change', applyFilters);
+    operacionSelect.addEventListener('change', applyFilters);
+    barrioSelect.addEventListener('change', applyFilters);
+    tipoSelect.addEventListener('change', applyFilters);
     
     debugLog(`🔧 Filtros inicializados - Barrios: ${barrios.length}, Tipos: ${tipos.length}`, 'info');
 }
@@ -732,5 +746,46 @@ document.addEventListener('click', function(event) {
         event.stopPropagation();
     }
 });
+
+// ========================================
+// FUNCIONES PARA BOTONES DE BÚSQUEDA HTML
+// ========================================
+
+function searchProperties() {
+    debugLog('🔍 Función searchProperties() ejecutada', 'info');
+    // Los filtros ya se aplican automáticamente cuando cambian los select
+    // Solo necesitamos asegurarnos de que se ejecute el filtrado
+    const operacionSelect = document.getElementById('operacion-select-styled');
+    const barrioSelect = document.getElementById('barrio-select-styled');
+    const tipoSelect = document.getElementById('tipo-select-styled');
+    
+    if (operacionSelect || barrioSelect || tipoSelect) {
+        // Simular cambio en filtros para activar applyFilters()
+        if (operacionSelect) operacionSelect.dispatchEvent(new Event('change'));
+        else if (barrioSelect) barrioSelect.dispatchEvent(new Event('change'));
+        else if (tipoSelect) tipoSelect.dispatchEvent(new Event('change'));
+    }
+    debugLog('✅ Búsqueda ejecutada', 'success');
+}
+
+function resetFilters() {
+    debugLog('🏠 Función resetFilters() ejecutada', 'info');
+    
+    const operacionSelect = document.getElementById('operacion-select-styled');
+    const barrioSelect = document.getElementById('barrio-select-styled');
+    const tipoSelect = document.getElementById('tipo-select-styled');
+    
+    if (operacionSelect) operacionSelect.value = '';
+    if (barrioSelect) barrioSelect.value = '';
+    if (tipoSelect) tipoSelect.value = '';
+    
+    // Aplicar filtros (que ahora mostrarán todas las propiedades)
+    applyFilters();
+    debugLog('✅ Filtros reseteados - Mostrando todas las propiedades', 'success');
+}
+
+// Hacer funciones disponibles globalmente
+window.searchProperties = searchProperties;
+window.resetFilters = resetFilters;
 
 debugLog('🎯 Sistema de modal mejorado cargado correctamente', 'success');
