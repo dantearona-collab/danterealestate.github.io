@@ -6,6 +6,39 @@
 // ========================================
 
 // Variables globales para el slider
+// ========================================
+// VARIABLES GLOBALES - AGREGAR AQUÍ
+// ========================================
+
+// Variables globales para el slider
+let currentSlides = {};
+
+// Variables globales para multimedia
+let multimediaModal = null;
+let documentosProperty = [];
+let videosProperty = [];
+
+// === AGREGAR ESTAS VARIABLES ===
+let planoPdf = null;
+let reglamentoPdf = null;  // <- ESTA ES LA QUE FALTA
+let expensasPdf = null;
+let entornosPdf = null;
+let datosParcelaPdf = null;
+let photosIcon = null;
+let tourIcon = null;
+let videoIcon = null;
+let contactButton = null;
+let closeModal = null;
+let pdfViewer = null;
+let modalTitle = null;
+let pdfModal = null;
+
+
+
+
+
+
+
 function initializeVariables() {
     // Obtener referencias con verificación de existencia
     planoPdf = document.getElementById('planoPdf');
