@@ -50,10 +50,7 @@
     ],
     "moneda_precio": "x",
     "moneda_expensas": "ARS",
-    "fecha_procesamiento": "2025-11-09T08:33:51.258324",
-    "videos": [
-      "imgs/recorrido-terreno-uf001.mp4"
-    ]
+    "fecha_procesamiento": "2025-11-09T08:33:51.258324"
   },
   {
     "id_temporal": "UF001",
@@ -92,10 +89,7 @@
     ],
     "moneda_precio": "USD",
     "moneda_expensas": "ARS",
-    "fecha_procesamiento": "2025-11-09T08:33:51.258324",
-    "videos": [
-      "imgs/recorrido-terreno-uf001.mp4"
-    ]
+    "fecha_procesamiento": "2025-11-09T08:33:51.258324"
   },
   {
     "id_temporal": "UF002",
@@ -122,9 +116,13 @@
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
     "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
-    "documentos": [],
-    "videos": [
-      "imgs/tour-monoambiente.mp4"
+    "documentos": [
+      "imgs/PLANO_DEPARTAMENTO.PDF",
+      "imgs/EXPENSAS_DETALLE.PDF"
+    ],
+      "videos": [
+    "imgs/UF003-VIDEO.MP4",
+    "imgs/UF003-VIDEO1.MP4"
     ],
     "fotos": [
       "imgs/UF023-1.jpg",
@@ -162,9 +160,14 @@
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
     "info_multimedia": "Fotos panorámicas disponibles, Video recorrido",
-    "documentos": [],
+    "documentos": [
+      "imgs/TITULO_PROPIEDAD.PDF",
+      "imgs/PLANO_CASA.PDF",
+      "imgs/AVALUO_2025.PDF"
+    ],
     "videos": [
-      "imgs/recorrido-casa-uf003.mp4"
+    "imgs/UF003-VIDEO.MP4",
+    "imgs/UF003-VIDEO1.MP4"
     ],
     "fotos": [
       "imgs/OFI-1.jpg",
@@ -209,9 +212,8 @@
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Si",
     "info_multimedia": "Fotos de la propiedad y terraza",
-    "documentos": [],
-    "videos": [
-      "imgs/tour-pilar-uf004.mp4"
+    "documentos": [
+      "imgs/TITULO_PH.PDF"
     ],
 
     "fotos": [
