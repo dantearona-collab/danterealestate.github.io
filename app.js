@@ -1919,31 +1919,20 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initPropertyInteractive() {
-    // Mostrar el JSON en la página
-    const jsonDataElement = document.getElementById('jsonData');
-    if (jsonDataElement) {
-        jsonDataElement.textContent = JSON.stringify(propiedadesJSON, null, 2);
-    }
-
-    // Elementos del DOM
+    // Verificar si existen los elementos antes de proceder
     const propertyCard = document.getElementById('propertyCard');
     const pdfModal = document.getElementById('pdfModal');
-    const pdfViewer = document.getElementById('pdfViewer');
-    const modalTitle = document.getElementById('modalTitle');
-    const closeModal = document.getElementById('closeModal');
-    const planoPdf = document.getElementById('planoPdf');
-    const reglamentoPdf = document.getElementById('reglamentoPdf');
-    const expensasPdf = document.getElementById('expensasPdf');
-    const contactButton = document.getElementById('contactButton');
-    const photosIcon = document.getElementById('photosIcon');
-    const tourIcon = document.getElementById('tourIcon');
-    const videoIcon = document.getElementById('videoIcon');
-
-    // Verificar que todos los elementos existen
+    
+    // Si no existen los elementos, salir silenciosamente
     if (!propertyCard || !pdfModal) {
-        console.error('No se encontraron todos los elementos necesarios');
+        console.log('ℹ️ Propiedad interactiva no presente en esta página');
         return;
     }
+    
+    // Solo ejecutar si los elementos existen
+    console.log('✅ Inicializando propiedad interactiva...');
+    // ... el resto del código de la función ...
+}
 
 
     // Función para abrir PDF
