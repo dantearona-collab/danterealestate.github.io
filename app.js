@@ -1995,16 +1995,16 @@ const propiedadesJSON = {
 
 
     // Evento para hacer clic en cualquier parte de la tarjeta
-    if (propertyCard) {
-        propertyCard.addEventListener('click', function(e) {
-            // Evitar que se active cuando se hace clic en elementos específicos
-            if (!e.target.closest('.media-icon') && 
-                !e.target.closest('.pdf-item') && 
-                !e.target.closest('.action-button')) {
-                openPdf('plano', 'Plano del Departamento');
-            }
-        });
-    }
+    // if (propertyCard) {
+    //     propertyCard.addEventListener('click', function(e) {
+    //         // Evitar que se active cuando se hace clic en elementos específicos
+    //         if (!e.target.closest('.media-icon') && 
+    //             !e.target.closest('.pdf-item') && 
+    //             !e.target.closest('.action-button')) {
+    //             openPdf('plano', 'Plano del Departamento');
+    //         }
+    //     });
+    // }
 
     // Eventos para los PDFs individuales
     if (planoPdf) {
