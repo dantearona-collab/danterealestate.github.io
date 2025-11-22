@@ -117,8 +117,6 @@
     "aire_acondicionado": "Sí",
     "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
     "documentos": [
-      "imgs/DATOS PARCELARIOS.pdf",
-      "imgs/EXPENSAS_DETALLE.pdf"
     ],
     "fotos": [
       "imgs/UF023-1.jpg",
@@ -157,9 +155,6 @@
     "aire_acondicionado": "Sí",
     "info_multimedia": "Fotos panorámicas disponibles, Video recorrido",
     "documentos": [
-      "imgs/TITULO_PROPIEDAD.pdf",
-      "imgs/PLANO_CASA.pdf",
-      "imgs/AVALUO_2025.pdf"
     ],
     "fotos": [
       "imgs/OFI-1.jpg",
@@ -205,7 +200,6 @@
     "aire_acondicionado": "Si",
     "info_multimedia": "Fotos de la propiedad y terraza",
     "documentos": [
-      "imgs/TITULO_PH.pdf"
     ],
 
     "fotos": [
