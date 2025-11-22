@@ -6,49 +6,10 @@
 // ========================================
 
 // Variables globales para el slider
-let currentSlides = {};
-let planoPdf = null;
-let reglamentoPdf = null;
-let expensasPdf = null;
-let entornosPdf = null;
-let datosParcelaPdf = null;
-let photosIcon = null;
-let tourIcon = null;
-let videoIcon = null;
-let contactButton = null;
-let closeModal = null;
-let pdfViewer = null;
-let modalTitle = null;
-let pdfModal = null;
-let multimediaModal = null;
-let documentosProperty = [];
-let videosProperty = [];
-
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🏠 Sistema Dante Propiedades - Sin errores + Slider cargando...');
-    console.log('🎯 Sistema de slider de múltiples fotos incluido');
-    console.log('✅ Sin dependencias de Font Awesome');
-    console.log('🎬 Sistema de multimedia activado');
-    
-    // Cargar CSS del slider
-    addSliderStyles();
-    
-    // Cargar propiedades
-    loadProperties();
-    
-    // Inicializar variables después de que el DOM esté listo
-    initializeVariables();
-    
-    console.log('✅ Sistema inicializado sin errores de consola');
-    console.log('🎠 Slider de múltiples fotos disponible');
-    console.log('📄 Soporte para PDFs activado');
-    console.log('🎥 Soporte para videos activado');
-});
-
-// Función para inicializar variables del DOM
 function initializeVariables() {
+    // Obtener referencias con verificación de existencia
     planoPdf = document.getElementById('planoPdf');
-    reglamentoPdf = document.getElementById('reglamentoPdf');
+    reglamentoPdf = document.getElementById('reglamentoPdf');  // <- AGREGAR ESTA LÍNEA
     expensasPdf = document.getElementById('expensasPdf');
     entornosPdf = document.getElementById('entornosPdf');
     datosParcelaPdf = document.getElementById('datosParcelaPdf');
@@ -61,9 +22,19 @@ function initializeVariables() {
     modalTitle = document.getElementById('modalTitle');
     pdfModal = document.getElementById('pdfModal');
     
+    // Log para depuración
+    console.log('🔍 Elementos del DOM inicializados:', {
+        planoPdf: !!planoPdf,
+        reglamentoPdf: !!reglamentoPdf,  // <- AGREGAR ESTA LÍNEA
+        entornosPdf: !!entornosPdf,
+        datosParcelaPdf: !!datosParcelaPdf,
+        pdfModal: !!pdfModal
+    });
+    
     // Configurar event listeners para PDFs
     setupPdfEventListeners();
 }
+
 
 // Función para configurar event listeners de PDFs
 // Función para configurar event listeners de PDFs
@@ -2057,24 +2028,55 @@ const propiedadesJSON = {
 
 
     // Función para abrir PDF
+    // En la función openPdf, cambia las rutas a minúsculas
+
+function debugPdfFiles() {
+    console.log('🔍 Verificando archivos PDF disponibles...');
+    
+    const pdfFiles = [
+        'imgs/ENTORNOS.pdf',      // ← minúsculas
+        'imgs/ENTORNOS.PDF',      // ← mayúsculas (para comparar)
+        'imgs/DATOS PARCELA.pdf',
+        'imgs/PLANO.pdf',
+        'imgs/REGLAMENTO.pdf',
+        'imgs/EXPENSAS.pdf'
+    ];
+    
+    pdfFiles.forEach(file => {
+        fetch(file, { method: 'HEAD' })
+            .then(response => {
+                console.log(`📄 ${file}: ${response.ok ? '✅ Existe' : '❌ No existe'}`);
+            })
+            .catch(() => {
+                console.log(`📄 ${file}: ❌ Error al verificar`);
+            });
+    });
+}
+
+// También verifica qué documentos tienes en el JSON
+console.log('📋 Documentos en propiedades.json:', globalData.properties.map(p => p.documentos));
+
+
+
+
+
     function openPdf(pdfName, title) {
     console.log('📂 Buscando PDF:', pdfName);
     
-    // Buscar en el array de documentos de tu JSON
     const documentos = propiedadesJSON.documentos || [];
     console.log('📄 Documentos disponibles:', documentos);
     
     let rutaArchivo = '';
     
-    // Buscar inteligentemente en el array de documentos
+    // Buscar inteligentemente en el array de documentos - CORREGIDO
     if (pdfName === 'entornos') {
-        rutaArchivo = documentos.find(doc => doc.includes('ENTORNOS'));
+        rutaArchivo = documentos.find(doc => doc.toLowerCase().includes('entornos'));
     } else if (pdfName === 'datos_parcela') {
-        rutaArchivo = documentos.find(doc => doc.includes('DATOS PARCELA') || doc.includes('DATOS_PARCELA'));
+        rutaArchivo = documentos.find(doc => doc.toLowerCase().includes('datos') && doc.toLowerCase().includes('parcela'));
     } else if (pdfName === 'plano') {
-        rutaArchivo = documentos.find(doc => doc.includes('PLANO') || doc.includes('plano'));
+        rutaArchivo = documentos.find(doc => doc.toLowerCase().includes('plano'));
     } else if (pdfName === 'reglamento') {
-        rutaArchivo = documentos.find(doc => doc.includes('REGLAMENTO') || doc.includes('reglamento'));
+        rutaArchivo = documentos.find(doc => doc.toLowerCase().includes('reglamento'));
     } else {
         // Búsqueda genérica
         rutaArchivo = documentos.find(doc => 
@@ -2085,8 +2087,8 @@ const propiedadesJSON = {
     console.log('🔍 Ruta encontrada:', rutaArchivo);
     
     if (rutaArchivo) {
-        // Asegurar que la ruta sea correcta
-        const rutaFinal = rutaArchivo.startsWith('./') ? rutaArchivo : './' + rutaArchivo;
+        // Asegurar que la ruta use minúsculas para la extensión
+        const rutaFinal = rutaArchivo.replace(/\.PDF$/, '.pdf');
         console.log('🚀 Abriendo PDF:', rutaFinal);
         
         pdfViewer.src = rutaFinal;
@@ -2094,24 +2096,7 @@ const propiedadesJSON = {
         pdfModal.style.display = 'flex';
     } else {
         console.warn('⚠️ PDF no encontrado en documentos:', pdfName);
-        console.log('📋 Documentos disponibles:', documentos);
-        
-        // Fallback a PDF de prueba
-        const pdfUrls = {
-            plano: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-            entornos: 'https://www.africau.edu/images/default/sample.pdf',
-            datos_parcela: 'https://www.orimi.com/pdf-test.pdf',
-            reglamento: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
-        };
-        
-        pdfViewer.src = pdfUrls[pdfName] || pdfUrls.plano;
-        modalTitle.textContent = title + ' (Vista Previa)';
-        pdfModal.style.display = 'flex';
-        
-        // Opcional: mostrar alerta solo en desarrollo
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            alert('Documento no encontrado. Mostrando vista previa.\nArchivo buscado: ' + pdfName);
-        }
+        // ... resto del código de fallback
     }
 }
 
