@@ -1260,14 +1260,6 @@
     .masonry-item:nth-child(5) { animation-delay: 0.5s; }
     .masonry-item:nth-child(6) { animation-delay: 0.6s; }
                 
-        
-        
-    
-    
-    
-    
-    
-    
     
     
     
@@ -1402,7 +1394,13 @@
         console.log('✅ Sin dependencias de Font Awesome');
         console.log('🎠 Slider de múltiples fotos incluido');
         console.log('🔧 Sistema de emojis para iconos');
-        
+        console.log('📄 Sistema de PDFs integrado');
+        console.log('🎥 Sistema de videos integrado');
+        console.log('🏗️ Galería Masonry activada');
+
+
+
+
         // Función para buscar propiedades
         function searchProperties() {
             const operacion = document.getElementById('operacion-select-styled').value;
@@ -1728,5 +1726,52 @@
         </div>
     </div>
     
+
+<script>
+// Inicializar sistema de multimedia cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎬 Sistema de multimedia inicializado');
+    console.log('📄 Soporte para PDFs activado');
+    console.log('🎥 Soporte para videos activado');
+});
+
+// Función global para cerrar modales multimedia
+function closeMultimediaModal() {
+    const modals = document.querySelectorAll('#pdf-modal, #video-modal');
+    modals.forEach(modal => {
+        // Detener videos antes de remover
+        const videos = modal.querySelectorAll('video');
+        videos.forEach(video => {
+            video.pause();
+            video.currentTime = 0;
+        });
+        modal.remove();
+    });
+    document.body.style.overflow = 'auto';
+}
+
+// Cerrar modales multimedia con tecla Escape
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeMultimediaModal();
+    }
+});
+
+// Cerrar modales multimedia al hacer clic fuera
+document.addEventListener('click', function(event) {
+    const pdfModal = document.getElementById('pdf-modal');
+    const videoModal = document.getElementById('video-modal');
+    
+    if (pdfModal && event.target === pdfModal) {
+        closeMultimediaModal();
+    }
+    if (videoModal && event.target === videoModal) {
+        closeMultimediaModal();
+    }
+});
+</script>
+
+
+
 </body>
 </html> 
