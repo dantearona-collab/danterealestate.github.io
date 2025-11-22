@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dante Propiedades - Galería con Múltiples Imágenes</title>
     <link rel="icon" href="/logo.png" type="image/png">
+    <link rel="stylesheet" href="app.css">
     
     <style>
         /* RESET Y BASE */
@@ -243,13 +244,7 @@
             font-weight: 600;
         }
         
-        /* GRID DE PROPIEDADES */
-        .properties-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
+        /* GRID DE PROPIEDADES - USANDO app.css externo */
         
         .property-card {
             position: relative;
@@ -662,10 +657,6 @@
             
             .header h1 {
                 font-size: 2em;
-            }
-            
-            .properties-grid {
-                grid-template-columns: 1fr;
             }
             
             .filter-row {
@@ -1182,7 +1173,7 @@
         </div>
         
         <!-- Grid de propiedades -->
-        <div class="properties-grid" id="properties-container">
+        <div class="propiedades-grid" id="properties-container">
             <div class="logo-spinner">
                 <img src="llave.png" alt="Logo" class="spinning-logo">
                 <div>Cargando propiedades con galería de imágenes...</div>
