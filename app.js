@@ -1914,25 +1914,25 @@ const propiedadesJSON = {
 };
 
 // Inicialización cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function() {
-    initPropertyInteractive();
-});
+// document.addEventListener('DOMContentLoaded', function() {
+//     initPropertyInteractive();
+// });
 
-function initPropertyInteractive() {
-    // Verificar si existen los elementos antes de proceder
-    const propertyCard = document.getElementById('propertyCard');
-    const pdfModal = document.getElementById('pdfModal');
+// function initPropertyInteractive() {
+//     // Verificar si existen los elementos antes de proceder
+//     const propertyCard = document.getElementById('propertyCard');
+//     const pdfModal = document.getElementById('pdfModal');
     
-    // Si no existen los elementos, salir silenciosamente
-    if (!propertyCard || !pdfModal) {
-        console.log('ℹ️ Propiedad interactiva no presente en esta página');
-        return;
-    }
+//     // Si no existen los elementos, salir silenciosamente
+//     if (!propertyCard || !pdfModal) {
+//         console.log('ℹ️ Propiedad interactiva no presente en esta página');
+//         return;
+//     }
     
-    // Solo ejecutar si los elementos existen
-    console.log('✅ Inicializando propiedad interactiva...');
-    // ... el resto del código de la función ...
-}
+//     // Solo ejecutar si los elementos existen
+//     console.log('✅ Inicializando propiedad interactiva...');
+//     // ... el resto del código de la función ...
+// }
 
 
     // Función para abrir PDF
@@ -2081,7 +2081,7 @@ function initPropertyInteractive() {
             }
         });
     }
-}
+
 
 
 
