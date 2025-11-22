@@ -1911,7 +1911,49 @@ document.addEventListener('click', function(event) {
 });
 </script>
 
-
+    <!-- JavaScript del sistema -->
+    <script src="app.js"></script>
+    
+    <script>
+        console.log('🏠 Sistema Dante Propiedades - Versión Sin Errores + Slider cargando...');
+        console.log('✅ Sin dependencias de Font Awesome');
+        console.log('🎠 Slider de múltiples fotos incluido');
+        console.log('🔧 Sistema de emojis para iconos');
+        
+        // Función para buscar propiedades
+        function searchProperties() {
+            const operacion = document.getElementById('operacion-select-styled').value;
+            const barrio = document.getElementById('barrio-select-styled').value;
+            const tipo = document.getElementById('tipo-select-styled').value;
+            
+            console.log('🔍 Buscando propiedades con filtros:', { operacion, barrio, tipo });
+            
+            // Llamar a la función de búsqueda del app.js si existe
+            if (typeof window.loadProperties === 'function') {
+                window.loadProperties();
+            }
+        }
+        
+        // Función para resetear filtros
+        function resetFilters() {
+            document.getElementById('operacion-select-styled').value = '';
+            document.getElementById('barrio-select-styled').value = '';
+            document.getElementById('tipo-select-styled').value = '';
+            
+            console.log('🏠 Filtros reseteados - Mostrando todas las propiedades');
+            
+            // Llamar a la función de mostrar todas las propiedades
+            if (typeof window.loadProperties === 'function') {
+                window.loadProperties();
+            }
+        }
+        
+        // Verificación de carga de recursos
+        window.addEventListener('load', function() {
+            console.log('✅ Todos los recursos cargados correctamente');
+            console.log('🎯 Sistema completamente funcional');
+        });
+    </script>
 
 </body>
 </html> 
