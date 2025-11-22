@@ -1111,10 +1111,157 @@
         /* ... continuar según necesidad */
             
             
-            
-            
-    
-    
+        /* ========================================
+    ESTILOS PARA MODALES DE MULTIMEDIA (PDFs y VIDEOS)
+    ======================================== */
+
+    #pdf-modal,
+    #video-modal {
+        animation: fadeIn 0.3s ease !important;
+    }
+
+    #pdf-modal iframe,
+    #video-modal video {
+        border-radius: 0 0 8px 8px !important;
+    }
+
+    /* Botones de multimedia en las tarjetas */
+    .multimedia-btn {
+        transition: all 0.3s ease !important;
+    }
+
+    .multimedia-btn:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+    }
+
+    /* Responsive para modales de video */
+    @media (max-width: 768px) {
+        #video-modal > div {
+            width: 95% !important;
+            height: 60% !important;
+        }
+        
+        #pdf-modal > div {
+            width: 95% !important;
+            height: 80% !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+        #video-modal > div {
+            width: 98% !important;
+            height: 50% !important;
+        }
+        
+        #pdf-modal > div {
+            width: 98% !important;
+            height: 70% !important;
+        }
+        
+        .multimedia-section {
+            font-size: 12px !important;
+        }
+        
+        .multimedia-section button {
+            padding: 4px 8px !important;
+            font-size: 11px !important;
+        }
+    }
+
+    /* Efectos de hover para botones de multimedia */
+    .multimedia-section button:hover {
+        background: #e9ecef !important;
+        border-color: #232deb !important;
+        color: #232deb !important;
+    }
+
+    /* ========================================
+    ESTILOS PARA GALERÍA MASONRY
+    ======================================== */
+
+    .masonry-item {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    .masonry-item:hover {
+        z-index: 10 !important;
+    }
+
+    .masonry-small {
+        /* Tamaño pequeño - ya definido en JS */
+    }
+
+    .masonry-medium {
+        /* Tamaño mediano - ya definido en JS */
+    }
+
+    .masonry-large {
+        /* Tamaño grande - ya definido en JS */
+    }
+
+    /* Efectos de hover mejorados */
+    .masonry-item:hover img {
+        transform: scale(1.05);
+        transition: transform 0.4s ease !important;
+    }
+
+    /* Responsive para masonry */
+    @media (max-width: 768px) {
+        #masonry-gallery-container {
+            padding: 10px !important;
+        }
+        
+        .masonry-item {
+            border-radius: 8px !important;
+        }
+    }
+
+    /* Scrollbar personalizado para el contenedor masonry */
+    #masonry-gallery-container::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    #masonry-gallery-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    #masonry-gallery-container::-webkit-scrollbar-thumb {
+        background: #232deb;
+        border-radius: 4px;
+    }
+
+    #masonry-gallery-container::-webkit-scrollbar-thumb:hover {
+        background: #1a1db4;
+    }
+
+    /* Animación de entrada para items masonry */
+    @keyframes masonryItemFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .masonry-item {
+        animation: masonryItemFadeIn 0.5s ease-out;
+    }
+
+    /* Efecto de carga progresiva */
+    .masonry-item:nth-child(1) { animation-delay: 0.1s; }
+    .masonry-item:nth-child(2) { animation-delay: 0.2s; }
+    .masonry-item:nth-child(3) { animation-delay: 0.3s; }
+    .masonry-item:nth-child(4) { animation-delay: 0.4s; }
+    .masonry-item:nth-child(5) { animation-delay: 0.5s; }
+    .masonry-item:nth-child(6) { animation-delay: 0.6s; }
+                
+        
+        
     
     
     

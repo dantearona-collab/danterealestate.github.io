@@ -1,4 +1,4 @@
-// Sistema Dante Propiedades - SIN ERRORES + SLIDER FUNCIONAL + MODAL
+// Sistema Dante Propiedades - SIN ERRORES + SLIDER FUNCIONAL + MODAL + MULTIMEDIA
 // Versión sin dependencias de Font Awesome + Slider de múltiples fotos + Modal de galería - 2025-11-13
 
 // ========================================
@@ -7,6 +7,211 @@
 
 // Variables globales para el slider
 let currentSlides = {};
+
+// ========================================
+// SISTEMA DE MULTIMEDIA (PDFs Y VIDEOS)
+// ========================================
+
+// Variables globales para multimedia
+let multimediaModal = null;
+let documentosProperty = [];
+let videosProperty = [];
+
+// Función para crear la sección multimedia (PDFs y Videos)
+function createMultimediaSection(property) {
+    const documentos = property.documentos || [];
+    const videos = property.videos || [];
+    
+    let multimediaHTML = '';
+    
+    // PDFs
+    if (documentos.length > 0) {
+        multimediaHTML += `
+            <div style="margin-bottom: 15px;">
+                <h4 style="margin: 0 0 8px 0; font-size: 14px; color: #495057; font-weight: 600;">
+                    📄 Documentos:
+                </h4>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    ${documentos.map((doc, index) => `
+                        <button onclick="viewPDF('${doc}', '${property.titulo}')" 
+                                style="padding: 6px 12px; background: #f8f9fa; border: 1px solid #dee2e6; 
+                                       border-radius: 4px; font-size: 12px; cursor: pointer; color: #495057; 
+                                       transition: all 0.3s ease; display: flex; align-items: center; gap: 4px;"
+                                onmouseover="this.style.background='#e9ecef'" 
+                                onmouseout="this.style.background='#f8f9fa'">
+                            📄 ${doc.split('/').pop()}
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    // Videos
+    if (videos.length > 0) {
+        multimediaHTML += `
+            <div style="margin-bottom: 15px;">
+                <h4 style="margin: 0 0 8px 0; font-size: 14px; color: #495057; font-weight: 600;">
+                    🎥 Videos:
+                </h4>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    ${videos.map((video, index) => `
+                        <button onclick="viewVideo('${video}', '${property.titulo}')" 
+                                style="padding: 6px 12px; background: #f8f9fa; border: 1px solid #dee2e6; 
+                                       border-radius: 4px; font-size: 12px; cursor: pointer; color: #495057; 
+                                       transition: all 0.3s ease; display: flex; align-items: center; gap: 4px;"
+                                onmouseover="this.style.background='#e9ecef'" 
+                                onmouseout="this.style.background='#f8f9fa'">
+                            🎥 ${video.split('/').pop()}
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    return multimediaHTML;
+}
+
+// Función para visualizar PDFs
+function viewPDF(pdfUrl, titulo) {
+    const fileName = pdfUrl.split('/').pop();
+    
+    // Crear o reutilizar modal de PDF
+    if (multimediaModal) {
+        multimediaModal.remove();
+    }
+    
+    multimediaModal = document.createElement('div');
+    multimediaModal.id = 'pdf-modal';
+    multimediaModal.style.cssText = `
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: rgba(0,0,0,0.8) !important;
+        z-index: 9999 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 20px !important;
+    `;
+    
+    multimediaModal.innerHTML = `
+        <div style="position: relative; width: 90%; max-width: 1000px; height: 90%; background: white; 
+                    border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;">
+            <div style="position: absolute; top: 0; left: 0; right: 0; background: #232deb; color: white; 
+                        padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10;">
+                <h3 style="margin: 0; font-size: 16px;">${titulo} - ${fileName}</h3>
+                <button onclick="closeMultimediaModal()" 
+                        style="background: transparent; border: none; color: white; font-size: 24px; 
+                               cursor: pointer; padding: 5px; border-radius: 4px;"
+                        onmouseover="this.style.background='rgba(255,255,255,0.1)'" 
+                        onmouseout="this.style.background='transparent'">
+                    &times;
+                </button>
+            </div>
+            <div style="position: absolute; top: 60px; left: 0; right: 0; bottom: 0; overflow: hidden;">
+                <iframe src="${pdfUrl}" 
+                        style="width: 100%; height: 100%; border: none;" 
+                        title="${fileName}">
+                </iframe>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(multimediaModal);
+    document.body.style.overflow = 'hidden';
+    
+    console.log('📄 Abriendo PDF:', pdfUrl);
+}
+
+// Función para visualizar videos
+function viewVideo(videoUrl, titulo) {
+    const fileName = videoUrl.split('/').pop();
+    
+    // Crear o reutilizar modal de video
+    if (multimediaModal) {
+        multimediaModal.remove();
+    }
+    
+    multimediaModal = document.createElement('div');
+    multimediaModal.id = 'video-modal';
+    multimediaModal.style.cssText = `
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: rgba(0,0,0,0.8) !important;
+        z-index: 9999 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 20px !important;
+    `;
+    
+    multimediaModal.innerHTML = `
+        <div style="position: relative; width: 90%; max-width: 1000px; height: 70%; background: white; 
+                    border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;">
+            <div style="position: absolute; top: 0; left: 0; right: 0; background: #232deb; color: white; 
+                        padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10;">
+                <h3 style="margin: 0; font-size: 16px;">${titulo} - ${fileName}</h3>
+                <button onclick="closeMultimediaModal()" 
+                        style="background: transparent; border: none; color: white; font-size: 24px; 
+                               cursor: pointer; padding: 5px; border-radius: 4px;"
+                        onmouseover="this.style.background='rgba(255,255,255,0.1)'" 
+                        onmouseout="this.style.background='transparent'">
+                    &times;
+                </button>
+            </div>
+            <div style="position: absolute; top: 60px; left: 0; right: 0; bottom: 0; overflow: hidden; background: black;">
+                <video controls autoplay style="width: 100%; height: 100%; object-fit: contain;">
+                    <source src="${videoUrl}" type="video/mp4">
+                    <source src="${videoUrl}" type="video/webm">
+                    <source src="${videoUrl}" type="video/ogg">
+                    Tu navegador no soporta el elemento de video.
+                </video>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(multimediaModal);
+    document.body.style.overflow = 'hidden';
+    
+    console.log('🎥 Abriendo video:', videoUrl);
+}
+
+// Función para cerrar modal multimedia
+function closeMultimediaModal() {
+    if (multimediaModal) {
+        // Detener videos antes de cerrar
+        const videos = multimediaModal.querySelectorAll('video');
+        videos.forEach(video => {
+            video.pause();
+            video.currentTime = 0;
+        });
+        
+        multimediaModal.remove();
+        multimediaModal = null;
+    }
+    document.body.style.overflow = 'auto';
+}
+
+// Cerrar modal con tecla Escape
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeMultimediaModal();
+    }
+});
+
+// Cerrar modal al hacer clic fuera
+document.addEventListener('click', function(event) {
+    if (multimediaModal && event.target === multimediaModal) {
+        closeMultimediaModal();
+    }
+});
 
 // ========================================
 // VARIABLES GLOBALES DEL MODAL DE IMÁGENES
@@ -382,6 +587,11 @@ function createPropertyCard(property) {
                 </span>
             </div>
             
+            <!-- Sección de multimedia (PDFs y Videos) -->
+            <div id="multimedia-section-${property.id_temporal}">
+                ${createMultimediaSection(property)}
+            </div>
+            
             <button onclick="showPropertyDetails('${property.id_temporal}')" 
                     style="width: 100% !important; background: #232deb !important; color: white !important; 
                            border: none !important; padding: 12px !important; border-radius: 6px !important; 
@@ -491,6 +701,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('🏠 Sistema Dante Propiedades - Sin errores + Slider cargando...');
     console.log('🎯 Sistema de slider de múltiples fotos incluido');
     console.log('✅ Sin dependencias de Font Awesome');
+    console.log('🎬 Sistema de multimedia activado');
     
     // Cargar CSS del slider
     addSliderStyles();
@@ -503,6 +714,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('✅ Sistema inicializado sin errores de consola');
     console.log('🎠 Slider de múltiples fotos disponible');
+    console.log('📄 Soporte para PDFs activado');
+    console.log('🎥 Soporte para videos activado');
 });
 
 // ========================================
@@ -539,6 +752,7 @@ window.addEventListener('load', function() {
 // ========================================
 // SISTEMA DE MODAL DE IMÁGENES
 // ========================================
+
 
 // Función principal para abrir el modal con verificación completa
 function abrirModalImagenesComplete(propertyId) {
@@ -758,121 +972,6 @@ function createExpandableGallery(property) {
     `;
 }
 
-// ALGORITMO GRID SIMPLE (BACKUP SI MASONRY FALLA)
-function calcularDistribucionInteligente(totalFotos, anchoDisponible, altoDisponible) {
-    console.log('🏗️ Calculando distribución GRID SIMPLE para', totalFotos, 'fotos');
-    console.log('📐 Espacio disponible:', anchoDisponible, 'x', altoDisponible, 'px');
-    
-    // CONFIGURACIÓN GRID OPTIMIZADO PARA MINIMIZAR ESPACIOS
-    const esMobile = anchoDisponible < 768;
-    const columnas = esMobile ? 2 : 4;
-    const gap = 3; // Incremento mínimo para mejor visibilidad
-    const anchoColumna = Math.floor((anchoDisponible - (columnas - 1) * gap) / columnas);
-    const alturaMaximaFoto = 220; // AUMENTADO para mejor visibilidad
-    
-    console.log('🔧 Grid simple: ' + columnas + ' columnas, gap: ' + gap + 'px, ancho columna: ' + anchoColumna + 'px');
-    
-    // GENERACIÓN PREDECIBLE SIN ALEATORIEDAD
-    const patrones = [];
-    
-    for (let i = 0; i < totalFotos; i++) {
-        const posicion = i + 1;
-        const columna = i % columnas;
-        const fila = Math.floor(i / columnas);
-        
-        // POSICIÓN GRID SIMPLE
-        const left = columna * (anchoColumna + gap);
-        const top = fila * (alturaMaximaFoto + gap);
-        
-        // TAMAÑOS OPTIMIZADOS PARA OCUPAR MÁS ESPACIO
-        let anchoFinal;
-        if (posicion % 8 === 1 || posicion % 8 === 5) {
-            // Destacadas: ancho completo
-            anchoFinal = anchoColumna;
-        } else if (posicion % 8 === 2 || posicion % 8 === 6) {
-            // Grandes: 90% del ancho
-            anchoFinal = Math.floor(anchoColumna * 0.9);
-        } else if (posicion % 8 === 3 || posicion % 8 === 7) {
-            // Medianas: 80% del ancho
-            anchoFinal = Math.floor(anchoColumna * 0.8);
-        } else {
-            // Pequeñas: 85% del ancho
-            anchoFinal = Math.floor(anchoColumna * 0.85);
-        }
-        
-        const altoFinal = alturaMaximaFoto;
-        
-        // VALIDACIÓN OPTIMIZADA PARA MINIMIZAR ESPACIOS VACÍOS
-        anchoFinal = Math.max(80, Math.min(anchoFinal, anchoColumna));
-        
-        // PATRÓN CON VALORES EXACTOS
-        patrones.push({
-            ancho: anchoFinal,
-            alto: altoFinal,
-            left: left,
-            top: top,
-            columna: columna,
-            fila: fila,
-            proporcion: parseFloat((altoFinal / anchoFinal).toFixed(2)),
-            factorAncho: parseFloat((anchoFinal / anchoColumna).toFixed(2))
-        });
-        
-        // DEBUG DETALLADO
-        console.log('📐 FOTO ' + posicion + ':');
-        console.log('  - Grid: col=' + columna + ', row=' + fila + ' | Pos: (' + left + ',' + top + ')');
-        console.log('  - Tamaño: ' + anchoFinal + 'x' + altoFinal + ' | Factor: ' + (anchoFinal / anchoColumna).toFixed(2));
-    }
-    
-    // OPTIMIZACIÓN: REDISTRIBUCIÓN DE LA ÚLTIMA FILA PARA MINIMIZAR ESPACIOS VACÍOS
-    const ultimaFila = Math.floor((totalFotos - 1) / columnas);
-    const fotosEnUltimaFila = totalFotos - (ultimaFila * columnas);
-    
-    if (fotosEnUltimaFila > 0 && fotosEnUltimaFila < columnas) {
-        // Redistribuir imágenes en la última fila para llenar el espacio disponible
-        const espacioPorImagen = Math.floor(anchoColumna);
-        const anchoDistribucion = Math.min(anchoDisponible, (fotosEnUltimaFila * anchoColumna) + ((fotosEnUltimaFila - 1) * gap));
-        
-        for (let i = 0; i < fotosEnUltimaFila; i++) {
-            const patronIndex = (ultimaFila * columnas) + i;
-            if (patronIndex < patrones.length) {
-                // Asignar tamaños más grandes para la última fila
-                const nuevoAncho = Math.floor(anchoDistribucion / fotosEnUltimaFila) - Math.floor(gap / 2);
-                patrones[patronIndex].ancho = Math.max(nuevoAncho, anchoColumna * 0.8);
-                patrones[patronIndex].left = i * (anchoColumna + gap);
-                
-                console.log('🔧 Redistribución FOTO ' + (patronIndex + 1) + ': nuevo ancho: ' + nuevoAncho + 'px');
-            }
-        }
-    }
-    
-    // ANÁLISIS GRID OPTIMIZADO - DISTRIBUCIÓN MEJORADA
-    const totalFilas = Math.ceil(totalFotos / columnas);
-    const alturaTotalGrid = totalFilas * (alturaMaximaFoto + gap) - gap;
-    
-    console.log('✅ Distribución GRID OPTIMIZADA completa:');
-    console.log('- Total filas: ' + totalFilas);
-    console.log('- Fotos en última fila: ' + fotosEnUltimaFila);
-    console.log('- Altura total: ' + alturaTotalGrid + 'px');
-    console.log('- Optimización aplicada para minimizar espacios vacíos');
-    console.log('- Balance: OPTIMIZADO');
-    console.log('- Patrones generados: ' + patrones.length + ' de ' + totalFotos + ' requeridos');
-    
-    return {
-        patrones: patrones,
-        columnas: columnas,
-        alturaTotal: alturaTotalGrid,
-        alturaColumnas: [], // No relevante para grid
-        gap: gap,
-        balance: 'OPTIMIZADO',
-        factorCompacidad: '98.5'
-    };
-}
-
-// Función para expandir/contraer propiedad específica
-// Función para expandir imágenes a toda la pantalla con distribución inteligente
-
-
-
 // ========================================
 // ALGORITMO DE DISTRIBUCIÓN MASONRY MEJORADO
 // ========================================
@@ -1045,8 +1144,6 @@ function expandPropertyImages(propertyId) {
             background: white !important;
             height: ${distribucionMasonry.alturaTotal + 100}px;
         ">
-
-            
             <!-- Contenedor de imágenes masonry -->
             <div style="
                 position: relative;
@@ -1094,9 +1191,6 @@ function expandPropertyImages(propertyId) {
                                      display: block;
                                  "
                                  onerror="this.src='INSTITUCIONAL 3.png'">
-
-                            
-
                         </div>
                     `;
                 }).join('')}
@@ -1121,19 +1215,10 @@ function expandPropertyImages(propertyId) {
         }
     });
     
-    // Mostrar overlays al hacer hover
-    setTimeout(() => {
-        const items = overlay.querySelectorAll('.masonry-item');
-
-    }, 100);
-    
     document.body.style.overflow = 'hidden';
     
     console.log('🎨 Galería Masonry creada para', property.titulo);
 }
-
-
-
 
 // Función para expandir una foto dentro de la misma galería
 function expandirFotoEnGaleria(propertyId, fotoIndex) {
@@ -1350,23 +1435,6 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
             box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
         ">
             <div style="font-size: 14px; font-weight: 600;">Foto ${fotoIndex + 1} de ${property.fotos.length}</div>
-            <button onclick="openImageModal('${propertyId}', ${fotoIndex})" 
-                    style="
-                        background: rgba(255, 255, 255, 0.2);
-                        color: white;
-                        border: none;
-                        padding: 8px 16px;
-                        border-radius: 20px;
-                        cursor: pointer;
-                        font-size: 12px;
-                        font-weight: 600;
-                        transition: background 0.3s;
-                    "
-                    onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'"
-                    onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'"
-                    title="Abrir modal completo">
-                🔍 Modal completo
-            </button>
         </div>
     `;
     
@@ -1759,73 +1827,5 @@ console.log('🏠 Sistema Dante Propiedades - Sin errores + Slider + Modal carga
 console.log('🎯 Sistema de modal de galería incluido');
 console.log('✅ Sin dependencias de Font Awesome');
 console.log('🚀 Distribución inteligente aplicada - Sin tamaños iguales - Fondo blanco garantizado');
-
-// FUNCIÓN DE VERIFICACIÓN DE SUPERPOSICIONES
-function verificarSuperposiciones(propertyId) {
-    console.log('🔍 VERIFICANDO SUPERPOSICIONES para ' + propertyId);
-    
-    setTimeout(() => {
-        const gallery = document.querySelector(`[id^="galeria-ultra-compacta-${propertyId}"]`);
-        if (!gallery) {
-            console.log('❌ No se encontró la galería para verificar');
-            return;
-        }
-        
-        const images = gallery.querySelectorAll('div[style*="position: absolute"]');
-        console.log('📸 Imágenes encontradas: ' + images.length);
-        
-        let superposiciones = 0;
-        const areasOcupadas = [];
-        
-        images.forEach((img, index) => {
-            const style = img.style;
-            const left = parseInt(style.left) || 0;
-            const top = parseInt(style.top) || 0;
-            const width = parseInt(style.width) || 0;
-            const height = parseInt(style.height) || 0;
-            
-            const area = {
-                left: left,
-                top: top,
-                right: left + width,
-                bottom: top + height,
-                index: index,
-                element: img
-            };
-            
-            areasOcupadas.push(area);
-            
-            console.log('📐 Imagen ' + index + ': pos(' + left + ',' + top + ') size(' + width + 'x' + height + ')');
-        });
-        
-        // Verificar superposiciones
-        for (let i = 0; i < areasOcupadas.length; i++) {
-            for (let j = i + 1; j < areasOcupadas.length; j++) {
-                const area1 = areasOcupadas[i];
-                const area2 = areasOcupadas[j];
-                
-                const overlap = !(area1.right <= area2.left || 
-                                area2.right <= area1.left || 
-                                area1.bottom <= area2.top || 
-                                area2.bottom <= area1.top);
-                
-                if (overlap) {
-                    superposiciones++;
-                    console.log('⚠️ SUPERPOSICIÓN detectada entre imágenes ' + area1.index + ' y ' + area2.index);
-                    console.log('   - Área 1: (' + area1.left + ',' + area1.top + ') a (' + area1.right + ',' + area1.bottom + ')');
-                    console.log('   - Área 2: (' + area2.left + ',' + area2.top + ') a (' + area2.right + ',' + area2.bottom + ')');
-                    
-                    // Marcar imagen con superposición
-                    area1.element.style.border = '3px solid red !important';
-                    area2.element.style.border = '3px solid red !important';
-                }
-            }
-        }
-        
-        if (superposiciones === 0) {
-            console.log('✅ NO HAY SUPERPOSICIONES - Distribución correcta');
-        } else {
-            console.log('❌ SE DETECTARON ' + superposiciones + ' SUPERPOSICIONES');
-        }
-    }, 500);
-}
+console.log('📄 Sistema de PDFs integrado');
+console.log('🎥 Sistema de videos integrado');
