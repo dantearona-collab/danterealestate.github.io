@@ -2036,65 +2036,6 @@ const propiedadesJSON = {
     }
 };
 
-// Inicialización cuando el DOM esté listo
-// document.addEventListener('DOMContentLoaded', function() {
-//     initPropertyInteractive();
-// });
-
-// function initPropertyInteractive() {
-//     // Verificar si existen los elementos antes de proceder
-//     const propertyCard = document.getElementById('propertyCard');
-//     const pdfModal = document.getElementById('pdfModal');
-    
-//     // Si no existen los elementos, salir silenciosamente
-//     if (!propertyCard || !pdfModal) {
-//         console.log('ℹ️ Propiedad interactiva no presente en esta página');
-//         return;
-//     }
-    
-//     // Solo ejecutar si los elementos existen
-//     console.log('✅ Inicializando propiedad interactiva...');
-//     // ... el resto del código de la función ...
-// }
-
-
-    // Función para abrir PDF
-    // En la función openPdf, cambia las rutas a minúsculas
-
-function debugPDFs() {
-    console.log('🔍 DEBUG: Verificando configuración de PDFs');
-    
-    // Verificar propiedades cargadas
-    globalData.properties.forEach(prop => {
-        if (prop.documentos && prop.documentos.length > 0) {
-            console.log(`📋 ${prop.titulo}:`, prop.documentos);
-        }
-    });
-    
-    // Verificar archivos específicos
-    // const testFiles = [
-    //     'imgs/ENTORNOS.pdf',
-    //     'imgs/ENTORNOS.PDF'
-    // ];
-    
-    // testFiles.forEach(file => {
-    //     fetch(file, { method: 'HEAD' })
-    //         .then(response => {
-    //             console.log(`📄 ${file}: ${response.ok ? '✅ EXISTE' : '❌ NO EXISTE'}`);
-    //         })
-    //         .catch(() => {
-    //             console.log(`📄 ${file}: ❌ ERROR`);
-    //         });
-    // });
-}
-
-// Ejecutar después de cargar las propiedades
-setTimeout(debugPDFs, 3000);
-// También verifica qué documentos tienes en el JSON
-console.log('📋 Documentos en propiedades.json:', globalData.properties.map(p => p.documentos));
-
-
-
 
 
     function openPdf(pdfName, title) {
