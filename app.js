@@ -166,8 +166,14 @@ function createMultimediaSection(property) {
 }
 
 // Función para visualizar PDFs
+// Función para visualizar PDFs - VERSIÓN CORREGIDA
 function viewPDF(pdfUrl, titulo) {
-    const fileName = pdfUrl.split('/').pop();
+    // CORREGIR: Cambiar extensión .PDF a .pdf
+    const pdfUrlCorregido = pdfUrl.replace(/\.PDF$/i, '.pdf');
+    const fileName = pdfUrlCorregido.split('/').pop();
+    
+    console.log('📄 URL original:', pdfUrl);
+    console.log('📄 URL corregido:', pdfUrlCorregido);
     
     // Crear o reutilizar modal de PDF
     if (multimediaModal) {
@@ -205,7 +211,7 @@ function viewPDF(pdfUrl, titulo) {
                 </button>
             </div>
             <div style="position: absolute; top: 60px; left: 0; right: 0; bottom: 0; overflow: hidden;">
-                <iframe src="${pdfUrl}" 
+                <iframe src="${pdfUrlCorregido}" 
                         style="width: 100%; height: 100%; border: none;" 
                         title="${fileName}">
                 </iframe>
@@ -216,9 +222,8 @@ function viewPDF(pdfUrl, titulo) {
     document.body.appendChild(multimediaModal);
     document.body.style.overflow = 'hidden';
     
-    console.log('📄 Abriendo PDF:', pdfUrl);
+    console.log('📄 Abriendo PDF corregido:', pdfUrlCorregido);
 }
-
 // Función para visualizar videos
 function viewVideo(videoUrl, titulo) {
     const fileName = videoUrl.split('/').pop();
@@ -2030,29 +2035,35 @@ const propiedadesJSON = {
     // Función para abrir PDF
     // En la función openPdf, cambia las rutas a minúsculas
 
-function debugPdfFiles() {
-    console.log('🔍 Verificando archivos PDF disponibles...');
+function debugPDFs() {
+    console.log('🔍 DEBUG: Verificando configuración de PDFs');
     
-    const pdfFiles = [
-        'imgs/ENTORNOS.pdf',      // ← minúsculas
-        'imgs/ENTORNOS.PDF',      // ← mayúsculas (para comparar)
-        'imgs/DATOS PARCELA.pdf',
-        'imgs/PLANO.pdf',
-        'imgs/REGLAMENTO.pdf',
-        'imgs/EXPENSAS.pdf'
+    // Verificar propiedades cargadas
+    globalData.properties.forEach(prop => {
+        if (prop.documentos && prop.documentos.length > 0) {
+            console.log(`📋 ${prop.titulo}:`, prop.documentos);
+        }
+    });
+    
+    // Verificar archivos específicos
+    const testFiles = [
+        'imgs/ENTORNOS.pdf',
+        'imgs/ENTORNOS.PDF'
     ];
     
-    pdfFiles.forEach(file => {
+    testFiles.forEach(file => {
         fetch(file, { method: 'HEAD' })
             .then(response => {
-                console.log(`📄 ${file}: ${response.ok ? '✅ Existe' : '❌ No existe'}`);
+                console.log(`📄 ${file}: ${response.ok ? '✅ EXISTE' : '❌ NO EXISTE'}`);
             })
             .catch(() => {
-                console.log(`📄 ${file}: ❌ Error al verificar`);
+                console.log(`📄 ${file}: ❌ ERROR`);
             });
     });
 }
 
+// Ejecutar después de cargar las propiedades
+setTimeout(debugPDFs, 3000);
 // También verifica qué documentos tienes en el JSON
 console.log('📋 Documentos en propiedades.json:', globalData.properties.map(p => p.documentos));
 
