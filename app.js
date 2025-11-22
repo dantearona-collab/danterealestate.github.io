@@ -7,15 +7,136 @@
 
 // Variables globales para el slider
 let currentSlides = {};
-
-// ========================================
-// SISTEMA DE MULTIMEDIA (PDFs Y VIDEOS)
-// ========================================
-
-// Variables globales para multimedia
+let planoPdf = null;
+let reglamentoPdf = null;
+let expensasPdf = null;
+let entornosPdf = null;
+let datosParcelaPdf = null;
+let photosIcon = null;
+let tourIcon = null;
+let videoIcon = null;
+let contactButton = null;
+let closeModal = null;
+let pdfViewer = null;
+let modalTitle = null;
+let pdfModal = null;
 let multimediaModal = null;
 let documentosProperty = [];
 let videosProperty = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🏠 Sistema Dante Propiedades - Sin errores + Slider cargando...');
+    console.log('🎯 Sistema de slider de múltiples fotos incluido');
+    console.log('✅ Sin dependencias de Font Awesome');
+    console.log('🎬 Sistema de multimedia activado');
+    
+    // Cargar CSS del slider
+    addSliderStyles();
+    
+    // Cargar propiedades
+    loadProperties();
+    
+    // Inicializar variables después de que el DOM esté listo
+    initializeVariables();
+    
+    console.log('✅ Sistema inicializado sin errores de consola');
+    console.log('🎠 Slider de múltiples fotos disponible');
+    console.log('📄 Soporte para PDFs activado');
+    console.log('🎥 Soporte para videos activado');
+});
+
+// Función para inicializar variables del DOM
+function initializeVariables() {
+    planoPdf = document.getElementById('planoPdf');
+    reglamentoPdf = document.getElementById('reglamentoPdf');
+    expensasPdf = document.getElementById('expensasPdf');
+    entornosPdf = document.getElementById('entornosPdf');
+    datosParcelaPdf = document.getElementById('datosParcelaPdf');
+    photosIcon = document.getElementById('photosIcon');
+    tourIcon = document.getElementById('tourIcon');
+    videoIcon = document.getElementById('videoIcon');
+    contactButton = document.getElementById('contactButton');
+    closeModal = document.getElementById('closeModal');
+    pdfViewer = document.getElementById('pdfViewer');
+    modalTitle = document.getElementById('modalTitle');
+    pdfModal = document.getElementById('pdfModal');
+    
+    // Configurar event listeners para PDFs
+    setupPdfEventListeners();
+}
+
+// Función para configurar event listeners de PDFs
+// Función para configurar event listeners de PDFs
+function setupPdfEventListeners() {
+    // ========== EVENT LISTENERS PARA PDFs ==========
+    // (aquí van los event listeners de PDFs que ya teníamos)
+    if (entornosPdf && typeof entornosPdf.addEventListener === 'function') {
+        entornosPdf.addEventListener('click', function(e) {
+            e.stopPropagation();
+            console.log('📄 Click en Entornos PDF');
+            openPdf('entornos', 'Estudio de Entornos');
+        });
+    }
+    // ... resto de PDFs ...
+
+    // ========== EVENT LISTENERS PARA MULTIMEDIA ==========
+    // Eventos para los iconos de multimedia con verificación
+    if (photosIcon && typeof photosIcon.addEventListener === 'function') {
+        photosIcon.addEventListener('click', function(e) {
+            e.stopPropagation();
+            alert('Mostrando: ' + propiedadesJSON.propiedad.archivos.fotos);
+        });
+    }
+
+    if (tourIcon && typeof tourIcon.addEventListener === 'function') {
+        tourIcon.addEventListener('click', function(e) {
+            e.stopPropagation();
+            alert('Abriendo: ' + propiedadesJSON.propiedad.archivos.tour);
+        });
+    }
+
+    if (videoIcon && typeof videoIcon.addEventListener === 'function') {
+        videoIcon.addEventListener('click', function(e) {
+            e.stopPropagation();
+            alert('Reproduciendo: ' + propiedadesJSON.propiedad.archivos.video);
+        });
+    }
+
+    // ========== EVENT LISTENERS PARA BOTONES ==========
+    // Evento para el botón de contacto con verificación
+    if (contactButton && typeof contactButton.addEventListener === 'function') {
+        contactButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            alert('Redirigiendo al formulario de contacto...');
+        });
+    }
+
+    // ========== EVENT LISTENERS PARA MODAL ==========
+    // Cerrar modal con verificación
+    if (closeModal && typeof closeModal.addEventListener === 'function') {
+        closeModal.addEventListener('click', function() {
+            if (pdfModal) {
+                pdfModal.style.display = 'none';
+            }
+            if (pdfViewer) {
+                pdfViewer.src = '';
+            }
+        });
+    }
+
+    // Cerrar modal al hacer clic fuera del contenido con verificación
+    if (pdfModal && typeof pdfModal.addEventListener === 'function') {
+        pdfModal.addEventListener('click', function(e) {
+            if (e.target === pdfModal) {
+                pdfModal.style.display = 'none';
+                if (pdfViewer) {
+                    pdfViewer.src = '';
+                }
+            }
+        });
+    }
+}
+
 
 // Función para crear la sección multimedia (PDFs y Videos)
 function createMultimediaSection(property) {
