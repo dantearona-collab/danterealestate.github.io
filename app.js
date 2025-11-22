@@ -867,48 +867,6 @@ window.addEventListener('load', function() {
         } else {
             console.log('⚠️ Errores de recursos:', errors.length);
         }
-        
-        // === AGREGAR AQUÍ LOS EVENT LISTENERS PARA PDFs ===
-        setTimeout(() => {
-            console.log('📄 Configurando event listeners para PDFs...');
-            
-            const entornosPdf = document.getElementById('entornosPdf');
-            const datosParcelaPdf = document.getElementById('datosParcelaPdf');
-            const planoPdf = document.getElementById('planoPdf');
-            
-            if (entornosPdf) {
-                entornosPdf.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    console.log('📄 Click en Entornos PDF');
-                    openPdf('entornos', 'Estudio de Entornos');
-                });
-                console.log('✅ Event listener para entornosPdf agregado');
-            } else {
-                console.log('❌ entornosPdf no encontrado');
-            }
-            
-            if (datosParcelaPdf) {
-                datosParcelaPdf.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    console.log('📄 Click en Datos Parcela PDF');
-                    openPdf('datos_parcela', 'Datos de la Parcela');
-                });
-                console.log('✅ Event listener para datosParcelaPdf agregado');
-            } else {
-                console.log('❌ datosParcelaPdf no encontrado');
-            }
-            
-            if (planoPdf) {
-                planoPdf.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    console.log('📄 Click en Plano PDF');
-                    openPdf('plano', 'Plano del Departamento');
-                });
-                console.log('✅ Event listener para planoPdf agregado');
-            }
-            
-        }, 500); // Pequeño delay para asegurar que el DOM esté listo
-        
     }, 1000);
     
     setTimeout(setupFilterEvents, 100);
