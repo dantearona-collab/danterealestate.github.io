@@ -14,7 +14,7 @@
 let currentSlides = {};
 
 // Variables globales para multimedia
-let multimediaModal = null;
+
 let documentosProperty = [];
 let videosProperty = [];
 
@@ -33,7 +33,7 @@ let pdfViewer = null;
 let modalTitle = null;
 let pdfModal = null;
 
-
+let multimediaModal = null;
 
 
 
@@ -198,68 +198,114 @@ function createMultimediaSection(property) {
     return multimediaHTML;
 }
 
-// Función para visualizar PDFs
-// Función para visualizar PDFs - VERSIÓN CORREGIDA
 
-// Función para visualizar PDFs - VERSIÓN CORREGIDA DEFINITIVA
-// Función para visualizar PDFs - VERSIÓN CORREGIDA DEFINITIVA
-function viewPDF(pdfUrl, titulo) {
-    console.log('🔧 DEBUG viewPDF - URL original:', pdfUrl);
+
+
+
+// Función para cerrar modal multimedia - DEFINIR ANTES DE viewPDF
+function closeMultimediaModal() {
+    console.log('🔧 DEBUG closeMultimediaModal - multimediaModal:', multimediaModal);
     
-    // CORRECCIÓN: Cambiar cualquier extensión .PDF a .pdf (case insensitive)
+    if (multimediaModal) {
+        // Detener videos antes de cerrar
+        const videos = multimediaModal.querySelectorAll('video');
+        videos.forEach(video => {
+            video.pause();
+            video.currentTime = 0;
+        });
+        
+        multimediaModal.remove();
+        multimediaModal = null;
+        console.log('✅ Modal multimedia cerrado');
+    }
+    document.body.style.overflow = 'auto';
+}
+
+
+// Función para visualizar PDFs
+function viewPDF(pdfUrl, titulo) {
+    // ... el código de viewPDF que ya tienes ...
+}
+
+
+
+
+
+// Función para visualizar PDFs - VERSIÓN CON MANEJO DE ERRORES
+function viewPDF(pdfUrl, titulo) {
+    console.log('🔧 DEBUG viewPDF - INICIANDO...');
+    
+    // Verificar que multimediaModal esté disponible
+    if (typeof multimediaModal === 'undefined') {
+        console.warn('⚠️ multimediaModal no definida, inicializando...');
+        window.multimediaModal = null;
+    }
+    
+    // CORRECCIÓN: Cambiar cualquier extensión .PDF a .pdf
     const pdfUrlCorregido = pdfUrl.replace(/\.PDF$/i, '.pdf');
     const fileName = pdfUrlCorregido.split('/').pop();
     
-    console.log('🔧 DEBUG viewPDF - URL corregida:', pdfUrlCorregido);
+    console.log('📄 URL original:', pdfUrl);
+    console.log('📄 URL corregida:', pdfUrlCorregido);
+    console.log('📄 multimediaModal estado:', multimediaModal);
     
     // Crear o reutilizar modal de PDF
     if (multimediaModal) {
+        console.log('🔄 Reutilizando modal existente');
         multimediaModal.remove();
     }
     
-    multimediaModal = document.createElement('div');
-    multimediaModal.id = 'pdf-modal';
-    multimediaModal.style.cssText = `
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        background: rgba(0,0,0,0.8) !important;
-        z-index: 9999 !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        padding: 20px !important;
-    `;
-    
-    multimediaModal.innerHTML = `
-        <div style="position: relative; width: 90%; max-width: 1000px; height: 90%; background: white; 
-                    border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;">
-            <div style="position: absolute; top: 0; left: 0; right: 0; background: #232deb; color: white; 
-                        padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10;">
-                <h3 style="margin: 0; font-size: 16px;">${titulo} - ${fileName}</h3>
-                <button onclick="closeMultimediaModal()" 
-                        style="background: transparent; border: none; color: white; font-size: 24px; 
-                               cursor: pointer; padding: 5px; border-radius: 4px;"
-                        onmouseover="this.style.background='rgba(255,255,255,0.1)'" 
-                        onmouseout="this.style.background='transparent'">
-                    &times;
-                </button>
+    try {
+        multimediaModal = document.createElement('div');
+        multimediaModal.id = 'pdf-modal';
+        multimediaModal.style.cssText = `
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            background: rgba(0,0,0,0.8) !important;
+            z-index: 9999 !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            padding: 20px !important;
+        `;
+        
+        multimediaModal.innerHTML = `
+            <div style="position: relative; width: 90%; max-width: 1000px; height: 90%; background: white; 
+                        border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;">
+                <div style="position: absolute; top: 0; left: 0; right: 0; background: #232deb; color: white; 
+                            padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10;">
+                    <h3 style="margin: 0; font-size: 16px;">${titulo} - ${fileName}</h3>
+                    <button onclick="closeMultimediaModal()" 
+                            style="background: transparent; border: none; color: white; font-size: 24px; 
+                                   cursor: pointer; padding: 5px; border-radius: 4px;"
+                            onmouseover="this.style.background='rgba(255,255,255,0.1)'" 
+                            onmouseout="this.style.background='transparent'">
+                        &times;
+                    </button>
+                </div>
+                <div style="position: absolute; top: 60px; left: 0; right: 0; bottom: 0; overflow: hidden;">
+                    <iframe src="${pdfUrlCorregido}" 
+                            style="width: 100%; height: 100%; border: none;" 
+                            title="${fileName}">
+                    </iframe>
+                </div>
             </div>
-            <div style="position: absolute; top: 60px; left: 0; right: 0; bottom: 0; overflow: hidden;">
-                <iframe src="${pdfUrlCorregido}" 
-                        style="width: 100%; height: 100%; border: none;" 
-                        title="${fileName}">
-                </iframe>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(multimediaModal);
-    document.body.style.overflow = 'hidden';
-    
-    console.log('📄 Abriendo PDF corregido:', pdfUrlCorregido);
+        `;
+        
+        document.body.appendChild(multimediaModal);
+        document.body.style.overflow = 'hidden';
+        
+        console.log('✅ PDF modal creado exitosamente');
+        console.log('📄 Abriendo PDF:', pdfUrlCorregido);
+        
+    } catch (error) {
+        console.error('❌ Error creando modal PDF:', error);
+        // Fallback: abrir en nueva pestaña
+        window.open(pdfUrlCorregido, '_blank');
+    }
 }
 // Función para visualizar videos
 // Función para visualizar videos - VERSIÓN CORREGIDA
