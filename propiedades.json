@@ -22,8 +22,8 @@
     "aire_acondicionado": "Si",
     "info_multimedia": "Set de 10 fotos de alta calidad, Fotos de exteriores, Recorrido visual completo",
     "documentos": [
-      "imgs/ENTORNOS.pdf",
-      "imgs/DATOS PARCELA.pdf"
+      // "imgs/ENTORNOS.pdf",
+      // "imgs/DATOS PARCELA.pdf"
     ],
     "fotos": [
       "imgs/UF000-1.jpeg",
