@@ -1992,7 +1992,7 @@ const propiedadesJSON = {
             alert('Documento no encontrado. Mostrando vista previa.\nArchivo buscado: ' + pdfName);
         }
     }
-}
+
 
     // Evento para hacer clic en cualquier parte de la tarjeta
     if (propertyCard) {
@@ -2082,32 +2082,28 @@ const propiedadesJSON = {
         });
     }
 
-
-
-
-
-// CSS FORZADO: Asegurar fondo blanco en todas las galerías
-const cssInteligenteForzado = document.createElement('style');
-cssInteligenteForzado.textContent = `
-    .image-expansion-overlay {
-        background: white !important;
-        background-color: white !important;
-    }
-    
-    [id^="galeria-inteligente-"] {
-        background: white !important;
-        background-color: white !important;
-    }
-    
-    [id^="image-expansion-"] {
-        background: white !important;
-        background-color: white !important;
-    }
-    
-    .image-expansion-overlay * {
-        background-color: inherit;
-    }
-`;
+    // CSS FORZADO: Asegurar fondo blanco en todas las galerías
+    const cssInteligenteForzado = document.createElement('style');
+    cssInteligenteForzado.textContent = `
+        .image-expansion-overlay {
+            background: white !important;
+            background-color: white !important;
+        }
+        
+        [id^="galeria-inteligente-"] {
+            background: white !important;
+            background-color: white !important;
+        }
+        
+        [id^="image-expansion-"] {
+            background: white !important;
+            background-color: white !important;
+        }
+        
+        .image-expansion-overlay * {
+            background-color: inherit;
+        }
+    `;
 document.head.appendChild(cssInteligenteForzado);
 
 console.log('🎨 CSS forzado para fondo blanco aplicado');
