@@ -175,8 +175,8 @@ function initializeFilters() {
     const barrios = [...new Set(propertiesData.map(p => p.ubicacion))].sort();
     const tipos = [...new Set(propertiesData.map(p => p.tipo))].sort();
     
-    const barrioSelect = document.getElementById('barrioFilter');
-    const tipoSelect = document.getElementById('tipoFilter');
+    const barrioSelect = document.getElementById('barrio-select-styled');
+    const tipoSelect = document.getElementById('tipo-select-styled');
     
     // Poblar dropdown de barrios
     barrioSelect.innerHTML = '<option value="">Todos los barrios</option>';
@@ -191,17 +191,17 @@ function initializeFilters() {
     });
     
     // Agregar event listeners
-    document.getElementById('operacionFilter').addEventListener('change', applyFilters);
-    document.getElementById('barrioFilter').addEventListener('change', applyFilters);
-    document.getElementById('tipoFilter').addEventListener('change', applyFilters);
+    document.getElementById('operacion-select-styled').addEventListener('change', applyFilters);
+    document.getElementById('barrio-select-styled').addEventListener('change', applyFilters);
+    document.getElementById('tipo-select-styled').addEventListener('change', applyFilters);
     
     debugLog(`🔧 Filtros inicializados - Barrios: ${barrios.length}, Tipos: ${tipos.length}`, 'info');
 }
 
 function applyFilters() {
-    const operacion = document.getElementById('operacionFilter').value;
-    const barrio = document.getElementById('barrioFilter').value;
-    const tipo = document.getElementById('tipoFilter').value;
+    const operacion = document.getElementById('operacion-select-styled').value;
+    const barrio = document.getElementById('barrio-select-styled').value;
+    const tipo = document.getElementById('tipo-select-styled').value;
     
     filteredProperties = propertiesData.filter(property => {
         return (!operacion || property.operacion === operacion) &&
@@ -215,9 +215,9 @@ function applyFilters() {
 }
 
 function clearFilters() {
-    document.getElementById('operacionFilter').value = '';
-    document.getElementById('barrioFilter').value = '';
-    document.getElementById('tipoFilter').value = '';
+    document.getElementById('operacion-select-styled').value = '';
+    document.getElementById('barrio-select-styled').value = '';
+    document.getElementById('tipo-select-styled').value = '';
     
     filteredProperties = [...propertiesData];
     renderProperties();
@@ -230,8 +230,8 @@ function clearFilters() {
 // ========================================
 
 function renderProperties() {
-    const grid = document.getElementById('propertiesGrid');
-    const resultsCount = document.getElementById('resultsCount');
+    const grid = document.getElementById('properties-container');
+    const resultsCount = document.getElementById('results-counter-styled');
     
     resultsCount.textContent = `Mostrando ${filteredProperties.length} de ${propertiesData.length} propiedades`;
     
@@ -346,23 +346,132 @@ function openGalleryModal(propertyId) {
         return;
     }
     
+    // Crear modal dinámicamente si no existe
+    let galleryModal = document.getElementById('galleryModal');
+    if (!galleryModal) {
+        galleryModal = createGalleryModal();
+        document.body.appendChild(galleryModal);
+    }
+    
     // Configurar modal global
-    currentModal = document.getElementById('galleryModal');
+    currentModal = galleryModal;
     
     // Título
-    document.getElementById('galleryTitle').textContent = `${property.titulo} - ${property.fotos.length} fotos`;
+    const galleryTitle = galleryModal.querySelector('.gallery-title');
+    if (galleryTitle) {
+        galleryTitle.textContent = `${property.titulo} - ${property.fotos.length} fotos`;
+    }
     
     // Slider
     setupSlider(property.fotos, propertyId);
     
-    // Collage
-    setupCollage(property.fotos, propertyId);
-    
     // Mostrar modal
-    currentModal.classList.add('show');
+    galleryModal.classList.add('show');
     document.body.style.overflow = 'hidden';
     
     debugLog(`✅ Galería abierta para: ${property.titulo}`, 'success');
+}
+
+function createGalleryModal() {
+    const modal = document.createElement('div');
+    modal.id = 'galleryModal';
+    modal.className = 'gallery-modal';
+    modal.innerHTML = `
+        <div class="gallery-content">
+            <div class="gallery-header">
+                <h3 class="gallery-title">Galería</h3>
+                <button class="gallery-close" onclick="closeCurrentModal()">✕</button>
+            </div>
+            <div class="gallery-body">
+                <div class="gallery-slider">
+                    <div id="sliderContainer" class="slider-container"></div>
+                    <div id="sliderDots" class="slider-dots"></div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Agregar estilos si no existen
+    if (!document.getElementById('galleryModalStyles')) {
+        const styles = document.createElement('style');
+        styles.id = 'galleryModalStyles';
+        styles.textContent = `
+            .gallery-modal {
+                display: none;
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.9);
+            }
+            .gallery-modal.show {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .gallery-content {
+                background: white;
+                border-radius: 8px;
+                max-width: 90%;
+                max-height: 90%;
+                overflow: hidden;
+            }
+            .gallery-header {
+                padding: 15px;
+                background: #232deb;
+                color: white;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .gallery-close {
+                background: none;
+                border: none;
+                color: white;
+                font-size: 24px;
+                cursor: pointer;
+            }
+            .gallery-body {
+                padding: 20px;
+                max-height: 70vh;
+                overflow-y: auto;
+            }
+            .slider-container {
+                position: relative;
+                overflow: hidden;
+            }
+            .slider-image {
+                width: 100%;
+                height: 400px;
+                object-fit: cover;
+                display: none;
+            }
+            .slider-image.active {
+                display: block;
+            }
+            .slider-dots {
+                text-align: center;
+                margin-top: 15px;
+            }
+            .slider-dot {
+                display: inline-block;
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: #ccc;
+                margin: 0 5px;
+                cursor: pointer;
+            }
+            .slider-dot.active {
+                background: #232deb;
+            }
+        `;
+        document.head.appendChild(styles);
+    }
+    
+    return modal;
 }
 
 function closeGalleryModal() {
@@ -370,8 +479,22 @@ function closeGalleryModal() {
 }
 
 function setupSlider(images, propertyId) {
-    const container = document.getElementById('sliderContainer');
-    const dotsContainer = document.getElementById('sliderDots');
+    let container = document.getElementById('sliderContainer');
+    let dotsContainer = document.getElementById('sliderDots');
+    
+    // Crear elementos si no existen
+    if (!container || !dotsContainer) {
+        const modal = document.getElementById('galleryModal');
+        if (modal) {
+            container = modal.querySelector('#sliderContainer');
+            dotsContainer = modal.querySelector('#sliderDots');
+        }
+    }
+    
+    if (!container || !dotsContainer) {
+        debugLog('❌ No se pudieron encontrar los elementos del slider', 'error');
+        return;
+    }
     
     // Limpiar
     container.innerHTML = '';
