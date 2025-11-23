@@ -308,20 +308,67 @@ function viewPDF(pdfUrl, titulo) {
     }
 }
 // Función para visualizar videos
-// Función para visualizar videos - VERSIÓN CORREGIDA
-// Función para visualizar videos - VERSIÓN CORREGIDA
+
+
+
 function viewVideo(videoUrl, titulo) {
-    console.log('🎬 DEBUG viewVideo - URL original:', videoUrl);
-    
     // CORRECCIÓN: Cambiar extensiones de video a minúsculas
     const videoUrlCorregido = videoUrl.replace(/\.(MP4|WEBM|OGG|AVI|MOV)$/i, (match) => match.toLowerCase());
     const fileName = videoUrlCorregido.split('/').pop();
     
-    console.log('🎬 DEBUG viewVideo - URL corregida:', videoUrlCorregido);
+    // Crear o reutilizar modal de video
+    if (multimediaModal) {
+        multimediaModal.remove();
+    }
     
-    // ... el resto del código de viewVideo permanece igual ...
-    // (solo cambia las referencias de videoUrl a videoUrlCorregido)
+    multimediaModal = document.createElement('div');
+    multimediaModal.id = 'video-modal';
+    multimediaModal.style.cssText = `
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: rgba(0,0,0,0.8) !important;
+        z-index: 9999 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 20px !important;
+    `;
+    
+    multimediaModal.innerHTML = `
+        <div style="position: relative; width: 90%; max-width: 1000px; height: 70%; background: white; 
+                    border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;">
+            <div style="position: absolute; top: 0; left: 0; right: 0; background: #232deb; color: white; 
+                        padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10;">
+                <h3 style="margin: 0; font-size: 16px;">${titulo} - ${fileName}</h3>
+                <button onclick="closeMultimediaModal()" 
+                        style="background: transparent; border: none; color: white; font-size: 24px; 
+                               cursor: pointer; padding: 5px; border-radius: 4px;"
+                        onmouseover="this.style.background='rgba(255,255,255,0.1)'" 
+                        onmouseout="this.style.background='transparent'">
+                    &times;
+                </button>
+            </div>
+            <div style="position: absolute; top: 60px; left: 0; right: 0; bottom: 0; overflow: hidden; background: black;">
+                <video controls autoplay style="width: 100%; height: 100%; object-fit: contain;">
+                    <source src="${videoUrlCorregido}" type="video/mp4">
+                    <source src="${videoUrlCorregido}" type="video/webm">
+                    <source src="${videoUrlCorregido}" type="video/ogg">
+                    Tu navegador no soporta el elemento de video.
+                </video>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(multimediaModal);
+    document.body.style.overflow = 'hidden';
+    
+    console.log('🎥 Abriendo video:', videoUrlCorregido);
 }
+
+
 // Cerrar modal con tecla Escape
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
