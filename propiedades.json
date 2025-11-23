@@ -23,6 +23,8 @@
     "info_multimedia": "Set de 10 fotos de alta calidad, Fotos de exteriores, Recorrido visual completo",
     "documentos": [
     ],
+     "videos": [
+    ],
     "fotos": [
       "imgs/UF000-1.jpeg",
       "imgs/UF000-2.jpeg",
@@ -78,6 +80,8 @@
       "imgs/MANZANA.pdf",
       "imgs/DATOS PARCELA.pdf"
     ],
+     "videos": [
+    ],
     "fotos": [
       "imgs/UF001-1.jpg",
       "imgs/UF001-2.jpg",
@@ -118,6 +122,8 @@
     "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
     "documentos": [
     ],
+     "videos": [
+    ],
     "fotos": [
       "imgs/UF023-1.jpg",
       "imgs/UF023-2.jpg",
@@ -155,6 +161,8 @@
     "aire_acondicionado": "Sí",
     "info_multimedia": "Fotos panorámicas disponibles, Video recorrido",
     "documentos": [
+    ],
+     "videos": [
     ],
     "fotos": [
       "imgs/OFI-1.jpg",
@@ -200,6 +208,11 @@
     "aire_acondicionado": "Si",
     "info_multimedia": "Fotos de la propiedad y terraza",
     "documentos": [
+    ],
+
+    "videos": [
+      "imgs/UF003-VIDEO.mp4",
+      "imgs/UF003-VIDEO1.mp4"  
     ],
 
     "fotos": [
