@@ -22,18 +22,18 @@
             line-height: 1.6;
         }
         
-        /* HEADER */
+        /* HEADER REDUCIDO 35% */
         .header {
             background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
             color: white;
-            padding: 40px 20px;
+            padding: 26px 20px; /* Reducido de 40px a 26px (35% menos) */
             text-align: center;
             box-shadow: 0 4px 20px rgba(35, 45, 235, 0.3);
         }
         
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: 2.2em; /* Reducido ligeramente para mantener proporción */
+            margin-bottom: 8px; /* Reducido de 10px */
             font-weight: 700;
             display: flex;
             align-items: center;
@@ -51,14 +51,14 @@
         .header .phone {
             font-size: 0.4em;
             background: rgba(255, 255, 255, 0.2);
-            padding: 8px 16px;
+            padding: 6px 12px; /* Reducido ligeramente */
             border-radius: 20px;
             font-weight: 500;
         }
         
         .header .logo-key {
-            width: 50px;
-            height: 50px;
+            width: 45px; /* Reducido de 50px */
+            height: 45px; /* Reducido de 50px */
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.2);
             display: flex;
@@ -74,13 +74,17 @@
         }
         
         @media (max-width: 768px) {
+            .header {
+                padding: 20px 15px; /* Reducido también en móvil */
+            }
+            
             .header h1 {
-                font-size: 1.8em;
+                font-size: 1.6em; /* Ajustado para móvil */
             }
             
             .header .phone {
                 font-size: 0.35em;
-                padding: 6px 12px;
+                padding: 5px 10px;
             }
             
             .whatsapp-float {
@@ -96,10 +100,7 @@
             }
         }
         
-        .header p {
-            font-size: 1.2em;
-            opacity: 0.9;
-        }
+        /* ELIMINADO: Estilos para .header p (texto removido) */
         
         /* BOTONES DE ACCIÓN */
         .btn-search, .btn-reset {
@@ -1277,7 +1278,7 @@
                 <span class="phone">📞 +54 11 2536-8595</span>
             </div>
         </h1>
-        <p>Sistema sin errores de consola + Slider de múltiples fotos</p>
+        <!-- ELIMINADO: Texto "Sistema sin errores de consola + Slider de múltiples fotos" -->
     </div>
     
 
