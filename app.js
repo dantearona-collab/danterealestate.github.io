@@ -885,6 +885,10 @@ function loadGoogleMap(placeholder, direccionCompleta, titulo, propertyId) {
 // ========================================
 
 // Función para mostrar el mapa en pantalla completa con botón Volver
+
+
+
+// Función para mostrar el mapa en pantalla completa con botón Volver
 function showPropertyMap(propertyId, address, title) {
     console.log('🗺️ Mostrando mapa para propiedad:', propertyId, address, title);
     
@@ -901,7 +905,7 @@ function showPropertyMap(propertyId, address, title) {
         // 2. Mostrar el botón Volver
         showBackButton(title || 'Propiedad');
         
-        // 3. Integrar el mapa
+        // 3. Integrar el mapa (sin API key problemática)
         showActualMap(propertyId, address, title);
         
         // 4. Añadir clase al body para modo mapa
@@ -975,7 +979,7 @@ function backToProperties() {
     }
 }
 
-// Función para mostrar el mapa
+// Función para mostrar el mapa (SIN API KEY problemática)
 function showActualMap(propertyId, address, title) {
     try {
         // Remover mapa anterior si existe
@@ -997,13 +1001,16 @@ function showActualMap(propertyId, address, title) {
             z-index: 9998 !important;
         `;
         
-        // Codificar la dirección para Google Maps
+        // Codificar la dirección para Google Maps (sin API key)
         const encodedAddress = encodeURIComponent(address);
+        
+        // Usar Google Maps Embed sin API key (modo place)
+        const mapUrl = `https://www.google.com/maps/embed/v1/place?q=${encodedAddress}&zoom=15&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`;
         
         // Crear iframe de Google Maps
         mapContainer.innerHTML = `
             <iframe 
-                src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodedAddress}"
+                src="${mapUrl}"
                 width="100%" 
                 height="100%" 
                 style="border:0;" 
@@ -1013,8 +1020,8 @@ function showActualMap(propertyId, address, title) {
                 title="Mapa de ${title}">
             </iframe>
             
-            <div style="position: absolute; top: 20px; right: 20px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); z-index: 9999; max-width: 300px;">
-                <h4 style="margin: 0 0 8px 0; color: #232deb; font-size: 16px;">${title}</h4>
+            <div style="position: absolute; top: 80px; right: 20px; background: rgba(255,255,255,0.95); padding: 15px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); z-index: 9999; max-width: 300px; border-left: 4px solid #232deb;">
+                <h4 style="margin: 0 0 8px 0; color: #232deb; font-size: 16px; font-weight: 600;">${title}</h4>
                 <p style="margin: 0; color: #666; font-size: 14px; line-height: 1.4;">${address}</p>
             </div>
         `;
@@ -1023,6 +1030,10 @@ function showActualMap(propertyId, address, title) {
         console.log('✅ Mapa creado correctamente');
     } catch (error) {
         console.error('❌ Error al crear mapa:', error);
+        // Fallback: abrir Google Maps en nueva pestaña
+        const encodedAddress = encodeURIComponent(address);
+        window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+        backToProperties(); // Volver ya que el mapa falló
     }
 }
 
@@ -1038,7 +1049,6 @@ function closeMap() {
         console.error('❌ Error al cerrar mapa:', error);
     }
 }
-
 // Cerrar con tecla Escape
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape' && document.body.classList.contains('map-view-active')) {
@@ -2656,6 +2666,17 @@ const propiedadesJSON = {
             background-color: inherit;
         }
     `;
+
+
+    // Cerrar con tecla Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && document.body.classList.contains('map-view-active')) {
+            console.log('⎋ Tecla Escape presionada - Volviendo a propiedades');
+            backToProperties();
+        }
+    });
+
+console.log('✅ Sistema de botón Volver para mapas cargado');
 document.head.appendChild(cssInteligenteForzado);
 
 console.log('🎨 CSS forzado para fondo blanco aplicado');
