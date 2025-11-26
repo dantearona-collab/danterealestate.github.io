@@ -823,37 +823,97 @@ function toggleMap(button, direccionCompleta, titulo) {
         button.style.borderColor = '#232deb';
         button.style.color = 'white';
         
-        // Cargar mapa si no está cargado
+        // Cargar mapa si no está cargado (PASANDO EL propertyId)
         if (!mapPlaceholder.classList.contains('loaded')) {
-            loadGoogleMap(mapPlaceholder, direccionCompleta, titulo);
+            loadGoogleMap(mapPlaceholder, direccionCompleta, titulo, propertyId);
         }
     }
 }
 
-function loadGoogleMap(placeholder, direccionCompleta, titulo) {
+
+
+function loadGoogleMap(placeholder, direccionCompleta, titulo, propertyId) {
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccionCompleta)}`;
     
     placeholder.innerHTML = `
-        <div style="text-align: center; padding: 20px; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8f9fa;">
+        <div style="text-align: center; padding: 15px; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8f9fa; border-radius: 8px;">
             <div style="margin-bottom: 15px;">
-                <p style="margin: 0 0 8px 0; color: #495057; font-weight: 600; font-size: 14px;">📍 Ubicación</p>
-                <p style="margin: 0; color: #6c757d; font-size: 13px; line-height: 1.4;">${direccionCompleta}</p>
+                <p style="margin: 0 0 8px 0; color: #495057; font-weight: 600; font-size: 14px;">📍 Ubicación Exacta</p>
+                <p style="margin: 0; color: #6c757d; font-size: 13px; line-height: 1.4; padding: 0 10px;">${direccionCompleta}</p>
             </div>
-            <a href="${mapsUrl}" target="_blank" 
-               style="background: #232deb; color: white; padding: 10px 20px; border-radius: 6px; 
-                      text-decoration: none; display: inline-block; font-weight: 600;
-                      transition: all 0.3s ease; border: none; cursor: pointer; font-size: 14px;"
-               onmouseover="this.style.background='#1a1db4'; this.style.transform='translateY(-1px)'" 
-               onmouseout="this.style.background='#232deb'; this.style.transform='translateY(0)'">
-                🗺️ Abrir en Google Maps
-            </a>
-            <p style="margin: 10px 0 0 0; color: #6c757d; font-size: 12px;">
-                Se abrirá en una nueva pestaña
+            
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                <a href="${mapsUrl}" target="_blank" 
+                   style="background: #232deb; color: white; padding: 10px 16px; border-radius: 6px; 
+                          text-decoration: none; display: inline-block; font-weight: 600;
+                          transition: all 0.3s ease; border: none; cursor: pointer; font-size: 13px;"
+                   onmouseover="this.style.background='#1a1db4'; this.style.transform='translateY(-1px)'" 
+                   onmouseout="this.style.background='#232deb'; this.style.transform='translateY(0)'">
+                    🗺️ Abrir en Google Maps
+                </a>
+                
+                <button onclick="scrollToProperty('${propertyId}')"
+                        style="background: #28a745; color: white; padding: 10px 16px; border-radius: 6px; 
+                               text-decoration: none; display: inline-block; font-weight: 600;
+                               transition: all 0.3s ease; border: none; cursor: pointer; font-size: 13px;"
+                        onmouseover="this.style.background='#218838'; this.style.transform='translateY(-1px)'" 
+                        onmouseout="this.style.background='#28a745'; this.style.transform='translateY(0)'">
+                    🏠 Volver a la Propiedad
+                </button>
+            </div>
+            
+            <p style="margin: 15px 0 0 0; color: #6c757d; font-size: 11px; line-height: 1.3;">
+                💡 <strong>Consejo:</strong> Abre el mapa y luego usa "Volver a la Propiedad" para regresar fácilmente
             </p>
         </div>
     `;
     placeholder.classList.add('loaded');
 }
+
+// NUEVA FUNCIÓN: Scroll a la propiedad
+function scrollToProperty(propertyId) {
+    const propertyCard = document.querySelector(`[data-property-card="${propertyId}"]`);
+    if (propertyCard) {
+        // Cerrar el mapa primero
+        const mapContainer = document.getElementById(`map-container-${propertyId}`);
+        const mapButton = propertyCard.querySelector('button[onclick*="toggleMap"]');
+        
+        if (mapContainer && mapButton) {
+            mapContainer.style.height = '0';
+            mapContainer.style.opacity = '0';
+            mapContainer.style.marginTop = '0';
+            mapButton.innerHTML = '🗺️ Ver en el Mapa';
+            mapButton.style.background = '#f8f9fa';
+            mapButton.style.borderColor = '#dee2e6';
+            mapButton.style.color = '#495057';
+        }
+        
+        // Scroll suave a la propiedad
+        propertyCard.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center'
+        });
+        
+        // Efecto visual de highlight
+        propertyCard.style.boxShadow = '0 0 0 3px rgba(35, 45, 235, 0.3)';
+        propertyCard.style.transition = 'box-shadow 0.5s ease';
+        
+        setTimeout(() => {
+            propertyCard.style.boxShadow = '0 4px 16px rgba(0,0,0,0.1)';
+        }, 2000);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
 // Función para manejar estilos del mapa container
 function initializeMapStyles() {
     const style = document.createElement('style');
