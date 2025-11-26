@@ -761,21 +761,21 @@ function createPropertyCard(property) {
                 ${createMultimediaSection(property)}
             </div>
 
-            <!-- NUEVA SECCIÓN: MAPA DE UBICACIÓN -->
-            <div class="property-map-section">
-                <div class="property-address">
+            <!-- NUEVA SECCIÓN: MAPA DE UBICACIÓN - CON ESTILOS INLINE -->
+            <div style="border-top: 1px solid #e1e5e9 !important; margin-top: 15px !important; padding-top: 15px !important;">
+                <div style="font-size: 14px !important; color: #6c757d !important; margin-bottom: 10px !important; text-align: center !important;">
                     📍 ${property.direccion_completa || `${property.direccion}, ${property.barrio}, Argentina`}
                 </div>
-                <div class="map-toggle">
-                    <button class="btn-map-toggle" 
-                            onclick="toggleMap(this, '${property.direccion_completa ? property.direccion_completa.replace(/'/g, "\\'") : `${property.direccion}, ${property.barrio}, Argentina`.replace(/'/g, "\\'")}', '${property.titulo.replace(/'/g, "\\'")}')">
+                <div style="text-align: center !important; margin-bottom: 10px !important;">
+                    <button onclick="toggleMap(this, '${property.direccion_completa ? property.direccion_completa.replace(/'/g, "\\'") : `${property.direccion}, ${property.barrio}, Argentina`.replace(/'/g, "\\'")}', '${property.titulo.replace(/'/g, "\\'")}')"
+                            style="background: #f8f9fa !important; border: 1px solid #dee2e6 !important; padding: 8px 16px !important; border-radius: 6px !important; cursor: pointer !important; font-size: 14px !important; transition: all 0.3s ease !important; color: #495057 !important; font-weight: 500 !important;">
                         🗺️ Ver en el Mapa
                     </button>
                 </div>
-                <div class="map-container" id="map-${property.id_temporal}">
-                    <div class="map-placeholder">
-                        <div class="loading-with-logo">
-                            <img src="llave.png" alt="Cargando" style="width: 20px; height: 20px; margin-right: 8px;">
+                <div id="map-container-${property.id_temporal}" style="height: 0 !important; border-radius: 8px !important; overflow: hidden !important; box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important; transition: all 0.3s ease !important; opacity: 0 !important;">
+                    <div id="map-placeholder-${property.id_temporal}" style="height: 100% !important; display: flex !important; align-items: center !important; justify-content: center !important; background: #f8f9fa !important; color: #6c757d !important; font-size: 14px !important;">
+                        <div style="display: flex !important; align-items: center !important; justify-content: center !important;">
+                            <img src="llave.png" alt="Cargando" style="width: 20px !important; height: 20px !important; margin-right: 8px !important;">
                             <span>Cargando mapa...</span>
                         </div>
                     </div>
@@ -797,32 +797,31 @@ function createPropertyCard(property) {
     return card;
 }
 
-// ========================================
-// FUNCIONES PARA MAPAS - AGREGAR AL JAVASCRIPT
-// ========================================
-
-// Función para alternar mapa
+// FUNCIONES PARA MAPAS - VERSIÓN CON IDS
 function toggleMap(button, direccionCompleta, titulo) {
     const propertyCard = button.closest('.property-card');
-    const mapContainer = propertyCard.querySelector('.map-container');
-    const mapPlaceholder = mapContainer.querySelector('.map-placeholder');
+    const propertyId = propertyCard.getAttribute('data-property-card');
+    const mapContainer = document.getElementById(`map-container-${propertyId}`);
+    const mapPlaceholder = document.getElementById(`map-placeholder-${propertyId}`);
     
-    if (mapContainer.classList.contains('active')) {
+    if (mapContainer.style.height === '200px') {
         // Ocultar mapa
-        mapContainer.classList.remove('active');
-        button.classList.remove('active');
+        mapContainer.style.height = '0';
+        mapContainer.style.opacity = '0';
+        mapContainer.style.marginTop = '0';
         button.innerHTML = '🗺️ Ver en el Mapa';
-        button.style.background = '#f8f9fa !important';
-        button.style.borderColor = '#dee2e6 !important';
-        button.style.color = '#495057 !important';
+        button.style.background = '#f8f9fa';
+        button.style.borderColor = '#dee2e6';
+        button.style.color = '#495057';
     } else {
         // Mostrar mapa
-        mapContainer.classList.add('active');
-        button.classList.add('active');
+        mapContainer.style.height = '200px';
+        mapContainer.style.opacity = '1';
+        mapContainer.style.marginTop = '10px';
         button.innerHTML = '🗺️ Ocultar Mapa';
-        button.style.background = '#232deb !important';
-        button.style.borderColor = '#232deb !important';
-        button.style.color = 'white !important';
+        button.style.background = '#232deb';
+        button.style.borderColor = '#232deb';
+        button.style.color = 'white';
         
         // Cargar mapa si no está cargado
         if (!mapPlaceholder.classList.contains('loaded')) {
@@ -831,7 +830,6 @@ function toggleMap(button, direccionCompleta, titulo) {
     }
 }
 
-// Cargar mapa de Google (versión SIN API Key)
 function loadGoogleMap(placeholder, direccionCompleta, titulo) {
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccionCompleta)}`;
     
@@ -856,7 +854,6 @@ function loadGoogleMap(placeholder, direccionCompleta, titulo) {
     `;
     placeholder.classList.add('loaded');
 }
-
 // Función para manejar estilos del mapa container
 function initializeMapStyles() {
     const style = document.createElement('style');
