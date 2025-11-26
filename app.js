@@ -699,7 +699,6 @@ function populateFilters(properties) {
     console.log('🔧 Filtros poblados - Barrios:', barrios.length, 'Tipos:', tipos.length);
 }
 
-// Crear tarjeta de propiedad con slider
 function createPropertyCard(property) {
     const card = document.createElement('div');
     card.className = 'property-card';
@@ -713,7 +712,7 @@ function createPropertyCard(property) {
         border: 1px solid #e1e5e9 !important;
     `;
     
-    // Crear galería de imágenes inicial (una sola imagen expandible)
+    // Crear galería de imágenes inicial
     const imageSection = createExpandableGallery(property);
     
     card.innerHTML = `
@@ -761,14 +760,35 @@ function createPropertyCard(property) {
             <div id="multimedia-section-${property.id_temporal}">
                 ${createMultimediaSection(property)}
             </div>
+
+            <!-- NUEVA SECCIÓN: MAPA DE UBICACIÓN -->
+            <div class="property-map-section">
+                <div class="property-address">
+                    📍 ${property.direccion_completa || `${property.direccion}, ${property.barrio}, Argentina`}
+                </div>
+                <div class="map-toggle">
+                    <button class="btn-map-toggle" 
+                            onclick="toggleMap(this, '${property.direccion_completa ? property.direccion_completa.replace(/'/g, "\\'") : `${property.direccion}, ${property.barrio}, Argentina`.replace(/'/g, "\\'")}', '${property.titulo.replace(/'/g, "\\'")}')">
+                        🗺️ Ver en el Mapa
+                    </button>
+                </div>
+                <div class="map-container" id="map-${property.id_temporal}">
+                    <div class="map-placeholder">
+                        <div class="loading-with-logo">
+                            <img src="llave.png" alt="Cargando" style="width: 20px; height: 20px; margin-right: 8px;">
+                            <span>Cargando mapa...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
             <button onclick="showPropertyDetails('${property.id_temporal}')" 
                     style="width: 100% !important; background: #232deb !important; color: white !important; 
                            border: none !important; padding: 12px !important; border-radius: 6px !important; 
                            font-size: 14px !important; font-weight: 600 !important; cursor: pointer !important; 
-                           transition: all 0.3s ease !important;"
-                    onmouseover="this.style.background='#1a1db4'" 
-                    onmouseout="this.style.background='#232deb'">
+                           transition: all 0.3s ease !important; margin-top: 15px !important;"
+                    onmouseover="this.style.background='#1a1db4' !important" 
+                    onmouseout="this.style.background='#232deb' !important">
                 Ver Detalles
             </button>
         </div>
@@ -776,6 +796,96 @@ function createPropertyCard(property) {
     
     return card;
 }
+
+// ========================================
+// FUNCIONES PARA MAPAS - AGREGAR AL JAVASCRIPT
+// ========================================
+
+// Función para alternar mapa
+function toggleMap(button, direccionCompleta, titulo) {
+    const propertyCard = button.closest('.property-card');
+    const mapContainer = propertyCard.querySelector('.map-container');
+    const mapPlaceholder = mapContainer.querySelector('.map-placeholder');
+    
+    if (mapContainer.classList.contains('active')) {
+        // Ocultar mapa
+        mapContainer.classList.remove('active');
+        button.classList.remove('active');
+        button.innerHTML = '🗺️ Ver en el Mapa';
+        button.style.background = '#f8f9fa !important';
+        button.style.borderColor = '#dee2e6 !important';
+        button.style.color = '#495057 !important';
+    } else {
+        // Mostrar mapa
+        mapContainer.classList.add('active');
+        button.classList.add('active');
+        button.innerHTML = '🗺️ Ocultar Mapa';
+        button.style.background = '#232deb !important';
+        button.style.borderColor = '#232deb !important';
+        button.style.color = 'white !important';
+        
+        // Cargar mapa si no está cargado
+        if (!mapPlaceholder.classList.contains('loaded')) {
+            loadGoogleMap(mapPlaceholder, direccionCompleta, titulo);
+        }
+    }
+}
+
+// Cargar mapa de Google (versión SIN API Key)
+function loadGoogleMap(placeholder, direccionCompleta, titulo) {
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccionCompleta)}`;
+    
+    placeholder.innerHTML = `
+        <div style="text-align: center; padding: 20px; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8f9fa;">
+            <div style="margin-bottom: 15px;">
+                <p style="margin: 0 0 8px 0; color: #495057; font-weight: 600; font-size: 14px;">📍 Ubicación</p>
+                <p style="margin: 0; color: #6c757d; font-size: 13px; line-height: 1.4;">${direccionCompleta}</p>
+            </div>
+            <a href="${mapsUrl}" target="_blank" 
+               style="background: #232deb; color: white; padding: 10px 20px; border-radius: 6px; 
+                      text-decoration: none; display: inline-block; font-weight: 600;
+                      transition: all 0.3s ease; border: none; cursor: pointer; font-size: 14px;"
+               onmouseover="this.style.background='#1a1db4'; this.style.transform='translateY(-1px)'" 
+               onmouseout="this.style.background='#232deb'; this.style.transform='translateY(0)'">
+                🗺️ Abrir en Google Maps
+            </a>
+            <p style="margin: 10px 0 0 0; color: #6c757d; font-size: 12px;">
+                Se abrirá en una nueva pestaña
+            </p>
+        </div>
+    `;
+    placeholder.classList.add('loaded');
+}
+
+// Función para manejar estilos del mapa container
+function initializeMapStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+        .map-container.active {
+            height: 200px !important;
+            opacity: 1 !important;
+            margin-top: 10px !important;
+        }
+        
+        .btn-map-toggle.active {
+            background: #232deb !important;
+            border-color: #232deb !important;
+            color: white !important;
+        }
+        
+        .map-placeholder.loaded {
+            background: white !important;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Inicializar estilos cuando se cargue la página
+document.addEventListener('DOMContentLoaded', initializeMapStyles);
+
+
+
+
 
 function displayProperties(properties) {
     const container = document.getElementById('properties-container');

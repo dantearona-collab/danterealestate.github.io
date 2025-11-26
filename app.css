@@ -3400,3 +3400,97 @@ button {
         padding: 10px 15px;
     }
 }
+/* ========================================
+   ESTILOS PARA MAPAS DE PROPIEDADES
+   ======================================== */
+.property-map-section {
+    border-top: 1px solid #e1e5e9;
+    margin-top: 15px;
+    padding-top: 15px;
+}
+
+.map-toggle {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.btn-map-toggle {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    color: #495057;
+    font-weight: 500;
+}
+
+.btn-map-toggle:hover {
+    background: #e9ecef;
+    border-color: #232deb;
+    color: #232deb;
+    transform: translateY(-1px);
+}
+
+.btn-map-toggle.active {
+    background: #232deb;
+    border-color: #232deb;
+    color: white;
+}
+
+.map-container {
+    height: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    opacity: 0;
+}
+
+.map-container.active {
+    height: 200px;
+    opacity: 1;
+    margin-top: 10px;
+}
+
+.map-placeholder {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.property-address {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.property-address i {
+    margin-right: 5px;
+}
+
+/* Efectos para el enlace del mapa */
+.btn-map-link {
+    background: #232deb;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-map-link:hover {
+    background: #1a1db4;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(35, 45, 235, 0.3);
+}
