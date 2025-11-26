@@ -880,215 +880,268 @@ function loadGoogleMap(placeholder, direccionCompleta, titulo, propertyId) {
 
 
 
+// ========================================
+// SISTEMA DE BOTÓN VOLVER PARA MAPAS
+// ========================================
+
+// Función para mostrar el mapa en pantalla completa con botón Volver
 function showPropertyMap(propertyId, address, title) {
-    console.log('🗺️ Mostrando mapa para propiedad:', propertyId);
+    console.log('🗺️ Mostrando mapa para propiedad:', propertyId, address, title);
     
-    // 1. Ocultar el contenedor de propiedades
-    const propertiesContainer = document.getElementById('properties-container');
-    const filters = document.querySelector('.filters');
-    const resultsCounter = document.getElementById('results-counter-styled');
-    
-    if (propertiesContainer) propertiesContainer.style.display = 'none';
-    if (filters) filters.style.display = 'none';
-    if (resultsCounter) resultsCounter.style.display = 'none';
-    
-    // 2. Mostrar el botón Volver
-    showBackButton(title || 'Propiedad');
-    
-    // 3. Integrar el mapa
-    showActualMap(propertyId, address, title);
-    
-    // 4. Añadir clase al body para modo mapa
-    document.body.classList.add('map-view-active');
+    try {
+        // 1. Ocultar el contenedor de propiedades
+        const propertiesContainer = document.getElementById('properties-container');
+        const filters = document.querySelector('.filters');
+        const resultsCounter = document.getElementById('results-counter-styled');
+        
+        if (propertiesContainer) propertiesContainer.style.display = 'none';
+        if (filters) filters.style.display = 'none';
+        if (resultsCounter) resultsCounter.style.display = 'none';
+        
+        // 2. Mostrar el botón Volver
+        showBackButton(title || 'Propiedad');
+        
+        // 3. Integrar el mapa
+        showActualMap(propertyId, address, title);
+        
+        // 4. Añadir clase al body para modo mapa
+        document.body.classList.add('map-view-active');
+        
+        console.log('✅ Mapa mostrado correctamente');
+    } catch (error) {
+        console.error('❌ Error al mostrar mapa:', error);
+    }
 }
 
 // Función para mostrar el botón Volver
 function showBackButton(title) {
-    let backButton = document.getElementById('mapBackButton');
-    
-    if (!backButton) {
-        // Crear el botón si no existe
-        backButton = document.createElement('div');
-        backButton.id = 'mapBackButton';
-        backButton.className = 'map-back-button';
-        backButton.innerHTML = `
-            <button class="back-to-properties-btn" onclick="backToProperties()">
-                <span>←</span> Volver a Propiedades
-            </button>
-        `;
-        document.body.appendChild(backButton);
+    try {
+        let backButton = document.getElementById('mapBackButton');
         
-        // Agregar estilos si no existen
-        if (!document.querySelector('#map-back-button-styles')) {
-            const styles = document.createElement('style');
-            styles.id = 'map-back-button-styles';
-            styles.textContent = `
-                .map-back-button {
-                    position: fixed;
-                    top: 20px;
-                    left: 20px;
-                    z-index: 10000;
-                    animation: slideInFromLeft 0.3s ease;
-                    display: none;
-                }
-                
-                @keyframes slideInFromLeft {
-                    from {
-                        opacity: 0;
-                        transform: translateX(-20px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateX(0);
-                    }
-                }
-                
-                .back-to-properties-btn {
-                    background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
-                    color: white;
-                    border: none;
-                    padding: 12px 20px;
-                    border-radius: 25px;
-                    font-size: 14px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    box-shadow: 0 4px 20px rgba(35, 45, 235, 0.4);
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    transition: all 0.3s ease;
-                    backdrop-filter: blur(10px);
-                    border: 2px solid rgba(255, 255, 255, 0.2);
-                }
-                
-                .back-to-properties-btn:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 6px 25px rgba(35, 45, 235, 0.6);
-                    background: linear-gradient(135deg, #1a1db4 0%, #232deb 100%);
-                }
-                
-                .back-to-properties-btn:active {
-                    transform: translateY(0);
-                }
-                
-                .back-to-properties-btn span {
-                    font-size: 18px;
-                    font-weight: bold;
-                }
-                
-                /* Responsive para móviles */
-                @media (max-width: 768px) {
-                    .map-back-button {
-                        top: 15px;
-                        left: 15px;
-                    }
-                    
-                    .back-to-properties-btn {
-                        padding: 10px 16px;
-                        font-size: 13px;
-                        border-radius: 20px;
-                    }
-                    
-                    .back-to-properties-btn span {
-                        font-size: 16px;
-                    }
-                }
-                
-                .map-view-active {
-                    overflow: hidden;
-                }
+        if (!backButton) {
+            // Crear el botón si no existe
+            backButton = document.createElement('div');
+            backButton.id = 'mapBackButton';
+            backButton.className = 'map-back-button';
+            backButton.innerHTML = `
+                <button class="back-to-properties-btn" onclick="backToProperties()">
+                    <span>←</span> Volver a Propiedades
+                </button>
             `;
-            document.head.appendChild(styles);
+            document.body.appendChild(backButton);
+            
+            console.log('✅ Botón Volver creado');
         }
+        
+        backButton.style.display = 'block';
+        console.log('✅ Botón Volver mostrado');
+    } catch (error) {
+        console.error('❌ Error al mostrar botón volver:', error);
     }
-    
-    backButton.style.display = 'block';
 }
 
-// Función para volver a las propiedades (debes agregarla)
+// Función para volver a las propiedades
 function backToProperties() {
     console.log('🏠 Volviendo a propiedades');
     
-    // 1. Mostrar el contenedor de propiedades
-    const propertiesContainer = document.getElementById('properties-container');
-    const filters = document.querySelector('.filters');
-    const resultsCounter = document.getElementById('results-counter-styled');
-    
-    if (propertiesContainer) propertiesContainer.style.display = 'grid';
-    if (filters) filters.style.display = 'block';
-    if (resultsCounter) resultsCounter.style.display = 'block';
-    
-    // 2. Ocultar el botón Volver
-    const backButton = document.getElementById('mapBackButton');
-    if (backButton) {
-        backButton.style.display = 'none';
-    }
-    
-    // 3. Cerrar/limpiar el mapa (llamar a tu función existente)
-    if (typeof closeMap === 'function') {
+    try {
+        // 1. Mostrar el contenedor de propiedades
+        const propertiesContainer = document.getElementById('properties-container');
+        const filters = document.querySelector('.filters');
+        const resultsCounter = document.getElementById('results-counter-styled');
+        
+        if (propertiesContainer) propertiesContainer.style.display = 'grid';
+        if (filters) filters.style.display = 'block';
+        if (resultsCounter) resultsCounter.style.display = 'block';
+        
+        // 2. Ocultar el botón Volver
+        const backButton = document.getElementById('mapBackButton');
+        if (backButton) {
+            backButton.style.display = 'none';
+        }
+        
+        // 3. Cerrar/limpiar el mapa
         closeMap();
+        
+        // 4. Remover clase del body
+        document.body.classList.remove('map-view-active');
+        
+        // 5. Scroll al inicio suavemente
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        console.log('✅ Vuelta a propiedades exitosa');
+    } catch (error) {
+        console.error('❌ Error al volver a propiedades:', error);
     }
-    
-    // 4. Remover clase del body
-    document.body.classList.remove('map-view-active');
-    
-    // 5. Scroll al inicio suavemente
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Función para mostrar el mapa
+function showActualMap(propertyId, address, title) {
+    try {
+        // Remover mapa anterior si existe
+        const existingMap = document.getElementById('fullscreen-map-container');
+        if (existingMap) {
+            existingMap.remove();
+        }
+        
+        // Crear contenedor del mapa
+        const mapContainer = document.createElement('div');
+        mapContainer.id = 'fullscreen-map-container';
+        mapContainer.style.cssText = `
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: white !important;
+            z-index: 9998 !important;
+        `;
+        
+        // Codificar la dirección para Google Maps
+        const encodedAddress = encodeURIComponent(address);
+        
+        // Crear iframe de Google Maps
+        mapContainer.innerHTML = `
+            <iframe 
+                src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodedAddress}"
+                width="100%" 
+                height="100%" 
+                style="border:0;" 
+                allowfullscreen 
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                title="Mapa de ${title}">
+            </iframe>
+            
+            <div style="position: absolute; top: 20px; right: 20px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); z-index: 9999; max-width: 300px;">
+                <h4 style="margin: 0 0 8px 0; color: #232deb; font-size: 16px;">${title}</h4>
+                <p style="margin: 0; color: #666; font-size: 14px; line-height: 1.4;">${address}</p>
+            </div>
+        `;
+        
+        document.body.appendChild(mapContainer);
+        console.log('✅ Mapa creado correctamente');
+    } catch (error) {
+        console.error('❌ Error al crear mapa:', error);
+    }
+}
+
+// Función para cerrar el mapa
+function closeMap() {
+    try {
+        const mapContainer = document.getElementById('fullscreen-map-container');
+        if (mapContainer) {
+            mapContainer.remove();
+        }
+        console.log('🗺️ Mapa cerrado');
+    } catch (error) {
+        console.error('❌ Error al cerrar mapa:', error);
+    }
 }
 
 // Cerrar con tecla Escape
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape' && document.body.classList.contains('map-view-active')) {
+        console.log('⎋ Tecla Escape presionada - Volviendo a propiedades');
         backToProperties();
     }
 });
 
-
-
-// Función para integrar con tu sistema de mapas existente
-function showActualMap(propertyId, address) {
-    // Aquí va tu implementación específica del mapa
-    // Por ejemplo:
-    
-    // Opción 1: Mostrar iframe de Google Maps
-    const mapContainer = document.createElement('div');
-    mapContainer.id = 'property-map-container';
-    mapContainer.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: white;
-        z-index: 9999;
-    `;
-    
-    // Codificar la dirección para Google Maps
-    const encodedAddress = encodeURIComponent(address);
-    const iframeSrc = `https://www.google.com/maps/embed/v1/place?key=TU_API_KEY&q=${encodedAddress}`;
-    
-    mapContainer.innerHTML = `
-        <iframe 
-            src="${iframeSrc}"
-            width="100%" 
-            height="100%" 
-            style="border:0;" 
-            allowfullscreen 
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade">
-        </iframe>
-    `;
-    
-    document.body.appendChild(mapContainer);
-}
-
-function closeMap() {
-    // Limpiar el mapa
-    const mapContainer = document.getElementById('property-map-container');
-    if (mapContainer) {
-        mapContainer.remove();
+// Inicializar estilos cuando se carga la página
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar que los estilos estén presentes
+    if (!document.querySelector('#map-back-styles')) {
+        const styles = document.createElement('style');
+        styles.id = 'map-back-styles';
+        styles.textContent = `
+            /* ========================================
+               BOTÓN VOLVER DESDE MAPA
+               ======================================== */
+            
+            .map-back-button {
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                z-index: 10000;
+                animation: slideInFromLeft 0.3s ease;
+                display: none;
+            }
+            
+            @keyframes slideInFromLeft {
+                from {
+                    opacity: 0;
+                    transform: translateX(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+            
+            .back-to-properties-btn {
+                background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
+                color: white;
+                border: none;
+                padding: 12px 20px;
+                border-radius: 25px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                box-shadow: 0 4px 20px rgba(35, 45, 235, 0.4);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+                border: 2px solid rgba(255, 255, 255, 0.2);
+            }
+            
+            .back-to-properties-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 25px rgba(35, 45, 235, 0.6);
+                background: linear-gradient(135deg, #1a1db4 0%, #232deb 100%);
+            }
+            
+            .back-to-properties-btn:active {
+                transform: translateY(0);
+            }
+            
+            .back-to-properties-btn span {
+                font-size: 18px;
+                font-weight: bold;
+            }
+            
+            /* Responsive para móviles */
+            @media (max-width: 768px) {
+                .map-back-button {
+                    top: 15px;
+                    left: 15px;
+                }
+                
+                .back-to-properties-btn {
+                    padding: 10px 16px;
+                    font-size: 13px;
+                    border-radius: 20px;
+                }
+                
+                .back-to-properties-btn span {
+                    font-size: 16px;
+                }
+            }
+            
+            .map-view-active {
+                overflow: hidden;
+            }
+        `;
+        document.head.appendChild(styles);
+        console.log('✅ Estilos del botón Volver cargados');
     }
-}
+});
+
+console.log('✅ Sistema de botón Volver para mapas cargado');
+
+
+
 
 // También puedes integrarlo con tu botón existente "Cómo llegar"
 function openDirectionsFromCard(propertyId, address) {
