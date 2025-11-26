@@ -119,7 +119,7 @@
     "pileta": "No",
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
-    "info_multimedia": "Fotos profesionales disponibles, Tour virtual 360°",
+    "info_multimedia": "Fotos profesionales disponibles",
     "documentos": [
     ],
      "videos": [
@@ -130,7 +130,8 @@
       "imgs/UF023-3.jpg",
       "imgs/UF023-4.jpg",
       "imgs/UF023-5.jpg",
-      "imgs/UF023-6.jpg"
+      "imgs/UF023-6.jpg",
+      "imgs/UF023-7.jpg"
     ],
     "moneda_precio": "ARS",
     "moneda_expensas": "ARS",
