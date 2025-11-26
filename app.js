@@ -699,6 +699,9 @@ function populateFilters(properties) {
     console.log('🔧 Filtros poblados - Barrios:', barrios.length, 'Tipos:', tipos.length);
 }
 
+
+
+
 function createPropertyCard(property) {
     const card = document.createElement('div');
     card.className = 'property-card';
@@ -767,8 +770,10 @@ function createPropertyCard(property) {
                     📍 ${property.direccion_completa || `${property.direccion}, ${property.barrio}, Argentina`}
                 </div>
                 <div style="text-align: center !important; margin-bottom: 10px !important;">
-                    <button onclick="toggleMap(this, '${property.direccion_completa ? property.direccion_completa.replace(/'/g, "\\'") : `${property.direccion}, ${property.barrio}, Argentina`.replace(/'/g, "\\'")}', '${property.titulo.replace(/'/g, "\\'")}')"
-                            style="background: #f8f9fa !important; border: 1px solid #dee2e6 !important; padding: 8px 16px !important; border-radius: 6px !important; cursor: pointer !important; font-size: 14px !important; transition: all 0.3s ease !important; color: #495057 !important; font-weight: 500 !important;">
+                    <button onclick="showPropertyMap('${property.id_temporal}', '${property.direccion_completa ? property.direccion_completa.replace(/'/g, "\\'") : `${property.direccion}, ${property.barrio}, Argentina`.replace(/'/g, "\\'")}', '${property.titulo.replace(/'/g, "\\'")}')"
+                            style="background: #232deb !important; color: white !important; border: none !important; padding: 10px 20px !important; border-radius: 6px !important; cursor: pointer !important; font-size: 14px !important; font-weight: 600 !important; transition: all 0.3s ease !important; display: inline-flex !important; align-items: center !important; gap: 8px !important;"
+                            onmouseover="this.style.background='#1a1db4' !important; transform: 'translateY(-2px)' !important" 
+                            onmouseout="this.style.background='#232deb' !important; transform: 'translateY(0)' !important">
                         🗺️ Ver en el Mapa
                     </button>
                 </div>
@@ -796,6 +801,8 @@ function createPropertyCard(property) {
     
     return card;
 }
+
+
 
 // FUNCIONES PARA MAPAS - VERSIÓN CON IDS
 function toggleMap(button, direccionCompleta, titulo) {
@@ -869,6 +876,242 @@ function loadGoogleMap(placeholder, direccionCompleta, titulo, propertyId) {
     `;
     placeholder.classList.add('loaded');
 }
+// Función para mostrar el mapa y ocultar propiedades
+
+
+
+function showPropertyMap(propertyId, address, title) {
+    console.log('🗺️ Mostrando mapa para propiedad:', propertyId);
+    
+    // 1. Ocultar el contenedor de propiedades
+    const propertiesContainer = document.getElementById('properties-container');
+    const filters = document.querySelector('.filters');
+    const resultsCounter = document.getElementById('results-counter-styled');
+    
+    if (propertiesContainer) propertiesContainer.style.display = 'none';
+    if (filters) filters.style.display = 'none';
+    if (resultsCounter) resultsCounter.style.display = 'none';
+    
+    // 2. Mostrar el botón Volver
+    showBackButton(title || 'Propiedad');
+    
+    // 3. Integrar el mapa
+    showActualMap(propertyId, address, title);
+    
+    // 4. Añadir clase al body para modo mapa
+    document.body.classList.add('map-view-active');
+}
+
+// Función para mostrar el botón Volver
+function showBackButton(title) {
+    let backButton = document.getElementById('mapBackButton');
+    
+    if (!backButton) {
+        // Crear el botón si no existe
+        backButton = document.createElement('div');
+        backButton.id = 'mapBackButton';
+        backButton.className = 'map-back-button';
+        backButton.innerHTML = `
+            <button class="back-to-properties-btn" onclick="backToProperties()">
+                <span>←</span> Volver a Propiedades
+            </button>
+        `;
+        document.body.appendChild(backButton);
+        
+        // Agregar estilos si no existen
+        if (!document.querySelector('#map-back-button-styles')) {
+            const styles = document.createElement('style');
+            styles.id = 'map-back-button-styles';
+            styles.textContent = `
+                .map-back-button {
+                    position: fixed;
+                    top: 20px;
+                    left: 20px;
+                    z-index: 10000;
+                    animation: slideInFromLeft 0.3s ease;
+                    display: none;
+                }
+                
+                @keyframes slideInFromLeft {
+                    from {
+                        opacity: 0;
+                        transform: translateX(-20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                }
+                
+                .back-to-properties-btn {
+                    background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
+                    color: white;
+                    border: none;
+                    padding: 12px 20px;
+                    border-radius: 25px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    box-shadow: 0 4px 20px rgba(35, 45, 235, 0.4);
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    transition: all 0.3s ease;
+                    backdrop-filter: blur(10px);
+                    border: 2px solid rgba(255, 255, 255, 0.2);
+                }
+                
+                .back-to-properties-btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 25px rgba(35, 45, 235, 0.6);
+                    background: linear-gradient(135deg, #1a1db4 0%, #232deb 100%);
+                }
+                
+                .back-to-properties-btn:active {
+                    transform: translateY(0);
+                }
+                
+                .back-to-properties-btn span {
+                    font-size: 18px;
+                    font-weight: bold;
+                }
+                
+                /* Responsive para móviles */
+                @media (max-width: 768px) {
+                    .map-back-button {
+                        top: 15px;
+                        left: 15px;
+                    }
+                    
+                    .back-to-properties-btn {
+                        padding: 10px 16px;
+                        font-size: 13px;
+                        border-radius: 20px;
+                    }
+                    
+                    .back-to-properties-btn span {
+                        font-size: 16px;
+                    }
+                }
+                
+                .map-view-active {
+                    overflow: hidden;
+                }
+            `;
+            document.head.appendChild(styles);
+        }
+    }
+    
+    backButton.style.display = 'block';
+}
+
+// Función para volver a las propiedades (debes agregarla)
+function backToProperties() {
+    console.log('🏠 Volviendo a propiedades');
+    
+    // 1. Mostrar el contenedor de propiedades
+    const propertiesContainer = document.getElementById('properties-container');
+    const filters = document.querySelector('.filters');
+    const resultsCounter = document.getElementById('results-counter-styled');
+    
+    if (propertiesContainer) propertiesContainer.style.display = 'grid';
+    if (filters) filters.style.display = 'block';
+    if (resultsCounter) resultsCounter.style.display = 'block';
+    
+    // 2. Ocultar el botón Volver
+    const backButton = document.getElementById('mapBackButton');
+    if (backButton) {
+        backButton.style.display = 'none';
+    }
+    
+    // 3. Cerrar/limpiar el mapa (llamar a tu función existente)
+    if (typeof closeMap === 'function') {
+        closeMap();
+    }
+    
+    // 4. Remover clase del body
+    document.body.classList.remove('map-view-active');
+    
+    // 5. Scroll al inicio suavemente
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Cerrar con tecla Escape
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape' && document.body.classList.contains('map-view-active')) {
+        backToProperties();
+    }
+});
+
+
+
+// Función para integrar con tu sistema de mapas existente
+function showActualMap(propertyId, address) {
+    // Aquí va tu implementación específica del mapa
+    // Por ejemplo:
+    
+    // Opción 1: Mostrar iframe de Google Maps
+    const mapContainer = document.createElement('div');
+    mapContainer.id = 'property-map-container';
+    mapContainer.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: white;
+        z-index: 9999;
+    `;
+    
+    // Codificar la dirección para Google Maps
+    const encodedAddress = encodeURIComponent(address);
+    const iframeSrc = `https://www.google.com/maps/embed/v1/place?key=TU_API_KEY&q=${encodedAddress}`;
+    
+    mapContainer.innerHTML = `
+        <iframe 
+            src="${iframeSrc}"
+            width="100%" 
+            height="100%" 
+            style="border:0;" 
+            allowfullscreen 
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+    `;
+    
+    document.body.appendChild(mapContainer);
+}
+
+function closeMap() {
+    // Limpiar el mapa
+    const mapContainer = document.getElementById('property-map-container');
+    if (mapContainer) {
+        mapContainer.remove();
+    }
+}
+
+// También puedes integrarlo con tu botón existente "Cómo llegar"
+function openDirectionsFromCard(propertyId, address) {
+    // Esta función se llamaría cuando hagan clic en "Cómo llegar" en una tarjeta
+    showPropertyMap(propertyId, address);
+}
+
+// Cerrar con tecla Escape
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape' && document.body.classList.contains('map-view-active')) {
+        backToProperties();
+    }
+});
+
+
+
+
+
+
+
+
+
+
 
 // NUEVA FUNCIÓN: Scroll a la propiedad
 function scrollToProperty(propertyId) {

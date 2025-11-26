@@ -3494,3 +3494,88 @@ button {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(35, 45, 235, 0.3);
 }
+/* ========================================
+   BOTÓN VOLVER DESDE MAPA
+   ======================================== */
+
+.map-back-button {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 10000;
+    animation: slideInFromLeft 0.3s ease;
+}
+
+@keyframes slideInFromLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.back-to-properties-btn {
+    background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(35, 45, 235, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.back-to-properties-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(35, 45, 235, 0.6);
+    background: linear-gradient(135deg, #1a1db4 0%, #232deb 100%);
+}
+
+.back-to-properties-btn:active {
+    transform: translateY(0);
+}
+
+.back-to-properties-btn span {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    .map-back-button {
+        top: 15px;
+        left: 15px;
+    }
+    
+    .back-to-properties-btn {
+        padding: 10px 16px;
+        font-size: 13px;
+        border-radius: 20px;
+    }
+    
+    .back-to-properties-btn span {
+        font-size: 16px;
+    }
+}
+
+/* Cuando el mapa está en pantalla completa */
+.map-fullscreen-mode .map-back-button {
+    top: 25px;
+    left: 25px;
+}
+
+.map-fullscreen-mode .back-to-properties-btn {
+    padding: 14px 24px;
+    font-size: 15px;
+    border-radius: 30px;
+}
