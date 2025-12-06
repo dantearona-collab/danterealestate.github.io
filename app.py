@@ -280,6 +280,29 @@ class ExcelStorageManager:
 app = Flask(__name__)
 CORS(app)  # Permitir solicitudes desde cualquier origen
 
+# ✅ AGREGAR ESTAS LÍNEAS INMEDIATAMENTE DESPUÉS:
+@app.route('/debug', methods=['GET'])
+@app.route('/api/status', methods=['GET'])
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Endpoint para verificar que el servidor está funcionando"""
+    return jsonify({
+        'status': 'online',
+        'service': 'Dante Propiedades Backend',
+        'timestamp': datetime.now().isoformat(),
+        'version': '1.0',
+        'endpoints': {
+            'guardar_contacto': '/api/guardar-contacto (POST)',
+            'health': '/debug, /api/status, /health (GET)'
+        }
+    }), 200
+
+
+
+
+
+
+
 # Inicializar gestor de almacenamiento
 storage_manager = ExcelStorageManager()
 
