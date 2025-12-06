@@ -489,6 +489,137 @@ function createImageSlider(property) {
     `;
 }
 
+// ========================================
+// FUNCIÓN PRINCIPAL PARA MOSTRAR PROPIEDADES
+// ========================================
+
+function mostrarPropiedades(propiedades) {
+    console.log(`🎨 Mostrando ${propiedades.length} propiedades en la página`);
+    
+    // 1. Obtener contenedor donde mostrar propiedades
+    const contenedor = document.getElementById('properties-container') || 
+                       document.getElementById('propiedades-container') ||
+                       document.querySelector('.properties-grid') ||
+                       document.querySelector('.grid-container') ||
+                       document.querySelector('main') ||  // Fallback
+                       document.body; // Último recurso
+    
+    if (!contenedor) {
+        console.error('❌ No se encontró contenedor para propiedades');
+        return;
+    }
+    
+    // 2. Limpiar contenedor (opcional)
+    contenedor.innerHTML = '';
+    
+    // 3. Si no hay propiedades, mostrar mensaje
+    if (!propiedades || propiedades.length === 0) {
+        contenedor.innerHTML = `
+            <div class="no-propiedades" style="text-align: center; padding: 40px;">
+                <h3>🚫 No hay propiedades disponibles</h3>
+                <p>Intenta recargar la página o contactar al administrador.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // 4. Actualizar datos globales
+    window.propiedadesData = propiedades;
+    globalData.properties = propiedades;
+    globalData.filteredProperties = propiedades;
+    
+    // 5. Crear HTML para cada propiedad usando createPropertyCard (que ya tienes)
+    propiedades.forEach(propiedad => {
+        const card = createPropertyCard(propiedad);
+        contenedor.appendChild(card);
+    });
+    
+    // 6. Actualizar contador de resultados
+    updateResultsCount(propiedades.length);
+    
+    // 7. Poblar filtros con datos únicos
+    populateFilters(propiedades);
+    
+    // 8. Configurar eventos de filtros
+    setupFilterEvents();
+    
+    console.log(`✅ ${propiedades.length} propiedades mostradas`);
+}
+
+
+
+// Función para llenar los filtros con datos únicos
+function populateFilters(properties) {
+    console.log('🔧 Poblando filtros con datos...');
+    
+    const barrios = [...new Set(properties.map(p => p.barrio).filter(Boolean))].sort();
+    const tipos = [...new Set(properties.map(p => p.tipo).filter(Boolean))].sort();
+    const operaciones = [...new Set(properties.map(p => p.operacion).filter(Boolean))].sort();
+    
+    console.log('📊 Datos disponibles:', { barrios, tipos, operaciones });
+    
+    // Actualizar select de barrios
+    const barrioSelect = document.getElementById('barrio-select-styled') || 
+                         document.getElementById('barrio-select') ||
+                         document.querySelector('select[name="barrio"]');
+    
+    if (barrioSelect) {
+        barrioSelect.innerHTML = '<option value="">Todos los barrios</option>' + 
+            barrios.map(barrio => `<option value="${barrio}">${barrio}</option>`).join('');
+    }
+    
+    // Actualizar select de tipos
+    const tipoSelect = document.getElementById('tipo-select-styled') || 
+                       document.getElementById('tipo-select') ||
+                       document.querySelector('select[name="tipo"]');
+    
+    if (tipoSelect) {
+        tipoSelect.innerHTML = '<option value="">Todos los tipos</option>' + 
+            tipos.map(tipo => `<option value="${tipo}">${tipo}</option>`).join('');
+    }
+    
+    // Actualizar select de operaciones
+    const operacionSelect = document.getElementById('operacion-select-styled') || 
+                            document.getElementById('operacion-select') ||
+                            document.querySelector('select[name="operacion"]');
+    
+    if (operacionSelect) {
+        operacionSelect.innerHTML = '<option value="">Todas las operaciones</option>' + 
+            operaciones.map(operacion => `<option value="${operacion}">${operacion}</option>`).join('');
+    }
+    
+    console.log('✅ Filtros poblados:', { 
+        barrios: barrios.length, 
+        tipos: tipos.length, 
+        operaciones: operaciones.length 
+    });
+}
+
+
+// Actualizar contador de resultados
+function updateResultsCount(count) {
+    const counter = document.getElementById('results-counter-styled') || 
+                    document.getElementById('results-counter') ||
+                    document.querySelector('.results-count');
+    
+    if (!counter) {
+        console.log('⚠️ No se encontró contador de resultados');
+        return;
+    }
+    
+    if (count === 0) {
+        counter.innerHTML = '<div>No se encontraron propiedades</div>';
+    } else {
+        counter.innerHTML = `<div><strong>${count}</strong> propiedades encontradas</div>`;
+    }
+    
+    console.log(`📊 Contador actualizado: ${count} propiedades`);
+}
+
+
+
+
+
 // Función para mostrar slide específico
 function showSlide(propertyId, slideIndex) {
     const slider = document.querySelector(`[data-property="${propertyId}"]`);
