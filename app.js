@@ -556,10 +556,8 @@ let globalData = {
     }
 };
 
-// Configuración de API - Detectar entorno
-const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://127.0.0.1:5000'
-    : 'https://danterealestate-github-io.onrender.com';
+// Configuración de API - Usar paths relativos para compatibilidad
+const API_BASE_URL = '';
 
 // Cargar propiedades - Solo desde archivo externo propiedades.json
 async function loadProperties() {
