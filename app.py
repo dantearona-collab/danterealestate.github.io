@@ -298,11 +298,6 @@ def health_check():
     }), 200
 
 
-
-
-
-
-
 # Inicializar gestor de almacenamiento
 storage_manager = ExcelStorageManager()
 
@@ -318,19 +313,6 @@ def home():
             '/api/obtener-consultas': 'GET - Obtener últimas consultas',
             '/api/resumen': 'GET - Obtener resumen estadístico',
             '/health': 'GET - Estado del sistema'
-        }
-    })
-
-@app.route('/health')
-def health_check():
-    """🏥 Verificar estado del sistema"""
-    return jsonify({
-        'status': 'healthy',
-        'timestamp': datetime.now().isoformat(),
-        'storage_path': str(storage_manager.excel_path),
-        'files_exist': {
-            'excel': storage_manager.excel_path.exists(),
-            'csv': storage_manager.csv_path.exists()
         }
     })
 
@@ -452,4 +434,6 @@ if __name__ == '__main__':
     print("🌐 Servidor disponible en: http://localhost:5000")
     print("=" * 60)
     
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # ⚠️ CAMBIAR ESTO: Render usa puerto 10000, no 5000
+    port = int(os.environ.get('PORT', 10000))
+    app.run(debug=True, host='0.0.0.0', port=port)
