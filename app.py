@@ -276,12 +276,13 @@ class ExcelStorageManager:
             
             return resumen
             
+
         except Exception as e:
             return f"Error generando resumen: {str(e)}"
 
 # Crear aplicación Flask
-app = Flask(__name__)
-CORS(app)  # Permitir solicitudes desde cualquier origen
+app = Flask(__name__, static_folder='.', static_url_path='')
+CORS(app)
 
 # Inicializar gestor de almacenamiento
 storage_manager = ExcelStorageManager()
@@ -309,6 +310,11 @@ load_properties()
 @app.route('/')
 def home():
     """🏠 Página principal del sistema"""
+    return app.send_static_file('index.html')
+
+@app.route('/api/status')
+def status():
+    """📊 Estado del sistema (API)"""
     return jsonify({
         'message': '🚀 Sistema de Formularios con Almacenamiento Excel + API Propiedades',
         'version': '1.1.0',

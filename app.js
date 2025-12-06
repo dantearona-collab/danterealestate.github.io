@@ -556,14 +556,19 @@ let globalData = {
     }
 };
 
+// Configuración de API - Detectar entorno
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://127.0.0.1:5000'
+    : 'https://danterealestate-github-io.onrender.com';
+
 // Cargar propiedades - Solo desde archivo externo propiedades.json
 async function loadProperties() {
-    console.log('🔄 Iniciando carga de propiedades desde API...');
+    console.log(`🔄 Iniciando carga de propiedades desde API (${API_BASE_URL})...`);
 
     try {
-        console.log('📂 Cargando propiedades desde /api/propiedades...');
+        console.log('📂 Cargando propiedades...');
 
-        const response = await fetch('/api/propiedades');
+        const response = await fetch(`${API_BASE_URL}/api/propiedades`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
