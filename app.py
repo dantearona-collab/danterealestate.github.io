@@ -317,7 +317,7 @@ def status():
     """📊 Estado del sistema (API)"""
     return jsonify({
         'message': '🚀 Sistema de Formularios con Almacenamiento Excel + API Propiedades',
-        'version': '1.1.0',
+        'version': '1.2.0',
         'status': 'active',
         'endpoints': {
             '/api/guardar-contacto': 'POST - Guardar consulta de contacto',

@@ -568,7 +568,15 @@ async function loadProperties() {
     try {
         console.log('📂 Cargando propiedades...');
 
-        const response = await fetch(`${API_BASE_URL}/api/propiedades`);
+        // Intentar cargar desde /api/propiedades
+        let response = await fetch(`${API_BASE_URL}/api/propiedades`);
+
+        // Si falla (404), intentar con /api/properties (fallback)
+        if (response.status === 404) {
+            console.warn('⚠️ /api/propiedades no encontrado, intentando /api/properties...');
+            response = await fetch(`${API_BASE_URL}/api/properties`);
+        }
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
