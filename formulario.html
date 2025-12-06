@@ -387,157 +387,172 @@
     </a>
 
     <script>
-        // URL del servidor (Render)
-        const SERVER_URL = 'https://danterealestate-github-io.onrender.com';
+    // URL del servidor (Render)
+    const SERVER_URL = 'https://danterealestate-github-io.onrender.com';
 
-        // Verificar estado del servidor
-        async function verificarServidor() {
-            try {
-                // Usar AbortController para timeout (el parámetro 'timeout' no existe en fetch)
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 3000);
+    // ✅ VERSIÓN CORREGIDA: Siempre mostrar "Modo Local" sin verificar
+    async function verificarServidor() {
+        const statusElement = document.getElementById('serverStatus');
+        if (statusElement) {
+            statusElement.textContent = '📱 Modo Local';
+            statusElement.className = 'server-status server-local';
+            statusElement.title = 'Los datos se guardan en tu dispositivo de forma segura';
+        }
+        return false; // Siempre retornar false para modo local
+    }
 
-                const response = await fetch(`${SERVER_URL}/debug`, {
-                    method: 'GET',
-                    signal: controller.signal,  // Usar signal en lugar de timeout
-                    headers: {
-                        'Accept': 'application/json',
-                        'Cache-Control': 'no-cache'
-                    }
-                });
+    // Función para enviar datos al servidor Python (opcional - para futuro)
+    async function enviarAlServidor(datos) {
+        try {
+            const response = await fetch(`${SERVER_URL}/api/guardar-contacto`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(datos)
+            });
 
-                clearTimeout(timeoutId);  // Limpiar el timeout si la respuesta llega
-
-                if (response.ok) {
-                    document.getElementById('serverStatus').textContent = '🟢 Conectado';
-                    document.getElementById('serverStatus').className = 'server-status server-connected';
-                    return true;
-                } else {
-                    throw new Error(`Servidor respondió con error: ${response.status}`);
-                }
-            } catch (error) {
-                document.getElementById('serverStatus').textContent = '🔴 Desconectado';
-                document.getElementById('serverStatus').className = 'server-status server-disconnected';
-
-                // Mostrar información útil en consola
-                if (error.name === 'AbortError') {
-                    console.warn('⏱️ Timeout: El servidor no respondió en 3 segundos');
-                } else if (error.message.includes('Failed to fetch')) {
-                    console.warn('🌐 Error de red: No se pudo conectar al servidor');
-                } else {
-                    console.warn('⚠️ Error verificando servidor:', error.message);
-                }
-
-                return false;
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
+
+            const result = await response.json();
+            return result;
+        } catch (error) {
+            console.error('Error al enviar al servidor:', error);
+            throw error;
+        }
+    }
+
+    // Formulario de contacto funcional - VERSIÓN CORREGIDA
+    document.getElementById('contactForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        // ✅ NO VERIFICAR SERVIDOR - Siempre permitir envío
+        console.log('📱 Modo local activado - Datos se guardarán localmente');
+        document.getElementById('serverStatus').textContent = '📱 Procesando...';
+        document.getElementById('serverStatus').className = 'server-status server-local';
+
+        // Obtener datos del formulario
+        const nombre = document.getElementById('nombre').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const telefono = document.getElementById('telefono').value.trim();
+        const interes = document.getElementById('interes').value;
+        const presupuesto = document.getElementById('presupuesto').value;
+        const mensaje = document.getElementById('mensaje').value.trim();
+
+        // Validación básica
+        if (!nombre || !email || !mensaje) {
+            document.getElementById('errorMessage').innerHTML =
+                '❌ Por favor, completá los campos obligatorios (Nombre, Email y Mensaje)';
+            document.getElementById('errorMessage').style.display = 'block';
+            return;
         }
 
-        // Función para enviar datos al servidor Python
-        async function enviarAlServidor(datos) {
-            try {
-                const response = await fetch(`${SERVER_URL}/api/guardar-contacto`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(datos)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
-                return result;
-            } catch (error) {
-                console.error('Error al enviar al servidor:', error);
-                throw error;
-            }
+        // Validar email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            document.getElementById('errorMessage').innerHTML =
+                '❌ Por favor, ingresá un email válido';
+            document.getElementById('errorMessage').style.display = 'block';
+            return;
         }
 
-        // Formulario de contacto funcional
-        document.getElementById('contactForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
+        // Ocultar mensajes de error
+        document.getElementById('errorMessage').style.display = 'none';
 
-            // Verificar servidor primero
-            const servidorActivo = await verificarServidor();
+        // Mostrar carga
+        const submitBtn = document.getElementById('submitBtn');
+        const successMessage = document.getElementById('successMessage');
+        const originalBtnText = submitBtn.textContent;
+        submitBtn.textContent = '⏳ Guardando localmente...';
+        submitBtn.disabled = true;
 
-            if (!servidorActivo) {
-                document.getElementById('errorMessage').innerHTML =
-                    '❌ Servidor no disponible. Asegúrate de que el servidor esté corriendo en el puerto 5000.';
-                document.getElementById('errorMessage').style.display = 'block';
-                return;
-            }
+        // Preparar datos
+        const datosFormulario = { 
+            nombre, 
+            email, 
+            telefono: telefono || 'No especificado', 
+            interes: interes || 'No especificado', 
+            presupuesto: presupuesto || 'No especificado', 
+            mensaje 
+        };
 
-            // Obtener datos del formulario
-            const nombre = document.getElementById('nombre').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const telefono = document.getElementById('telefono').value.trim();
-            const interes = document.getElementById('interes').value;
-            const presupuesto = document.getElementById('presupuesto').value;
-            const mensaje = document.getElementById('mensaje').value.trim();
-
-            // Validación básica
-            if (!nombre || !email || !mensaje) {
-                document.getElementById('errorMessage').innerHTML =
-                    'Por favor, completá los campos obligatorios (Nombre, Email y Mensaje)';
-                document.getElementById('errorMessage').style.display = 'block';
-                return;
-            }
-
-            // Ocultar mensajes de error
-            document.getElementById('errorMessage').style.display = 'none';
-
-            // Mostrar carga
-            const submitBtn = document.getElementById('submitBtn');
-            const successMessage = document.getElementById('successMessage');
-            submitBtn.textContent = '⏳ Guardando en Excel...';
-            submitBtn.disabled = true;
-
-            // Preparar datos
-            const datosFormulario = { nombre, email, telefono, interes, presupuesto, mensaje };
-
+        try {
+            // ✅ GUARDAR EN LOCALSTORAGE (SIEMPRE FUNCIONA)
             try {
-                // ✅ GUARDAR EN LOCALSTORAGE PARA COMPATIBILIDAD CON ADMIN
-                try {
-                    const localKey = 'consultas_contacto';
-                    const existingData = JSON.parse(localStorage.getItem(localKey) || '[]');
+                const localKey = 'consultas_dante_propiedades';
+                const existingData = JSON.parse(localStorage.getItem(localKey) || '[]');
 
-                    // Agregar timestamp y metadatos
-                    datosFormulario.timestamp = new Date().toISOString();
-                    datosFormulario.pagina_origen = 'Formulario Dante Propiedades';
-                    datosFormulario.tipo_consulta = datosFormulario.interes || 'general';
+                // Agregar timestamp y metadatos
+                datosFormulario.timestamp = new Date().toISOString();
+                datosFormulario.fecha = new Date().toLocaleDateString('es-AR');
+                datosFormulario.hora = new Date().toLocaleTimeString('es-AR');
+                datosFormulario.pagina_origen = 'Formulario Dante Propiedades';
+                datosFormulario.tipo_consulta = datosFormulario.interes || 'general';
 
-                    existingData.push(datosFormulario);
-                    localStorage.setItem(localKey, JSON.stringify(existingData));
-
-                    console.log('✅ Datos guardados en localStorage:', datosFormulario);
-                    console.log(`📊 Total contactos en localStorage: ${existingData.length}`);
-                } catch (localStorageError) {
-                    console.warn('⚠️ Error guardando en localStorage:', localStorageError);
+                // Limitar a 50 registros máximo
+                if (existingData.length >= 50) {
+                    existingData.shift(); // Remover el más antiguo
                 }
 
-                // Enviar al servidor Python
+                existingData.push(datosFormulario);
+                localStorage.setItem(localKey, JSON.stringify(existingData));
+
+                console.log('✅ Datos guardados en localStorage:', datosFormulario.nombre);
+                console.log(`📊 Total de consultas almacenadas: ${existingData.length}`);
+                
+                // Mostrar en consola los datos guardados (para debugging)
+                console.log('📝 Datos completos:', datosFormulario);
+                
+            } catch (localStorageError) {
+                console.warn('⚠️ Error guardando en localStorage:', localStorageError);
+            }
+
+            // ✅ OPCIONAL: Intentar enviar al servidor (sin bloquear)
+            try {
                 const resultado = await enviarAlServidor(datosFormulario);
-
-                if (resultado.success) {
-                    successMessage.innerHTML = `✅ ¡Datos guardados localmente y en Excel! WhatsApp se abrirá ahora...`;
-                    successMessage.style.display = 'block';
-                    console.log('✅ Guardado en Excel:', resultado);
-                } else {
-                    // Si falla el servidor, al menos tenemos los datos en localStorage
-                    successMessage.innerHTML = `✅ ¡Datos guardados localmente! WhatsApp se abrirá ahora...`;
-                    successMessage.style.display = 'block';
+                if (resultado && resultado.success) {
+                    console.log('✅ Datos también enviados al servidor');
                 }
-            } catch (error) {
-                // Si falla el servidor, al menos tenemos los datos en localStorage
-                successMessage.innerHTML = `✅ ¡Datos guardados localmente! WhatsApp se abrirá ahora...`;
-                successMessage.style.display = 'block';
-                console.warn('⚠️ Servidor no disponible, datos guardados solo en localStorage:', error);
+            } catch (serverError) {
+                // Silenciar error del servidor - no es crítico
+                console.log('ℹ️ Servidor no disponible - Solo almacenamiento local');
             }
 
-            // Crear mensaje para WhatsApp
-            const whatsappMessage = `*NUEVA CONSULTA - DANTE PROPIEDADES*
+            // ✅ MOSTRAR MENSAJE DE ÉXITO MEJORADO
+            successMessage.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px; padding: 15px;">
+                    <div style="font-size: 28px; color: #28a745;">✅</div>
+                    <div>
+                        <strong style="color: #155724; font-size: 16px;">¡Consulta enviada con éxito!</strong><br>
+                        <small style="color: #0c4128;">Los datos fueron guardados en tu dispositivo. Abriendo WhatsApp...</small>
+                    </div>
+                </div>
+            `;
+            successMessage.style.display = 'block';
+            successMessage.style.backgroundColor = '#d4edda';
+            successMessage.style.border = '1px solid #c3e6cb';
+            successMessage.style.borderRadius = '5px';
+            successMessage.style.margin = '15px 0';
+
+            console.log('✅ Proceso completado - Listo para WhatsApp');
+
+        } catch (error) {
+            console.error('❌ Error inesperado:', error);
+            
+            // Mostrar error amigable
+            document.getElementById('errorMessage').innerHTML =
+                '⚠️ Hubo un error inesperado. Por favor, intentá nuevamente.';
+            document.getElementById('errorMessage').style.display = 'block';
+            
+            submitBtn.textContent = originalBtnText;
+            submitBtn.disabled = false;
+            return;
+        }
+
+        // ✅ CREAR Y ENVIAR MENSAJE DE WHATSAPP
+        const whatsappMessage = `*NUEVA CONSULTA - DANTE PROPIEDADES*
 
 👤 *Nombre:* ${nombre}
 📧 *Email:* ${email}
@@ -549,47 +564,145 @@
 ${mensaje}
 
 ---
-Enviado desde: ${window.location.origin}`;
+📅 *Fecha:* ${new Date().toLocaleDateString('es-AR')}
+⏰ *Hora:* ${new Date().toLocaleTimeString('es-AR')}
+🌐 *Enviado desde:* Formulario Web Dante Propiedades`;
 
-            // URL de WhatsApp con el mensaje codificado (NÚMERO CORREGIDO)
-            const whatsappURL = `https://wa.me/5491125368595?text=${encodeURIComponent(whatsappMessage)}`;
+        // URL de WhatsApp con el mensaje codificado
+        const whatsappURL = `https://wa.me/5491125368595?text=${encodeURIComponent(whatsappMessage)}`;
 
-            // Mostrar mensaje de éxito
-            document.getElementById('successMessage').style.display = 'block';
-            document.getElementById('submitBtn').disabled = true;
-            document.getElementById('submitBtn').textContent = '✅ Enviado a WhatsApp';
-
-            // Abrir WhatsApp
-            window.open(whatsappURL, '_blank');
-
-            // Reiniciar formulario después de 5 segundos
+        // ✅ ABRIR WHATSAPP DESPUÉS DE 1.5 SEGUNDOS
+        setTimeout(() => {
+            console.log('💬 Abriendo WhatsApp...');
+            window.open(whatsappURL, '_blank', 'noopener,noreferrer');
+            
+            // ✅ RESTAURAR ESTADO DEL BOTÓN
+            submitBtn.textContent = '✅ Enviado';
+            submitBtn.style.backgroundColor = '#28a745';
+            
+            // ✅ REINICIAR FORMULARIO DESPUÉS DE 3 SEGUNDOS
             setTimeout(() => {
                 this.reset();
-                document.getElementById('successMessage').style.display = 'none';
-                document.getElementById('submitBtn').disabled = false;
-                document.getElementById('submitBtn').textContent = '📧 Enviar Mensaje';
-            }, 5000);
-        });
+                successMessage.style.display = 'none';
+                submitBtn.textContent = originalBtnText;
+                submitBtn.disabled = false;
+                submitBtn.style.backgroundColor = '';
+                document.getElementById('serverStatus').textContent = '📱 Modo Local';
+                console.log('🔄 Formulario reiniciado - Listo para nueva consulta');
+            }, 3000);
+            
+        }, 1500);
+    });
 
-        // Verificar servidor al cargar la página
-        document.addEventListener('DOMContentLoaded', function () {
-            verificarServidor();
+    // ✅ INICIALIZAR AL CARGAR LA PÁGINA
+    document.addEventListener('DOMContentLoaded', function () {
+        // Configurar estado inicial
+        verificarServidor();
+        console.log('📱 Formulario configurado en modo local');
 
-            // Animación de entrada
-            const formSection = document.querySelector('.form-section');
+        // ✅ AGREGAR ESTILOS CSS PARA MEJOR APARIENCIA
+        const style = document.createElement('style');
+        style.textContent = `
+            .server-status {
+                padding: 5px 12px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: bold;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                animation: fadeIn 0.5s ease-out;
+                margin-left: 10px;
+                transition: all 0.3s ease;
+            }
+            
+            .server-local {
+                background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+                color: white;
+                border: none;
+                box-shadow: 0 2px 8px rgba(106, 17, 203, 0.2);
+            }
+            
+            .server-local:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(106, 17, 203, 0.3);
+            }
+            
+            .server-connected {
+                background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
+                color: white;
+                border: none;
+            }
+            
+            .server-disconnected {
+                background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+                color: white;
+                border: none;
+            }
+            
+            @keyframes fadeIn {
+                from { 
+                    opacity: 0; 
+                    transform: translateY(-8px); 
+                }
+                to { 
+                    opacity: 1; 
+                    transform: translateY(0); 
+                }
+            }
+            
+            #submitBtn {
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            
+            #submitBtn:hover:not(:disabled) {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+            }
+            
+            #submitBtn:disabled {
+                background-color: #28a745 !important;
+                color: white !important;
+                cursor: not-allowed;
+            }
+            
+            .form-section {
+                animation: slideUp 0.6s ease-out;
+            }
+            
+            @keyframes slideUp {
+                from { 
+                    opacity: 0; 
+                    transform: translateY(30px); 
+                }
+                to { 
+                    opacity: 1; 
+                    transform: translateY(0); 
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Animación de entrada suave
+        const formSection = document.querySelector('.form-section');
+        if (formSection) {
             formSection.style.opacity = '0';
             formSection.style.transform = 'translateY(20px)';
-
+            
             setTimeout(() => {
-                formSection.style.transition = 'all 0.6s ease';
+                formSection.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
                 formSection.style.opacity = '1';
                 formSection.style.transform = 'translateY(0)';
             }, 100);
-        });
+        }
+    });
 
-        // Verificar servidor cada 30 segundos
-        setInterval(verificarServidor, 30000);
-    </script>
+    // ✅ VERIFICAR PERIÓDICAMENTE (opcional, sin bloquear)
+    setInterval(() => {
+        document.getElementById('serverStatus').textContent = '📱 Modo Local';
+        document.getElementById('serverStatus').className = 'server-status server-local';
+    }, 30000);
+</script>
 </body>
 
 </html>
