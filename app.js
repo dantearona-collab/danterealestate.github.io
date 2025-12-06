@@ -610,35 +610,80 @@ let globalData = {
 
 // Cargar propiedades - Solo desde archivo externo propiedades.json
 async function loadProperties() {
-    console.log('🔄 Iniciando carga de propiedades desde propiedades.json...');
+    console.log("🔄 Iniciando carga de propiedades...");
     
     try {
-        console.log('📂 Cargando propiedades.json desde servidor...');
+        const response = await fetch('/propiedades.json');
         
-        const response = await fetch('propiedades.json');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const data = await response.json();
-        console.log('✅ Datos cargados exitosamente:', data.length, 'propiedades');
+        console.log(`✅ ${data.length} propiedades cargadas correctamente`);
         
-        // Datos cargados exitosamente
-        globalData.properties = data;
-        globalData.filteredProperties = data;
-        
-        // Llenar filtros y mostrar
-        populateFilters(data);
-        displayProperties(data);
+        // Tu código para mostrar propiedades
+        window.propiedadesData = data;
+        mostrarPropiedades(data);
         
     } catch (error) {
-        // Error - archivo no encontrado o no accesible
-        console.error('❌ Error al cargar propiedades.json:', error.message);
-        console.log('💡 Asegúrate de que el archivo propiedades.json esté disponible');
+        console.error("❌ Error cargando propiedades:", error);
         
-        // Mostrar mensaje de error en la interfaz
-        showErrorMessage();
+        // Mostrar mensaje al usuario
+        mostrarError(`Error cargando propiedades: ${error.message}`);
+        
+        // Intentar cargar desde ruta alternativa
+        await cargarPropiedadesAlternativas();
     }
+}
+
+async function cargarPropiedadesAlternativas() {
+    try {
+        // Intentar desde ruta absoluta diferente
+        const response = await fetch('https://danterealestate-github-io.onrender.com/propiedades.json');
+        const data = await response.json();
+        console.log("✅ Propiedades cargadas desde URL alternativa");
+        window.propiedadesData = data;
+        mostrarPropiedades(data);
+    } catch (error) {
+        console.warn("⚠️ Usando datos de respaldo...");
+        
+        // Datos mínimos de respaldo
+        const propiedadesRespaldo = [
+            {
+                "id": 1,
+                "titulo": "Propiedad Ejemplo",
+                "operacion": "venta",
+                "barrio": "Ejemplo",
+                "tipo": "casa",
+                "descripcion": "Sistema en mantenimiento",
+                "imagenes": [],
+                "precio": "Consultar"
+            }
+        ];
+        
+        window.propiedadesData = propiedadesRespaldo;
+        mostrarPropiedades(propiedadesRespaldo);
+    }
+}
+
+function mostrarError(mensaje) {
+    // Crear o mostrar elemento de error
+    let errorDiv = document.getElementById('error-message');
+    if (!errorDiv) {
+        errorDiv = document.createElement('div');
+        errorDiv.id = 'error-message';
+        errorDiv.style.cssText = `
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #c62828;
+        `;
+        document.body.prepend(errorDiv);
+    }
+    errorDiv.innerHTML = `<strong>⚠️ Atención:</strong> ${mensaje}`;
 }
 
 // Mostrar mensaje de error cuando no se puede cargar el archivo
