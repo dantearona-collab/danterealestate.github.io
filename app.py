@@ -330,6 +330,7 @@ def status():
     })
 
 @app.route('/api/propiedades', methods=['GET'])
+@app.route('/api/properties', methods=['GET']) # Alias para compatibilidad
 def get_properties():
     """🏠 Obtener todas las propiedades"""
     return jsonify(properties_data)
@@ -491,4 +492,6 @@ if __name__ == '__main__':
     print("🌐 Servidor disponible en: http://localhost:5000")
     print("=" * 60)
     
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Usar puerto del entorno o 5000 por defecto
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=True, host='0.0.0.0', port=port)
