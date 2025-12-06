@@ -181,6 +181,15 @@ def get_filter_options():
         safe_print(f"Error en get_filter_options: {str(e)}")
         return {"error": f"Error obteniendo opciones de filtros: {str(e)}"}
 
+@app.post("/chat")
+def chat():
+    try:
+        data = request.json
+        # ... rest of function ...
+        return jsonify({"response": "Echo"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/properties/filter-options', methods=['GET'])
 def get_filter_options_endpoint():
     try:
