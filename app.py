@@ -4,23 +4,21 @@
 ================================================================
 
 Este servidor Python recibe los datos del formulario y los almacena automáticamente
-en Excel y CSV. Usa openpyxl para mejor compatibilidad con Python 3.13.
+en Excel y CSV. Incluye modo offline, respaldos automáticos y manejo de errores.
 """
 
-from flask import Flask, request, jsonify, send_file, send_from_directory
+from flask import Flask, request, jsonify
 from flask_cors import CORS
-from openpyxl import load_workbook, Workbook
-from openpyxl.utils import get_column_letter
+import pandas as pd
 import json
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 import csv
 import logging
-import shutil
+import threading
+import time
+import glob
 from pathlib import Path
-
-# Asegurar que existe el directorio de logs
-os.makedirs('data', exist_ok=True)
 
 # Configuración de logging
 logging.basicConfig(
@@ -34,7 +32,8 @@ logging.basicConfig(
 
 class ExcelStorageManager:
     """
-    📊 Gestor completo de almacenamiento en Excel usando openpyxl
+    📊 Gestor completo de almacenamiento en Excel
+    Maneja múltiples archivos, respaldos y exportación automática
     """
     
     def __init__(self, base_path='data'):
@@ -71,35 +70,20 @@ class ExcelStorageManager:
     
     def _inicializar_archivos(self):
         """Inicializar archivos Excel y CSV con encabezados"""
-        # Crear Excel si no existe
+        # Crear DataFrame con encabezados
+        df_vacio = pd.DataFrame(columns=self.columnas)
+        
+        # Guardar en Excel si no existe
         if not self.excel_path.exists():
-            wb = Workbook()
-            
-            # Hoja principal - Consultas
-            ws_main = wb.active
-            ws_main.title = 'Consultas'
-            for col_idx, col_name in enumerate(self.columnas, 1):
-                ws_main.cell(row=1, column=col_idx, value=col_name)
-            
-            # Hoja de backup
-            ws_backup = wb.create_sheet('Backup')
-            for col_idx, col_name in enumerate(self.columnas, 1):
-                ws_backup.cell(row=1, column=col_idx, value=col_name)
-            
-            # Hoja de estadísticas
-            ws_stats = wb.create_sheet('Estadísticas')
-            ws_stats.cell(row=1, column=1, value='Métrica')
-            ws_stats.cell(row=1, column=2, value='Valor')
-            
-            wb.save(str(self.excel_path))
-            logging.info(f"✅ Archivo Excel creado: {self.excel_path}")
+            with pd.ExcelWriter(self.excel_path, engine='openpyxl') as writer:
+                df_vacio.to_excel(writer, sheet_name='Consultas', index=False)
+                df_vacio.to_excel(writer, sheet_name='Backup', index=False)
         
         # Crear CSV con encabezados
         if not self.csv_path.exists():
             with open(self.csv_path, 'w', newline='', encoding='utf-8') as f:
                 writer = csv.writer(f)
                 writer.writerow(self.columnas)
-            logging.info(f"✅ Archivo CSV creado: {self.csv_path}")
     
     def añadir_consulta(self, datos_formulario):
         """
@@ -108,6 +92,7 @@ class ExcelStorageManager:
         try:
             # Preparar datos completos
             timestamp = datetime.now()
+            fecha_hora = timestamp.strftime('%d/%m/%Y %H:%M:%S')
             
             consulta_completa = {
                 'Fecha': timestamp.strftime('%d/%m/%Y'),
@@ -153,147 +138,49 @@ class ExcelStorageManager:
             }
     
     def _guardar_en_excel(self, consulta):
-        """💾 Guardar en archivo Excel usando openpyxl"""
+        """💾 Guardar en archivo Excel con formato"""
         try:
-            # Cargar workbook existente
-            wb = load_workbook(str(self.excel_path))
+            # Leer Excel existente
+            df = pd.read_excel(self.excel_path, sheet_name='Consultas')
             
-            # Obtener hoja Consultas
-            if 'Consultas' in wb.sheetnames:
-                ws = wb['Consultas']
-            else:
-                ws = wb.create_sheet('Consultas')
-                # Escribir encabezados si es nueva
-                for col_idx, col_name in enumerate(self.columnas, 1):
-                    ws.cell(row=1, column=col_idx, value=col_name)
+            # Añadir nueva fila
+            df_nuevo = pd.DataFrame([consulta])
+            df_completo = pd.concat([df, df_nuevo], ignore_index=True)
             
-            # Encontrar última fila
-            last_row = ws.max_row + 1
-            
-            # Escribir datos
-            for col_idx, col_name in enumerate(self.columnas, 1):
-                ws.cell(row=last_row, column=col_idx, value=consulta.get(col_name, ''))
-            
-            # Ajustar ancho de columnas
-            self._ajustar_ancho_columnas(ws)
-            
-            # Actualizar hoja de backup
-            self._actualizar_backup(wb, consulta)
-            
-            # Actualizar estadísticas
-            self._actualizar_estadisticas(wb)
-            
-            # Guardar
-            wb.save(str(self.excel_path))
+            # Guardar con formato
+            with pd.ExcelWriter(self.excel_path, engine='openpyxl') as writer:
+                # Sheet principal con formato
+                df_completo.to_excel(writer, sheet_name='Consultas', index=False)
+                
+                # Sheet de backup
+                df_completo.to_excel(writer, sheet_name='Backup', index=False)
+                
+                # Sheet de estadísticas
+                stats = self._generar_estadisticas()
+                stats.to_excel(writer, sheet_name='Estadísticas', index=False)
+                
+                # Formatear columnas
+                workbook = writer.book
+                worksheet = writer.sheets['Consultas']
+                
+                # Formatear columnas de texto
+                for column in worksheet.columns:
+                    max_length = 0
+                    column_letter = column[0].column_letter
+                    for cell in column:
+                        try:
+                            if len(str(cell.value)) > max_length:
+                                max_length = len(str(cell.value))
+                        except:
+                            pass
+                    adjusted_width = min(max_length + 2, 50)
+                    worksheet.column_dimensions[column_letter].width = adjusted_width
             
             logging.info("✅ Guardado en Excel completado")
             
         except Exception as e:
             logging.error(f"❌ Error guardando en Excel: {str(e)}")
             raise
-    
-    def _ajustar_ancho_columnas(self, worksheet):
-        """Ajustar ancho de columnas automáticamente"""
-        for column in worksheet.columns:
-            max_length = 0
-            column_letter = get_column_letter(column[0].column)
-            
-            for cell in column:
-                try:
-                    if cell.value and len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
-                except:
-                    pass
-            
-            adjusted_width = min(max_length + 2, 50)
-            worksheet.column_dimensions[column_letter].width = adjusted_width
-    
-    def _actualizar_backup(self, workbook, consulta):
-        """Actualizar hoja de backup"""
-        if 'Backup' not in workbook.sheetnames:
-            ws_backup = workbook.create_sheet('Backup')
-            for col_idx, col_name in enumerate(self.columnas, 1):
-                ws_backup.cell(row=1, column=col_idx, value=col_name)
-        else:
-            ws_backup = workbook['Backup']
-        
-        last_row = ws_backup.max_row + 1
-        for col_idx, col_name in enumerate(self.columnas, 1):
-            ws_backup.cell(row=last_row, column=col_idx, value=consulta.get(col_name, ''))
-    
-    def _actualizar_estadisticas(self, workbook):
-        """Actualizar hoja de estadísticas"""
-        if 'Consultas' not in workbook.sheetnames:
-            return
-        
-        ws = workbook['Consultas']
-        total_rows = ws.max_row - 1  # Restar encabezado
-        
-        # Crear o limpiar hoja de estadísticas
-        if 'Estadísticas' in workbook.sheetnames:
-            ws_stats = workbook['Estadísticas']
-            # Limpiar datos existentes (mantener encabezados)
-            for row in ws_stats.iter_rows(min_row=2):
-                for cell in row:
-                    cell.value = None
-        else:
-            ws_stats = workbook.create_sheet('Estadísticas')
-            ws_stats.cell(row=1, column=1, value='Métrica')
-            ws_stats.cell(row=1, column=2, value='Valor')
-        
-        # Calcular estadísticas básicas
-        fecha_hoy = datetime.now().strftime('%d/%m/%Y')
-        consultas_hoy = 0
-        intereses = {}
-        presupuestos = {}
-        
-        # Analizar datos
-        for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
-            # Fecha
-            fecha_cell = row[0]
-            if fecha_cell.value == fecha_hoy:
-                consultas_hoy += 1
-            
-            # Interés (columna 7)
-            interes_cell = row[6]
-            if interes_cell.value:
-                interes = str(interes_cell.value)
-                intereses[interes] = intereses.get(interes, 0) + 1
-            
-            # Presupuesto (columna 8)
-            presupuesto_cell = row[7]
-            if presupuesto_cell.value:
-                presupuesto = str(presupuesto_cell.value)
-                presupuestos[presupuesto] = presupuestos.get(presupuesto, 0) + 1
-        
-        # Interés más común
-        interes_comun = "N/A"
-        if intereses:
-            interes_comun = max(intereses, key=intereses.get)
-        
-        # Presupuesto más común
-        presupuesto_comun = "N/A"
-        if presupuestos:
-            presupuesto_comun = max(presupuestos, key=presupuestos.get)
-        
-        # Última consulta
-        ultima_fecha = "N/A"
-        if total_rows > 0:
-            ultima_fecha = ws.cell(row=ws.max_row, column=1).value or "N/A"
-        
-        # Escribir estadísticas
-        estadisticas = [
-            ('Total Consultas', total_rows),
-            ('Consultas Hoy', consultas_hoy),
-            ('Interés Más Común', interes_comun),
-            ('Presupuesto Más Común', presupuesto_comun),
-            ('Última Consulta', ultima_fecha),
-            ('Última Actualización', datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
-        ]
-        
-        for idx, (metrica, valor) in enumerate(estadisticas, start=2):
-            ws_stats.cell(row=idx, column=1, value=metrica)
-            ws_stats.cell(row=idx, column=2, value=valor)
     
     def _guardar_en_csv(self, consulta):
         """📄 Guardar en archivo CSV"""
@@ -312,15 +199,15 @@ class ExcelStorageManager:
         """🗂️ Crear backup automático cada 50 consultas"""
         try:
             # Contar consultas actuales
-            wb = load_workbook(str(self.excel_path), data_only=True)
-            ws = wb['Consultas']
-            total_consultas = ws.max_row - 1  # Restar encabezado
+            df = pd.read_excel(self.excel_path, sheet_name='Consultas')
+            total_consultas = len(df)
             
             if total_consultas > 0 and total_consultas % 50 == 0:
                 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
                 backup_file = self.backup_path / f'backup_consultas_{timestamp}.xlsx'
                 
                 # Copiar archivo completo
+                import shutil
                 shutil.copy2(self.excel_path, backup_file)
                 
                 logging.info(f"🗂️ Backup creado: {backup_file}")
@@ -328,33 +215,31 @@ class ExcelStorageManager:
         except Exception as e:
             logging.error(f"❌ Error creando backup: {str(e)}")
     
+    def _generar_estadisticas(self):
+        """📊 Generar estadísticas de las consultas"""
+        try:
+            df = pd.read_excel(self.excel_path, sheet_name='Consultas')
+            
+            stats = {
+                'Total Consultas': len(df),
+                'Consultas Hoy': len(df[df['Fecha'] == datetime.now().strftime('%d/%m/%Y')]),
+                'Interés Más Común': df['Interés'].value_counts().head(1).to_dict() if not df.empty else {},
+                'Presupuesto Más Común': df['Presupuesto'].value_counts().head(1).to_dict() if not df.empty else {},
+                'Última Consulta': df['Fecha'].max() if not df.empty else 'N/A',
+                'Consultas Esta Semana': len(df[df['Fecha'] >= (datetime.now() - pd.Timedelta(days=7)).strftime('%d/%m/%Y')]) if not df.empty else 0
+            }
+            
+            return pd.DataFrame(list(stats.items()), columns=['Métrica', 'Valor'])
+            
+        except Exception as e:
+            logging.error(f"❌ Error generando estadísticas: {str(e)}")
+            return pd.DataFrame({'Métrica': ['Error'], 'Valor': [str(e)]})
+    
     def obtener_consultas(self, limite=100):
         """📋 Obtener últimas consultas"""
         try:
-            wb = load_workbook(str(self.excel_path), data_only=True)
-            
-            if 'Consultas' not in wb.sheetnames:
-                return []
-            
-            ws = wb['Consultas']
-            
-            # Obtener encabezados
-            headers = []
-            for cell in ws[1]:
-                headers.append(cell.value)
-            
-            # Obtener datos (últimas 'limite' filas)
-            consultas = []
-            start_row = max(2, ws.max_row - limite + 1)
-            
-            for row in ws.iter_rows(min_row=start_row, max_row=ws.max_row):
-                consulta = {}
-                for header, cell in zip(headers, row):
-                    consulta[header] = cell.value
-                consultas.append(consulta)
-            
-            return consultas
-            
+            df = pd.read_excel(self.excel_path, sheet_name='Consultas')
+            return df.tail(limite).to_dict('records')
         except Exception as e:
             logging.error(f"❌ Error obteniendo consultas: {str(e)}")
             return []
@@ -362,59 +247,23 @@ class ExcelStorageManager:
     def exportar_resumen(self):
         """📊 Exportar resumen de estadísticas"""
         try:
-            wb = load_workbook(str(self.excel_path), data_only=True)
-            
-            if 'Consultas' not in wb.sheetnames:
+            df = pd.read_excel(self.excel_path, sheet_name='Consultas')
+            if df.empty:
                 return "No hay datos para exportar"
-            
-            ws = wb['Consultas']
-            total_consultas = ws.max_row - 1
-            
-            if total_consultas == 0:
-                return "No hay consultas registradas"
-            
-            # Contar consultas de hoy
-            fecha_hoy = datetime.now().strftime('%d/%m/%Y')
-            consultas_hoy = 0
-            intereses = {}
-            presupuestos = {}
-            
-            for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
-                fecha_cell = row[0]
-                if fecha_cell.value == fecha_hoy:
-                    consultas_hoy += 1
-                
-                interes_cell = row[6]
-                if interes_cell.value:
-                    interes = str(interes_cell.value)
-                    intereses[interes] = intereses.get(interes, 0) + 1
-                
-                presupuesto_cell = row[7]
-                if presupuesto_cell.value:
-                    presupuesto = str(presupuesto_cell.value)
-                    presupuestos[presupuesto] = presupuestos.get(presupuesto, 0) + 1
-            
-            # Top 5 intereses
-            top_intereses = sorted(intereses.items(), key=lambda x: x[1], reverse=True)[:5]
-            intereses_str = "\n".join([f"  • {k}: {v}" for k, v in top_intereses]) if top_intereses else "  No hay datos"
-            
-            # Top 5 presupuestos
-            top_presupuestos = sorted(presupuestos.items(), key=lambda x: x[1], reverse=True)[:5]
-            presupuestos_str = "\n".join([f"  • {k}: {v}" for k, v in top_presupuestos]) if top_presupuestos else "  No hay datos"
             
             resumen = f"""
 📊 RESUMEN DE CONSULTAS - {datetime.now().strftime('%d/%m/%Y %H:%M')}
 
 📈 ESTADÍSTICAS GENERALES:
-• Total de consultas: {total_consultas}
-• Consultas hoy: {consultas_hoy}
-• Última consulta: {fecha_hoy if consultas_hoy > 0 else 'N/A'}
+• Total de consultas: {len(df)}
+• Consultas hoy: {len(df[df['Fecha'] == datetime.now().strftime('%d/%m/%Y')])}
+• Última consulta: {df['Fecha'].max()}
 
-🎯 INTERESES MÁS CONSULTADOS (Top 5):
-{intereses_str}
+🎯 INTERESES MÁS CONSULTADOS:
+{df['Interés'].value_counts().head(5).to_string() if not df.empty else 'No hay datos'}
 
-💰 PRESUPUESTOS MÁS CONSULTADOS (Top 5):
-{presupuestos_str}
+💰 PRESUPUESTOS MÁS CONSULTADOS:
+{df['Presupuesto'].value_counts().head(5).to_string() if not df.empty else 'No hay datos'}
 
 📁 ARCHIVOS:
 • Excel: {self.excel_path}
@@ -428,95 +277,26 @@ class ExcelStorageManager:
             return f"Error generando resumen: {str(e)}"
 
 # Crear aplicación Flask
-app = Flask(__name__, static_folder='.', static_url_path='')
-CORS(app)
+app = Flask(__name__)
+CORS(app)  # Permitir solicitudes desde cualquier origen
 
 # Inicializar gestor de almacenamiento
 storage_manager = ExcelStorageManager()
 
 @app.route('/')
 def home():
-    """🏠 Página principal - Sirve index.html o muestra API"""
-    try:
-        # Verificar si existe index.html
-        if os.path.exists('index.html'):
-            return send_file('index.html')
-        else:
-            # Si no existe, mostrar info de API
-            return jsonify({
-                'message': '🚀 Sistema de Formularios con Almacenamiento Excel',
-                'version': '1.3.0',
-                'status': 'active',
-                'note': 'index.html no encontrado en el servidor',
-                'endpoints': {
-                    '/health': 'GET - Estado del sistema',
-                    '/api/guardar-contacto': 'POST - Guardar consulta de contacto',
-                    '/api/obtener-consultas': 'GET - Obtener últimas consultas',
-                    '/api/resumen': 'GET - Obtener resumen estadístico',
-                    '/api/exportar-excel': 'GET - Descargar archivo Excel'
-                }
-            })
-    except Exception as e:
-        logging.error(f"❌ Error en ruta principal: {str(e)}")
-        return jsonify({'error': str(e)}), 500
-
-
-
-# 📁 SERVIR ARCHIVOS ESTÁTICOS
-@app.route('/<path:filename>')
-def serve_static(filename):
-    """Servir archivos estáticos (CSS, JS, imágenes, etc.)"""
-    try:
-        # Lista de extensiones permitidas
-        allowed_ext = {'.html', '.css', '.js', '.png', '.jpg', '.jpeg', 
-                      '.gif', '.ico', '.svg', '.json', '.txt', '.woff', 
-                      '.woff2', '.ttf', '.eot'}
-        
-        filepath = Path(filename)
-        
-        # Verificar si existe
-        if not filepath.exists():
-            return jsonify({'error': 'Archivo no encontrado'}), 404
-        
-        # Verificar extensión
-        if filepath.suffix.lower() not in allowed_ext:
-            return jsonify({'error': 'Tipo de archivo no permitido'}), 403
-        
-        return send_file(str(filepath))
-        
-    except Exception as e:
-        logging.error(f"❌ Error sirviendo {filename}: {str(e)}")
-        return jsonify({'error': 'Error interno del servidor'}), 500
-
-# 🎨 RUTAS ESPECÍFICAS PARA CARPETAS COMUNES
-@app.route('/css/<path:filename>')
-def serve_css(filename):
-    """Servir archivos CSS"""
-    return send_from_directory('css', filename)
-
-@app.route('/js/<path:filename>')
-def serve_js(filename):
-    """Servir archivos JavaScript"""
-    return send_from_directory('js', filename)
-
-@app.route('/imgs/<path:filename>')
-def serve_imgs(filename):
-    """Servir imágenes"""
-    return send_from_directory('imgs', filename)
-
-@app.route('/img/<path:filename>')
-def serve_img(filename):
-    """Servir imágenes (alternativa)"""
-    return send_from_directory('img', filename)
-
-
-
-
-
-
-
-
-
+    """🏠 Página principal del sistema"""
+    return jsonify({
+        'message': '🚀 Sistema de Formularios con Almacenamiento Excel',
+        'version': '1.0.0',
+        'status': 'active',
+        'endpoints': {
+            '/api/guardar-contacto': 'POST - Guardar consulta de contacto',
+            '/api/obtener-consultas': 'GET - Obtener últimas consultas',
+            '/api/resumen': 'GET - Obtener resumen estadístico',
+            '/health': 'GET - Estado del sistema'
+        }
+    })
 
 @app.route('/health')
 def health_check():
@@ -528,8 +308,7 @@ def health_check():
         'files_exist': {
             'excel': storage_manager.excel_path.exists(),
             'csv': storage_manager.csv_path.exists()
-        },
-        'python_version': os.sys.version
+        }
     })
 
 @app.route('/api/guardar-contacto', methods=['POST'])
@@ -629,11 +408,10 @@ def exportar_excel():
             }), 404
         
         # Leer archivo y devolver como descarga
-        return send_file(
-            str(storage_manager.excel_path),
+        return app.send_file(
+            storage_manager.excel_path,
             as_attachment=True,
-            download_name=f'consultas_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx',
-            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            download_name=f'consultas_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
         )
         
     except Exception as e:
@@ -644,13 +422,11 @@ def exportar_excel():
         }), 500
 
 if __name__ == '__main__':
-    print("🚀 Iniciando Sistema de Formularios con Almacenamiento Excel (openpyxl)")
+    print("🚀 Iniciando Sistema de Formularios con Almacenamiento Excel")
     print(f"📁 Archivos de datos en: {storage_manager.base_path}")
     print(f"📊 Excel: {storage_manager.excel_path}")
     print(f"📄 CSV: {storage_manager.csv_path}")
     print("🌐 Servidor disponible en: http://localhost:5000")
     print("=" * 60)
     
-    # Usar puerto del entorno o 5000 por defecto
-    port = int(os.environ.get('PORT', 5000))
-    app.run(debug=True, host='0.0.0.0', port=port)
+    app.run(debug=True, host='0.0.0.0', port=5000)
