@@ -586,8 +586,9 @@ async function loadProperties() {
 
     } catch (error) {
         // Error - archivo no encontrado o no accesible
-        console.error('❌ Error al cargar propiedades.json:', error.message);
-        console.log('💡 Asegúrate de que el archivo propiedades.json esté disponible');
+        console.error('❌ Error al cargar propiedades:', error.message);
+        console.error('🌐 URL intentada:', `${API_BASE_URL}/api/propiedades`);
+        console.log('💡 Asegúrate de que el backend esté corriendo y el archivo propiedades.json exista');
 
         // Mostrar mensaje de error en la interfaz
         showErrorMessage();
