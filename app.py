@@ -7,7 +7,7 @@ Este servidor Python recibe los datos del formulario y los almacena automáticam
 en Excel y CSV. Usa openpyxl para mejor compatibilidad con Python 3.13.
 """
 
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, send_from_directory
 from flask_cors import CORS
 from openpyxl import load_workbook, Workbook
 from openpyxl.utils import get_column_letter
@@ -428,28 +428,95 @@ class ExcelStorageManager:
             return f"Error generando resumen: {str(e)}"
 
 # Crear aplicación Flask
-app = Flask(__name__)
-CORS(app)  # Permitir solicitudes desde cualquier origen
+app = Flask(__name__, static_folder='.', static_url_path='')
+CORS(app)
 
 # Inicializar gestor de almacenamiento
 storage_manager = ExcelStorageManager()
 
 @app.route('/')
 def home():
-    """🏠 Página principal del sistema"""
-    return jsonify({
-        'message': '🚀 Sistema de Formularios con Almacenamiento Excel (openpyxl)',
-        'version': '1.3.0',
-        'status': 'active',
-        'storage_engine': 'openpyxl',
-        'endpoints': {
-            '/api/guardar-contacto': 'POST - Guardar consulta de contacto',
-            '/api/obtener-consultas': 'GET - Obtener últimas consultas',
-            '/api/resumen': 'GET - Obtener resumen estadístico',
-            '/api/exportar-excel': 'GET - Descargar archivo Excel',
-            '/health': 'GET - Estado del sistema'
-        }
-    })
+    """🏠 Página principal - Sirve index.html o muestra API"""
+    try:
+        # Verificar si existe index.html
+        if os.path.exists('index.html'):
+            return send_file('index.html')
+        else:
+            # Si no existe, mostrar info de API
+            return jsonify({
+                'message': '🚀 Sistema de Formularios con Almacenamiento Excel',
+                'version': '1.3.0',
+                'status': 'active',
+                'note': 'index.html no encontrado en el servidor',
+                'endpoints': {
+                    '/health': 'GET - Estado del sistema',
+                    '/api/guardar-contacto': 'POST - Guardar consulta de contacto',
+                    '/api/obtener-consultas': 'GET - Obtener últimas consultas',
+                    '/api/resumen': 'GET - Obtener resumen estadístico',
+                    '/api/exportar-excel': 'GET - Descargar archivo Excel'
+                }
+            })
+    except Exception as e:
+        logging.error(f"❌ Error en ruta principal: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
+
+# 📁 SERVIR ARCHIVOS ESTÁTICOS
+@app.route('/<path:filename>')
+def serve_static(filename):
+    """Servir archivos estáticos (CSS, JS, imágenes, etc.)"""
+    try:
+        # Lista de extensiones permitidas
+        allowed_ext = {'.html', '.css', '.js', '.png', '.jpg', '.jpeg', 
+                      '.gif', '.ico', '.svg', '.json', '.txt', '.woff', 
+                      '.woff2', '.ttf', '.eot'}
+        
+        filepath = Path(filename)
+        
+        # Verificar si existe
+        if not filepath.exists():
+            return jsonify({'error': 'Archivo no encontrado'}), 404
+        
+        # Verificar extensión
+        if filepath.suffix.lower() not in allowed_ext:
+            return jsonify({'error': 'Tipo de archivo no permitido'}), 403
+        
+        return send_file(str(filepath))
+        
+    except Exception as e:
+        logging.error(f"❌ Error sirviendo {filename}: {str(e)}")
+        return jsonify({'error': 'Error interno del servidor'}), 500
+
+# 🎨 RUTAS ESPECÍFICAS PARA CARPETAS COMUNES
+@app.route('/css/<path:filename>')
+def serve_css(filename):
+    """Servir archivos CSS"""
+    return send_from_directory('css', filename)
+
+@app.route('/js/<path:filename>')
+def serve_js(filename):
+    """Servir archivos JavaScript"""
+    return send_from_directory('js', filename)
+
+@app.route('/imgs/<path:filename>')
+def serve_imgs(filename):
+    """Servir imágenes"""
+    return send_from_directory('imgs', filename)
+
+@app.route('/img/<path:filename>')
+def serve_img(filename):
+    """Servir imágenes (alternativa)"""
+    return send_from_directory('img', filename)
+
+
+
+
+
+
+
+
+
 
 @app.route('/health')
 def health_check():
