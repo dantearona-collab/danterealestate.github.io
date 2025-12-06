@@ -20,6 +20,9 @@ import time
 import glob
 from pathlib import Path
 
+# Asegurar que existe el directorio de logs
+os.makedirs('data', exist_ok=True)
+
 # Configuración de logging
 logging.basicConfig(
     level=logging.INFO,
@@ -283,20 +286,73 @@ CORS(app)  # Permitir solicitudes desde cualquier origen
 # Inicializar gestor de almacenamiento
 storage_manager = ExcelStorageManager()
 
+# Cargar propiedades al inicio
+PROPERTIES_FILE = 'propiedades.json'
+properties_data = []
+
+def load_properties():
+    global properties_data
+    try:
+        if os.path.exists(PROPERTIES_FILE):
+            with open(PROPERTIES_FILE, 'r', encoding='utf-8') as f:
+                properties_data = json.load(f)
+            logging.info(f"✅ Propiedades cargadas: {len(properties_data)}")
+        else:
+            logging.warning(f"⚠️ Archivo {PROPERTIES_FILE} no encontrado")
+            properties_data = []
+    except Exception as e:
+        logging.error(f"❌ Error cargando propiedades: {str(e)}")
+        properties_data = []
+
+load_properties()
+
 @app.route('/')
 def home():
     """🏠 Página principal del sistema"""
     return jsonify({
-        'message': '🚀 Sistema de Formularios con Almacenamiento Excel',
-        'version': '1.0.0',
+        'message': '🚀 Sistema de Formularios con Almacenamiento Excel + API Propiedades',
+        'version': '1.1.0',
         'status': 'active',
         'endpoints': {
             '/api/guardar-contacto': 'POST - Guardar consulta de contacto',
             '/api/obtener-consultas': 'GET - Obtener últimas consultas',
             '/api/resumen': 'GET - Obtener resumen estadístico',
+            '/api/propiedades': 'GET - Obtener todas las propiedades',
+            '/api/propiedades/search': 'GET - Buscar propiedades (params: operacion, barrio, tipo)',
             '/health': 'GET - Estado del sistema'
         }
     })
+
+@app.route('/api/propiedades', methods=['GET'])
+def get_properties():
+    """🏠 Obtener todas las propiedades"""
+    return jsonify(properties_data)
+
+@app.route('/api/propiedades/search', methods=['GET'])
+def search_properties():
+    """🔍 Buscar propiedades con filtros"""
+    try:
+        # Obtener parámetros de búsqueda
+        operacion = request.args.get('operacion', '').lower()
+        barrio = request.args.get('barrio', '').lower()
+        tipo = request.args.get('tipo', '').lower()
+        
+        filtered = properties_data
+        
+        if operacion:
+            filtered = [p for p in filtered if p.get('operacion', '').lower() == operacion]
+        
+        if barrio:
+            filtered = [p for p in filtered if p.get('barrio', '').lower() == barrio]
+            
+        if tipo:
+            filtered = [p for p in filtered if p.get('tipo', '').lower() == tipo]
+            
+        return jsonify(filtered)
+        
+    except Exception as e:
+        logging.error(f"❌ Error en búsqueda: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/health')
 def health_check():
