@@ -426,6 +426,64 @@ def exportar_excel():
             'error': str(e)
         }), 500
 
+# ==============================================
+# ENDPOINTS DE ADMINISTRACIÓN SEGUROS
+# ==============================================
+
+# Token secreto para acceso admin (¡CAMBIA ESTO!)
+ADMIN_TOKEN = 'dante_propiedades_admin_token_2024'
+
+@app.route('/admin/download/<token>')
+def descargar_excel_admin(token):
+    """Descargar archivo Excel solo con token válido"""
+    if token != ADMIN_TOKEN:
+        return jsonify({'error': 'Acceso no autorizado'}), 403
+    
+    if os.path.exists(EXCEL_FILE):
+        return send_file(
+            EXCEL_FILE,
+            as_attachment=True,
+            download_name=f'contactos_dante_{datetime.now().strftime("%Y%m%d_%H%M")}.xlsx'
+        )
+    return jsonify({'error': 'Archivo no encontrado'}), 404
+
+@app.route('/admin/stats/<token>')
+def estadisticas_admin(token):
+    """Estadísticas detalladas solo para admin"""
+    if token != ADMIN_TOKEN:
+        return jsonify({'error': 'Acceso no autorizado'}), 403
+    
+    try:
+        if os.path.exists(EXCEL_FILE):
+            wb = load_workbook(EXCEL_FILE)
+            ws = wb.active
+            total = ws.max_row - 1
+            
+            # Obtener últimos 10 registros
+            ultimos = []
+            for row in ws.iter_rows(min_row=2, max_row=min(12, ws.max_row), values_only=True):
+                if row[0]:  # Si tiene fecha
+                    ultimos.append({
+                        'fecha': row[0],
+                        'nombre': row[1],
+                        'telefono': row[3],
+                        'propiedad': row[4]
+                    })
+            
+            return jsonify({
+                'success': True,
+                'total_contactos': total,
+                'ultimos_registros': ultimos,
+                'archivo': EXCEL_FILE,
+                'tamano_bytes': os.path.getsize(EXCEL_FILE) if os.path.exists(EXCEL_FILE) else 0
+            })
+        return jsonify({'success': False, 'message': 'No hay datos'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
+
+
 if __name__ == '__main__':
     print("🚀 Iniciando Sistema de Formularios con Almacenamiento Excel")
     print(f"📁 Archivos de datos en: {storage_manager.base_path}")
