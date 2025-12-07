@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración Completo - Dante Propiedades</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .panel {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card h3 {
+            font-size: 2.5em;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #ffb347 0%, #ffcc33 100%);
+            color: white;
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .contacts-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .contacts-table th,
+        .contacts-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .contacts-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+        
+        .contacts-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .action-btn {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .edit-btn {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .delete-btn {
+            background: #f44336;
+            color: white;
+        }
+        
+        .view-btn {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: bold;
+        }
+        
+        .status-nuevo {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .status-atendido {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .status-importante {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .warning {
+            background: #fff3e0;
+            color: #f57c00;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        
+        .search-box {
+            margin-bottom: 20px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+        }
+        
+        @media (max-width: 768px) {
+            .actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .contacts-table {
+                font-size: 0.9em;
+            }
+            
+            .contacts-table th,
+            .contacts-table td {
+                padding: 8px 6px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .filter-bar {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏢 Panel de Administración Completo</h1>
+            <p>Dante Propiedades - Sistema de Gestión de Contactos</p>
+            <p style="font-size: 0.9em; margin-top: 5px;">Gestión CRUD completa + Filtros + Estadísticas</p>
+        </div>
+        
+        <div class="panel">
+            <div class="stats-grid" id="statsGrid">
+                <div class="loading">Cargando estadísticas...</div>
+            </div>
+            
+            <div class="actions">
+                <button class="btn btn-primary" onclick="cargarDatos()">
+                    🔄 Actualizar Datos
+                </button>
+                <button class="btn btn-success" onclick="agregarContacto()">
+                    ➕ Agregar Contacto
+                </button>
+                <button class="btn btn-warning" onclick="mostrarFiltros()">
+                    🔍 Buscar & Filtrar
+                </button>
+                <button class="btn btn-danger" onclick="limpiarDatos()">
+                    🗑️ Limpiar Todo
+                </button>
+                <button class="btn btn-info" onclick="exportarDatos()">
+                    📥 Exportar JSON
+                </button>
+                <button class="btn" onclick="exportarExcel()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
+                    📊 Exportar Excel
+                </button>
+            </div>
+            
+            <div id="status"></div>
+        </div>
+        
+        <div class="panel">
+            <div id="filterBar" style="display: none;">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="🔍 Buscar por nombre, email, teléfono o mensaje..." onkeyup="filtrarContactos()">
+                </div>
+                <div class="filter-bar">
+                    <select class="filter-select" id="filterStatus" onchange="filtrarContactos()">
+                        <option value="">Todos los estados</option>
+                        <option value="nuevo">Nuevo</option>
+                        <option value="atendido">Atendido</option>
+                        <option value="importante">Importante</option>
+                    </select>
+                    <select class="filter-select" id="filterTipo" onchange="filtrarContactos()">
+                        <option value="">Todos los tipos</option>
+                        <option value="venta">VENTA</option>
+                        <option value="alquiler">ALQUILER</option>
+                        <option value="consulta">CONSULTA</option>
+                        <option value="general">GENERAL</option>
+                    </select>
+                    <select class="filter-select" id="filterOrigen" onchange="filtrarContactos()">
+                        <option value="">Todos los orígenes</option>
+                        <option value="Dante Propiedades">Dante Propiedades</option>
+                        <option value="página web">Página Web</option>
+                        <option value="whatsapp">WhatsApp</option>
+                    </select>
+                    <input type="date" class="filter-select" id="filterFecha" onchange="filtrarContactos()">
+                    <button class="btn" onclick="limpiarFiltros()" style="background: #666; color: white; padding: 8px 15px;">
+                        🗑️ Limpiar Filtros
+                    </button>
+                </div>
+            </div>
+            
+            <h2>📋 Lista de Contactos (<span id="contactCount">0</span> registros)</h2>
+            <div id="contactsContainer">
+                <div class="loading">Cargando contactos...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para ver/editar contacto -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">📝 Editar Contacto</h2>
+            <form id="contactForm">
+                <input type="hidden" id="contactId">
+                
+                <div class="form-group">
+                    <label for="editNombre">Nombre completo:</label>
+                    <input type="text" id="editNombre" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editEmail">Email:</label>
+                    <input type="email" id="editEmail" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editTelefono">Teléfono:</label>
+                    <input type="tel" id="editTelefono">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editTipo">Tipo de consulta:</label>
+                    <select id="editTipo">
+                        <option value="venta">Venta</option>
+                        <option value="alquiler">Alquiler</option>
+                        <option value="consulta">Consulta General</option>
+                        <option value="general">General</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editMensaje">Mensaje:</label>
+                    <textarea id="editMensaje"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editOrigen">Origen:</label>
+                    <input type="text" id="editOrigen" value="Dante Propiedades">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editEstado">Estado:</label>
+                    <select id="editEstado">
+                        <option value="nuevo">Nuevo</option>
+                        <option value="atendido">Atendido</option>
+                        <option value="importante">Importante</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editNotas">Notas internas:</label>
+                    <textarea id="editNotas" placeholder="Notas adicionales..."></textarea>
+                </div>
+                
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-danger" onclick="cerrarModal()">
+                        ❌ Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        💾 Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para ver detalles completos -->
+    <div id="viewModal" class="modal">
+        <div class="modal-content">
+            <h2>👁️ Detalles del Contacto</h2>
+            <div id="contactDetails"></div>
+            <div class="modal-buttons">
+                <button class="btn" onclick="cerrarViewModal()">
+                    ✅ Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+
+        // FUNCIÓN PARA COMBINAR TODOS LOS DATOS
+        function combinarTodosLosDatos() {
+            const claves = [
+                'consultas_dante_propiedades',  // 24 contactos
+                'consultas_contacto',           // 10 contactos  
+                'dante_consultas_unificado'     // 16 contactos
+            ];
+            
+            let todosLosContactos = [];
+            const resultados = {};
+            
+            // Recopilar de todas las claves
+            claves.forEach(clave => {
+                try {
+                    const datos = JSON.parse(localStorage.getItem(clave)) || [];
+                    resultados[clave] = datos.length;
+                    todosLosContactos = [...todosLosContactos, ...datos];
+                    console.log(`✅ ${datos.length} contactos de "${clave}"`);
+                } catch (e) {
+                    console.warn(`⚠️ Error leyendo "${clave}":`, e.message);
+                }
+            });
+            
+            // Eliminar duplicados (por ID o timestamp)
+            const contactosUnicos = [];
+            const idsVistos = new Set();
+            const timestampsVistos = new Set();
+            
+            todosLosContactos.forEach(contacto => {
+                const idUnico = contacto.id || contacto.timestamp;
+                if (!idsVistos.has(idUnico) && !timestampsVistos.has(contacto.timestamp)) {
+                    idsVistos.add(idUnico);
+                    timestampsVistos.add(contacto.timestamp);
+                    contactosUnicos.push(contacto);
+                }
+            });
+            
+            // Guardar en la clave principal Y en una clave de respaldo
+            localStorage.setItem('consultas_dante_propiedades', JSON.stringify(contactosUnicos));
+            localStorage.setItem('dante_todos_contactos_backup', JSON.stringify(contactosUnicos));
+            
+            console.log(`🎯 TOTAL UNIFICADO: ${contactosUnicos.length} contactos únicos`);
+            console.log(`📊 Resumen:`, resultados);
+            
+            return contactosUnicos;
+        }
+
+        // Y MODIFICA la función cargarDatos para que primero combine:
+        function cargarDatos() {
+            // Primero combinar todos los datos
+            combinarTodosLosDatos();
+            
+            // Luego cargar normalmente
+            try {
+                const datos = localStorage.getItem(STORAGE_KEY);
+                contactos = datos ? JSON.parse(datos) : [];
+                mostrarContactos();
+                mostrarEstado();
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+                contactos = [];
+            }
+        }
+        // ========================================
+        // SISTEMA DE ADMINISTRACIÓN COMPLETO
+        // ========================================
+        
+        const STORAGE_KEY = 'consultas_dante_propiedades';
+        let contactos = [];
+        let contactosFiltrados = [];
+        
+        // Cargar datos al inicio
+        window.addEventListener('load', () => {
+            cargarDatos();
+            document.getElementById('contactForm').addEventListener('submit', guardarContacto);
+        });
+        
+        // Cargar datos desde localStorage
+        function cargarDatos() {
+            try {
+                const datos = localStorage.getItem(STORAGE_KEY);
+                contactos = datos ? JSON.parse(datos) : [];
+                mostrarEstadisticas();
+                mostrarContactos();
+                mostrarEstado();
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+                contactos = [];
+            }
+        }
+        
+        // Guardar datos en localStorage
+        function guardarDatos() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(contactos));
+                return true;
+            } catch (error) {
+                console.error('Error guardando datos:', error);
+                mostrarMensaje('Error al guardar datos', 'error');
+                return false;
+            }
+        }
+        
+        // Mostrar estadísticas
+        function mostrarEstadisticas() {
+            const statsGrid = document.getElementById('statsGrid');
+            
+            const total = contactos.length;
+            const hoy = new Date().toDateString();
+            const hoyCount = contactos.filter(c => new Date(c.timestamp).toDateString() === hoy).length;
+            const atendidos = contactos.filter(c => c.estado === 'atendido').length;
+            const importantes = contactos.filter(c => c.estado === 'importante').length;
+            const pendientes = contactos.filter(c => c.estado === 'nuevo').length;
+            
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <h3>${total}</h3>
+                    <p>📊 Total Contactos</p>
+                </div>
+                <div class="stat-card">
+                    <h3>${hoyCount}</h3>
+                    <p>📅 Hoy</p>
+                </div>
+                <div class="stat-card">
+                    <h3>${atendidos}</h3>
+                    <p>✅ Atendidos</p>
+                </div>
+                <div class="stat-card">
+                    <h3>${pendientes}</h3>
+                    <p>⏳ Pendientes</p>
+                </div>
+                <div class="stat-card">
+                    <h3>${importantes}</h3>
+                    <p>⭐ Importantes</p>
+                </div>
+            `;
+        }
+        
+        // Mostrar contactos en tabla
+        function mostrarContactos() {
+            const container = document.getElementById('contactsContainer');
+            const contactosMostrar = contactosFiltrados.length > 0 ? contactosFiltrados : contactos;
+            
+            document.getElementById('contactCount').textContent = contactosMostrar.length;
+            
+            if (contactosMostrar.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <p>📭 No hay contactos registrados.</p>
+                        <button onclick="agregarContacto()" class="btn btn-success" style="margin-top: 15px;">
+                            ➕ Agregar Primer Contacto
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = `
+                <div style="margin-bottom: 15px; padding: 15px; background: #f0f8ff; border-radius: 8px; font-size: 0.9em; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                    <span>📊 Mostrando ${contactosMostrar.length} de ${contactos.length} contactos</span>
+                    <div>
+                        <button onclick="exportarExcel()" class="btn" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 8px 15px;">
+                            📊 Exportar Excel
+                        </button>
+                    </div>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="contacts-table">
+                        <thead>
+                            <tr>
+                                <th>📅 Fecha</th>
+                                <th>👤 Nombre</th>
+                                <th>📧 Email</th>
+                                <th>📱 Teléfono</th>
+                                <th>💬 Tipo</th>
+                                <th>📝 Mensaje</th>
+                                <th>🏷️ Estado</th>
+                                <th>⚡ Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            contactosMostrar.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).forEach((contacto, index) => {
+                const fecha = new Date(contacto.timestamp).toLocaleString('es-AR');
+                const mensajeCorto = (contacto.mensaje || '').substring(0, 50) + '...';
+                const tipo = (contacto.tipo_consulta || 'general').toUpperCase();
+                const estado = contacto.estado || 'nuevo';
+                const estadoClass = `status-${estado}`;
+                const estadoText = estado === 'nuevo' ? 'NUEVO' : estado === 'atendido' ? 'ATENDIDO' : 'IMPORTANTE';
+                
+                html += `
+                    <tr data-id="${contacto.id}">
+                        <td style="font-size: 0.85em; white-space: nowrap;">${fecha}</td>
+                        <td><strong>${contacto.nombre || 'N/A'}</strong></td>
+                        <td style="font-size: 0.85em;">${contacto.email || 'N/A'}</td>
+                        <td style="font-size: 0.85em;">${contacto.telefono || 'N/A'}</td>
+                        <td><span style="background: #e3f2fd; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">${tipo}</span></td>
+                        <td title="${contacto.mensaje || ''}" style="font-size: 0.85em;">${mensajeCorto}</td>
+                        <td><span class="status-badge ${estadoClass}">${estadoText}</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button onclick="verContacto('${contacto.id}')" class="action-btn view-btn" title="Ver detalles">
+                                    👁️ Ver
+                                </button>
+                                <button onclick="editarContacto('${contacto.id}')" class="action-btn edit-btn" title="Editar">
+                                    ✏️ Editar
+                                </button>
+                                <button onclick="eliminarContacto('${contacto.id}')" class="action-btn delete-btn" title="Eliminar">
+                                    🗑️ Eliminar
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        // Agregar nuevo contacto
+        function agregarContacto() {
+            document.getElementById('modalTitle').textContent = '➕ Agregar Nuevo Contacto';
+            document.getElementById('contactForm').reset();
+            document.getElementById('contactId').value = '';
+            document.getElementById('editEstado').value = 'nuevo';
+            //document.getElementById('editTimestamp').value = new Date().toISOString();
+            
+            const modal = document.getElementById('contactModal');
+            modal.style.display = 'flex';
+        }
+        
+        // Editar contacto existente
+        function editarContacto(id) {
+            const contacto = contactos.find(c => c.id === id);
+            if (!contacto) return;
+            
+            document.getElementById('modalTitle').textContent = '📝 Editar Contacto';
+            document.getElementById('contactId').value = contacto.id;
+            document.getElementById('editNombre').value = contacto.nombre || '';
+            document.getElementById('editEmail').value = contacto.email || '';
+            document.getElementById('editTelefono').value = contacto.telefono || '';
+            document.getElementById('editTipo').value = contacto.tipo_consulta || 'general';
+            document.getElementById('editMensaje').value = contacto.mensaje || '';
+            document.getElementById('editOrigen').value = contacto.pagina_origen || 'Dante Propiedades';
+            document.getElementById('editEstado').value = contacto.estado || 'nuevo';
+            document.getElementById('editNotas').value = contacto.notas || '';
+            
+            const modal = document.getElementById('contactModal');
+            modal.style.display = 'flex';
+        }
+        
+        // Ver detalles completos del contacto
+        function verContacto(id) {
+            const contacto = contactos.find(c => c.id === id);
+            if (!contacto) return;
+            
+            const fecha = new Date(contacto.timestamp).toLocaleString('es-AR');
+            const tipo = (contacto.tipo_consulta || 'general').toUpperCase();
+            const estado = contacto.estado || 'nuevo';
+            const estadoClass = `status-${estado}`;
+            const estadoText = estado === 'nuevo' ? 'NUEVO' : estado === 'atendido' ? 'ATENDIDO' : 'IMPORTANTE';
+            
+            document.getElementById('contactDetails').innerHTML = `
+                <div style="padding: 20px; background: #f9f9f9; border-radius: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px;">
+                        <div>
+                            <h3 style="margin-bottom: 5px;">${contacto.nombre || 'Sin nombre'}</h3>
+                            <p style="color: #666; margin-bottom: 10px;">${fecha}</p>
+                            <span class="status-badge ${estadoClass}" style="font-size: 0.9em;">${estadoText}</span>
+                            <span style="background: #e3f2fd; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; margin-left: 10px;">${tipo}</span>
+                        </div>
+                        <div>
+                            <button onclick="editarContacto('${id}')" class="btn" style="background: #4CAF50; color: white; padding: 6px 12px;">
+                                ✏️ Editar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                        <div>
+                            <h4 style="margin-bottom: 5px; color: #555;">📧 Email</h4>
+                            <p style="font-size: 1.1em;">${contacto.email || 'No especificado'}</p>
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom: 5px; color: #555;">📱 Teléfono</h4>
+                            <p style="font-size: 1.1em;">${contacto.telefono || 'No especificado'}</p>
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom: 5px; color: #555;">🌐 Origen</h4>
+                            <p style="font-size: 1.1em;">${contacto.pagina_origen || 'Dante Propiedades'}</p>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 5px; color: #555;">📝 Mensaje</h4>
+                        <div style="padding: 15px; background: white; border: 1px solid #eee; border-radius: 5px;">
+                            ${contacto.mensaje || '<i>Sin mensaje</i>'}
+                        </div>
+                    </div>
+                    
+                    ${contacto.notas ? `
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 5px; color: #555;">📋 Notas Internas</h4>
+                        <div style="padding: 15px; background: #fffde7; border: 1px solid #ffe082; border-radius: 5px;">
+                            ${contacto.notas}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    <div style="font-size: 0.85em; color: #888; padding-top: 15px; border-top: 1px solid #eee;">
+                        ID: ${contacto.id}<br>
+                        Registrado: ${new Date(contacto.timestamp).toLocaleString('es-AR')}
+                    </div>
+                </div>
+            `;
+            
+            const modal = document.getElementById('viewModal');
+            modal.style.display = 'flex';
+        }
+        
+        // Guardar contacto (crear o actualizar)
+        function guardarContacto(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('contactId').value;
+            const isNew = !id;
+            
+            const contacto = {
+                id: isNew ? 'contact_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9) : id,
+                nombre: document.getElementById('editNombre').value,
+                email: document.getElementById('editEmail').value,
+                telefono: document.getElementById('editTelefono').value,
+                tipo_consulta: document.getElementById('editTipo').value,
+                mensaje: document.getElementById('editMensaje').value,
+                pagina_origen: document.getElementById('editOrigen').value,
+                estado: document.getElementById('editEstado').value,
+                notas: document.getElementById('editNotas').value,
+                timestamp: isNew ? new Date().toISOString() : contactos.find(c => c.id === id)?.timestamp || new Date().toISOString()
+            };
+            
+            if (isNew) {
+                contactos.unshift(contacto);
+            } else {
+                const index = contactos.findIndex(c => c.id === id);
+                if (index !== -1) {
+                    // Mantener el timestamp original al editar
+                    contacto.timestamp = contactos[index].timestamp;
+                    contactos[index] = contacto;
+                }
+            }
+            
+            if (guardarDatos()) {
+                cargarDatos();
+                cerrarModal();
+                mostrarMensaje(`Contacto ${isNew ? 'agregado' : 'actualizado'} correctamente`, 'success');
+            }
+        }
+        
+        // Eliminar contacto
+        function eliminarContacto(id) {
+            if (!confirm('¿Estás seguro de eliminar este contacto? Esta acción no se puede deshacer.')) {
+                return;
+            }
+            
+            const index = contactos.findIndex(c => c.id === id);
+            if (index !== -1) {
+                contactos.splice(index, 1);
+                if (guardarDatos()) {
+                    cargarDatos();
+                    mostrarMensaje('Contacto eliminado correctamente', 'success');
+                }
+            }
+        }
+        
+        // Limpiar todos los datos
+        function limpiarDatos() {
+            if (!confirm('⚠️ ¿ESTÁS SEGURO DE ELIMINAR TODOS LOS CONTACTOS?\n\nEsta acción eliminará permanentemente todos los datos y no se puede deshacer.')) {
+                return;
+            }
+            
+            contactos = [];
+            localStorage.removeItem(STORAGE_KEY);
+            cargarDatos();
+            mostrarMensaje('Todos los datos han sido eliminados', 'warning');
+        }
+        
+        // Filtrar contactos
+        function filtrarContactos() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filterStatus = document.getElementById('filterStatus').value;
+            const filterTipo = document.getElementById('filterTipo').value;
+            const filterOrigen = document.getElementById('filterOrigen').value;
+            const filterFecha = document.getElementById('filterFecha').value;
+            
+            contactosFiltrados = contactos.filter(contacto => {
+                // Búsqueda general
+                if (searchTerm && !(
+                    contacto.nombre?.toLowerCase().includes(searchTerm) ||
+                    contacto.email?.toLowerCase().includes(searchTerm) ||
+                    contacto.telefono?.includes(searchTerm) ||
+                    contacto.mensaje?.toLowerCase().includes(searchTerm)
+                )) {
+                    return false;
+                }
+                
+                // Filtro por estado
+                if (filterStatus && contacto.estado !== filterStatus) {
+                    return false;
+                }
+                
+                // Filtro por tipo
+                if (filterTipo && contacto.tipo_consulta !== filterTipo) {
+                    return false;
+                }
+                
+                // Filtro por origen
+                if (filterOrigen && contacto.pagina_origen !== filterOrigen) {
+                    return false;
+                }
+                
+                // Filtro por fecha
+                if (filterFecha) {
+                    const contactoFecha = new Date(contacto.timestamp).toISOString().split('T')[0];
+                    if (contactoFecha !== filterFecha) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            });
+            
+            mostrarContactos();
+        }
+        
+        // Mostrar/ocultar filtros
+        function mostrarFiltros() {
+            const filterBar = document.getElementById('filterBar');
+            filterBar.style.display = filterBar.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // Limpiar filtros
+        function limpiarFiltros() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('filterTipo').value = '';
+            document.getElementById('filterOrigen').value = '';
+            document.getElementById('filterFecha').value = '';
+            contactosFiltrados = [];
+            mostrarContactos();
+        }
+        
+        // Exportar a Excel
+        function exportarExcel() {
+            const datosExportar = contactosFiltrados.length > 0 ? contactosFiltrados : contactos;
+            
+            if (datosExportar.length === 0) {
+                alert('⚠️ No hay datos para exportar.');
+                return;
+            }
+            
+            const encabezados = ['Fecha', 'Hora', 'Nombre', 'Email', 'Teléfono', 'Tipo', 'Estado', 'Mensaje', 'Origen', 'Notas'];
+            
+            const filas = datosExportar.map(contacto => {
+                const fecha = new Date(contacto.timestamp).toLocaleString('es-AR');
+                const partes = fecha.split(' ');
+                const fechaSolo = partes[0];
+                const horaSolo = partes[1];
+                
+                return [
+                    fechaSolo,
+                    horaSolo,
+                    (contacto.nombre || '').replace(/,/g, ';'),
+                    (contacto.email || '').replace(/,/g, ';'),
+                    (contacto.telefono || '').replace(/,/g, ';'),
+                    (contacto.tipo_consulta || 'general').toUpperCase(),
+                    (contacto.estado || 'nuevo').toUpperCase(),
+                    (contacto.mensaje || '').replace(/,/g, ';'),
+                    (contacto.pagina_origen || 'Dante Propiedades').replace(/,/g, ';'),
+                    (contacto.notas || '').replace(/,/g, ';')
+                ];
+            });
+            
+            const csvContent = [encabezados, ...filas]
+                .map(fila => fila.join(','))
+                .join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `contactos-dante-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert(`✅ ¡Excel exportado correctamente!\n📊 Registros: ${datosExportar.length}\n📁 Archivo: contactos-dante-${new Date().toISOString().split('T')[0]}.csv`);
+        }
+        
+        // Exportar a JSON
+        function exportarDatos() {
+            const datosExportar = contactosFiltrados.length > 0 ? contactosFiltrados : contactos;
+            const blob = new Blob([JSON.stringify(datosExportar, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `contactos-dante-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Mostrar estado del sistema
+        function mostrarEstado() {
+            const statusDiv = document.getElementById('status');
+            if (contactos.length > 0) {
+                statusDiv.innerHTML = `
+                    <div class="success">
+                        ✅ Sistema funcionando correctamente<br>
+                        📊 ${contactos.length} contactos cargados desde localStorage<br>
+                        📅 Última actualización: ${new Date().toLocaleString('es-AR')}
+                    </div>
+                `;
+            } else {
+                statusDiv.innerHTML = `
+                    <div class="warning">
+                        ⚠️ Sin datos locales aún<br>
+                        📋 Usa el botón "➕ Agregar Contacto" para comenzar
+                    </div>
+                `;
+            }
+        }
+        
+        // Mostrar mensajes temporales
+        function mostrarMensaje(texto, tipo = 'info') {
+            const statusDiv = document.getElementById('status');
+            const clase = tipo === 'success' ? 'success' : tipo === 'error' ? 'error' : 'warning';
+            
+            statusDiv.innerHTML = `<div class="${clase}">${texto}</div>`;
+            
+            setTimeout(() => {
+                mostrarEstado();
+            }, 3000);
+        }
+        
+        // Cerrar modales
+        function cerrarModal() {
+            document.getElementById('contactModal').style.display = 'none';
+        }
+        
+        function cerrarViewModal() {
+            document.getElementById('viewModal').style.display = 'none';
+        }
+        
+        // Cerrar modal con ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                cerrarModal();
+                cerrarViewModal();
+            }
+        });
+        
+        // Cerrar modal haciendo clic fuera
+        window.onclick = (e) => {
+            const contactModal = document.getElementById('contactModal');
+            const viewModal = document.getElementById('viewModal');
+            
+            if (e.target === contactModal) {
+                cerrarModal();
+            }
+            if (e.target === viewModal) {
+                cerrarViewModal();
+            }
+        };
+        
+        // Actualizar automáticamente cada 30 segundos
+        setInterval(() => {
+            if (contactos.length > 0) {
+                cargarDatos();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
