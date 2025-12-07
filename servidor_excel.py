@@ -11,8 +11,35 @@ from datetime import datetime
 import os
 from flask_cors import CORS
 
+
+
 app = Flask(__name__)
-CORS(app)  # Permitir requests desde el frontend
+
+# ✅ CONFIGURACIÓN CORS ESPECÍFICA PARA TU DOMINIO
+CORS(app, resources={
+    r"/api/*": {
+        "origins": ["https://www.dantepropiedades.com.ar", "https://dantepropiedades.com.ar"],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"]
+    },
+    r"/debug": {
+        "origins": ["https://www.dantepropiedades.com.ar", "https://dantepropiedades.com.ar"]
+    }
+})
+
+# ✅ O esta configuración más simple (permite todos los orígenes):
+CORS(app)  # Esto permitirá requests desde cualquier dominio
+
+
+@app.after_request
+def after_request(response):
+    """Agregar headers CORS a todas las respuestas"""
+    response.headers.add('Access-Control-Allow-Origin', 'https://www.dantepropiedades.com.ar')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
+
 
 # Configuración
 EXCEL_FILE = 'contactos_dante_propiedades.xlsx'

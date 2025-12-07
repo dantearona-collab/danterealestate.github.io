@@ -264,6 +264,32 @@
                 font-size: 25px;
             }
         }
+
+        .server-status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .server-connected {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .server-disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }      
+
+
+
+
     </style>
 </head>
 <body>
@@ -349,6 +375,25 @@
             </form>
         </div>
         
+        <div id="serverStatus" class="server-status" style="
+            padding: 8px;
+            margin: 10px 0;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+        ">
+            🔄 Verificando conexión...
+        </div>
+
+        <style>
+        .server-connected { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .server-disconnected { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        </style>
+        
+        
+        
+        
         <div class="contact-info">
             <div class="contact-card">
                 <h3>📞 Teléfono</h3>
@@ -379,26 +424,44 @@
     <script>
         // URL del servidor (Render)
        // Esto usará automáticamente la URL actual
-        const SERVER_URL = window.location.origin;
+        const SERVER_URL = 'https://dante-propiedades.onrender.com';
 
         // Verificar estado del servidor
         async function verificarServidor() {
             try {
+                console.log('🔍 Probando conexión con:', SERVER_URL);
+                
                 const response = await fetch(`${SERVER_URL}/debug`, {
                     method: 'GET',
-                    timeout: 3000
+                    headers: {
+                        'Origin': 'https://www.dantepropiedades.com.ar'
+                    }
                 });
                 
+                console.log('📡 Status de respuesta:', response.status);
+                
                 if (response.ok) {
-                    document.getElementById('serverStatus').textContent = '🟢 Conectado';
+                    const data = await response.json();
+                    console.log('✅ Servidor Flask activo:', data);
+                    
+                    document.getElementById('serverStatus').textContent = '🟢 Conectado al servidor de datos';
                     document.getElementById('serverStatus').className = 'server-status server-connected';
                     return true;
                 } else {
-                    throw new Error('Servidor no responde');
+                    console.warn('⚠️ Servidor responde con error:', response.status);
+                    throw new Error(`HTTP ${response.status}`);
                 }
             } catch (error) {
-                document.getElementById('serverStatus').textContent = '🔴 Desconectado';
+                console.error('❌ Error de conexión completo:', error);
+                
+                document.getElementById('serverStatus').textContent = '🔴 Sin conexión al servidor de datos';
                 document.getElementById('serverStatus').className = 'server-status server-disconnected';
+                
+                // Mostrar mensaje más específico
+                document.getElementById('errorMessage').innerHTML = 
+                    '⚠️ El servidor de datos no está disponible, pero puedes contactarnos por WhatsApp directamente.';
+                document.getElementById('errorMessage').style.display = 'block';
+                
                 return false;
             }
         }
@@ -430,17 +493,9 @@
         document.getElementById('contactForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            // Verificar servidor primero
-            const servidorActivo = await verificarServidor();
+            console.log('🚀 Iniciando envío de formulario desde:', window.location.origin);
             
-            if (!servidorActivo) {
-                document.getElementById('errorMessage').innerHTML = 
-                    '❌ Servidor no disponible. Asegúrate de que el servidor esté corriendo en el puerto 5000.';
-                document.getElementById('errorMessage').style.display = 'block';
-                return;
-            }
-            
-            // Obtener datos del formulario
+            // 1. Obtener datos del formulario
             const nombre = document.getElementById('nombre').value.trim();
             const email = document.getElementById('email').value.trim();
             const telefono = document.getElementById('telefono').value.trim();
@@ -448,7 +503,7 @@
             const presupuesto = document.getElementById('presupuesto').value;
             const mensaje = document.getElementById('mensaje').value.trim();
             
-            // Validación básica
+            // 2. Validación básica
             if (!nombre || !email || !mensaje) {
                 document.getElementById('errorMessage').innerHTML = 
                     'Por favor, completá los campos obligatorios (Nombre, Email y Mensaje)';
@@ -456,110 +511,207 @@
                 return;
             }
             
-            // Ocultar mensajes de error
+            // 3. Ocultar mensajes de error previos
             document.getElementById('errorMessage').style.display = 'none';
             
-            // Mostrar carga
+            // 4. Mostrar estado de carga
             const submitBtn = document.getElementById('submitBtn');
             const successMessage = document.getElementById('successMessage');
-            submitBtn.textContent = '⏳ Guardando en Excel...';
+            const btnOriginalText = submitBtn.textContent;
+            submitBtn.textContent = '⏳ Procesando...';
             submitBtn.disabled = true;
             
-            // Preparar datos
-            const datosFormulario = { nombre, email, telefono, interes, presupuesto, mensaje };
+            // 5. Preparar datos COMPLETOS para enviar
+            const datosFormulario = { 
+                nombre, 
+                email, 
+                telefono, 
+                interes, 
+                presupuesto, 
+                mensaje,
+                // ✅ AGREGAR ESTO ES CRÍTICO PARA EL SERVIDOR
+                pagina_origen: window.location.origin,
+                timestamp: new Date().toISOString(),
+                user_agent: navigator.userAgent
+            };
             
+            console.log('📤 Datos preparados:', datosFormulario);
+            console.log('📡 Intentando enviar a:', SERVER_URL);
+            
+            // 6. GUARDAR EN LOCALSTORAGE (siempre primero)
             try {
-                // ✅ GUARDAR EN LOCALSTORAGE PARA COMPATIBILIDAD CON ADMIN
-                try {
-                    const localKey = 'consultas_contacto';
-                    const existingData = JSON.parse(localStorage.getItem(localKey) || '[]');
-                    
-                    // Agregar timestamp y metadatos
-                    datosFormulario.timestamp = new Date().toISOString();
-                    datosFormulario.pagina_origen = 'Formulario Dante Propiedades';
-                    datosFormulario.tipo_consulta = datosFormulario.interes || 'general';
-                    
-                    existingData.push(datosFormulario);
-                    localStorage.setItem(localKey, JSON.stringify(existingData));
-                    
-                    console.log('✅ Datos guardados en localStorage:', datosFormulario);
-                    console.log(`📊 Total contactos en localStorage: ${existingData.length}`);
-                } catch (localStorageError) {
-                    console.warn('⚠️ Error guardando en localStorage:', localStorageError);
-                }
+                const localKey = 'consultas_dante_propiedades';
+                const existingData = JSON.parse(localStorage.getItem(localKey) || '[]');
                 
-                // Enviar al servidor Python
-                const resultado = await enviarAlServidor(datosFormulario);
+                // Agregar ID único para seguimiento
+                datosFormulario.localId = Date.now();
+                datosFormulario.fecha_legible = new Date().toLocaleString('es-AR');
                 
-                if (resultado.success) {
-                    successMessage.innerHTML = `✅ ¡Datos guardados localmente y en Excel! WhatsApp se abrirá ahora...`;
-                    successMessage.style.display = 'block';
-                    console.log('✅ Guardado en Excel:', resultado);
-                } else {
-                    // Si falla el servidor, al menos tenemos los datos en localStorage
-                    successMessage.innerHTML = `✅ ¡Datos guardados localmente! WhatsApp se abrirá ahora...`;
-                    successMessage.style.display = 'block';
-                }
-            } catch (error) {
-                // Si falla el servidor, al menos tenemos los datos en localStorage
-                successMessage.innerHTML = `✅ ¡Datos guardados localmente! WhatsApp se abrirá ahora...`;
-                successMessage.style.display = 'block';
-                console.warn('⚠️ Servidor no disponible, datos guardados solo en localStorage:', error);
+                existingData.push(datosFormulario);
+                localStorage.setItem(localKey, JSON.stringify(existingData));
+                
+                console.log('✅ Guardado en localStorage. Total:', existingData.length, 'consultas');
+            } catch (localStorageError) {
+                console.warn('⚠️ Error en localStorage:', localStorageError);
             }
             
-            // Crear mensaje para WhatsApp
-            const whatsappMessage = `*NUEVA CONSULTA - DANTE PROPIEDADES*
-
-👤 *Nombre:* ${nombre}
-📧 *Email:* ${email}
-📱 *Teléfono:* ${telefono || 'No especificado'}
-🎯 *Interés:* ${interes || 'No especificado'}
-💰 *Presupuesto:* ${presupuesto || 'No especificado'}
-
-💬 *Mensaje:*
-${mensaje}
-
----
-Enviado desde: ${window.location.origin}`;
+            // 7. INTENTAR ENVIAR AL SERVIDOR FLASK (con manejo de errores mejorado)
+            let servidorRespondio = false;
+            let respuestaServidor = null;
             
-            // URL de WhatsApp con el mensaje codificado (NÚMERO CORREGIDO)
-            const whatsappURL = `https://wa.me/5491125368595?text=${encodeURIComponent(whatsappMessage)}`;
+            try {
+                console.log('🔄 Intentando conexión con servidor Flask...');
+                
+                // ✅ USAR FUNCIÓN enviarAlServidor CON DATOS COMPLETOS
+                respuestaServidor = await enviarAlServidor(datosFormulario);
+                
+                if (respuestaServidor && respuestaServidor.success) {
+                    servidorRespondio = true;
+                    console.log('✅ Servidor Flask respondió exitosamente:', respuestaServidor);
+                } else {
+                    console.warn('⚠️ Servidor respondió con error:', respuestaServidor);
+                }
+                
+            } catch (serverError) {
+                console.warn('⚠️ No se pudo conectar con el servidor Flask:', serverError);
+                // Continuamos aunque falle el servidor
+            }
             
-            // Mostrar mensaje de éxito
-            document.getElementById('successMessage').style.display = 'block';
-            document.getElementById('submitBtn').disabled = true;
-            document.getElementById('submitBtn').textContent = '✅ Enviado a WhatsApp';
+            // 8. MOSTRAR MENSAJE DE ÉXITO APROPIADO
+            if (servidorRespondio) {
+                successMessage.innerHTML = `
+                    <div style="color: #155724; background: #d4edda; padding: 15px; border-radius: 5px; border: 1px solid #c3e6cb;">
+                        <strong>✅ ¡Consulta enviada exitosamente!</strong><br>
+                        <small>Los datos se guardaron en nuestro sistema y en tu navegador.</small>
+                    </div>
+                `;
+            } else {
+                successMessage.innerHTML = `
+                    <div style="color: #856404; background: #fff3cd; padding: 15px; border-radius: 5px; border: 1px solid #ffeaa7;">
+                        <strong>⚠️ ¡Consulta guardada localmente!</strong><br>
+                        <small>Te contactaremos pronto por WhatsApp. Los datos se guardaron en tu navegador.</small>
+                    </div>
+                `;
+            }
             
-            // Abrir WhatsApp
-            window.open(whatsappURL, '_blank');
+            successMessage.style.display = 'block';
             
-            // Reiniciar formulario después de 5 segundos
+            // 9. CREAR Y ENVIAR WHATSAPP (siempre se hace)
             setTimeout(() => {
+                crearYEnviarWhatsApp(datosFormulario);
+                
+                // 10. LIMPIAR FORMULARIO
                 this.reset();
-                document.getElementById('successMessage').style.display = 'none';
-                document.getElementById('submitBtn').disabled = false;
-                document.getElementById('submitBtn').textContent = '📧 Enviar Mensaje';
-            }, 5000);
+                
+                // 11. RESTAURAR BOTÓN
+                submitBtn.disabled = false;
+                submitBtn.textContent = btnOriginalText;
+                
+                // 12. OCULTAR MENSAJE DESPUÉS DE 5 SEGUNDOS
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 5000);
+                
+            }, 1500); // Pequeña pausa para que el usuario vea el mensaje
         });
-        
-        // Verificar servidor al cargar la página
+
+        // ✅ FUNCIÓN AUXILIAR MEJORADA: Crear y enviar WhatsApp
+        function crearYEnviarWhatsApp(datos) {
+            const telefonoWhatsApp = "+5491125368595";
+            
+            // Mensaje formateado para WhatsApp
+            const mensaje = `*NUEVA CONSULTA - DANTE PROPIEDADES* 🏢
+
+        👤 *Nombre:* ${datos.nombre}
+        📧 *Email:* ${datos.email}
+        📱 *Teléfono:* ${datos.telefono || 'No especificado'}
+        🎯 *Tipo de Propiedad:* ${datos.interes || 'No especificado'}
+        💰 *Presupuesto Estimado:* ${datos.presupuesto || 'Consultar'}
+
+        📝 *Mensaje del Cliente:*
+        "${datos.mensaje}"
+
+        ---
+        📅 *Fecha y Hora:* ${datos.fecha_legible || new Date().toLocaleString('es-AR')}
+        🌐 *Origen:* Formulario Web
+        🆔 *ID Local:* ${datos.localId || 'N/A'}`;
+
+            const urlWhatsApp = `https://wa.me/${telefonoWhatsApp}?text=${encodeURIComponent(mensaje)}`;
+            
+            console.log('💬 Abriendo WhatsApp con mensaje:', mensaje);
+            
+            // Abrir en nueva pestaña
+            window.open(urlWhatsApp, '_blank');
+        }
+
+        // ✅ FUNCIÓN AUXILIAR: Verificar servidor (CORREGIDA)
+        async function verificarServidor() {
+            const serverStatus = document.getElementById('serverStatus');
+            if (!serverStatus) return true; // Si no existe el elemento, continuar
+            
+            try {
+                console.log('🔍 Probando conexión con:', SERVER_URL);
+                
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+                
+                const response = await fetch(`${SERVER_URL}/debug`, {
+                    method: 'GET',
+                    signal: controller.signal,
+                    headers: {
+                        'Origin': window.location.origin
+                    }
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('✅ Servidor activo:', data);
+                    
+                    serverStatus.textContent = '🟢 Conectado al sistema de datos';
+                    serverStatus.className = 'server-status server-connected';
+                    return true;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+            } catch (error) {
+                console.warn('⚠️ Servidor no disponible:', error.message);
+                
+                serverStatus.textContent = '🔴 Sin conexión al sistema de datos';
+                serverStatus.className = 'server-status server-disconnected';
+                return false; // Devolver false, pero NO bloquear el envío
+            }
+        }
+
+        // ✅ INICIALIZACIÓN AL CARGAR LA PÁGINA
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Sistema de formulario inicializado');
+            console.log('📍 URL actual:', window.location.href);
+            console.log('🌐 SERVER_URL configurada:', SERVER_URL);
+            
+            // Verificar servidor (pero no bloquear si falla)
             verificarServidor();
             
             // Animación de entrada
             const formSection = document.querySelector('.form-section');
-            formSection.style.opacity = '0';
-            formSection.style.transform = 'translateY(20px)';
+            if (formSection) {
+                formSection.style.opacity = '0';
+                formSection.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    formSection.style.transition = 'all 0.6s ease';
+                    formSection.style.opacity = '1';
+                    formSection.style.transform = 'translateY(0)';
+                }, 100);
+            }
             
-            setTimeout(() => {
-                formSection.style.transition = 'all 0.6s ease';
-                formSection.style.opacity = '1';
-                formSection.style.transform = 'translateY(0)';
-            }, 100);
+            // Verificar servidor periódicamente
+            setInterval(verificarServidor, 30000);
         });
 
-        // Verificar servidor cada 30 segundos
-        setInterval(verificarServidor, 30000);
+        
     </script>
 </body>
 </html>
