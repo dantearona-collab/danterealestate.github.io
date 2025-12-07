@@ -391,279 +391,11 @@
         💬
     </a>
 
-        <script>
-        // ==============================================
-        // SISTEMA DE ADMINISTRACIÓN SEGURO - SOLUCIÓN 4
-        // ==============================================
-        
+    <script>
         // URL del servidor (Render)
         const SERVER_URL = 'https://danterealestate-github-io.onrender.com';
 
-        // 1. FUNCIÓN PARA EXPORTAR DATOS (se mantiene igual)
-        function exportarDatosCompletos() {
-            console.log('📤 Exportando todos los datos...');
-            
-            const datos1 = JSON.parse(localStorage.getItem('consultas_dante_propiedades') || '[]');
-            const datos2 = JSON.parse(localStorage.getItem('consultas_contacto') || '[]');
-            const todosDatos = [...datos1, ...datos2];
-            
-            console.log(`📊 Total: ${todosDatos.length} registros`);
-            
-            // Crear CSV
-            const headers = ['Nombre', 'Email', 'Teléfono', 'Interés', 'Presupuesto', 'Fecha', 'Mensaje'];
-            const csvRows = [
-                headers.join(','),
-                ...todosDatos.map(item => [
-                    `"${(item.nombre || '').replace(/"/g, '""')}"`,
-                    `"${(item.email || '').replace(/"/g, '""')}"`,
-                    `"${(item.telefono || '').replace(/"/g, '""')}"`,
-                    `"${(item.interes || '').replace(/"/g, '""')}"`,
-                    `"${(item.presupuesto || '').replace(/"/g, '""')}"`,
-                    `"${(item.timestamp || '').split('T')[0]}"`,
-                    `"${(item.mensaje || '').replace(/"/g, '""').substring(0, 100)}"`
-                ].join(','))
-            ];
-            
-            const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `dante_consultas_${new Date().toISOString().split('T')[0]}.csv`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            alert(`✅ Descargado: ${todosDatos.length} consultas`);
-            return todosDatos;
-        }
-
-        // 2. CLASE DEL SISTEMA ADMIN SEGURO (SOLUCIÓN 4 COMPLETA)
-        class SistemaAdminSeguro {
-            constructor() {
-                this.claveLocalStorage = 'dante_admin_session';
-                this.passwordCorrecta = 'DantePropiedades2024'; // ¡¡¡CAMBIA ESTA CONTRASEÑA!!!
-                this.sessionTimeout = 3600000; // 1 hora
-            }
-            
-            inicializar() {
-                this.verificarSesion();
-                this.crearInterfaz();
-                this.configurarComboTeclas();
-            }
-            
-            verificarSesion() {
-                const sessionData = localStorage.getItem(this.claveLocalStorage);
-                
-                if (sessionData) {
-                    try {
-                        const data = JSON.parse(sessionData);
-                        const ahora = Date.now();
-                        
-                        if (ahora - data.timestamp < this.sessionTimeout) {
-                            this.sesionActiva = true;
-                            console.log('🔐 Sesión admin activa');
-                        } else {
-                            localStorage.removeItem(this.claveLocalStorage);
-                            this.sesionActiva = false;
-                        }
-                    } catch (e) {
-                        this.sesionActiva = false;
-                    }
-                } else {
-                    this.sesionActiva = false;
-                }
-            }
-            
-            crearInterfaz() {
-                if (this.sesionActiva) {
-                    this.crearBotonAdminVisible();
-                } else {
-                    this.crearBotonAccesoOculto();
-                }
-            }
-            
-            crearBotonAdminVisible() {
-                const adminBtn = document.createElement('button');
-                adminBtn.innerHTML = '🔐 <span style="font-size: 10px;">ADMIN</span>';
-                adminBtn.style.cssText = `
-                    position: fixed; bottom: 90px; right: 20px; 
-                    background: linear-gradient(135deg, #dc3545, #c82333);
-                    color: white; border: none; padding: 8px 12px; 
-                    border-radius: 20px; cursor: pointer; z-index: 1000; 
-                    font-size: 11px; font-weight: bold; box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
-                    display: flex; align-items: center; gap: 5px;
-                `;
-                
-                adminBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    this.mostrarPanelAdmin();
-                };
-                
-                adminBtn.title = 'Panel de administración (sesión activa)';
-                document.body.appendChild(adminBtn);
-            }
-            
-            crearBotonAccesoOculto() {
-                const accessBtn = document.createElement('div');
-                accessBtn.innerHTML = '🔧';
-                accessBtn.style.cssText = `
-                    position: fixed; bottom: 20px; left: 20px;
-                    width: 25px; height: 25px; opacity: 0.2;
-                    background: #6c757d; color: white; border: none;
-                    border-radius: 50%; cursor: pointer; z-index: 1000;
-                    font-size: 14px; display: flex; align-items: center;
-                    justify-content: center; transition: opacity 0.3s;
-                `;
-                
-                accessBtn.onmouseenter = () => accessBtn.style.opacity = '0.5';
-                accessBtn.onmouseleave = () => accessBtn.style.opacity = '0.2';
-                
-                accessBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    this.solicitarAutenticacion();
-                };
-                
-                document.body.appendChild(accessBtn);
-            }
-            
-            solicitarAutenticacion() {
-                const password = prompt('🔐 Acceso de administración\n\nIngresá la contraseña:');
-                
-                if (password === this.passwordCorrecta) {
-                    const sessionData = {
-                        timestamp: Date.now(),
-                        userAgent: navigator.userAgent
-                    };
-                    localStorage.setItem(this.claveLocalStorage, JSON.stringify(sessionData));
-                    
-                    alert('✅ Acceso concedido. Recargando...');
-                    setTimeout(() => location.reload(), 500);
-                } else if (password !== null) {
-                    alert('❌ Contraseña incorrecta');
-                }
-            }
-            
-            mostrarPanelAdmin() {
-                const datos = JSON.parse(localStorage.getItem('consultas_dante_propiedades') || '[]');
-                
-                const panel = document.createElement('div');
-                panel.innerHTML = `
-                    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-                                background: rgba(0,0,0,0.8); z-index: 10001; display: flex; 
-                                align-items: center; justify-content: center;">
-                        <div style="background: white; padding: 30px; border-radius: 15px; 
-                                    max-width: 800px; max-height: 80vh; overflow-y: auto; width: 90%;">
-                            <h2 style="color: #232deb; margin-top: 0;">🔐 Panel de Administración Dante Propiedades</h2>
-                            
-                            <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-                                <p><strong>📊 Estadísticas:</strong></p>
-                                <p>• Total consultas: <strong>${datos.length}</strong></p>
-                                <p>• Última consulta: <strong>${datos.length > 0 ? datos[datos.length-1].fecha || 'Hoy' : 'Ninguna'}</strong></p>
-                                <p>• Capacidad usada: <strong>${datos.length}/100 registros</strong></p>
-                            </div>
-                            
-                            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0;">
-                                <button onclick="exportarDatosCompletos()" class="admin-btn" style="background: #28a745;">
-                                    📥 Exportar CSV
-                                </button>
-                                <button onclick="verDetalleConsultas()" class="admin-btn" style="background: #17a2b8;">
-                                    👁️ Ver Detalles
-                                </button>
-                                <button onclick="limpiarDatosViejos()" class="admin-btn" style="background: #ffc107; color: #212529;">
-                                    🗑️ Limpiar Viejos
-                                </button>
-                                <button onclick="cerrarSesionAdmin()" class="admin-btn" style="background: #6c757d;">
-                                    🔒 Cerrar Sesión
-                                </button>
-                                <button onclick="document.body.removeChild(this.parentElement.parentElement.parentElement)" 
-                                        class="admin-btn" style="background: #dc3545;">
-                                    ✕ Cerrar Panel
-                                </button>
-                            </div>
-                            
-                            <div id="detalleConsultas"></div>
-                        </div>
-                    </div>
-                `;
-                
-                const style = document.createElement('style');
-                style.textContent = `
-                    .admin-btn {
-                        padding: 10px 15px; border: none; border-radius: 5px;
-                        color: white; cursor: pointer; font-weight: bold;
-                        transition: transform 0.2s;
-                    }
-                    .admin-btn:hover {
-                        transform: translateY(-2px);
-                    }
-                `;
-                document.head.appendChild(style);
-                
-                document.body.appendChild(panel);
-            }
-            
-            configurarComboTeclas() {
-                document.addEventListener('keydown', (e) => {
-                    if (e.ctrlKey && e.shiftKey && e.key === 'A') {
-                        e.preventDefault();
-                        this.solicitarAutenticacion();
-                    }
-                });
-            }
-        }
-
-        // 3. FUNCIONES GLOBALES PARA EL PANEL ADMIN
-        window.verDetalleConsultas = function() {
-            const datos = JSON.parse(localStorage.getItem('consultas_dante_propiedades') || '[]');
-            
-            let html = '<h3>📝 Últimas 10 consultas:</h3><table style="width: 100%; border-collapse: collapse;">';
-            html += '<tr style="background: #f8f9fa;"><th>#</th><th>Nombre</th><th>Email</th><th>Fecha</th><th>Interés</th></tr>';
-            
-            datos.slice(-10).reverse().forEach((item, i) => {
-                html += `
-                    <tr style="border-bottom: 1px solid #dee2e6;">
-                        <td style="padding: 8px;">${datos.length - i}</td>
-                        <td style="padding: 8px;">${item.nombre}</td>
-                        <td style="padding: 8px;">${item.email}</td>
-                        <td style="padding: 8px;">${item.fecha || item.timestamp.split('T')[0]}</td>
-                        <td style="padding: 8px;">${item.interes || 'General'}</td>
-                    </tr>
-                `;
-            });
-            
-            html += '</table>';
-            const detalleElement = document.getElementById('detalleConsultas');
-            if (detalleElement) {
-                detalleElement.innerHTML = html;
-            }
-        };
-
-        window.limpiarDatosViejos = function() {
-            if (confirm('¿Eliminar consultas con más de 30 días? (Se guardará backup)')) {
-                const datos = JSON.parse(localStorage.getItem('consultas_dante_propiedades') || '[]');
-                const ahora = Date.now();
-                const hace30Dias = ahora - (30 * 24 * 60 * 60 * 1000);
-                
-                const nuevos = datos.filter(item => {
-                    const fechaItem = new Date(item.timestamp).getTime();
-                    return fechaItem > hace30Dias;
-                });
-                
-                localStorage.setItem('backup_' + Date.now(), JSON.stringify(datos));
-                localStorage.setItem('consultas_dante_propiedades', JSON.stringify(nuevos));
-                
-                alert(`✅ Limpiados ${datos.length - nuevos.length} registros antiguos.`);
-                location.reload();
-            }
-        };
-
-        window.cerrarSesionAdmin = function() {
-            localStorage.removeItem('dante_admin_session');
-            alert('🔒 Sesión cerrada. Recargando...');
-            setTimeout(() => location.reload(), 500);
-        };
-
-        // 4. TU CÓDIGO ORIGINAL DEL FORMULARIO (modificado ligeramente)
+        // Función simple para verificar servidor
         function verificarServidor() {
             const statusElement = document.getElementById('serverStatus');
             if (statusElement) {
@@ -733,7 +465,7 @@
             }
         }
 
-        // Formulario de contacto funcional
+        // Formulario de contacto funcional - VERSIÓN SIMPLE
         document.getElementById('contactForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
@@ -789,11 +521,12 @@
             };
 
             try {
-                // ✅ GUARDAR EN LOCALSTORAGE
+                // ✅ GUARDAR EN LOCALSTORAGE (clave única)
                 const localKey = 'consultas_dante_propiedades';
                 const existingData = JSON.parse(localStorage.getItem(localKey) || '[]');
                 
-                if (existingData.length >= 100) {
+                // Limitar a 200 registros máximo
+                if (existingData.length >= 200) {
                     existingData.shift();
                 }
                 
@@ -810,7 +543,7 @@
                 if (!enviadoAServidor) {
                     successMessage.innerHTML = `
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <div style="font-size: 24px;">📱</div>
+                            <div style="font-size: 24px;">✅</div>
                             <div>
                                 <strong>¡Consulta enviada con éxito!</strong><br>
                                 <small>Los datos fueron guardados en tu dispositivo.</small><br>
@@ -831,19 +564,19 @@
             // ✅ CREAR Y ENVIAR WHATSAPP
             const whatsappMessage = `*NUEVA CONSULTA - DANTE PROPIEDADES*
 
-👤 *Nombre:* ${nombre}
-📧 *Email:* ${email}
-📱 *Teléfono:* ${telefono || 'No especificado'}
-🎯 *Interés:* ${interes || 'Consulta general'}
-💰 *Presupuesto:* ${presupuesto || 'No especificado'}
+    👤 *Nombre:* ${nombre}
+    📧 *Email:* ${email}
+    📱 *Teléfono:* ${telefono || 'No especificado'}
+    🎯 *Interés:* ${interes || 'Consulta general'}
+    💰 *Presupuesto:* ${presupuesto || 'No especificado'}
 
-💬 *Mensaje:*
-${mensaje}
+    💬 *Mensaje:*
+    ${mensaje}
 
----
-📅 *Fecha:* ${new Date().toLocaleDateString('es-AR')}
-⏰ *Hora:* ${new Date().toLocaleTimeString('es-AR')}
-🌐 *Enviado desde:* Formulario Web Dante Propiedades`;
+    ---
+    📅 *Fecha:* ${new Date().toLocaleDateString('es-AR')}
+    ⏰ *Hora:* ${new Date().toLocaleTimeString('es-AR')}
+    🌐 *Enviado desde:* Formulario Web Dante Propiedades`;
 
             const whatsappURL = `https://wa.me/5491125368595?text=${encodeURIComponent(whatsappMessage)}`;
 
@@ -863,16 +596,28 @@ ${mensaje}
             }, 1500);
         });
 
-        // 5. INICIALIZAR TODO AL CARGAR
+        // ✅ INICIALIZAR SIMPLE
         document.addEventListener('DOMContentLoaded', function () {
-            // Sistema admin seguro
-            const adminSystem = new SistemaAdminSeguro();
-            adminSystem.inicializar();
-            
-            // Verificar servidor (modo local)
             verificarServidor();
-            console.log('✅ Formulario listo con sistema admin seguro');
+            console.log('✅ Formulario listo - Solo localStorage + WhatsApp');
+            
+            // Solo un enlace discreto al panel admin (opcional)
+            const adminLink = document.createElement('a');
+            adminLink.href = 'admin_excel.html';
+            adminLink.innerHTML = '📊';
+            adminLink.style.cssText = `
+                position: fixed; bottom: 20px; left: 20px;
+                width: 30px; height: 30px; opacity: 0.3;
+                background: #6c757d; color: white; border: none;
+                border-radius: 50%; cursor: pointer; z-index: 1000;
+                font-size: 16px; display: flex; align-items: center;
+                justify-content: center; text-decoration: none;
+                transition: opacity 0.3s;
+            `;
+            adminLink.title = 'Panel de administración';
+            document.body.appendChild(adminLink);
         });
     </script>
+    
 </body>
 </html>
