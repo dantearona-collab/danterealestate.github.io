@@ -437,184 +437,146 @@
     }
 
         // Ejecutar exportación
-    exportarDatosCompletos();
+        <script>
+        // URL del servidor (Render)
+        const SERVER_URL = 'https://danterealestate-github-io.onrender.com';
 
-
-
-
-
-    <script>
-    // URL del servidor (Render)
-    const SERVER_URL = 'https://danterealestate-github-io.onrender.com';
-
-    // ✅ VERSIÓN CORREGIDA: Siempre mostrar "Modo Local" sin verificar
-    async function verificarServidor() {
-        const statusElement = document.getElementById('serverStatus');
-        if (statusElement) {
-            statusElement.textContent = '📱 Modo Local';
-            statusElement.className = 'server-status server-local';
-            statusElement.title = 'Los datos se guardan en tu dispositivo de forma segura';
+        // Función para exportar datos (solo para admin)
+        function exportarDatosCompletos() {
+            console.log('📤 Exportando todos los datos...');
+            
+            const datos1 = JSON.parse(localStorage.getItem('consultas_dante_propiedades') || '[]');
+            const datos2 = JSON.parse(localStorage.getItem('consultas_contacto') || '[]');
+            const todosDatos = [...datos1, ...datos2];
+            
+            console.log(`📊 Total: ${todosDatos.length} registros`);
+            
+            // Crear CSV
+            const headers = ['Nombre', 'Email', 'Teléfono', 'Interés', 'Presupuesto', 'Fecha', 'Mensaje'];
+            const csvRows = [
+                headers.join(','),
+                ...todosDatos.map(item => [
+                    `"${(item.nombre || '').replace(/"/g, '""')}"`,
+                    `"${(item.email || '').replace(/"/g, '""')}"`,
+                    `"${(item.telefono || '').replace(/"/g, '""')}"`,
+                    `"${(item.interes || '').replace(/"/g, '""')}"`,
+                    `"${(item.presupuesto || '').replace(/"/g, '""')}"`,
+                    `"${(item.timestamp || '').split('T')[0]}"`,
+                    `"${(item.mensaje || '').replace(/"/g, '""').substring(0, 100)}"`
+                ].join(','))
+            ];
+            
+            const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `dante_consultas_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert(`✅ Descargado: ${todosDatos.length} consultas`);
+            return todosDatos;
         }
-        return false; // Siempre retornar false para modo local
-    }
 
-    // Función para enviar datos al servidor Python (opcional - para futuro)
-    async function enviarAlServidor(datos) {
-        try {
-            const response = await fetch(`${SERVER_URL}/api/guardar-contacto`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(datos)
-            });
+        // ✅ VERSIÓN SIMPLE: Siempre mostrar "Modo Local"
+        function verificarServidor() {
+            const statusElement = document.getElementById('serverStatus');
+            if (statusElement) {
+                statusElement.textContent = '📱 Modo Local';
+                statusElement.className = 'server-status server-local';
+            }
+            return false;
+        }
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+        // Formulario de contacto funcional - VERSIÓN SIMPLE Y CONFIABLE
+        document.getElementById('contactForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            console.log('📱 Modo local activado');
+            document.getElementById('serverStatus').textContent = '📱 Guardando...';
+
+            // Obtener datos del formulario
+            const nombre = document.getElementById('nombre').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const telefono = document.getElementById('telefono').value.trim();
+            const interes = document.getElementById('interes').value;
+            const presupuesto = document.getElementById('presupuesto').value;
+            const mensaje = document.getElementById('mensaje').value.trim();
+
+            // Validación básica
+            if (!nombre || !email || !mensaje) {
+                document.getElementById('errorMessage').innerHTML =
+                    '❌ Por favor, completá los campos obligatorios (Nombre, Email y Mensaje)';
+                document.getElementById('errorMessage').style.display = 'block';
+                return;
             }
 
-            const result = await response.json();
-            return result;
-        } catch (error) {
-            console.error('Error al enviar al servidor:', error);
-            throw error;
-        }
-    }
+            // Ocultar mensajes de error
+            document.getElementById('errorMessage').style.display = 'none';
 
-    // Formulario de contacto funcional - VERSIÓN CORREGIDA
-    document.getElementById('contactForm').addEventListener('submit', async function (e) {
-        e.preventDefault();
+            // Mostrar carga
+            const submitBtn = document.getElementById('submitBtn');
+            const successMessage = document.getElementById('successMessage');
+            const originalBtnText = submitBtn.textContent;
+            submitBtn.textContent = '⏳ Guardando...';
+            submitBtn.disabled = true;
 
-        // ✅ NO VERIFICAR SERVIDOR - Siempre permitir envío
-        console.log('📱 Modo local activado - Datos se guardarán localmente');
-        document.getElementById('serverStatus').textContent = '📱 Procesando...';
-        document.getElementById('serverStatus').className = 'server-status server-local';
+            // Preparar datos
+            const datosFormulario = { 
+                nombre, 
+                email, 
+                telefono: telefono || 'No especificado', 
+                interes: interes || 'Consulta general', 
+                presupuesto: presupuesto || 'No especificado', 
+                mensaje,
+                timestamp: new Date().toISOString(),
+                fecha: new Date().toLocaleDateString('es-AR'),
+                hora: new Date().toLocaleTimeString('es-AR')
+            };
 
-        // Obtener datos del formulario
-        const nombre = document.getElementById('nombre').value.trim();
-        const email = document.getElementById('email').value.trim();
-        const telefono = document.getElementById('telefono').value.trim();
-        const interes = document.getElementById('interes').value;
-        const presupuesto = document.getElementById('presupuesto').value;
-        const mensaje = document.getElementById('mensaje').value.trim();
-
-        // Validación básica
-        if (!nombre || !email || !mensaje) {
-            document.getElementById('errorMessage').innerHTML =
-                '❌ Por favor, completá los campos obligatorios (Nombre, Email y Mensaje)';
-            document.getElementById('errorMessage').style.display = 'block';
-            return;
-        }
-
-        // Validar email
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            document.getElementById('errorMessage').innerHTML =
-                '❌ Por favor, ingresá un email válido';
-            document.getElementById('errorMessage').style.display = 'block';
-            return;
-        }
-
-        // Ocultar mensajes de error
-        document.getElementById('errorMessage').style.display = 'none';
-
-        // Mostrar carga
-        const submitBtn = document.getElementById('submitBtn');
-        const successMessage = document.getElementById('successMessage');
-        const originalBtnText = submitBtn.textContent;
-        submitBtn.textContent = '⏳ Guardando localmente...';
-        submitBtn.disabled = true;
-
-        // Preparar datos
-        const datosFormulario = { 
-            nombre, 
-            email, 
-            telefono: telefono || 'No especificado', 
-            interes: interes || 'No especificado', 
-            presupuesto: presupuesto || 'No especificado', 
-            mensaje 
-        };
-
-        try {
             // ✅ GUARDAR EN LOCALSTORAGE (SIEMPRE FUNCIONA)
             try {
                 const localKey = 'consultas_dante_propiedades';
                 const existingData = JSON.parse(localStorage.getItem(localKey) || '[]');
-
-                // Agregar timestamp y metadatos
-                datosFormulario.timestamp = new Date().toISOString();
-                datosFormulario.fecha = new Date().toLocaleDateString('es-AR');
-                datosFormulario.hora = new Date().toLocaleTimeString('es-AR');
-                datosFormulario.pagina_origen = 'Formulario Dante Propiedades';
-                datosFormulario.tipo_consulta = datosFormulario.interes || 'general';
-
-                // Limitar a 50 registros máximo
-                if (existingData.length >= 50) {
-                    existingData.shift(); // Remover el más antiguo
+                
+                // Limitar a 100 registros máximo
+                if (existingData.length >= 100) {
+                    existingData.shift();
                 }
-
+                
                 existingData.push(datosFormulario);
                 localStorage.setItem(localKey, JSON.stringify(existingData));
-
-                console.log('✅ Datos guardados en localStorage:', datosFormulario.nombre);
-                console.log(`📊 Total de consultas almacenadas: ${existingData.length}`);
                 
-                // Mostrar en consola los datos guardados (para debugging)
-                console.log('📝 Datos completos:', datosFormulario);
+                console.log('✅ Guardado en localStorage:', datosFormulario.nombre);
+                console.log('📊 Total:', existingData.length, 'registros');
                 
-            } catch (localStorageError) {
-                console.warn('⚠️ Error guardando en localStorage:', localStorageError);
-            }
-
-            // ✅ OPCIONAL: Intentar enviar al servidor (sin bloquear)
-            try {
-                const resultado = await enviarAlServidor(datosFormulario);
-                if (resultado && resultado.success) {
-                    console.log('✅ Datos también enviados al servidor');
-                }
-            } catch (serverError) {
-                // Silenciar error del servidor - no es crítico
-                console.log('ℹ️ Servidor no disponible - Solo almacenamiento local');
-            }
-
-            // ✅ MOSTRAR MENSAJE DE ÉXITO MEJORADO
-            successMessage.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 10px; padding: 15px;">
-                    <div style="font-size: 28px; color: #28a745;">✅</div>
-                    <div>
-                        <strong style="color: #155724; font-size: 16px;">¡Consulta enviada con éxito!</strong><br>
-                        <small style="color: #0c4128;">Los datos fueron guardados en tu dispositivo. Abriendo WhatsApp...</small>
+                // ✅ MOSTRAR ÉXITO
+                successMessage.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="font-size: 24px;">✅</div>
+                        <div>
+                            <strong>¡Consulta enviada con éxito!</strong><br>
+                            <small>Los datos fueron guardados en tu dispositivo.</small><br>
+                            <small>Abriendo WhatsApp...</small>
+                        </div>
                     </div>
-                </div>
-            `;
-            successMessage.style.display = 'block';
-            successMessage.style.backgroundColor = '#d4edda';
-            successMessage.style.border = '1px solid #c3e6cb';
-            successMessage.style.borderRadius = '5px';
-            successMessage.style.margin = '15px 0';
+                `;
+                successMessage.style.display = 'block';
+                
+            } catch (error) {
+                console.error('❌ Error:', error);
+                successMessage.innerHTML = '⚠️ Error guardando, pero WhatsApp se abrirá igual';
+                successMessage.style.display = 'block';
+            }
 
-            console.log('✅ Proceso completado - Listo para WhatsApp');
-
-        } catch (error) {
-            console.error('❌ Error inesperado:', error);
-            
-            // Mostrar error amigable
-            document.getElementById('errorMessage').innerHTML =
-                '⚠️ Hubo un error inesperado. Por favor, intentá nuevamente.';
-            document.getElementById('errorMessage').style.display = 'block';
-            
-            submitBtn.textContent = originalBtnText;
-            submitBtn.disabled = false;
-            return;
-        }
-
-        // ✅ CREAR Y ENVIAR MENSAJE DE WHATSAPP
-        const whatsappMessage = `*NUEVA CONSULTA - DANTE PROPIEDADES*
+            // ✅ CREAR WHATSAPP
+            const whatsappMessage = `*NUEVA CONSULTA - DANTE PROPIEDADES*
 
 👤 *Nombre:* ${nombre}
 📧 *Email:* ${email}
 📱 *Teléfono:* ${telefono || 'No especificado'}
-🎯 *Interés:* ${interes || 'No especificado'}
+🎯 *Interés:* ${interes || 'Consulta general'}
 💰 *Presupuesto:* ${presupuesto || 'No especificado'}
 
 💬 *Mensaje:*
@@ -622,144 +584,51 @@ ${mensaje}
 
 ---
 📅 *Fecha:* ${new Date().toLocaleDateString('es-AR')}
-⏰ *Hora:* ${new Date().toLocaleTimeString('es-AR')}
-🌐 *Enviado desde:* Formulario Web Dante Propiedades`;
+⏰ *Hora:* ${new Date().toLocaleTimeString('es-AR')}`;
 
-        // URL de WhatsApp con el mensaje codificado
-        const whatsappURL = `https://wa.me/5491125368595?text=${encodeURIComponent(whatsappMessage)}`;
+            const whatsappURL = `https://wa.me/5491125368595?text=${encodeURIComponent(whatsappMessage)}`;
 
-        // ✅ ABRIR WHATSAPP DESPUÉS DE 1.5 SEGUNDOS
-        setTimeout(() => {
-            console.log('💬 Abriendo WhatsApp...');
-            window.open(whatsappURL, '_blank', 'noopener,noreferrer');
-            
-            // ✅ RESTAURAR ESTADO DEL BOTÓN
-            submitBtn.textContent = '✅ Enviado';
-            submitBtn.style.backgroundColor = '#28a745';
-            
-            // ✅ REINICIAR FORMULARIO DESPUÉS DE 3 SEGUNDOS
+            // ✅ ABRIR WHATSAPP
             setTimeout(() => {
-                this.reset();
-                successMessage.style.display = 'none';
-                submitBtn.textContent = originalBtnText;
-                submitBtn.disabled = false;
-                submitBtn.style.backgroundColor = '';
-                document.getElementById('serverStatus').textContent = '📱 Modo Local';
-                console.log('🔄 Formulario reiniciado - Listo para nueva consulta');
-            }, 3000);
-            
-        }, 1500);
-    });
+                console.log('💬 Abriendo WhatsApp...');
+                window.open(whatsappURL, '_blank');
+                
+                // Restaurar botón después de 3 segundos
+                setTimeout(() => {
+                    document.getElementById('contactForm').reset();
+                    successMessage.style.display = 'none';
+                    submitBtn.textContent = originalBtnText;
+                    submitBtn.disabled = false;
+                    document.getElementById('serverStatus').textContent = '📱 Modo Local';
+                }, 3000);
+            }, 1500);
+        });
 
-    // ✅ INICIALIZAR AL CARGAR LA PÁGINA
-    document.addEventListener('DOMContentLoaded', function () {
-        // Configurar estado inicial
-        verificarServidor();
-        console.log('📱 Formulario configurado en modo local');
+        // ✅ INICIALIZAR
+        document.addEventListener('DOMContentLoaded', function () {
+            verificarServidor();
+            console.log('✅ Formulario listo');
+            
+            // Agregar botón de admin (solo para testing)
+            const adminBtn = document.createElement('button');
+            adminBtn.textContent = '📊 Admin';
+            adminBtn.style.cssText = `
+                position: fixed; bottom: 90px; right: 20px; 
+                background: #6f42c1; color: white; border: none;
+                padding: 10px 15px; border-radius: 50px; cursor: pointer;
+                z-index: 1000; font-size: 12px; font-weight: bold;
+            `;
+            adminBtn.onclick = function() {
+                const datos1 = JSON.parse(localStorage.getItem('consultas_dante_propiedades') || '[]');
+                const datos2 = JSON.parse(localStorage.getItem('consultas_contacto') || '[]');
+                alert(`📊 Consultas almacenadas:\n\nconsultas_dante_propiedades: ${datos1.length}\nconsultas_contacto: ${datos2.length}\n\nTotal: ${datos1.length + datos2.length}`);
+            };
+            document.body.appendChild(adminBtn);
+            
+            console.log('💡 Para exportar datos, ejecuta: exportarDatosCompletos()');
+        });
+    </script>
 
-        // ✅ AGREGAR ESTILOS CSS PARA MEJOR APARIENCIA
-        const style = document.createElement('style');
-        style.textContent = `
-            .server-status {
-                padding: 5px 12px;
-                border-radius: 20px;
-                font-size: 12px;
-                font-weight: bold;
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                animation: fadeIn 0.5s ease-out;
-                margin-left: 10px;
-                transition: all 0.3s ease;
-            }
-            
-            .server-local {
-                background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-                color: white;
-                border: none;
-                box-shadow: 0 2px 8px rgba(106, 17, 203, 0.2);
-            }
-            
-            .server-local:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(106, 17, 203, 0.3);
-            }
-            
-            .server-connected {
-                background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
-                color: white;
-                border: none;
-            }
-            
-            .server-disconnected {
-                background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
-                color: white;
-                border: none;
-            }
-            
-            @keyframes fadeIn {
-                from { 
-                    opacity: 0; 
-                    transform: translateY(-8px); 
-                }
-                to { 
-                    opacity: 1; 
-                    transform: translateY(0); 
-                }
-            }
-            
-            #submitBtn {
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-            
-            #submitBtn:hover:not(:disabled) {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
-            }
-            
-            #submitBtn:disabled {
-                background-color: #28a745 !important;
-                color: white !important;
-                cursor: not-allowed;
-            }
-            
-            .form-section {
-                animation: slideUp 0.6s ease-out;
-            }
-            
-            @keyframes slideUp {
-                from { 
-                    opacity: 0; 
-                    transform: translateY(30px); 
-                }
-                to { 
-                    opacity: 1; 
-                    transform: translateY(0); 
-                }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // Animación de entrada suave
-        const formSection = document.querySelector('.form-section');
-        if (formSection) {
-            formSection.style.opacity = '0';
-            formSection.style.transform = 'translateY(20px)';
-            
-            setTimeout(() => {
-                formSection.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-                formSection.style.opacity = '1';
-                formSection.style.transform = 'translateY(0)';
-            }, 100);
-        }
-    });
-
-    // ✅ VERIFICAR PERIÓDICAMENTE (opcional, sin bloquear)
-    setInterval(() => {
-        document.getElementById('serverStatus').textContent = '📱 Modo Local';
-        document.getElementById('serverStatus').className = 'server-status server-local';
-    }, 30000);
-</script>
 </body>
-
 </html>
+
