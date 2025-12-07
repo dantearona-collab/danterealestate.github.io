@@ -11,42 +11,29 @@
  * ✅ Analytics básicos
  */
 
-// Detección automática de entorno
-const isLocalDevelopment = window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1' ||
-    window.location.port === '5500'; // Live Server
-
-const API_BASE_URL = isLocalDevelopment
-    ? 'http://localhost:5000'
-    : 'https://danterealestate-github-io.onrender.com';
-
-console.log(`🌐 Entorno: ${isLocalDevelopment ? 'Desarrollo Local' : 'Producción'}`);
-console.log(`🔗 API Base: ${API_BASE_URL}`);
-
 // Configuración global del sistema
 const FormSystemConfig = {
-    // URLs del servidor - CON DETECCIÓN AUTOMÁTICA
+    // URLs del servidor
     serverEndpoints: {
-        save: `${API_BASE_URL}/api/guardar-contacto`,
-        getConsultas: `${API_BASE_URL}/api/obtener-consultas`,
-        resumen: `${API_BASE_URL}/api/resumen`,
-        health: `${API_BASE_URL}/health`,
-        exportarExcel: `${API_BASE_URL}/api/exportar-excel`
+        save: 'http://localhost:5000/api/guardar-contacto',
+        getConsultas: 'http://localhost:5000/api/obtener-consultas',
+        resumen: 'http://localhost:5000/api/resumen',
+        health: 'http://localhost:5000/health'
     },
-
+    
     // Configuración de almacenamiento
     storage: {
         localKey: 'formulario_consultas_respaldo',
         backupInterval: 60000, // 1 minuto
         maxLocalRecords: 1000
     },
-
+    
     // WhatsApp
     whatsapp: {
         number: '+5491125368595',
         enabled: true
     },
-
+    
     // Validación
     validation: {
         requiredFields: ['nombre', 'email', 'mensaje'],
@@ -55,10 +42,6 @@ const FormSystemConfig = {
     }
 };
 
-console.log('📡 Endpoints configurados:', FormSystemConfig.serverEndpoints);
-
-// ... EL RESTO DE TU CÓDIGO SE MANTIENE IGUAL ...
-// Clases FormStorageManager, FormValidator, WhatsAppIntegration, etc.
 class FormStorageManager {
     /**
      * 💾 Gestor de almacenamiento con múltiples métodos
@@ -67,21 +50,21 @@ class FormStorageManager {
         this.localData = this._loadFromLocalStorage();
         this.syncQueue = [];
         this.isOnline = navigator.onLine;
-
+        
         // Event listeners para cambios de conectividad
         window.addEventListener('online', () => {
             this.isOnline = true;
             this._syncPendingData();
         });
-
+        
         window.addEventListener('offline', () => {
             this.isOnline = false;
         });
-
+        
         // Auto-sync cada minuto
         setInterval(() => this._syncPendingData(), FormSystemConfig.storage.backupInterval);
     }
-
+    
     /**
      * 💾 Guardar datos del formulario
      */
@@ -94,10 +77,10 @@ class FormStorageManager {
             userAgent: navigator.userAgent,
             online: this.isOnline
         };
-
+        
         // 1. Guardar inmediatamente en localStorage
         this._saveToLocalStorage(registroCompleto);
-
+        
         // 2. Intentar enviar al servidor
         if (this.isOnline) {
             try {
@@ -115,7 +98,7 @@ class FormStorageManager {
             return { localGuardado: true, servidorGuardado: false, modo: 'offline' };
         }
     }
-
+    
     /**
      * 📊 Obtener estadísticas
      */
@@ -127,10 +110,10 @@ class FormStorageManager {
             const fechaHoy = new Date().toDateString();
             return fechaItem === fechaHoy;
         }).length;
-
+        
         const intereses = {};
         const presupuestos = {};
-
+        
         datos.forEach(item => {
             // Contar intereses
             if (item.interes) {
@@ -141,7 +124,7 @@ class FormStorageManager {
                 presupuestos[item.presupuesto] = (presupuestos[item.presupuesto] || 0) + 1;
             }
         });
-
+        
         return {
             total,
             hoy,
@@ -150,34 +133,34 @@ class FormStorageManager {
             ultimoRegistro: datos.length > 0 ? datos[datos.length - 1].timestamp : null
         };
     }
-
+    
     /**
      * 📤 Exportar datos
      */
     exportarDatos(formato = 'csv') {
         const datos = this._loadFromLocalStorage();
-
+        
         if (formato === 'csv') {
             return this._exportarCSV(datos);
         } else if (formato === 'json') {
             return this._exportarJSON(datos);
         }
     }
-
+    
     // Métodos privados
     _saveToLocalStorage(datos) {
         let datosExistentes = this._loadFromLocalStorage();
         datosExistentes.push(datos);
-
+        
         // Limitar número de registros
         if (datosExistentes.length > FormSystemConfig.storage.maxLocalRecords) {
             datosExistentes = datosExistentes.slice(-FormSystemConfig.storage.maxLocalRecords);
         }
-
+        
         localStorage.setItem(FormSystemConfig.storage.localKey, JSON.stringify(datosExistentes));
         this.localData = datosExistentes;
     }
-
+    
     _loadFromLocalStorage() {
         try {
             const data = localStorage.getItem(FormSystemConfig.storage.localKey);
@@ -187,7 +170,7 @@ class FormStorageManager {
             return [];
         }
     }
-
+    
     async _enviarAlServidor(datos) {
         const response = await fetch(FormSystemConfig.serverEndpoints.save, {
             method: 'POST',
@@ -196,29 +179,29 @@ class FormStorageManager {
             },
             body: JSON.stringify(datos)
         });
-
+        
         if (!response.ok) {
             throw new Error(`Error del servidor: ${response.status}`);
         }
-
+        
         return await response.json();
     }
-
+    
     _agregarAColaSync(datos) {
         this.syncQueue.push(datos);
         console.log(`📋 Datos agregados a cola de sincronización. Total en cola: ${this.syncQueue.length}`);
     }
-
+    
     async _syncPendingData() {
         if (this.syncQueue.length === 0 || !this.isOnline) {
             return;
         }
-
+        
         console.log(`🔄 Sincronizando ${this.syncQueue.length} registros pendientes...`);
-
+        
         const colaActual = [...this.syncQueue];
         this.syncQueue = [];
-
+        
         for (const datos of colaActual) {
             try {
                 await this._enviarAlServidor(datos);
@@ -230,14 +213,14 @@ class FormStorageManager {
             }
         }
     }
-
+    
     _exportarCSV(datos) {
         if (datos.length === 0) return 'No hay datos para exportar';
-
+        
         const headers = Object.keys(datos[0]);
         const csvContent = [
             headers.join(','),
-            ...datos.map(row =>
+            ...datos.map(row => 
                 headers.map(header => {
                     const value = row[header] || '';
                     // Escapar comillas y envolver en comillas si contiene comas
@@ -246,10 +229,10 @@ class FormStorageManager {
                 }).join(',')
             )
         ].join('\n');
-
+        
         return csvContent;
     }
-
+    
     _exportarJSON(datos) {
         return JSON.stringify(datos, null, 2);
     }
@@ -281,57 +264,57 @@ class FormValidator {
             }
         };
     }
-
+    
     validarFormulario(formData) {
         const errores = {};
-
+        
         Object.keys(this.rules).forEach(campo => {
             const regla = this.rules[campo];
             const valor = formData[campo];
-
+            
             if (regla.required && (!valor || valor.trim() === '')) {
                 errores[campo] = `El campo ${campo} es obligatorio`;
                 return;
             }
-
+            
             if (valor && regla.minLength && valor.length < regla.minLength) {
                 errores[campo] = `Mínimo ${regla.minLength} caracteres`;
                 return;
             }
-
+            
             if (valor && regla.maxLength && valor.length > regla.maxLength) {
                 errores[campo] = `Máximo ${regla.maxLength} caracteres`;
                 return;
             }
-
+            
             if (valor && regla.pattern && !regla.pattern.test(valor)) {
                 errores[campo] = 'Formato inválido';
                 return;
             }
         });
-
+        
         return {
             esValido: Object.keys(errores).length === 0,
             errores
         };
     }
-
+    
     mostrarErrores(errores, formId) {
         // Limpiar errores anteriores
         document.querySelectorAll(`#${formId} .error-message`).forEach(el => el.remove());
         document.querySelectorAll(`#${formId} .field-error`).forEach(el => el.classList.remove('field-error'));
-
+        
         // Mostrar nuevos errores
         Object.keys(errores).forEach(campo => {
             const field = document.getElementById(campo);
             if (field) {
                 field.classList.add('field-error');
-
+                
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'error-message';
                 errorDiv.textContent = errores[campo];
                 errorDiv.style.cssText = 'color: #dc3545; font-size: 0.875em; margin-top: 5px;';
-
+                
                 field.parentNode.appendChild(errorDiv);
             }
         });
@@ -344,7 +327,7 @@ class WhatsAppIntegration {
      */
     static generarMensaje(datos) {
         const timestamp = new Date().toLocaleString('es-AR');
-
+        
         return `*NUEVA CONSULTA - SISTEMA DE FORMULARIOS*
 
 👤 *Nombre:* ${datos.nombre}
@@ -360,16 +343,16 @@ ${datos.mensaje}
 📅 Enviado: ${timestamp}
 🌐 Desde: ${window.location.origin}`;
     }
-
+    
     static abrirWhatsApp(datos) {
         if (!FormSystemConfig.whatsapp.enabled) return;
-
+        
         const mensaje = this.generarMensaje(datos);
         const url = `https://wa.me/${FormSystemConfig.whatsapp.number.replace(/[^\d]/g, '')}?text=${encodeURIComponent(mensaje)}`;
-
+        
         // Abrir en nueva ventana
         window.open(url, '_blank');
-
+        
         console.log('📱 WhatsApp abierto con mensaje generado');
     }
 }
@@ -382,7 +365,7 @@ class FormAnalytics {
         this.eventos = [];
         this.inicioSesion = Date.now();
     }
-
+    
     registrarEvento(tipo, datos = {}) {
         const evento = {
             tipo,
@@ -390,9 +373,9 @@ class FormAnalytics {
             datos,
             duracion: Date.now() - this.inicioSesion
         };
-
+        
         this.eventos.push(evento);
-
+        
         // Enviar a Google Analytics si está disponible
         if (typeof gtag !== 'undefined') {
             gtag('event', tipo, {
@@ -401,13 +384,13 @@ class FormAnalytics {
             });
         }
     }
-
+    
     obtenerResumen() {
         const eventosPorTipo = {};
         this.eventos.forEach(evento => {
             eventosPorTipo[evento.tipo] = (eventosPorTipo[evento.tipo] || 0) + 1;
         });
-
+        
         return {
             totalEventos: this.eventos.length,
             duracionTotal: Date.now() - this.inicioSesion,
@@ -428,10 +411,10 @@ class FormSystem {
         this.validator = new FormValidator();
         this.analytics = new FormAnalytics();
         this.formularioActivo = null;
-
+        
         this._inicializarEventListeners();
     }
-
+    
     /**
      * 🔧 Inicializar el sistema
      */
@@ -440,50 +423,50 @@ class FormSystem {
         if (!this.formularioActivo) {
             throw new Error(`Formulario con ID '${formId}' no encontrado`);
         }
-
+        
         // Configurar validaciones en tiempo real
         this._configurarValidacionTiempoReal();
-
+        
         // Configurar envío del formulario
         this._configurarEnvioFormulario(opciones);
-
+        
         // Registrar evento de inicialización
         this.analytics.registrarEvento('formulario_inicializado', { formId });
-
+        
         console.log('✅ Sistema de formularios inicializado');
     }
-
+    
     /**
      * 📨 Enviar formulario manualmente
      */
     async enviarFormulario(formId, datos = null) {
         try {
             const formData = datos || this._obtenerDatosFormulario(formId);
-
+            
             // Validar datos
             const validacion = this.validator.validarFormulario(formData);
             if (!validacion.esValido) {
                 this.validator.mostrarErrores(validacion.errores, formId);
                 throw new Error('Errores de validación');
             }
-
+            
             // Mostrar estado de carga
             this._mostrarEstadoCarga(formId, 'Enviando...');
-
+            
             // Registrar evento
             this.analytics.registrarEvento('formulario_enviado', formData);
-
+            
             // Guardar datos
             const resultado = await this.storage.guardarDatos(formData);
-
+            
             // Abrir WhatsApp
             WhatsAppIntegration.abrirWhatsApp(formData);
-
+            
             // Mostrar éxito
             this._mostrarExito(formId, resultado);
-
+            
             return resultado;
-
+            
         } catch (error) {
             console.error('❌ Error enviando formulario:', error);
             this._mostrarError(formId, error.message);
@@ -492,38 +475,38 @@ class FormSystem {
             this._ocultarEstadoCarga(formId);
         }
     }
-
+    
     // Métodos privados
     _inicializarEventListeners() {
         // Detectar cambios de conectividad
         window.addEventListener('online', () => {
             console.log('🌐 Conexión restaurada');
         });
-
+        
         window.addEventListener('offline', () => {
             console.log('📴 Modo offline activado');
         });
     }
-
+    
     _configurarValidacionTiempoReal() {
         if (!this.formularioActivo) return;
-
+        
         const campos = this.formularioActivo.querySelectorAll('input, textarea, select');
         campos.forEach(campo => {
             campo.addEventListener('blur', () => {
                 this._validarCampo(campo);
             });
-
+            
             campo.addEventListener('input', () => {
                 this._limpiarErrorCampo(campo);
             });
         });
     }
-
+    
     _configurarEnvioFormulario(opciones) {
         this.formularioActivo.addEventListener('submit', async (e) => {
             e.preventDefault();
-
+            
             if (opciones.onSubmit) {
                 await opciones.onSubmit();
             } else {
@@ -531,44 +514,44 @@ class FormSystem {
             }
         });
     }
-
+    
     _obtenerDatosFormulario(formId) {
         const form = document.getElementById(formId);
         const formData = new FormData(form);
         const datos = {};
-
+        
         for (let [key, value] of formData.entries()) {
             datos[key] = value;
         }
-
+        
         return datos;
     }
-
+    
     _validarCampo(campo) {
         const nombre = campo.name || campo.id;
         const valor = campo.value;
         const reglas = this.validator.rules[nombre];
-
+        
         if (!reglas) return;
-
+        
         let error = null;
-
+        
         if (reglas.required && (!valor || valor.trim() === '')) {
             error = `El campo ${nombre} es obligatorio`;
         } else if (valor && reglas.pattern && !reglas.pattern.test(valor)) {
             error = 'Formato inválido';
         }
-
+        
         if (error) {
             this._mostrarErrorCampo(campo, error);
         } else {
             this._limpiarErrorCampo(campo);
         }
     }
-
+    
     _mostrarErrorCampo(campo, mensaje) {
         campo.classList.add('field-error');
-
+        
         let errorDiv = campo.parentNode.querySelector('.error-message');
         if (!errorDiv) {
             errorDiv = document.createElement('div');
@@ -578,7 +561,7 @@ class FormSystem {
         }
         errorDiv.textContent = mensaje;
     }
-
+    
     _limpiarErrorCampo(campo) {
         campo.classList.remove('field-error');
         const errorDiv = campo.parentNode.querySelector('.error-message');
@@ -586,7 +569,7 @@ class FormSystem {
             errorDiv.remove();
         }
     }
-
+    
     _mostrarEstadoCarga(formId, mensaje) {
         const form = document.getElementById(formId);
         const submitBtn = form.querySelector('button[type="submit"]');
@@ -595,7 +578,7 @@ class FormSystem {
             submitBtn.textContent = mensaje;
         }
     }
-
+    
     _ocultarEstadoCarga(formId) {
         const form = document.getElementById(formId);
         const submitBtn = form.querySelector('button[type="submit"]');
@@ -604,37 +587,37 @@ class FormSystem {
             submitBtn.textContent = 'Enviar';
         }
     }
-
+    
     _mostrarExito(formId, resultado) {
         const form = document.getElementById(formId);
         const mensaje = form.querySelector('.success-message') || this._crearMensajeExito(formId);
-
+        
         let texto = '¡Formulario enviado correctamente!';
         if (resultado.servidorGuardado === false) {
             texto += ' (Modo offline - datos guardados localmente)';
         }
-
+        
         mensaje.textContent = texto;
         mensaje.style.display = 'block';
-
+        
         setTimeout(() => {
             mensaje.style.display = 'none';
             form.reset();
         }, 5000);
     }
-
+    
     _mostrarError(formId, error) {
         const form = document.getElementById(formId);
         const mensaje = form.querySelector('.error-message') || this._crearMensajeError(formId);
-
+        
         mensaje.textContent = `Error: ${error}`;
         mensaje.style.display = 'block';
-
+        
         setTimeout(() => {
             mensaje.style.display = 'none';
         }, 5000);
     }
-
+    
     _crearMensajeExito(formId) {
         const form = document.getElementById(formId);
         const mensaje = document.createElement('div');
@@ -643,7 +626,7 @@ class FormSystem {
         form.insertBefore(mensaje, form.firstChild);
         return mensaje;
     }
-
+    
     _crearMensajeError(formId) {
         const form = document.getElementById(formId);
         const mensaje = document.createElement('div');
@@ -661,9 +644,9 @@ if (typeof window !== 'undefined') {
     window.FormStorageManager = FormStorageManager;
     window.FormValidator = FormValidator;
     window.WhatsAppIntegration = WhatsAppIntegration;
-
+    
     // Auto-inicializar si hay un formulario con data-auto-init
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         const formsToInit = document.querySelectorAll('[data-auto-init]');
         formsToInit.forEach(form => {
             const formSystem = new FormSystem();

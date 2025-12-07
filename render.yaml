@@ -1,6 +1,1 @@
-services:
-  - type: web
-    name: danterealestate
-    env: python
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn app:app"
+web: python servidor_excel.py
