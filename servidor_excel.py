@@ -5,23 +5,24 @@ PARCHE URGENTE - Corregir error 'Fecha' en API de estadísticas
 Dante Propiedades - Solución para problema "desconectado"
 """
 
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, send_from_directory
 import pandas as pd
 from datetime import datetime
 import os
 from flask_cors import CORS
+# Importar mimetypes para asegurar tipos de contenido correctos
+import mimetypes
 
-
-
-app = Flask(__name__)
-
-# ✅ CONFIGURACIÓN CORS CORRECTA PARA TU DOMINIO
-CORS(app)
-
+app = Flask(__name__, static_folder='.')
+CORS(app)  # Permitir requests desde el frontend
 
 # Configuración
 EXCEL_FILE = 'contactos_dante_propiedades.xlsx'
 LOG_FILE = 'registro_contactos.log'
+
+# Agregar tipos MIME adicionales por si acaso
+mimetypes.add_type('application/javascript', '.js')
+mimetypes.add_type('text/css', '.css')
 
 def log_contacto(mensaje):
     """Registra actividad en archivo de log"""
@@ -542,44 +543,30 @@ def formulario():
     except:
         return "Formulario no disponible", 404
 
+@app.route('/<path:filename>')
+def serve_static(filename):
+    """Servir archivos estáticos de forma genérica"""
+    return send_from_directory('.', filename)
+
+# ✅ AGREGAR ESTO AL FINAL DEL ARCHIVO, ANTES DEL if __name__...
+
+# Health check endpoint (Render lo necesita)
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Health check para Render"""
+    return jsonify({
+        'status': 'healthy',
+        'service': 'Dante Propiedades Backend',
+        'timestamp': datetime.now().isoformat(),
+        'python_version': '3.11'
+    }), 200
+
+# ✅ MODIFICA EL BLOQUE FINAL:
 if __name__ == '__main__':
-    print("🏢 Dante Propiedades - Servidor PARCHE CORREGIDO")
-    print("=" * 60)
-    print(f"📁 Archivo Excel: {EXCEL_FILE}")
-    print(f"📋 Archivo Log: {LOG_FILE}")
-    print("🚀 Iniciando servidor...")
-    
-    log_contacto("🎉 Servidor iniciado correctamente con parche de 'Fecha'")
-    
-    # Crear archivo Excel inicial si no existe
-    if not os.path.exists(EXCEL_FILE):
-        try:
-            df_inicial = pd.DataFrame(columns=[
-                'Fecha', 'Nombre', 'Email', 'Teléfono', 'Interés', 
-                'Presupuesto', 'Mensaje', 'Página_Origen', 'IP_Cliente', 'User_Agent'
-            ])
-            df_inicial.to_excel(EXCEL_FILE, index=False, engine='openpyxl')
-            print("📄 Archivo Excel inicializado")
-            log_contacto("📄 Archivo Excel creado inicialmente")
-        except Exception as e:
-            print(f"⚠️ Error inicializando Excel: {str(e)}")
-    
-    # Configuración para Render (puerto dinámico)
+    # Render asigna el puerto automáticamente
     port = int(os.environ.get('PORT', 5000))
-    print(f"🌐 Servidor corriendo en puerto: {port}")
-    print("📄 Páginas web disponibles:")
-    print("   / - Página principal")
-    print("   /formulario - Formulario de contacto")
-    print("   /admin - Panel de administración")
-    print("   /api/descargar-excel - Descargar Excel")
-    print()
-    print("📡 APIs disponibles:")
-    print("   POST /api/guardar-contacto - Guardar nuevo contacto")
-    print("   GET  /api/estadisticas - Ver estadísticas (CORREGIDA)")
-    print("   GET  /api/descargar-excel - Descargar archivo Excel")
-    print("   GET  /debug - Diagnóstico del sistema (MEJORADO)")
-    print("=" * 60)
+    print(f"🚀 Iniciando servidor Flask en puerto {port}")
+    print(f"🌐 URL: http://0.0.0.0:{port}")
     
-    # Configuración para Render (sin debug en producción)
-    debug_mode = os.environ.get('FLASK_ENV') != 'production'
-    app.run(debug=debug_mode, host='0.0.0.0', port=port)
+    # NO usar debug en producción
+    app.run(host='0.0.0.0', port=port, debug=False)
