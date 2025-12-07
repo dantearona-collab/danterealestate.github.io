@@ -386,6 +386,63 @@
         💬
     </a>
 
+    function exportarDatosCompletos() {
+        console.log('📤 Exportando todos los datos...');
+        
+        // Obtener datos de ambas claves
+        const datos1 = JSON.parse(localStorage.getItem('consultas_dante_propiedades') || '[]');
+        const datos2 = JSON.parse(localStorage.getItem('consultas_contacto') || '[]');
+        
+        // Combinar todos los datos
+        const todosDatos = [...datos1, ...datos2];
+        
+        console.log(`📊 Total combinado: ${todosDatos.length} registros`);
+        console.log(`   De consultas_dante_propiedades: ${datos1.length}`);
+        console.log(`   De consultas_contacto: ${datos2.length}`);
+        
+        // Formatear como CSV
+        const headers = ['Nombre', 'Email', 'Teléfono', 'Interés', 'Presupuesto', 'Mensaje', 'Fecha', 'Origen'];
+        
+        const csvRows = [
+            headers.join(','), // Encabezados
+            ...todosDatos.map(item => [
+            `"${(item.nombre || '').replace(/"/g, '""')}"`,
+            `"${(item.email || '').replace(/"/g, '""')}"`,
+            `"${(item.telefono || '').replace(/"/g, '""')}"`,
+            `"${(item.interes || '').replace(/"/g, '""')}"`,
+            `"${(item.presupuesto || '').replace(/"/g, '""')}"`,
+            `"${(item.mensaje || '').replace(/"/g, '""').substring(0, 100)}"`,
+            `"${(item.fecha || item.timestamp || '').replace(/"/g, '""')}"`,
+            `"${(item.pagina_origen || 'Formulario Web').replace(/"/g, '""')}"`
+            ].join(','))
+        ];
+        
+        const csvString = csvRows.join('\n');
+        
+        // Crear y descargar archivo
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `dante_consultas_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        console.log('✅ Archivo CSV descargado!');
+        console.log('📝 Para ver datos detallados:');
+        console.log(todosDatos);
+        
+        return todosDatos;
+    }
+
+        // Ejecutar exportación
+    exportarDatosCompletos();
+
+
+
+
+
     <script>
     // URL del servidor (Render)
     const SERVER_URL = 'https://danterealestate-github-io.onrender.com';
