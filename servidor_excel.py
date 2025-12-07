@@ -13,8 +13,10 @@ from flask_cors import CORS
 # Importar mimetypes para asegurar tipos de contenido correctos
 import mimetypes
 
-app = Flask(__name__, static_folder='.')
-CORS(app)  # Permitir requests desde el frontend
+app = Flask(__name__)
+
+# ✅ ELIMINA UNA DE LAS DOS - DEJA SOLO ESTA:
+CORS(app)  # ← Esta permite todo (bueno para pruebas)
 
 # Configuración
 EXCEL_FILE = 'contactos_dante_propiedades.xlsx'
@@ -146,12 +148,16 @@ def obtener_contactos():
             'mensaje': 'Error al obtener la lista de contactos'
         }), 500
 
-@app.route('/api/guardar-contacto', methods=['GET', 'POST'])
+@app.route('/api/guardar-contacto', methods=['GET', 'POST', 'OPTIONS'])  # ✅ AGREGAR OPTIONS
 def guardar_contacto():
     """
     Endpoint para recibir y guardar datos del formulario (POST)
     o obtener la lista de contactos (GET)
     """
+    # ✅ MANEJAR PREFLIGHT REQUEST (CORS)
+    if request.method == 'OPTIONS':
+        return '', 200
+    
     if request.method == 'GET':
         return obtener_contactos()
     
@@ -182,9 +188,16 @@ def guardar_contacto():
         exito, mensaje = guardar_contacto_excel(datos)
         
         if exito:
+            # ✅ AGREGAR WHATSAPP URL A LA RESPUESTA
+            telefono_whatsapp = "+5491125368595"
+            mensaje_whatsapp = f"Hola, soy {datos['nombre']}. Estoy interesado en: {datos.get('interes', '')}. {datos['mensaje']}"
+            mensaje_codificado = mensaje_whatsapp.replace(' ', '%20').replace('\n', '%0A')
+            url_whatsapp = f"https://wa.me/{telefono_whatsapp}?text={mensaje_codificado}"
+            
             return jsonify({
                 'success': True,
-                'message': 'Contacto guardado exitosamente',
+                'message': '✅ Contacto guardado exitosamente en Excel',
+                'whatsapp': url_whatsapp,  # ✅ AGREGAR ESTO
                 'datos_guardados': {
                     'nombre': datos['nombre'],
                     'email': datos['email'],
@@ -204,7 +217,6 @@ def guardar_contacto():
             'success': False,
             'message': 'Error interno del servidor'
         }), 500
-
 # API ESTADÍSTICAS CORREGIDA - SIN ERROR DE 'FECHA'
 @app.route('/api/estadisticas', methods=['GET'])
 def obtener_estadisticas():
@@ -490,15 +502,18 @@ def admin_panel():
 </html>'''
 
 # RUTA DEBUG - VERSIÓN MEJORADA
-@app.route('/debug', methods=['GET'])
+@app.route('/debug', methods=['GET', 'OPTIONS'])  # ✅ AGREGAR OPTIONS
 def debug():
-    """Ruta de diagnóstico - VERSIÓN CORREGIDA"""
+    """Ruta de diagnóstico - CON CORS"""
+    if request.method == 'OPTIONS':
+        return '', 200  # ✅ RESPONDER PREFLIGHT
+    
     try:
         excel_existe = os.path.exists(EXCEL_FILE)
         archivos = []
         try:
             if os.path.exists('.'):
-                archivos = os.listdir('.')[:10]  # Solo primeros 10 archivos
+                archivos = os.listdir('.')[:10]
         except:
             archivos = ['Error listando archivos']
             
@@ -509,11 +524,13 @@ def debug():
             'directorio': os.getcwd() if os.path.exists('.') else 'No accesible',
             'archivos_disponibles': archivos,
             'excel_existe': excel_existe,
-            'excel_path': EXCEL_FILE if excel_existe else 'No existe'
+            'excel_path': EXCEL_FILE if excel_existe else 'No existe',
+            'cors_enabled': True  # ✅ AGREGAR ESTO
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
+    
+    
 @app.route('/api/descargar-excel', methods=['GET'])
 def api_descargar_excel():
     """API para descargar archivo Excel"""
