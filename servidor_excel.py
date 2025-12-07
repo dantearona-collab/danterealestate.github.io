@@ -13,71 +13,11 @@ from flask_cors import CORS
 
 
 
-from flask import Flask, request, jsonify, send_file
-import pandas as pd
-from datetime import datetime
-import os
-from flask_cors import CORS
-
 app = Flask(__name__)
 
 # ✅ CONFIGURACIÓN CORS CORRECTA PARA TU DOMINIO
-CORS(app, origins=[
-    "https://www.dantepropiedades.com.ar",
-    "https://dantepropiedades.com.ar", 
-    "http://localhost:5000",
-    "http://localhost:5500",
-    "http://127.0.0.1:5000"
-])
+CORS(app)
 
-# ✅ O esta alternativa más específica:
-CORS(app, resources={
-    r"/*": {
-        "origins": ["https://www.dantepropiedades.com.ar", "https://dantepropiedades.com.ar"],
-        "methods": ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
-        "allow_headers": ["Content-Type", "Authorization", "Origin", "Accept"],
-        "expose_headers": ["Content-Type", "Authorization"],
-        "supports_credentials": True,
-        "max_age": 3600
-    }
-})
-
-# ✅ AGREGAR HEADERS MANUALMENTE (seguridad extra)
-@app.after_request
-def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', 'https://www.dantepropiedades.com.ar')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,Origin')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
-    response.headers.add('Access-Control-Allow-Credentials', 'true')
-    return response
-
-# ✅ RUTA DEBUG CON CORS EXPLÍCITO
-@app.route('/debug', methods=['GET', 'OPTIONS'])
-def debug():
-    """Ruta de diagnóstico - CON CORS"""
-    if request.method == 'OPTIONS':
-        return '', 200
-    
-    try:
-        excel_existe = os.path.exists(EXCEL_FILE)
-        return jsonify({
-            'status': 'ok',
-            'message': 'Flask funcionando con CORS configurado',
-            'timestamp': datetime.now().isoformat(),
-            'excel_existe': excel_existe,
-            'cors_origin': request.headers.get('Origin', 'No Origin header'),
-            'allowed_origins': ['https://www.dantepropiedades.com.ar', 'https://dantepropiedades.com.ar']
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-# ✅ RUTA API CON CORS
-@app.route('/api/guardar-contacto', methods=['POST', 'OPTIONS'])
-def guardar_contacto():
-    """Endpoint para guardar contacto - CON CORS"""
-    if request.method == 'OPTIONS':
-        return '', 200
-    
 
 # Configuración
 EXCEL_FILE = 'contactos_dante_propiedades.xlsx'
