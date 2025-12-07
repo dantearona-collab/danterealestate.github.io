@@ -349,6 +349,70 @@
     </style>
 </head>
 <body>
+
+    <!-- Reemplaza el input de password en la Opción 1 con esto: -->
+    <div class="pin-container">
+        <p style="color: #666; margin-bottom: 15px;">Ingresa el PIN de 4 dígitos</p>
+        
+        <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px;">
+            <input type="password" maxlength="1" class="pin-digit" 
+                oninput="moverFoco(this, 1)" style="width: 50px; height: 50px; text-align: center; font-size: 24px;">
+            <input type="password" maxlength="1" class="pin-digit" 
+                oninput="moverFoco(this, 2)" style="width: 50px; height: 50px; text-align: center; font-size: 24px;">
+            <input type="password" maxlength="1" class="pin-digit" 
+                oninput="moverFoco(this, 3)" style="width: 50px; height: 50px; text-align: center; font-size: 24px;">
+            <input type="password" maxlength="1" class="pin-digit" 
+                oninput="moverFoco(this, 4)" style="width: 50px; height: 50px; text-align: center; font-size: 24px;">
+        </div>
+        
+        <input type="hidden" id="pinCompleto">
+        
+        <button onclick="verificarPin()" class="login-btn">
+            🔓 Verificar PIN
+        </button>
+    </div>
+
+    <script>
+    const PIN_CORRECTO = '2580'; // ⚠️ CAMBIA ESTE PIN
+
+    function moverFoco(input, posicion) {
+        if (input.value.length === 1) {
+            if (posicion < 4) {
+                const nextInput = document.querySelector(`.pin-digit:nth-child(${posicion + 1})`);
+                nextInput.focus();
+            }
+        }
+        actualizarPinCompleto();
+    }
+
+    function actualizarPinCompleto() {
+        const digitos = document.querySelectorAll('.pin-digit');
+        let pin = '';
+        digitos.forEach(d => pin += d.value);
+        document.getElementById('pinCompleto').value = pin;
+        
+        // Verificar automáticamente cuando se completan 4 dígitos
+        if (pin.length === 4) {
+            setTimeout(() => verificarPin(), 300);
+        }
+    }
+
+    function verificarPin() {
+        const pinIngresado = document.getElementById('pinCompleto').value;
+        
+        if (pinIngresado === PIN_CORRECTO) {
+            sessionStorage.setItem('admin_autenticado', 'true');
+            document.getElementById('loginScreen').style.display = 'none';
+            iniciarSistema();
+        } else {
+            // Limpiar y mostrar error
+            document.querySelectorAll('.pin-digit').forEach(input => input.value = '');
+            document.querySelector('.pin-digit').focus();
+            document.getElementById('loginError').style.display = 'block';
+        }
+    }
+    </script>
+
     <div class="container">
         <div class="header">
             <h1>🏢 Panel de Administración Completo</h1>
