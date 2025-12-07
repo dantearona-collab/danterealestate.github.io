@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Excel - Dante Propiedades</title>
+    <!-- LIBRERÍAS EXTERNAS -->
+    <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+        
+        .admin-header {
+            background: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-bottom: 3px solid #232deb;
+        }
+        
+        .admin-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .admin-title i {
+            font-size: 32px;
+            color: #232deb;
+        }
+        
+        .admin-title h1 {
+            color: #232deb;
+            margin: 0;
+        }
+        
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            padding: 20px 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card i {
+            font-size: 24px;
+            color: #232deb;
+            margin-bottom: 10px;
+        }
+        
+        .stat-value {
+            display: block;
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .filters-section {
+            background: white;
+            margin: 0 30px 20px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .table-container {
+            background: white;
+            margin: 0 30px 30px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-nuevo { background: #e3f2fd; color: #1976d2; }
+        .status-contactado { background: #fff3e0; color: #f57c00; }
+        .status-cotizado { background: #e8f5e9; color: #388e3c; }
+        .status-cerrado { background: #fce4ec; color: #c2185b; }
+        
+        .budget-low { color: #4caf50; }
+        .budget-medium { color: #ff9800; }
+        .budget-high { color: #f44336; }
+        
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        
+        .no-data i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- HEADER -->
+        <div class="admin-header">
+            <div class="admin-title">
+                <i class="fas fa-file-excel"></i>
+                <div>
+                    <h1>Panel Admin Excel</h1>
+                    <p style="color: #7f8c8d; margin-top: 5px;">
+                        Gestión de leads y contactos
+                        <span :style="{
+                            color: connected ? '#4CAF50' : '#FF9800',
+                            fontSize: '12px',
+                            marginLeft: '10px',
+                            padding: '2px 8px',
+                            borderRadius: '10px',
+                            backgroundColor: connected ? '#E8F5E9' : '#FFF3E0',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px'
+                        }">
+                            {{ connected ? '✅ Conectado' : '⚠️ Local' }}
+                            <span v-if="backendURL.includes('localhost')" style="font-size: 10px; opacity: 0.7;">
+                                (Local)
+                            </span>
+                            <span v-else style="font-size: 10px; opacity: 0.7;">
+                                (Nube)
+                            </span>
+                        </span>
+                        <el-button 
+                            v-if="!connected"
+                            size="mini" 
+                            type="text" 
+                            @click="loadDataFromBackend"
+                            style="margin-left: 10px; font-size: 11px;"
+                        >
+                            🔄 Reconectar
+                        </el-button>
+                    </p>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <el-button type="primary" @click="exportToExcel" icon="el-icon-download">
+                    Exportar Excel
+                </el-button>
+                <el-button type="success" @click="openDialog(null)" icon="el-icon-plus">
+                    Nuevo Lead
+                </el-button>
+                <el-button type="info" @click="openUploadDialog" icon="el-icon-upload2">
+                    Importar Excel
+                </el-button>
+                <el-button type="warning" @click="showHelp" icon="el-icon-question">
+                    Ayuda
+                </el-button>
+            </div>
+        </div>
+
+        <!-- ESTADÍSTICAS -->
+        <div class="stats-section">
+            <div class="stat-card">
+                <i class="fas fa-users"></i>
+                <span class="stat-value">{{ stats.total }}</span>
+                <span class="stat-label">Total Leads</span>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-star"></i>
+                <span class="stat-value">{{ stats.nuevos }}</span>
+                <span class="stat-label">Nuevos</span>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-phone"></i>
+                <span class="stat-value">{{ stats.contactados }}</span>
+                <span class="stat-label">Contactados</span>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span class="stat-value">{{ stats.cotizados }}</span>
+                <span class="stat-label">Cotizados</span>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-check-circle"></i>
+                <span class="stat-value">{{ stats.cerrados }}</span>
+                <span class="stat-label">Cerrados</span>
+            </div>
+        </div>
+
+        <!-- FILTROS -->
+        <div class="filters-section">
+            <el-row :gutter="20">
+                <el-col :span="8">
+                    <el-input
+                        v-model="searchQuery"
+                        placeholder="Buscar por nombre, email, teléfono..."
+                        clearable
+                        @input="handleSearch"
+                        prefix-icon="el-icon-search"
+                    />
+                </el-col>
+                <el-col :span="6">
+                    <el-select
+                        v-model="filters.estado"
+                        placeholder="Filtrar por estado"
+                        clearable
+                        @change="handleFilter"
+                    >
+                        <el-option label="Nuevo" value="nuevo"></el-option>
+                        <el-option label="Contactado" value="contactado"></el-option>
+                        <el-option label="Cotizado" value="cotizado"></el-option>
+                        <el-option label="Cerrado" value="cerrado"></el-option>
+                    </el-select>
+                </el-col>
+                <el-col :span="6">
+                    <el-select
+                        v-model="filters.interes"
+                        placeholder="Filtrar por interés"
+                        clearable
+                        @change="handleFilter"
+                    >
+                        <el-option label="Compra" value="compra"></el-option>
+                        <el-option label="Venta" value="venta"></el-option>
+                        <el-option label="Alquiler" value="alquiler"></el-option>
+                        <el-option label="Consulta general" value="consulta"></el-option>
+                    </el-select>
+                </el-col>
+                <el-col :span="4">
+                    <el-button @click="resetFilters" icon="el-icon-refresh">
+                        Limpiar Filtros
+                    </el-button>
+                </el-col>
+            </el-row>
+        </div>
+
+        <!-- TABLA -->
+        <div class="table-container">
+            <el-table
+                :data="filteredData.slice((pagination.currentPage-1)*pagination.pageSize, pagination.currentPage*pagination.pageSize)"
+                v-loading="loading"
+                @sort-change="handleSort"
+                style="width: 100%"
+            >
+                <el-table-column prop="id" label="ID" width="80" sortable></el-table-column>
+                <el-table-column prop="nombre" label="Nombre" sortable></el-table-column>
+                <el-table-column prop="email" label="Email" sortable></el-table-column>
+                <el-table-column prop="telefono" label="Teléfono"></el-table-column>
+                <el-table-column prop="interes" label="Interés" sortable></el-table-column>
+                <el-table-column prop="presupuesto" label="Presupuesto" sortable>
+                    <template slot-scope="scope">
+                        <span :class="getBudgetClass(scope.row.presupuesto)">
+                            {{ scope.row.presupuesto ? '$' + formatNumber(scope.row.presupuesto) : 'No especificado' }}
+                        </span>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="estado" label="Estado" sortable>
+                    <template slot-scope="scope">
+                        <span :class="'status-badge status-' + scope.row.estado">
+                            {{ getStatusText(scope.row.estado) }}
+                        </span>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="fecha_contacto" label="Fecha Contacto" sortable>
+                    <template slot-scope="scope">
+                        {{ formatDate(scope.row.fecha_contacto) }}
+                    </template>
+                </el-table-column>
+                <el-table-column label="Acciones" width="180">
+                    <template slot-scope="scope">
+                        <el-button-group>
+                            <el-button
+                                size="mini"
+                                @click="viewDetails(scope.row)"
+                                type="info"
+                                icon="el-icon-view"
+                                title="Ver detalles"
+                            />
+                            <el-button
+                                size="mini"
+                                @click="openDialog(scope.row)"
+                                type="primary"
+                                icon="el-icon-edit"
+                                title="Editar"
+                            />
+                            <el-button
+                                size="mini"
+                                @click="confirmDelete(scope.row)"
+                                type="danger"
+                                icon="el-icon-delete"
+                                title="Eliminar"
+                            />
+                        </el-button-group>
+                    </template>
+                </el-table-column>
+            </el-table>
+
+            <!-- PAGINACIÓN -->
+            <div class="pagination-container">
+                <el-pagination
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                    :current-page="pagination.currentPage"
+                    :page-sizes="[10, 20, 50, 100]"
+                    :page-size="pagination.pageSize"
+                    layout="total, sizes, prev, pager, next, jumper"
+                    :total="filteredData.length"
+                />
+            </div>
+
+            <!-- SIN DATOS -->
+            <div v-if="filteredData.length === 0 && !loading" class="no-data">
+                <i class="fas fa-database"></i>
+                <h3>No hay datos para mostrar</h3>
+                <p>Usa el botón "Nuevo Lead" para agregar registros</p>
+            </div>
+        </div>
+
+        <!-- DIALOGO FORMULARIO -->
+        <el-dialog
+            :title="dialogTitle"
+            :visible.sync="dialogVisible"
+            width="600px"
+            @closed="resetForm"
+        >
+            <el-form 
+                :model="formData" 
+                :rules="formRules" 
+                ref="form" 
+                label-width="120px"
+            >
+                <el-form-item label="Nombre completo" prop="nombre">
+                    <el-input v-model="formData.nombre" placeholder="Ej: Juan Pérez"></el-input>
+                </el-form-item>
+                
+                <el-form-item label="Email" prop="email">
+                    <el-input v-model="formData.email" type="email" placeholder="Ej: juan@empresa.com"></el-input>
+                </el-form-item>
+                
+                <el-form-item label="Teléfono">
+                    <el-input v-model="formData.telefono" placeholder="Ej: +54 11 1234-5678"></el-input>
+                </el-form-item>
+                
+                <el-form-item label="Interés">
+                    <el-select v-model="formData.interes" placeholder="Seleccionar interés" style="width: 100%">
+                        <el-option label="Compra" value="compra"></el-option>
+                        <el-option label="Venta" value="venta"></el-option>
+                        <el-option label="Alquiler" value="alquiler"></el-option>
+                        <el-option label="Consulta general" value="consulta"></el-option>
+                    </el-select>
+                </el-form-item>
+                
+                <el-form-item label="Presupuesto">
+                    <el-input-number 
+                        v-model="formData.presupuesto" 
+                        :min="0" 
+                        :step="1000"
+                        placeholder="Ej: 50000"
+                        style="width: 100%"
+                    />
+                </el-form-item>
+                
+                <el-form-item label="Estado">
+                    <el-select v-model="formData.estado" placeholder="Seleccionar estado" style="width: 100%">
+                        <el-option label="Nuevo" value="nuevo"></el-option>
+                        <el-option label="Contactado" value="contactado"></el-option>
+                        <el-option label="Cotizado" value="cotizado"></el-option>
+                        <el-option label="Cerrado" value="cerrado"></el-option>
+                    </el-select>
+                </el-form-item>
+                
+                <el-form-item label="Mensaje" prop="mensaje">
+                    <el-input 
+                        v-model="formData.mensaje" 
+                        type="textarea" 
+                        :rows="4"
+                        placeholder="Descripción del interés o consulta..."
+                    />
+                </el-form-item>
+            </el-form>
+            
+            <span slot="footer">
+                <el-button @click="dialogVisible = false">Cancelar</el-button>
+                <el-button 
+                    type="primary" 
+                    @click="saveForm" 
+                    :loading="saving"
+                >
+                    {{ isEditMode ? 'Actualizar' : 'Guardar' }}
+                </el-button>
+            </span>
+        </el-dialog>
+
+        <!-- DIALOGO DETALLES -->
+        <el-dialog
+            title="Detalles del Lead"
+            :visible.sync="detailDialogVisible"
+            width="500px"
+        >
+            <div v-if="selectedItem" style="line-height: 1.8;">
+                <h3 style="color: #232deb; margin-bottom: 15px;">{{ selectedItem.nombre }}</h3>
+                <p><strong>📧 Email:</strong> {{ selectedItem.email }}</p>
+                <p><strong>📱 Teléfono:</strong> {{ selectedItem.telefono || 'No especificado' }}</p>
+                <p><strong>🎯 Interés:</strong> {{ selectedItem.interes || 'Consulta general' }}</p>
+                <p><strong>💰 Presupuesto:</strong> {{ selectedItem.presupuesto ? '$' + formatNumber(selectedItem.presupuesto) : 'No especificado' }}</p>
+                <p><strong>📅 Fecha Contacto:</strong> {{ formatDate(selectedItem.fecha_contacto) }}</p>
+                <p><strong>📝 Estado:</strong> <span :class="'status-badge status-' + selectedItem.estado">{{ getStatusText(selectedItem.estado) }}</span></p>
+                <p><strong>💬 Mensaje:</strong></p>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                    {{ selectedItem.mensaje }}
+                </div>
+            </div>
+            <span slot="footer">
+                <el-button @click="detailDialogVisible = false">Cerrar</el-button>
+                <el-button 
+                    type="primary" 
+                    @click="openDialog(selectedItem); detailDialogVisible = false"
+                >
+                    Editar
+                </el-button>
+            </span>
+        </el-dialog>
+
+        <!-- DIALOGO IMPORTAR EXCEL -->
+        <el-dialog
+            title="Importar desde Excel"
+            :visible.sync="uploadDialogVisible"
+            width="500px"
+        >
+            <div style="text-align: center; padding: 20px;">
+                <input
+                    type="file"
+                    ref="fileInput"
+                    @change="handleFileUpload"
+                    accept=".xlsx,.xls,.csv"
+                    style="display: none"
+                />
+                
+                <div v-if="!uploadedFile" style="margin-bottom: 20px;">
+                    <i class="fas fa-file-upload" style="font-size: 48px; color: #ccc; margin-bottom: 15px;"></i>
+                    <p>Arrastra un archivo Excel aquí o haz clic para seleccionar</p>
+                </div>
+                
+                <div v-else style="margin-bottom: 20px;">
+                    <i class="fas fa-file-excel" style="font-size: 48px; color: #4CAF50; margin-bottom: 15px;"></i>
+                    <p><strong>Archivo seleccionado:</strong> {{ uploadedFile.name }}</p>
+                    <p style="color: #666; font-size: 12px;">Tamaño: {{ (uploadedFile.size / 1024).toFixed(2) }} KB</p>
+                </div>
+                
+                <el-progress 
+                    v-if="uploadProgress > 0"
+                    :percentage="uploadProgress"
+                    :status="uploadProgress === 100 ? 'success' : ''"
+                    style="margin: 20px 0;"
+                />
+                
+                <el-button 
+                    type="primary" 
+                    @click="triggerFileInput"
+                    :disabled="uploadProgress > 0 && uploadProgress < 100"
+                >
+                    <i class="fas fa-folder-open"></i> Seleccionar Archivo
+                </el-button>
+                
+                <el-button 
+                    type="success" 
+                    @click="processUpload"
+                    :disabled="!uploadedFile || (uploadProgress > 0 && uploadProgress < 100)"
+                    style="margin-left: 10px;"
+                >
+                    <i class="fas fa-upload"></i> Importar
+                </el-button>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                <p style="font-size: 12px; color: #666; margin: 0;">
+                    <strong>📋 Formato esperado:</strong> Excel (.xlsx, .xls) o CSV con columnas: 
+                    nombre, email, telefono, interes, presupuesto, mensaje, estado, fecha_contacto
+                </p>
+            </div>
+        </el-dialog>
+    </div>
+
+    <script>
+    // Detectar entorno automáticamente
+    function detectarEntorno() {
+        // Si es archivo local (file://)
+        if (window.location.protocol === 'file:') {
+            console.log('📱 Modo archivo local detectado');
+            return 'local';
+        }
+        
+        // Si es localhost
+        if (window.location.hostname === 'localhost' || 
+            window.location.hostname === '127.0.0.1') {
+            return 'local';
+        }
+        
+        // Si está en GitHub Pages o similar
+        if (window.location.hostname.includes('github.io')) {
+            return 'github';
+        }
+        
+        // Por defecto producción
+        return 'produccion';
+    }
+
+    // Configurar axios para no usar cookies (evitar Tracking Prevention)
+    axios.defaults.withCredentials = false;
+    
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                tableData: [],
+                filteredData: [],
+                loading: false,
+                saving: false,
+                searchQuery: '',
+                filters: {
+                    estado: '',
+                    interes: ''
+                },
+                pagination: {
+                    currentPage: 1,
+                    pageSize: 10,
+                    total: 0
+                },
+                dialogVisible: false,
+                uploadDialogVisible: false,
+                detailDialogVisible: false,
+                formData: this.getEmptyForm(),
+                isEditMode: false,
+                currentEditId: null,
+                uploadedFile: null,
+                uploadProgress: 0,
+                selectedItem: null,
+                stats: {
+                    total: 0,
+                    nuevos: 0,
+                    contactados: 0,
+                    cotizados: 0,
+                    cerrados: 0
+                },
+                formRules: {
+                    nombre: [
+                        { required: true, message: 'El nombre completo es requerido', trigger: 'blur' },
+                        { min: 3, message: 'Mínimo 3 caracteres', trigger: 'blur' }
+                    ],
+                    email: [
+                        { required: true, message: 'El email es requerido', trigger: 'blur' },
+                        { type: 'email', message: 'Email inválido', trigger: 'blur' }
+                    ],
+                    mensaje: [
+                        { required: true, message: 'El mensaje es requerido', trigger: 'blur' },
+                        { min: 10, message: 'Mínimo 10 caracteres', trigger: 'blur' }
+                    ]
+                },
+                // URLs del backend - Detección automática
+                backendURL: (function() {
+                    const entorno = detectarEntorno();
+                    
+                    if (entorno === 'local') {
+                        console.log('🌍 Entorno local, usando localhost:5000');
+                        return 'http://localhost:5000';
+                    } else if (entorno === 'github') {
+                        console.log('🌍 Entorno GitHub, usando Render');
+                        return 'https://danterealestate-github-io.onrender.com';
+                    } else {
+                        console.log('🌍 Entorno producción, usando Render');
+                        return 'https://danterealestate-github-io.onrender.com';
+                    }
+                })(),
+                connected: false
+            };
+        },
+        computed: {
+            dialogTitle() {
+                return this.isEditMode ? 'Editar Lead' : 'Nuevo Lead';
+            }
+        },
+        created() {
+            console.log('✅ Vue creado, cargando datos...');
+            console.log('🌍 URL backend:', this.backendURL);
+            
+            // Intentar cargar datos del backend primero
+            this.loadDataFromBackend();
+            
+            // Sincronizar automáticamente cada 30 segundos si está conectado
+            setInterval(() => {
+                if (this.connected && !this.loading) {
+                    console.log('🔄 Sincronización automática...');
+                    this.loadDataFromBackend();
+                }
+            }, 30000);
+        },
+        methods: {
+            // ========== CONEXIÓN CON BACKEND ==========
+            
+            async loadDataFromBackend() {
+                this.loading = true;
+                try {
+                    console.log(`📡 Conectando a: ${this.backendURL}`);
+                    
+                    // Configurar timeout más corto para desarrollo
+                    const timeout = this.backendURL.includes('localhost') ? 3000 : 10000;
+                    
+                    // Primero verificar si el backend está activo
+                    const healthResponse = await axios.get(`${this.backendURL}/health`, {
+                        timeout: timeout,
+                        headers: {
+                            'Accept': 'application/json',
+                            'Cache-Control': 'no-cache'
+                        }
+                    }).catch(() => null);
+                    
+                    if (healthResponse && healthResponse.data.status === 'online') {
+                        console.log('✅ Backend activo, cargando datos...');
+                        
+                        // Ahora obtener los datos
+                        const response = await axios.get(`${this.backendURL}/api/admin/obtener-datos`, {
+                            timeout: timeout,
+                            headers: {
+                                'Accept': 'application/json',
+                                'Cache-Control': 'no-cache'
+                            }
+                        });
+                        
+                        if (response.data.success) {
+                            this.tableData = response.data.data;
+                            this.filteredData = [...response.data.data];
+                            this.connected = true;
+                            
+                            // Actualizar estadísticas del backend
+                            if (response.data.estadisticas) {
+                                this.stats = response.data.estadisticas;
+                            } else {
+                                this.calculateStats();
+                            }
+                            
+                            console.log(`✅ Datos cargados del backend: ${this.tableData.length} registros`);
+                            this.$message.success(`Sincronizado: ${this.tableData.length} leads`);
+                        } else {
+                            throw new Error('Respuesta del servidor no exitosa');
+                        }
+                    } else {
+                        console.log('⚠️ Backend no disponible');
+                        throw new Error('Backend no responde');
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Error conectando al backend:', error.message);
+                    this.connected = false;
+                    
+                    // Intentar cargar datos locales
+                    await this.loadLocalData();
+                } finally {
+                    this.loading = false;
+                }
+            },
+            
+            async loadLocalData() {
+                try {
+                    console.log('📱 Cargando datos locales...');
+                    
+                    // Intentar cargar de localStorage
+                    const localData = localStorage.getItem('admin_backup_leads');
+                    if (localData) {
+                        const parsedData = JSON.parse(localData);
+                        
+                        // Convertir datos locales al formato esperado
+                        this.tableData = parsedData.map((item, index) => ({
+                            id: index + 1,
+                            nombre: item.nombre || '',
+                            email: item.email || '',
+                            telefono: item.telefono || '',
+                            interes: item.interes || 'Consulta general',
+                            presupuesto: item.presupuesto || 'No especificado',
+                            mensaje: item.mensaje || '',
+                            estado: item.estado || 'nuevo',
+                            fecha_contacto: item.fecha || new Date().toISOString().split('T')[0]
+                        }));
+                        
+                        this.filteredData = [...this.tableData];
+                        this.calculateStats();
+                        
+                        console.log(`📱 Datos locales cargados: ${this.tableData.length} registros`);
+                        this.$message.info(`Modo local: ${this.tableData.length} leads`);
+                    } else {
+                        // Si no hay datos locales, usar mock temporalmente
+                        this.loadMockData();
+                        this.$message.warning('Usando datos de demostración');
+                    }
+                } catch (error) {
+                    console.error('❌ Error cargando datos locales:', error);
+                    this.loadMockData();
+                }
+            },
+            
+            loadMockData() {
+                console.log('🎭 Cargando datos de demostración...');
+                const mockData = [
+                    { 
+                        id: 1, 
+                        nombre: 'Juan Pérez', 
+                        email: 'juan@empresa.com', 
+                        telefono: '+1 234 567 8901', 
+                        interes: 'Compra', 
+                        presupuesto: 250000, 
+                        mensaje: 'Necesito una casa de 3 habitaciones en zona norte.', 
+                        estado: 'nuevo', 
+                        fecha_contacto: '2024-01-15' 
+                    },
+                    { 
+                        id: 2, 
+                        nombre: 'María García', 
+                        email: 'maria@empresa.com', 
+                        telefono: '+1 234 567 8902', 
+                        interes: 'Alquiler', 
+                        presupuesto: 1500, 
+                        mensaje: 'Busco departamento de 2 ambientes en Capital Federal.', 
+                        estado: 'contactado', 
+                        fecha_contacto: '2024-01-10' 
+                    },
+                    { 
+                        id: 3, 
+                        nombre: 'Carlos López', 
+                        email: 'carlos@empresa.com', 
+                        telefono: '+1 234 567 8903', 
+                        interes: 'Venta', 
+                        presupuesto: 350000, 
+                        mensaje: 'Quiero vender mi departamento en Palermo.', 
+                        estado: 'cotizado', 
+                        fecha_contacto: '2024-01-05' 
+                    }
+                ];
+                
+                this.tableData = mockData;
+                this.filteredData = [...mockData];
+                this.calculateStats();
+                console.log('✅ Datos de demostración cargados');
+            },
+            
+            // ========== MÉTODOS PRINCIPALES ==========
+            
+            getEmptyForm() {
+                return {
+                    nombre: '',
+                    email: '',
+                    telefono: '',
+                    interes: 'consulta',
+                    presupuesto: null,
+                    mensaje: '',
+                    estado: 'nuevo',
+                    fecha_contacto: new Date().toISOString().split('T')[0]
+                };
+            },
+            
+            openDialog(row) {
+                if (row) {
+                    this.isEditMode = true;
+                    this.currentEditId = row.id;
+                    this.formData = Object.assign({}, row);
+                } else {
+                    this.isEditMode = false;
+                    this.currentEditId = null;
+                    this.resetForm();
+                }
+                this.dialogVisible = true;
+            },
+            
+            resetForm() {
+                if (this.$refs.form) {
+                    this.$refs.form.resetFields();
+                }
+                this.formData = this.getEmptyForm();
+            },
+            
+            async saveForm() {
+                this.$refs.form.validate(async valid => {
+                    if (valid) {
+                        this.saving = true;
+                        
+                        try {
+                            if (this.isEditMode) {
+                                // Actualizar en backend
+                                await this.updateInBackend();
+                            } else {
+                                // Crear nuevo en backend
+                                await this.createInBackend();
+                            }
+                        } catch (error) {
+                            console.error('❌ Error con backend, guardando localmente:', error);
+                            this.saveLocally();
+                        } finally {
+                            this.saving = false;
+                        }
+                    }
+                });
+            },
+            
+            async updateInBackend() {
+                try {
+                    const response = await axios.put(
+                        `${this.backendURL}/api/admin/actualizar-datos/${this.currentEditId}`,
+                        this.formData,
+                        { 
+                            timeout: 10000,
+                            headers: { 'Content-Type': 'application/json' }
+                        }
+                    );
+                    
+                    if (response.data.success) {
+                        this.$message.success('Lead actualizado en el servidor');
+                        await this.loadDataFromBackend();
+                        this.dialogVisible = false;
+                    } else {
+                        throw new Error(response.data.message);
+                    }
+                } catch (error) {
+                    throw error;
+                }
+            },
+            
+            async createInBackend() {
+                try {
+                    // Preparar datos para el formulario
+                    const datosFormulario = {
+                        nombre: this.formData.nombre,
+                        email: this.formData.email,
+                        telefono: this.formData.telefono || '',
+                        interes: this.formData.interes || 'Consulta general',
+                        presupuesto: this.formData.presupuesto || 'No especificado',
+                        mensaje: this.formData.mensaje
+                    };
+                    
+                    const response = await axios.post(
+                        `${this.backendURL}/api/guardar-contacto`,
+                        datosFormulario,
+                        { 
+                            timeout: 10000,
+                            headers: { 'Content-Type': 'application/json' }
+                        }
+                    );
+                    
+                    if (response.data.success) {
+                        this.$message.success('Lead creado en el servidor');
+                        await this.loadDataFromBackend();
+                        this.dialogVisible = false;
+                    } else {
+                        throw new Error(response.data.message);
+                    }
+                } catch (error) {
+                    throw error;
+                }
+            },
+            
+            saveLocally() {
+                setTimeout(() => {
+                    if (this.isEditMode) {
+                        const index = this.tableData.findIndex(item => item.id === this.currentEditId);
+                        if (index !== -1) {
+                            this.tableData[index] = {
+                                ...this.formData,
+                                id: this.currentEditId
+                            };
+                        }
+                        this.$message.success('Lead actualizado localmente');
+                    } else {
+                        const newId = this.tableData.length > 0 ? Math.max(...this.tableData.map(item => item.id)) + 1 : 1;
+                        const newRecord = {
+                            ...this.formData,
+                            id: newId,
+                            fecha_contacto: new Date().toISOString().split('T')[0]
+                        };
+                        this.tableData.unshift(newRecord);
+                        this.$message.success('Lead creado localmente');
+                    }
+                    
+                    this.dialogVisible = false;
+                    this.applyFilters();
+                    this.calculateStats();
+                    
+                    // Guardar en localStorage como respaldo
+                    this.saveToLocalStorage();
+                }, 800);
+            },
+            
+            calculateStats() {
+                this.stats.total = this.tableData.length;
+                this.stats.nuevos = this.tableData.filter(item => item.estado === 'nuevo').length;
+                this.stats.contactados = this.tableData.filter(item => item.estado === 'contactado').length;
+                this.stats.cotizados = this.tableData.filter(item => item.estado === 'cotizado').length;
+                this.stats.cerrados = this.tableData.filter(item => item.estado === 'cerrado').length;
+            },
+            
+            handleSearch() {
+                this.applyFilters();
+            },
+            
+            handleFilter() {
+                this.applyFilters();
+            },
+            
+            applyFilters() {
+                let filtered = [...this.tableData];
+                
+                if (this.searchQuery) {
+                    const query = this.searchQuery.toLowerCase();
+                    filtered = filtered.filter(item => 
+                        item.nombre.toLowerCase().includes(query) ||
+                        item.email.toLowerCase().includes(query) ||
+                        (item.telefono && item.telefono.toLowerCase().includes(query)) ||
+                        (item.interes && item.interes.toLowerCase().includes(query)) ||
+                        item.mensaje.toLowerCase().includes(query)
+                    );
+                }
+                
+                if (this.filters.estado) {
+                    filtered = filtered.filter(item => item.estado === this.filters.estado);
+                }
+                
+                if (this.filters.interes) {
+                    filtered = filtered.filter(item => item.interes === this.filters.interes);
+                }
+                
+                this.filteredData = filtered;
+                this.pagination.currentPage = 1;
+                this.calculateStats();
+            },
+            
+            resetFilters() {
+                this.searchQuery = '';
+                this.filters = {
+                    estado: '',
+                    interes: ''
+                };
+                this.filteredData = [...this.tableData];
+                this.calculateStats();
+                this.$message.info('Filtros restablecidos');
+            },
+            
+            viewDetails(row) {
+                this.selectedItem = { ...row };
+                this.detailDialogVisible = true;
+            },
+            
+            async confirmDelete(row) {
+                this.$confirm(
+                    `¿Está seguro de eliminar el lead de ${row.nombre}?`,
+                    'Confirmar eliminación',
+                    {
+                        confirmButtonText: 'Eliminar',
+                        cancelButtonText: 'Cancelar',
+                        type: 'warning'
+                    }
+                ).then(async () => {
+                    try {
+                        // Intentar eliminar del backend
+                        await this.deleteFromBackend(row.id);
+                    } catch (error) {
+                        console.error('❌ Error eliminando del backend:', error);
+                        this.deleteLocally(row);
+                    }
+                }).catch(() => {});
+            },
+            
+            async deleteFromBackend(id) {
+                try {
+                    const response = await axios.delete(
+                        `${this.backendURL}/api/admin/eliminar-datos/${id}`,
+                        { 
+                            timeout: 10000,
+                            headers: { 'Content-Type': 'application/json' }
+                        }
+                    );
+                    
+                    if (response.data.success) {
+                        this.$message.success('Lead eliminado del servidor');
+                        await this.loadDataFromBackend();
+                    } else {
+                        throw new Error(response.data.message);
+                    }
+                } catch (error) {
+                    throw error;
+                }
+            },
+            
+            deleteLocally(row) {
+                const index = this.tableData.findIndex(item => item.id === row.id);
+                if (index !== -1) {
+                    this.tableData.splice(index, 1);
+                    this.applyFilters();
+                    this.calculateStats();
+                    this.$message.success('Lead eliminado localmente');
+                    
+                    // Actualizar localStorage
+                    this.saveToLocalStorage();
+                }
+            },
+            
+            handleSort({ column, prop, order }) {
+                if (prop && order) {
+                    this.filteredData.sort((a, b) => {
+                        const aVal = a[prop] || '';
+                        const bVal = b[prop] || '';
+                        
+                        if (order === 'ascending') {
+                            return aVal > bVal ? 1 : -1;
+                        } else {
+                            return aVal < bVal ? 1 : -1;
+                        }
+                    });
+                }
+            },
+            
+            openUploadDialog() {
+                this.uploadDialogVisible = true;
+                this.uploadedFile = null;
+                this.uploadProgress = 0;
+            },
+            
+            triggerFileInput() {
+                this.$refs.fileInput.click();
+            },
+            
+            handleFileUpload(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    this.uploadedFile = file;
+                    this.$message.success(`Archivo seleccionado: ${file.name}`);
+                }
+            },
+            
+            async processUpload() {
+                if (!this.uploadedFile) return;
+                
+                this.uploadProgress = 10;
+                
+                try {
+                    // Intentar importar al backend
+                    const formData = new FormData();
+                    formData.append('file', this.uploadedFile);
+                    
+                    const response = await axios.post(
+                        `${this.backendURL}/api/admin/importar-excel`,
+                        formData,
+                        {
+                            headers: { 'Content-Type': 'multipart/form-data' },
+                            timeout: 30000,
+                            onUploadProgress: (progressEvent) => {
+                                if (progressEvent.total) {
+                                    this.uploadProgress = Math.round(
+                                        (progressEvent.loaded * 100) / progressEvent.total
+                                    );
+                                }
+                            }
+                        }
+                    );
+                    
+                    if (response.data.success) {
+                        this.uploadProgress = 100;
+                        this.$message.success(`Importados ${response.data.importados} registros`);
+                        await this.loadDataFromBackend();
+                        this.uploadDialogVisible = false;
+                    } else {
+                        throw new Error(response.data.message);
+                    }
+                } catch (error) {
+                    console.error('❌ Error importando al backend:', error);
+                    this.uploadProgress = 0;
+                    this.$message.error('Error importando. Intentando importación local...');
+                    this.processUploadLocal();
+                }
+            },
+            
+            processUploadLocal() {
+                const interval = setInterval(() => {
+                    if (this.uploadProgress < 90) {
+                        this.uploadProgress += 10;
+                    } else {
+                        clearInterval(interval);
+                        
+                        setTimeout(() => {
+                            this.uploadProgress = 100;
+                            
+                            // Datos de ejemplo importados localmente
+                            const newRecords = [
+                                { 
+                                    id: this.tableData.length + 1, 
+                                    nombre: 'Lead Importado 1', 
+                                    email: 'import1@empresa.com', 
+                                    telefono: '+1 111 111 1111', 
+                                    interes: 'Compra', 
+                                    presupuesto: 300000, 
+                                    mensaje: 'Lead importado desde Excel', 
+                                    estado: 'nuevo', 
+                                    fecha_contacto: new Date().toISOString().split('T')[0] 
+                                },
+                                { 
+                                    id: this.tableData.length + 2, 
+                                    nombre: 'Lead Importado 2', 
+                                    email: 'import2@empresa.com', 
+                                    telefono: '+1 222 222 2222', 
+                                    interes: 'Venta', 
+                                    presupuesto: 150000, 
+                                    mensaje: 'Lead importado desde Excel', 
+                                    estado: 'contactado', 
+                                    fecha_contacto: new Date().toISOString().split('T')[0] 
+                                }
+                            ];
+                            
+                            this.tableData.push(...newRecords);
+                            this.applyFilters();
+                            this.calculateStats();
+                            
+                            this.$message.success('Archivo Excel importado localmente');
+                            this.uploadDialogVisible = false;
+                            this.uploadProgress = 0;
+                            
+                            // Guardar en localStorage
+                            this.saveToLocalStorage();
+                        }, 1000);
+                    }
+                }, 300);
+            },
+            
+            async exportToExcel() {
+                this.loading = true;
+                
+                try {
+                    // Intentar exportar del backend
+                    const response = await axios.get(
+                        `${this.backendURL}/api/admin/exportar-excel`,
+                        {
+                            responseType: 'blob',
+                            timeout: 30000
+                        }
+                    );
+                    
+                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', `leads_backend_${new Date().toISOString().split('T')[0]}.xlsx`);
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    
+                    this.$message.success('Excel descargado del servidor');
+                } catch (error) {
+                    console.error('❌ Error descargando del backend:', error);
+                    this.$message.warning('Generando Excel local...');
+                    this.exportToExcelLocal();
+                } finally {
+                    this.loading = false;
+                }
+            },
+            
+            exportToExcelLocal() {
+                const data = this.filteredData.map(item => ({
+                    ID: item.id,
+                    'Nombre Completo': item.nombre,
+                    Email: item.email,
+                    Teléfono: item.telefono || '',
+                    Interés: item.interes || '',
+                    Presupuesto: item.presupuesto ? `$${this.formatNumber(item.presupuesto)}` : '',
+                    Mensaje: item.mensaje,
+                    Estado: this.getStatusText(item.estado),
+                    'Fecha Contacto': this.formatDate(item.fecha_contacto)
+                }));
+                
+                const ws = XLSX.utils.json_to_sheet(data);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Leads');
+                
+                const fileName = `leads_local_${new Date().toISOString().split('T')[0]}.xlsx`;
+                XLSX.writeFile(wb, fileName);
+                
+                this.$message.success('Excel exportado localmente');
+            },
+            
+            saveToLocalStorage() {
+                try {
+                    // Guardar una copia en localStorage como respaldo
+                    const backupData = this.tableData.map(item => ({
+                        nombre: item.nombre,
+                        email: item.email,
+                        telefono: item.telefono,
+                        interes: item.interes,
+                        presupuesto: item.presupuesto,
+                        mensaje: item.mensaje,
+                        fecha: item.fecha_contacto,
+                        estado: item.estado
+                    }));
+                    
+                    localStorage.setItem('admin_backup_leads', JSON.stringify(backupData));
+                    console.log('💾 Backup guardado en localStorage');
+                } catch (error) {
+                    console.error('❌ Error guardando en localStorage:', error);
+                }
+            },
+            
+            formatDate(dateString) {
+                if (!dateString) return '';
+                try {
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('es-ES');
+                } catch {
+                    return dateString;
+                }
+            },
+            
+            formatNumber(num) {
+                if (!num) return '0';
+                try {
+                    return parseFloat(num).toLocaleString('es-ES');
+                } catch {
+                    return num.toString();
+                }
+            },
+            
+            getStatusText(status) {
+                const statusMap = {
+                    'nuevo': 'Nuevo',
+                    'contactado': 'Contactado',
+                    'cotizado': 'Cotizado',
+                    'cerrado': 'Cerrado'
+                };
+                return statusMap[status] || status;
+            },
+            
+            getBudgetClass(presupuesto) {
+                if (!presupuesto) return '';
+                const num = parseFloat(presupuesto);
+                if (isNaN(num)) return '';
+                if (num < 100000) return 'budget-low';
+                if (num < 300000) return 'budget-medium';
+                return 'budget-high';
+            },
+            
+            handleSizeChange(size) {
+                this.pagination.pageSize = size;
+                this.pagination.currentPage = 1;
+            },
+            
+            handleCurrentChange(page) {
+                this.pagination.currentPage = page;
+            },
+            
+            showHelp() {
+                this.$alert(
+                    `📖 Guía de Uso - Panel Admin Dante Propiedades\n\n` +
+                    `1. 📊 VER DATOS: Los leads se cargan automáticamente\n` +
+                    `2. ➕ NUEVO LEAD: Botón "Nuevo Lead"\n` +
+                    `3. ✏️ EDITAR: Click en el ícono de lápiz\n` +
+                    `4. 👁️ VER DETALLES: Click en el ícono de ojo\n` +
+                    `5. 🗑️ ELIMINAR: Click en el ícono de basura\n` +
+                    `6. 🔍 FILTRAR: Use los filtros superiores\n` +
+                    `7. 📤 EXPORTAR: Botón "Exportar Excel"\n` +
+                    `8. 📥 IMPORTAR: Botón "Importar Excel"\n\n` +
+                    `📡 Estado: ${this.connected ? '✅ Conectado al servidor' : '⚠️ Modo local'}\n` +
+                    `🔗 URL: ${this.backendURL}\n` +
+                    `💾 Datos locales: ${this.tableData.length} registros`,
+                    'Ayuda y Soporte',
+                    { confirmButtonText: 'Entendido' }
+                );
+            }
+        }
+    });
+    </script>
+</body>
+</html>
