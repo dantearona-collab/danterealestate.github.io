@@ -989,57 +989,53 @@ def exportar_excel():
 # ==============================================
 
 if __name__ == '__main__':
-    # Mostrar información del sistema
-    print("=" * 70)
-    print("🚀 SISTEMA DE FORMULARIOS DANTE PROPIEDADES")
-    print("=" * 70)
-    print(f"🌍 Entorno: {entorno.upper()}")
-    print(f"🐍 Python: {sys.version.split()[0]}")
-    print(f"📁 Directorio de trabajo: {os.getcwd()}")
-    print(f"💾 Datos almacenados en: {storage_manager.base_path}")
-    print("=" * 70)
-    print("🌐 URLS DISPONIBLES:")
+    # Configuración SIMPLIFICADA para producción
+    # IMPORTANTE: En Render, PORT siempre está definido como variable de entorno
     
-    if entorno == 'local':
-        print(f"   📋 Formulario: http://localhost:5000/")
-        print(f"   📊 Admin Panel: http://localhost:5000/admin (si existe)")
-        print(f"   🔧 API: http://localhost:5000/api/...")
-        print(f"   🩺 Health: http://localhost:5000/health")
+    try:
+        # Obtener puerto de variable de entorno
+        port_str = os.environ.get('PORT', '5000')
+        port = int(port_str)
+    except (ValueError, TypeError):
+        # Si hay error, usar puerto por defecto
         port = 5000
-    elif entorno == 'render':
-        print(f"   🌐 Servidor en la nube (Render)")
-        print(f"   📋 Formulario: https://danterealestate-github-io.onrender.com/")
-        print(f"   🔧 API: https://danterealestate-github-io.onrender.com/api/...")
-        port = int(os.environ.get('PORT', 10000))
+        print(f"⚠️  No se pudo obtener PORT de entorno, usando {port}")
+    
+    # Configurar host
+    host = '0.0.0.0'
+    
+    # Información de depuración SOLO en desarrollo
+    if entorno == 'local':
+        print("=" * 70)
+        print("🚀 SISTEMA DE FORMULARIOS - MODO DESARROLLO")
+        print("=" * 70)
+        print(f"🌍 Entorno: LOCAL")
+        print(f"🐍 Python: {sys.version.split()[0]}")
+        print(f"📁 Directorio: {os.getcwd()}")
+        print(f"🌐 URL: http://localhost:{port}")
+        print("=" * 70)
+        debug_mode = True
     else:
-        print(f"   🔧 Servidor en entorno: {entorno}")
-        port = int(os.environ.get('PORT', 5000))
-    
-    print("=" * 70)
-    print("📊 ENDPOINTS PRINCIPALES:")
-    print("   • POST /api/guardar-contacto     - Recibir datos del formulario")
-    print("   • GET  /api/admin/obtener-datos  - Obtener datos para admin")
-    print("   • PUT  /api/admin/actualizar-datos/:id - Actualizar registro")
-    print("   • DELETE /api/admin/eliminar-datos/:id - Eliminar registro")
-    print("=" * 70)
-    
-    # Configurar puerto automáticamente
-    debug_mode = entorno == 'local'
-    
-    print(f"🔧 Iniciando servidor en puerto {port}...")
-    print(f"🐛 Modo debug: {'ACTIVADO' if debug_mode else 'DESACTIVADO'}")
-    print("=" * 70)
+        print(f"🚀 Iniciando servidor en modo producción")
+        print(f"📡 Host: {host}")
+        print(f"🔧 Puerto: {port}")
+        print(f"🌍 Entorno: {entorno.upper()}")
+        debug_mode = False
     
     try:
         app.run(
-            host='0.0.0.0', 
+            host=host, 
             port=port, 
             debug=debug_mode,
             threaded=True
         )
     except Exception as e:
         print(f"❌ Error iniciando servidor: {e}")
-        print(f"💡 Intenta con un puerto diferente: python app.py --port=5001")
+        
+        # Intentar con puerto alternativo si falla
         if port == 5000:
             print("🔄 Intentando con puerto 5001...")
-            app.run(host='0.0.0.0', port=5001, debug=debug_mode, threaded=True)
+            app.run(host=host, port=5001, debug=debug_mode, threaded=True)
+        elif port == 10000:
+            print("🔄 Intentando con puerto 8080...")
+            app.run(host=host, port=8080, debug=debug_mode, threaded=True)
