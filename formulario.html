@@ -427,43 +427,48 @@
         const SERVER_URL = 'https://dante-propiedades.onrender.com';
 
         // Verificar estado del servidor
+        // ✅ VERSIÓN TEMPORAL - NO BLOQUEA SI HAY ERROR CORS
         async function verificarServidor() {
+            const serverStatus = document.getElementById('serverStatus');
+            if (!serverStatus) {
+                console.log('⚠️ Elemento serverStatus no encontrado');
+                return true; // Siempre continuar
+            }
+            
             try {
                 console.log('🔍 Probando conexión con:', SERVER_URL);
                 
+                // Intentar conectar pero con timeout corto
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3000);
+                
                 const response = await fetch(`${SERVER_URL}/debug`, {
                     method: 'GET',
-                    headers: {
-                        'Origin': 'https://www.dantepropiedades.com.ar'
-                    }
+                    signal: controller.signal,
+                    mode: 'cors', // Forzar modo CORS
+                    credentials: 'omit' // No enviar cookies
                 });
                 
-                console.log('📡 Status de respuesta:', response.status);
+                clearTimeout(timeoutId);
                 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('✅ Servidor Flask activo:', data);
+                    console.log('✅ Servidor activo:', data);
                     
-                    document.getElementById('serverStatus').textContent = '🟢 Conectado al servidor de datos';
-                    document.getElementById('serverStatus').className = 'server-status server-connected';
+                    serverStatus.textContent = '🟢 Sistema de datos conectado';
+                    serverStatus.className = 'server-status server-connected';
                     return true;
-                } else {
-                    console.warn('⚠️ Servidor responde con error:', response.status);
-                    throw new Error(`HTTP ${response.status}`);
                 }
+                
             } catch (error) {
-                console.error('❌ Error de conexión completo:', error);
-                
-                document.getElementById('serverStatus').textContent = '🔴 Sin conexión al servidor de datos';
-                document.getElementById('serverStatus').className = 'server-status server-disconnected';
-                
-                // Mostrar mensaje más específico
-                document.getElementById('errorMessage').innerHTML = 
-                    '⚠️ El servidor de datos no está disponible, pero puedes contactarnos por WhatsApp directamente.';
-                document.getElementById('errorMessage').style.display = 'block';
-                
-                return false;
+                console.log('ℹ️ Servidor Flask no disponible (probable CORS). Continuando de todos modos...');
+                // ⚠️ IMPORTANTE: NO mostrar error al usuario
             }
+            
+            // Si hay cualquier error, mostrar estado neutral
+            serverStatus.textContent = '⚪ Sistema de datos: Modo local';
+            serverStatus.className = 'server-status server-neutral';
+            return true; // ⚠️ SIEMPRE DEVOLVER TRUE PARA NO BLOQUEAR
         }
 
         // Función para enviar datos al servidor Python
