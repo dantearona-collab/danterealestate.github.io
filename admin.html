@@ -569,7 +569,37 @@
         </div>
     </div>
 
+    <!-- Botón de logout - Añadir en el panel admin -->
+    <button onclick="cerrarSesion()" 
+            style="position: fixed; top: 20px; right: 20px; background: #ff6b6b; color: white; 
+                border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; z-index: 1000;">
+        🔓 Cerrar Sesión
+    </button>
+
     <script>
+    function cerrarSesion() {
+        if (confirm('¿Cerrar sesión del admin?')) {
+            sessionStorage.removeItem('admin_autenticado');
+            localStorage.removeItem('admin_session_time');
+            location.reload();
+        }
+    }
+
+    // Cierre automático después de 2 horas
+    setTimeout(() => {
+        if (sessionStorage.getItem('admin_autenticado') === 'true') {
+            sessionStorage.removeItem('admin_autenticado');
+            alert('Sesión expirada por seguridad');
+            location.reload();
+        }
+    }, 2 * 60 * 60 * 1000); // 2 horas
+    </script>
+
+
+    <script>
+
+
+        
 
 
         // FUNCIÓN PARA COMBINAR TODOS LOS DATOS
