@@ -555,6 +555,42 @@
             return contactosUnicos;
         }
 
+        // Añade esta función al admin
+        async function cargarDatosDesdeBackend() {
+            try {
+                const response = await fetch('https://dante-propiedades-backend.onrender.com/api/contactos');
+                if (response.ok) {
+                    const contactosBackend = await response.json();
+                    
+                    // Combinar con datos locales
+                    const datosLocales = JSON.parse(localStorage.getItem('consultas_dante_propiedades')) || [];
+                    const todosLosContactos = [...contactosBackend, ...datosLocales];
+                    
+                    // Eliminar duplicados
+                    const contactosUnicos = Array.from(
+                        new Map(todosLosContactos.map(c => [c.localId || c.timestamp, c])).values()
+                    );
+                    
+                    localStorage.setItem('consultas_dante_propiedades', JSON.stringify(contactosUnicos));
+                    console.log(`✅ ${contactosUnicos.length} contactos sincronizados desde backend`);
+                    
+                    return contactosUnicos;
+                }
+            } catch (error) {
+                console.log('⚠️ No se pudo conectar al backend, usando datos locales');
+                return JSON.parse(localStorage.getItem('consultas_dante_propiedades')) || [];
+            }
+        }
+
+        // Modifica cargarDatos para usar esta función
+        async function cargarDatos() {
+            const contactos = await cargarDatosDesdeBackend();
+            mostrarContactos(contactos);
+            mostrarEstado(contactos);
+        }
+
+
+
         // Y MODIFICA la función cargarDatos para que primero combine:
         function cargarDatos() {
             // Primero combinar todos los datos
