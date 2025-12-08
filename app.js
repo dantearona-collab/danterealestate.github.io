@@ -19,7 +19,7 @@ let videosProperty = [];
 
 // === AGREGAR ESTAS VARIABLES ===
 let planoPdf = null;
-let reglamentoPdf = null;  // <- ESTA ES LA QUE FALTA
+let reglamentoPdf = null;
 let expensasPdf = null;
 let entornosPdf = null;
 let datosParcelaPdf = null;
@@ -104,7 +104,7 @@ function updateCollageDisplay(propertyId, index) {
 function initializeVariables() {
     // Obtener referencias con verificación de existencia
     planoPdf = document.getElementById('planoPdf');
-    reglamentoPdf = document.getElementById('reglamentoPdf');  // <- AGREGAR ESTA LÍNEA
+    reglamentoPdf = document.getElementById('reglamentoPdf');
     expensasPdf = document.getElementById('expensasPdf');
     entornosPdf = document.getElementById('entornosPdf');
     datosParcelaPdf = document.getElementById('datosParcelaPdf');
@@ -123,7 +123,7 @@ function initializeVariables() {
     // Log para depuración
     console.log('🔍 Elementos del DOM inicializados:', {
         planoPdf: !!planoPdf,
-        reglamentoPdf: !!reglamentoPdf,  // <- AGREGAR ESTA LÍNEA
+        reglamentoPdf: !!reglamentoPdf,
         entornosPdf: !!entornosPdf,
         datosParcelaPdf: !!datosParcelaPdf,
         pdfModal: !!pdfModal
@@ -172,7 +172,6 @@ function setupPdfEventListeners() {
     }
 
     // ========== EVENT LISTENERS PARA MULTIMEDIA ==========
-    // Eventos para los iconos de multimedia con verificación
     if (photosIcon && typeof photosIcon.addEventListener === 'function') {
         photosIcon.addEventListener('click', function (e) {
             e.stopPropagation();
@@ -195,7 +194,6 @@ function setupPdfEventListeners() {
     }
 
     // ========== EVENT LISTENERS PARA BOTONES ==========
-    // Evento para el botón de contacto con verificación
     if (contactButton && typeof contactButton.addEventListener === 'function') {
         contactButton.addEventListener('click', function (e) {
             e.stopPropagation();
@@ -204,7 +202,6 @@ function setupPdfEventListeners() {
     }
 
     // ========== EVENT LISTENERS PARA MODAL ==========
-    // Cerrar modal con verificación
     if (closeModal && typeof closeModal.addEventListener === 'function') {
         closeModal.addEventListener('click', function () {
             if (pdfModal) {
@@ -216,7 +213,6 @@ function setupPdfEventListeners() {
         });
     }
 
-    // Cerrar modal al hacer clic fuera del contenido con verificación
     if (pdfModal && typeof pdfModal.addEventListener === 'function') {
         pdfModal.addEventListener('click', function (e) {
             if (e.target === pdfModal) {
@@ -289,7 +285,7 @@ function createMultimediaSection(property) {
 // SISTEMA DE VISOR 360
 // ========================================
 
-let visor360Activo = false;  // <-- CAMBIAR de 0 a false
+let visor360Activo = false;
 let imagenes360Actuales = [];
 let imagen360Actual = 0;
 
@@ -546,7 +542,7 @@ function agregarFuncionalidadArrastre() {
         const deltaX = e.clientX - startX;
         rotation = (deltaX / imagen360.clientWidth) * 360;
 
-        // Efecto visual de rotación (puedes usar CSS transform para mejor efecto)
+        // Efecto visual de rotación
         imagen360.style.transform = `rotateY(${rotation}deg)`;
         imagen360.style.transition = 'transform 0.1s';
     });
@@ -604,7 +600,7 @@ document.addEventListener('keydown', function (event) {
     }
 });
 
-// Función para cerrar modal multimedia - DEFINIR ANTES DE viewPDF
+// Función para cerrar modal multimedia
 function closeMultimediaModal() {
     console.log('🔧 DEBUG closeMultimediaModal - multimediaModal:', multimediaModal);
 
@@ -636,7 +632,7 @@ function debugProperties() {
     });
 }
 
-// Función para visualizar PDFs - VERSIÓN CON MANEJO DE ERRORES
+// Función para visualizar PDFs
 function viewPDF(pdfUrl, titulo) {
     console.log('🔧 DEBUG viewPDF - INICIANDO...');
 
@@ -792,19 +788,17 @@ let imagenesModal = [];
 let imagenActual = 0;
 let tituloPropiedad = '';
 
-// Función para crear el slider de imágenes (Ahora clickeable para abrir modal)
+// Función para crear el slider de imágenes
 function createImageSlider(property) {
     const fotos = property.fotos || [];
 
     if (fotos.length === 0) {
-        // Sin imágenes - usar imagen por defecto
         return `
             <div style="position: relative; cursor: pointer;" onclick="expandPropertyImages('${property.id_temporal}')" class="modal-trigger">
                 <img src="INSTITUCIONAL 1.jpg" 
                      alt="${property.titulo}" 
                      style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
                      onerror="this.src='INSTITUCIONAL 3.png'">
-                <!-- Botón para ver modal completo -->
                 <div style="position: absolute; top: 5px; right: 5px; background: rgba(35, 45, 235, 0.8); color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer;" 
                      onclick="event.stopPropagation(); abrirModalImagenesComplete('${property.id_temporal}')">
                     🔍 Ver todas
@@ -814,14 +808,12 @@ function createImageSlider(property) {
     }
 
     if (fotos.length === 1) {
-        // Una sola imagen - hacer clickeable
         return `
             <div style="position: relative; cursor: pointer;" onclick="expandPropertyImages('${property.id_temporal}')" class="modal-trigger">
                 <img src="${fotos[0]}" 
                      alt="${property.titulo}" 
                      style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
                      onerror="this.src='INSTITUCIONAL 3.png'">
-                <!-- Botón para ver modal completo -->
                 <div style="position: absolute; top: 5px; right: 5px; background: rgba(35, 45, 235, 0.8); color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer;" 
                      onclick="event.stopPropagation(); abrirModalImagenesComplete('${property.id_temporal}')">
                     🔍 Ver todas
@@ -830,7 +822,7 @@ function createImageSlider(property) {
         `;
     }
 
-    // Múltiples imágenes - crear slider clickeable
+    // Múltiples imágenes - crear slider
     const imageSlides = fotos.map((foto, index) => `
         <div class="property-slide ${index === 0 ? 'active' : ''}" data-slide="${index}">
             <img src="${foto}" 
@@ -851,9 +843,8 @@ function createImageSlider(property) {
                 ${imageSlides}
             </div>
             
-            <!-- Controles de navegación (EMOJIS) -->
+            <!-- Controles de navegación -->
             ${fotos.length > 1 ? `
-                <!-- Flecha anterior -->
                 <button class="property-slider-btn property-prev" 
                         onclick="event.stopPropagation(); prevSlide('${property.id_temporal}')"
                         style="position: absolute; top: 50%; left: 8px; transform: translateY(-50%); 
@@ -864,7 +855,6 @@ function createImageSlider(property) {
                     ◀
                 </button>
                 
-                <!-- Flecha siguiente -->
                 <button class="property-slider-btn property-next" 
                         onclick="event.stopPropagation(); nextSlide('${property.id_temporal}')"
                         style="position: absolute; top: 50%; right: 8px; transform: translateY(-50%); 
@@ -875,14 +865,12 @@ function createImageSlider(property) {
                     ▶
                 </button>
                 
-                <!-- Dots de navegación -->
                 <div class="property-nav-dots" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); 
                                                      display: flex; gap: 6px; z-index: 2;">
                     ${navigationDots}
                 </div>
             ` : ''}
             
-            <!-- Botón para ver modal completo -->
             <div style="position: absolute; top: 5px; right: 5px; background: rgba(35, 45, 235, 0.8); color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; z-index: 3;" 
                  onclick="event.stopPropagation(); abrirModalImagenesComplete('${property.id_temporal}')">
                 🔍 Ver todas
@@ -940,7 +928,7 @@ function nextSlide(propertyId) {
     showSlide(propertyId, newIndex);
 }
 
-// CSS para el slider (agregar al head)
+// CSS para el slider
 function addSliderStyles() {
     const style = document.createElement('style');
     style.textContent = `
@@ -1010,7 +998,7 @@ let globalData = {
     }
 };
 
-// Cargar propiedades - Solo desde archivo externo propiedades.json
+// Cargar propiedades
 async function loadProperties() {
     console.log('🔄 Iniciando carga de propiedades desde propiedades.json...');
 
@@ -1025,7 +1013,6 @@ async function loadProperties() {
         const data = await response.json();
         console.log('✅ Datos cargados exitosamente:', data.length, 'propiedades');
 
-        // Datos cargados exitosamente
         globalData.properties = data;
         globalData.filteredProperties = data;
 
@@ -1034,26 +1021,21 @@ async function loadProperties() {
         displayProperties(data);
 
     } catch (error) {
-        // Error - archivo no encontrado o no accesible
         console.error('❌ Error al cargar propiedades.json:', error.message);
         console.log('💡 Asegúrate de que el archivo propiedades.json esté disponible');
-
-        // Mostrar mensaje de error en la interfaz
         showErrorMessage();
     }
 }
 
-// Mostrar mensaje de error cuando no se puede cargar el archivo
+// Mostrar mensaje de error
 function showErrorMessage() {
     console.log('🔧 Mostrando mensaje de error en la interfaz...');
 
-    // Ocultar spinner de carga
     const loadingSpinner = document.getElementById('loadingSpinner');
     if (loadingSpinner) {
         loadingSpinner.style.display = 'none';
     }
 
-    // Mostrar mensaje de error en la interfaz
     const errorDiv = document.createElement('div');
     errorDiv.id = 'errorMessage';
     errorDiv.style.cssText = `
@@ -1071,7 +1053,6 @@ function showErrorMessage() {
         <p>Verifica que el archivo esté disponible en el servidor</p>
     `;
 
-    // Insertar después del header
     const header = document.querySelector('header');
     if (header && header.nextSibling) {
         header.parentNode.insertBefore(errorDiv, header.nextSibling);
@@ -1101,7 +1082,7 @@ function populateFilters(properties) {
     console.log('🔧 Filtros poblados - Barrios:', barrios.length, 'Tipos:', tipos.length);
 }
 
-// Función para crear la tarjeta de propiedad - REEMPLAZA LA SECCIÓN DEL BOTÓN 360°
+// Función para crear la tarjeta de propiedad
 function createPropertyCard(property) {
     const card = document.createElement('div');
     card.className = 'property-card';
@@ -1125,7 +1106,7 @@ function createPropertyCard(property) {
                 ${property.titulo}
             </h3>
             
-            <!-- SECCIÓN: RECORRIDO VIRTUAL 360° - CORREGIDA -->
+            <!-- SECCIÓN: RECORRIDO VIRTUAL 360° -->
             ${property.imagenes_360 && Array.isArray(property.imagenes_360) && property.imagenes_360.length > 0 ? `
                 <div style="
                     border-top: 1px solid #e1e5e9 !important;
@@ -1178,7 +1159,7 @@ function createPropertyCard(property) {
     return card;
 }
 
-// FUNCIONES PARA MAPAS - VERSIÓN CON IDS
+// FUNCIONES PARA MAPAS
 function toggleMap(button, direccionCompleta, titulo) {
     const propertyCard = button.closest('.property-card');
     const propertyId = propertyCard.getAttribute('data-property-card');
@@ -1204,7 +1185,6 @@ function toggleMap(button, direccionCompleta, titulo) {
         button.style.borderColor = '#232deb';
         button.style.color = 'white';
 
-        // Cargar mapa si no está cargado (PASANDO EL propertyId)
         if (!mapPlaceholder.classList.contains('loaded')) {
             loadGoogleMap(mapPlaceholder, direccionCompleta, titulo, propertyId);
         }
@@ -1249,12 +1229,11 @@ function loadGoogleMap(placeholder, direccionCompleta, titulo, propertyId) {
     placeholder.classList.add('loaded');
 }
 
-// Función para mostrar el mapa en pantalla completa con botón Volver
+// Función para mostrar el mapa en pantalla completa
 function showPropertyMap(propertyId, address, title) {
     console.log('🗺️ Mostrando mapa para propiedad:', propertyId, address, title);
 
     try {
-        // 1. Ocultar el contenedor de propiedades
         const propertiesContainer = document.getElementById('properties-container');
         const filters = document.querySelector('.filters');
         const resultsCounter = document.getElementById('results-counter-styled');
@@ -1263,13 +1242,8 @@ function showPropertyMap(propertyId, address, title) {
         if (filters) filters.style.display = 'none';
         if (resultsCounter) resultsCounter.style.display = 'none';
 
-        // 2. Mostrar el botón Volver
         showBackButton(title || 'Propiedad');
-
-        // 3. Integrar el mapa (sin API key problemática)
         showActualMap(propertyId, address, title);
-
-        // 4. Añadir clase al body para modo mapa
         document.body.classList.add('map-view-active');
 
         console.log('✅ Mapa mostrado correctamente');
@@ -1284,7 +1258,6 @@ function showBackButton(title) {
         let backButton = document.getElementById('mapBackButton');
 
         if (!backButton) {
-            // Crear el botón si no existe
             backButton = document.createElement('div');
             backButton.id = 'mapBackButton';
             backButton.className = 'map-back-button';
@@ -1294,7 +1267,6 @@ function showBackButton(title) {
                 </button>
             `;
             document.body.appendChild(backButton);
-
             console.log('✅ Botón Volver creado');
         }
 
@@ -1310,7 +1282,6 @@ function backToProperties() {
     console.log('🏠 Volviendo a propiedades');
 
     try {
-        // 1. Mostrar el contenedor de propiedades
         const propertiesContainer = document.getElementById('properties-container');
         const filters = document.querySelector('.filters');
         const resultsCounter = document.getElementById('results-counter-styled');
@@ -1319,19 +1290,13 @@ function backToProperties() {
         if (filters) filters.style.display = 'block';
         if (resultsCounter) resultsCounter.style.display = 'block';
 
-        // 2. Ocultar el botón Volver
         const backButton = document.getElementById('mapBackButton');
         if (backButton) {
             backButton.style.display = 'none';
         }
 
-        // 3. Cerrar/limpiar el mapa
         closeMap();
-
-        // 4. Remover clase del body
         document.body.classList.remove('map-view-active');
-
-        // 5. Scroll al inicio suavemente
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
         console.log('✅ Vuelta a propiedades exitosa');
@@ -1340,16 +1305,14 @@ function backToProperties() {
     }
 }
 
-// Función para mostrar el mapa (SIN API KEY problemática)
+// Función para mostrar el mapa
 function showActualMap(propertyId, address, title) {
     try {
-        // Remover mapa anterior si existe
         const existingMap = document.getElementById('fullscreen-map-container');
         if (existingMap) {
             existingMap.remove();
         }
 
-        // Crear contenedor del mapa
         const mapContainer = document.createElement('div');
         mapContainer.id = 'fullscreen-map-container';
         mapContainer.style.cssText = `
@@ -1362,13 +1325,9 @@ function showActualMap(propertyId, address, title) {
             z-index: 9998 !important;
         `;
 
-        // Codificar la dirección para Google Maps (sin API key)
         const encodedAddress = encodeURIComponent(address);
-
-        // Usar Google Maps Embed sin API key (modo place)
         const mapUrl = `https://www.google.com/maps/embed/v1/place?q=${encodedAddress}&zoom=15&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`;
 
-        // Crear iframe de Google Maps
         mapContainer.innerHTML = `
             <iframe 
                 src="${mapUrl}"
@@ -1391,10 +1350,9 @@ function showActualMap(propertyId, address, title) {
         console.log('✅ Mapa creado correctamente');
     } catch (error) {
         console.error('❌ Error al crear mapa:', error);
-        // Fallback: abrir Google Maps en nueva pestaña
         const encodedAddress = encodeURIComponent(address);
         window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
-        backToProperties(); // Volver ya que el mapa falló
+        backToProperties();
     }
 }
 
@@ -1419,17 +1377,12 @@ document.addEventListener('keydown', function (event) {
     }
 });
 
-// Inicializar estilos cuando se carga la página
+// Inicializar estilos
 document.addEventListener('DOMContentLoaded', function () {
-    // Verificar que los estilos estén presentes
     if (!document.querySelector('#map-back-styles')) {
         const styles = document.createElement('style');
         styles.id = 'map-back-styles';
         styles.textContent = `
-            /* ========================================
-               BOTÓN VOLVER DESDE MAPA
-               ======================================== */
-            
             .map-back-button {
                 position: fixed;
                 top: 20px;
@@ -1483,7 +1436,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 font-weight: bold;
             }
             
-            /* Responsive para móviles */
             @media (max-width: 768px) {
                 .map-back-button {
                     top: 15px;
@@ -1512,7 +1464,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 console.log('✅ Sistema de botón Volver para mapas cargado');
 
-// Función para manejar estilos del mapa container
+// Función para manejar estilos del mapa
 function initializeMapStyles() {
     const style = document.createElement('style');
     style.textContent = `
@@ -1572,7 +1524,6 @@ function updateResultsCount(count) {
 // ========================================
 
 function setupFilterEvents() {
-    // Event listeners para filtros
     const operacionSelect = document.getElementById('operacion-select-styled');
     const barrioSelect = document.getElementById('barrio-select-styled');
     const tipoSelect = document.getElementById('tipo-select-styled');
@@ -1656,7 +1607,6 @@ document.addEventListener('DOMContentLoaded', function () {
 function checkResourceErrors() {
     const imageErrors = [];
 
-    // Verificar imágenes que no cargan
     document.querySelectorAll('img').forEach(img => {
         img.addEventListener('error', function () {
             imageErrors.push(this.src);
@@ -1718,12 +1668,10 @@ function abrirModalImagenesComplete(propertyId) {
 function abrirModalImagenes(property) {
     console.log('🔍 Abriendo modal para:', property.titulo);
 
-    // Configurar datos del modal
     imagenesModal = property.fotos || [];
     imagenActual = 0;
     tituloPropiedad = property.titulo || 'Galería de Imágenes';
 
-    // Verificar elementos del DOM
     const modalElement = document.getElementById('modal-imagenes');
     const imagenPrincipalElement = document.getElementById('imagen-principal');
     const contadorElement = document.getElementById('imagen-contador');
@@ -1753,16 +1701,10 @@ function abrirModalImagenes(property) {
         return;
     }
 
-    // Actualizar información del modal
     tituloElement.textContent = tituloPropiedad;
-
-    // Mostrar la primera imagen
     mostrarImagenActual();
-
-    // Mostrar modal
     modalElement.style.display = 'block';
 
-    // Aplicar layout específico para móviles
     if (window.innerWidth <= 480) {
         modalElement.style.display = 'flex';
         modalElement.style.alignItems = 'center';
@@ -1770,8 +1712,6 @@ function abrirModalImagenes(property) {
     }
 
     document.body.style.overflow = 'hidden';
-
-    // Agregar event listener para teclado
     document.addEventListener('keydown', manejarTecladoModal);
 
     console.log('✅ Modal abierto para:', property.titulo);
@@ -1795,14 +1735,10 @@ function mostrarImagenActual() {
     }
 
     const imagenUrl = imagenesModal[imagenActual];
-
-    // Configurar imagen de fondo
     imagenPrincipalElement.style.backgroundImage = `url('${imagenUrl}')`;
     imagenPrincipalElement.style.backgroundSize = 'contain';
     imagenPrincipalElement.style.backgroundRepeat = 'no-repeat';
     imagenPrincipalElement.style.backgroundPosition = 'center';
-
-    // Actualizar contador
     contadorElement.textContent = `${imagenActual + 1} / ${imagenesModal.length}`;
 
     console.log('🖼️ Imagen mostrada:', imagenActual + 1, '/', imagenesModal.length);
@@ -1814,7 +1750,6 @@ function cerrarModalImagenes() {
 
     if (modalElement) {
         modalElement.style.display = 'none';
-        // Resetear estilos específicos de móviles
         if (window.innerWidth <= 480) {
             modalElement.style.alignItems = '';
             modalElement.style.justifyContent = '';
@@ -1822,9 +1757,7 @@ function cerrarModalImagenes() {
         document.body.style.overflow = 'auto';
     }
 
-    // Remover event listener
     document.removeEventListener('keydown', manejarTecladoModal);
-
     console.log('🔒 Modal cerrado');
 }
 
@@ -1834,7 +1767,6 @@ function imagenAnterior() {
         imagenActual--;
         mostrarImagenActual();
     } else {
-        // Ir a la última imagen
         imagenActual = imagenesModal.length - 1;
         mostrarImagenActual();
     }
@@ -1846,18 +1778,16 @@ function imagenSiguiente() {
         imagenActual++;
         mostrarImagenActual();
     } else {
-        // Ir a la primera imagen
         imagenActual = 0;
         mostrarImagenActual();
     }
 }
 
-// Función para crear galería expandible (una imagen que se expande al hacer clic)
+// Función para crear galería expandible
 function createExpandableGallery(property) {
     const fotos = property.fotos || [];
 
     if (fotos.length === 0) {
-        // Sin imágenes - usar imagen por defecto
         return `
             <div class="expandable-gallery" style="position: relative; cursor: pointer; height: 200px;" 
                  onclick="expandPropertyImages('${property.id_temporal}')">
@@ -1874,7 +1804,6 @@ function createExpandableGallery(property) {
         `;
     }
 
-    // Mostrar la primera imagen como vista inicial
     const firstImage = fotos[0];
     const totalPhotos = fotos.length;
 
@@ -1883,7 +1812,6 @@ function createExpandableGallery(property) {
              onclick="expandPropertyImages('${property.id_temporal}')" 
              data-property-id="${property.id_temporal}">
             
-            <!-- Vista inicial: Una sola imagen -->
             <div class="gallery-initial-view">
                 <img src="${firstImage}" 
                      alt="${property.titulo}" 
@@ -1912,7 +1840,6 @@ function calcularDistribucionMasonry(totalFotos, anchoDisponible, altoDisponible
     console.log('🏗️ Calculando distribución MASONRY para', totalFotos, 'fotos');
     console.log('📐 Espacio disponible:', anchoDisponible, 'x', altoDisponible, 'px');
 
-    // CONFIGURACIÓN MASONRY OPTIMIZADA
     const esMobile = anchoDisponible < 768;
     const columnas = esMobile ? 2 : 4;
     const gap = 8;
@@ -1920,42 +1847,33 @@ function calcularDistribucionMasonry(totalFotos, anchoDisponible, altoDisponible
 
     console.log('🔧 Masonry: ' + columnas + ' columnas, gap: ' + gap + 'px, ancho columna: ' + anchoColumna + 'px');
 
-    // ALTURAS VARIADAS PARA EFECTO MASONRY
     const alturasPosibles = [
-        Math.floor(anchoColumna * 0.8),   // Pequeña
-        Math.floor(anchoColumna * 1.2),   // Mediana
-        Math.floor(anchoColumna * 1.6),   // Grande
-        Math.floor(anchoColumna * 2.0)    // Extra grande
+        Math.floor(anchoColumna * 0.8),
+        Math.floor(anchoColumna * 1.2),
+        Math.floor(anchoColumna * 1.6),
+        Math.floor(anchoColumna * 2.0)
     ];
 
-    // INICIALIZAR COLUMNAS
     const alturasColumnas = new Array(columnas).fill(0);
     const patrones = [];
 
-    // GENERAR PATRONES MASONRY
     for (let i = 0; i < totalFotos; i++) {
-        // Encontrar la columna con menor altura
         const columnaMasBaja = alturasColumnas.indexOf(Math.min(...alturasColumnas));
-
-        // VARIEDAD DE TAMAÑOS - distribución 30% pequeñas, 40% medianas, 20% grandes, 10% extra grandes
         let alturaFoto;
         const random = Math.random();
 
         if (random < 0.3) {
-            alturaFoto = alturasPosibles[0]; // Pequeña
+            alturaFoto = alturasPosibles[0];
         } else if (random < 0.7) {
-            alturaFoto = alturasPosibles[1]; // Mediana
+            alturaFoto = alturasPosibles[1];
         } else if (random < 0.9) {
-            alturaFoto = alturasPosibles[2]; // Grande
+            alturaFoto = alturasPosibles[2];
         } else {
-            alturaFoto = alturasPosibles[3]; // Extra grande
+            alturaFoto = alturasPosibles[3];
         }
 
-        // POSICIÓN EN LA COLUMNA SELECCIONADA
         const left = columnaMasBaja * (anchoColumna + gap);
         const top = alturasColumnas[columnaMasBaja];
-
-        // ACTUALIZAR ALTURA DE LA COLUMNA
         alturasColumnas[columnaMasBaja] += alturaFoto + gap;
 
         patrones.push({
@@ -1971,7 +1889,6 @@ function calcularDistribucionMasonry(totalFotos, anchoDisponible, altoDisponible
         console.log('📐 FOTO ' + (i + 1) + ': Columna ' + columnaMasBaja + ' - ' + anchoColumna + 'x' + alturaFoto + 'px (top: ' + top + 'px)');
     }
 
-    // CALCULAR ALTURA TOTAL
     const alturaTotal = Math.max(...alturasColumnas) - gap;
 
     console.log('✅ Distribución MASONRY completa:');
@@ -2000,16 +1917,13 @@ function expandPropertyImages(propertyId) {
     const fotos = property.fotos;
     const totalPhotos = fotos.length;
 
-    // Calcular dimensiones disponibles
     const anchoVentana = window.innerWidth;
     const altoVentana = window.innerHeight;
     const anchoDisponible = anchoVentana - 40;
     const altoDisponible = altoVentana - 120;
 
-    // USAR ALGORITMO MASONRY MEJORADO
     const distribucionMasonry = calcularDistribucionMasonry(totalPhotos, anchoDisponible, altoDisponible);
 
-    // Crear overlay
     const overlay = document.createElement('div');
     overlay.id = `image-expansion-${propertyId}`;
     overlay.className = 'image-expansion-overlay';
@@ -2026,7 +1940,6 @@ function expandPropertyImages(propertyId) {
         overflow: hidden;
     `;
 
-    // Header
     const header = `
         <div style="
             display: flex;
@@ -2066,7 +1979,6 @@ function expandPropertyImages(propertyId) {
         </div>
     `;
 
-    // Contenedor Masonry
     const masonryContainer = `
         <div id="masonry-gallery-${propertyId}" style="
             flex: 1;
@@ -2076,7 +1988,6 @@ function expandPropertyImages(propertyId) {
             background: white !important;
             height: ${distribucionMasonry.alturaTotal + 100}px;
         ">
-            <!-- Contenedor de imágenes masonry -->
             <div style="
                 position: relative;
                 width: 100%;
@@ -2089,7 +2000,6 @@ function expandPropertyImages(propertyId) {
         const left = patron.left;
         const top = patron.top;
 
-        // Determinar clase de tamaño para estilos CSS
         let claseTamaño = 'masonry-small';
         if (alto > ancho * 1.5) claseTamaño = 'masonry-large';
         else if (alto > ancho * 1.2) claseTamaño = 'masonry-medium';
@@ -2133,14 +2043,12 @@ function expandPropertyImages(propertyId) {
     overlay.innerHTML = header + masonryContainer;
     document.body.appendChild(overlay);
 
-    // Agregar event listeners para overlay
     overlay.addEventListener('click', function (e) {
         if (e.target === overlay) {
             closeImageExpansion(propertyId);
         }
     });
 
-    // Evento para cerrar con Escape
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             closeImageExpansion(propertyId);
@@ -2148,7 +2056,6 @@ function expandPropertyImages(propertyId) {
     });
 
     document.body.style.overflow = 'hidden';
-
     console.log('🎨 Galería Masonry creada para', property.titulo);
 }
 
@@ -2170,7 +2077,6 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
     }
     console.log('✅ DEBUG: Foto seleccionada:', fotoSeleccionada);
 
-    // Obtener la galería actual
     const galeriaOverlay = document.getElementById(`image-expansion-${propertyId}`);
     if (!galeriaOverlay) {
         console.log('❌ DEBUG: Overlay de galería no encontrado:', `image-expansion-${propertyId}`);
@@ -2178,13 +2084,11 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
     }
     console.log('✅ DEBUG: Overlay de galería encontrado');
 
-    // Limpiar cualquier vista expandida anterior
     const vistaExpandidaAnterior = galeriaOverlay.querySelector('.vista-foto-expandida');
     if (vistaExpandidaAnterior) {
         vistaExpandidaAnterior.remove();
     }
 
-    // Crear la vista expandida de la foto DENTRO de la galería
     const vistaExpandida = document.createElement('div');
     vistaExpandida.className = 'vista-foto-expandida';
     vistaExpandida.style.cssText = `
@@ -2201,7 +2105,6 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
     `;
 
     vistaExpandida.innerHTML = `
-        <!-- Header con título y controles -->
         <div style="
             display: flex;
             justify-content: space-between;
@@ -2214,7 +2117,6 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
         ">
             <div style="font-size: 16px;">${property.titulo} - Foto ${fotoIndex + 1}</div>
             <div style="display: flex; gap: 10px; align-items: center;">
-                <!-- Botón volver al grid -->
                 <button onclick="volverAGaleriaGrid('${propertyId}')" 
                         style="
                             background: rgba(255, 255, 255, 0.2);
@@ -2236,7 +2138,6 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
                     ← Grid
                 </button>
                 
-                <!-- Botón cerrar galería -->
                 <button onclick="closeImageExpansion('${propertyId}')" 
                         style="
                             background: rgba(255, 255, 255, 0.2);
@@ -2262,7 +2163,6 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
             </div>
         </div>
         
-        <!-- Imagen expandida MÁXIMO ESPACIO -->
         <div style="
             flex: 1;
             display: flex;
@@ -2291,7 +2191,6 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
                  onmouseout="this.style.transform='scale(1)'"
                  title="Haz clic para volver al grid">
                  
-            <!-- Controles de navegación INTEGRADOS en la imagen - APROVECHANDO ESPACIO -->
             ${fotoIndex > 0 ? `
                 <button onclick="expandirFotoEnGaleria('${propertyId}', ${fotoIndex - 1})" 
                         style="
@@ -2355,7 +2254,6 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
             ` : ''}
         </div>
         
-        <!-- Footer con información -->
         <div style="
             padding: 15px 20px;
             background: #232deb;
@@ -2370,17 +2268,14 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
         </div>
     `;
 
-    // Agregar la vista expandida a la galería
     galeriaOverlay.appendChild(vistaExpandida);
 
-    // Ocultar temporalmente el grid
     const gridImages = galeriaOverlay.querySelector('div[style*="display: grid"]');
     if (gridImages) {
         gridImages.style.opacity = '0.3';
         gridImages.style.pointerEvents = 'none';
     }
 
-    // Evento para volver al grid con Escape
     const escapeHandler = function (e) {
         if (e.key === 'Escape') {
             volverAGaleriaGrid(propertyId);
@@ -2389,7 +2284,6 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
     };
     document.addEventListener('keydown', escapeHandler);
 
-    // Evento para volver al grid al hacer clic en el fondo de la imagen
     vistaExpandida.addEventListener('click', function (e) {
         if (e.target === vistaExpandida.querySelector('div[style*="flex: 1"]')) {
             volverAGaleriaGrid(propertyId);
@@ -2404,20 +2298,17 @@ function volverAGaleriaGrid(propertyId) {
     const galeriaOverlay = document.getElementById(`image-expansion-${propertyId}`);
     if (!galeriaOverlay) return;
 
-    // Remover la vista expandida
     const vistaExpandida = galeriaOverlay.querySelector('.vista-foto-expandida');
     if (vistaExpandida) {
         vistaExpandida.remove();
     }
 
-    // Restaurar la visibilidad del grid
     const gridImages = galeriaOverlay.querySelector('div[style*="display: grid"]');
     if (gridImages) {
         gridImages.style.opacity = '1';
         gridImages.style.pointerEvents = 'auto';
     }
 
-    // Remover listeners específicos
     document.removeEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             volverAGaleriaGrid(propertyId);
@@ -2427,20 +2318,16 @@ function volverAGaleriaGrid(propertyId) {
     console.log('🔄 Volviendo al grid de fotos en la galería');
 }
 
-// Función para cerrar expansión (versión simplificada)
+// Función para cerrar expansión
 function closeImageExpansion(propertyId) {
     const overlay = document.getElementById(`image-expansion-${propertyId}`);
     if (overlay) {
         overlay.remove();
     }
 
-    // Restaurar scroll del body
     document.body.style.overflow = 'auto';
-
     console.log('🔒 Galería expandida cerrada');
 }
-
-// Sistema de galería expandible - Una imagen que se expande al hacer clic
 
 // Función para manejar eventos de teclado
 function manejarTecladoModal(event) {
@@ -2468,7 +2355,6 @@ window.addEventListener('click', function (event) {
     }
 });
 
-// Mostrar variables del modal inicializadas
 console.log('🖼️ Variables del modal inicializadas');
 
 // ========================================
@@ -2489,11 +2375,9 @@ function createImageCollage(property) {
     const fotos = property.fotos;
     const totalFotos = fotos.length;
 
-    // Seleccionar imágenes para el collage
     let collageHtml = '';
 
     if (totalFotos >= 5) {
-        // Para 5+ fotos: 2 arriba, 1 grande en medio, 2 abajo
         collageHtml = `
             <div class="property-gallery-collage">
                 <div class="collage-top-row">
@@ -2539,7 +2423,6 @@ function createImageCollage(property) {
             </div>
         `;
     } else if (totalFotos >= 3) {
-        // Para 3-4 fotos: adaptar layout
         collageHtml = `
             <div class="property-gallery-collage">
                 <div class="collage-top-row">
@@ -2577,7 +2460,6 @@ function createImageCollage(property) {
             </div>
         `;
     } else {
-        // Para 1-2 fotos: mostrar en tamaño completo
         collageHtml = `
             <div class="property-gallery-collage">
                 <div class="collage-main" style="position: relative;">
@@ -2614,7 +2496,6 @@ function createImageCollage(property) {
             <div class="gallery-overlay">
                 <span>Ver ${totalFotos} foto${totalFotos > 1 ? 's' : ''}</span>
             </div>
-            <!-- Botón para ver modal completo -->
             <div style="position: absolute; top: 5px; right: 5px; background: rgba(35, 45, 235, 0.8); color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; z-index: 3;" 
                  onclick="event.stopPropagation(); abrirModalImagenesComplete('${property.id_temporal}')">
                 🔍 Ver todas
@@ -2639,7 +2520,6 @@ function openImageModal(propertyId, imageIndex) {
 
     showImageInModal();
 
-    // Mostrar modal
     const modal = document.getElementById('imageModal');
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
@@ -2692,7 +2572,6 @@ function closeImageModal() {
     modal.style.display = 'none';
     document.body.style.overflow = 'auto';
 
-    // Limpiar variables
     currentImageIndex = 0;
     currentPropertyId = '';
     currentPropertyPhotos = [];
@@ -2716,8 +2595,6 @@ document.addEventListener('keydown', function (event) {
     }
 });
 
-// Sistema de galería expandible - Una imagen que se expande al hacer clic
-
 // Cerrar modal al hacer clic fuera de la imagen
 document.addEventListener('click', function (event) {
     const modal = document.getElementById('imageModal');
@@ -2730,7 +2607,6 @@ document.addEventListener('click', function (event) {
 
 // === JAVASCRIPT PARA PROPIEDAD INTERACTIVA ===
 
-// Simulación del archivo propiedades.json
 const propiedadesJSON = {
     propiedad: {
         id: "UF003",
@@ -2765,7 +2641,6 @@ function openPdf(pdfName, title) {
 
     let rutaArchivo = '';
 
-    // Buscar inteligentemente en el array de documentos - CORREGIDO
     if (pdfName === 'entornos') {
         rutaArchivo = documentos.find(doc => doc.toLowerCase().includes('entornos'));
     } else if (pdfName === 'datos_parcela') {
@@ -2775,7 +2650,6 @@ function openPdf(pdfName, title) {
     } else if (pdfName === 'reglamento') {
         rutaArchivo = documentos.find(doc => doc.toLowerCase().includes('reglamento'));
     } else {
-        // Búsqueda genérica
         rutaArchivo = documentos.find(doc =>
             doc.toLowerCase().includes(pdfName.toLowerCase())
         );
@@ -2784,7 +2658,6 @@ function openPdf(pdfName, title) {
     console.log('🔍 Ruta encontrada:', rutaArchivo);
 
     if (rutaArchivo) {
-        // Asegurar que la ruta use minúsculas para la extensión
         const rutaFinal = rutaArchivo.replace(/\.PDF$/, '.pdf');
         console.log('🚀 Abriendo PDF:', rutaFinal);
 
