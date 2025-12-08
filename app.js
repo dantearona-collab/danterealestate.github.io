@@ -590,9 +590,9 @@ function abrirVisor360Mejorado(propertyId, titulo, imagenes360) {
     try {
         // Verificar si el sistema mejorado está disponible
         if (typeof sistema360Mejorado !== 'undefined' && 
-            typeof sistema360Mejorado.mostrarFallback === 'function') {
+            typeof sistema360Mejorado.activarModoFallback === 'function') {
             
-            sistema360Mejorado.mostrarFallback(titulo);
+            sistema360Mejorado.activarModoFallback(titulo);
         } else {
             // Fallback manual si el sistema mejorado no está disponible
             console.warn('⚠️ Sistema mejorado no disponible, usando fallback manual');
@@ -757,6 +757,8 @@ function cerrarFallbackManual() {
     const modal = document.getElementById('modal-fallback-360');
     if (modal) {
         modal.style.display = 'none';
+    }
+}
     }
 }
 
