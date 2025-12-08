@@ -1805,28 +1805,28 @@
         }
         
         function previousImage() {
-            if (currentImages.length > 0) {
+            if (modalcurrentImages.length > 0) {
                 modalCurrentImageIndex = (modalCurrentImageIndex - 1 + modalCurrentImages.length) % modalCurrentImages.length;
                 const modalImage = document.getElementById('modalImage');
                 const modalCounter = document.getElementById('modalCounter');
                 const modalInfo = document.getElementById('modalInfo');
                 
-                modalImage.src = currentImages[currentImageIndex];
-                modalCounter.textContent = `${currentImageIndex + 1} / ${currentImages.length}`;
-                modalInfo.textContent = `Imagen ${currentImageIndex + 1} de ${currentImages.length}`;
+                modalImage.src = modalcurrentImages[modalcurrentImageIndex];
+                modalCounter.textContent = `${modalcurrentImageIndex + 1} / ${modalcurrentImages.length}`;
+                modalInfo.textContent = `Imagen ${modalcurrentImageIndex + 1} de ${modalcurrentImages.length}`;
             }
         }
         
         function nextImage() {
-            if (currentImages.length > 0) {
+            if (modalcurrentImages.length > 0) {
                 modalCurrentImageIndex = (modalCurrentImageIndex + 1) % modalCurrentImages.length;
                 const modalImage = document.getElementById('modalImage');
                 const modalCounter = document.getElementById('modalCounter');
                 const modalInfo = document.getElementById('modalInfo');
                 
-                modalImage.src = currentImages[currentImageIndex];
-                modalCounter.textContent = `${currentImageIndex + 1} / ${currentImages.length}`;
-                modalInfo.textContent = `Imagen ${currentImageIndex + 1} de ${currentImages.length}`;
+                modalImage.src = modalcurrentImages[modalcurrentImageIndex];
+                modalCounter.textContent = `${modalcurrentImageIndex + 1} / ${modalcurrentImages.length}`;
+                modalInfo.textContent = `Imagen ${modalcurrentImageIndex + 1} de ${modalcurrentImages.length}`;
             }
         }
         
