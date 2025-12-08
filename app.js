@@ -2782,7 +2782,7 @@ function createImageCollage(property) {
 }
 
 // Variables globales para el modal de imágenes
-let currentImageIndex = 0;
+let appCurrentImageIndex = 0;
 let currentPropertyId = '';
 let currentPropertyPhotos = [];
 

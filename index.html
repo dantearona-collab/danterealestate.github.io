@@ -1778,12 +1778,12 @@
         }
         
         // Funciones para modal de galería de imágenes
-        let currentImageIndex = 0;
-        let currentImages = [];
+        let modalCurrentImageIndex = 0;
+        let modalCurrentImages = [];
         
         function openImageModal(images, index = 0) {
-            currentImages = images;
-            currentImageIndex = index;
+            modalCurrentImages = images;
+            modalCurrentImageIndex = index;
             const modal = document.getElementById('imageModal');
             const modalImage = document.getElementById('modalImage');
             const modalCounter = document.getElementById('modalCounter');
@@ -1806,7 +1806,7 @@
         
         function previousImage() {
             if (currentImages.length > 0) {
-                currentImageIndex = (currentImageIndex - 1 + currentImages.length) % currentImages.length;
+                modalCurrentImageIndex = (modalCurrentImageIndex - 1 + modalCurrentImages.length) % modalCurrentImages.length;
                 const modalImage = document.getElementById('modalImage');
                 const modalCounter = document.getElementById('modalCounter');
                 const modalInfo = document.getElementById('modalInfo');
@@ -1819,7 +1819,7 @@
         
         function nextImage() {
             if (currentImages.length > 0) {
-                currentImageIndex = (currentImageIndex + 1) % currentImages.length;
+                modalCurrentImageIndex = (modalCurrentImageIndex + 1) % modalCurrentImages.length;
                 const modalImage = document.getElementById('modalImage');
                 const modalCounter = document.getElementById('modalCounter');
                 const modalInfo = document.getElementById('modalInfo');
