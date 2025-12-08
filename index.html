@@ -1724,7 +1724,8 @@
         }
     </style>
     
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+    <script>
         console.log('🏠 Sistema Dante Propiedades - Versión Completa cargando...');
         console.log('✅ Todas las funcionalidades disponibles');
         console.log('🎠 Slider de múltiples fotos incluido');
@@ -1805,28 +1806,28 @@
         }
         
         function previousImage() {
-            if (modalcurrentImages.length > 0) {
+            if (modalCurrentImages.length > 0) {
                 modalCurrentImageIndex = (modalCurrentImageIndex - 1 + modalCurrentImages.length) % modalCurrentImages.length;
                 const modalImage = document.getElementById('modalImage');
                 const modalCounter = document.getElementById('modalCounter');
                 const modalInfo = document.getElementById('modalInfo');
                 
-                modalImage.src = modalcurrentImages[modalcurrentImageIndex];
-                modalCounter.textContent = `${modalcurrentImageIndex + 1} / ${modalcurrentImages.length}`;
-                modalInfo.textContent = `Imagen ${modalcurrentImageIndex + 1} de ${modalcurrentImages.length}`;
+                modalImage.src = modalCurrentImages[modalCurrentImageIndex];
+                modalCounter.textContent = `${modalCurrentImageIndex + 1} / ${modalCurrentImages.length}`;
+                modalInfo.textContent = `Imagen ${modalCurrentImageIndex + 1} de ${modalCurrentImages.length}`;
             }
         }
         
         function nextImage() {
-            if (modalcurrentImages.length > 0) {
+            if (modalCurrentImages.length > 0) {
                 modalCurrentImageIndex = (modalCurrentImageIndex + 1) % modalCurrentImages.length;
                 const modalImage = document.getElementById('modalImage');
                 const modalCounter = document.getElementById('modalCounter');
                 const modalInfo = document.getElementById('modalInfo');
                 
-                modalImage.src = modalcurrentImages[modalcurrentImageIndex];
-                modalCounter.textContent = `${modalcurrentImageIndex + 1} / ${modalcurrentImages.length}`;
-                modalInfo.textContent = `Imagen ${modalcurrentImageIndex + 1} de ${modalcurrentImages.length}`;
+                modalImage.src = modalCurrentImages[modalCurrentImageIndex];
+                modalCounter.textContent = `${modalCurrentImageIndex + 1} / ${modalCurrentImages.length}`;
+                modalInfo.textContent = `Imagen ${modalCurrentImageIndex + 1} de ${modalCurrentImages.length}`;
             }
         }
         
@@ -1910,7 +1911,7 @@
             if (event.target == imageModal) {
                 closeImageModal();
             }
-        }
+        };
         
         // Cerrar modal con tecla Escape
         document.addEventListener('keydown', function(event) {
@@ -1976,7 +1977,7 @@
                     closeMultimediaModal();
                 }
             });
-        });  // <-- ¡AÑADÍ ESTA LLAVE! (cierra el DOMContentLoaded)
+        });
 
         // Verificación de carga de recursos
         window.addEventListener('load', function() {
@@ -2003,12 +2004,12 @@
         window.addEventListener('unhandledrejection', function(e) {
             console.error('X Promesa rechazada:', e.reason);
         });
-                
-        </script>
-        <!-- Scripts de optimización del sistema 360° -->
-        <script src="fix_360_system.js"></script>
-        <script src="optimize_360_final.js"></script>
-        <!-- JavaScript principal -->
-        <script src="app.js"></script>
-    </body>
+    </script>
+    
+    <!-- Scripts de optimización del sistema 360° -->
+    <script src="fix_360_system.js"></script>
+    <script src="optimize_360_final.js"></script>
+    <!-- JavaScript principal -->
+    <script src="app.js"></script>
+</body>
 </html>
