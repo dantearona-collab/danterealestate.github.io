@@ -82,6 +82,103 @@ let currentImageIndex = 0;
     
     console.log('✅ Parche aplicado para botones 360°');
 })();
+
+
+// ============================================
+// PARCHES DE EMERGENCIA - PRIMERAS LÍNEAS
+// ============================================
+
+// 1. Definir loadBackupProperties primero
+window.loadBackupProperties = function() {
+    console.log('🆘 Función de respaldo ejecutada');
+    
+    const backupData = [
+        {
+            "id_temporal": "backup-1",
+            "titulo": "Propiedad de Respaldo",
+            "descripcion": "Sistema en modo demostración",
+            "precio": "Consultar",
+            "barrio": "Demo",
+            "tipo": "Departamento",
+            "imagenes": [],
+            "imagenes_360": []
+        }
+    ];
+    
+    window.propertyData = backupData;
+    
+    // Solo ejecutar si las funciones existen
+    setTimeout(() => {
+        if (typeof populateFilters === 'function') {
+            populateFilters(backupData);
+        }
+        if (typeof displayProperties === 'function') {
+            displayProperties(backupData);
+        }
+    }, 100);
+    
+    return backupData;
+};
+
+// 2. Interceptar y proteger loadProperties
+const originalLoadProperties = window.loadProperties;
+if (typeof originalLoadProperties === 'function') {
+    window.loadProperties = async function() {
+        try {
+            console.log('🔄 loadProperties interceptado - versión segura');
+            const result = await originalLoadProperties.apply(this, arguments);
+            return result;
+        } catch (error) {
+            console.error('💥 Error en loadProperties:', error.message);
+            console.log('🔧 Ejecutando respaldo...');
+            return loadBackupProperties();
+        }
+    };
+}
+
+// 3. Parche para el error "html.replace"
+const originalFetch = window.fetch;
+window.fetch = function(url, options) {
+    const fetchPromise = originalFetch.apply(this, arguments);
+    
+    if (typeof url === 'string' && url.includes('propiedades.json')) {
+        return fetchPromise.then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            return response.text().then(text => {
+                // Verificar si es JSON válido
+                if (text.trim().startsWith('[') || text.trim().startsWith('{')) {
+                    try {
+                        JSON.parse(text);
+                        return {
+                            ok: true,
+                            text: () => Promise.resolve(text),
+                            json: () => Promise.resolve(JSON.parse(text))
+                        };
+                    } catch (e) {
+                        // Si no es JSON válido, lanzar error
+                        throw new Error('JSON inválido');
+                    }
+                } else {
+                    // Si no es JSON, lanzar error
+                    throw new Error('Respuesta no es JSON');
+                }
+            });
+        }).catch(error => {
+            console.error('❌ Error procesando propiedades.json:', error);
+            // Retornar datos de respaldo
+            return {
+                ok: true,
+                json: () => Promise.resolve(loadBackupProperties())
+            };
+        });
+    }
+    
+    return fetchPromise;
+};
+
 // ============================================
 // ========================================
 // FUNCIÓN PARA SCROLL A PROPIEDAD (AÑADIDA)
@@ -970,6 +1067,75 @@ function nextSlide(propertyId) {
 
     showSlide(propertyId, newIndex);
 }
+// Función de respaldo con datos de ejemplo
+function loadBackupProperties() {
+    console.log('🔧 Cargando datos de respaldo...');
+    
+    const backupData = [
+        {
+            "id": 1,
+            "titulo": "PH en Venta - Palermo",
+            "descripcion": "Hermoso PH de 2 ambientes con patio",
+            "precio": "$250,000",
+            "barrio": "Palermo",
+            "tipo": "PH",
+            "imagenes": ["fotos/ejemplo/1.jpg"],
+            "imagenes_360": [],
+            "dormitorios": 2,
+            "banos": 1,
+            "metros_cuadrados": 65
+        },
+        {
+            "id": 2,
+            "titulo": "Casa en Alquiler - Belgrano",
+            "descripcion": "Casa familiar de 4 ambientes con jardín",
+            "precio": "$2,500/mes",
+            "barrio": "Belgrano",
+            "tipo": "Casa",
+            "imagenes": ["fotos/ejemplo/2.jpg"],
+            "imagenes_360": ["360/1/1.jpg", "360/1/2.jpg"],
+            "dormitorios": 3,
+            "banos": 2,
+            "metros_cuadrados": 120
+        }
+    ];
+    
+    window.propertyData = backupData;
+    
+    if (typeof populateFilters === 'function') {
+        populateFilters(backupData);
+    }
+    
+    if (typeof displayProperties === 'function') {
+        displayProperties(backupData);
+    }
+    
+    // Mostrar mensaje al usuario
+    const errorContainer = document.getElementById('error-message') || document.createElement('div');
+    errorContainer.id = 'error-message';
+    errorContainer.innerHTML = `
+        <div style="
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            margin: 20px;
+            border-radius: 5px;
+            text-align: center;
+        ">
+            ⚠️ <strong>Modo demostración:</strong> Mostrando propiedades de ejemplo.
+            <br>
+            <small>El archivo propiedades.json no está disponible.</small>
+        </div>
+    `;
+    
+    const mainContent = document.querySelector('.properties-container') || document.body;
+    mainContent.insertBefore(errorContainer, mainContent.firstChild);
+    
+    return backupData;
+}
+
+
 
 // CSS para el slider
 function addSliderStyles() {
@@ -1042,33 +1208,54 @@ let globalData = {
 };
 
 // Cargar propiedades
+// REEMPLAZA la función loadProperties con esta versión corregida:
 async function loadProperties() {
-    console.log('🔄 Iniciando carga de propiedades desde propiedades.json...');
-
+    console.log('🔄 Iniciando carga de propiedades...');
+    
     try {
-        console.log('📂 Cargando propiedades.json desde servidor...');
-
-        const response = await fetch('propiedades.json');
+        const response = await fetch('propiedades.json?v=' + Date.now());
+        console.log('📊 Estado:', response.status);
+        
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-
-        const data = await response.json();
-        console.log('✅ Datos cargados exitosamente:', data.length, 'propiedades');
-
-        globalData.properties = data;
-        globalData.filteredProperties = data;
-
-        // Llenar filtros y mostrar
-        populateFilters(data);
-        displayProperties(data);
-
+        
+        const contentType = response.headers.get('content-type');
+        console.log('📄 Content-Type:', contentType);
+        
+        const data = await response.text();
+        console.log('📦 Datos recibidos:', data.length, 'caracteres');
+        
+        // Verificar si es HTML
+        if (data.trim().startsWith('<') || data.includes('<!DOCTYPE') || data.includes('<html')) {
+            console.error('❌ El servidor devuelve HTML en lugar de JSON');
+            console.log('🔍 Respuesta:', data.substring(0, 200));
+            
+            // Usar datos de respaldo
+            await loadBackupProperties();
+            return;
+        }
+        
+        // Intentar parsear como JSON
+        try {
+            const jsonData = JSON.parse(data);
+            console.log('✅ JSON parseado:', jsonData.length, 'propiedades');
+            
+            // Continuar con el procesamiento normal
+            window.propertyData = jsonData;
+            populateFilters(jsonData);
+            displayProperties(jsonData);
+        } catch (parseError) {
+            console.error('❌ Error parseando JSON:', parseError);
+            await loadBackupProperties();
+        }
+        
     } catch (error) {
-        console.error('❌ Error al cargar propiedades.json:', error.message);
-        console.log('💡 Asegúrate de que el archivo propiedades.json esté disponible');
-        showErrorMessage();
+        console.error('❌ Error cargando propiedades:', error);
+        await loadBackupProperties();
     }
 }
+
 
 // Mostrar mensaje de error
 function showErrorMessage() {
