@@ -39,7 +39,50 @@ let multimediaModal = null;
 // ========================================
 let currentCollageImageIndex = 0;
 let currentImageIndex = 0;
-
+// ============================================
+// PARCHE PARA BOTONES 360° DEFECTUOSOS
+// ============================================
+(function() {
+    console.log('🔧 Aplicando parche para botones 360°...');
+    
+    // Guardar función original
+    const originalCreatePropertyCard = window.createPropertyCard;
+    
+    if (originalCreatePropertyCard) {
+        window.createPropertyCard = function(property) {
+            const html = originalCreatePropertyCard(property);
+            
+            // Corregir onclick defectuosos
+            return html.replace(
+                /onclick\s*=\s*["']abrirVisor360\([^)]*\)[^"']*["']/g,
+                function(match) {
+                    // Eliminar cualquier ! y cerrar correctamente
+                    const fixed = match.replace(/[^a-zA-Z0-9_\(\)'"=\s]/g, '');
+                    console.log('🔄 Corregido onclick:', match, '→', fixed);
+                    return fixed;
+                }
+            );
+        };
+    }
+    
+    // También corregir cualquier botón existente
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            const buttons = document.querySelectorAll('[onclick*="abrirVisor360"]');
+            buttons.forEach(btn => {
+                const onclick = btn.getAttribute('onclick');
+                if (onclick && onclick.includes('!')) {
+                    const fixed = onclick.replace(/[^a-zA-Z0-9_\(\)'"=\s]/g, '');
+                    btn.setAttribute('onclick', fixed);
+                    console.log('✅ Botón corregido:', fixed);
+                }
+            });
+        }, 1000);
+    });
+    
+    console.log('✅ Parche aplicado para botones 360°');
+})();
+// ============================================
 // ========================================
 // FUNCIÓN PARA SCROLL A PROPIEDAD (AÑADIDA)
 // ========================================
@@ -1114,7 +1157,8 @@ function createPropertyCard(property) {
                     padding-top: 15px !important;
                     text-align: center !important;
                 ">
-                    <button onclick="abrirVisor360('${property.id_temporal}')"
+                    // CORRECTO:
+                    const button360 = `<button onclick ="abrirVisor360('${property.id_temporal}')" class="btn-360">🔄 Ver 360°</button>`;
                             style="
                                 background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
                                 color: white !important;
