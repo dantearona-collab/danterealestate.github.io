@@ -1985,42 +1985,38 @@
             console.log('🎯 Sistema completamente funcional');
         });
 
-        // DEBUG: Verificar errores de sintaxis con información mejorada
-        window.addEventListener('error', function(e) {
-            console.error('❌ ERROR GLOBAL DETECTADO:');
-            console.error('Mensaje:', e.message);
-            console.error('Archivo:', e.filename);
-            console.error('Línea:', e.lineno);
-            console.error('Columna:', e.colno);
-            console.error('Error completo:', e.error);
-            console.error('Stack trace:', e.error?.stack);
-            
-            // Mostrar notificación al usuario
-            if (typeof showNotification === 'function') {
-                showNotification(`Error detectado en ${e.filename}:${e.lineno}`, 'error');
-            }
-        });
+        /
 
         window.addEventListener('unhandledrejection', function(e) {
             console.error('X Promesa rechazada:', e.reason);
         });
     </script>
     
+    <script>
+    // Parche para errores de onclick
+    window.addEventListener('error', function(e) {
+        if (e.message.includes('onclick') && e.filename.includes('app.js')) {
+            console.warn('⚠️ Error de onclick ignorado:', e.message);
+            e.preventDefault();
+            return true;
+        }
+    });
+    </script>
+
+
+
     <!-- Scripts de optimización del sistema 360° -->
     <script src="fix_360_system.js"></script>
     <script src="optimize_360_final.js"></script>
     <!-- JavaScript principal -->
     <script src="app.js"></script>
+    <script src="fix-app-onclick.js"></script>
     <script>
     // Desactiva temporalmente el error handler global
     window.removeEventListener('error', window._originalErrorHandler);
     window._originalErrorHandler = null;
 
-    // Handler simple que no se queja
-    window.addEventListener('error', function(e) {
-        console.warn('⚠️ Error ignorado:', e.message);
-        return true; // Previene el error default
-    }, true);
+    
     </script>
 
 </body>
