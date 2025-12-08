@@ -574,7 +574,21 @@ function closeMultimediaModal() {
     }
     document.body.style.overflow = 'auto';
 }
+// Función para depurar propiedades
+function debugProperties() {
+    console.log('🔍 DEPURACIÓN DE PROPIEDADES:');
+    console.log('Total de propiedades:', globalData.properties.length);
+    
+    globalData.properties.forEach((prop, index) => {
+        console.log(`📌 ${index}. ${prop.titulo}`);
+        console.log(`   ID: ${prop.id_temporal}`);
+        console.log(`   Imágenes 360: ${prop.imagenes_360 ? prop.imagenes_360.length : 0}`);
+        console.log(`   URLs:`, prop.imagenes_360 || []);
+    });
+}
 
+// Llama a esta función después de cargar las propiedades:
+// loadProperties().then(() => debugProperties());
 
 // Función para visualizar PDFs
 function viewPDF(pdfUrl, titulo) {
@@ -1056,6 +1070,7 @@ function populateFilters(properties) {
 
 
 
+// Función para crear la tarjeta de propiedad - REEMPLAZA LA SECCIÓN DEL BOTÓN 360°
 function createPropertyCard(property) {
     const card = document.createElement('div');
     card.className = 'property-card';
@@ -1069,57 +1084,21 @@ function createPropertyCard(property) {
         border: 1px solid #e1e5e9 !important;
     `;
 
-    // Crear galería de imágenes inicial
     const imageSection = createExpandableGallery(property);
 
     card.innerHTML = `
         ${imageSection}
-        <div style="position: absolute; top: 10px; left: 10px;">
-            <span style="background: #232deb !important; color: white !important; padding: 4px 8px !important; border-radius: 4px !important; font-size: 12px !important; font-weight: 600 !important;">
-                ${property.operacion}
-            </span>
-        </div>
-        <div style="position: absolute; top: 10px; right: 10px;">
-            <span style="background: ${property.operacion === 'Venta' ? '#232deb' : '#ff0101'} !important; color: white !important; padding: 4px 8px !important; border-radius: 4px !important; font-size: 12px !important; font-weight: 600 !important;">
-                ${property.tipo}
-            </span>
-        </div>
+        <!-- ... resto del código de badges y contenido ... -->
         
         <div style="padding: 20px !important;">
             <h3 style="margin: 0 0 10px 0 !important; color: #495057 !important; font-size: 18px !important; font-weight: 600 !important; line-height: 1.3 !important;">
                 ${property.titulo}
             </h3>
             
-            <div style="color: #6c757d !important; font-size: 14px !important; margin-bottom: 10px !important;">
-                📍 ${property.direccion} - ${property.barrio}
-            </div>
+            <!-- ... resto del contenido ... -->
             
-            <div style="margin-bottom: 15px !important;">
-                <span style="font-size: 24px !important; font-weight: 700 !important; color: #232deb !important;">
-                    ${property.moneda_precio || 'USD'} ${property.precio?.toLocaleString() || '0'}
-                </span>
-                ${property.expensas > 0 ? `<div style="font-size: 12px; color: #6c757d;">+ ${property.moneda_expensas || 'ARS'} ${property.expensas.toLocaleString()} expensas</div>` : ''}
-            </div>
-            
-            <div style="display: flex !important; justify-content: space-between !important; margin-bottom: 15px !important; font-size: 14px !important; color: #495057 !important;">
-                <span>🏠 ${property.ambientes} amb.</span>
-                <span>📏 ${property.metros_cuadrados} m²</span>
-                <span>📅 ${property.estado}</span>
-            </div>
-            
-            <div style="margin-bottom: 15px !important;">
-                <span style="color: #232deb !important; font-size: 14px !important; font-weight: 600 !important;">
-                    ${property.info_multimedia || 'Fotos disponibles'}
-                </span>
-            </div>
-            
-            <!-- Sección de multimedia (PDFs y Videos) -->
-            <div id="multimedia-section-${property.id_temporal}">
-                ${createMultimediaSection(property)}
-            </div>
-
-            <!-- NUEVA SECCIÓN: RECORRIDO VIRTUAL 360° (si hay imágenes disponibles) -->
-            ${property.imagenes_360 && property.imagenes_360.length > 0 ? `
+            <!-- SECCIÓN: RECORRIDO VIRTUAL 360° - CORREGIDA -->
+            ${property.imagenes_360 && Array.isArray(property.imagenes_360) && property.imagenes_360.length > 0 ? `
                 <div style="
                     border-top: 1px solid #e1e5e9 !important;
                     margin-top: 15px !important;
@@ -1166,44 +1145,12 @@ function createPropertyCard(property) {
                 </div>
             ` : ''}
 
-            <!-- SECCIÓN: MAPA DE UBICACIÓN -->
-            <div style="border-top: 1px solid #e1e5e9 !important; margin-top: 15px !important; padding-top: 15px !important;">
-                <div style="font-size: 14px !important; color: #6c757d !important; margin-bottom: 10px !important; text-align: center !important;">
-                    📍 ${property.direccion_completa || `${property.direccion}, ${property.barrio}, Argentina`}
-                </div>
-                <div style="text-align: center !important; margin-bottom: 10px !important;">
-                    <button onclick="showPropertyMap('${property.id_temporal}', '${property.direccion_completa ? property.direccion_completa.replace(/'/g, "\\'") : `${property.direccion}, ${property.barrio}, Argentina`.replace(/'/g, "\\'")}', '${property.titulo.replace(/'/g, "\\'")}')"
-                            style="background: #232deb !important; color: white !important; border: none !important; padding: 10px 20px !important; border-radius: 6px !important; cursor: pointer !important; font-size: 14px !important; font-weight: 600 !important; transition: all 0.3s ease !important; display: inline-flex !important; align-items: center !important; gap: 8px !important;"
-                            onmouseover="this.style.background='#1a1db4' !important; this.style.transform='translateY(-2px)' !important" 
-                            onmouseout="this.style.background='#232deb' !important; this.style.transform='translateY(0)' !important">
-                        🗺️ Ver en el Mapa
-                    </button>
-                </div>
-                <div id="map-container-${property.id_temporal}" style="height: 0 !important; border-radius: 8px !important; overflow: hidden !important; box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important; transition: all 0.3s ease !important; opacity: 0 !important;">
-                    <div id="map-placeholder-${property.id_temporal}" style="height: 100% !important; display: flex !important; align-items: center !important; justify-content: center !important; background: #f8f9fa !important; color: #6c757d !important; font-size: 14px !important;">
-                        <div style="display: flex !important; align-items: center !important; justify-content: center !important;">
-                            <img src="llave.png" alt="Cargando" style="width: 20px !important; height: 20px !important; margin-right: 8px !important;">
-                            <span>Cargando mapa...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <button onclick="showPropertyDetails('${property.id_temporal}')" 
-                    style="width: 100% !important; background: #232deb !important; color: white !important; 
-                           border: none !important; padding: 12px !important; border-radius: 6px !important; 
-                           font-size: 14px !important; font-weight: 600 !important; cursor: pointer !important; 
-                           transition: all 0.3s ease !important; margin-top: 15px !important;"
-                    onmouseover="this.style.background='#1a1db4' !important" 
-                    onmouseout="this.style.background='#232deb' !important">
-                Ver Detalles
-            </button>
+            <!-- ... resto del código ... -->
         </div>
     `;
 
     return card;
 }
-
 
 
 // FUNCIONES PARA MAPAS - VERSIÓN CON IDS
