@@ -2842,4 +2842,3 @@ console.log('✅ Sin dependencias de Font Awesome');
 console.log('🚀 Distribución inteligente aplicada - Sin tamaños iguales - Fondo blanco garantizado');
 console.log('📄 Sistema de PDFs integrado');
 console.log('🎥 Sistema de videos integrado');
-[file content end]
