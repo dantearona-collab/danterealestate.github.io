@@ -1,4 +1,3 @@
-
 // Sistema Dante Propiedades - SIN ERRORES + SLIDER FUNCIONAL + MODAL + MULTIMEDIA
 // Versión sin dependencias de Font Awesome + Slider de múltiples fotos + Modal de galería - 2025-11-13
 
@@ -1120,14 +1119,11 @@ function createPropertyCard(property) {
 
     card.innerHTML = `
         ${imageSection}
-        <!-- ... resto del código de badges y contenido ... -->
         
         <div style="padding: 20px !important;">
             <h3 style="margin: 0 0 10px 0 !important; color: #495057 !important; font-size: 18px !important; font-weight: 600 !important; line-height: 1.3 !important;">
                 ${property.titulo}
             </h3>
-            
-            <!-- ... resto del contenido ... -->
             
             <!-- SECCIÓN: RECORRIDO VIRTUAL 360° - CORREGIDA -->
             ${property.imagenes_360 && Array.isArray(property.imagenes_360) && property.imagenes_360.length > 0 ? `
@@ -1176,8 +1172,6 @@ function createPropertyCard(property) {
                     </div>
                 </div>
             ` : ''}
-
-            <!-- ... resto del código ... -->
         </div>
     `;
 
