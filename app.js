@@ -1,5 +1,4 @@
-[file name]: app.js
-[file content begin]
+
 // Sistema Dante Propiedades - SIN ERRORES + SLIDER FUNCIONAL + MODAL + MULTIMEDIA
 // Versión sin dependencias de Font Awesome + Slider de múltiples fotos + Modal de galería - 2025-11-13
 
