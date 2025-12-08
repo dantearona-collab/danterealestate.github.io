@@ -1157,42 +1157,49 @@ function createPropertyCard(property) {
                     padding-top: 15px !important;
                     text-align: center !important;
                 ">
-                    // CORRECTO:
-                    const button360 = `<button onclick="abrirVisor360('${property.id_temporal}')" class="btn-360">🔄 Ver 360°</button>`;
-                            style="
-                                background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
-                                color: white !important;
-                                border: none !important;
-                                padding: 10px 20px !important;
-                                border-radius: 6px !important;
-                                cursor: pointer !important;
-                                font-size: 14px !important;
-                                font-weight: 600 !important;
-                                transition: all 0.3s ease !important;
-                                display: inline-flex !important;
-                                align-items: center !important;
-                                gap: 8px !important;
-                                box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3) !important;
-                            "
-                            onmouseover="
-                                this.style.background='linear-gradient(135deg, #20c997 0%, #28a745 100%)' !important;
-                                this.style.transform='translateY(-2px)' !important;
-                                this.style.boxShadow='0 6px 20px rgba(40, 167, 69, 0.5)' !important
-                            "
-                            onmouseout="
-                                this.style.background='linear-gradient(135deg, #28a745 0%, #20c997 100%)' !important;
-                                this.style.transform='translateY(0)' !important;
-                                this.style.boxShadow='0 4px 15px rgba(40, 167, 69, 0.3)' !important
-                            ">
+                    <button 
+                        onclick="abrirVisor360('${property.id_temporal}')"
+                        class="btn-360"
+                        style="
+                            background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+                            color: white !important;
+                            border: none !important;
+                            padding: 10px 20px !important;
+                            border-radius: 6px !important;
+                            cursor: pointer !important;
+                            font-size: 14px !important;
+                            font-weight: 600 !important;
+                            transition: all 0.3s ease !important;
+                            display: inline-flex !important;
+                            align-items: center !important;
+                            gap: 8px !important;
+                            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3) !important;
+                        "
+                        onmouseover="
+                            this.style.background='linear-gradient(135deg, #20c997 0%, #28a745 100%)' !important;
+                            this.style.transform='translateY(-2px)' !important;
+                            this.style.boxShadow='0 6px 20px rgba(40, 167, 69, 0.5)' !important
+                        "
+                        onmouseout="
+                            this.style.background='linear-gradient(135deg, #28a745 0%, #20c997 100%)' !important;
+                            this.style.transform='translateY(0)' !important;
+                            this.style.boxShadow='0 4px 15px rgba(40, 167, 69, 0.3)' !important
+                        ">
                         🎬 Recorrido Virtual 360°
                         <span style="
                             background: rgba(255, 255, 255, 0.3) !important;
                             padding: 2px 8px !important;
                             border-radius: 12px !important;
                             font-size: 12px !important;
-                        ">${property.imagenes_360.length} vista${property.imagenes_360.length > 1 ? 's' : ''}</span>
+                        ">
+                            ${property.imagenes_360.length} vista${property.imagenes_360.length > 1 ? 's' : ''}
+                        </span>
                     </button>
-                    <div style="font-size: 12px !important; color: #6c757d !important; margin-top: 8px !important;">
+                    <div style="
+                        font-size: 12px !important;
+                        color: #6c757d !important;
+                        margin-top: 8px !important;
+                    ">
                         🖱️ Arrastra la imagen para rotar 360°
                     </div>
                 </div>
