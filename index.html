@@ -1342,6 +1342,149 @@
         animation: masonryItemFadeIn 0.5s ease-out;
     }
 
+    /* ========================================
+   ESTILOS PARA VISOR 360
+   ======================================== */
+
+    /* Modal del visor 360 */
+    #modal-360 {
+        animation: fadeIn360 0.3s ease !important;
+    }
+
+    @keyframes fadeIn360 {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* Contenedor principal */
+    #visor360-container {
+        transition: all 0.3s ease !important;
+    }
+
+    /* Imagen 360 */
+    #imagen360-actual {
+        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        transform-style: preserve-3d !important;
+    }
+
+    /* Efecto 3D para rotación */
+    #imagen360-actual.rotating {
+        animation: rotate360 20s linear infinite !important;
+    }
+
+    @keyframes rotate360 {
+        from { transform: rotateY(0deg); }
+        to { transform: rotateY(360deg); }
+    }
+
+    /* Miniaturas */
+    #miniaturas360-container {
+        scrollbar-width: thin !important;
+        scrollbar-color: #232deb rgba(255, 255, 255, 0.1) !important;
+    }
+
+    #miniaturas360-container::-webkit-scrollbar {
+        height: 6px !important;
+    }
+
+    #miniaturas360-container::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border-radius: 3px !important;
+    }
+
+    #miniaturas360-container::-webkit-scrollbar-thumb {
+        background: #232deb !important;
+        border-radius: 3px !important;
+    }
+
+    #miniaturas360-container::-webkit-scrollbar-thumb:hover {
+        background: #1a1db4 !important;
+    }
+
+    /* Botones de navegación */
+    #visor360-container button {
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+    }
+
+    /* Instrucciones */
+    #modal-360 > div:last-child {
+        background: rgba(0, 0, 0, 0.3) !important;
+        border-radius: 8px !important;
+        padding: 15px !important;
+        backdrop-filter: blur(5px) !important;
+    }
+
+    /* Responsive para móviles */
+    @media (max-width: 768px) {
+        #modal-360 > div:first-child {
+            padding: 10px 15px !important;
+        }
+        
+        #modal-360 > div:first-child div {
+            font-size: 14px !important;
+        }
+        
+        #visor360-container {
+            width: 95% !important;
+            height: 60% !important;
+        }
+        
+        #miniaturas360-container img {
+            width: 50px !important;
+            height: 35px !important;
+        }
+        
+        #visor360-container button {
+            width: 45px !important;
+            height: 45px !important;
+            font-size: 18px !important;
+        }
+        
+        #visor360-container > div:first-child {
+            font-size: 13px !important;
+            padding: 8px 16px !important;
+        }
+    }
+
+    /* Para tablets */
+    @media (max-width: 1024px) and (min-width: 769px) {
+        #visor360-container {
+            width: 92% !important;
+            height: 65% !important;
+        }
+    }
+
+    /* Efectos de hover mejorados para miniaturas */
+    #miniaturas360-container img:hover {
+        transform: scale(1.08) !important;
+        box-shadow: 0 4px 12px rgba(35, 45, 235, 0.4) !important;
+    }
+
+    /* Animación de carga para imagen 360 */
+    #imagen360-actual.loading {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%) !important;
+        background-size: 200% 100% !important;
+        animation: loadingShimmer 1.5s infinite !important;
+    }
+
+    @keyframes loadingShimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+
+    /* Efecto de click en botones */
+    #visor360-container button:active {
+        transform: scale(0.95) !important;
+    }
+
+    /* Indicador de imagen activa */
+    #miniaturas360-container img.active {
+        border: 3px solid #28a745 !important;
+        box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.3) !important;
+    }
+
+
     /* Efecto de carga progresiva */
     .masonry-item:nth-child(1) { animation-delay: 0.1s; }
     .masonry-item:nth-child(2) { animation-delay: 0.2s; }

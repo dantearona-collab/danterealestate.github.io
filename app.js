@@ -36,7 +36,9 @@ let pdfModal = null;
 let multimediaModal = null;
 
 
-
+let visor360Activo = false;
+let imagenes360Actuales = [];
+let imagen360Actual = 0;
 
 
 function initializeVariables() {
@@ -67,6 +69,7 @@ function initializeVariables() {
     // Configurar event listeners para PDFs
     setupPdfEventListeners();
 }
+
 
 
 // Función para configurar event listeners de PDFs
@@ -199,7 +202,362 @@ function createMultimediaSection(property) {
 }
 
 
+// ========================================
+// SISTEMA DE VISOR 360
+// ========================================
 
+let visor360Activo = false;
+let imagenes360Actuales = [];
+let imagen360Actual = 0;
+
+// Función para abrir el visor 360
+function abrirVisor360(propertyId, index = 0) {
+    const property = globalData.properties.find(p => p.id_temporal === propertyId);
+    if (!property || !property.imagenes_360 || property.imagenes_360.length === 0) {
+        console.log('⚠️ Esta propiedad no tiene imágenes 360 disponibles');
+        alert('Esta propiedad no tiene recorrido virtual 360° disponible.');
+        return;
+    }
+
+    imagenes360Actuales = property.imagenes_360;
+    imagen360Actual = index;
+    visor360Activo = true;
+
+    // Crear modal para visor 360
+    crearModal360(property);
+}
+
+// Función para crear el modal 360
+function crearModal360(property) {
+    // Cerrar cualquier modal existente primero
+    cerrarVisor360();
+
+    const modal360 = document.createElement('div');
+    modal360.id = 'modal-360';
+    modal360.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 10001;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(10px);
+    `;
+
+    modal360.innerHTML = `
+        <!-- Header del visor 360 -->
+        <div style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(35, 45, 235, 0.9);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10002;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        ">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <img src="llave.png" alt="Logo" style="width: 32px; height: 32px; border-radius: 50%;">
+                <div>
+                    <div style="font-weight: 600; font-size: 16px;">Recorrido Virtual 360°</div>
+                    <div style="font-size: 14px; opacity: 0.9;">${property.titulo}</div>
+                </div>
+            </div>
+            <button onclick="cerrarVisor360()" 
+                    style="
+                        background: rgba(255, 255, 255, 0.2);
+                        color: white;
+                        border: none;
+                        border-radius: 50%;
+                        width: 40px;
+                        height: 40px;
+                        cursor: pointer;
+                        font-size: 20px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: all 0.3s ease;
+                    "
+                    onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='scale(1.1)'"
+                    onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='scale(1)'">
+                ✕
+            </button>
+        </div>
+
+        <!-- Contenedor principal del visor 360 -->
+        <div id="visor360-container" style="
+            width: 90%;
+            max-width: 800px;
+            height: 70%;
+            max-height: 600px;
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            background: #000;
+        ">
+            <!-- Imagen 360 actual -->
+            <img id="imagen360-actual" 
+                 src="${imagenes360Actuales[imagen360Actual]}" 
+                 alt="Recorrido virtual 360° - ${property.titulo}"
+                 style="
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                    cursor: grab;
+                 "
+                 draggable="false">
+            
+            <!-- Controles de navegación -->
+            <div style="position: absolute; bottom: 20px; left: 0; right: 0; display: flex; justify-content: center; gap: 20px; z-index: 10003;">
+                <button onclick="cambiarImagen360(-1)" 
+                        style="
+                            background: rgba(35, 45, 235, 0.8);
+                            color: white;
+                            border: none;
+                            border-radius: 50%;
+                            width: 50px;
+                            height: 50px;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 20px;
+                            transition: all 0.3s ease;
+                            backdrop-filter: blur(10px);
+                            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                        "
+                        onmouseover="this.style.background='rgba(35, 45, 235, 1)'; this.style.transform='scale(1.1)'"
+                        onmouseout="this.style.background='rgba(35, 45, 235, 0.8)'; this.style.transform='scale(1)'">
+                    ←
+                </button>
+                
+                <div style="
+                    background: rgba(0, 0, 0, 0.7);
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 25px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    backdrop-filter: blur(10px);
+                ">
+                    <span id="contador-360">${imagen360Actual + 1} / ${imagenes360Actuales.length}</span>
+                </div>
+                
+                <button onclick="cambiarImagen360(1)" 
+                        style="
+                            background: rgba(35, 45, 235, 0.8);
+                            color: white;
+                            border: none;
+                            border-radius: 50%;
+                            width: 50px;
+                            height: 50px;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 20px;
+                            transition: all 0.3s ease;
+                            backdrop-filter: blur(10px);
+                            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                        "
+                        onmouseover="this.style.background='rgba(35, 45, 235, 1)'; this.style.transform='scale(1.1)'"
+                        onmouseout="this.style.background='rgba(35, 45, 235, 0.8)'; this.style.transform='scale(1)'">
+                    →
+                </button>
+            </div>
+            
+            <!-- Miniaturas de todas las imágenes 360 -->
+            <div id="miniaturas360-container" style="
+                position: absolute;
+                bottom: 90px;
+                left: 0;
+                right: 0;
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+                padding: 10px;
+                overflow-x: auto;
+                z-index: 10003;
+            ">
+                ${imagenes360Actuales.map((img, index) => `
+                    <img src="${img}" 
+                         alt="Miniatura ${index + 1}"
+                         onclick="seleccionarImagen360(${index})"
+                         style="
+                            width: 60px;
+                            height: 40px;
+                            object-fit: cover;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            border: ${index === imagen360Actual ? '3px solid #232deb' : '2px solid rgba(255,255,255,0.3)'};
+                            opacity: ${index === imagen360Actual ? '1' : '0.7'};
+                            transition: all 0.3s ease;
+                         "
+                         onmouseover="this.style.opacity='1'; this.style.transform='scale(1.05)'"
+                         onmouseout="this.style.opacity='${index === imagen360Actual ? '1' : '0.7'}'; this.style.transform='scale(1)'">
+                `).join('')}
+            </div>
+        </div>
+
+        <!-- Instrucciones -->
+        <div style="
+            color: white;
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 14px;
+            opacity: 0.8;
+            max-width: 600px;
+        ">
+            <div>🖱️ <strong>Arrastra la imagen</strong> para rotar la vista 360°</div>
+            <div>🔄 Usa las <strong>flechas</strong> para cambiar entre vistas</div>
+            <div>📸 Haz clic en las <strong>miniaturas</strong> para saltar a una vista específica</div>
+        </div>
+    `;
+
+    document.body.appendChild(modal360);
+    document.body.style.overflow = 'hidden';
+
+    // Agregar funcionalidad de arrastre para el efecto 360
+    agregarFuncionalidadArrastre();
+
+    console.log('🔄 Visor 360 abierto para:', property.titulo);
+}
+
+// Función para cambiar de imagen 360
+function cambiarImagen360(direccion) {
+    const nuevaPosicion = imagen360Actual + direccion;
+    
+    if (nuevaPosicion >= 0 && nuevaPosicion < imagenes360Actuales.length) {
+        imagen360Actual = nuevaPosicion;
+        actualizarVisor360();
+    } else if (nuevaPosicion < 0) {
+        imagen360Actual = imagenes360Actuales.length - 1;
+        actualizarVisor360();
+    } else if (nuevaPosicion >= imagenes360Actuales.length) {
+        imagen360Actual = 0;
+        actualizarVisor360();
+    }
+}
+
+// Función para seleccionar imagen específica
+function seleccionarImagen360(index) {
+    if (index >= 0 && index < imagenes360Actuales.length) {
+        imagen360Actual = index;
+        actualizarVisor360();
+    }
+}
+
+// Función para actualizar el visor 360
+function actualizarVisor360() {
+    const imagenActual = document.getElementById('imagen360-actual');
+    const contador = document.getElementById('contador-360');
+    const miniaturas = document.querySelectorAll('#miniaturas360-container img');
+    
+    if (imagenActual && imagenes360Actuales[imagen360Actual]) {
+        imagenActual.src = imagenes360Actuales[imagen360Actual];
+    }
+    
+    if (contador) {
+        contador.textContent = `${imagen360Actual + 1} / ${imagenes360Actuales.length}`;
+    }
+    
+    // Actualizar borde de miniaturas
+    miniaturas.forEach((img, index) => {
+        img.style.border = index === imagen360Actual ? '3px solid #232deb' : '2px solid rgba(255,255,255,0.3)';
+        img.style.opacity = index === imagen360Actual ? '1' : '0.7';
+    });
+}
+
+// Función para agregar funcionalidad de arrastre (simulación 360)
+function agregarFuncionalidadArrastre() {
+    const imagen360 = document.getElementById('imagen360-actual');
+    if (!imagen360) return;
+    
+    let isDragging = false;
+    let startX = 0;
+    let rotation = 0;
+    
+    imagen360.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.clientX;
+        imagen360.style.cursor = 'grabbing';
+        e.preventDefault();
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        
+        const deltaX = e.clientX - startX;
+        rotation = (deltaX / imagen360.clientWidth) * 360;
+        
+        // Efecto visual de rotación (puedes usar CSS transform para mejor efecto)
+        imagen360.style.transform = `rotateY(${rotation}deg)`;
+        imagen360.style.transition = 'transform 0.1s';
+    });
+    
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
+        imagen360.style.cursor = 'grab';
+        imagen360.style.transform = '';
+        imagen360.style.transition = 'transform 0.5s ease';
+    });
+    
+    // Para touch en dispositivos móviles
+    imagen360.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        startX = e.touches[0].clientX;
+        e.preventDefault();
+    });
+    
+    document.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        
+        const deltaX = e.touches[0].clientX - startX;
+        rotation = (deltaX / imagen360.clientWidth) * 360;
+        
+        imagen360.style.transform = `rotateY(${rotation}deg)`;
+        imagen360.style.transition = 'transform 0.1s';
+    });
+    
+    document.addEventListener('touchend', () => {
+        isDragging = false;
+        imagen360.style.transform = '';
+        imagen360.style.transition = 'transform 0.5s ease';
+    });
+}
+
+// Función para cerrar el visor 360
+function cerrarVisor360() {
+    const modal360 = document.getElementById('modal-360');
+    if (modal360) {
+        modal360.remove();
+    }
+    
+    visor360Activo = false;
+    imagenes360Actuales = [];
+    imagen360Actual = 0;
+    document.body.style.overflow = 'auto';
+    
+    console.log('🔒 Visor 360 cerrado');
+}
+
+// Cerrar visor 360 con tecla Escape
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape' && visor360Activo) {
+        cerrarVisor360();
+    }
+});
 
 
 // Función para cerrar modal multimedia - DEFINIR ANTES DE viewPDF
@@ -764,7 +1122,55 @@ function createPropertyCard(property) {
                 ${createMultimediaSection(property)}
             </div>
 
-            <!-- NUEVA SECCIÓN: MAPA DE UBICACIÓN - CON ESTILOS INLINE -->
+            <!-- NUEVA SECCIÓN: RECORRIDO VIRTUAL 360° (si hay imágenes disponibles) -->
+            ${property.imagenes_360 && property.imagenes_360.length > 0 ? `
+                <div style="
+                    border-top: 1px solid #e1e5e9 !important;
+                    margin-top: 15px !important;
+                    padding-top: 15px !important;
+                    text-align: center !important;
+                ">
+                    <button onclick="abrirVisor360('${property.id_temporal}')"
+                            style="
+                                background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+                                color: white !important;
+                                border: none !important;
+                                padding: 10px 20px !important;
+                                border-radius: 6px !important;
+                                cursor: pointer !important;
+                                font-size: 14px !important;
+                                font-weight: 600 !important;
+                                transition: all 0.3s ease !important;
+                                display: inline-flex !important;
+                                align-items: center !important;
+                                gap: 8px !important;
+                                box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3) !important;
+                            "
+                            onmouseover="
+                                this.style.background='linear-gradient(135deg, #20c997 0%, #28a745 100%)' !important;
+                                this.style.transform='translateY(-2px)' !important;
+                                this.style.boxShadow='0 6px 20px rgba(40, 167, 69, 0.5)' !important
+                            "
+                            onmouseout="
+                                this.style.background='linear-gradient(135deg, #28a745 0%, #20c997 100%)' !important;
+                                this.style.transform='translateY(0)' !important;
+                                this.style.boxShadow='0 4px 15px rgba(40, 167, 69, 0.3)' !important
+                            ">
+                        🎬 Recorrido Virtual 360°
+                        <span style="
+                            background: rgba(255, 255, 255, 0.3) !important;
+                            padding: 2px 8px !important;
+                            border-radius: 12px !important;
+                            font-size: 12px !important;
+                        ">${property.imagenes_360.length} vista${property.imagenes_360.length > 1 ? 's' : ''}</span>
+                    </button>
+                    <div style="font-size: 12px !important; color: #6c757d !important; margin-top: 8px !important;">
+                        🖱️ Arrastra la imagen para rotar 360°
+                    </div>
+                </div>
+            ` : ''}
+
+            <!-- SECCIÓN: MAPA DE UBICACIÓN -->
             <div style="border-top: 1px solid #e1e5e9 !important; margin-top: 15px !important; padding-top: 15px !important;">
                 <div style="font-size: 14px !important; color: #6c757d !important; margin-bottom: 10px !important; text-align: center !important;">
                     📍 ${property.direccion_completa || `${property.direccion}, ${property.barrio}, Argentina`}
@@ -772,8 +1178,8 @@ function createPropertyCard(property) {
                 <div style="text-align: center !important; margin-bottom: 10px !important;">
                     <button onclick="showPropertyMap('${property.id_temporal}', '${property.direccion_completa ? property.direccion_completa.replace(/'/g, "\\'") : `${property.direccion}, ${property.barrio}, Argentina`.replace(/'/g, "\\'")}', '${property.titulo.replace(/'/g, "\\'")}')"
                             style="background: #232deb !important; color: white !important; border: none !important; padding: 10px 20px !important; border-radius: 6px !important; cursor: pointer !important; font-size: 14px !important; font-weight: 600 !important; transition: all 0.3s ease !important; display: inline-flex !important; align-items: center !important; gap: 8px !important;"
-                            onmouseover="this.style.background='#1a1db4' !important; transform: 'translateY(-2px)' !important" 
-                            onmouseout="this.style.background='#232deb' !important; transform: 'translateY(0)' !important">
+                            onmouseover="this.style.background='#1a1db4' !important; this.style.transform='translateY(-2px)' !important" 
+                            onmouseout="this.style.background='#232deb' !important; this.style.transform='translateY(0)' !important">
                         🗺️ Ver en el Mapa
                     </button>
                 </div>

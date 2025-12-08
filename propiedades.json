@@ -10,7 +10,7 @@
     "tipo": "casa",
     "descripcion": "Ubicada en una zona tranquila y residencial, ofrece la combinación perfecta de vida urbana y refugio personal.",
     "direccion": "Espinillo al 1400",
-    "direccion_completa":"Espinillo 1400, CABA, Argentina",
+    "direccion_completa": "Espinillo 1400, CABA, Argentina",
     "antiguedad": 40,
     "estado": "Bueno",
     "orientacion": "Este",
@@ -22,10 +22,8 @@
     "acepta_mascotas": "Si",
     "aire_acondicionado": "Si",
     "info_multimedia": "Set de 10 fotos de alta calidad, Fotos de exteriores",
-    "documentos": [
-    ],
-     "videos": [
-    ],
+    "documentos": [],
+    "videos": [],
     "fotos": [
       "imgs/UF000-1.jpeg",
       "imgs/UF000-2.jpeg",
@@ -49,6 +47,12 @@
       "imgs/UF000-20.jpeg",
       "imgs/UF000-21.jpeg"
     ],
+    "imagenes_360": [
+      "imgs/360/UF004-13.jpg" 
+      "imgs/360/UF004-14.jpg",
+      "imgs/360/UF004-15.jpg",
+      "imgs/360/UF001-16.jpg"
+    ],
     "moneda_precio": "USD",
     "moneda_expensas": "ARS",
     "fecha_procesamiento": "2025-11-09T08:33:51.258324"
@@ -64,7 +68,7 @@
     "tipo": "terreno",
     "descripcion": "Amplia casa familiar con múltiples ambientes, patio parrillero y cochera. Excelente estado de conservación en zona residencial.",
     "direccion": "Avda. La Plata 1300",
-    "direccion_completa":"Avda. La Plata 1300, CABA, Argentina",
+    "direccion_completa": "Avda. La Plata 1300, CABA, Argentina",
     "antiguedad": 15,
     "estado": "bueno",
     "orientacion": "norte",
@@ -82,8 +86,7 @@
       "imgs/MANZANA.pdf",
       "imgs/DATOS PARCELA.pdf"
     ],
-     "videos": [
-    ],
+    "videos": [],
     "fotos": [
       "imgs/UF001-1.jpg",
       "imgs/UF001-2.jpg",
@@ -93,6 +96,7 @@
       "imgs/UF001-6.jpg",
       "imgs/UF001-7.jpg"
     ],
+    "imagenes_360": [],
     "moneda_precio": "USD",
     "moneda_expensas": "ARS",
     "fecha_procesamiento": "2025-11-09T08:33:51.258324"
@@ -123,10 +127,8 @@
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
     "info_multimedia": "Fotos profesionales disponibles",
-    "documentos": [
-    ],
-     "videos": [
-    ],
+    "documentos": [],
+    "videos": [],
     "fotos": [
       "imgs/UF023-1.jpg",
       "imgs/UF023-2.jpg",
@@ -136,6 +138,7 @@
       "imgs/UF023-6.jpg",
       "imgs/UF023-7.jpg"
     ],
+    "imagenes_360": [],
     "moneda_precio": "ARS",
     "moneda_expensas": "ARS",
     "fecha_procesamiento": "2025-11-08T15:22:30.123456"
@@ -165,10 +168,8 @@
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Sí",
     "info_multimedia": "Fotos panorámicas disponibles",
-    "documentos": [
-    ],
-     "videos": [
-    ],
+    "documentos": [],
+    "videos": [],
     "fotos": [
       "imgs/OFI-1.jpg",
       "imgs/OFI-2.jpg",
@@ -184,6 +185,7 @@
       "imgs/OFI-12.jpg",
       "imgs/OFI-13.jpg"
     ],
+    "imagenes_360": [],
     "moneda_precio": "ARS",
     "moneda_expensas": "ARS",
     "fecha_procesamiento": "2025-11-07T10:45:20.789123"
@@ -192,7 +194,7 @@
     "id_temporal": "UF004",
     "titulo": "Barrio Privado, Km- 50 Pilar, 2.000 m2 de terreno propios",
     "barrio": "Pilar",
-    "precio": 1250,
+    "precio": 1100,
     "ambientes": 8,
     "metros_cuadrados": 200,
     "operacion": "alquiler",
@@ -213,14 +215,11 @@
     "acepta_mascotas": "Sí",
     "aire_acondicionado": "Si",
     "info_multimedia": "Fotos de la propiedad y terraza",
-    "documentos": [
-    ],
-
+    "documentos": [],
     "videos": [
       "imgs/UF003-VIDEO.mp4",
-      "imgs/UF003-VIDEO1.mp4"  
+      "imgs/UF003-VIDEO1.mp4"
     ],
-
     "fotos": [
       "imgs/UF004-1.jpg",
       "imgs/UF004-2.jpg",
@@ -241,6 +240,10 @@
       "imgs/UF004-17.jpg",
       "imgs/UF004-18.jpg",
       "imgs/UF004-19.jpg"
+    ],
+    "imagenes_360": [
+      "imgs/360/UF004-13.jpg",
+      "imgs/360/UF004-14.jpg"
     ],
     "moneda_precio": "USD",
     "moneda_expensas": "ARS",
