@@ -50,7 +50,7 @@ function initializeVariables() {
     pdfViewer = document.getElementById('pdfViewer');
     modalTitle = document.getElementById('modalTitle');
     pdfModal = document.getElementById('pdfModal');
-    
+
     // Log para depuración
     console.log('🔍 Elementos del DOM inicializados:', {
         planoPdf: !!planoPdf,
@@ -59,7 +59,7 @@ function initializeVariables() {
         datosParcelaPdf: !!datosParcelaPdf,
         pdfModal: !!pdfModal
     });
-    
+
     // Configurar event listeners para PDFs
     setupPdfEventListeners();
 }
@@ -72,7 +72,7 @@ function setupPdfEventListeners() {
     // ========== EVENT LISTENERS PARA PDFs ==========
     // (aquí van los event listeners de PDFs que ya teníamos)
     if (entornosPdf && typeof entornosPdf.addEventListener === 'function') {
-        entornosPdf.addEventListener('click', function(e) {
+        entornosPdf.addEventListener('click', function (e) {
             e.stopPropagation();
             console.log('📄 Click en Entornos PDF');
             openPdf('entornos', 'Estudio de Entornos');
@@ -83,21 +83,21 @@ function setupPdfEventListeners() {
     // ========== EVENT LISTENERS PARA MULTIMEDIA ==========
     // Eventos para los iconos de multimedia con verificación
     if (photosIcon && typeof photosIcon.addEventListener === 'function') {
-        photosIcon.addEventListener('click', function(e) {
+        photosIcon.addEventListener('click', function (e) {
             e.stopPropagation();
             alert('Mostrando: ' + propiedadesJSON.propiedad.archivos.fotos);
         });
     }
 
     if (tourIcon && typeof tourIcon.addEventListener === 'function') {
-        tourIcon.addEventListener('click', function(e) {
+        tourIcon.addEventListener('click', function (e) {
             e.stopPropagation();
             alert('Abriendo: ' + propiedadesJSON.propiedad.archivos.tour);
         });
     }
 
     if (videoIcon && typeof videoIcon.addEventListener === 'function') {
-        videoIcon.addEventListener('click', function(e) {
+        videoIcon.addEventListener('click', function (e) {
             e.stopPropagation();
             alert('Reproduciendo: ' + propiedadesJSON.propiedad.archivos.video);
         });
@@ -106,7 +106,7 @@ function setupPdfEventListeners() {
     // ========== EVENT LISTENERS PARA BOTONES ==========
     // Evento para el botón de contacto con verificación
     if (contactButton && typeof contactButton.addEventListener === 'function') {
-        contactButton.addEventListener('click', function(e) {
+        contactButton.addEventListener('click', function (e) {
             e.stopPropagation();
             alert('Redirigiendo al formulario de contacto...');
         });
@@ -115,7 +115,7 @@ function setupPdfEventListeners() {
     // ========== EVENT LISTENERS PARA MODAL ==========
     // Cerrar modal con verificación
     if (closeModal && typeof closeModal.addEventListener === 'function') {
-        closeModal.addEventListener('click', function() {
+        closeModal.addEventListener('click', function () {
             if (pdfModal) {
                 pdfModal.style.display = 'none';
             }
@@ -127,7 +127,7 @@ function setupPdfEventListeners() {
 
     // Cerrar modal al hacer clic fuera del contenido con verificación
     if (pdfModal && typeof pdfModal.addEventListener === 'function') {
-        pdfModal.addEventListener('click', function(e) {
+        pdfModal.addEventListener('click', function (e) {
             if (e.target === pdfModal) {
                 pdfModal.style.display = 'none';
                 if (pdfViewer) {
@@ -143,9 +143,9 @@ function setupPdfEventListeners() {
 function createMultimediaSection(property) {
     const documentos = property.documentos || [];
     const videos = property.videos || [];
-    
+
     let multimediaHTML = '';
-    
+
     // PDFs
     if (documentos.length > 0) {
         multimediaHTML += `
@@ -168,7 +168,7 @@ function createMultimediaSection(property) {
             </div>
         `;
     }
-    
+
     // Videos
     if (videos.length > 0) {
         multimediaHTML += `
@@ -191,7 +191,7 @@ function createMultimediaSection(property) {
             </div>
         `;
     }
-    
+
     return multimediaHTML;
 }
 
@@ -302,7 +302,8 @@ function crearModal360(property) {
         ">
             <!-- Imagen 360 actual -->
             <img id="imagen360-actual" 
-                 src="${imagenes360Actuales[imagen360Actual]}" 
+                 src="${imagenes360Actuales[imagen360Actual] || ''}" 
+                 onerror="this.src='llave.png'; console.error('❌ Error cargando imagen 360');" 
                  alt="Recorrido virtual 360° - ${property.titulo}"
                  style="
                     width: 100%;
@@ -432,7 +433,7 @@ function crearModal360(property) {
 // Función para cambiar de imagen 360
 function cambiarImagen360(direccion) {
     const nuevaPosicion = imagen360Actual + direccion;
-    
+
     if (nuevaPosicion >= 0 && nuevaPosicion < imagenes360Actuales.length) {
         imagen360Actual = nuevaPosicion;
         actualizarVisor360();
@@ -458,15 +459,15 @@ function actualizarVisor360() {
     const imagenActual = document.getElementById('imagen360-actual');
     const contador = document.getElementById('contador-360');
     const miniaturas = document.querySelectorAll('#miniaturas360-container img');
-    
+
     if (imagenActual && imagenes360Actuales[imagen360Actual]) {
         imagenActual.src = imagenes360Actuales[imagen360Actual];
     }
-    
+
     if (contador) {
         contador.textContent = `${imagen360Actual + 1} / ${imagenes360Actuales.length}`;
     }
-    
+
     // Actualizar borde de miniaturas
     miniaturas.forEach((img, index) => {
         img.style.border = index === imagen360Actual ? '3px solid #232deb' : '2px solid rgba(255,255,255,0.3)';
@@ -478,53 +479,53 @@ function actualizarVisor360() {
 function agregarFuncionalidadArrastre() {
     const imagen360 = document.getElementById('imagen360-actual');
     if (!imagen360) return;
-    
+
     let isDragging = false;
     let startX = 0;
     let rotation = 0;
-    
+
     imagen360.addEventListener('mousedown', (e) => {
         isDragging = true;
         startX = e.clientX;
         imagen360.style.cursor = 'grabbing';
         e.preventDefault();
     });
-    
+
     document.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
-        
+
         const deltaX = e.clientX - startX;
         rotation = (deltaX / imagen360.clientWidth) * 360;
-        
+
         // Efecto visual de rotación (puedes usar CSS transform para mejor efecto)
         imagen360.style.transform = `rotateY(${rotation}deg)`;
         imagen360.style.transition = 'transform 0.1s';
     });
-    
+
     document.addEventListener('mouseup', () => {
         isDragging = false;
         imagen360.style.cursor = 'grab';
         imagen360.style.transform = '';
         imagen360.style.transition = 'transform 0.5s ease';
     });
-    
+
     // Para touch en dispositivos móviles
     imagen360.addEventListener('touchstart', (e) => {
         isDragging = true;
         startX = e.touches[0].clientX;
         e.preventDefault();
     });
-    
+
     document.addEventListener('touchmove', (e) => {
         if (!isDragging) return;
-        
+
         const deltaX = e.touches[0].clientX - startX;
         rotation = (deltaX / imagen360.clientWidth) * 360;
-        
+
         imagen360.style.transform = `rotateY(${rotation}deg)`;
         imagen360.style.transition = 'transform 0.1s';
     });
-    
+
     document.addEventListener('touchend', () => {
         isDragging = false;
         imagen360.style.transform = '';
@@ -538,17 +539,17 @@ function cerrarVisor360() {
     if (modal360) {
         modal360.remove();
     }
-    
+
     visor360Activo = false;
     imagenes360Actuales = [];
     imagen360Actual = 0;
     document.body.style.overflow = 'auto';
-    
+
     console.log('🔒 Visor 360 cerrado');
 }
 
 // Cerrar visor 360 con tecla Escape
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape' && visor360Activo) {
         cerrarVisor360();
     }
@@ -558,7 +559,7 @@ document.addEventListener('keydown', function(event) {
 // Función para cerrar modal multimedia - DEFINIR ANTES DE viewPDF
 function closeMultimediaModal() {
     console.log('🔧 DEBUG closeMultimediaModal - multimediaModal:', multimediaModal);
-    
+
     if (multimediaModal) {
         // Detener videos antes de cerrar
         const videos = multimediaModal.querySelectorAll('video');
@@ -566,7 +567,7 @@ function closeMultimediaModal() {
             video.pause();
             video.currentTime = 0;
         });
-        
+
         multimediaModal.remove();
         multimediaModal = null;
         console.log('✅ Modal multimedia cerrado');
@@ -587,27 +588,27 @@ function viewPDF(pdfUrl, titulo) {
 // Función para visualizar PDFs - VERSIÓN CON MANEJO DE ERRORES
 function viewPDF(pdfUrl, titulo) {
     console.log('🔧 DEBUG viewPDF - INICIANDO...');
-    
+
     // Verificar que multimediaModal esté disponible
     if (typeof multimediaModal === 'undefined') {
         console.warn('⚠️ multimediaModal no definida, inicializando...');
         window.multimediaModal = null;
     }
-    
+
     // CORRECCIÓN: Cambiar cualquier extensión .PDF a .pdf
     const pdfUrlCorregido = pdfUrl.replace(/\.PDF$/i, '.pdf');
     const fileName = pdfUrlCorregido.split('/').pop();
-    
+
     console.log('📄 URL original:', pdfUrl);
     console.log('📄 URL corregida:', pdfUrlCorregido);
     console.log('📄 multimediaModal estado:', multimediaModal);
-    
+
     // Crear o reutilizar modal de PDF
     if (multimediaModal) {
         console.log('🔄 Reutilizando modal existente');
         multimediaModal.remove();
     }
-    
+
     try {
         multimediaModal = document.createElement('div');
         multimediaModal.id = 'pdf-modal';
@@ -624,7 +625,7 @@ function viewPDF(pdfUrl, titulo) {
             align-items: center !important;
             padding: 20px !important;
         `;
-        
+
         multimediaModal.innerHTML = `
             <div style="position: relative; width: 90%; max-width: 1000px; height: 90%; background: white; 
                         border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;">
@@ -647,13 +648,13 @@ function viewPDF(pdfUrl, titulo) {
                 </div>
             </div>
         `;
-        
+
         document.body.appendChild(multimediaModal);
         document.body.style.overflow = 'hidden';
-        
+
         console.log('✅ PDF modal creado exitosamente');
         console.log('📄 Abriendo PDF:', pdfUrlCorregido);
-        
+
     } catch (error) {
         console.error('❌ Error creando modal PDF:', error);
         // Fallback: abrir en nueva pestaña
@@ -668,12 +669,12 @@ function viewVideo(videoUrl, titulo) {
     // CORRECCIÓN: Cambiar extensiones de video a minúsculas
     const videoUrlCorregido = videoUrl.replace(/\.(MP4|WEBM|OGG|AVI|MOV)$/i, (match) => match.toLowerCase());
     const fileName = videoUrlCorregido.split('/').pop();
-    
+
     // Crear o reutilizar modal de video
     if (multimediaModal) {
         multimediaModal.remove();
     }
-    
+
     multimediaModal = document.createElement('div');
     multimediaModal.id = 'video-modal';
     multimediaModal.style.cssText = `
@@ -689,7 +690,7 @@ function viewVideo(videoUrl, titulo) {
         align-items: center !important;
         padding: 20px !important;
     `;
-    
+
     multimediaModal.innerHTML = `
         <div style="position: relative; width: 90%; max-width: 1000px; height: 70%; background: white; 
                     border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;">
@@ -714,23 +715,23 @@ function viewVideo(videoUrl, titulo) {
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(multimediaModal);
     document.body.style.overflow = 'hidden';
-    
+
     console.log('🎥 Abriendo video:', videoUrlCorregido);
 }
 
 
 // Cerrar modal con tecla Escape
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape') {
         closeMultimediaModal();
     }
 });
 
 // Cerrar modal al hacer clic fuera
-document.addEventListener('click', function(event) {
+document.addEventListener('click', function (event) {
     if (multimediaModal && event.target === multimediaModal) {
         closeMultimediaModal();
     }
@@ -746,7 +747,7 @@ let tituloPropiedad = '';
 // Función para crear el slider de imágenes (Ahora clickeable para abrir modal)
 function createImageSlider(property) {
     const fotos = property.fotos || [];
-    
+
     if (fotos.length === 0) {
         // Sin imágenes - usar imagen por defecto
         return `
@@ -763,7 +764,7 @@ function createImageSlider(property) {
             </div>
         `;
     }
-    
+
     if (fotos.length === 1) {
         // Una sola imagen - hacer clickeable
         return `
@@ -780,7 +781,7 @@ function createImageSlider(property) {
             </div>
         `;
     }
-    
+
     // Múltiples imágenes - crear slider clickeable
     const imageSlides = fotos.map((foto, index) => `
         <div class="property-slide ${index === 0 ? 'active' : ''}" data-slide="${index}">
@@ -790,11 +791,11 @@ function createImageSlider(property) {
                  onerror="this.src='INSTITUCIONAL 3.png'">
         </div>
     `).join('');
-    
+
     const navigationDots = fotos.map((_, index) => `
         <span class="property-nav-dot ${index === 0 ? 'active' : ''}" onclick="showSlide('${property.id_temporal}', ${index})"></span>
     `).join('');
-    
+
     return `
         <div class="property-slider" data-property="${property.id_temporal}" style="position: relative; cursor: pointer;" 
              onclick="expandPropertyImages('${property.id_temporal}')">
@@ -846,24 +847,24 @@ function createImageSlider(property) {
 function showSlide(propertyId, slideIndex) {
     const slider = document.querySelector(`[data-property="${propertyId}"]`);
     if (!slider) return;
-    
+
     const slides = slider.querySelectorAll('.property-slide');
     const dots = slider.querySelectorAll('.property-nav-dot');
-    
+
     slides.forEach((slide, index) => {
         slide.classList.remove('active');
         if (index === slideIndex) {
             slide.classList.add('active');
         }
     });
-    
+
     dots.forEach((dot, index) => {
         dot.classList.remove('active');
         if (index === slideIndex) {
             dot.classList.add('active');
         }
     });
-    
+
     currentSlides[propertyId] = slideIndex;
 }
 
@@ -871,11 +872,11 @@ function showSlide(propertyId, slideIndex) {
 function prevSlide(propertyId) {
     const slider = document.querySelector(`[data-property="${propertyId}"]`);
     if (!slider) return;
-    
+
     const current = currentSlides[propertyId] || 0;
     const totalSlides = slider.querySelectorAll('.property-slide').length;
     const newIndex = current > 0 ? current - 1 : totalSlides - 1;
-    
+
     showSlide(propertyId, newIndex);
 }
 
@@ -883,11 +884,11 @@ function prevSlide(propertyId) {
 function nextSlide(propertyId) {
     const slider = document.querySelector(`[data-property="${propertyId}"]`);
     if (!slider) return;
-    
+
     const current = currentSlides[propertyId] || 0;
     const totalSlides = slider.querySelectorAll('.property-slide').length;
     const newIndex = current < totalSlides - 1 ? current + 1 : 0;
-    
+
     showSlide(propertyId, newIndex);
 }
 
@@ -964,31 +965,31 @@ let globalData = {
 // Cargar propiedades - Solo desde archivo externo propiedades.json
 async function loadProperties() {
     console.log('🔄 Iniciando carga de propiedades desde propiedades.json...');
-    
+
     try {
         console.log('📂 Cargando propiedades.json desde servidor...');
-        
+
         const response = await fetch('propiedades.json');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         console.log('✅ Datos cargados exitosamente:', data.length, 'propiedades');
-        
+
         // Datos cargados exitosamente
         globalData.properties = data;
         globalData.filteredProperties = data;
-        
+
         // Llenar filtros y mostrar
         populateFilters(data);
         displayProperties(data);
-        
+
     } catch (error) {
         // Error - archivo no encontrado o no accesible
         console.error('❌ Error al cargar propiedades.json:', error.message);
         console.log('💡 Asegúrate de que el archivo propiedades.json esté disponible');
-        
+
         // Mostrar mensaje de error en la interfaz
         showErrorMessage();
     }
@@ -997,13 +998,13 @@ async function loadProperties() {
 // Mostrar mensaje de error cuando no se puede cargar el archivo
 function showErrorMessage() {
     console.log('🔧 Mostrando mensaje de error en la interfaz...');
-    
+
     // Ocultar spinner de carga
     const loadingSpinner = document.getElementById('loadingSpinner');
     if (loadingSpinner) {
         loadingSpinner.style.display = 'none';
     }
-    
+
     // Mostrar mensaje de error en la interfaz
     const errorDiv = document.createElement('div');
     errorDiv.id = 'errorMessage';
@@ -1021,7 +1022,7 @@ function showErrorMessage() {
         <p>No se pudo cargar el archivo <strong>propiedades.json</strong></p>
         <p>Verifica que el archivo esté disponible en el servidor</p>
     `;
-    
+
     // Insertar después del header
     const header = document.querySelector('header');
     if (header && header.nextSibling) {
@@ -1035,20 +1036,20 @@ function showErrorMessage() {
 function populateFilters(properties) {
     const barrios = [...new Set(properties.map(p => p.barrio).filter(Boolean))].sort();
     const tipos = [...new Set(properties.map(p => p.tipo).filter(Boolean))].sort();
-    
+
     const barrioSelect = document.getElementById('barrio-select-styled');
     const tipoSelect = document.getElementById('tipo-select-styled');
-    
+
     if (barrioSelect) {
-        barrioSelect.innerHTML = '<option value="">Todos los barrios</option>' + 
+        barrioSelect.innerHTML = '<option value="">Todos los barrios</option>' +
             barrios.map(barrio => `<option value="${barrio}">${barrio}</option>`).join('');
     }
-    
+
     if (tipoSelect) {
-        tipoSelect.innerHTML = '<option value="">Todos los tipos</option>' + 
+        tipoSelect.innerHTML = '<option value="">Todos los tipos</option>' +
             tipos.map(tipo => `<option value="${tipo}">${tipo}</option>`).join('');
     }
-    
+
     console.log('🔧 Filtros poblados - Barrios:', barrios.length, 'Tipos:', tipos.length);
 }
 
@@ -1067,10 +1068,10 @@ function createPropertyCard(property) {
         transition: transform 0.3s ease !important;
         border: 1px solid #e1e5e9 !important;
     `;
-    
+
     // Crear galería de imágenes inicial
     const imageSection = createExpandableGallery(property);
-    
+
     card.innerHTML = `
         ${imageSection}
         <div style="position: absolute; top: 10px; left: 10px;">
@@ -1199,7 +1200,7 @@ function createPropertyCard(property) {
             </button>
         </div>
     `;
-    
+
     return card;
 }
 
@@ -1211,7 +1212,7 @@ function toggleMap(button, direccionCompleta, titulo) {
     const propertyId = propertyCard.getAttribute('data-property-card');
     const mapContainer = document.getElementById(`map-container-${propertyId}`);
     const mapPlaceholder = document.getElementById(`map-placeholder-${propertyId}`);
-    
+
     if (mapContainer.style.height === '200px') {
         // Ocultar mapa
         mapContainer.style.height = '0';
@@ -1230,7 +1231,7 @@ function toggleMap(button, direccionCompleta, titulo) {
         button.style.background = '#232deb';
         button.style.borderColor = '#232deb';
         button.style.color = 'white';
-        
+
         // Cargar mapa si no está cargado (PASANDO EL propertyId)
         if (!mapPlaceholder.classList.contains('loaded')) {
             loadGoogleMap(mapPlaceholder, direccionCompleta, titulo, propertyId);
@@ -1242,7 +1243,7 @@ function toggleMap(button, direccionCompleta, titulo) {
 
 function loadGoogleMap(placeholder, direccionCompleta, titulo, propertyId) {
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccionCompleta)}`;
-    
+
     placeholder.innerHTML = `
         <div style="text-align: center; padding: 15px; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8f9fa; border-radius: 8px;">
             <div style="margin-bottom: 15px;">
@@ -1292,26 +1293,26 @@ function loadGoogleMap(placeholder, direccionCompleta, titulo, propertyId) {
 // Función para mostrar el mapa en pantalla completa con botón Volver
 function showPropertyMap(propertyId, address, title) {
     console.log('🗺️ Mostrando mapa para propiedad:', propertyId, address, title);
-    
+
     try {
         // 1. Ocultar el contenedor de propiedades
         const propertiesContainer = document.getElementById('properties-container');
         const filters = document.querySelector('.filters');
         const resultsCounter = document.getElementById('results-counter-styled');
-        
+
         if (propertiesContainer) propertiesContainer.style.display = 'none';
         if (filters) filters.style.display = 'none';
         if (resultsCounter) resultsCounter.style.display = 'none';
-        
+
         // 2. Mostrar el botón Volver
         showBackButton(title || 'Propiedad');
-        
+
         // 3. Integrar el mapa (sin API key problemática)
         showActualMap(propertyId, address, title);
-        
+
         // 4. Añadir clase al body para modo mapa
         document.body.classList.add('map-view-active');
-        
+
         console.log('✅ Mapa mostrado correctamente');
     } catch (error) {
         console.error('❌ Error al mostrar mapa:', error);
@@ -1322,7 +1323,7 @@ function showPropertyMap(propertyId, address, title) {
 function showBackButton(title) {
     try {
         let backButton = document.getElementById('mapBackButton');
-        
+
         if (!backButton) {
             // Crear el botón si no existe
             backButton = document.createElement('div');
@@ -1334,10 +1335,10 @@ function showBackButton(title) {
                 </button>
             `;
             document.body.appendChild(backButton);
-            
+
             console.log('✅ Botón Volver creado');
         }
-        
+
         backButton.style.display = 'block';
         console.log('✅ Botón Volver mostrado');
     } catch (error) {
@@ -1348,32 +1349,32 @@ function showBackButton(title) {
 // Función para volver a las propiedades
 function backToProperties() {
     console.log('🏠 Volviendo a propiedades');
-    
+
     try {
         // 1. Mostrar el contenedor de propiedades
         const propertiesContainer = document.getElementById('properties-container');
         const filters = document.querySelector('.filters');
         const resultsCounter = document.getElementById('results-counter-styled');
-        
+
         if (propertiesContainer) propertiesContainer.style.display = 'grid';
         if (filters) filters.style.display = 'block';
         if (resultsCounter) resultsCounter.style.display = 'block';
-        
+
         // 2. Ocultar el botón Volver
         const backButton = document.getElementById('mapBackButton');
         if (backButton) {
             backButton.style.display = 'none';
         }
-        
+
         // 3. Cerrar/limpiar el mapa
         closeMap();
-        
+
         // 4. Remover clase del body
         document.body.classList.remove('map-view-active');
-        
+
         // 5. Scroll al inicio suavemente
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        
+
         console.log('✅ Vuelta a propiedades exitosa');
     } catch (error) {
         console.error('❌ Error al volver a propiedades:', error);
@@ -1388,7 +1389,7 @@ function showActualMap(propertyId, address, title) {
         if (existingMap) {
             existingMap.remove();
         }
-        
+
         // Crear contenedor del mapa
         const mapContainer = document.createElement('div');
         mapContainer.id = 'fullscreen-map-container';
@@ -1401,13 +1402,13 @@ function showActualMap(propertyId, address, title) {
             background: white !important;
             z-index: 9998 !important;
         `;
-        
+
         // Codificar la dirección para Google Maps (sin API key)
         const encodedAddress = encodeURIComponent(address);
-        
+
         // Usar Google Maps Embed sin API key (modo place)
         const mapUrl = `https://www.google.com/maps/embed/v1/place?q=${encodedAddress}&zoom=15&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`;
-        
+
         // Crear iframe de Google Maps
         mapContainer.innerHTML = `
             <iframe 
@@ -1426,7 +1427,7 @@ function showActualMap(propertyId, address, title) {
                 <p style="margin: 0; color: #666; font-size: 14px; line-height: 1.4;">${address}</p>
             </div>
         `;
-        
+
         document.body.appendChild(mapContainer);
         console.log('✅ Mapa creado correctamente');
     } catch (error) {
@@ -1451,7 +1452,7 @@ function closeMap() {
     }
 }
 // Cerrar con tecla Escape
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape' && document.body.classList.contains('map-view-active')) {
         console.log('⎋ Tecla Escape presionada - Volviendo a propiedades');
         backToProperties();
@@ -1459,7 +1460,7 @@ document.addEventListener('keydown', function(event) {
 });
 
 // Inicializar estilos cuando se carga la página
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Verificar que los estilos estén presentes
     if (!document.querySelector('#map-back-styles')) {
         const styles = document.createElement('style');
@@ -1561,7 +1562,7 @@ function openDirectionsFromCard(propertyId, address) {
 }
 
 // Cerrar con tecla Escape
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape' && document.body.classList.contains('map-view-active')) {
         backToProperties();
     }
@@ -1584,7 +1585,7 @@ function scrollToProperty(propertyId) {
         // Cerrar el mapa primero
         const mapContainer = document.getElementById(`map-container-${propertyId}`);
         const mapButton = propertyCard.querySelector('button[onclick*="toggleMap"]');
-        
+
         if (mapContainer && mapButton) {
             mapContainer.style.height = '0';
             mapContainer.style.opacity = '0';
@@ -1594,17 +1595,17 @@ function scrollToProperty(propertyId) {
             mapButton.style.borderColor = '#dee2e6';
             mapButton.style.color = '#495057';
         }
-        
+
         // Scroll suave a la propiedad
-        propertyCard.scrollIntoView({ 
-            behavior: 'smooth', 
+        propertyCard.scrollIntoView({
+            behavior: 'smooth',
             block: 'center'
         });
-        
+
         // Efecto visual de highlight
         propertyCard.style.boxShadow = '0 0 0 3px rgba(35, 45, 235, 0.3)';
         propertyCard.style.transition = 'box-shadow 0.5s ease';
-        
+
         setTimeout(() => {
             propertyCard.style.boxShadow = '0 4px 16px rgba(0,0,0,0.1)';
         }, 2000);
@@ -1654,20 +1655,20 @@ document.addEventListener('DOMContentLoaded', initializeMapStyles);
 function displayProperties(properties) {
     const container = document.getElementById('properties-container');
     if (!container) return;
-    
+
     container.innerHTML = '';
-    
+
     if (properties.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #666;">No se encontraron propiedades</p>';
         updateResultsCount(0);
         return;
     }
-    
+
     properties.forEach(property => {
         const card = createPropertyCard(property);
         container.appendChild(card);
     });
-    
+
     updateResultsCount(properties.length);
     console.log('📋 Mostrando', properties.length, 'propiedades');
 }
@@ -1675,7 +1676,7 @@ function displayProperties(properties) {
 function updateResultsCount(count) {
     const counter = document.getElementById('results-counter-styled');
     if (!counter) return;
-    
+
     if (count === 0) {
         counter.innerHTML = '<div>No se encontraron propiedades</div>';
     } else {
@@ -1692,7 +1693,7 @@ function setupFilterEvents() {
     const operacionSelect = document.getElementById('operacion-select-styled');
     const barrioSelect = document.getElementById('barrio-select-styled');
     const tipoSelect = document.getElementById('tipo-select-styled');
-    
+
     if (operacionSelect) {
         operacionSelect.addEventListener('change', applyFilters);
     }
@@ -1708,20 +1709,20 @@ function applyFilters() {
     const operacionSelect = document.getElementById('operacion-select-styled');
     const barrioSelect = document.getElementById('barrio-select-styled');
     const tipoSelect = document.getElementById('tipo-select-styled');
-    
+
     const selectedOperacion = operacionSelect ? operacionSelect.value : '';
     const selectedBarrio = barrioSelect ? barrioSelect.value : '';
     const selectedTipo = tipoSelect ? tipoSelect.value : '';
-    
+
     console.log('🔍 Aplicando filtros:', { selectedOperacion, selectedBarrio, selectedTipo });
-    
+
     const filtered = globalData.properties.filter(property => {
         if (selectedOperacion && property.operacion !== selectedOperacion) return false;
         if (selectedBarrio && property.barrio !== selectedBarrio) return false;
         if (selectedTipo && property.tipo !== selectedTipo) return false;
         return true;
     });
-    
+
     globalData.filteredProperties = filtered;
     displayProperties(filtered);
 }
@@ -1741,19 +1742,19 @@ function showPropertyDetails(propertyId) {
 // INICIALIZACIÓN
 // ========================================
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('🏠 Sistema Dante Propiedades - Sin errores + Slider cargando...');
     console.log('🎯 Sistema de slider de múltiples fotos incluido');
     console.log('✅ Sin dependencias de Font Awesome');
     console.log('🎬 Sistema de multimedia activado');
-    
+
     // Cargar CSS del slider
     addSliderStyles();
-    
+
     // Cargar propiedades
     loadProperties();
-    
-    
+
+
     console.log('✅ Sistema inicializado sin errores de consola');
     console.log('🎠 Slider de múltiples fotos disponible');
     console.log('📄 Soporte para PDFs activado');
@@ -1766,20 +1767,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function checkResourceErrors() {
     const imageErrors = [];
-    
+
     // Verificar imágenes que no cargan
     document.querySelectorAll('img').forEach(img => {
-        img.addEventListener('error', function() {
+        img.addEventListener('error', function () {
             imageErrors.push(this.src);
             console.warn('⚠️ Imagen no encontrada:', this.src);
         });
     });
-    
+
     return imageErrors;
 }
 
 // Verificar errores al cargar
-window.addEventListener('load', function() {
+window.addEventListener('load', function () {
     setTimeout(() => {
         const errors = checkResourceErrors();
         if (errors.length === 0) {
@@ -1789,7 +1790,7 @@ window.addEventListener('load', function() {
             console.log('⚠️ Errores de recursos:', errors.length);
         }
     }, 1000);
-    
+
     setTimeout(setupFilterEvents, 100);
 });
 
@@ -1801,25 +1802,25 @@ window.addEventListener('load', function() {
 // Función principal para abrir el modal con verificación completa
 function abrirModalImagenesComplete(propertyId) {
     console.log('📸 Iniciando apertura de modal para propiedad:', propertyId);
-    
+
     try {
         const property = globalData.properties.find(p => p.id_temporal === propertyId);
-        
+
         if (!property) {
             console.error('❌ Propiedad no encontrada:', propertyId);
             return;
         }
-        
+
         console.log('✅ Propiedad encontrada:', property.titulo, 'con', property.fotos?.length || 0, 'imágenes');
-        
+
         if (!property.fotos || property.fotos.length === 0) {
             console.log('⚠️ La propiedad no tiene imágenes disponibles');
             alert('Esta propiedad no tiene imágenes disponibles.');
             return;
         }
-        
+
         abrirModalImagenes(property);
-        
+
     } catch (error) {
         console.error('❌ Error al abrir modal:', error);
         alert('Error al abrir la galería de imágenes.');
@@ -1829,63 +1830,63 @@ function abrirModalImagenesComplete(propertyId) {
 // Función principal para abrir el modal
 function abrirModalImagenes(property) {
     console.log('🔍 Abriendo modal para:', property.titulo);
-    
+
     // Configurar datos del modal
     imagenesModal = property.fotos || [];
     imagenActual = 0;
     tituloPropiedad = property.titulo || 'Galería de Imágenes';
-    
+
     // Verificar elementos del DOM
     const modalElement = document.getElementById('modal-imagenes');
     const imagenPrincipalElement = document.getElementById('imagen-principal');
     const contadorElement = document.getElementById('imagen-contador');
     const tituloElement = document.getElementById('imagen-titulo-display');
-    
+
     if (!modalElement) {
         console.error('❌ Elemento modal-imagenes no encontrado en el DOM');
         alert('Error: No se pudo encontrar el elemento del modal.');
         return;
     }
-    
+
     if (!imagenPrincipalElement) {
         console.error('❌ Elemento imagen-principal no encontrado en el DOM');
         alert('Error: No se pudo encontrar el elemento de imagen principal.');
         return;
     }
-    
+
     if (!contadorElement) {
         console.error('❌ Elemento imagen-contador no encontrado en el DOM');
         alert('Error: No se pudo encontrar el contador de imágenes.');
         return;
     }
-    
+
     if (!tituloElement) {
         console.error('❌ Elemento imagen-titulo-display no encontrado en el DOM');
         alert('Error: No se pudo encontrar el título de imagen.');
         return;
     }
-    
+
     // Actualizar información del modal
     tituloElement.textContent = tituloPropiedad;
-    
+
     // Mostrar la primera imagen
     mostrarImagenActual();
-    
+
     // Mostrar modal
     modalElement.style.display = 'block';
-    
+
     // Aplicar layout específico para móviles
     if (window.innerWidth <= 480) {
         modalElement.style.display = 'flex';
         modalElement.style.alignItems = 'center';
         modalElement.style.justifyContent = 'center';
     }
-    
+
     document.body.style.overflow = 'hidden';
-    
+
     // Agregar event listener para teclado
     document.addEventListener('keydown', manejarTecladoModal);
-    
+
     console.log('✅ Modal abierto para:', property.titulo);
 }
 
@@ -1893,37 +1894,37 @@ function abrirModalImagenes(property) {
 function mostrarImagenActual() {
     const imagenPrincipalElement = document.getElementById('imagen-principal');
     const contadorElement = document.getElementById('imagen-contador');
-    
+
     if (!imagenPrincipalElement || !contadorElement) {
         console.error('❌ Elementos del modal no disponibles para mostrar imagen');
         return;
     }
-    
+
     if (imagenesModal.length === 0) {
         imagenPrincipalElement.style.backgroundImage = 'none';
         imagenPrincipalElement.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666; font-size: 18px;">No hay imágenes disponibles</div>';
         contadorElement.textContent = '0 / 0';
         return;
     }
-    
+
     const imagenUrl = imagenesModal[imagenActual];
-    
+
     // Configurar imagen de fondo
     imagenPrincipalElement.style.backgroundImage = `url('${imagenUrl}')`;
     imagenPrincipalElement.style.backgroundSize = 'contain';
     imagenPrincipalElement.style.backgroundRepeat = 'no-repeat';
     imagenPrincipalElement.style.backgroundPosition = 'center';
-    
+
     // Actualizar contador
     contadorElement.textContent = `${imagenActual + 1} / ${imagenesModal.length}`;
-    
+
     console.log('🖼️ Imagen mostrada:', imagenActual + 1, '/', imagenesModal.length);
 }
 
 // Función para cerrar el modal
 function cerrarModalImagenes() {
     const modalElement = document.getElementById('modal-imagenes');
-    
+
     if (modalElement) {
         modalElement.style.display = 'none';
         // Resetear estilos específicos de móviles
@@ -1933,10 +1934,10 @@ function cerrarModalImagenes() {
         }
         document.body.style.overflow = 'auto';
     }
-    
+
     // Remover event listener
     document.removeEventListener('keydown', manejarTecladoModal);
-    
+
     console.log('🔒 Modal cerrado');
 }
 
@@ -1967,7 +1968,7 @@ function imagenSiguiente() {
 // Función para crear galería expandible (una imagen que se expande al hacer clic)
 function createExpandableGallery(property) {
     const fotos = property.fotos || [];
-    
+
     if (fotos.length === 0) {
         // Sin imágenes - usar imagen por defecto
         return `
@@ -1985,11 +1986,11 @@ function createExpandableGallery(property) {
             </div>
         `;
     }
-    
+
     // Mostrar la primera imagen como vista inicial
     const firstImage = fotos[0];
     const totalPhotos = fotos.length;
-    
+
     return `
         <div class="expandable-gallery-container" style="position: relative; cursor: pointer;" 
              onclick="expandPropertyImages('${property.id_temporal}')" 
@@ -2023,15 +2024,15 @@ function createExpandableGallery(property) {
 function calcularDistribucionMasonry(totalFotos, anchoDisponible, altoDisponible) {
     console.log('🏗️ Calculando distribución MASONRY para', totalFotos, 'fotos');
     console.log('📐 Espacio disponible:', anchoDisponible, 'x', altoDisponible, 'px');
-    
+
     // CONFIGURACIÓN MASONRY OPTIMIZADA
     const esMobile = anchoDisponible < 768;
     const columnas = esMobile ? 2 : 4;
     const gap = 8;
     const anchoColumna = Math.floor((anchoDisponible - (columnas - 1) * gap) / columnas);
-    
+
     console.log('🔧 Masonry: ' + columnas + ' columnas, gap: ' + gap + 'px, ancho columna: ' + anchoColumna + 'px');
-    
+
     // ALTURAS VARIADAS PARA EFECTO MASONRY
     const alturasPosibles = [
         Math.floor(anchoColumna * 0.8),   // Pequeña
@@ -2039,20 +2040,20 @@ function calcularDistribucionMasonry(totalFotos, anchoDisponible, altoDisponible
         Math.floor(anchoColumna * 1.6),   // Grande
         Math.floor(anchoColumna * 2.0)    // Extra grande
     ];
-    
+
     // INICIALIZAR COLUMNAS
     const alturasColumnas = new Array(columnas).fill(0);
     const patrones = [];
-    
+
     // GENERAR PATRONES MASONRY
     for (let i = 0; i < totalFotos; i++) {
         // Encontrar la columna con menor altura
         const columnaMasBaja = alturasColumnas.indexOf(Math.min(...alturasColumnas));
-        
+
         // VARIEDAD DE TAMAÑOS - distribución 30% pequeñas, 40% medianas, 20% grandes, 10% extra grandes
         let alturaFoto;
         const random = Math.random();
-        
+
         if (random < 0.3) {
             alturaFoto = alturasPosibles[0]; // Pequeña
         } else if (random < 0.7) {
@@ -2062,14 +2063,14 @@ function calcularDistribucionMasonry(totalFotos, anchoDisponible, altoDisponible
         } else {
             alturaFoto = alturasPosibles[3]; // Extra grande
         }
-        
+
         // POSICIÓN EN LA COLUMNA SELECCIONADA
         const left = columnaMasBaja * (anchoColumna + gap);
         const top = alturasColumnas[columnaMasBaja];
-        
+
         // ACTUALIZAR ALTURA DE LA COLUMNA
         alturasColumnas[columnaMasBaja] += alturaFoto + gap;
-        
+
         patrones.push({
             ancho: anchoColumna,
             alto: alturaFoto,
@@ -2079,18 +2080,18 @@ function calcularDistribucionMasonry(totalFotos, anchoDisponible, altoDisponible
             fila: Math.floor(top / (alturaFoto + gap)),
             proporcion: parseFloat((alturaFoto / anchoColumna).toFixed(2))
         });
-        
+
         console.log('📐 FOTO ' + (i + 1) + ': Columna ' + columnaMasBaja + ' - ' + anchoColumna + 'x' + alturaFoto + 'px (top: ' + top + 'px)');
     }
-    
+
     // CALCULAR ALTURA TOTAL
     const alturaTotal = Math.max(...alturasColumnas) - gap;
-    
+
     console.log('✅ Distribución MASONRY completa:');
     console.log('- Alturas finales columnas: [' + alturasColumnas.map(h => Math.floor(h)).join(', ') + ']px');
     console.log('- Altura total: ' + alturaTotal + 'px');
     console.log('- Variedad de tamaños aplicada');
-    
+
     return {
         patrones: patrones,
         columnas: columnas,
@@ -2108,19 +2109,19 @@ function calcularDistribucionMasonry(totalFotos, anchoDisponible, altoDisponible
 function expandPropertyImages(propertyId) {
     const property = globalData.properties.find(p => p.id_temporal === propertyId);
     if (!property || !property.fotos) return;
-    
+
     const fotos = property.fotos;
     const totalPhotos = fotos.length;
-    
+
     // Calcular dimensiones disponibles
     const anchoVentana = window.innerWidth;
     const altoVentana = window.innerHeight;
     const anchoDisponible = anchoVentana - 40;
     const altoDisponible = altoVentana - 120;
-    
+
     // USAR ALGORITMO MASONRY MEJORADO
     const distribucionMasonry = calcularDistribucionMasonry(totalPhotos, anchoDisponible, altoDisponible);
-    
+
     // Crear overlay
     const overlay = document.createElement('div');
     overlay.id = `image-expansion-${propertyId}`;
@@ -2137,7 +2138,7 @@ function expandPropertyImages(propertyId) {
         flex-direction: column;
         overflow: hidden;
     `;
-    
+
     // Header
     const header = `
         <div style="
@@ -2177,7 +2178,7 @@ function expandPropertyImages(propertyId) {
             </button>
         </div>
     `;
-    
+
     // Contenedor Masonry
     const masonryContainer = `
         <div id="masonry-gallery-${propertyId}" style="
@@ -2195,18 +2196,18 @@ function expandPropertyImages(propertyId) {
                 height: ${distribucionMasonry.alturaTotal}px;
             ">
                 ${fotos.map((foto, index) => {
-                    const patron = distribucionMasonry.patrones[index];
-                    const ancho = patron.ancho;
-                    const alto = patron.alto;
-                    const left = patron.left;
-                    const top = patron.top;
-                    
-                    // Determinar clase de tamaño para estilos CSS
-                    let claseTamaño = 'masonry-small';
-                    if (alto > ancho * 1.5) claseTamaño = 'masonry-large';
-                    else if (alto > ancho * 1.2) claseTamaño = 'masonry-medium';
-                    
-                    return `
+        const patron = distribucionMasonry.patrones[index];
+        const ancho = patron.ancho;
+        const alto = patron.alto;
+        const left = patron.left;
+        const top = patron.top;
+
+        // Determinar clase de tamaño para estilos CSS
+        let claseTamaño = 'masonry-small';
+        if (alto > ancho * 1.5) claseTamaño = 'masonry-large';
+        else if (alto > ancho * 1.2) claseTamaño = 'masonry-medium';
+
+        return `
                         <div class="masonry-item ${claseTamaño}" 
                              style="
                                  position: absolute;
@@ -2237,19 +2238,19 @@ function expandPropertyImages(propertyId) {
                                  onerror="this.src='INSTITUCIONAL 3.png'">
                         </div>
                     `;
-                }).join('')}
+    }).join('')}
             </div>
         </div>
     `;
-    
+
     overlay.innerHTML = header + masonryContainer;
     document.body.appendChild(overlay);
-    
+
     // === EN TU ARCHIVO JAVASCRIPT - Donde están los event listeners ===
 
     // Eventos para los PDFs individuales (AGREGA ESTOS NUEVOS)
     if (planoPdf) {
-        planoPdf.addEventListener('click', function(e) {
+        planoPdf.addEventListener('click', function (e) {
             e.stopPropagation();
             openPdf('plano', 'Plano del Departamento');
         });
@@ -2257,14 +2258,14 @@ function expandPropertyImages(propertyId) {
 
     // --- AGREGAR AQUÍ LOS NUEVOS EVENT LISTENERS ---
     if (document.getElementById('entornosPdf')) {
-        document.getElementById('entornosPdf').addEventListener('click', function(e) {
+        document.getElementById('entornosPdf').addEventListener('click', function (e) {
             e.stopPropagation();
             openPdf('entornos', 'Estudio de Entornos');
         });
     }
 
     if (document.getElementById('datosParcelaPdf')) {
-        document.getElementById('datosParcelaPdf').addEventListener('click', function(e) {
+        document.getElementById('datosParcelaPdf').addEventListener('click', function (e) {
             e.stopPropagation();
             openPdf('datos_parcela', 'Datos de la Parcela');
         });
@@ -2272,62 +2273,62 @@ function expandPropertyImages(propertyId) {
     // --- FIN DE NUEVOS EVENT LISTENERS ---
 
     if (reglamentoPdf) {
-        reglamentoPdf.addEventListener('click', function(e) {
+        reglamentoPdf.addEventListener('click', function (e) {
             e.stopPropagation();
             openPdf('reglamento', 'Reglamento de Copropiedad');
         });
     }
 
     if (expensasPdf) {
-        expensasPdf.addEventListener('click', function(e) {
+        expensasPdf.addEventListener('click', function (e) {
             e.stopPropagation();
             openPdf('expensas', 'Detalle de Expensas');
         });
     }
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
     // Agregar event listeners para overlay
-    overlay.addEventListener('click', function(e) {
+    overlay.addEventListener('click', function (e) {
         if (e.target === overlay) {
             closeImageExpansion(propertyId);
         }
     });
-    
+
     // Evento para cerrar con Escape
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             closeImageExpansion(propertyId);
         }
     });
-    
+
     document.body.style.overflow = 'hidden';
-    
+
     console.log('🎨 Galería Masonry creada para', property.titulo);
 }
 
 // Función para expandir una foto dentro de la misma galería
 function expandirFotoEnGaleria(propertyId, fotoIndex) {
     console.log('🔍 DEBUG: expandirFotoEnGaleria llamada con propertyId:', propertyId, 'fotoIndex:', fotoIndex);
-    
+
     const property = globalData.properties.find(p => p.id_temporal === propertyId);
     if (!property || !property.fotos) {
         console.log('❌ DEBUG: Propiedad no encontrada o sin fotos', { property: !!property, fotos: property?.fotos?.length });
         return;
     }
     console.log('✅ DEBUG: Propiedad encontrada:', property.titulo, 'Fotos:', property.fotos.length);
-    
+
     const fotoSeleccionada = property.fotos[fotoIndex];
     if (!fotoSeleccionada) {
         console.log('❌ DEBUG: Foto no encontrada en índice', fotoIndex);
         return;
     }
     console.log('✅ DEBUG: Foto seleccionada:', fotoSeleccionada);
-    
+
     // Obtener la galería actual
     const galeriaOverlay = document.getElementById(`image-expansion-${propertyId}`);
     if (!galeriaOverlay) {
@@ -2335,13 +2336,13 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
         return;
     }
     console.log('✅ DEBUG: Overlay de galería encontrado');
-    
+
     // Limpiar cualquier vista expandida anterior
     const vistaExpandidaAnterior = galeriaOverlay.querySelector('.vista-foto-expandida');
     if (vistaExpandidaAnterior) {
         vistaExpandidaAnterior.remove();
     }
-    
+
     // Crear la vista expandida de la foto DENTRO de la galería
     const vistaExpandida = document.createElement('div');
     vistaExpandida.className = 'vista-foto-expandida';
@@ -2357,7 +2358,7 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
         flex-direction: column;
         backdrop-filter: blur(15px);
     `;
-    
+
     vistaExpandida.innerHTML = `
         <!-- Header con título y controles -->
         <div style="
@@ -2527,33 +2528,33 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
             <div style="font-size: 14px; font-weight: 600;">Foto ${fotoIndex + 1} de ${property.fotos.length}</div>
         </div>
     `;
-    
+
     // Agregar la vista expandida a la galería
     galeriaOverlay.appendChild(vistaExpandida);
-    
+
     // Ocultar temporalmente el grid
     const gridImages = galeriaOverlay.querySelector('div[style*="display: grid"]');
     if (gridImages) {
         gridImages.style.opacity = '0.3';
         gridImages.style.pointerEvents = 'none';
     }
-    
+
     // Evento para volver al grid con Escape
-    const escapeHandler = function(e) {
+    const escapeHandler = function (e) {
         if (e.key === 'Escape') {
             volverAGaleriaGrid(propertyId);
             document.removeEventListener('keydown', escapeHandler);
         }
     };
     document.addEventListener('keydown', escapeHandler);
-    
+
     // Evento para volver al grid al hacer clic en el fondo de la imagen
-    vistaExpandida.addEventListener('click', function(e) {
+    vistaExpandida.addEventListener('click', function (e) {
         if (e.target === vistaExpandida.querySelector('div[style*="flex: 1"]')) {
             volverAGaleriaGrid(propertyId);
         }
     });
-    
+
     console.log(`📸 Expandiendo foto ${fotoIndex + 1} en la galería`);
 }
 
@@ -2561,27 +2562,27 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
 function volverAGaleriaGrid(propertyId) {
     const galeriaOverlay = document.getElementById(`image-expansion-${propertyId}`);
     if (!galeriaOverlay) return;
-    
+
     // Remover la vista expandida
     const vistaExpandida = galeriaOverlay.querySelector('.vista-foto-expandida');
     if (vistaExpandida) {
         vistaExpandida.remove();
     }
-    
+
     // Restaurar la visibilidad del grid
     const gridImages = galeriaOverlay.querySelector('div[style*="display: grid"]');
     if (gridImages) {
         gridImages.style.opacity = '1';
         gridImages.style.pointerEvents = 'auto';
     }
-    
+
     // Remover listeners específicos
-    document.removeEventListener('keydown', function(e) {
+    document.removeEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             volverAGaleriaGrid(propertyId);
         }
     });
-    
+
     console.log('🔄 Volviendo al grid de fotos en la galería');
 }
 
@@ -2591,10 +2592,10 @@ function closeImageExpansion(propertyId) {
     if (overlay) {
         overlay.remove();
     }
-    
+
     // Restaurar scroll del body
     document.body.style.overflow = 'auto';
-    
+
     console.log('🔒 Galería expandida cerrada');
 }
 
@@ -2602,7 +2603,7 @@ function closeImageExpansion(propertyId) {
 
 // Función para manejar eventos de teclado
 function manejarTecladoModal(event) {
-    switch(event.key) {
+    switch (event.key) {
         case 'Escape':
             event.preventDefault();
             cerrarModalImagenes();
@@ -2619,7 +2620,7 @@ function manejarTecladoModal(event) {
 }
 
 // Cerrar modal al hacer clic fuera de él
-window.addEventListener('click', function(event) {
+window.addEventListener('click', function (event) {
     const modalElement = document.getElementById('modal-imagenes');
     if (event.target === modalElement) {
         cerrarModalImagenes();
@@ -2646,10 +2647,10 @@ function createImageCollage(property) {
 
     const fotos = property.fotos;
     const totalFotos = fotos.length;
-    
+
     // Seleccionar imágenes para el collage
     let collageHtml = '';
-    
+
     if (totalFotos >= 5) {
         // Para 5+ fotos: 2 arriba, 1 grande en medio, 2 abajo
         collageHtml = `
@@ -2796,7 +2797,7 @@ function openImageModal(propertyId, imageIndex) {
     currentImageIndex = imageIndex;
 
     showImageInModal();
-    
+
     // Mostrar modal
     const modal = document.getElementById('imageModal');
     modal.style.display = 'block';
@@ -2849,7 +2850,7 @@ function closeImageModal() {
     const modal = document.getElementById('imageModal');
     modal.style.display = 'none';
     document.body.style.overflow = 'auto';
-    
+
     // Limpiar variables
     currentImageIndex = 0;
     currentPropertyId = '';
@@ -2857,10 +2858,10 @@ function closeImageModal() {
 }
 
 // Event listeners para modal
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
     const modal = document.getElementById('imageModal');
     if (modal.style.display === 'block') {
-        switch(event.key) {
+        switch (event.key) {
             case 'Escape':
                 closeImageModal();
                 break;
@@ -2877,10 +2878,10 @@ document.addEventListener('keydown', function(event) {
 // Sistema de galería expandible - Una imagen que se expande al hacer clic
 
 // Cerrar modal al hacer clic fuera de la imagen
-document.addEventListener('click', function(event) {
+document.addEventListener('click', function (event) {
     const modal = document.getElementById('imageModal');
     const modalContent = document.querySelector('.modal-content');
-    
+
     if (event.target === modal && !modalContent.contains(event.target)) {
         closeImageModal();
     }
@@ -2917,14 +2918,14 @@ const propiedadesJSON = {
 
 
 
-    function openPdf(pdfName, title) {
+function openPdf(pdfName, title) {
     console.log('📂 Buscando PDF:', pdfName);
-    
+
     const documentos = propiedadesJSON.documentos || [];
     console.log('📄 Documentos disponibles:', documentos);
-    
+
     let rutaArchivo = '';
-    
+
     // Buscar inteligentemente en el array de documentos - CORREGIDO
     if (pdfName === 'entornos') {
         rutaArchivo = documentos.find(doc => doc.toLowerCase().includes('entornos'));
@@ -2936,18 +2937,18 @@ const propiedadesJSON = {
         rutaArchivo = documentos.find(doc => doc.toLowerCase().includes('reglamento'));
     } else {
         // Búsqueda genérica
-        rutaArchivo = documentos.find(doc => 
+        rutaArchivo = documentos.find(doc =>
             doc.toLowerCase().includes(pdfName.toLowerCase())
         );
     }
-    
+
     console.log('🔍 Ruta encontrada:', rutaArchivo);
-    
+
     if (rutaArchivo) {
         // Asegurar que la ruta use minúsculas para la extensión
         const rutaFinal = rutaArchivo.replace(/\.PDF$/, '.pdf');
         console.log('🚀 Abriendo PDF:', rutaFinal);
-        
+
         pdfViewer.src = rutaFinal;
         modalTitle.textContent = title;
         pdfModal.style.display = 'flex';
@@ -2957,97 +2958,97 @@ const propiedadesJSON = {
     }
 }
 
-    // Evento para hacer clic en cualquier parte de la tarjeta
-    // if (propertyCard) {
-    //     propertyCard.addEventListener('click', function(e) {
-    //         // Evitar que se active cuando se hace clic en elementos específicos
-    //         if (!e.target.closest('.media-icon') && 
-    //             !e.target.closest('.pdf-item') && 
-    //             !e.target.closest('.action-button')) {
-    //             openPdf('plano', 'Plano del Departamento');
-    //         }
-    //     });
-    // }
+// Evento para hacer clic en cualquier parte de la tarjeta
+// if (propertyCard) {
+//     propertyCard.addEventListener('click', function(e) {
+//         // Evitar que se active cuando se hace clic en elementos específicos
+//         if (!e.target.closest('.media-icon') && 
+//             !e.target.closest('.pdf-item') && 
+//             !e.target.closest('.action-button')) {
+//             openPdf('plano', 'Plano del Departamento');
+//         }
+//     });
+// }
 
-    // Eventos para los PDFs individuales
-    if (planoPdf) {
-        planoPdf.addEventListener('click', function(e) {
-            e.stopPropagation();
-            openPdf('plano', 'Plano del Departamento');
-        });
-    }
+// Eventos para los PDFs individuales
+if (planoPdf) {
+    planoPdf.addEventListener('click', function (e) {
+        e.stopPropagation();
+        openPdf('plano', 'Plano del Departamento');
+    });
+}
 
-    if (reglamentoPdf) {
-        reglamentoPdf.addEventListener('click', function(e) {
-            e.stopPropagation();
-            openPdf('reglamento', 'Reglamento de Copropiedad');
-        });
-    }
+if (reglamentoPdf) {
+    reglamentoPdf.addEventListener('click', function (e) {
+        e.stopPropagation();
+        openPdf('reglamento', 'Reglamento de Copropiedad');
+    });
+}
 
-    if (expensasPdf) {
-        expensasPdf.addEventListener('click', function(e) {
-            e.stopPropagation();
-            openPdf('expensas', 'Detalle de Expensas');
-        });
-    }
+if (expensasPdf) {
+    expensasPdf.addEventListener('click', function (e) {
+        e.stopPropagation();
+        openPdf('expensas', 'Detalle de Expensas');
+    });
+}
 
-    // Eventos para los iconos de multimedia
-    if (photosIcon) {
-        photosIcon.addEventListener('click', function(e) {
-            e.stopPropagation();
-            alert('Mostrando: ' + propiedadesJSON.propiedad.archivos.fotos);
-        });
-    }
+// Eventos para los iconos de multimedia
+if (photosIcon) {
+    photosIcon.addEventListener('click', function (e) {
+        e.stopPropagation();
+        alert('Mostrando: ' + propiedadesJSON.propiedad.archivos.fotos);
+    });
+}
 
-    if (tourIcon) {
-        tourIcon.addEventListener('click', function(e) {
-            e.stopPropagation();
-            alert('Abriendo: ' + propiedadesJSON.propiedad.archivos.tour);
-        });
-    }
+if (tourIcon) {
+    tourIcon.addEventListener('click', function (e) {
+        e.stopPropagation();
+        alert('Abriendo: ' + propiedadesJSON.propiedad.archivos.tour);
+    });
+}
 
-    if (videoIcon) {
-        videoIcon.addEventListener('click', function(e) {
-            e.stopPropagation();
-            alert('Reproduciendo: ' + propiedadesJSON.propiedad.archivos.video);
-        });
-    }
+if (videoIcon) {
+    videoIcon.addEventListener('click', function (e) {
+        e.stopPropagation();
+        alert('Reproduciendo: ' + propiedadesJSON.propiedad.archivos.video);
+    });
+}
 
-    // Evento para el botón de contacto
-    if (contactButton) {
-        contactButton.addEventListener('click', function(e) {
-            e.stopPropagation();
-            alert('Redirigiendo al formulario de contacto...');
-        });
-    }
+// Evento para el botón de contacto
+if (contactButton) {
+    contactButton.addEventListener('click', function (e) {
+        e.stopPropagation();
+        alert('Redirigiendo al formulario de contacto...');
+    });
+}
 
-    // Cerrar modal
-    if (closeModal) {
-        closeModal.addEventListener('click', function() {
-            if (pdfModal) {
-                pdfModal.style.display = 'none';
-            }
+// Cerrar modal
+if (closeModal) {
+    closeModal.addEventListener('click', function () {
+        if (pdfModal) {
+            pdfModal.style.display = 'none';
+        }
+        if (pdfViewer) {
+            pdfViewer.src = '';
+        }
+    });
+}
+
+// Cerrar modal al hacer clic fuera del contenido
+if (pdfModal) {
+    pdfModal.addEventListener('click', function (e) {
+        if (e.target === pdfModal) {
+            pdfModal.style.display = 'none';
             if (pdfViewer) {
                 pdfViewer.src = '';
             }
-        });
-    }
+        }
+    });
+}
 
-    // Cerrar modal al hacer clic fuera del contenido
-    if (pdfModal) {
-        pdfModal.addEventListener('click', function(e) {
-            if (e.target === pdfModal) {
-                pdfModal.style.display = 'none';
-                if (pdfViewer) {
-                    pdfViewer.src = '';
-                }
-            }
-        });
-    }
-
-    // CSS FORZADO: Asegurar fondo blanco en todas las galerías
-    const cssInteligenteForzado = document.createElement('style');
-    cssInteligenteForzado.textContent = `
+// CSS FORZADO: Asegurar fondo blanco en todas las galerías
+const cssInteligenteForzado = document.createElement('style');
+cssInteligenteForzado.textContent = `
         .image-expansion-overlay {
             background: white !important;
             background-color: white !important;
@@ -3069,13 +3070,13 @@ const propiedadesJSON = {
     `;
 
 
-    // Cerrar con tecla Escape
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape' && document.body.classList.contains('map-view-active')) {
-            console.log('⎋ Tecla Escape presionada - Volviendo a propiedades');
-            backToProperties();
-        }
-    });
+// Cerrar con tecla Escape
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && document.body.classList.contains('map-view-active')) {
+        console.log('⎋ Tecla Escape presionada - Volviendo a propiedades');
+        backToProperties();
+    }
+});
 
 console.log('✅ Sistema de botón Volver para mapas cargado');
 document.head.appendChild(cssInteligenteForzado);
