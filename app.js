@@ -1098,7 +1098,7 @@ function createPropertyCard(property) {
                 <span style="font-size: 24px !important; font-weight: 700 !important; color: #232deb !important;">
                     ${property.moneda_precio || 'USD'} ${property.precio?.toLocaleString() || '0'}
                 </span>
-                ${property.expensas > 0 ? `<div style="font-size: 12px !important; color: #6c757d !important;">+ ${property.moneda_expensas || 'ARS'} ${property.expensas.toLocaleString()} expensas</div>` : ''}
+                ${property.expensas > 0 ? `<div style="font-size: 12px; color: #6c757d;">+ ${property.moneda_expensas || 'ARS'} ${property.expensas.toLocaleString()} expensas</div>` : ''}
             </div>
             
             <div style="display: flex !important; justify-content: space-between !important; margin-bottom: 15px !important; font-size: 14px !important; color: #495057 !important;">

@@ -1475,7 +1475,7 @@
                         <strong style="font-size: 18px;">Dante Propiedades</strong>
                     </div>
                     <div style="color: #bdc3c7;">
-                        <strong>Contacto:</strong> +54 11 6656 2078 | contacto@dantepropiedades.com
+                        <strong>Contacto:</strong> +54 11 6656 2078 | <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b4d7dbdac0d5d7c0dbf4d0d5dac0d1c4c6dbc4ddd1d0d5d0d1c79ad7dbd9">[email&#160;protected]</a>
                     </div>
                 </div>
                 
@@ -1724,7 +1724,7 @@
         }
     </style>
     
-    <script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
         console.log('🏠 Sistema Dante Propiedades - Versión Completa cargando...');
         console.log('✅ Todas las funcionalidades disponibles');
         console.log('🎠 Slider de múltiples fotos incluido');
@@ -1984,21 +1984,29 @@
             console.log('🎯 Sistema completamente funcional');
         });
         
-        // DEBUG: Verificar errores de sintaxis
+        // DEBUG: Verificar errores de sintaxis con información mejorada
         window.addEventListener('error', function(e) {
-            console.error('Error global detectado:', {
-                message: e.message,
-                filename: e.filename,
-                lineno: e.lineno,
-                colno: e.colno,
-                error: e.error
-            });
+            console.error('❌ ERROR GLOBAL DETECTADO:');
+            console.error('Mensaje:', e.message);
+            console.error('Archivo:', e.filename);
+            console.error('Línea:', e.lineno);
+            console.error('Columna:', e.colno);
+            console.error('Error completo:', e.error);
+            console.error('Stack trace:', e.error?.stack);
+            
+            // Mostrar notificación al usuario
+            if (typeof showNotification === 'function') {
+                showNotification(`Error detectado en ${e.filename}:${e.lineno}`, 'error');
+            }
         });
 
         window.addEventListener('unhandledrejection', function(e) {
             console.error('X Promesa rechazada:', e.reason);
         });
         </script>
+        <!-- Scripts de optimización del sistema 360° -->
+        <script src="../fix_360_system.js"></script>
+        <script src="../optimize_360_final.js"></script>
         <!-- JavaScript principal -->
         <script src="app.js"></script>
     </body>
