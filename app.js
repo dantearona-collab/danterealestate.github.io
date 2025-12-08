@@ -1080,22 +1080,22 @@ function createPropertyCard(property) {
             </span>
         </div>
         <div style="position: absolute; top: 10px; right: 10px;">
-            <span style="background: ${property.operacion === 'Venta' ? '#232deb' : '#ff0101'} !important; color: white !important; padding: 4px 8px !important; border-radius: 4px !important; font-size: 12px !important; font-weight: 600 !important;">
+            <span style="background: ${property.operacion === 'Venta' ? '#232deb' : '#ff0101'}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
                 ${property.tipo}
             </span>
         </div>
         
-        <div style="padding: 20px !important;">
-            <h3 style="margin: 0 0 10px 0 !important; color: #495057 !important; font-size: 18px !important; font-weight: 600 !important; line-height: 1.3 !important;">
+        <div style="padding: 20px;">
+            <h3 style="margin: 0 0 10px 0; color: #495057; font-size: 18px; font-weight: 600; line-height: 1.3;">
                 ${property.titulo}
             </h3>
             
-            <div style="color: #6c757d !important; font-size: 14px !important; margin-bottom: 10px !important;">
+            <div style="color: #6c757d; font-size: 14px; margin-bottom: 10px;">
                 📍 ${property.direccion} - ${property.barrio}
             </div>
             
-            <div style="margin-bottom: 15px !important;">
-                <span style="font-size: 24px !important; font-weight: 700 !important; color: #232deb !important;">
+            <div style="margin-bottom: 15px;">
+                <span style="font-size: 24px; font-weight: 700; color: #232deb;">
                     ${property.moneda_precio || 'USD'} ${property.precio?.toLocaleString() || '0'}
                 </span>
                 ${property.expensas > 0 ? `<div style="font-size: 12px; color: #6c757d;">+ ${property.moneda_expensas || 'ARS'} ${property.expensas.toLocaleString()} expensas</div>` : ''}
@@ -1143,14 +1143,14 @@ function createPropertyCard(property) {
                                 box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3) !important;
                             "
                             onmouseover="
-                                this.style.background='linear-gradient(135deg, #20c997 0%, #28a745 100%)' !important;
-                                this.style.transform='translateY(-2px)' !important;
-                                this.style.boxShadow='0 6px 20px rgba(40, 167, 69, 0.5)' !important
+                                this.style.background='linear-gradient(135deg, #20c997 0%, #28a745 100%)';
+                                this.style.transform='translateY(-2px)';
+                                this.style.boxShadow='0 6px 20px rgba(40, 167, 69, 0.5)'
                             "
                             onmouseout="
-                                this.style.background='linear-gradient(135deg, #28a745 0%, #20c997 100%)' !important;
-                                this.style.transform='translateY(0)' !important;
-                                this.style.boxShadow='0 4px 15px rgba(40, 167, 69, 0.3)' !important
+                                this.style.background='linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+                                this.style.transform='translateY(0)';
+                                this.style.boxShadow='0 4px 15px rgba(40, 167, 69, 0.3)'
                             ">
                         🎬 Recorrido Virtual 360°
                         <span style="
@@ -1173,16 +1173,16 @@ function createPropertyCard(property) {
                 </div>
                 <div style="text-align: center !important; margin-bottom: 10px !important;">
                     <button onclick="showPropertyMap('${property.id_temporal}', '${property.direccion_completa ? property.direccion_completa.replace(/'/g, "\\'") : `${property.direccion}, ${property.barrio}, Argentina`.replace(/'/g, "\\'")}', '${property.titulo.replace(/'/g, "\\'")}')"
-                            style="background: #232deb !important; color: white !important; border: none !important; padding: 10px 20px !important; border-radius: 6px !important; cursor: pointer !important; font-size: 14px !important; font-weight: 600 !important; transition: all 0.3s ease !important; display: inline-flex !important; align-items: center !important; gap: 8px !important;"
-                            onmouseover="this.style.background='#1a1db4' !important; this.style.transform='translateY(-2px)' !important" 
-                            onmouseout="this.style.background='#232deb' !important; this.style.transform='translateY(0)' !important">
+                            style="background: #232deb; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px;"
+                            onmouseover="this.style.background='#1a1db4'; this.style.transform='translateY(-2px)'" 
+                            onmouseout="this.style.background='#232deb'; this.style.transform='translateY(0)'">
                         🗺️ Ver en el Mapa
                     </button>
                 </div>
-                <div id="map-container-${property.id_temporal}" style="height: 0 !important; border-radius: 8px !important; overflow: hidden !important; box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important; transition: all 0.3s ease !important; opacity: 0 !important;">
-                    <div id="map-placeholder-${property.id_temporal}" style="height: 100% !important; display: flex !important; align-items: center !important; justify-content: center !important; background: #f8f9fa !important; color: #6c757d !important; font-size: 14px !important;">
-                        <div style="display: flex !important; align-items: center !important; justify-content: center !important;">
-                            <img src="llave.png" alt="Cargando" style="width: 20px !important; height: 20px !important; margin-right: 8px !important;">
+                <div id="map-container-${property.id_temporal}" style="height: 0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.3s ease; opacity: 0;">
+                    <div id="map-placeholder-${property.id_temporal}" style="height: 100%; display: flex; align-items: center; justify-content: center; background: #f8f9fa; color: #6c757d; font-size: 14px;">
+                        <div style="display: flex; align-items: center; justify-content: center;">
+                            <img src="llave.png" alt="Cargando" style="width: 20px; height: 20px; margin-right: 8px;">
                             <span>Cargando mapa...</span>
                         </div>
                     </div>
@@ -1190,12 +1190,12 @@ function createPropertyCard(property) {
             </div>
             
             <button onclick="showPropertyDetails('${property.id_temporal}')" 
-                    style="width: 100% !important; background: #232deb !important; color: white !important; 
-                           border: none !important; padding: 12px !important; border-radius: 6px !important; 
-                           font-size: 14px !important; font-weight: 600 !important; cursor: pointer !important; 
-                           transition: all 0.3s ease !important; margin-top: 15px !important;"
-                    onmouseover="this.style.background='#1a1db4' !important" 
-                    onmouseout="this.style.background='#232deb' !important">
+                    style="width: 100%; background: #232deb; color: white; 
+                           border: none; padding: 12px; border-radius: 6px; 
+                           font-size: 14px; font-weight: 600; cursor: pointer; 
+                           transition: all 0.3s ease; margin-top: 15px;"
+                    onmouseover="this.style.background='#1a1db4'" 
+                    onmouseout="this.style.background='#232deb'">
                 Ver Detalles
             </button>
         </div>
