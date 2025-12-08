@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dante Propiedades - Galería con Múltiples Imágenes</title>
-    <link rel="icon" href="/llave.png" type="image/png">
+    <link rel="icon" href="/logo.png" type="image/png">
     
     <style>
         /* RESET Y BASE */
@@ -121,11 +121,6 @@
         .btn-search:hover {
             background: #1a1db4;
             transform: translateY(-2px);
-        }
-        
-        .btn-reset {
-            background: #6c757d;
-            color: white;
         }
         
         .btn-reset:hover {
@@ -375,7 +370,7 @@
         }
         
         .expanded-controls button:hover {
-            background: rgba(35, 45, 235, 1);
+            background: rgba(35, 45, 235, 1) !important;
         }
         
         .gallery-expand-indicator {
@@ -493,6 +488,7 @@
             font-weight: 600;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
+        
         
         .property-nav-dot {
             width: 8px;
@@ -683,10 +679,9 @@
             display: inline-block;
             font-size: 1em;
         }
-        
-        /* ========================================
-           BOTÓN VOLVER DESDE MAPA
-           ======================================== */
+    /* ========================================
+   BOTÓN VOLVER DESDE MAPA
+   ======================================== */
 
         .map-back-button {
             position: fixed;
@@ -762,6 +757,17 @@
         .map-view-active {
             overflow: hidden;
         }
+
+
+
+
+
+
+
+
+
+
+
 
         /* ========================================
            MODAL DE IMÁGENES - GALERÍA COMPLETA
@@ -1042,21 +1048,21 @@
         }
         
         /* ========================================
-            ESTILOS PARA SLIDER CLICKEABLE
-            ======================================== */
-
-            /* Asegurar que los controles del slider no interfieran con el clic del modal */
-            .property-slider-btn {
-                z-index: 3 !important;
-            }
-
-            .property-nav-dots {
-                z-index: 3 !important;
-            }
-
-            .property-nav-dot {
-                z-index: 3 !important;
-            }
+           ESTILOS PARA SLIDER CLICKEABLE
+           ======================================== */
+        
+        /* Asegurar que los controles del slider no interfieran con el clic del modal */
+        .property-slider-btn {
+            z-index: 3 !important;
+        }
+        
+        .property-nav-dots {
+            z-index: 3 !important;
+        }
+        
+        .property-nav-dot {
+            z-index: 3 !important;
+        }
         
         /* ANIMACIONES */
         @keyframes fadeIn {
@@ -1192,213 +1198,162 @@
         .masonry-item:nth-child(4) { animation-delay: 0.4s; }
         .masonry-item:nth-child(5) { animation-delay: 0.5s; }
         .masonry-item:nth-child(6) { animation-delay: 0.6s; }
+        /* ... continuar según necesidad */
+            
+            
+        /* ========================================
+    ESTILOS PARA MODALES DE MULTIMEDIA (PDFs y VIDEOS)
+    ======================================== */
+
+    #pdf-modal,
+    #video-modal {
+        animation: fadeIn 0.3s ease !important;
+    }
+
+    #pdf-modal iframe,
+    #video-modal video {
+        border-radius: 0 0 8px 8px !important;
+    }
+
+    /* Botones de multimedia en las tarjetas */
+    .multimedia-btn {
+        transition: all 0.3s ease !important;
+    }
+
+    .multimedia-btn:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+    }
+
+    /* Responsive para modales de video */
+    @media (max-width: 768px) {
+        #video-modal > div {
+            width: 95% !important;
+            height: 60% !important;
+        }
         
-        /* ========================================
-        ESTILOS PARA MODALES DE MULTIMEDIA (PDFs y VIDEOS)
-        ======================================== */
-
-        #pdf-modal,
-        #video-modal {
-            animation: fadeIn 0.3s ease !important;
+        #pdf-modal > div {
+            width: 95% !important;
+            height: 80% !important;
         }
+    }
 
-        #pdf-modal iframe,
-        #video-modal video {
-            border-radius: 0 0 8px 8px !important;
+    @media (max-width: 480px) {
+        #video-modal > div {
+            width: 98% !important;
+            height: 50% !important;
         }
-
-        /* Botones de multimedia en las tarjetas */
-        .multimedia-btn {
-            transition: all 0.3s ease !important;
+        
+        #pdf-modal > div {
+            width: 98% !important;
+            height: 70% !important;
         }
-
-        .multimedia-btn:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+        
+        .multimedia-section {
+            font-size: 12px !important;
         }
-
-        /* Responsive para modales de video */
-        @media (max-width: 768px) {
-            #video-modal > div {
-                width: 95% !important;
-                height: 60% !important;
-            }
-            
-            #pdf-modal > div {
-                width: 95% !important;
-                height: 80% !important;
-            }
+        
+        .multimedia-section button {
+            padding: 4px 8px !important;
+            font-size: 11px !important;
         }
+    }
 
-        @media (max-width: 480px) {
-            #video-modal > div {
-                width: 98% !important;
-                height: 50% !important;
-            }
-            
-            #pdf-modal > div {
-                width: 98% !important;
-                height: 70% !important;
-            }
-            
-            .multimedia-section {
-                font-size: 12px !important;
-            }
-            
-            .multimedia-section button {
-                padding: 4px 8px !important;
-                font-size: 11px !important;
-            }
+    /* Efectos de hover para botones de multimedia */
+    .multimedia-section button:hover {
+        background: #e9ecef !important;
+        border-color: #232deb !important;
+        color: #232deb !important;
+    }
+
+    /* ========================================
+    ESTILOS PARA GALERÍA MASONRY
+    ======================================== */
+
+    .masonry-item {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    .masonry-item:hover {
+        z-index: 10 !important;
+    }
+
+    .masonry-small {
+        /* Tamaño pequeño - ya definido en JS */
+    }
+
+    .masonry-medium {
+        /* Tamaño mediano - ya definido en JS */
+    }
+
+    .masonry-large {
+        /* Tamaño grande - ya definido en JS */
+    }
+
+    /* Efectos de hover mejorados */
+    .masonry-item:hover img {
+        transform: scale(1.05);
+        transition: transform 0.4s ease !important;
+    }
+
+    /* Responsive para masonry */
+    @media (max-width: 768px) {
+        #masonry-gallery-container {
+            padding: 10px !important;
         }
-
-        /* Efectos de hover para botones de multimedia */
-        .multimedia-section button:hover {
-            background: #e9ecef !important;
-            border-color: #232deb !important;
-            color: #232deb !important;
-        }
-
-        /* ========================================
-        ESTILOS PARA VISOR 360
-        ======================================== */
-
-        /* Modal del visor 360 */
-        #modal-360 {
-            animation: fadeIn360 0.3s ease !important;
-        }
-
-        @keyframes fadeIn360 {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* Contenedor principal */
-        #visor360-container {
-            transition: all 0.3s ease !important;
-        }
-
-        /* Imagen 360 */
-        #imagen360-actual {
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            transform-style: preserve-3d !important;
-        }
-
-        /* Efecto 3D para rotación */
-        #imagen360-actual.rotating {
-            animation: rotate360 20s linear infinite !important;
-        }
-
-        @keyframes rotate360 {
-            from { transform: rotateY(0deg); }
-            to { transform: rotateY(360deg); }
-        }
-
-        /* Miniaturas */
-        #miniaturas360-container {
-            scrollbar-width: thin !important;
-            scrollbar-color: #232deb rgba(255, 255, 255, 0.1) !important;
-        }
-
-        #miniaturas360-container::-webkit-scrollbar {
-            height: 6px !important;
-        }
-
-        #miniaturas360-container::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1) !important;
-            border-radius: 3px !important;
-        }
-
-        #miniaturas360-container::-webkit-scrollbar-thumb {
-            background: #232deb !important;
-            border-radius: 3px !important;
-        }
-
-        #miniaturas360-container::-webkit-scrollbar-thumb:hover {
-            background: #1a1db4 !important;
-        }
-
-        /* Botones de navegación */
-        #visor360-container button {
-            backdrop-filter: blur(10px) !important;
-            -webkit-backdrop-filter: blur(10px) !important;
-        }
-
-        /* Instrucciones */
-        #modal-360 > div:last-child {
-            background: rgba(0, 0, 0, 0.3) !important;
+        
+        .masonry-item {
             border-radius: 8px !important;
-            padding: 15px !important;
-            backdrop-filter: blur(5px) !important;
         }
+    }
 
-        /* Responsive para móviles */
-        @media (max-width: 768px) {
-            #modal-360 > div:first-child {
-                padding: 10px 15px !important;
-            }
-            
-            #modal-360 > div:first-child div {
-                font-size: 14px !important;
-            }
-            
-            #visor360-container {
-                width: 95% !important;
-                height: 60% !important;
-            }
-            
-            #miniaturas360-container img {
-                width: 50px !important;
-                height: 35px !important;
-            }
-            
-            #visor360-container button {
-                width: 45px !important;
-                height: 45px !important;
-                font-size: 18px !important;
-            }
-            
-            #visor360-container > div:first-child {
-                font-size: 13px !important;
-                padding: 8px 16px !important;
-            }
-        }
+    /* Scrollbar personalizado para el contenedor masonry */
+    #masonry-gallery-container::-webkit-scrollbar {
+        width: 8px;
+    }
 
-        /* Para tablets */
-        @media (max-width: 1024px) and (min-width: 769px) {
-            #visor360-container {
-                width: 92% !important;
-                height: 65% !important;
-            }
-        }
+    #masonry-gallery-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
 
-        /* Efectos de hover mejorados para miniaturas */
-        #miniaturas360-container img:hover {
-            transform: scale(1.08) !important;
-            box-shadow: 0 4px 12px rgba(35, 45, 235, 0.4) !important;
-        }
+    #masonry-gallery-container::-webkit-scrollbar-thumb {
+        background: #232deb;
+        border-radius: 4px;
+    }
 
-        /* Animación de carga para imagen 360 */
-        #imagen360-actual.loading {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%) !important;
-            background-size: 200% 100% !important;
-            animation: loadingShimmer 1.5s infinite !important;
-        }
+    #masonry-gallery-container::-webkit-scrollbar-thumb:hover {
+        background: #1a1db4;
+    }
 
-        @keyframes loadingShimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
+    /* Animación de entrada para items masonry */
+    @keyframes masonryItemFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
         }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
 
-        /* Efecto de click en botones */
-        #visor360-container button:active {
-            transform: scale(0.95) !important;
-        }
+    .masonry-item {
+        animation: masonryItemFadeIn 0.5s ease-out;
+    }
 
-        /* Indicador de imagen activa */
-        #miniaturas360-container img.active {
-            border: 3px solid #28a745 !important;
-            box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.3) !important;
-        }
+    /* Efecto de carga progresiva */
+    .masonry-item:nth-child(1) { animation-delay: 0.1s; }
+    .masonry-item:nth-child(2) { animation-delay: 0.2s; }
+    .masonry-item:nth-child(3) { animation-delay: 0.3s; }
+    .masonry-item:nth-child(4) { animation-delay: 0.4s; }
+    .masonry-item:nth-child(5) { animation-delay: 0.5s; }
+    .masonry-item:nth-child(6) { animation-delay: 0.6s; }
+                
+    
+    
+    
+    
     </style>
 </head>
 <body>
@@ -1412,7 +1367,144 @@
                 <span class="phone">📞 +54 11 2536-8595</span>
             </div>
         </h1>
+        <!-- ELIMINADO: Texto "Sistema sin errores de consola + Slider de múltiples fotos" -->
     </div>
+    
+
+    <!-- === SECCIÓN PROPIEDAD INTERACTIVA === -->
+    <!-- <div class="property-interactive-container">
+        <div class="property-card" id="propertyCard">
+            <div class="property-header">
+                <h1 class="property-title">Monoambiente Microcentro</h1>
+                <div class="property-address">
+                    <span>📍</span> Avda. Corrientes 848 - Microcentro
+                </div>
+                <div class="property-price">ARS 400.000</div>
+                <div class="expenses">+ ARS 95.000 expensas</div>
+            </div>
+            
+            <div class="property-details">
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <div class="detail-value">1</div>
+                        <div class="detail-label">Ambiente</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-value">23 m²</div>
+                        <div class="detail-label">Superficie</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-value">4°</div>
+                        <div class="detail-label">Piso</div>
+                    </div>
+                </div>
+                
+                <div class="property-condition">
+                    <span>✓</span> Estado: Bueno
+                </div>
+            </div>
+            
+            <div class="media-section">
+                <div class="section-title">
+                    <span>📸</span> Multimedia Disponible
+                </div>
+                <div class="media-icons">
+                    <div class="media-icon" id="photosIcon">
+                        <div class="icon icon-camera">📷</div>
+                        <div class="icon-label">Fotos Profesionales</div>
+                    </div>
+                    <div class="media-icon" id="tourIcon">
+                        <div class="icon icon-tour">🔄</div>
+                        <div class="icon-label">Tour 360°</div>
+                    </div>
+                    <div class="media-icon" id="videoIcon">
+                        <div class="icon icon-video">🎥</div>
+                        <div class="icon-label">Video</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pdf-section">
+                <div class="section-title">
+                    <span>📄</span> Documentos PDF
+                </div>
+                <div class="pdf-item" id="planoPdf">
+                    <div class="pdf-icon">📐</div>
+                    <div class="pdf-info">
+                        <div class="pdf-title">Plano del Departamento</div>
+                        <div class="pdf-size">Tamaño: 1.2 MB</div>
+                    </div>
+                </div>
+                <div class="pdf-item" id="reglamentoPdf">
+                    <div class="pdf-icon">📋</div>
+                    <div class="pdf-info">
+                        <div class="pdf-title">Reglamento de Copropiedad</div>
+                        <div class="pdf-size">Tamaño: 850 KB</div>
+                    </div>
+                </div>
+                <div class="pdf-item" id="expensasPdf">
+                    <div class="pdf-icon">💰</div>
+                    <div class="pdf-info">
+                        <div class="pdf-title">Detalle de Expensas</div>
+                        <div class="pdf-size">Tamaño: 720 KB</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="property-details">
+                <button class="action-button" id="contactButton">Contactar para más información</button>
+            </div>
+        </div> -->
+        
+        <!-- <div class="json-display">
+            <div class="json-title">
+                <span>⚙️</span> Archivo propiedades.json (simulado)
+            </div>
+            <pre class="json-pre" id="jsonData"></pre>
+        </div> -->
+    </div>
+
+    <!-- Modal para PDFs -->
+    <!-- <div class="property-modal" id="pdfModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Documento PDF</h2>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            <iframe class="pdf-viewer" id="pdfViewer" frameborder="0"></iframe>
+        </div>
+    </div> --> 
+
+    <!-- <div class="pdf-section">
+        <div class="section-title">
+            <span>📄</span> Documentos PDF
+        </div>
+        
+        <div class="pdf-item" id="entornosPdf">
+            <div class="pdf-icon">🏞️</div>
+            <div class="pdf-info">
+                <div class="pdf-title">Estudio de Entornos</div>
+                <div class="pdf-size">Tamaño: 1.5 MB</div>
+            </div>
+        </div>
+        
+        <div class="pdf-item" id="datosParcelaPdf">
+            <div class="pdf-icon">📊</div>
+            <div class="pdf-info">
+                <div class="pdf-title">Datos de la Parcela</div>
+                <div class="pdf-size">Tamaño: 2.1 MB</div>
+            </div>
+        </div>
+        
+        
+        <div class="pdf-item" id="planoPdf">
+            <div class="pdf-icon">📐</div>
+            <div class="pdf-info">
+                <div class="pdf-title">Plano del Departamento</div>
+                <div class="pdf-size">Tamaño: 1.2 MB</div>
+            </div>
+        </div>
+    </div> -->
     
     <div class="container">
         <!-- Contador de resultados -->
@@ -1459,7 +1551,7 @@
                     <button id="search-btn-styled" class="btn-search" onclick="searchProperties()">
                         🔍 Buscar
                     </button>
-                    <button id="reset-btn-styled" class="btn-reset" onclick="resetFilters()">
+                    <button id="reset-btn-styled" class="btn-reset" onclick="resetFilters()" style="background: #6c757d;">
                         🏠 Inicio
                     </button>
                 </div>
@@ -1475,12 +1567,13 @@
                         <strong style="font-size: 18px;">Dante Propiedades</strong>
                     </div>
                     <div style="color: #bdc3c7;">
-                        <strong>Contacto:</strong> +54 11 6656 2078 | <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b4d7dbdac0d5d7c0dbf4d0d5dac0d1c4c6dbc4ddd1d0d5d0d1c79ad7dbd9">[email&#160;protected]</a>
+                        <strong>Contacto:</strong> +54 11 6656 2078 | <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3f565159507f5b5e514b5a4f4d504f565a5b5e5b5a4c115c5052115e4d">[email&#160;protected]</a>
                     </div>
                 </div>
                 
                 <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
                     <a href="formulario.html" style="color: #3498db; text-decoration: none; padding: 8px 15px; border: 1px solid #3498db; border-radius: 5px; transition: all 0.3s ease;">📋 Formulario de Contacto</a>
+                    <!-- <a href="#" onclick="mostrarTerminos(); return false;" style="color: #3498db; text-decoration: none; padding: 8px 15px; border: 1px solid #3498db; border-radius: 5px; transition: all 0.3s ease;">📜 Términos y Condiciones</a> -->
                 </div>
                 
                 <div style="border-top: 1px solid #34495e; padding-top: 15px; color: #95a5a6; font-size: 14px;">
@@ -1519,48 +1612,57 @@
         </svg>
     </a>
     
-    <!-- Botón Volver para Mapas -->
-    <div class="map-back-button" id="mapBackButton" style="display: none;">
-        <button class="back-to-properties-btn" onclick="backToProperties()">
-            <span>←</span> Volver a Propiedades
-        </button>
-    </div>
+    <!-- JavaScript del sistema -->
+    <!-- <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="app.js"></script> -->
     
-    <!-- MODAL PARA GALERÍA DE IMÁGENES -->
-    <div class="image-modal" id="imageModal">
-        <div class="modal-content">
-            <div class="modal-info" id="modalInfo"></div>
-            <img class="modal-image" id="modalImage" src="" alt="">
-            <button class="modal-nav modal-prev" onclick="previousImage()">‹</button>
-            <button class="modal-nav modal-next" onclick="nextImage()">›</button>
-            <button class="modal-close" onclick="closeImageModal()">×</button>
-            <div class="modal-counter" id="modalCounter"></div>
-        </div>
-    </div>
+    <script>
+        // console.log('🏠 Sistema Dante Propiedades - Versión Sin Errores + Slider cargando...');
+        // console.log('✅ Sin dependencias de Font Awesome');
+        // console.log('🎠 Slider de múltiples fotos incluido');
+        // console.log('🔧 Sistema de emojis para iconos');
+        // console.log('📄 Sistema de PDFs integrado');
+        // console.log('🎥 Sistema de videos integrado');
+        // console.log('🏗️ Galería Masonry activada');
     
-    <!-- Modal de Galería de Imágenes -->
-    <div id="modal-imagenes" class="modal-imagenes">
-        <div class="modal-contenido">
-            <div class="modal-header">
-                <div class="modal-logo-title">
-                    <div class="modal-logo">
-                        <img src="llave.png" alt="Dante Propiedades">
-                    </div>
-                    <h3 id="imagen-titulo">Galería de Imágenes</h3>
-                </div>
-                <button class="btn-cerrar" onclick="cerrarModalImagenes()">&times;</button>
-            </div>
-            <div id="imagen-principal" class="imagen-principal"></div>
-            <button class="modal-nav nav-anterior" onclick="imagenAnterior()">&#10094;</button>
-            <button class="modal-nav nav-siguiente" onclick="imagenSiguiente()">&#10095;</button>
-            <div class="modal-info">
-                <span id="imagen-contador" class="imagen-contador">1 / 1</span>
-                <span id="imagen-titulo-display" class="imagen-titulo"></span>
-            </div>
-        </div>
-    </div>
+
+
+        // Función para buscar propiedades
+        function searchProperties() {
+            const operacion = document.getElementById('operacion-select-styled').value;
+            const barrio = document.getElementById('barrio-select-styled').value;
+            const tipo = document.getElementById('tipo-select-styled').value;
+            
+            console.log('🔍 Buscando propiedades con filtros:', { operacion, barrio, tipo });
+            
+            // Llamar a la función de búsqueda del app.js si existe
+            if (typeof window.loadProperties === 'function') {
+                window.loadProperties();
+            }
+        }
+        
+        // Función para resetear filtros
+        function resetFilters() {
+            document.getElementById('operacion-select-styled').value = '';
+            document.getElementById('barrio-select-styled').value = '';
+            document.getElementById('tipo-select-styled').value = '';
+            
+            console.log('🏠 Filtros reseteados - Mostrando todas las propiedades');
+            
+            // Llamar a la función de mostrar todas las propiedades
+            if (typeof window.loadProperties === 'function') {
+                window.loadProperties();
+            }
+        }
+        
+        // Verificación de carga de recursos
+        window.addEventListener('load', function() {
+            console.log('✅ Todos los recursos cargados correctamente');
+            console.log('🎯 Sistema completamente funcional');
+        });
+    </script>
     
-    <!-- Modal de Términos y Condiciones (oculto por defecto) -->
+    <!-- Modal de Términos y Condiciones - DESHABILITADO -->
+    <!--
     <div id="modal-terminos" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -1604,136 +1706,319 @@
             </div>
         </div>
     </div>
+    -->
+    
+    <!-- Modal de Galería de Imágenes -->
+    <div id="modal-imagenes" class="modal-imagenes">
+        <div class="modal-contenido">
+            <div class="modal-header">
+                <div class="modal-logo-title">
+                    <div class="modal-logo">
+                        <img src="llave.png" alt="Dante Propiedades">
+                    </div>
+                    <h3 id="imagen-titulo">Galería de Imágenes</h3>
+                </div>
+                <button class="btn-cerrar" onclick="cerrarModalImagenes()">&times;</button>
+            </div>
+            <div id="imagen-principal" class="imagen-principal"></div>
+            <button class="modal-nav nav-anterior" onclick="imagenAnterior()">&#10094;</button>
+            <button class="modal-nav nav-siguiente" onclick="imagenSiguiente()">&#10095;</button>
+            <div class="modal-info">
+                <span id="imagen-contador" class="imagen-contador">1 / 1</span>
+                <span id="imagen-titulo-display" class="imagen-titulo"></span>
+            </div>
+        </div>
+    </div>
     
     <style>
-        .modal {
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-            backdrop-filter: blur(5px);
-        }
-        
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 0;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 80vh;
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            animation: modalAppear 0.3s ease;
-        }
-        
-        @keyframes modalAppear {
-            from { opacity: 0; transform: scale(0.7); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        
-        .modal-header {
-            background: #232deb;
-            color: white;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(35, 45, 235, 0.3);
-        }
-        
-        .modal-header h2 {
-            margin: 0;
-            font-size: 1.8em;
-        }
-        
-        .close {
-            color: white;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            line-height: 1;
-        }
-        
-        .close:hover {
-            opacity: 0.8;
-        }
-        
-        .modal-body {
-            padding: 30px;
-            max-height: 60vh;
-            overflow-y: auto;
-            line-height: 1.6;
-        }
-        
-        .last-updated {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            text-align: center;
-            border-left: 4px solid #667eea;
-        }
-        
-        .modal-body h3 {
-            color: #333;
-            margin-top: 25px;
-            margin-bottom: 10px;
-            border-bottom: 2px solid #e9ecef;
-            padding-bottom: 5px;
-        }
-        
-        .modal-body p {
-            margin-bottom: 15px;
-            color: #555;
-        }
-        
-        .modal-body ul {
-            margin-bottom: 15px;
-            padding-left: 20px;
-        }
-        
-        .modal-body li {
-            margin-bottom: 5px;
-            color: #555;
-        }
-        
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: bold;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
+    .modal {
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.4);
+        backdrop-filter: blur(5px);
+    }
+    
+    .modal-content {
+        background-color: white;
+        margin: 5% auto;
+        padding: 0;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 800px;
+        max-height: 80vh;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        animation: modalAppear 0.3s ease;
+    }
+    
+    @keyframes modalAppear {
+        from { opacity: 0; transform: scale(0.7); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    
+    .modal-header {
+        background: #232deb;
+        color: white;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(35, 45, 235, 0.3);
+    }
+    
+    .modal-header h2 {
+        margin: 0;
+        font-size: 1.8em;
+    }
+    
+    .close {
+        color: white;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        line-height: 1;
+    }
+    
+    .close:hover {
+        opacity: 0.8;
+    }
+    
+    .modal-body {
+        padding: 30px;
+        max-height: 60vh;
+        overflow-y: auto;
+        line-height: 1.6;
+    }
+    
+    .last-updated {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        text-align: center;
+        border-left: 4px solid #667eea;
+    }
+    
+    .modal-body h3 {
+        color: #333;
+        margin-top: 25px;
+        margin-bottom: 10px;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 5px;
+    }
+    
+    .modal-body p {
+        margin-bottom: 15px;
+        color: #555;
+    }
+    
+    .modal-body ul {
+        margin-bottom: 15px;
+        padding-left: 20px;
+    }
+    
+    .modal-body li {
+        margin-bottom: 5px;
+        color: #555;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: bold;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
     </style>
     
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
     <script>
-        console.log('🏠 Sistema Dante Propiedades - Versión Completa cargando...');
-        console.log('✅ Todas las funcionalidades disponibles');
+    function mostrarTerminos() {
+        document.getElementById('modal-terminos').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function cerrarModal() {
+        document.getElementById('modal-terminos').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+    
+    // Cerrar modal al hacer clic fuera de él
+    window.onclick = function(event) {
+        const modal = document.getElementById('modal-terminos');
+        if (event.target == modal) {
+            cerrarModal();
+        }
+    }
+    
+    // Cerrar modal con tecla Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            cerrarModal();
+        }
+    });
+    </script>
+    
+    <script>
+    // Función para WhatsApp flotante
+    function setupWhatsAppFloat() {
+        const whatsappBtn = document.querySelector('.whatsapp-float');
+        if (whatsappBtn) {
+            // Agregar animación especial en primer clic
+            whatsappBtn.addEventListener('click', function() {
+                // Efecto visual de confirmación
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+                
+                // Log para seguimiento
+                console.log('💬 WhatsApp: Redirigiendo a chat...');
+                
+                // Mensaje de confirmación
+                setTimeout(() => {
+                    const message = '💬 Abriendo WhatsApp para chatear sobre propiedades...';
+                    console.log(message);
+                    
+                    // Mostrar notificación visual (si el navegador lo permite)
+                    if ('Notification' in window && Notification.permission === 'granted') {
+                        new Notification('WhatsApp', {
+                            body: 'Redirigiendo al chat...',
+                            icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2325d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.071z"/></svg>'
+                        });
+                    }
+                }, 100);
+            });
+        }
+    }
+    
+    // Inicializar funciones cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', function() {
+        setupWhatsAppFloat();
+        console.log('💬 Botón WhatsApp flotante configurado correctamente');
+    });
+    
+    // FUNCIONES TÉRMINOS Y CONDICIONES - DESHABILITADAS
+    /*
+    function mostrarTerminos() {
+        document.getElementById('modal-terminos').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function cerrarModal() {
+        document.getElementById('modal-terminos').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+    
+    // Cerrar modal al hacer clic fuera de él
+    window.onclick = function(event) {
+        const modal = document.getElementById('modal-terminos');
+        if (event.target == modal) {
+            cerrarModal();
+        }
+    }
+    
+    // Cerrar modal con tecla Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            cerrarModal();
+        }
+    });
+    */
+
+    <!-- Botón Volver para Mapas -->
+    <div class="map-back-button" id="mapBackButton" style="display: none;">
+        <button class="back-to-properties-btn" onclick="backToProperties()">
+            <span>←</span> Volver a Propiedades
+        </button>
+    </div>
+
+
+
+    </script>
+    
+    <!-- MODAL PARA GALERÍA DE IMÁGENES -->
+    <div class="image-modal" id="imageModal">
+        <div class="modal-content">
+            <div class="modal-info" id="modalInfo"></div>
+            <img class="modal-image" id="modalImage" src="" alt="">
+            <button class="modal-nav modal-prev" onclick="previousImage()">‹</button>
+            <button class="modal-nav modal-next" onclick="nextImage()">›</button>
+            <button class="modal-close" onclick="closeImageModal()">×</button>
+            <div class="modal-counter" id="modalCounter"></div>
+        </div>
+    </div>
+    
+
+<script>
+// Inicializar sistema de multimedia cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎬 Sistema de multimedia inicializado');
+    console.log('📄 Soporte para PDFs activado');
+    console.log('🎥 Soporte para videos activado');
+});
+
+// Función global para cerrar modales multimedia
+function closeMultimediaModal() {
+    const modals = document.querySelectorAll('#pdf-modal, #video-modal');
+    modals.forEach(modal => {
+        // Detener videos antes de remover
+        const videos = modal.querySelectorAll('video');
+        videos.forEach(video => {
+            video.pause();
+            video.currentTime = 0;
+        });
+        modal.remove();
+    });
+    document.body.style.overflow = 'auto';
+}
+
+// Cerrar modales multimedia con tecla Escape
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeMultimediaModal();
+    }
+});
+
+// Cerrar modales multimedia al hacer clic fuera
+document.addEventListener('click', function(event) {
+    const pdfModal = document.getElementById('pdf-modal');
+    const videoModal = document.getElementById('video-modal');
+    
+    if (pdfModal && event.target === pdfModal) {
+        closeMultimediaModal();
+    }
+    if (videoModal && event.target === videoModal) {
+        closeMultimediaModal();
+    }
+});
+</script>
+
+    <!-- JavaScript del sistema -->
+    <script src="app.js"></script>
+    
+    <script>
+        console.log('🏠 Sistema Dante Propiedades - Versión Sin Errores + Slider cargando...');
+        console.log('✅ Sin dependencias de Font Awesome');
         console.log('🎠 Slider de múltiples fotos incluido');
         console.log('🔧 Sistema de emojis para iconos');
-        console.log('📄 Sistema de PDFs integrado');
-        console.log('🎥 Sistema de videos integrado');
-        console.log('🏗️ Galería Masonry activada');
-        console.log('🔄 Visor 360° configurado');
         
         // Función para buscar propiedades
         function searchProperties() {
@@ -1763,345 +2048,12 @@
             }
         }
         
-        // Función para volver a propiedades desde mapa
-        function backToProperties() {
-            console.log('↩️ Volviendo a vista de propiedades');
-            const mapBackButton = document.getElementById('mapBackButton');
-            if (mapBackButton) {
-                mapBackButton.style.display = 'none';
-            }
-            document.body.classList.remove('map-view-active');
-            
-            // Si existe una función específica para volver, llamarla
-            if (typeof window.showPropertiesView === 'function') {
-                window.showPropertiesView();
-            }
-        }
-        
-        // Funciones para modal de galería de imágenes
-        let modalCurrentImageIndex = 0;
-        let modalCurrentImages = [];
-        
-        function openImageModal(images, index = 0) {
-            modalCurrentImages = images;
-            modalCurrentImageIndex = index;
-            const modal = document.getElementById('imageModal');
-            const modalImage = document.getElementById('modalImage');
-            const modalCounter = document.getElementById('modalCounter');
-            const modalInfo = document.getElementById('modalInfo');
-            
-            if (images.length > 0 && index < images.length) {
-                modalImage.src = images[index];
-                modalCounter.textContent = `${index + 1} / ${images.length}`;
-                modalInfo.textContent = `Imagen ${index + 1} de ${images.length}`;
-                modal.style.display = 'block';
-                document.body.style.overflow = 'hidden';
-            }
-        }
-        
-        function closeImageModal() {
-            const modal = document.getElementById('imageModal');
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-        
-        function previousImage() {
-            if (modalCurrentImages.length > 0) {
-                modalCurrentImageIndex = (modalCurrentImageIndex - 1 + modalCurrentImages.length) % modalCurrentImages.length;
-                const modalImage = document.getElementById('modalImage');
-                const modalCounter = document.getElementById('modalCounter');
-                const modalInfo = document.getElementById('modalInfo');
-                
-                modalImage.src = modalCurrentImages[modalCurrentImageIndex];
-                modalCounter.textContent = `${modalCurrentImageIndex + 1} / ${modalCurrentImages.length}`;
-                modalInfo.textContent = `Imagen ${modalCurrentImageIndex + 1} de ${modalCurrentImages.length}`;
-            }
-        }
-        
-        function nextImage() {
-            if (modalCurrentImages.length > 0) {
-                modalCurrentImageIndex = (modalCurrentImageIndex + 1) % modalCurrentImages.length;
-                const modalImage = document.getElementById('modalImage');
-                const modalCounter = document.getElementById('modalCounter');
-                const modalInfo = document.getElementById('modalInfo');
-                
-                modalImage.src = modalCurrentImages[modalCurrentImageIndex];
-                modalCounter.textContent = `${modalCurrentImageIndex + 1} / ${modalCurrentImages.length}`;
-                modalInfo.textContent = `Imagen ${modalCurrentImageIndex + 1} de ${modalCurrentImages.length}`;
-            }
-        }
-        
-        // Funciones para modal de imágenes alternativo
-        let imagenesActuales = [];
-        let indiceImagenActual = 0;
-        
-        function abrirModalImagenes(imagenes, indice = 0) {
-            imagenesActuales = imagenes;
-            indiceImagenActual = indice;
-            const modal = document.getElementById('modal-imagenes');
-            const imagenPrincipal = document.getElementById('imagen-principal');
-            const contador = document.getElementById('imagen-contador');
-            const tituloDisplay = document.getElementById('imagen-titulo-display');
-            
-            if (imagenes.length > 0 && indice < imagenes.length) {
-                imagenPrincipal.style.backgroundImage = `url('${imagenes[indice]}')`;
-                contador.textContent = `${indice + 1} / ${imagenes.length}`;
-                tituloDisplay.textContent = `Imagen ${indice + 1} de ${imagenes.length}`;
-                modal.style.display = 'block';
-                document.body.style.overflow = 'hidden';
-            }
-        }
-        
-        function cerrarModalImagenes() {
-            const modal = document.getElementById('modal-imagenes');
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-        
-        function imagenAnterior() {
-            if (imagenesActuales.length > 0) {
-                indiceImagenActual = (indiceImagenActual - 1 + imagenesActuales.length) % imagenesActuales.length;
-                const imagenPrincipal = document.getElementById('imagen-principal');
-                const contador = document.getElementById('imagen-contador');
-                const tituloDisplay = document.getElementById('imagen-titulo-display');
-                
-                imagenPrincipal.style.backgroundImage = `url('${imagenesActuales[indiceImagenActual]}')`;
-                contador.textContent = `${indiceImagenActual + 1} / ${imagenesActuales.length}`;
-                tituloDisplay.textContent = `Imagen ${indiceImagenActual + 1} de ${imagenesActuales.length}`;
-            }
-        }
-        
-        function imagenSiguiente() {
-            if (imagenesActuales.length > 0) {
-                indiceImagenActual = (indiceImagenActual + 1) % imagenesActuales.length;
-                const imagenPrincipal = document.getElementById('imagen-principal');
-                const contador = document.getElementById('imagen-contador');
-                const tituloDisplay = document.getElementById('imagen-titulo-display');
-                
-                imagenPrincipal.style.backgroundImage = `url('${imagenesActuales[indiceImagenActual]}')`;
-                contador.textContent = `${indiceImagenActual + 1} / ${imagenesActuales.length}`;
-                tituloDisplay.textContent = `Imagen ${indiceImagenActual + 1} de ${imagenesActuales.length}`;
-            }
-        }
-        
-        // Funciones para términos y condiciones
-        function mostrarTerminos() {
-            document.getElementById('modal-terminos').style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        }
-        
-        function cerrarModal() {
-            document.getElementById('modal-terminos').style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-        
-        // Cerrar modal al hacer clic fuera de él
-        window.onclick = function(event) {
-            const modal = document.getElementById('modal-terminos');
-            if (event.target == modal) {
-                cerrarModal();
-            }
-            
-            const modalImagenes = document.getElementById('modal-imagenes');
-            if (event.target == modalImagenes) {
-                cerrarModalImagenes();
-            }
-            
-            const imageModal = document.getElementById('imageModal');
-            if (event.target == imageModal) {
-                closeImageModal();
-            }
-        };
-        
-        // Cerrar modal con tecla Escape
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                cerrarModal();
-                cerrarModalImagenes();
-                closeImageModal();
-            }
-        });
-        
-        // Función para WhatsApp flotante
-        function setupWhatsAppFloat() {
-            const whatsappBtn = document.querySelector('.whatsapp-float');
-            if (whatsappBtn) {
-                whatsappBtn.addEventListener('click', function() {
-                    this.style.transform = 'scale(0.95)';
-                    setTimeout(() => {
-                        this.style.transform = '';
-                    }, 150);
-                    
-                    console.log('💬 WhatsApp: Redirigiendo a chat...');
-                });
-            }
-        }
-        
-        // Función global para cerrar modales multimedia
-        function closeMultimediaModal() {
-            const modals = document.querySelectorAll('#pdf-modal, #video-modal');
-            modals.forEach(modal => {
-                const videos = modal.querySelectorAll('video');
-                videos.forEach(video => {
-                    video.pause();
-                    video.currentTime = 0;
-                });
-                modal.remove();
-            });
-            document.body.style.overflow = 'auto';
-        }
-        
-        // Inicializar cuando el DOM esté listo
-        document.addEventListener('DOMContentLoaded', function() {
-            setupWhatsAppFloat();
-            console.log('💬 Botón WhatsApp flotante configurado');
-            console.log('🎬 Sistema de multimedia inicializado');
-            console.log('📄 Soporte para PDFs activado');
-            console.log('🎥 Soporte para videos activado');
-            
-            // Configurar eventos para cerrar modales multimedia
-            document.addEventListener('keydown', function(event) {
-                if (event.key === 'Escape') {
-                    closeMultimediaModal();
-                }
-            });
-            
-            document.addEventListener('click', function(event) {
-                const pdfModal = document.getElementById('pdf-modal');
-                const videoModal = document.getElementById('video-modal');
-                
-                if (pdfModal && event.target === pdfModal) {
-                    closeMultimediaModal();
-                }
-                if (videoModal && event.target === videoModal) {
-                    closeMultimediaModal();
-                }
-            });
-        });
-
         // Verificación de carga de recursos
         window.addEventListener('load', function() {
             console.log('✅ Todos los recursos cargados correctamente');
             console.log('🎯 Sistema completamente funcional');
         });
-
-  
-
-        window.addEventListener('unhandledrejection', function(e) {
-            console.error('X Promesa rechazada:', e.reason);
-        });
     </script>
-    
-  
-   
-    <!-- Scripts de optimización del sistema 360° -->
-    <script src="fix_360_system.js"></script>
-    <script src="optimize_360_final.js"></script>
-    
-    
-    <script>
-// Corregir app.js antes de cargarlo
-(function() {
-    // Interceptar la carga de app.js
-    const originalCreateElement = document.createElement;
-    
-    document.createElement = function(tagName) {
-        const element = originalCreateElement.call(document, tagName);
-        
-        if (tagName.toLowerCase() === 'script') {
-            const originalSetAttribute = element.setAttribute;
-            
-            // Interceptar setAttribute para corregir onclick
-            element.setAttribute = function(name, value) {
-                if (name === 'src' && value.includes('app.js')) {
-                    // Crear script corregido
-                    setTimeout(() => {
-                        const fixedScript = document.createElement('script');
-                        fixedScript.src = value.replace('app.js', 'app_fixed.js');
-                        document.head.appendChild(fixedScript);
-                    }, 100);
-                    return;
-                }
-                originalSetAttribute.call(this, name, value);
-            };
-        }
-        
-        return element;
-    };
-})();
-</script>
-    
-    
-    
-    <!-- JavaScript principal -->
-    <script src="app.js?v=20250115"></script>
-    
-    <!-- Parcha temporal para onclick (OPCIONAL - comenta si no existe) -->
-    <!-- <script src="fix-app-onclick.js"></script> -->
-    
-    <script>
-    // ============================================
-    // CORRECCIÓN FINAL PARA ERRORES
-    // ============================================
-    (function() {
-        'use strict';
-        
-        console.log('🔧 Aplicando corrección final...');
-        
-        // 1. Prevenir errores de onclick en tiempo real
-        window.addEventListener('error', function(e) {
-            if (e.message.includes('onclick') || 
-                e.message.includes('Unexpected identifier') || 
-                e.message.includes('Unexpected token')) {
-                
-                console.warn('⚠️ Error prevenido:', e.message.substring(0, 100));
-                
-                // Corregir onclick defectuosos automáticamente
-                setTimeout(function() {
-                    document.querySelectorAll('[onclick]').forEach(el => {
-                        const onclick = el.getAttribute('onclick');
-                        if (onclick) {
-                            // Eliminar espacios inválidos
-                            const limpio = onclick.replace(/\s*=\s*/g, '=');
-                            el.setAttribute('onclick', limpio);
-                        }
-                    });
-                }, 50);
-                
-                return true; // Prevenir que el error se propague
-            }
-            return false;
-        }, true); // Usar capture phase
-        
-        // 2. Corregir onclick existentes después de cargar
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(function() {
-                const elementos = document.querySelectorAll('button, [onclick*="abrirVisor360"]');
-                
-                elementos.forEach(elemento => {
-                    const html = elemento.outerHTML;
-                    if (html.includes('onclick =')) {
-                        const corregido = html.replace(/onclick\s*=\s*"/g, 'onclick="');
-                        elemento.outerHTML = corregido;
-                        console.log('🔧 onclick corregido en:', elemento.tagName);
-                    }
-                });
-                
-                // Verificar app.js línea 1161 (información)
-                console.log('ℹ️ Para corrección permanente, edita app.js línea 1161:');
-                console.log('   Cambia: onclick =');
-                console.log('   Por:    onclick=');
-            }, 1000);
-        });
-        
-        // 3. Manejar promesas rechazadas silenciosamente
-        window.addEventListener('unhandledrejection', function(e) {
-            console.warn('⚠️ Promesa rechazada:', e.reason?.message || e.reason);
-        });
-        
-        console.log('✅ Corrección final aplicada - sistema estabilizado');
-    })();
-    // ============================================
-    </script>
+
 </body>
 </html>
