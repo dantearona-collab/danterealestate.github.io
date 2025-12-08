@@ -1986,7 +1986,7 @@
         
         // DEBUG: Verificar errores de sintaxis
         window.addEventListener('error', function(e) {
-            console.error('❌ Error global detectado:', {
+            console.error('Error global detectado:', {
                 message: e.message,
                 filename: e.filename,
                 lineno: e.lineno,
@@ -1994,13 +1994,12 @@
                 error: e.error
             });
         });
-        
+
         window.addEventListener('unhandledrejection', function(e) {
-            console.error('❌ Promesa rechazada:', e.reason);
+            console.error('X Promesa rechazada:', e.reason);
         });
-    </script>
-    
-    <!-- JavaScript principal -->
-    <script src="app.js"></script>
-</body>
+        </script>
+        <!-- JavaScript principal -->
+        <script src="app.js"></script>
+    </body>
 </html>
