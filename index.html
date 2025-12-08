@@ -1976,14 +1976,14 @@
                     closeMultimediaModal();
                 }
             });
-        });
-        
-                // Verificación de carga de recursos
+        });  // <-- ¡AÑADÍ ESTA LLAVE! (cierra el DOMContentLoaded)
+
+        // Verificación de carga de recursos
         window.addEventListener('load', function() {
             console.log('✅ Todos los recursos cargados correctamente');
             console.log('🎯 Sistema completamente funcional');
         });
-        
+
         // DEBUG: Verificar errores de sintaxis con información mejorada
         window.addEventListener('error', function(e) {
             console.error('❌ ERROR GLOBAL DETECTADO:');
@@ -2003,6 +2003,7 @@
         window.addEventListener('unhandledrejection', function(e) {
             console.error('X Promesa rechazada:', e.reason);
         });
+                
         </script>
         <!-- Scripts de optimización del sistema 360° -->
         <script src="fix_360_system.js"></script>
