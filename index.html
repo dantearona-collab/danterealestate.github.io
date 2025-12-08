@@ -22,18 +22,18 @@
             line-height: 1.6;
         }
         
-        /* HEADER REDUCIDO 35% */
+        /* HEADER */
         .header {
             background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
             color: white;
-            padding: 26px 20px; /* Reducido de 40px a 26px (35% menos) */
+            padding: 26px 20px;
             text-align: center;
             box-shadow: 0 4px 20px rgba(35, 45, 235, 0.3);
         }
         
         .header h1 {
-            font-size: 2.2em; /* Reducido ligeramente para mantener proporción */
-            margin-bottom: 8px; /* Reducido de 10px */
+            font-size: 2.2em;
+            margin-bottom: 8px;
             font-weight: 700;
             display: flex;
             align-items: center;
@@ -51,14 +51,14 @@
         .header .phone {
             font-size: 0.4em;
             background: rgba(255, 255, 255, 0.2);
-            padding: 6px 12px; /* Reducido ligeramente */
+            padding: 6px 12px;
             border-radius: 20px;
             font-weight: 500;
         }
         
         .header .logo-key {
-            width: 45px; /* Reducido de 50px */
-            height: 45px; /* Reducido de 50px */
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.2);
             display: flex;
@@ -71,33 +71,6 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
-        }
-        
-        @media (max-width: 768px) {
-            .header {
-                padding: 20px 15px; /* Reducido también en móvil */
-            }
-            
-            .header h1 {
-                font-size: 1.6em; /* Ajustado para móvil */
-            }
-            
-            .header .phone {
-                font-size: 0.35em;
-                padding: 5px 10px;
-            }
-            
-            .whatsapp-float {
-                width: 55px;
-                height: 55px;
-                bottom: 15px;
-                right: 15px;
-            }
-            
-            .whatsapp-float svg {
-                width: 24px;
-                height: 24px;
-            }
         }
         
         /* CONTENEDOR PRINCIPAL */
@@ -199,7 +172,7 @@
             color: #232deb;
         }
         
-        /* BOTÓN 360° MEJORADO */
+        /* BOTÓN 360° */
         .btn-360 {
             width: 100%;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -215,8 +188,6 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            position: relative;
-            overflow: hidden;
         }
         
         .btn-360:hover {
@@ -226,21 +197,6 @@
         
         .btn-360:active {
             transform: translateY(0);
-        }
-        
-        .btn-360::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-        
-        .btn-360:hover::before {
-            left: 100%;
         }
         
         .btn-360 .icon {
@@ -276,7 +232,7 @@
             fill: white;
         }
         
-        /* MODAL 360° MEJORADO */
+        /* MODAL 360° */
         .modal-360 {
             display: none;
             position: fixed;
@@ -432,69 +388,16 @@
                 gap: 20px;
             }
             
-            .property-details {
-                gap: 15px;
-            }
-            
             .modal-content-360 {
                 width: 98%;
                 margin: 1% auto;
                 max-height: 95vh;
             }
             
-            .modal-header-360 {
-                padding: 15px 20px;
-            }
-            
-            .image-gallery {
-                padding: 20px;
-            }
-            
             .main-image {
                 height: 300px;
             }
-            
-            .image-thumbnails {
-                gap: 8px;
-            }
-            
-            .thumbnail {
-                width: 70px;
-                height: 50px;
-            }
         }
-        
-        @media (max-width: 480px) {
-            .header h1 {
-                font-size: 1.4em;
-            }
-            
-            .properties-section h2 {
-                font-size: 2em;
-            }
-            
-            .property-title {
-                font-size: 1.2em;
-            }
-            
-            .property-price {
-                font-size: 1.5em;
-            }
-        }
-        
-        /* ANIMACIONES */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .property-card {
-            animation: fadeIn 0.6s ease-out;
-        }
-        
-        .property-card:nth-child(2) { animation-delay: 0.1s; }
-        .property-card:nth-child(3) { animation-delay: 0.2s; }
-        .property-card:nth-child(4) { animation-delay: 0.3s; }
         
         /* LOADING */
         .loading {
@@ -578,15 +481,11 @@
         </svg>
     </a>
 
-    <script===============
-        // 🔧 SISTEMA 360° LIMPIO Y>
-        // ================================= FUNCIONAL
-        // ================================================
-        
+    <script>
         console.log('🏠 === SISTEMA DANTEPROPIEDADES 360° CARGADO ===');
         console.log('✅ Sin bucles infinitos - Sistema limpio y funcional');
-        
-        // Datos de propiedades (ejemplo)
+
+        // Datos de propiedades
         const propiedadesData = [
             {
                 id: 1,
@@ -651,24 +550,38 @@
                 ]
             }
         ];
-        
+
         // Variables para el modal
         let propiedadActual = null;
         let imagenActual = 0;
-        
+
         // Función para crear tarjetas de propiedades
         function crearTarjetasPropiedades() {
+            console.log('🏗️ Creando tarjetas de propiedades...');
+            
             const grid = document.getElementById('propertiesGrid');
             const loading = document.getElementById('loading');
             
+            if (!grid) {
+                console.error('❌ No se encontró el elemento #propertiesGrid');
+                return;
+            }
+            
             // Mostrar loading
-            loading.style.display = 'block';
+            if (loading) {
+                loading.style.display = 'block';
+            }
             grid.style.display = 'none';
             
             // Simular carga
             setTimeout(() => {
-                loading.style.display = 'none';
+                if (loading) {
+                    loading.style.display = 'none';
+                }
                 grid.style.display = 'grid';
+                
+                // Limpiar grid existente
+                grid.innerHTML = '';
                 
                 propiedadesData.forEach((propiedad, index) => {
                     const tarjeta = document.createElement('div');
@@ -718,16 +631,26 @@
                 console.log(`✅ ${propiedadesData.length} propiedades cargadas exitosamente`);
             }, 800);
         }
-        
+
         // Función para abrir modal 360°
         function abrirModal360(indice) {
             console.log(`🎬 Abriendo galería 360° para: ${propiedadesData[indice].titulo}`);
+            
+            if (indice < 0 || indice >= propiedadesData.length) {
+                console.error('❌ Índice de propiedad inválido:', indice);
+                return;
+            }
             
             propiedadActual = propiedadesData[indice];
             imagenActual = 0;
             
             // Mostrar modal
             const modal = document.getElementById('modal360');
+            if (!modal) {
+                console.error('❌ No se encontró el modal con id "modal360"');
+                return;
+            }
+            
             modal.style.display = 'block';
             
             // Actualizar contenido
@@ -738,10 +661,12 @@
                 modal.style.opacity = '1';
             }, 10);
         }
-        
+
         // Función para cerrar modal
         function cerrarModal360() {
             const modal = document.getElementById('modal360');
+            if (!modal) return;
+            
             modal.style.opacity = '0';
             
             setTimeout(() => {
@@ -750,13 +675,21 @@
                 imagenActual = 0;
             }, 300);
         }
-        
+
         // Función para actualizar imágenes del modal
         function actualizarImagenesModal() {
-            if (!propiedadActual) return;
+            if (!propiedadActual) {
+                console.warn('⚠️ No hay propiedad actual seleccionada');
+                return;
+            }
             
             const mainImage = document.getElementById('mainImage');
             const thumbnailsContainer = document.getElementById('imageThumbnails');
+            
+            if (!mainImage || !thumbnailsContainer) {
+                console.error('❌ No se encontraron elementos del modal');
+                return;
+            }
             
             // Actualizar imagen principal
             mainImage.src = propiedadActual.imagenes[imagenActual];
@@ -774,15 +707,23 @@
             });
             
             // Actualizar navegación
-            document.querySelector('.image-navigation.prev').style.display = 
-                imagenActual > 0 ? 'flex' : 'none';
-            document.querySelector('.image-navigation.next').style.display = 
-                imagenActual < propiedadActual.imagenes.length - 1 ? 'flex' : 'none';
+            const prevBtn = document.querySelector('.image-navigation.prev');
+            const nextBtn = document.querySelector('.image-navigation.next');
+            
+            if (prevBtn) {
+                prevBtn.style.display = imagenActual > 0 ? 'flex' : 'none';
+            }
+            if (nextBtn) {
+                nextBtn.style.display = imagenActual < propiedadActual.imagenes.length - 1 ? 'flex' : 'none';
+            }
         }
-        
+
         // Función para cambiar imagen
         function cambiarImagen(direccion) {
-            if (!propiedadActual) return;
+            if (!propiedadActual) {
+                console.warn('⚠️ No hay propiedad actual');
+                return;
+            }
             
             const nuevaImagen = imagenActual + direccion;
             if (nuevaImagen >= 0 && nuevaImagen < propiedadActual.imagenes.length) {
@@ -790,37 +731,42 @@
                 actualizarImagenesModal();
             }
         }
-        
+
         // Función para cambiar a imagen específica
         function cambiarAImagen(indice) {
-            if (!propiedadActual) return;
+            if (!propiedadActual) {
+                console.warn('⚠️ No hay propiedad actual');
+                return;
+            }
             
             if (indice >= 0 && indice < propiedadActual.imagenes.length) {
                 imagenActual = indice;
                 actualizarImagenesModal();
             }
         }
-        
-        // Cerrar modal con tecla Escape
+
+        // Event listeners
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 cerrarModal360();
             }
         });
         
-        // Cerrar modal al hacer clic fuera del contenido
-        document.getElementById('modal360').addEventListener('click', function(e) {
-            if (e.target === this) {
-                cerrarModal360();
-            }
-        });
-        
+        const modal = document.getElementById('modal360');
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    cerrarModal360();
+                }
+            });
+        }
+
         // Inicialización
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 Inicializando sistema DantePropiedades 360°...');
             crearTarjetasPropiedades();
         });
-        
+
         // Exponer funciones globalmente
         window.abrirModal360 = abrirModal360;
         window.cerrarModal360 = cerrarModal360;
