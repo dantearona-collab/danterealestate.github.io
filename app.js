@@ -759,8 +759,6 @@ function cerrarFallbackManual() {
         modal.style.display = 'none';
     }
 }
-    }
-}
 
 // Función para cerrar modal multimedia - DEFINIR ANTES DE viewPDF
 function closeMultimediaModal() {
