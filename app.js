@@ -35,12 +35,6 @@ let pdfModal = null;
 
 let multimediaModal = null;
 
-
-let visor360Activo = false;
-let imagenes360Actuales = [];
-let imagen360Actual = 0;
-
-
 function initializeVariables() {
     // Obtener referencias con verificación de existencia
     planoPdf = document.getElementById('planoPdf');
@@ -206,9 +200,10 @@ function createMultimediaSection(property) {
 // SISTEMA DE VISOR 360
 // ========================================
 
-let visor360Activo = false;
+let visor360Activo = false;  // <-- CAMBIAR de 0 a false
 let imagenes360Actuales = [];
 let imagen360Actual = 0;
+
 
 // Función para abrir el visor 360
 function abrirVisor360(propertyId, index = 0) {
