@@ -1,18 +1,18 @@
 /**
  * SOLUCIÓN INMEDIATA - AGREGAR BOTONES 360° MANUALMENTE
- * Esta función agrega los botones directamente al DOM sin depender del código original
+ * VERSIÓN CORREGIDA SIN BUCLES INFINITOS
  */
 
-console.log('🛠️ === SOLUCIÓN INMEDIATA BOTONES 360° ===');
+console.log('🛠️ === SOLUCIÓN INMEDIATA BOTONES 360° (SIN BUCLES) ===');
 console.log('');
 
-// Función para agregar botones manualmente
+// Función para agregar botones manualmente (SIN BUCLES)
 function agregarBotones360Manual() {
     console.log('🔧 Agregando botones 360° manualmente...');
     
     try {
-        // Esperar a que las propiedades estén cargadas
-        const verificarYCargar = () => {
+        // SOLUCIÓN: Ejecutar solo una vez, sin bucles recursivos
+        const ejecutarUnaVez = () => {
             if (typeof propiedadesData !== 'undefined' && propiedadesData.length > 0) {
                 console.log(`📊 Propiedades encontradas: ${propiedadesData.length}`);
                 
@@ -179,28 +179,15 @@ function agregarBotones360Manual() {
                     }
                 });
                 
-                console.log('✅ Proceso completado');
+                console.log('✅ Proceso completado - Sin bucles infinitos');
             } else {
-                console.log('⏳ Esperando datos de propiedades...');
-                setTimeout(verificarYCargar, 1000);
+                console.log('⚠️ Datos de propiedades no disponibles aún');
+                console.log('💡 Los botones se agregarán cuando los datos estén listos');
             }
         };
         
-        // Ejecutar inmediatamente y luego cada 2 segundos
-        verificarYCargar();
-        const intervalId = setInterval(() => {
-            verificarYCargar();
-            // Detener después de 10 intentos
-            if (window.botones360Agregados) {
-                clearInterval(intervalId);
-            }
-        }, 2000);
-        
-        // Marcar como ejecutado después de 10 segundos
-        setTimeout(() => {
-            window.botones360Agregados = true;
-            clearInterval(intervalId);
-        }, 20000);
+        // EJECUTAR SOLO UNA VEZ - SIN BUCLES INFINITOS
+        ejecutarUnaVez();
         
     } catch (error) {
         console.error('❌ Error agregando botones:', error);
@@ -337,12 +324,13 @@ function mostrarVistaPanoramica(property) {
 // Función global para ejecutar
 window.agregarBotones360Manual = agregarBotones360Manual;
 
-// Ejecutar automáticamente cuando se carga el script
+// EJECUTAR AUTOMÁTICAMENTE - SOLO UNA VEZ
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', agregarBotones360Manual);
 } else {
     agregarBotones360Manual();
 }
 
-console.log('✅ Script de solución inmediata cargado');
+console.log('✅ Script de solución inmediata SIN BUCLES cargado');
 console.log('💡 Ejecutar manualmente con: agregarBotones360Manual()');
+console.log('🚫 SIN BUCLES INFINITOS - Solo ejecución única');

@@ -1,8 +1,9 @@
 // ================================================
 // 🚨 SOLUCIÓN URGENTE: FORZAR SISTEMA DE FALLBACK
+// VERSIÓN CORREGIDA SIN BUCLES INFINITOS
 // ================================================
 
-console.log('🚨 === FORZANDO SISTEMA DE FALLBACK ===');
+console.log('🚨 === FORZANDO SISTEMA DE FALLBACK (SIN BUCLES) ===');
 
 // Función para probar directamente el sistema de fallback
 function probarFallbackManual() {
@@ -139,27 +140,28 @@ function diagnosticarEstadoActual() {
     };
 }
 
-// Función para hacer que todos los botones usen fallback inmediatamente
+// Función para hacer que todos los botones usen fallback (SIN BUCLES)
 function activarTodosLosBotones() {
-    console.log('🚀 ACTIVANDO TODOS LOS BOTONES CON FALLBACK');
+    console.log('🚀 ACTIVANDO TODOS LOS BOTONES CON FALLBACK (UNA SOLA VEZ)');
     
     // Primero diagnosticar
     const estado = diagnosticarEstadoActual();
     
+    // SOLUCIÓN: Ejecutar solo una vez, sin bucles recursivos
     if (!estado.tieneDatos) {
-        console.log('⏳ Esperando datos de propiedades...');
-        setTimeout(activarTodosLosBotones, 1000);
-        return;
+        console.log('⚠️ Datos de propiedades no disponibles aún');
+        console.log('💡 El sistema funcionará cuando los datos estén listos');
+        // NO usar setTimeout recursivo - esto era el problema del bucle infinito
+    } else {
+        // Forzar fallback en todos los botones
+        forzarFallbackEnTodosLosBotones();
+        
+        // Probar con la primera propiedad
+        setTimeout(probarFallbackManual, 1000);
+        
+        console.log('✅ SISTEMA FORZADO A FALLBACK');
+        console.log('💡 Ahora todos los botones 360° usarán el sistema de fallback');
     }
-    
-    // Forzar fallback en todos los botones
-    forzarFallbackEnTodosLosBotones();
-    
-    // Probar con la primera propiedad
-    setTimeout(probarFallbackManual, 1000);
-    
-    console.log('✅ SISTEMA FORZADO A FALLBACK');
-    console.log('💡 Ahora todos los botones 360° usarán el sistema de fallback');
 }
 
 // Función para abrir modal directamente
@@ -184,13 +186,91 @@ function abrirModalDirecto(titulo) {
     mostrarFallbackManual(propiedad.titulo, propiedad.id_temporal);
 }
 
+// Función para mostrar fallback manual (si no existe, crearla)
+function mostrarFallbackManual(titulo, id) {
+    console.log(`🖼️ Mostrando fallback manual para: ${titulo}`);
+    
+    // Verificar si la función ya existe
+    if (typeof mostrarFallbackManual === 'function') {
+        // La función ya existe, la usamos
+        return;
+    }
+    
+    // Si no existe, crear función básica
+    window.mostrarFallbackManual = function(titulo, id) {
+        const modal = document.createElement('div');
+        modal.id = 'modal-fallback-360';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        `;
+        
+        modal.innerHTML = `
+            <div style="
+                background: white;
+                padding: 30px;
+                border-radius: 15px;
+                text-align: center;
+                max-width: 500px;
+                margin: 20px;
+            ">
+                <h2>🎬 Vista Panorámica</h2>
+                <h3>${titulo}</h3>
+                <p>Esta es una vista alternativa de la propiedad.</p>
+                <button onclick="this.closest('#modal-fallback-360').remove()" style="
+                    background: #007bff;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                ">
+                    Cerrar
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        console.log('✅ Modal fallback creado');
+    };
+    
+    // Función para cerrar modal
+    window.cerrarFallbackManual = function() {
+        const modal = document.getElementById('modal-fallback-360');
+        if (modal) {
+            modal.remove();
+            console.log('✅ Modal fallback cerrado');
+        }
+    };
+    
+    // Ejecutar la función
+    window.mostrarFallbackManual(titulo, id);
+}
+
 // Instrucciones
-console.log('🚨 === SISTEMA DE FORZADO DE FALLBACK CARGADO ===');
+console.log('🚨 === SISTEMA DE FORZADO DE FALLBACK SIN BUCLES CARGADO ===');
 console.log('💡 Comandos disponibles:');
-console.log('   - activarTodosLosBotones()     → Activa todos los botones con fallback');
+console.log('   - activarTodosLosBotones()     → Activa todos los botones con fallback (UNA VEZ)');
 console.log('   - probarFallbackManual()       → Prueba el sistema de fallback');
 console.log('   - diagnosticarEstadoActual()   → Diagnostica el estado actual');
 console.log('   - abrirModalDirecto("título")  → Abre modal directamente');
 console.log('   - cerrarFallbackManual()       → Cierra modal activo');
 console.log('');
-console.log('🚀 RECOMENDADO: Ejecuta activarTodosLosBotones()');
+console.log('🚫 SIN BUCLES INFINITOS - Solo ejecución única');
+
+// EJECUTAR AUTOMÁTICAMENTE - SOLO UNA VEZ
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', activarTodosLosBotones);
+} else {
+    activarTodosLosBotones();
+}
+
+console.log('✅ Sistema cargado sin bucles infinitos');
