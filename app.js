@@ -42,27 +42,353 @@ let currentImageIndex = 0;
 // ============================================
 // PARCHE PARA BOTONES 360° DEFECTUOSOS
 // ============================================
+// SOLUCIÓN COMPLETA - REPARAR displayProperties y createPropertyCard
+
 (function() {
-    console.log('🔧 Aplicando parche para botones 360°...');
+    console.log('🔧 INICIANDO REPARACIÓN COMPLETA');
+    
+    // ============================================
+    // 1. REPARAR createPropertyCard
+    // ============================================
+    
+    console.log('1️⃣ Reparando createPropertyCard...');
+    
+    // Guardar cualquier función existente
+    const existingCreatePropertyCard = window.createPropertyCard;
+    
+    // Nueva versión que siempre retorna ELEMENTO DOM
+    window.createPropertyCard = function(property) {
+        console.log('🏠 createPropertyCard para:', property?.titulo);
+        
+        try {
+            let cardElement = null;
+            
+            // Intentar usar función existente si hay
+            if (typeof existingCreatePropertyCard === 'function' && 
+                existingCreatePropertyCard !== window.createPropertyCard) {
+                const result = existingCreatePropertyCard(property);
+                
+                // Verificar qué retornó
+                if (result instanceof HTMLElement || result instanceof Element) {
+                    // Ya es un elemento DOM
+                    cardElement = result;
+                } else if (typeof result === 'string') {
+                    // Es string HTML, convertirlo a elemento
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = result.trim();
+                    cardElement = tempDiv.firstChild;
+                }
+            }
+            
+            // Si no se pudo crear con la función existente, crear uno básico
+            if (!cardElement || !(cardElement instanceof Element)) {
+                cardElement = createBasicPropertyCard(property);
+            }
+            
+            // Asegurar que sea un elemento DOM válido
+            if (!(cardElement instanceof Element)) {
+                throw new Error('No se pudo crear elemento DOM válido');
+            }
+            
+            // Añadir clases y estilos básicos
+            cardElement.classList.add('property-card');
+            cardElement.style.cssText += `
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 15px;
+                margin: 10px;
+                background: white;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            `;
+            
+            return cardElement;
+            
+        } catch (error) {
+            console.error('❌ Error en createPropertyCard:', error);
+            return createErrorCard(property, error);
+        }
+    };
+    
+    // Función para crear tarjeta básica como ELEMENTO DOM
+    function createBasicPropertyCard(property) {
+        const card = document.createElement('div');
+        card.className = 'property-card-basic';
+        
+        card.innerHTML = `
+            <h3 style="margin-top: 0;">${escapeHTML(property?.titulo || 'Propiedad')}</h3>
+            <p style="color: green; font-weight: bold;">
+                ${escapeHTML(property?.precio || 'Consultar')}
+            </p>
+            <p style="color: #666;">
+                📍 ${escapeHTML(property?.barrio || '')} 
+                ${property?.tipo ? '· ' + escapeHTML(property.tipo) : ''}
+            </p>
+            ${property?.descripcion ? `
+                <p style="color: #777; font-size: 14px;">
+                    ${escapeHTML(
+                        property.descripcion.length > 100 ? 
+                        property.descripcion.substring(0, 100) + '...' : 
+                        property.descripcion
+                    )}
+                </p>
+            ` : ''}
+        `;
+        
+        return card;
+    }
+    
+    // Función para crear tarjeta de error como ELEMENTO DOM
+    function createErrorCard(property, error) {
+        const card = document.createElement('div');
+        card.className = 'property-card-error';
+        card.style.cssText = `
+            border: 2px solid #ff6b6b;
+            border-radius: 8px;
+            padding: 15px;
+            background: #fff5f5;
+            color: #721c24;
+        `;
+        
+        card.innerHTML = `
+            <h4 style="margin: 0 0 10px 0;">⚠️ Error mostrando propiedad</h4>
+            <p><strong>${escapeHTML(property?.titulo || 'Propiedad desconocida')}</strong></p>
+            <p><small>${escapeHTML(error?.message || 'Error desconocido')}</small></p>
+        `;
+        
+        return card;
+    }
+    
+    // Función auxiliar para escapar HTML
+    function escapeHTML(text) {
+        if (!text) return '';
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+    
+    console.log('✅ createPropertyCard reparada para retornar elementos DOM');
+    
+    // ============================================
+    // 2. REPARAR displayProperties
+    // ============================================
+    
+    console.log('2️⃣ Reparando displayProperties...');
     
     // Guardar función original
-    const originalCreatePropertyCard = window.createPropertyCard;
+    const originalDisplayProperties = window.displayProperties;
     
-    if (originalCreatePropertyCard) {
-        window.createPropertyCard = function(property) {
-            const html = originalCreatePropertyCard(property);
+    // Nueva versión segura
+    window.displayProperties = function(properties) {
+        console.log('🏘️ displayProperties llamada con', properties?.length, 'propiedades');
+        
+        try {
+            // Validar entrada
+            if (!properties || !Array.isArray(properties)) {
+                console.error('❌ properties inválido:', properties);
+                properties = window.propertyData || [];
+            }
             
-            // Corregir onclick defectuosos
-            return html.replace(
-                /onclick\s*=\s*["']abrirVisor360\([^)]*\)[^"']*["']/g,
-                function(match) {
-                    // Eliminar cualquier ! y cerrar correctamente
-                    const fixed = match.replace(/[^a-zA-Z0-9_\(\)'"=\s]/g, '');
-                    console.log('🔄 Corregido onclick:', match, '→', fixed);
-                    return fixed;
+            // Buscar contenedor
+            let container = document.getElementById('properties-container');
+            if (!container) {
+                console.log('📦 Creando contenedor...');
+                container = document.createElement('div');
+                container.id = 'properties-container';
+                container.style.cssText = `
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                    gap: 20px;
+                    padding: 20px;
+                `;
+                
+                // Buscar dónde insertar
+                const main = document.querySelector('main') || 
+                            document.querySelector('.content') || 
+                            document.body;
+                main.appendChild(container);
+            }
+            
+            // Limpiar contenedor
+            container.innerHTML = '';
+            
+            // Mostrar mensaje si no hay propiedades
+            if (properties.length === 0) {
+                container.innerHTML = `
+                    <div style="
+                        grid-column: 1 / -1;
+                        text-align: center;
+                        padding: 40px;
+                        color: #666;
+                    ">
+                        <div style="font-size: 48px; margin-bottom: 20px;">🏠</div>
+                        <h3>No se encontraron propiedades</h3>
+                        <p>Intenta con otros filtros</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Crear y agregar cada tarjeta
+            properties.forEach((property, index) => {
+                try {
+                    const card = window.createPropertyCard(property);
+                    
+                    // Verificar que sea elemento DOM válido
+                    if (card && card instanceof Element) {
+                        // Crear wrapper para mejor control
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'property-card-wrapper';
+                        wrapper.appendChild(card);
+                        container.appendChild(wrapper);
+                    } else {
+                        console.warn(`⚠️ Tarjeta ${index} no es elemento DOM válido`);
+                        createAndAppendErrorCard(container, property, 
+                            new Error('Tarjeta inválida'));
+                    }
+                } catch (cardError) {
+                    console.error(`💥 Error en tarjeta ${index}:`, cardError);
+                    createAndAppendErrorCard(container, property, cardError);
                 }
-            );
-        };
+            });
+            
+            console.log('✅ Propiedades mostradas:', properties.length);
+            
+            // Si hay función original y es diferente, ejecutarla también
+            if (typeof originalDisplayProperties === 'function' && 
+                originalDisplayProperties !== window.displayProperties) {
+                try {
+                    originalDisplayProperties(properties);
+                } catch (e) {
+                    console.warn('⚠️ Función original falló:', e.message);
+                }
+            }
+            
+        } catch (error) {
+            console.error('❌ Error crítico en displayProperties:', error);
+            showFatalErrorMessage(error);
+        }
+    };
+    
+    // Función auxiliar para crear tarjetas de error
+    function createAndAppendErrorCard(container, property, error) {
+        const errorCard = document.createElement('div');
+        errorCard.className = 'property-card-error';
+        errorCard.style.cssText = `
+            border: 2px solid #ff6b6b;
+            border-radius: 8px;
+            padding: 15px;
+            background: #fff5f5;
+            color: #721c24;
+        `;
+        errorCard.innerHTML = `
+            <h4 style="margin: 0 0 10px 0;">⚠️ Error</h4>
+            <p><strong>${escapeHTML(property?.titulo || 'Propiedad')}</strong></p>
+            <p><small>${escapeHTML(error?.message || 'Error desconocido')}</small></p>
+        `;
+        
+        const wrapper = document.createElement('div');
+        wrapper.className = 'property-card-wrapper';
+        wrapper.appendChild(errorCard);
+        container.appendChild(wrapper);
+    }
+    
+    // Función para mostrar error fatal
+    function showFatalErrorMessage(error) {
+        const errorDiv = document.createElement('div');
+        errorDiv.id = 'fatal-error-message';
+        errorDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #dc3545;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+            z-index: 10000;
+            max-width: 400px;
+        `;
+        errorDiv.innerHTML = `
+            <strong>⚠️ Error del sistema</strong>
+            <p style="margin: 5px 0 0 0; font-size: 14px;">
+                ${escapeHTML(error.message)}
+            </p>
+            <button onclick="this.parentElement.remove()" style="
+                background: white;
+                color: #dc3545;
+                border: none;
+                padding: 5px 10px;
+                border-radius: 4px;
+                margin-top: 10px;
+                cursor: pointer;
+                font-size: 12px;
+            ">
+                Cerrar
+            </button>
+        `;
+        
+        document.body.appendChild(errorDiv);
+    }
+    
+    console.log('✅ displayProperties reparada');
+    
+    // ============================================
+    // 3. EJECUTAR REPARACIÓN
+    // ============================================
+    
+    console.log('3️⃣ Ejecutando reparación...');
+    
+    // Forzar recarga de propiedades después de 1 segundo
+    setTimeout(() => {
+        if (window.propertyData && window.propertyData.length > 0) {
+            console.log('🚀 Mostrando propiedades existentes...');
+            window.displayProperties(window.propertyData);
+        } else if (typeof loadProperties === 'function') {
+            console.log('🔄 Ejecutando loadProperties...');
+            loadProperties();
+        } else {
+            console.log('📦 No hay datos ni funciones de carga');
+        }
+    }, 1000);
+    
+    console.log('🎉 REPARACIÓN COMPLETADA');
+})();
+
+
+
+    // Función para generar HTML básico de propiedad
+    function generatePropertyHTML(property) {
+        if (!property) return '<div>Propiedad no disponible</div>';
+        
+        return `
+            <div class="property-card">
+                <h3>${escapeHTML(property.titulo || 'Sin título')}</h3>
+                <p class="price">${escapeHTML(property.precio || 'Consultar')}</p>
+                <p class="location">📍 ${escapeHTML(property.barrio || '')}</p>
+                ${property.descripcion ? 
+                    `<p class="description">${escapeHTML(
+                        property.descripcion.length > 100 ? 
+                        property.descripcion.substring(0, 100) + '...' : 
+                        property.descripcion
+                    )}</p>` : 
+                    ''
+                }
+            </div>
+        `;
+    }
+
+    // Función auxiliar para escapar HTML
+    function escapeHTML(text) {
+        if (!text) return '';
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
     }
     
     // También corregir cualquier botón existente
