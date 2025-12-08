@@ -280,6 +280,24 @@ class ExcelStorageManager:
 app = Flask(__name__)
 CORS(app)  # Permitir solicitudes desde cualquier origen
 
+# ✅ AGREGAR ESTAS LÍNEAS INMEDIATAMENTE DESPUÉS:
+@app.route('/debug', methods=['GET'])
+@app.route('/api/status', methods=['GET'])
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Endpoint para verificar que el servidor está funcionando"""
+    return jsonify({
+        'status': 'online',
+        'service': 'Dante Propiedades Backend',
+        'timestamp': datetime.now().isoformat(),
+        'version': '1.0',
+        'endpoints': {
+            'guardar_contacto': '/api/guardar-contacto (POST)',
+            'health': '/debug, /api/status, /health (GET)'
+        }
+    }), 200
+
+
 # Inicializar gestor de almacenamiento
 storage_manager = ExcelStorageManager()
 
@@ -295,19 +313,6 @@ def home():
             '/api/obtener-consultas': 'GET - Obtener últimas consultas',
             '/api/resumen': 'GET - Obtener resumen estadístico',
             '/health': 'GET - Estado del sistema'
-        }
-    })
-
-@app.route('/health')
-def health_check():
-    """🏥 Verificar estado del sistema"""
-    return jsonify({
-        'status': 'healthy',
-        'timestamp': datetime.now().isoformat(),
-        'storage_path': str(storage_manager.excel_path),
-        'files_exist': {
-            'excel': storage_manager.excel_path.exists(),
-            'csv': storage_manager.csv_path.exists()
         }
     })
 
@@ -421,6 +426,64 @@ def exportar_excel():
             'error': str(e)
         }), 500
 
+# ==============================================
+# ENDPOINTS DE ADMINISTRACIÓN SEGUROS
+# ==============================================
+
+# Token secreto para acceso admin (¡CAMBIA ESTO!)
+ADMIN_TOKEN = '2205'
+
+@app.route('/admin/download/<token>')
+def descargar_excel_admin(token):
+    """Descargar archivo Excel solo con token válido"""
+    if token != ADMIN_TOKEN:
+        return jsonify({'error': 'Acceso no autorizado'}), 403
+    
+    if os.path.exists(EXCEL_FILE):
+        return send_file(
+            EXCEL_FILE,
+            as_attachment=True,
+            download_name=f'contactos_dante_{datetime.now().strftime("%Y%m%d_%H%M")}.xlsx'
+        )
+    return jsonify({'error': 'Archivo no encontrado'}), 404
+
+@app.route('/admin/stats/<token>')
+def estadisticas_admin(token):
+    """Estadísticas detalladas solo para admin"""
+    if token != ADMIN_TOKEN:
+        return jsonify({'error': 'Acceso no autorizado'}), 403
+    
+    try:
+        if os.path.exists(EXCEL_FILE):
+            wb = load_workbook(EXCEL_FILE)
+            ws = wb.active
+            total = ws.max_row - 1
+            
+            # Obtener últimos 10 registros
+            ultimos = []
+            for row in ws.iter_rows(min_row=2, max_row=min(12, ws.max_row), values_only=True):
+                if row[0]:  # Si tiene fecha
+                    ultimos.append({
+                        'fecha': row[0],
+                        'nombre': row[1],
+                        'telefono': row[3],
+                        'propiedad': row[4]
+                    })
+            
+            return jsonify({
+                'success': True,
+                'total_contactos': total,
+                'ultimos_registros': ultimos,
+                'archivo': EXCEL_FILE,
+                'tamano_bytes': os.path.getsize(EXCEL_FILE) if os.path.exists(EXCEL_FILE) else 0
+            })
+        return jsonify({'success': False, 'message': 'No hay datos'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
+
+
 if __name__ == '__main__':
     print("🚀 Iniciando Sistema de Formularios con Almacenamiento Excel")
     print(f"📁 Archivos de datos en: {storage_manager.base_path}")
@@ -429,4 +492,6 @@ if __name__ == '__main__':
     print("🌐 Servidor disponible en: http://localhost:5000")
     print("=" * 60)
     
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # ⚠️ CAMBIAR ESTO: Render usa puerto 10000, no 5000
+    port = int(os.environ.get('PORT', 10000))
+    app.run(debug=True, host='0.0.0.0', port=port)
