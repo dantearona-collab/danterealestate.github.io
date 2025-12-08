@@ -7,8 +7,9 @@ Este servidor Python recibe los datos del formulario y los almacena automáticam
 en Excel y CSV. Incluye modo offline, respaldos automáticos y manejo de errores.
 """
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
+from openpyxl import load_workbook
 import pandas as pd
 import json
 import os
@@ -439,9 +440,9 @@ def descargar_excel_admin(token):
     if token != ADMIN_TOKEN:
         return jsonify({'error': 'Acceso no autorizado'}), 403
     
-    if os.path.exists(EXCEL_FILE):
+    if storage_manager.excel_path.exists():
         return send_file(
-            EXCEL_FILE,
+            str(storage_manager.excel_path),
             as_attachment=True,
             download_name=f'contactos_dante_{datetime.now().strftime("%Y%m%d_%H%M")}.xlsx'
         )
@@ -454,33 +455,207 @@ def estadisticas_admin(token):
         return jsonify({'error': 'Acceso no autorizado'}), 403
     
     try:
-        if os.path.exists(EXCEL_FILE):
-            wb = load_workbook(EXCEL_FILE)
-            ws = wb.active
-            total = ws.max_row - 1
+        if storage_manager.excel_path.exists():
+            # Usar pandas para leer el archivo Excel
+            df = pd.read_excel(storage_manager.excel_path, sheet_name='Consultas')
+            total = len(df)
             
             # Obtener últimos 10 registros
             ultimos = []
-            for row in ws.iter_rows(min_row=2, max_row=min(12, ws.max_row), values_only=True):
-                if row[0]:  # Si tiene fecha
+            if not df.empty:
+                ultimos_df = df.tail(10)
+                for _, row in ultimos_df.iterrows():
                     ultimos.append({
-                        'fecha': row[0],
-                        'nombre': row[1],
-                        'telefono': row[3],
-                        'propiedad': row[4]
+                        'fecha': row.get('Fecha', ''),
+                        'nombre': row.get('Nombre', ''),
+                        'telefono': row.get('Teléfono', ''),
+                        'email': row.get('Email', '')
                     })
             
             return jsonify({
                 'success': True,
                 'total_contactos': total,
                 'ultimos_registros': ultimos,
-                'archivo': EXCEL_FILE,
-                'tamano_bytes': os.path.getsize(EXCEL_FILE) if os.path.exists(EXCEL_FILE) else 0
+                'archivo': str(storage_manager.excel_path),
+                'tamano_bytes': os.path.getsize(storage_manager.excel_path) if storage_manager.excel_path.exists() else 0
             })
         return jsonify({'success': False, 'message': 'No hay datos'})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
+@app.route('/admin/data/<token>')
+def obtener_datos_admin(token):
+    """Obtener todos los datos para el panel admin"""
+    if token != ADMIN_TOKEN:
+        return jsonify({'error': 'Acceso no autorizado'}), 403
+    
+    try:
+        contactos = []
+        if storage_manager.excel_path.exists():
+            # Leer archivo Excel
+            df = pd.read_excel(storage_manager.excel_path, sheet_name='Consultas')
+            
+            if not df.empty:
+                for _, row in df.iterrows():
+                    contacto = {
+                        'id': str(row.name) if pd.notna(row.name) else f"row_{len(contactos)}",
+                        'nombre': str(row.get('Nombre', '')),
+                        'email': str(row.get('Email', '')),
+                        'telefono': str(row.get('Teléfono', '')),
+                        'tipo_consulta': str(row.get('Interés', 'general')),
+                        'mensaje': str(row.get('Mensaje', '')),
+                        'pagina_origen': str(row.get('Página', 'Dante Propiedades')),
+                        'estado': str(row.get('Estado', 'nuevo')),
+                        'notas': str(row.get('Notas', '')),
+                        'timestamp': row.get('Timestamp', datetime.now().isoformat()),
+                        'fecha_legible': row.get('Fecha', '') + ' ' + str(row.get('Hora', ''))
+                    }
+                    contactos.append(contacto)
+        
+        return jsonify({
+            'success': True,
+            'contactos': contactos,
+            'total': len(contactos)
+        })
+    except Exception as e:
+        logging.error(f"Error obteniendo datos: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/admin/add/<token>', methods=['POST'])
+def agregar_contacto_admin(token):
+    """Agregar nuevo contacto desde panel admin"""
+    if token != ADMIN_TOKEN:
+        return jsonify({'error': 'Acceso no autorizado'}), 403
+    
+    try:
+        datos = request.get_json()
+        if not datos:
+            return jsonify({'error': 'No se recibieron datos'}), 400
+        
+        # Preparar datos para almacenamiento
+        datos_almacenamiento = {
+            'Nombre': datos.get('nombre', ''),
+            'Email': datos.get('email', ''),
+            'Teléfono': datos.get('telefono', ''),
+            'Interés': datos.get('tipo_consulta', 'general'),
+            'Mensaje': datos.get('mensaje', ''),
+            'Página': datos.get('pagina_origen', 'Dante Propiedades'),
+            'Estado': datos.get('estado', 'nuevo'),
+            'Notas': datos.get('notas', ''),
+            'Timestamp': datos.get('timestamp', datetime.now().isoformat())
+        }
+        
+        # Añadir usando el storage manager existente
+        storage_manager.añadir_consulta(datos_almacenamiento)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Contacto agregado correctamente'
+        })
+    except Exception as e:
+        logging.error(f"Error agregando contacto: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/admin/update/<token>', methods=['PUT'])
+def actualizar_contacto_admin(token):
+    """Actualizar contacto existente desde panel admin"""
+    if token != ADMIN_TOKEN:
+        return jsonify({'error': 'Acceso no autorizado'}), 403
+    
+    try:
+        datos = request.get_json()
+        if not datos or 'id' not in datos:
+            return jsonify({'error': 'ID de contacto requerido'}), 400
+        
+        contacto_id = datos['id']
+        
+        # Leer archivo Excel actual
+        if storage_manager.excel_path.exists():
+            df = pd.read_excel(storage_manager.excel_path, sheet_name='Consultas')
+            
+            # Buscar y actualizar el registro
+            if not df.empty:
+                # Actualizar campos
+                for index, row in df.iterrows():
+                    if str(index) == str(contacto_id):
+                        df.at[index, 'Nombre'] = datos.get('nombre', row.get('Nombre', ''))
+                        df.at[index, 'Email'] = datos.get('email', row.get('Email', ''))
+                        df.at[index, 'Teléfono'] = datos.get('telefono', row.get('Teléfono', ''))
+                        df.at[index, 'Interés'] = datos.get('tipo_consulta', row.get('Interés', 'general'))
+                        df.at[index, 'Mensaje'] = datos.get('mensaje', row.get('Mensaje', ''))
+                        df.at[index, 'Página'] = datos.get('pagina_origen', row.get('Página', 'Dante Propiedades'))
+                        df.at[index, 'Estado'] = datos.get('estado', row.get('Estado', 'nuevo'))
+                        df.at[index, 'Notas'] = datos.get('notas', row.get('Notas', ''))
+                        df.at[index, 'Timestamp'] = datos.get('timestamp', row.get('Timestamp', datetime.now().isoformat()))
+                        break
+                
+                # Guardar archivo actualizado
+                with pd.ExcelWriter(storage_manager.excel_path, engine='openpyxl') as writer:
+                    df.to_excel(writer, sheet_name='Consultas', index=True)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Contacto actualizado correctamente'
+        })
+    except Exception as e:
+        logging.error(f"Error actualizando contacto: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/admin/delete/<token>', methods=['DELETE'])
+def eliminar_contacto_admin(token):
+    """Eliminar contacto desde panel admin"""
+    if token != ADMIN_TOKEN:
+        return jsonify({'error': 'Acceso no autorizado'}), 403
+    
+    try:
+        datos = request.get_json()
+        if not datos or 'id' not in datos:
+            return jsonify({'error': 'ID de contacto requerido'}), 400
+        
+        contacto_id = datos['id']
+        
+        # Leer archivo Excel actual
+        if storage_manager.excel_path.exists():
+            df = pd.read_excel(storage_manager.excel_path, sheet_name='Consultas')
+            
+            if not df.empty:
+                # Filtrar para eliminar el registro
+                df_nuevo = df[df.index.to_string() != str(contacto_id)]
+                
+                # Guardar archivo actualizado
+                with pd.ExcelWriter(storage_manager.excel_path, engine='openpyxl') as writer:
+                    df_nuevo.to_excel(writer, sheet_name='Consultas', index=True)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Contacto eliminado correctamente'
+        })
+    except Exception as e:
+        logging.error(f"Error eliminando contacto: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/admin/clear/<token>', methods=['DELETE'])
+def limpiar_datos_admin(token):
+    """Limpiar todos los datos desde panel admin"""
+    if token != ADMIN_TOKEN:
+        return jsonify({'error': 'Acceso no autorizado'}), 403
+    
+    try:
+        # Crear DataFrame vacío con las columnas correctas
+        df_vacio = pd.DataFrame(columns=storage_manager.columnas)
+        
+        # Guardar archivo vacío
+        with pd.ExcelWriter(storage_manager.excel_path, engine='openpyxl') as writer:
+            df_vacio.to_excel(writer, sheet_name='Consultas', index=False)
+            df_vacio.to_excel(writer, sheet_name='Backup', index=False)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Todos los datos han sido eliminados'
+        })
+    except Exception as e:
+        logging.error(f"Error limpiando datos: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 
