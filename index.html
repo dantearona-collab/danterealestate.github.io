@@ -1998,6 +1998,41 @@
     <script src="fix_360_system.js"></script>
     <script src="optimize_360_final.js"></script>
     
+    
+    <script>
+// Corregir app.js antes de cargarlo
+(function() {
+    // Interceptar la carga de app.js
+    const originalCreateElement = document.createElement;
+    
+    document.createElement = function(tagName) {
+        const element = originalCreateElement.call(document, tagName);
+        
+        if (tagName.toLowerCase() === 'script') {
+            const originalSetAttribute = element.setAttribute;
+            
+            // Interceptar setAttribute para corregir onclick
+            element.setAttribute = function(name, value) {
+                if (name === 'src' && value.includes('app.js')) {
+                    // Crear script corregido
+                    setTimeout(() => {
+                        const fixedScript = document.createElement('script');
+                        fixedScript.src = value.replace('app.js', 'app_fixed.js');
+                        document.head.appendChild(fixedScript);
+                    }, 100);
+                    return;
+                }
+                originalSetAttribute.call(this, name, value);
+            };
+        }
+        
+        return element;
+    };
+})();
+</script>
+    
+    
+    
     <!-- JavaScript principal -->
     <script src="app.js?v=20250115"></script>
     
