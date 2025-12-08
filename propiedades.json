@@ -47,7 +47,12 @@
       "imgs/UF000-20.jpeg",
       "imgs/UF000-21.jpeg"
     ],
-    "imagenes_360": [],
+    "imagenes_360": [
+      "imgs/360/UF000-1.jpg",
+      "imgs/360/UF000-2.jpg",
+      "imgs/360/UF000-3.jpg",
+      "imgs/360/UF000-4.jpg"
+    ],
     "moneda_precio": "USD",
     "moneda_expensas": "ARS",
     "fecha_procesamiento": "2025-11-09T08:33:51.258324"
@@ -91,7 +96,10 @@
       "imgs/UF001-6.jpg",
       "imgs/UF001-7.jpg"
     ],
-    "imagenes_360": [],
+    "imagenes_360": [
+      "imgs/360/UF001-1.jpg",
+      "imgs/360/UF001-2.jpg"
+    ],
     "moneda_precio": "USD",
     "moneda_expensas": "ARS",
     "fecha_procesamiento": "2025-11-09T08:33:51.258324"
@@ -133,7 +141,10 @@
       "imgs/UF023-6.jpg",
       "imgs/UF023-7.jpg"
     ],
-    "imagenes_360": [],
+    "imagenes_360": [
+      "imgs/360/UF002-1.jpg",
+      "imgs/360/UF002-2.jpg"
+    ],
     "fecha_procesamiento": "2025-11-08T15:22:30.123456"
   },
   {
@@ -178,7 +189,10 @@
       "imgs/OFI-12.jpg",
       "imgs/OFI-13.jpg"
     ],
-    "imagenes_360": [],
+    "imagenes_360": [
+      "imgs/360/UF003-1.jpg",
+      "imgs/360/UF003-2.jpg"
+    ],
     "fecha_procesamiento": "2025-11-07T10:45:20.789123"
   },
   {
@@ -232,7 +246,10 @@
       "imgs/UF004-18.jpg",
       "imgs/UF004-19.jpg"
     ],
-    "imagenes_360": [],
+    "imagenes_360": [
+      "imgs/360/UF004-13.jpg",
+      "imgs/360/UF004-14.jpg"
+    ],
     "fecha_procesamiento": "2025-11-06T14:30:15.456789"
   }
 ]

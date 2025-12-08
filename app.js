@@ -556,210 +556,6 @@ document.addEventListener('keydown', function (event) {
 });
 
 
-// ========================================
-// FUNCIÓN MEJORADA PARA SISTEMA 360°
-// ========================================
-
-/**
- * Función mejorada que maneja tanto imágenes 360° reales como fallback
- * @param {string} propertyId - ID de la propiedad
- * @param {string} titulo - Título de la propiedad
- * @param {Array} imagenes360 - Array de imágenes 360° (puede estar vacío)
- */
-function abrirVisor360Mejorado(propertyId, titulo, imagenes360) {
-    console.log(`🔍 Abriendo visor 360° mejorado para: ${titulo}`);
-    console.log(`📸 Imágenes 360° disponibles: ${imagenes360 ? imagenes360.length : 0}`);
-    
-    // Si hay imágenes 360° configuradas y el sistema está disponible, usar función original
-    if (imagenes360 && imagenes360.length > 0) {
-        console.log('✅ Usando visor 360° tradicional');
-        // Intentar usar la función original primero
-        try {
-            if (typeof abrirVisor360 === 'function') {
-                abrirVisor360(propertyId);
-                return;
-            }
-        } catch (error) {
-            console.warn('⚠️ Error con visor 360° tradicional:', error);
-        }
-    }
-    
-    // Si no hay imágenes 360° o hubo error, usar sistema mejorado
-    console.log('🔄 Usando sistema mejorado con vista panorámica');
-    
-    try {
-        // Verificar si el sistema mejorado está disponible
-        if (typeof sistema360Mejorado !== 'undefined' && 
-            typeof sistema360Mejorado.activarModoFallback === 'function') {
-            
-            sistema360Mejorado.activarModoFallback(titulo);
-        } else {
-            // Fallback manual si el sistema mejorado no está disponible
-            console.warn('⚠️ Sistema mejorado no disponible, usando fallback manual');
-            mostrarFallbackManual(titulo, propertyId);
-        }
-    } catch (error) {
-        console.error('❌ Error en sistema mejorado:', error);
-        // Último recurso: fallback manual
-        mostrarFallbackManual(titulo, propertyId);
-    }
-}
-
-/**
- * Fallback manual para mostrar vista panorámica sin sistema mejorado
- */
-function mostrarFallbackManual(titulo, propertyId) {
-    console.log(`🔄 Mostrando fallback manual para: ${titulo}`);
-    
-    // Buscar la propiedad en los datos globales
-    let propiedad = null;
-    if (typeof propiedadesData !== 'undefined') {
-        propiedad = propiedadesData.find(p => p.id_temporal === propertyId || p.titulo === titulo);
-    }
-    
-    // Crear contenedor del modal si no existe
-    let modal = document.getElementById('modal-fallback-360');
-    if (!modal) {
-        modal = document.createElement('div');
-        modal.id = 'modal-fallback-360';
-        modal.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 9999;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            box-sizing: border-box;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        `;
-        
-        modal.innerHTML = `
-            <div style="
-                max-width: 800px;
-                width: 90%;
-                background: rgba(255,255,255,0.1);
-                border-radius: 15px;
-                padding: 30px;
-                backdrop-filter: blur(10px);
-            ">
-                <h2 style="margin: 0 0 20px 0; color: #fff;">
-                    🏠 Vista Panorámica: ${titulo}
-                </h2>
-                <div id="contenido-fallback-360"></div>
-                <button onclick="cerrarFallbackManual()" style="
-                    background: #007bff;
-                    color: white;
-                    border: none;
-                    padding: 12px 25px;
-                    border-radius: 8px;
-                    cursor: pointer;
-                    font-size: 16px;
-                    margin-top: 20px;
-                ">
-                    ✕ Cerrar
-                </button>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-    }
-    
-    // Actualizar contenido
-    const contenido = document.getElementById('contenido-fallback-360');
-    if (contenido) {
-        if (propiedad && propiedad.fotos && propiedad.fotos.length > 0) {
-            const imagenesAMostrar = propiedad.fotos.slice(0, 6);
-            contenido.innerHTML = `
-                <div style="
-                    background: rgba(255,193,7,0.2);
-                    border: 1px solid #ffc107;
-                    border-radius: 8px;
-                    padding: 15px;
-                    margin: 20px 0;
-                    color: #fff;
-                ">
-                    <p style="margin: 0; font-size: 14px;">
-                        📸 <strong>Vista Panorámica Alternativa</strong>
-                    </p>
-                    <p style="margin: 10px 0 0 0; font-size: 13px; opacity: 0.9;">
-                        Las imágenes 360° no están disponibles. Mostrando galería de fotos disponibles.
-                    </p>
-                </div>
-                <div style="
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 10px;
-                    justify-content: center;
-                    margin: 30px 0;
-                ">
-                    ${imagenesAMostrar.map((foto, index) => `
-                        <div style="
-                            width: 200px;
-                            height: 150px;
-                            background: #f8f9fa;
-                            border-radius: 8px;
-                            overflow: hidden;
-                            cursor: pointer;
-                            transition: transform 0.3s ease;
-                            border: 2px solid transparent;
-                        ">
-                            <img src="${foto}" alt="Foto ${index + 1}" 
-                                 style="width: 100%; height: 100%; object-fit: cover;"
-                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                                 onload="this.style.opacity='1';">
-                            <div style="
-                                display: none;
-                                width: 100%;
-                                height: 100%;
-                                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                                color: white;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                flex-direction: column;
-                                font-size: 14px;
-                            ">
-                                <div style="font-size: 24px; margin-bottom: 8px;">📷</div>
-                                <div>Imagen ${index + 1}</div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        } else {
-            contenido.innerHTML = `
-                <div style="
-                    padding: 40px;
-                    text-align: center;
-                    color: rgba(255,255,255,0.7);
-                ">
-                    <div style="font-size: 48px; margin-bottom: 20px;">📷</div>
-                    <p>No se encontraron imágenes disponibles para esta propiedad.</p>
-                </div>
-            `;
-        }
-    }
-    
-    // Mostrar modal
-    modal.style.display = 'flex';
-}
-
-/**
- * Función para cerrar el fallback manual
- */
-function cerrarFallbackManual() {
-    const modal = document.getElementById('modal-fallback-360');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
-
 // Función para cerrar modal multimedia - DEFINIR ANTES DE viewPDF
 function closeMultimediaModal() {
     console.log('🔧 DEBUG closeMultimediaModal - multimediaModal:', multimediaModal);
@@ -1284,22 +1080,22 @@ function createPropertyCard(property) {
             </span>
         </div>
         <div style="position: absolute; top: 10px; right: 10px;">
-            <span style="background: ${property.operacion === 'Venta' ? '#232deb' : '#ff0101'}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+            <span style="background: ${property.operacion === 'Venta' ? '#232deb' : '#ff0101'} !important; color: white !important; padding: 4px 8px !important; border-radius: 4px !important; font-size: 12px !important; font-weight: 600 !important;">
                 ${property.tipo}
             </span>
         </div>
         
-        <div style="padding: 20px;">
-            <h3 style="margin: 0 0 10px 0; color: #495057; font-size: 18px; font-weight: 600; line-height: 1.3;">
+        <div style="padding: 20px !important;">
+            <h3 style="margin: 0 0 10px 0 !important; color: #495057 !important; font-size: 18px !important; font-weight: 600 !important; line-height: 1.3 !important;">
                 ${property.titulo}
             </h3>
             
-            <div style="color: #6c757d; font-size: 14px; margin-bottom: 10px;">
+            <div style="color: #6c757d !important; font-size: 14px !important; margin-bottom: 10px !important;">
                 📍 ${property.direccion} - ${property.barrio}
             </div>
             
-            <div style="margin-bottom: 15px;">
-                <span style="font-size: 24px; font-weight: 700; color: #232deb;">
+            <div style="margin-bottom: 15px !important;">
+                <span style="font-size: 24px !important; font-weight: 700 !important; color: #232deb !important;">
                     ${property.moneda_precio || 'USD'} ${property.precio?.toLocaleString() || '0'}
                 </span>
                 ${property.expensas > 0 ? `<div style="font-size: 12px; color: #6c757d;">+ ${property.moneda_expensas || 'ARS'} ${property.expensas.toLocaleString()} expensas</div>` : ''}
@@ -1322,59 +1118,53 @@ function createPropertyCard(property) {
                 ${createMultimediaSection(property)}
             </div>
 
-            <!-- SECCIÓN: RECORRIDO VIRTUAL 360° (SIEMPRE VISIBLE) -->
-            <div style="
-                border-top: 1px solid #e1e5e9 !important;
-                margin-top: 15px !important;
-                padding-top: 15px !important;
-                text-align: center !important;
-            ">
-                <button onclick="abrirVisor360Mejorado('${property.id_temporal}', '${property.titulo}', ${JSON.stringify(property.imagenes_360)})"
-                        style="
-                            background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
-                            color: white !important;
-                            border: none !important;
-                            padding: 10px 20px !important;
-                            border-radius: 6px !important;
-                            cursor: pointer !important;
-                            font-size: 14px !important;
-                            font-weight: 600 !important;
-                            transition: all 0.3s ease !important;
-                            display: inline-flex !important;
-                            align-items: center !important;
-                            gap: 8px !important;
-                            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3) !important;
-                        "
-                        onmouseover="
-                            this.style.background='linear-gradient(135deg, #20c997 0%, #28a745 100%)';
-                            this.style.transform='translateY(-2px)';
-                            this.style.boxShadow='0 6px 20px rgba(40, 167, 69, 0.5)'
-                        "
-                        onmouseout="
-                            this.style.background='linear-gradient(135deg, #28a745 0%, #20c997 100%)';
-                            this.style.transform='translateY(0)';
-                            this.style.boxShadow='0 4px 15px rgba(40, 167, 69, 0.3)'
-                        ">
-                    🎬 Ver Recorrido 360°
-                    <span style="
-                        background: rgba(255, 255, 255, 0.3) !important;
-                        padding: 2px 8px !important;
-                        border-radius: 12px !important;
-                        font-size: 12px !important;
-                    ">
-                        ${property.imagenes_360.length > 0 ? 
-                            `${property.imagenes_360.length} vista${property.imagenes_360.length > 1 ? 's' : ''}` : 
-                            'Vista Panorámica'
-                        }
-                    </span>
-                </button>
-                <div style="font-size: 12px !important; color: #6c757d !important; margin-top: 8px !important;">
-                    🖱️ ${property.imagenes_360.length > 0 ? 
-                        'Arrastra la imagen para rotar 360°' : 
-                        'Explora las fotos disponibles'
-                    }
+            <!-- NUEVA SECCIÓN: RECORRIDO VIRTUAL 360° (si hay imágenes disponibles) -->
+            ${property.imagenes_360 && property.imagenes_360.length > 0 ? `
+                <div style="
+                    border-top: 1px solid #e1e5e9 !important;
+                    margin-top: 15px !important;
+                    padding-top: 15px !important;
+                    text-align: center !important;
+                ">
+                    <button onclick="abrirVisor360('${property.id_temporal}')"
+                            style="
+                                background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+                                color: white !important;
+                                border: none !important;
+                                padding: 10px 20px !important;
+                                border-radius: 6px !important;
+                                cursor: pointer !important;
+                                font-size: 14px !important;
+                                font-weight: 600 !important;
+                                transition: all 0.3s ease !important;
+                                display: inline-flex !important;
+                                align-items: center !important;
+                                gap: 8px !important;
+                                box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3) !important;
+                            "
+                            onmouseover="
+                                this.style.background='linear-gradient(135deg, #20c997 0%, #28a745 100%)' !important;
+                                this.style.transform='translateY(-2px)' !important;
+                                this.style.boxShadow='0 6px 20px rgba(40, 167, 69, 0.5)' !important
+                            "
+                            onmouseout="
+                                this.style.background='linear-gradient(135deg, #28a745 0%, #20c997 100%)' !important;
+                                this.style.transform='translateY(0)' !important;
+                                this.style.boxShadow='0 4px 15px rgba(40, 167, 69, 0.3)' !important
+                            ">
+                        🎬 Recorrido Virtual 360°
+                        <span style="
+                            background: rgba(255, 255, 255, 0.3) !important;
+                            padding: 2px 8px !important;
+                            border-radius: 12px !important;
+                            font-size: 12px !important;
+                        ">${property.imagenes_360.length} vista${property.imagenes_360.length > 1 ? 's' : ''}</span>
+                    </button>
+                    <div style="font-size: 12px !important; color: #6c757d !important; margin-top: 8px !important;">
+                        🖱️ Arrastra la imagen para rotar 360°
+                    </div>
                 </div>
-            </div>
+            ` : ''}
 
             <!-- SECCIÓN: MAPA DE UBICACIÓN -->
             <div style="border-top: 1px solid #e1e5e9 !important; margin-top: 15px !important; padding-top: 15px !important;">
@@ -1383,16 +1173,16 @@ function createPropertyCard(property) {
                 </div>
                 <div style="text-align: center !important; margin-bottom: 10px !important;">
                     <button onclick="showPropertyMap('${property.id_temporal}', '${property.direccion_completa ? property.direccion_completa.replace(/'/g, "\\'") : `${property.direccion}, ${property.barrio}, Argentina`.replace(/'/g, "\\'")}', '${property.titulo.replace(/'/g, "\\'")}')"
-                            style="background: #232deb; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px;"
-                            onmouseover="this.style.background='#1a1db4'; this.style.transform='translateY(-2px)'" 
-                            onmouseout="this.style.background='#232deb'; this.style.transform='translateY(0)'">
+                            style="background: #232deb !important; color: white !important; border: none !important; padding: 10px 20px !important; border-radius: 6px !important; cursor: pointer !important; font-size: 14px !important; font-weight: 600 !important; transition: all 0.3s ease !important; display: inline-flex !important; align-items: center !important; gap: 8px !important;"
+                            onmouseover="this.style.background='#1a1db4' !important; this.style.transform='translateY(-2px)' !important" 
+                            onmouseout="this.style.background='#232deb' !important; this.style.transform='translateY(0)' !important">
                         🗺️ Ver en el Mapa
                     </button>
                 </div>
-                <div id="map-container-${property.id_temporal}" style="height: 0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.3s ease; opacity: 0;">
-                    <div id="map-placeholder-${property.id_temporal}" style="height: 100%; display: flex; align-items: center; justify-content: center; background: #f8f9fa; color: #6c757d; font-size: 14px;">
-                        <div style="display: flex; align-items: center; justify-content: center;">
-                            <img src="llave.png" alt="Cargando" style="width: 20px; height: 20px; margin-right: 8px;">
+                <div id="map-container-${property.id_temporal}" style="height: 0 !important; border-radius: 8px !important; overflow: hidden !important; box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important; transition: all 0.3s ease !important; opacity: 0 !important;">
+                    <div id="map-placeholder-${property.id_temporal}" style="height: 100% !important; display: flex !important; align-items: center !important; justify-content: center !important; background: #f8f9fa !important; color: #6c757d !important; font-size: 14px !important;">
+                        <div style="display: flex !important; align-items: center !important; justify-content: center !important;">
+                            <img src="llave.png" alt="Cargando" style="width: 20px !important; height: 20px !important; margin-right: 8px !important;">
                             <span>Cargando mapa...</span>
                         </div>
                     </div>
@@ -1400,12 +1190,12 @@ function createPropertyCard(property) {
             </div>
             
             <button onclick="showPropertyDetails('${property.id_temporal}')" 
-                    style="width: 100%; background: #232deb; color: white; 
-                           border: none; padding: 12px; border-radius: 6px; 
-                           font-size: 14px; font-weight: 600; cursor: pointer; 
-                           transition: all 0.3s ease; margin-top: 15px;"
-                    onmouseover="this.style.background='#1a1db4'" 
-                    onmouseout="this.style.background='#232deb'">
+                    style="width: 100% !important; background: #232deb !important; color: white !important; 
+                           border: none !important; padding: 12px !important; border-radius: 6px !important; 
+                           font-size: 14px !important; font-weight: 600 !important; cursor: pointer !important; 
+                           transition: all 0.3s ease !important; margin-top: 15px !important;"
+                    onmouseover="this.style.background='#1a1db4' !important" 
+                    onmouseout="this.style.background='#232deb' !important">
                 Ver Detalles
             </button>
         </div>
