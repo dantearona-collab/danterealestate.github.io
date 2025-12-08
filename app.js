@@ -1,3 +1,5 @@
+[file name]: app.js
+[file content begin]
 // Sistema Dante Propiedades - SIN ERRORES + SLIDER FUNCIONAL + MODAL + MULTIMEDIA
 // Versión sin dependencias de Font Awesome + Slider de múltiples fotos + Modal de galería - 2025-11-13
 
@@ -14,7 +16,6 @@
 let currentSlides = {};
 
 // Variables globales para multimedia
-
 let documentosProperty = [];
 let videosProperty = [];
 
@@ -35,6 +36,73 @@ let pdfModal = null;
 
 let multimediaModal = null;
 
+// ========================================
+// NUEVAS VARIABLES PARA COLLAGE
+// ========================================
+let currentCollageImageIndex = 0;
+let currentImageIndex = 0;
+
+// ========================================
+// FUNCIÓN PARA SCROLL A PROPIEDAD (AÑADIDA)
+// ========================================
+function scrollToProperty(propertyId) {
+    const propertyCard = document.querySelector(`[data-property-card="${propertyId}"]`);
+    if (propertyCard) {
+        propertyCard.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+        
+        // Efecto de highlight
+        propertyCard.style.boxShadow = '0 0 0 3px rgba(35, 45, 235, 0.3)';
+        propertyCard.style.transition = 'box-shadow 0.5s ease';
+        
+        setTimeout(() => {
+            propertyCard.style.boxShadow = '0 4px 16px rgba(0,0,0,0.1)';
+        }, 2000);
+    }
+}
+
+// ========================================
+// FUNCIONES PARA COLLAGE (AÑADIDAS)
+// ========================================
+function prevCollageImage(propertyId) {
+    const property = globalData.properties.find(p => p.id_temporal === propertyId);
+    if (!property || !property.fotos) return;
+    
+    const totalFotos = property.fotos.length;
+    currentCollageImageIndex = currentCollageImageIndex > 0 ? currentCollageImageIndex - 1 : totalFotos - 1;
+    updateCollageDisplay(propertyId, currentCollageImageIndex);
+}
+
+function nextCollageImage(propertyId) {
+    const property = globalData.properties.find(p => p.id_temporal === propertyId);
+    if (!property || !property.fotos) return;
+    
+    const totalFotos = property.fotos.length;
+    currentCollageImageIndex = currentCollageImageIndex < totalFotos - 1 ? currentCollageImageIndex + 1 : 0;
+    updateCollageDisplay(propertyId, currentCollageImageIndex);
+}
+
+function updateCollageDisplay(propertyId, index) {
+    const collageElement = document.querySelector(`[data-property="${propertyId}"] .collage-main`);
+    if (collageElement) {
+        const property = globalData.properties.find(p => p.id_temporal === propertyId);
+        if (property && property.fotos && property.fotos[index]) {
+            const img = collageElement.querySelector('img');
+            if (img) {
+                img.src = property.fotos[index];
+                img.alt = `${property.titulo} - Foto ${index + 1}`;
+            }
+            
+            const counter = collageElement.querySelector('div[style*="position: absolute; bottom: 5px"]');
+            if (counter) {
+                counter.textContent = `${index + 1}/${property.fotos.length}`;
+            }
+        }
+    }
+}
+
 function initializeVariables() {
     // Obtener referencias con verificación de existencia
     planoPdf = document.getElementById('planoPdf');
@@ -51,6 +119,9 @@ function initializeVariables() {
     modalTitle = document.getElementById('modalTitle');
     pdfModal = document.getElementById('pdfModal');
 
+    // Inicializar multimediaModal
+    multimediaModal = null;
+
     // Log para depuración
     console.log('🔍 Elementos del DOM inicializados:', {
         planoPdf: !!planoPdf,
@@ -64,21 +135,43 @@ function initializeVariables() {
     setupPdfEventListeners();
 }
 
-
-
-// Función para configurar event listeners de PDFs
 // Función para configurar event listeners de PDFs
 function setupPdfEventListeners() {
     // ========== EVENT LISTENERS PARA PDFs ==========
-    // (aquí van los event listeners de PDFs que ya teníamos)
-    if (entornosPdf && typeof entornosPdf.addEventListener === 'function') {
-        entornosPdf.addEventListener('click', function (e) {
+    if (planoPdf) {
+        planoPdf.addEventListener('click', function(e) {
             e.stopPropagation();
-            console.log('📄 Click en Entornos PDF');
+            openPdf('plano', 'Plano del Departamento');
+        });
+    }
+    
+    if (reglamentoPdf) {
+        reglamentoPdf.addEventListener('click', function(e) {
+            e.stopPropagation();
+            openPdf('reglamento', 'Reglamento de Copropiedad');
+        });
+    }
+    
+    if (expensasPdf) {
+        expensasPdf.addEventListener('click', function(e) {
+            e.stopPropagation();
+            openPdf('expensas', 'Detalle de Expensas');
+        });
+    }
+    
+    if (entornosPdf) {
+        entornosPdf.addEventListener('click', function(e) {
+            e.stopPropagation();
             openPdf('entornos', 'Estudio de Entornos');
         });
     }
-    // ... resto de PDFs ...
+    
+    if (datosParcelaPdf) {
+        datosParcelaPdf.addEventListener('click', function(e) {
+            e.stopPropagation();
+            openPdf('datos_parcela', 'Datos de la Parcela');
+        });
+    }
 
     // ========== EVENT LISTENERS PARA MULTIMEDIA ==========
     // Eventos para los iconos de multimedia con verificación
@@ -138,7 +231,6 @@ function setupPdfEventListeners() {
     }
 }
 
-
 // Función para crear la sección multimedia (PDFs y Videos)
 function createMultimediaSection(property) {
     const documentos = property.documentos || [];
@@ -195,7 +287,6 @@ function createMultimediaSection(property) {
     return multimediaHTML;
 }
 
-
 // ========================================
 // SISTEMA DE VISOR 360
 // ========================================
@@ -203,7 +294,6 @@ function createMultimediaSection(property) {
 let visor360Activo = false;  // <-- CAMBIAR de 0 a false
 let imagenes360Actuales = [];
 let imagen360Actual = 0;
-
 
 // Función para abrir el visor 360
 function abrirVisor360(propertyId, index = 0) {
@@ -224,9 +314,18 @@ function abrirVisor360(propertyId, index = 0) {
 
 // Función para crear el modal 360
 function crearModal360(property) {
+    console.log('🔧 Creando modal 360...');
+    
     // Cerrar cualquier modal existente primero
     cerrarVisor360();
-
+    
+    // Verificar que hay imágenes
+    if (imagenes360Actuales.length === 0) {
+        console.error('❌ No hay imágenes 360 para mostrar');
+        alert('No hay imágenes 360 disponibles para esta propiedad.');
+        return;
+    }
+    
     const modal360 = document.createElement('div');
     modal360.id = 'modal-360';
     modal360.style.cssText = `
@@ -243,7 +342,10 @@ function crearModal360(property) {
         justify-content: center;
         backdrop-filter: blur(10px);
     `;
-
+    
+    // Usar la imagen actual o la primera si está disponible
+    const imagenMostrar = imagenes360Actuales[imagen360Actual] || imagenes360Actuales[0] || 'llave.png';
+    
     modal360.innerHTML = `
         <!-- Header del visor 360 -->
         <div style="
@@ -302,8 +404,7 @@ function crearModal360(property) {
         ">
             <!-- Imagen 360 actual -->
             <img id="imagen360-actual" 
-                 src="${imagenes360Actuales[imagen360Actual] || ''}" 
-                 onerror="this.src='llave.png'; console.error('❌ Error cargando imagen 360');" 
+                 src="${imagenMostrar}" 
                  alt="Recorrido virtual 360° - ${property.titulo}"
                  style="
                     width: 100%;
@@ -371,63 +472,13 @@ function crearModal360(property) {
                     →
                 </button>
             </div>
-            
-            <!-- Miniaturas de todas las imágenes 360 -->
-            <div id="miniaturas360-container" style="
-                position: absolute;
-                bottom: 90px;
-                left: 0;
-                right: 0;
-                display: flex;
-                justify-content: center;
-                gap: 10px;
-                padding: 10px;
-                overflow-x: auto;
-                z-index: 10003;
-            ">
-                ${imagenes360Actuales.map((img, index) => `
-                    <img src="${img}" 
-                         alt="Miniatura ${index + 1}"
-                         onclick="seleccionarImagen360(${index})"
-                         style="
-                            width: 60px;
-                            height: 40px;
-                            object-fit: cover;
-                            border-radius: 6px;
-                            cursor: pointer;
-                            border: ${index === imagen360Actual ? '3px solid #232deb' : '2px solid rgba(255,255,255,0.3)'};
-                            opacity: ${index === imagen360Actual ? '1' : '0.7'};
-                            transition: all 0.3s ease;
-                         "
-                         onmouseover="this.style.opacity='1'; this.style.transform='scale(1.05)'"
-                         onmouseout="this.style.opacity='${index === imagen360Actual ? '1' : '0.7'}'; this.style.transform='scale(1)'">
-                `).join('')}
-            </div>
-        </div>
-
-        <!-- Instrucciones -->
-        <div style="
-            color: white;
-            text-align: center;
-            margin-top: 20px;
-            padding: 10px;
-            font-size: 14px;
-            opacity: 0.8;
-            max-width: 600px;
-        ">
-            <div>🖱️ <strong>Arrastra la imagen</strong> para rotar la vista 360°</div>
-            <div>🔄 Usa las <strong>flechas</strong> para cambiar entre vistas</div>
-            <div>📸 Haz clic en las <strong>miniaturas</strong> para saltar a una vista específica</div>
         </div>
     `;
-
+    
     document.body.appendChild(modal360);
     document.body.style.overflow = 'hidden';
-
-    // Agregar funcionalidad de arrastre para el efecto 360
-    agregarFuncionalidadArrastre();
-
-    console.log('🔄 Visor 360 abierto para:', property.titulo);
+    
+    console.log('✅ Modal 360 creado correctamente');
 }
 
 // Función para cambiar de imagen 360
@@ -555,7 +606,6 @@ document.addEventListener('keydown', function (event) {
     }
 });
 
-
 // Función para cerrar modal multimedia - DEFINIR ANTES DE viewPDF
 function closeMultimediaModal() {
     console.log('🔧 DEBUG closeMultimediaModal - multimediaModal:', multimediaModal);
@@ -574,6 +624,7 @@ function closeMultimediaModal() {
     }
     document.body.style.overflow = 'auto';
 }
+
 // Función para depurar propiedades
 function debugProperties() {
     console.log('🔍 DEPURACIÓN DE PROPIEDADES:');
@@ -586,18 +637,6 @@ function debugProperties() {
         console.log(`   URLs:`, prop.imagenes_360 || []);
     });
 }
-
-// Llama a esta función después de cargar las propiedades:
-// loadProperties().then(() => debugProperties());
-
-// Función para visualizar PDFs
-function viewPDF(pdfUrl, titulo) {
-    // ... el código de viewPDF que ya tienes ...
-}
-
-
-
-
 
 // Función para visualizar PDFs - VERSIÓN CON MANEJO DE ERRORES
 function viewPDF(pdfUrl, titulo) {
@@ -642,7 +681,7 @@ function viewPDF(pdfUrl, titulo) {
 
         multimediaModal.innerHTML = `
             <div style="position: relative; width: 90%; max-width: 1000px; height: 90%; background: white; 
-                        border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;">
+                        border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3) ;">
                 <div style="position: absolute; top: 0; left: 0; right: 0; background: #232deb; color: white; 
                             padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10;">
                     <h3 style="margin: 0; font-size: 16px;">${titulo} - ${fileName}</h3>
@@ -675,10 +714,8 @@ function viewPDF(pdfUrl, titulo) {
         window.open(pdfUrlCorregido, '_blank');
     }
 }
+
 // Función para visualizar videos
-
-
-
 function viewVideo(videoUrl, titulo) {
     // CORRECCIÓN: Cambiar extensiones de video a minúsculas
     const videoUrlCorregido = videoUrl.replace(/\.(MP4|WEBM|OGG|AVI|MOV)$/i, (match) => match.toLowerCase());
@@ -692,18 +729,18 @@ function viewVideo(videoUrl, titulo) {
     multimediaModal = document.createElement('div');
     multimediaModal.id = 'video-modal';
     multimediaModal.style.cssText = `
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        background: rgba(0,0,0,0.8) !important;
-        z-index: 9999 !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        padding: 20px !important;
-    `;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0,0,0,0.8);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        `;
 
     multimediaModal.innerHTML = `
         <div style="position: relative; width: 90%; max-width: 1000px; height: 70%; background: white; 
@@ -735,7 +772,6 @@ function viewVideo(videoUrl, titulo) {
 
     console.log('🎥 Abriendo video:', videoUrlCorregido);
 }
-
 
 // Cerrar modal con tecla Escape
 document.addEventListener('keydown', function (event) {
@@ -1067,9 +1103,6 @@ function populateFilters(properties) {
     console.log('🔧 Filtros poblados - Barrios:', barrios.length, 'Tipos:', tipos.length);
 }
 
-
-
-
 // Función para crear la tarjeta de propiedad - REEMPLAZA LA SECCIÓN DEL BOTÓN 360°
 function createPropertyCard(property) {
     const card = document.createElement('div');
@@ -1152,7 +1185,6 @@ function createPropertyCard(property) {
     return card;
 }
 
-
 // FUNCIONES PARA MAPAS - VERSIÓN CON IDS
 function toggleMap(button, direccionCompleta, titulo) {
     const propertyCard = button.closest('.property-card');
@@ -1185,8 +1217,6 @@ function toggleMap(button, direccionCompleta, titulo) {
         }
     }
 }
-
-
 
 function loadGoogleMap(placeholder, direccionCompleta, titulo, propertyId) {
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccionCompleta)}`;
@@ -1225,17 +1255,6 @@ function loadGoogleMap(placeholder, direccionCompleta, titulo, propertyId) {
     `;
     placeholder.classList.add('loaded');
 }
-// Función para mostrar el mapa y ocultar propiedades
-
-
-
-// ========================================
-// SISTEMA DE BOTÓN VOLVER PARA MAPAS
-// ========================================
-
-// Función para mostrar el mapa en pantalla completa con botón Volver
-
-
 
 // Función para mostrar el mapa en pantalla completa con botón Volver
 function showPropertyMap(propertyId, address, title) {
@@ -1398,6 +1417,7 @@ function closeMap() {
         console.error('❌ Error al cerrar mapa:', error);
     }
 }
+
 // Cerrar con tecla Escape
 document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape' && document.body.classList.contains('map-view-active')) {
@@ -1499,76 +1519,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 console.log('✅ Sistema de botón Volver para mapas cargado');
 
-
-
-
-// También puedes integrarlo con tu botón existente "Cómo llegar"
-function openDirectionsFromCard(propertyId, address) {
-    // Esta función se llamaría cuando hagan clic en "Cómo llegar" en una tarjeta
-    showPropertyMap(propertyId, address);
-}
-
-// Cerrar con tecla Escape
-document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape' && document.body.classList.contains('map-view-active')) {
-        backToProperties();
-    }
-});
-
-
-
-
-
-
-
-
-
-
-
-// NUEVA FUNCIÓN: Scroll a la propiedad
-function scrollToProperty(propertyId) {
-    const propertyCard = document.querySelector(`[data-property-card="${propertyId}"]`);
-    if (propertyCard) {
-        // Cerrar el mapa primero
-        const mapContainer = document.getElementById(`map-container-${propertyId}`);
-        const mapButton = propertyCard.querySelector('button[onclick*="toggleMap"]');
-
-        if (mapContainer && mapButton) {
-            mapContainer.style.height = '0';
-            mapContainer.style.opacity = '0';
-            mapContainer.style.marginTop = '0';
-            mapButton.innerHTML = '🗺️ Ver en el Mapa';
-            mapButton.style.background = '#f8f9fa';
-            mapButton.style.borderColor = '#dee2e6';
-            mapButton.style.color = '#495057';
-        }
-
-        // Scroll suave a la propiedad
-        propertyCard.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center'
-        });
-
-        // Efecto visual de highlight
-        propertyCard.style.boxShadow = '0 0 0 3px rgba(35, 45, 235, 0.3)';
-        propertyCard.style.transition = 'box-shadow 0.5s ease';
-
-        setTimeout(() => {
-            propertyCard.style.boxShadow = '0 4px 16px rgba(0,0,0,0.1)';
-        }, 2000);
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
 // Función para manejar estilos del mapa container
 function initializeMapStyles() {
     const style = document.createElement('style');
@@ -1591,13 +1541,6 @@ function initializeMapStyles() {
     `;
     document.head.appendChild(style);
 }
-
-// Inicializar estilos cuando se cargue la página
-document.addEventListener('DOMContentLoaded', initializeMapStyles);
-
-
-
-
 
 function displayProperties(properties) {
     const container = document.getElementById('properties-container');
@@ -1695,12 +1638,17 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('✅ Sin dependencias de Font Awesome');
     console.log('🎬 Sistema de multimedia activado');
 
+    // INICIALIZAR VARIABLES CRÍTICAS
+    initializeVariables();
+    
     // Cargar CSS del slider
     addSliderStyles();
 
+    // Inicializar estilos de mapa
+    initializeMapStyles();
+
     // Cargar propiedades
     loadProperties();
-
 
     console.log('✅ Sistema inicializado sin errores de consola');
     console.log('🎠 Slider de múltiples fotos disponible');
@@ -1744,7 +1692,6 @@ window.addEventListener('load', function () {
 // ========================================
 // SISTEMA DE MODAL DE IMÁGENES
 // ========================================
-
 
 // Función principal para abrir el modal con verificación completa
 function abrirModalImagenesComplete(propertyId) {
@@ -2192,52 +2139,6 @@ function expandPropertyImages(propertyId) {
 
     overlay.innerHTML = header + masonryContainer;
     document.body.appendChild(overlay);
-
-    // === EN TU ARCHIVO JAVASCRIPT - Donde están los event listeners ===
-
-    // Eventos para los PDFs individuales (AGREGA ESTOS NUEVOS)
-    if (planoPdf) {
-        planoPdf.addEventListener('click', function (e) {
-            e.stopPropagation();
-            openPdf('plano', 'Plano del Departamento');
-        });
-    }
-
-    // --- AGREGAR AQUÍ LOS NUEVOS EVENT LISTENERS ---
-    if (document.getElementById('entornosPdf')) {
-        document.getElementById('entornosPdf').addEventListener('click', function (e) {
-            e.stopPropagation();
-            openPdf('entornos', 'Estudio de Entornos');
-        });
-    }
-
-    if (document.getElementById('datosParcelaPdf')) {
-        document.getElementById('datosParcelaPdf').addEventListener('click', function (e) {
-            e.stopPropagation();
-            openPdf('datos_parcela', 'Datos de la Parcela');
-        });
-    }
-    // --- FIN DE NUEVOS EVENT LISTENERS ---
-
-    if (reglamentoPdf) {
-        reglamentoPdf.addEventListener('click', function (e) {
-            e.stopPropagation();
-            openPdf('reglamento', 'Reglamento de Copropiedad');
-        });
-    }
-
-    if (expensasPdf) {
-        expensasPdf.addEventListener('click', function (e) {
-            e.stopPropagation();
-            openPdf('expensas', 'Detalle de Expensas');
-        });
-    }
-
-
-
-
-
-
 
     // Agregar event listeners para overlay
     overlay.addEventListener('click', function (e) {
@@ -2863,8 +2764,6 @@ const propiedadesJSON = {
     }
 };
 
-
-
 function openPdf(pdfName, title) {
     console.log('📂 Buscando PDF:', pdfName);
 
@@ -2896,136 +2795,42 @@ function openPdf(pdfName, title) {
         const rutaFinal = rutaArchivo.replace(/\.PDF$/, '.pdf');
         console.log('🚀 Abriendo PDF:', rutaFinal);
 
-        pdfViewer.src = rutaFinal;
-        modalTitle.textContent = title;
-        pdfModal.style.display = 'flex';
+        if (pdfViewer && modalTitle && pdfModal) {
+            pdfViewer.src = rutaFinal;
+            modalTitle.textContent = title;
+            pdfModal.style.display = 'flex';
+        } else {
+            console.error('❌ Elementos del modal no encontrados');
+        }
     } else {
         console.warn('⚠️ PDF no encontrado en documentos:', pdfName);
-        // ... resto del código de fallback
+        alert('El documento solicitado no está disponible.');
     }
-}
-
-// Evento para hacer clic en cualquier parte de la tarjeta
-// if (propertyCard) {
-//     propertyCard.addEventListener('click', function(e) {
-//         // Evitar que se active cuando se hace clic en elementos específicos
-//         if (!e.target.closest('.media-icon') && 
-//             !e.target.closest('.pdf-item') && 
-//             !e.target.closest('.action-button')) {
-//             openPdf('plano', 'Plano del Departamento');
-//         }
-//     });
-// }
-
-// Eventos para los PDFs individuales
-if (planoPdf) {
-    planoPdf.addEventListener('click', function (e) {
-        e.stopPropagation();
-        openPdf('plano', 'Plano del Departamento');
-    });
-}
-
-if (reglamentoPdf) {
-    reglamentoPdf.addEventListener('click', function (e) {
-        e.stopPropagation();
-        openPdf('reglamento', 'Reglamento de Copropiedad');
-    });
-}
-
-if (expensasPdf) {
-    expensasPdf.addEventListener('click', function (e) {
-        e.stopPropagation();
-        openPdf('expensas', 'Detalle de Expensas');
-    });
-}
-
-// Eventos para los iconos de multimedia
-if (photosIcon) {
-    photosIcon.addEventListener('click', function (e) {
-        e.stopPropagation();
-        alert('Mostrando: ' + propiedadesJSON.propiedad.archivos.fotos);
-    });
-}
-
-if (tourIcon) {
-    tourIcon.addEventListener('click', function (e) {
-        e.stopPropagation();
-        alert('Abriendo: ' + propiedadesJSON.propiedad.archivos.tour);
-    });
-}
-
-if (videoIcon) {
-    videoIcon.addEventListener('click', function (e) {
-        e.stopPropagation();
-        alert('Reproduciendo: ' + propiedadesJSON.propiedad.archivos.video);
-    });
-}
-
-// Evento para el botón de contacto
-if (contactButton) {
-    contactButton.addEventListener('click', function (e) {
-        e.stopPropagation();
-        alert('Redirigiendo al formulario de contacto...');
-    });
-}
-
-// Cerrar modal
-if (closeModal) {
-    closeModal.addEventListener('click', function () {
-        if (pdfModal) {
-            pdfModal.style.display = 'none';
-        }
-        if (pdfViewer) {
-            pdfViewer.src = '';
-        }
-    });
-}
-
-// Cerrar modal al hacer clic fuera del contenido
-if (pdfModal) {
-    pdfModal.addEventListener('click', function (e) {
-        if (e.target === pdfModal) {
-            pdfModal.style.display = 'none';
-            if (pdfViewer) {
-                pdfViewer.src = '';
-            }
-        }
-    });
 }
 
 // CSS FORZADO: Asegurar fondo blanco en todas las galerías
 const cssInteligenteForzado = document.createElement('style');
 cssInteligenteForzado.textContent = `
-        .image-expansion-overlay {
-            background: white !important;
-            background-color: white !important;
-        }
-        
-        [id^="galeria-inteligente-"] {
-            background: white !important;
-            background-color: white !important;
-        }
-        
-        [id^="image-expansion-"] {
-            background: white !important;
-            background-color: white !important;
-        }
-        
-        .image-expansion-overlay * {
-            background-color: inherit;
-        }
-    `;
-
-
-// Cerrar con tecla Escape
-document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape' && document.body.classList.contains('map-view-active')) {
-        console.log('⎋ Tecla Escape presionada - Volviendo a propiedades');
-        backToProperties();
+    .image-expansion-overlay {
+        background: white !important;
+        background-color: white !important;
     }
-});
+    
+    [id^="galeria-inteligente-"] {
+        background: white !important;
+        background-color: white !important;
+    }
+    
+    [id^="image-expansion-"] {
+        background: white !important;
+        background-color: white !important;
+    }
+    
+    .image-expansion-overlay * {
+        background-color: inherit;
+    }
+`;
 
-console.log('✅ Sistema de botón Volver para mapas cargado');
 document.head.appendChild(cssInteligenteForzado);
 
 console.log('🎨 CSS forzado para fondo blanco aplicado');
@@ -3037,3 +2842,4 @@ console.log('✅ Sin dependencias de Font Awesome');
 console.log('🚀 Distribución inteligente aplicada - Sin tamaños iguales - Fondo blanco garantizado');
 console.log('📄 Sistema de PDFs integrado');
 console.log('🎥 Sistema de videos integrado');
+[file content end]
