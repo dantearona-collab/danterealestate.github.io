@@ -1158,7 +1158,7 @@ function createPropertyCard(property) {
                     text-align: center !important;
                 ">
                     // CORRECTO:
-                    const button360 = `<button onclick ="abrirVisor360('${property.id_temporal}')" class="btn-360">🔄 Ver 360°</button>`;
+                    const button360 = `<button onclick="abrirVisor360('${property.id_temporal}')" class="btn-360">🔄 Ver 360°</button>`;
                             style="
                                 background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
                                 color: white !important;
