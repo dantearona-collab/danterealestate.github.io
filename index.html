@@ -1985,7 +1985,7 @@
             console.log('🎯 Sistema completamente funcional');
         });
 
-        /
+  
 
         window.addEventListener('unhandledrejection', function(e) {
             console.error('X Promesa rechazada:', e.reason);
@@ -1994,15 +1994,7 @@
     
     <script>
     // Parche para errores de onclick
-    window.addEventListener('error', function(e) {
-        if (e.message.includes('onclick') && e.filename.includes('app.js')) {
-            console.warn('⚠️ Error de onclick ignorado:', e.message);
-            e.preventDefault();
-            return true;
-        }
-    });
-    </script>
-
+  
 
 
     <!-- Scripts de optimización del sistema 360° -->
