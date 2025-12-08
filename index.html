@@ -2195,6 +2195,34 @@ document.addEventListener('click', function(event) {
             console.log('🎯 Sistema completamente funcional');
         });
     </script>
+    <script>
+        // DEBUG: Verificar errores de sintaxis
+        console.log('✅ index.html cargado completamente');
 
+        // Verificar si hay scripts con errores
+        window.addEventListener('error', function(e) {
+            console.error('❌ Error global detectado:', {
+                message: e.message,
+                filename: e.filename,
+                lineno: e.lineno,
+                colno: e.colno,
+                error: e.error
+            });
+            
+            if (e.filename && e.filename.includes('index.html')) {
+                console.error('📄 El error está en index.html, línea:', e.lineno);
+                
+                // Intentar obtener la línea problemática
+                if (e.lineno && document.readyState === 'complete') {
+                    console.warn('🔍 Revisa la línea ' + e.lineno + ' de index.html');
+                }
+            }
+        });
+
+        // También capturar errores de recursos
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('❌ Promesa rechazada:', e.reason);
+        });
+        </script>
 </body>
 </html>
