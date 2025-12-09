@@ -1,672 +1,522 @@
 # -*- coding: utf-8 -*-
 """
-🚀 SISTEMA DE ALMACENAMIENTO EXCEL - BACKEND COMPLETO
+🚀 SISTEMA DE ALMACENAMIENTO POSTGRESQL - BACKEND RENDER
 ================================================================
 
-Este servidor Python recibe los datos del formulario y los almacena automáticamente
-en Excel y CSV. Incluye modo offline, respaldos automáticos y manejo de errores.
+Versión optimizada para Render.com con PostgreSQL
+Almacenamiento robusto y escalable en la nube
 """
 
+import os
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
-from openpyxl import load_workbook
 import pandas as pd
+import psycopg2
+from psycopg2.extras import RealDictCursor
 import json
-import os
 from datetime import datetime
-import csv
 import logging
-import threading
-import time
-import glob
-from pathlib import Path
 
 # Configuración de logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('data/sistema-formularios.log', encoding='utf-8'),
-        logging.StreamHandler()
-    ]
+    handlers=[logging.StreamHandler()]
 )
 
-class ExcelStorageManager:
+app = Flask(__name__)
+
+# Configuración CORS para dominio personalizado
+CORS(app, origins=[
+    "https://dantepropiedades.com.ar",
+    "https://danterealestate.github.io",
+    "http://localhost:3000",
+    "http://localhost:8000"
+])
+
+# Configuración desde variables de entorno
+ADMIN_TOKEN = os.environ.get('ADMIN_TOKEN', '2205')
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+class PostgreSQLStorageManager:
     """
-    📊 Gestor completo de almacenamiento en Excel
-    Maneja múltiples archivos, respaldos y exportación automática
+    📊 Gestor de almacenamiento en PostgreSQL
+    Compatible con Render.com y bases de datos en la nube
     """
     
-    def __init__(self, base_path='data'):
-        self.base_path = Path(base_path)
-        self.excel_path = self.base_path / 'excel' / 'consultas.xlsx'
-        self.csv_path = self.base_path / 'excel' / 'consultas.csv'
-        self.backup_path = self.base_path / 'backups'
-        
-        # Crear directorios si no existen
-        self._crear_estructura_directorios()
-        
-        # Configuración de columnas
-        self.columnas = [
-            'Fecha', 'Hora', 'Timestamp', 'Nombre', 'Email', 'Teléfono', 
-            'Interés', 'Presupuesto', 'Mensaje', 'Página', 'IP', 'User_Agent',
-            'Estado', 'Notas'
-        ]
-        
-        # Inicializar archivos
-        self._inicializar_archivos()
-        
-        logging.info(f"✅ Sistema de almacenamiento inicializado en: {self.base_path}")
+    def __init__(self):
+        self.init_database()
     
-    def _crear_estructura_directorios(self):
-        """Crear estructura de directorios necesaria"""
-        directorios = [
-            self.base_path / 'excel',
-            self.base_path / 'backups',
-            self.base_path / 'temp'
-        ]
-        
-        for directorio in directorios:
-            directorio.mkdir(parents=True, exist_ok=True)
-    
-    def _inicializar_archivos(self):
-        """Inicializar archivos Excel y CSV con encabezados"""
-        # Crear DataFrame con encabezados
-        df_vacio = pd.DataFrame(columns=self.columnas)
-        
-        # Guardar en Excel si no existe
-        if not self.excel_path.exists():
-            with pd.ExcelWriter(self.excel_path, engine='openpyxl') as writer:
-                df_vacio.to_excel(writer, sheet_name='Consultas', index=False)
-                df_vacio.to_excel(writer, sheet_name='Backup', index=False)
-        
-        # Crear CSV con encabezados
-        if not self.csv_path.exists():
-            with open(self.csv_path, 'w', newline='', encoding='utf-8') as f:
-                writer = csv.writer(f)
-                writer.writerow(self.columnas)
-    
-    def añadir_consulta(self, datos_formulario):
-        """
-        📝 Añadir nueva consulta al sistema de almacenamiento
-        """
+    def get_connection(self):
+        """Obtener conexión a PostgreSQL"""
         try:
-            # Preparar datos completos
-            timestamp = datetime.now()
-            fecha_hora = timestamp.strftime('%d/%m/%Y %H:%M:%S')
-            
-            consulta_completa = {
-                'Fecha': timestamp.strftime('%d/%m/%Y'),
-                'Hora': timestamp.strftime('%H:%M:%S'),
-                'Timestamp': timestamp.isoformat(),
-                'Nombre': datos_formulario.get('nombre', ''),
-                'Email': datos_formulario.get('email', ''),
-                'Teléfono': datos_formulario.get('telefono', ''),
-                'Interés': datos_formulario.get('interes', ''),
-                'Presupuesto': datos_formulario.get('presupuesto', ''),
-                'Mensaje': datos_formulario.get('mensaje', ''),
-                'Página': datos_formulario.get('pagina', 'Desconocida'),
-                'IP': request.remote_addr if request else 'N/A',
-                'User_Agent': request.headers.get('User-Agent', 'N/A') if request else 'N/A',
-                'Estado': 'Nueva',
-                'Notas': ''
-            }
-            
-            # Guardar en Excel (sheet principal)
-            self._guardar_en_excel(consulta_completa)
-            
-            # Guardar en CSV
-            self._guardar_en_csv(consulta_completa)
-            
-            # Crear backup automático
-            self._crear_backup_automatico()
-            
-            logging.info(f"✅ Consulta guardada: {consulta_completa['Nombre']} - {consulta_completa['Email']}")
-            
-            return {
-                'success': True,
-                'message': 'Consulta guardada correctamente',
-                'timestamp': consulta_completa['Timestamp'],
-                'file': str(self.excel_path)
-            }
-            
+            conn = psycopg2.connect(DATABASE_URL)
+            return conn
         except Exception as e:
-            logging.error(f"❌ Error guardando consulta: {str(e)}")
-            return {
-                'success': False,
-                'error': str(e),
-                'message': 'Error al guardar consulta'
-            }
-    
-    def _guardar_en_excel(self, consulta):
-        """💾 Guardar en archivo Excel con formato"""
-        try:
-            # Leer Excel existente
-            df = pd.read_excel(self.excel_path, sheet_name='Consultas')
-            
-            # Añadir nueva fila
-            df_nuevo = pd.DataFrame([consulta])
-            df_completo = pd.concat([df, df_nuevo], ignore_index=True)
-            
-            # Guardar con formato
-            with pd.ExcelWriter(self.excel_path, engine='openpyxl') as writer:
-                # Sheet principal con formato
-                df_completo.to_excel(writer, sheet_name='Consultas', index=False)
-                
-                # Sheet de backup
-                df_completo.to_excel(writer, sheet_name='Backup', index=False)
-                
-                # Sheet de estadísticas
-                stats = self._generar_estadisticas()
-                stats.to_excel(writer, sheet_name='Estadísticas', index=False)
-                
-                # Formatear columnas
-                workbook = writer.book
-                worksheet = writer.sheets['Consultas']
-                
-                # Formatear columnas de texto
-                for column in worksheet.columns:
-                    max_length = 0
-                    column_letter = column[0].column_letter
-                    for cell in column:
-                        try:
-                            if len(str(cell.value)) > max_length:
-                                max_length = len(str(cell.value))
-                        except:
-                            pass
-                    adjusted_width = min(max_length + 2, 50)
-                    worksheet.column_dimensions[column_letter].width = adjusted_width
-            
-            logging.info("✅ Guardado en Excel completado")
-            
-        except Exception as e:
-            logging.error(f"❌ Error guardando en Excel: {str(e)}")
+            logging.error(f"Error conectando a PostgreSQL: {e}")
             raise
     
-    def _guardar_en_csv(self, consulta):
-        """📄 Guardar en archivo CSV"""
+    def init_database(self):
+        """Inicializar tabla de contactos"""
         try:
-            with open(self.csv_path, 'a', newline='', encoding='utf-8') as f:
-                writer = csv.DictWriter(f, fieldnames=self.columnas)
-                writer.writerow(consulta)
+            conn = self.get_connection()
+            cursor = conn.cursor()
             
-            logging.info("✅ Guardado en CSV completado")
+            # Crear tabla si no existe
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS contactos (
+                    id SERIAL PRIMARY KEY,
+                    timestamp VARCHAR(255) UNIQUE NOT NULL,
+                    nombre VARCHAR(255) NOT NULL,
+                    email VARCHAR(255),
+                    telefono VARCHAR(255),
+                    estado VARCHAR(100) DEFAULT 'nuevo',
+                    notas TEXT,
+                    ip_address VARCHAR(45),
+                    user_agent TEXT,
+                    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            
+            # Crear índices para mejorar rendimiento
+            cursor.execute("""
+                CREATE INDEX IF NOT EXISTS idx_contactos_timestamp 
+                ON contactos(timestamp)
+            """)
+            
+            cursor.execute("""
+                CREATE INDEX IF NOT EXISTS idx_contactos_fecha 
+                ON contactos(fecha_creacion)
+            """)
+            
+            conn.commit()
+            cursor.close()
+            conn.close()
+            logging.info("✅ Base de datos PostgreSQL inicializada correctamente")
             
         except Exception as e:
-            logging.error(f"❌ Error guardando en CSV: {str(e)}")
+            logging.error(f"❌ Error inicializando base de datos: {e}")
             raise
     
-    def _crear_backup_automatico(self):
-        """🗂️ Crear backup automático cada 50 consultas"""
+    def guardar_contacto(self, datos):
+        """Guardar nuevo contacto"""
         try:
-            # Contar consultas actuales
-            df = pd.read_excel(self.excel_path, sheet_name='Consultas')
-            total_consultas = len(df)
+            conn = self.get_connection()
+            cursor = conn.cursor()
             
-            if total_consultas > 0 and total_consultas % 50 == 0:
-                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-                backup_file = self.backup_path / f'backup_consultas_{timestamp}.xlsx'
-                
-                # Copiar archivo completo
-                import shutil
-                shutil.copy2(self.excel_path, backup_file)
-                
-                logging.info(f"🗂️ Backup creado: {backup_file}")
-                
+            cursor.execute("""
+                INSERT INTO contactos (
+                    timestamp, nombre, email, telefono, estado, notas, 
+                    ip_address, user_agent, fecha_creacion, fecha_actualizacion
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (timestamp) DO UPDATE SET
+                    nombre = EXCLUDED.nombre,
+                    email = EXCLUDED.email,
+                    telefono = EXCLUDED.telefono,
+                    estado = EXCLUDED.estado,
+                    notas = EXCLUDED.notas,
+                    fecha_actualizacion = CURRENT_TIMESTAMP
+            """, (
+                datos.get('timestamp'),
+                datos.get('nombre'),
+                datos.get('email'),
+                datos.get('telefono'),
+                datos.get('estado', 'nuevo'),
+                datos.get('notas'),
+                datos.get('ip_address'),
+                datos.get('user_agent'),
+                datetime.now(),
+                datetime.now()
+            ))
+            
+            conn.commit()
+            cursor.close()
+            conn.close()
+            
+            logging.info(f"✅ Contacto guardado: {datos.get('nombre', 'Sin nombre')}")
+            return True
+            
         except Exception as e:
-            logging.error(f"❌ Error creando backup: {str(e)}")
+            logging.error(f"❌ Error guardando contacto: {e}")
+            return False
     
-    def _generar_estadisticas(self):
-        """📊 Generar estadísticas de las consultas"""
+    def obtener_todos_contactos(self):
+        """Obtener todos los contactos"""
         try:
-            df = pd.read_excel(self.excel_path, sheet_name='Consultas')
+            conn = self.get_connection()
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
             
-            stats = {
-                'Total Consultas': len(df),
-                'Consultas Hoy': len(df[df['Fecha'] == datetime.now().strftime('%d/%m/%Y')]),
-                'Interés Más Común': df['Interés'].value_counts().head(1).to_dict() if not df.empty else {},
-                'Presupuesto Más Común': df['Presupuesto'].value_counts().head(1).to_dict() if not df.empty else {},
-                'Última Consulta': df['Fecha'].max() if not df.empty else 'N/A',
-                'Consultas Esta Semana': len(df[df['Fecha'] >= (datetime.now() - pd.Timedelta(days=7)).strftime('%d/%m/%Y')]) if not df.empty else 0
-            }
+            cursor.execute("""
+                SELECT id, timestamp, nombre, email, telefono, estado, notas,
+                       ip_address, user_agent, fecha_creacion, fecha_actualizacion
+                FROM contactos 
+                ORDER BY fecha_creacion DESC
+            """)
             
-            return pd.DataFrame(list(stats.items()), columns=['Métrica', 'Valor'])
+            contactos = cursor.fetchall()
+            
+            cursor.close()
+            conn.close()
+            
+            # Convertir a lista de diccionarios para JSON
+            return [dict(contacto) for contacto in contactos]
             
         except Exception as e:
-            logging.error(f"❌ Error generando estadísticas: {str(e)}")
-            return pd.DataFrame({'Métrica': ['Error'], 'Valor': [str(e)]})
-    
-    def obtener_consultas(self, limite=100):
-        """📋 Obtener últimas consultas"""
-        try:
-            df = pd.read_excel(self.excel_path, sheet_name='Consultas')
-            return df.tail(limite).to_dict('records')
-        except Exception as e:
-            logging.error(f"❌ Error obteniendo consultas: {str(e)}")
+            logging.error(f"❌ Error obteniendo contactos: {e}")
             return []
     
-    def exportar_resumen(self):
-        """📊 Exportar resumen de estadísticas"""
+    def obtener_contacto_por_id(self, timestamp):
+        """Obtener contacto específico por timestamp"""
         try:
-            df = pd.read_excel(self.excel_path, sheet_name='Consultas')
-            if df.empty:
-                return "No hay datos para exportar"
+            conn = self.get_connection()
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
             
-            resumen = f"""
-📊 RESUMEN DE CONSULTAS - {datetime.now().strftime('%d/%m/%Y %H:%M')}
-
-📈 ESTADÍSTICAS GENERALES:
-• Total de consultas: {len(df)}
-• Consultas hoy: {len(df[df['Fecha'] == datetime.now().strftime('%d/%m/%Y')])}
-• Última consulta: {df['Fecha'].max()}
-
-🎯 INTERESES MÁS CONSULTADOS:
-{df['Interés'].value_counts().head(5).to_string() if not df.empty else 'No hay datos'}
-
-💰 PRESUPUESTOS MÁS CONSULTADOS:
-{df['Presupuesto'].value_counts().head(5).to_string() if not df.empty else 'No hay datos'}
-
-📁 ARCHIVOS:
-• Excel: {self.excel_path}
-• CSV: {self.csv_path}
-• Backups: {self.backup_path}
-            """
+            cursor.execute("""
+                SELECT * FROM contactos WHERE timestamp = %s
+            """, (timestamp,))
             
-            return resumen
+            contacto = cursor.fetchone()
+            
+            cursor.close()
+            conn.close()
+            
+            return dict(contacto) if contacto else None
             
         except Exception as e:
-            return f"Error generando resumen: {str(e)}"
+            logging.error(f"❌ Error obteniendo contacto: {e}")
+            return None
+    
+    def actualizar_contacto(self, timestamp, datos_actualizados):
+        """Actualizar contacto existente"""
+        try:
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            
+            campos_actualizar = []
+            valores = []
+            
+            for campo in ['nombre', 'email', 'telefono', 'estado', 'notas']:
+                if campo in datos_actualizados:
+                    campos_actualizar.append(f"{campo} = %s")
+                    valores.append(datos_actualizados[campo])
+            
+            if campos_actualizar:
+                valores.append(datetime.now())
+                valores.append(timestamp)
+                
+                query = f"""
+                    UPDATE contactos 
+                    SET {', '.join(campos_actualizar)}, fecha_actualizacion = %s 
+                    WHERE timestamp = %s
+                """
+                
+                cursor.execute(query, valores)
+                conn.commit()
+            
+            cursor.close()
+            conn.close()
+            
+            logging.info(f"✅ Contacto actualizado: {timestamp}")
+            return True
+            
+        except Exception as e:
+            logging.error(f"❌ Error actualizando contacto: {e}")
+            return False
+    
+    def eliminar_contacto(self, timestamp):
+        """Eliminar contacto"""
+        try:
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            
+            cursor.execute("DELETE FROM contactos WHERE timestamp = %s", (timestamp,))
+            filas_afectadas = cursor.rowcount
+            
+            conn.commit()
+            cursor.close()
+            conn.close()
+            
+            logging.info(f"✅ Contacto eliminado: {timestamp} ({filas_afectadas} filas)")
+            return filas_afectadas > 0
+            
+        except Exception as e:
+            logging.error(f"❌ Error eliminando contacto: {e}")
+            return False
+    
+    def limpiar_todos_contactos(self):
+        """Eliminar todos los contactos"""
+        try:
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            
+            cursor.execute("SELECT COUNT(*) FROM contactos")
+            total = cursor.fetchone()[0]
+            
+            cursor.execute("DELETE FROM contactos")
+            conn.commit()
+            
+            cursor.close()
+            conn.close()
+            
+            logging.info(f"✅ {total} contactos eliminados")
+            return total
+            
+        except Exception as e:
+            logging.error(f"❌ Error limpiando contactos: {e}")
+            return False
+    
+    def obtener_estadisticas(self):
+        """Obtener estadísticas de contactos"""
+        try:
+            conn = self.get_connection()
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            
+            # Total de contactos
+            cursor.execute("SELECT COUNT(*) as total FROM contactos")
+            total = cursor.fetchone()['total']
+            
+            # Contactos por estado
+            cursor.execute("""
+                SELECT estado, COUNT(*) as cantidad 
+                FROM contactos 
+                GROUP BY estado 
+                ORDER BY cantidad DESC
+            """)
+            por_estado = cursor.fetchall()
+            
+            # Contactos por día (últimos 30 días)
+            cursor.execute("""
+                SELECT DATE(fecha_creacion) as fecha, COUNT(*) as cantidad
+                FROM contactos 
+                WHERE fecha_creacion >= CURRENT_DATE - INTERVAL '30 days'
+                GROUP BY DATE(fecha_creacion)
+                ORDER BY fecha DESC
+            """)
+            por_dia = cursor.fetchall()
+            
+            # Últimos contactos
+            cursor.execute("""
+                SELECT nombre, email, fecha_creacion 
+                FROM contactos 
+                ORDER BY fecha_creacion DESC 
+                LIMIT 5
+            """)
+            ultimos = cursor.fetchall()
+            
+            cursor.close()
+            conn.close()
+            
+            return {
+                'total': total,
+                'por_estado': [dict(row) for row in por_estado],
+                'por_dia': [dict(row) for row in por_dia],
+                'ultimos': [dict(row) for row in ultimos]
+            }
+            
+        except Exception as e:
+            logging.error(f"❌ Error obteniendo estadísticas: {e}")
+            return {'total': 0, 'por_estado': [], 'por_dia': [], 'ultimos': []}
 
-# Crear aplicación Flask
-app = Flask(__name__)
-CORS(app)  # Permitir solicitudes desde cualquier origen
+# Instancia del gestor de almacenamiento
+storage_manager = PostgreSQLStorageManager()
 
-# ✅ AGREGAR ESTAS LÍNEAS INMEDIATAMENTE DESPUÉS:
-@app.route('/debug', methods=['GET'])
-@app.route('/api/status', methods=['GET'])
+# ============================================================================
+# RUTAS DE LA API
+# ============================================================================
+
 @app.route('/health', methods=['GET'])
 def health_check():
-    """Endpoint para verificar que el servidor está funcionando"""
-    return jsonify({
-        'status': 'online',
-        'service': 'Dante Propiedades Backend',
-        'timestamp': datetime.now().isoformat(),
-        'version': '1.0',
-        'endpoints': {
-            'guardar_contacto': '/api/guardar-contacto (POST)',
-            'health': '/debug, /api/status, /health (GET)'
-        }
-    }), 200
-
-
-# Inicializar gestor de almacenamiento
-storage_manager = ExcelStorageManager()
+    """Health check para Render"""
+    try:
+        contactos = storage_manager.obtener_todos_contactos()
+        return jsonify({
+            'status': 'healthy',
+            'message': 'Servidor funcionando correctamente',
+            'total_contactos': len(contactos),
+            'timestamp': datetime.now().isoformat()
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'unhealthy',
+            'error': str(e)
+        }), 500
 
 @app.route('/')
 def home():
-    """🏠 Página principal del sistema"""
+    """Página principal"""
     return jsonify({
-        'message': '🚀 Sistema de Formularios con Almacenamiento Excel',
-        'version': '1.0.0',
-        'status': 'active',
-        'endpoints': {
-            '/api/guardar-contacto': 'POST - Guardar consulta de contacto',
-            '/api/obtener-consultas': 'GET - Obtener últimas consultas',
-            '/api/resumen': 'GET - Obtener resumen estadístico',
-            '/health': 'GET - Estado del sistema'
-        }
+        'message': 'API de Gestión de Contactos - Dantepropiedades',
+        'version': '2.0 (Render + PostgreSQL)',
+        'endpoints': [
+            'GET /health',
+            'POST /api/guardar-contacto',
+            'GET /api/obtener-consultas',
+            'GET /api/resumen',
+            'GET /admin/data/<token>',
+            'POST /admin/add/<token>',
+            'PUT /admin/update/<token>',
+            'DELETE /admin/delete/<token>',
+            'DELETE /admin/clear/<token>'
+        ]
     })
+
+# ============================================================================
+# RUTAS PÚBLICAS DE LA API
+# ============================================================================
 
 @app.route('/api/guardar-contacto', methods=['POST'])
 def guardar_contacto():
-    """💾 Guardar nueva consulta de contacto"""
+    """Guardar nuevo contacto desde formulario web"""
     try:
-        # Verificar que se envió JSON
-        if not request.is_json:
-            return jsonify({
-                'success': False,
-                'error': 'Se requiere contenido JSON'
-            }), 400
-        
         datos = request.get_json()
         
-        # Validaciones básicas
-        campos_requeridos = ['nombre', 'email', 'mensaje']
-        for campo in campos_requeridos:
-            if not datos.get(campo, '').strip():
-                return jsonify({
-                    'success': False,
-                    'error': f'Campo requerido faltante: {campo}'
-                }), 400
+        if not datos or not datos.get('nombre'):
+            return jsonify({'success': False, 'error': 'Datos incompletos'}), 400
         
-        # Validar email
-        email = datos.get('email', '')
-        if '@' not in email:
+        # Agregar metadatos
+        datos['timestamp'] = str(int(time.time() * 1000))
+        datos['ip_address'] = request.remote_addr
+        datos['user_agent'] = request.headers.get('User-Agent', '')
+        
+        # Guardar en base de datos
+        if storage_manager.guardar_contacto(datos):
+            logging.info(f"✅ Nuevo contacto guardado: {datos['nombre']}")
             return jsonify({
-                'success': False,
-                'error': 'Email inválido'
-            }), 400
-        
-        # Añadir información de contexto
-        datos['pagina'] = request.headers.get('Referer', 'Directo')
-        
-        # Guardar en almacenamiento
-        resultado = storage_manager.añadir_consulta(datos)
-        
-        if resultado['success']:
-            return jsonify(resultado), 200
+                'success': True, 
+                'message': 'Contacto guardado correctamente',
+                'timestamp': datos['timestamp']
+            })
         else:
-            return jsonify(resultado), 500
+            return jsonify({'success': False, 'error': 'Error guardando contacto'}), 500
             
     except Exception as e:
-        logging.error(f"❌ Error en guardar-contacto: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': 'Error interno del servidor'
-        }), 500
+        logging.error(f"❌ Error en guardar-contacto: {e}")
+        return jsonify({'success': False, 'error': 'Error interno del servidor'}), 500
 
 @app.route('/api/obtener-consultas', methods=['GET'])
 def obtener_consultas():
-    """📋 Obtener últimas consultas"""
+    """Obtener todas las consultas"""
     try:
-        limite = request.args.get('limite', 100, type=int)
-        consultas = storage_manager.obtener_consultas(limite)
-        
-        return jsonify({
-            'success': True,
-            'consultas': consultas,
-            'total': len(consultas)
-        })
-        
+        contactos = storage_manager.obtener_todos_contactos()
+        return jsonify({'success': True, 'data': contactos})
     except Exception as e:
-        logging.error(f"❌ Error en obtener-consultas: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        logging.error(f"❌ Error obteniendo consultas: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/resumen', methods=['GET'])
 def obtener_resumen():
-    """📊 Obtener resumen estadístico"""
+    """Obtener resumen de contactos"""
     try:
-        resumen = storage_manager.exportar_resumen()
-        return jsonify({
-            'success': True,
-            'resumen': resumen,
-            'timestamp': datetime.now().isoformat()
-        })
-        
+        stats = storage_manager.obtener_estadisticas()
+        return jsonify({'success': True, 'data': stats})
     except Exception as e:
-        logging.error(f"❌ Error en resumen: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        logging.error(f"❌ Error obteniendo resumen: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/api/exportar-excel', methods=['GET'])
-def exportar_excel():
-    """📊 Exportar archivo Excel"""
-    try:
-        if not storage_manager.excel_path.exists():
-            return jsonify({
-                'success': False,
-                'error': 'No hay datos para exportar'
-            }), 404
-        
-        # Leer archivo y devolver como descarga
-        return app.send_file(
-            storage_manager.excel_path,
-            as_attachment=True,
-            download_name=f'consultas_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
-        )
-        
-    except Exception as e:
-        logging.error(f"❌ Error exportando Excel: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-
-# ==============================================
-# ENDPOINTS DE ADMINISTRACIÓN SEGUROS
-# ==============================================
-
-# Token secreto para acceso admin (¡CAMBIA ESTO!)
-ADMIN_TOKEN = '2205'
-
-@app.route('/admin/download/<token>')
-def descargar_excel_admin(token):
-    """Descargar archivo Excel solo con token válido"""
-    if token != ADMIN_TOKEN:
-        return jsonify({'error': 'Acceso no autorizado'}), 403
-    
-    if storage_manager.excel_path.exists():
-        return send_file(
-            str(storage_manager.excel_path),
-            as_attachment=True,
-            download_name=f'contactos_dante_{datetime.now().strftime("%Y%m%d_%H%M")}.xlsx'
-        )
-    return jsonify({'error': 'Archivo no encontrado'}), 404
-
-@app.route('/admin/stats/<token>')
-def estadisticas_admin(token):
-    """Estadísticas detalladas solo para admin"""
-    if token != ADMIN_TOKEN:
-        return jsonify({'error': 'Acceso no autorizado'}), 403
-    
-    try:
-        if storage_manager.excel_path.exists():
-            # Usar pandas para leer el archivo Excel
-            df = pd.read_excel(storage_manager.excel_path, sheet_name='Consultas')
-            total = len(df)
-            
-            # Obtener últimos 10 registros
-            ultimos = []
-            if not df.empty:
-                ultimos_df = df.tail(10)
-                for _, row in ultimos_df.iterrows():
-                    ultimos.append({
-                        'fecha': row.get('Fecha', ''),
-                        'nombre': row.get('Nombre', ''),
-                        'telefono': row.get('Teléfono', ''),
-                        'email': row.get('Email', '')
-                    })
-            
-            return jsonify({
-                'success': True,
-                'total_contactos': total,
-                'ultimos_registros': ultimos,
-                'archivo': str(storage_manager.excel_path),
-                'tamano_bytes': os.path.getsize(storage_manager.excel_path) if storage_manager.excel_path.exists() else 0
-            })
-        return jsonify({'success': False, 'message': 'No hay datos'})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+# ============================================================================
+# RUTAS ADMINISTRATIVAS (PROTEGIDAS)
+# ============================================================================
 
 @app.route('/admin/data/<token>')
 def obtener_datos_admin(token):
-    """Obtener todos los datos para el panel admin"""
+    """Obtener todos los contactos para admin"""
     if token != ADMIN_TOKEN:
         return jsonify({'error': 'Acceso no autorizado'}), 403
     
     try:
-        contactos = []
-        if storage_manager.excel_path.exists():
-            # Leer archivo Excel
-            df = pd.read_excel(storage_manager.excel_path, sheet_name='Consultas')
-            
-            if not df.empty:
-                for _, row in df.iterrows():
-                    contacto = {
-                        'id': str(row.name) if pd.notna(row.name) else f"row_{len(contactos)}",
-                        'nombre': str(row.get('Nombre', '')),
-                        'email': str(row.get('Email', '')),
-                        'telefono': str(row.get('Teléfono', '')),
-                        'tipo_consulta': str(row.get('Interés', 'general')),
-                        'mensaje': str(row.get('Mensaje', '')),
-                        'pagina_origen': str(row.get('Página', 'Dante Propiedades')),
-                        'estado': str(row.get('Estado', 'nuevo')),
-                        'notas': str(row.get('Notas', '')),
-                        'timestamp': row.get('Timestamp', datetime.now().isoformat()),
-                        'fecha_legible': row.get('Fecha', '') + ' ' + str(row.get('Hora', ''))
-                    }
-                    contactos.append(contacto)
-        
-        return jsonify({
-            'success': True,
-            'contactos': contactos,
-            'total': len(contactos)
-        })
+        contactos = storage_manager.obtener_todos_contactos()
+        return jsonify({'success': True, 'data': contactos})
     except Exception as e:
-        logging.error(f"Error obteniendo datos: {str(e)}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/admin/add/<token>', methods=['POST'])
 def agregar_contacto_admin(token):
-    """Agregar nuevo contacto desde panel admin"""
+    """Agregar nuevo contacto desde admin"""
     if token != ADMIN_TOKEN:
         return jsonify({'error': 'Acceso no autorizado'}), 403
     
     try:
         datos = request.get_json()
-        if not datos:
-            return jsonify({'error': 'No se recibieron datos'}), 400
         
-        # Preparar datos para almacenamiento
-        datos_almacenamiento = {
-            'Nombre': datos.get('nombre', ''),
-            'Email': datos.get('email', ''),
-            'Teléfono': datos.get('telefono', ''),
-            'Interés': datos.get('tipo_consulta', 'general'),
-            'Mensaje': datos.get('mensaje', ''),
-            'Página': datos.get('pagina_origen', 'Dante Propiedades'),
-            'Estado': datos.get('estado', 'nuevo'),
-            'Notas': datos.get('notas', ''),
-            'Timestamp': datos.get('timestamp', datetime.now().isoformat())
-        }
+        if not datos or not datos.get('nombre'):
+            return jsonify({'error': 'Nombre es requerido'}), 400
         
-        # Añadir usando el storage manager existente
-        storage_manager.añadir_consulta(datos_almacenamiento)
+        # Agregar timestamp si no existe
+        if 'timestamp' not in datos:
+            datos['timestamp'] = str(int(time.time() * 1000))
         
-        return jsonify({
-            'success': True,
-            'message': 'Contacto agregado correctamente'
-        })
+        datos['estado'] = datos.get('estado', 'nuevo')
+        
+        if storage_manager.guardar_contacto(datos):
+            return jsonify({'success': True, 'message': 'Contacto agregado correctamente'})
+        else:
+            return jsonify({'error': 'Error guardando contacto'}), 500
+            
     except Exception as e:
-        logging.error(f"Error agregando contacto: {str(e)}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/admin/update/<token>', methods=['PUT'])
 def actualizar_contacto_admin(token):
-    """Actualizar contacto existente desde panel admin"""
+    """Actualizar contacto existente desde admin"""
     if token != ADMIN_TOKEN:
         return jsonify({'error': 'Acceso no autorizado'}), 403
     
     try:
         datos = request.get_json()
-        if not datos or 'id' not in datos:
+        contacto_id = datos.get('timestamp')
+        
+        if not contacto_id:
             return jsonify({'error': 'ID de contacto requerido'}), 400
         
-        contacto_id = datos['id']
-        
-        # Leer archivo Excel actual
-        if storage_manager.excel_path.exists():
-            df = pd.read_excel(storage_manager.excel_path, sheet_name='Consultas')
+        if storage_manager.actualizar_contacto(contacto_id, datos):
+            return jsonify({'success': True, 'message': 'Contacto actualizado correctamente'})
+        else:
+            return jsonify({'error': 'Error actualizando contacto'}), 500
             
-            # Buscar y actualizar el registro
-            if not df.empty:
-                # Actualizar campos
-                for index, row in df.iterrows():
-                    if str(index) == str(contacto_id):
-                        df.at[index, 'Nombre'] = datos.get('nombre', row.get('Nombre', ''))
-                        df.at[index, 'Email'] = datos.get('email', row.get('Email', ''))
-                        df.at[index, 'Teléfono'] = datos.get('telefono', row.get('Teléfono', ''))
-                        df.at[index, 'Interés'] = datos.get('tipo_consulta', row.get('Interés', 'general'))
-                        df.at[index, 'Mensaje'] = datos.get('mensaje', row.get('Mensaje', ''))
-                        df.at[index, 'Página'] = datos.get('pagina_origen', row.get('Página', 'Dante Propiedades'))
-                        df.at[index, 'Estado'] = datos.get('estado', row.get('Estado', 'nuevo'))
-                        df.at[index, 'Notas'] = datos.get('notas', row.get('Notas', ''))
-                        df.at[index, 'Timestamp'] = datos.get('timestamp', row.get('Timestamp', datetime.now().isoformat()))
-                        break
-                
-                # Guardar archivo actualizado
-                with pd.ExcelWriter(storage_manager.excel_path, engine='openpyxl') as writer:
-                    df.to_excel(writer, sheet_name='Consultas', index=True)
-        
-        return jsonify({
-            'success': True,
-            'message': 'Contacto actualizado correctamente'
-        })
     except Exception as e:
-        logging.error(f"Error actualizando contacto: {str(e)}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/admin/delete/<token>', methods=['DELETE'])
 def eliminar_contacto_admin(token):
-    """Eliminar contacto desde panel admin"""
+    """Eliminar contacto desde admin"""
     if token != ADMIN_TOKEN:
         return jsonify({'error': 'Acceso no autorizado'}), 403
     
     try:
         datos = request.get_json()
-        if not datos or 'id' not in datos:
+        contacto_id = datos.get('timestamp')
+        
+        if not contacto_id:
             return jsonify({'error': 'ID de contacto requerido'}), 400
         
-        contacto_id = datos['id']
-        
-        # Leer archivo Excel actual
-        if storage_manager.excel_path.exists():
-            df = pd.read_excel(storage_manager.excel_path, sheet_name='Consultas')
+        if storage_manager.eliminar_contacto(contacto_id):
+            return jsonify({'success': True, 'message': 'Contacto eliminado correctamente'})
+        else:
+            return jsonify({'error': 'Error eliminando contacto'}), 500
             
-            if not df.empty:
-                # Filtrar para eliminar el registro
-                df_nuevo = df[df.index.to_string() != str(contacto_id)]
-                
-                # Guardar archivo actualizado
-                with pd.ExcelWriter(storage_manager.excel_path, engine='openpyxl') as writer:
-                    df_nuevo.to_excel(writer, sheet_name='Consultas', index=True)
-        
-        return jsonify({
-            'success': True,
-            'message': 'Contacto eliminado correctamente'
-        })
     except Exception as e:
-        logging.error(f"Error eliminando contacto: {str(e)}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/admin/clear/<token>', methods=['DELETE'])
 def limpiar_datos_admin(token):
-    """Limpiar todos los datos desde panel admin"""
+    """Limpiar todos los datos desde admin"""
     if token != ADMIN_TOKEN:
         return jsonify({'error': 'Acceso no autorizado'}), 403
     
     try:
-        # Crear DataFrame vacío con las columnas correctas
-        df_vacio = pd.DataFrame(columns=storage_manager.columnas)
-        
-        # Guardar archivo vacío
-        with pd.ExcelWriter(storage_manager.excel_path, engine='openpyxl') as writer:
-            df_vacio.to_excel(writer, sheet_name='Consultas', index=False)
-            df_vacio.to_excel(writer, sheet_name='Backup', index=False)
-        
+        total_eliminados = storage_manager.limpiar_todos_contactos()
         return jsonify({
-            'success': True,
-            'message': 'Todos los datos han sido eliminados'
+            'success': True, 
+            'message': f'{total_eliminados} contactos eliminados correctamente'
         })
     except Exception as e:
-        logging.error(f"Error limpiando datos: {str(e)}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({'error': str(e)}), 500
 
-
+# ============================================================================
+# CONFIGURACIÓN PARA RENDER
+# ============================================================================
 
 if __name__ == '__main__':
-    print("🚀 Iniciando Sistema de Formularios con Almacenamiento Excel")
-    print(f"📁 Archivos de datos en: {storage_manager.base_path}")
-    print(f"📊 Excel: {storage_manager.excel_path}")
-    print(f"📄 CSV: {storage_manager.csv_path}")
-    print("🌐 Servidor disponible en: http://localhost:5000")
-    print("=" * 60)
-    
-    # ⚠️ CAMBIAR ESTO: Render usa puerto 10000, no 5000
-    port = int(os.environ.get('PORT', 10000))
-    app.run(debug=True, host='0.0.0.0', port=port)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)

@@ -3,1263 +3,410 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración - Dante Propiedades</title>
+    <title>Panel Admin - Dantepropiedades (Render)</title>
     <style>
-        /* ESTILOS DEL LOGIN */
-        .login-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-        
-        .login-box {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-        }
-        
-        .login-box h2 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-        
-        .login-input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            text-align: center;
-        }
-        
-        .login-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-            transition: all 0.3s ease;
-        }
-        
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        .login-error {
-            color: #ff6b6b;
-            margin-top: 10px;
-            display: none;
-        }
-        
-        /* Efecto de shake */
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
-        
-        /* OCULTAR EL CONTENIDO PRINCIPAL INICIALMENTE */
-        .main-content {
-            display: none;
-        }
-        
-        /* ESTILOS ORIGINALES DEL ADMIN */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .header {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .header h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-        }
-        
-        .header p {
-            color: #7f8c8d;
-            font-size: 1.1em;
-        }
-        
-        .panel {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        
-        .stat-card h3 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-        
-        .stat-card p {
-            opacity: 0.9;
-        }
-        
-        .actions {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            text-decoration: none;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .btn-success {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            color: white;
-        }
-        
-        .btn-warning {
-            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
-            color: white;
-        }
-        
-        .btn-danger {
-            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
-            color: white;
-        }
-        
-        .btn-info {
-            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-            color: white;
-        }
-        
-        .contacts-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            font-size: 14px;
-        }
-        
-        .contacts-table th,
-        .contacts-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .contacts-table th {
-            background: #f8f9fa;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        
-        .contacts-table tr:hover {
-            background: #f8f9fa;
-        }
-        
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8em;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        
-        .status-nuevo {
-            background: #e3f2fd;
-            color: #1976D2;
-        }
-        
-        .status-atendido {
-            background: #e8f5e8;
-            color: #4CAF50;
-        }
-        
-        .status-importante {
-            background: #fff3e0;
-            color: #ff9800;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 5px;
-        }
-        
-        .action-btn {
-            padding: 6px 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.2s ease;
-        }
-        
-        .view-btn {
-            background: #2196F3;
-            color: white;
-        }
-        
-        .edit-btn {
-            background: #4CAF50;
-            color: white;
-        }
-        
-        .delete-btn {
-            background: #f44336;
-            color: white;
-        }
-        
-        .action-btn:hover {
-            opacity: 0.8;
-            transform: scale(1.05);
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
+        /* ESTILOS BÁSICOS */
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .login-container { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center;
             z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
         }
-        
-        .modal-content {
-            background: white;
-            margin: 5% auto;
-            padding: 30px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
+        .login-box { 
+            background: white; padding: 40px; border-radius: 10px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3); text-align: center;
+            width: 300px;
         }
-        
-        .modal-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: flex-end;
-            margin-top: 20px;
+        .hidden { display: none !important; }
+        .admin-panel { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .contacto-item { 
+            padding: 15px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; 
+            background: #f9f9f9; display: flex; justify-content: space-between; align-items: center;
         }
-        
-        .form-group {
-            margin-bottom: 20px;
+        .contacto-info { flex: 1; }
+        .contacto-actions { display: flex; gap: 10px; }
+        .error { color: red; background: #ffe6e6; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .success { color: green; background: #e6ffe6; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .loading { color: #666; font-style: italic; }
+        .stats { background: #e3f2fd; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        input, textarea { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; }
+        .modal { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center;
+            z-index: 2000;
         }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #2c3e50;
+        .modal-content { 
+            background: white; padding: 20px; border-radius: 10px; max-width: 500px; width: 90%;
+            max-height: 80vh; overflow-y: auto;
         }
-        
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
+        .estado { 
+            padding: 3px 8px; border-radius: 12px; font-size: 0.8em; font-weight: bold; 
         }
-        
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-            font-style: italic;
-        }
-        
-        .success {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .search-box {
-            margin-bottom: 20px;
-        }
-        
-        .search-box input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-        
-        .filter-bar {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .filter-select {
-            padding: 8px 12px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            background: white;
-        }
-        
-        .logout-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #ff5252;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            z-index: 1000;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.3s ease;
-        }
-        
-        .logout-btn:hover {
-            background: #ff5252;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        @media (max-width: 768px) {
-            .actions {
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .contacts-table {
-                font-size: 0.9em;
-            }
-            
-            .contacts-table th,
-            .contacts-table td {
-                padding: 8px 6px;
-            }
-            
-            .action-buttons {
-                flex-direction: column;
-            }
-            
-            .filter-bar {
-                flex-direction: column;
-            }
-            
-            .logout-btn {
-                position: relative;
-                top: 0;
-                right: 0;
-                margin-bottom: 15px;
-                width: 100%;
-            }
-        }
+        .estado-nuevo { background: #e3f2fd; color: #1976d2; }
+        .estado-contactado { background: #fff3e0; color: #f57c00; }
+        .estado-interesado { background: #e8f5e8; color: #388e3c; }
+        .estado-no_interesado { background: #ffebee; color: #d32f2f; }
+        .estado-cerrado { background: #f3e5f5; color: #7b1fa2; }
     </style>
 </head>
 <body>
-    <!-- PANTALLA DE LOGIN -->
-    <div id="loginScreen" class="login-container">
-        <div class="login-box">
-            <h2>🔒 Panel de Administración</h2>
-            <p style="color: #666; margin-bottom: 20px;">Ingresa la contraseña de acceso</p>
-            
-            <input type="password" id="passwordInput" class="login-input" 
-                   placeholder="Contraseña" autocomplete="off" autofocus>
-            
-            <button onclick="verificarPassword()" class="login-btn">
-                🔑 Ingresar
-            </button>
-            
-            <div id="loginError" class="login-error">
-                ❌ Contraseña incorrecta
+    <div class="container">
+        <!-- LOGIN SCREEN -->
+        <div id="loginScreen" class="login-container">
+            <div class="login-box">
+                <h2>🔐 Acceso de Administrador</h2>
+                <p>Ingrese la contraseña para acceder al panel</p>
+                <input type="password" id="passwordInput" placeholder="Contraseña" />
+                <button class="btn btn-primary" onclick="iniciarSesion()">Acceder</button>
+                <div id="loginError" class="error" style="display: none;"></div>
             </div>
-            
-            <p style="margin-top: 20px; font-size: 0.8em; color: #888;">
-                Dante Propiedades - Sistema Seguro
-            </p>
         </div>
-    </div>
-    
-    <!-- CONTENIDO PRINCIPAL (OCULTO INICIALMENTE) -->
-    <div id="mainContent" class="main-content">
-        <!-- Botón de logout -->
-        <button onclick="cerrarSesion()" class="logout-btn">
-            🔓 Cerrar Sesión
-        </button>
-        
-        <div class="container">
-            <div class="header">
-                <h1>🏢 Panel de Administración Completo</h1>
-                <p>Dante Propiedades - Sistema de Gestión de Contactos</p>
-                <p style="font-size: 0.9em; margin-top: 5px;">Gestión CRUD completa + Filtros + Estadísticas</p>
-            </div>
+
+        <!-- ADMIN PANEL -->
+        <div id="adminPanel" class="admin-panel hidden">
+            <h1>📊 Panel de Administración - Dantepropiedades</h1>
+            <p><strong>🌐 Dominio:</strong> dantepropiedades.com.ar | <strong>🔗 Backend:</strong> Render.com</p>
             
-            <div class="panel">
-                <div class="stats-grid" id="statsGrid">
-                    <div class="loading">Cargando estadísticas...</div>
-                </div>
-                
-                <div class="actions">
-                    <button class="btn btn-primary" onclick="cargarDatos()">
-                        🔄 Actualizar Datos
-                    </button>
-                    <button class="btn btn-success" onclick="agregarContacto()">
-                        ➕ Agregar Contacto
-                    </button>
-                    <button class="btn btn-warning" onclick="mostrarFiltros()">
-                        🔍 Buscar & Filtrar
-                    </button>
-                    <button class="btn btn-danger" onclick="limpiarDatos()">
-                        🗑️ Limpiar Todo
-                    </button>
-                    <button class="btn btn-info" onclick="exportarDatos()">
-                        📥 Exportar JSON
-                    </button>
-                    <button class="btn" onclick="exportarExcel()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
-                        📊 Exportar Excel
-                    </button>
-                </div>
-                
-                <div id="status"></div>
+            <div class="stats">
+                <h3>📈 Estadísticas</h3>
+                <div id="estadisticas">Cargando estadísticas...</div>
             </div>
-            
-            <div class="panel">
-                <div id="filterBar" style="display: none;">
-                    <div class="search-box">
-                        <input type="text" id="searchInput" placeholder="🔍 Buscar por nombre, email, teléfono o mensaje..." onkeyup="filtrarContactos()">
-                    </div>
-                    <div class="filter-bar">
-                        <select class="filter-select" id="filterStatus" onchange="filtrarContactos()">
-                            <option value="">Todos los estados</option>
-                            <option value="nuevo">Nuevo</option>
-                            <option value="atendido">Atendido</option>
-                            <option value="importante">Importante</option>
-                        </select>
-                        <select class="filter-select" id="filterTipo" onchange="filtrarContactos()">
-                            <option value="">Todos los tipos</option>
-                            <option value="venta">VENTA</option>
-                            <option value="alquiler">ALQUILER</option>
-                            <option value="consulta">CONSULTA</option>
-                            <option value="general">GENERAL</option>
-                        </select>
-                        <select class="filter-select" id="filterOrigen" onchange="filtrarContactos()">
-                            <option value="">Todos los orígenes</option>
-                            <option value="Dante Propiedades">Dante Propiedades</option>
-                            <option value="página web">Página Web</option>
-                            <option value="whatsapp">WhatsApp</option>
-                        </select>
-                        <input type="date" class="filter-select" id="filterFecha" onchange="filtrarContactos()">
-                        <button class="btn" onclick="limpiarFiltros()" style="background: #666; color: white; padding: 8px 15px;">
-                            🗑️ Limpiar Filtros
-                        </button>
-                    </div>
-                </div>
-                
-                <h2>📋 Lista de Contactos (<span id="contactCount">0</span> registros)</h2>
-                <div id="contactsContainer">
-                    <div class="loading">Cargando contactos...</div>
-                </div>
+
+            <div style="margin-bottom: 20px;">
+                <button class="btn btn-success" onclick="mostrarFormularioNuevo()">➕ Agregar Nuevo Contacto</button>
+                <button class="btn btn-warning" onclick="refrescarDatos()">🔄 Refrescar</button>
+                <button class="btn btn-danger" onclick="limpiarTodosDatos()">🗑️ Limpiar Todo</button>
+            </div>
+
+            <div id="listaContactos">
+                <div class="loading">Cargando contactos...</div>
             </div>
         </div>
     </div>
 
-    <!-- Modal para ver/editar contacto -->
-    <div id="contactModal" class="modal">
+    <!-- MODAL FORMULARIO -->
+    <div id="modalFormulario" class="modal" style="display: none;">
         <div class="modal-content">
-            <h2 id="modalTitle">📝 Editar Contacto</h2>
-            <form id="contactForm">
-                <input type="hidden" id="contactId">
-                
-                <div class="form-group">
-                    <label for="editNombre">Nombre completo:</label>
-                    <input type="text" id="editNombre" required>
+            <h3 id="tituloFormulario">Nuevo Contacto</h3>
+            <form id="formularioContacto">
+                <input type="hidden" id="contactoId" />
+                <div>
+                    <label>Nombre *</label>
+                    <input type="text" id="nombre" required />
                 </div>
-                
-                <div class="form-group">
-                    <label for="editEmail">Email:</label>
-                    <input type="email" id="editEmail" required>
+                <div>
+                    <label>Email</label>
+                    <input type="email" id="email" />
                 </div>
-                
-                <div class="form-group">
-                    <label for="editTelefono">Teléfono:</label>
-                    <input type="tel" id="editTelefono">
+                <div>
+                    <label>Teléfono</label>
+                    <input type="text" id="telefono" />
                 </div>
-                
-                <div class="form-group">
-                    <label for="editTipo">Tipo de consulta:</label>
-                    <select id="editTipo">
-                        <option value="venta">Venta</option>
-                        <option value="alquiler">Alquiler</option>
-                        <option value="consulta">Consulta General</option>
-                        <option value="general">General</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="editMensaje">Mensaje:</label>
-                    <textarea id="editMensaje"></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="editOrigen">Origen:</label>
-                    <input type="text" id="editOrigen" value="Dante Propiedades">
-                </div>
-                
-                <div class="form-group">
-                    <label for="editEstado">Estado:</label>
-                    <select id="editEstado">
+                <div>
+                    <label>Estado</label>
+                    <select id="estado">
                         <option value="nuevo">Nuevo</option>
-                        <option value="atendido">Atendido</option>
-                        <option value="importante">Importante</option>
+                        <option value="contactado">Contactado</option>
+                        <option value="interesado">Interesado</option>
+                        <option value="no_interesado">No Interesado</option>
+                        <option value="cerrado">Cerrado</option>
                     </select>
                 </div>
-                
-                <div class="form-group">
-                    <label for="editNotas">Notas internas:</label>
-                    <textarea id="editNotas" placeholder="Notas adicionales..."></textarea>
+                <div>
+                    <label>Notas</label>
+                    <textarea id="notas" rows="3"></textarea>
                 </div>
-                
-                <div class="modal-buttons">
-                    <button type="button" class="btn btn-danger" onclick="cerrarModal()">
-                        ❌ Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-success">
-                        💾 Guardar Cambios
-                    </button>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button type="button" class="btn" onclick="cerrarFormulario()">Cancelar</button>
+                    <button type="submit" class="btn btn-success">💾 Guardar</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal para ver detalles completos -->
-    <div id="viewModal" class="modal">
+    <!-- MODAL VISUALIZAR -->
+    <div id="modalVisualizar" class="modal" style="display: none;">
         <div class="modal-content">
-            <h2>👁️ Detalles del Contacto</h2>
-            <div id="contactDetails"></div>
-            <div class="modal-buttons">
-                <button class="btn" onclick="cerrarViewModal()">
-                    ✅ Cerrar
-                </button>
+            <h3>👁️ Detalles del Contacto</h3>
+            <div id="detallesContacto">Cargando...</div>
+            <div style="text-align: right; margin-top: 20px;">
+                <button class="btn" onclick="cerrarVisualizar()">Cerrar</button>
+                <button class="btn btn-warning" onclick="editarDesdeVisualizar()">✏️ Editar</button>
             </div>
         </div>
     </div>
 
     <script>
-    // ========================================
-    // SISTEMA DE SEGURIDAD
-    // ========================================
-    
-    // ⚠️ ⚠️ ⚠️ CAMBIA ESTA CONTRASEÑA ⚠️ ⚠️ ⚠️
-    const ADMIN_PASSWORD = '2205';
-    
-    // Verificar autenticación al cargar
-    document.addEventListener('DOMContentLoaded', function() {
-        const estaAutenticado = sessionStorage.getItem('admin_autenticado') === 'true';
-        const loginScreen = document.getElementById('loginScreen');
-        const mainContent = document.getElementById('mainContent');
-        
-        if (!estaAutenticado) {
-            // Mostrar login, ocultar contenido
-            loginScreen.style.display = 'flex';
-            mainContent.style.display = 'none';
-            document.getElementById('passwordInput').focus();
-        } else {
-            // Ocultar login, mostrar contenido
-            loginScreen.style.display = 'none';
-            mainContent.style.display = 'block';
-            iniciarSistemaAdmin();
-        }
-    });
-    
-    // Función para verificar contraseña
-    function verificarPassword() {
-        const input = document.getElementById('passwordInput').value;
-        const errorDiv = document.getElementById('loginError');
-        const loginScreen = document.getElementById('loginScreen');
-        const mainContent = document.getElementById('mainContent');
-        
-        if (input === ADMIN_PASSWORD) {
-            // ✅ Contraseña correcta
-            sessionStorage.setItem('admin_autenticado', 'true');
-            loginScreen.style.display = 'none';
-            mainContent.style.display = 'block';
-            iniciarSistemaAdmin();
-        } else {
-            // ❌ Contraseña incorrecta
-            errorDiv.style.display = 'block';
-            document.getElementById('passwordInput').value = '';
-            document.getElementById('passwordInput').focus();
-            
-            // Efecto shake
-            const inputElem = document.getElementById('passwordInput');
-            inputElem.style.animation = 'shake 0.5s';
-            setTimeout(() => {
-                inputElem.style.animation = '';
-            }, 500);
-        }
-    }
-    
-    // Permitir Enter para enviar
-    document.getElementById('passwordInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            verificarPassword();
-        }
-    });
-    
-    // Función para cerrar sesión
-    function cerrarSesion() {
-        if (confirm('¿Estás seguro de cerrar sesión?')) {
-            sessionStorage.removeItem('admin_autenticado');
-            location.reload();
-        }
-    }
-    
-    // ========================================
-    // SISTEMA DE ADMINISTRACIÓN CONECTADO AL BACKEND
-    // ========================================
-    
-    let contactos = [];
-    let contactosFiltrados = [];
-    let token = '2205'; // Token para el backend
-    
-    // Función para iniciar el sistema del admin
-    function iniciarSistemaAdmin() {
-        console.log('✅ Sistema admin iniciado con seguridad');
-        
-        // Iniciar temporizador de sesión
-        iniciarTemporizadorSesion();
-        
-        // Configurar formulario
-        document.getElementById('contactForm').addEventListener('submit', guardarContacto);
-        
-        // Cargar datos iniciales
-        cargarDatos();
-    }
-    
-    // Cierre automático después de 8 horas de inactividad
-    function iniciarTemporizadorSesion() {
-        let tiempoInactivo = 0;
-        const tiempoMaximo = 8 * 60 * 60 * 1000; // 8 horas
-        
-        function reiniciarTemporizador() {
-            tiempoInactivo = 0;
-        }
-        
-        // Reiniciar con cualquier interacción
-        ['click', 'keypress', 'mousemove', 'scroll'].forEach(evento => {
-            document.addEventListener(evento, reiniciarTemporizador);
-        });
-        
-        // Verificar cada minuto
-        setInterval(() => {
-            tiempoInactivo += 60000; // 1 minuto
-            
-            if (tiempoInactivo >= tiempoMaximo && sessionStorage.getItem('admin_autenticado') === 'true') {
-                sessionStorage.removeItem('admin_autenticado');
-                alert('Sesión expirada por inactividad. Por favor, ingresa nuevamente.');
-                location.reload();
+        // CONFIGURACIÓN PARA DANTEPROPIEDADES.COM.AR + RENDER
+        const ADMIN_PASSWORD = '2205';
+        const TOKEN = '2205';
+        const BASE_URL = 'https://danterealestate-github-io.onrender.com';
+
+        let contactos = [];
+        let contactoSeleccionado = null;
+
+        // Verificar autenticación al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            const estaAutenticado = sessionStorage.getItem('admin_autenticado') === 'true';
+            if (estaAutenticado) {
+                mostrarAdmin();
             }
-        }, 60000);
-    }
-    
-    // Función para hacer requests al backend
-    async function apiRequest(endpoint, method = 'GET', data = null) {
-        try {
-            const options = {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json',
+        });
+
+        function iniciarSesion() {
+            const password = document.getElementById('passwordInput').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            if (password === ADMIN_PASSWORD) {
+                sessionStorage.setItem('admin_autenticado', 'true');
+                mostrarAdmin();
+            } else {
+                errorDiv.textContent = 'Contraseña incorrecta';
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function mostrarAdmin() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminPanel').classList.remove('hidden');
+            cargarDatos();
+        }
+
+        // Función para hacer requests al backend de Render
+        async function apiRequest(endpoint, method = 'GET', data = null) {
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+                
+                if (data && method !== 'GET') {
+                    options.body = JSON.stringify(data);
                 }
+                
+                const response = await fetch(`${BASE_URL}/admin/${endpoint}/${TOKEN}`, options);
+                
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('Error en API request:', error);
+                throw error;
+            }
+        }
+
+        async function cargarDatos() {
+            try {
+                console.log('🔄 Cargando datos desde Render...');
+                const respuesta = await apiRequest('data');
+                
+                if (respuesta.success) {
+                    contactos = respuesta.data;
+                    mostrarContactos();
+                    cargarEstadisticas();
+                } else {
+                    throw new Error(respuesta.error || 'Error cargando datos');
+                }
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+                document.getElementById('listaContactos').innerHTML = 
+                    `<div class="error">❌ Error cargando datos: ${error.message}</div>`;
+            }
+        }
+
+        function mostrarContactos() {
+            const contenedor = document.getElementById('listaContactos');
+            
+            if (contactos.length === 0) {
+                contenedor.innerHTML = '<div class="loading">No hay contactos registrados</div>';
+                return;
+            }
+            
+            let html = '<h3>📋 Lista de Contactos (' + contactos.length + ')</h3>';
+            
+            contactos.forEach(contacto => {
+                html += `
+                    <div class="contacto-item">
+                        <div class="contacto-info">
+                            <strong>${contacto.nombre || 'Sin nombre'}</strong><br>
+                            <small>📧 ${contacto.email || 'Sin email'} | 📱 ${contacto.telefono || 'Sin teléfono'}</small><br>
+                            <span class="estado estado-${contacto.estado}">${contacto.estado || 'nuevo'}</span>
+                        </div>
+                        <div class="contacto-actions">
+                            <button class="btn" onclick="verContacto('${contacto.timestamp}')">👁️ Ver</button>
+                            <button class="btn btn-warning" onclick="editarContacto('${contacto.timestamp}')">✏️ Editar</button>
+                            <button class="btn btn-danger" onclick="eliminarContacto('${contacto.timestamp}')">🗑️ Borrar</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            contenedor.innerHTML = html;
+        }
+
+        async function cargarEstadisticas() {
+            try {
+                const stats = await apiRequest('data');
+                if (stats.success) {
+                    const contactos = stats.data;
+                    const total = contactos.length;
+                    const nuevos = contactos.filter(c => c.estado === 'nuevo').length;
+                    const contactados = contactos.filter(c => c.estado === 'contactado').length;
+                    const interesados = contactos.filter(c => c.estado === 'interesado').length;
+                    
+                    document.getElementById('estadisticas').innerHTML = `
+                        <strong>Total:</strong> ${total} | 
+                        <strong>Nuevos:</strong> ${nuevos} | 
+                        <strong>Contactados:</strong> ${contactados} |
+                        <strong>Interesados:</strong> ${interesados}
+                    `;
+                }
+            } catch (error) {
+                console.error('Error cargando estadísticas:', error);
+            }
+        }
+
+        function mostrarFormularioNuevo() {
+            document.getElementById('tituloFormulario').textContent = 'Nuevo Contacto';
+            document.getElementById('contactoId').value = '';
+            document.getElementById('formularioContacto').reset();
+            document.getElementById('modalFormulario').style.display = 'flex';
+        }
+
+        async function editarContacto(timestamp) {
+            try {
+                const respuesta = await apiRequest('data');
+                const contacto = respuesta.data.find(c => c.timestamp === timestamp);
+                
+                if (contacto) {
+                    document.getElementById('tituloFormulario').textContent = 'Editar Contacto';
+                    document.getElementById('contactoId').value = contacto.timestamp;
+                    document.getElementById('nombre').value = contacto.nombre || '';
+                    document.getElementById('email').value = contacto.email || '';
+                    document.getElementById('telefono').value = contacto.telefono || '';
+                    document.getElementById('estado').value = contacto.estado || 'nuevo';
+                    document.getElementById('notas').value = contacto.notas || '';
+                    document.getElementById('modalFormulario').style.display = 'flex';
+                }
+            } catch (error) {
+                console.error('Error editando contacto:', error);
+            }
+        }
+
+        async function verContacto(timestamp) {
+            try {
+                const respuesta = await apiRequest('data');
+                const contacto = respuesta.data.find(c => c.timestamp === timestamp);
+                
+                if (contacto) {
+                    contactoSeleccionado = contacto;
+                    document.getElementById('detallesContacto').innerHTML = `
+                        <p><strong>Nombre:</strong> ${contacto.nombre || 'Sin nombre'}</p>
+                        <p><strong>Email:</strong> ${contacto.email || 'Sin email'}</p>
+                        <p><strong>Teléfono:</strong> ${contacto.telefono || 'Sin teléfono'}</p>
+                        <p><strong>Estado:</strong> ${contacto.estado || 'nuevo'}</p>
+                        <p><strong>Notas:</strong> ${contacto.notas || 'Sin notas'}</p>
+                        <p><strong>Fecha:</strong> ${contacto.fecha_creacion || 'No disponible'}</p>
+                    `;
+                    document.getElementById('modalVisualizar').style.display = 'flex';
+                }
+            } catch (error) {
+                console.error('Error visualizando contacto:', error);
+            }
+        }
+
+        async function eliminarContacto(timestamp) {
+            if (!confirm('¿Está seguro de eliminar este contacto?')) {
+                return;
+            }
+            
+            try {
+                await apiRequest('delete', 'DELETE', { timestamp });
+                await cargarDatos();
+                alert('✅ Contacto eliminado correctamente');
+            } catch (error) {
+                console.error('Error eliminando contacto:', error);
+                alert('❌ Error eliminando contacto');
+            }
+        }
+
+        function editarDesdeVisualizar() {
+            if (contactoSeleccionado) {
+                cerrarVisualizar();
+                editarContacto(contactoSeleccionado.timestamp);
+            }
+        }
+
+        function cerrarFormulario() {
+            document.getElementById('modalFormulario').style.display = 'none';
+        }
+
+        function cerrarVisualizar() {
+            document.getElementById('modalVisualizar').style.display = 'none';
+            contactoSeleccionado = null;
+        }
+
+        async function limpiarTodosDatos() {
+            if (!confirm('¿Está seguro de eliminar TODOS los contactos? Esta acción no se puede deshacer.')) {
+                return;
+            }
+            
+            try {
+                await apiRequest('clear', 'DELETE');
+                await cargarDatos();
+                alert('✅ Todos los contactos han sido eliminados');
+            } catch (error) {
+                console.error('Error limpiando datos:', error);
+                alert('❌ Error limpiando datos');
+            }
+        }
+
+        async function refrescarDatos() {
+            await cargarDatos();
+        }
+
+        // Manejar envío del formulario
+        document.getElementById('formularioContacto').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('contactoId').value;
+            const datos = {
+                nombre: document.getElementById('nombre').value,
+                email: document.getElementById('email').value,
+                telefono: document.getElementById('telefono').value,
+                estado: document.getElementById('estado').value,
+                notas: document.getElementById('notas').value
             };
             
-            if (data && method !== 'GET') {
-                options.body = JSON.stringify(data);
-            }
-            
-            const response = await fetch(`/admin/${endpoint}/${token}`, options);
-            
-            if (!response.ok) {
-                throw new Error(`Error ${response.status}: ${response.statusText}`);
-            }
-            
-            return await response.json();
-        } catch (error) {
-            console.error('Error en API request:', error);
-            mostrarMensaje(`Error de conexión: ${error.message}`, 'error');
-            throw error;
-        }
-    }
-    
-    // Cargar datos desde el backend
-    async function cargarDatos() {
-        try {
-            mostrarEstado('Cargando datos...');
-            const data = await apiRequest('data');
-            contactos = data.contactos || [];
-            mostrarEstadisticas();
-            mostrarContactos();
-            mostrarEstado('Datos cargados correctamente', 'success');
-        } catch (error) {
-            mostrarEstado('Error cargando datos', 'error');
-            console.error('Error cargando datos:', error);
-        }
-    }
-    
-    // Mostrar estadísticas
-    function mostrarEstadisticas() {
-        const statsGrid = document.getElementById('statsGrid');
-        
-        const total = contactos.length;
-        const hoy = new Date().toDateString();
-        const hoyCount = contactos.filter(c => new Date(c.timestamp).toDateString() === hoy).length;
-        const atendidos = contactos.filter(c => c.estado === 'atendido').length;
-        const importantes = contactos.filter(c => c.estado === 'importante').length;
-        const pendientes = contactos.filter(c => c.estado === 'nuevo').length;
-        
-        statsGrid.innerHTML = `
-            <div class="stat-card">
-                <h3>${total}</h3>
-                <p>Total Contactos</p>
-            </div>
-            <div class="stat-card">
-                <h3>${hoyCount}</h3>
-                <p>Hoy</p>
-            </div>
-            <div class="stat-card">
-                <h3>${pendientes}</h3>
-                <p>Pendientes</p>
-            </div>
-            <div class="stat-card">
-                <h3>${atendidos}</h3>
-                <p>Atendidos</p>
-            </div>
-            <div class="stat-card">
-                <h3>${importantes}</h3>
-                <p>⭐ Importantes</p>
-            </div>
-        `;
-    }
-    
-    // Mostrar contactos en tabla
-    function mostrarContactos() {
-        const container = document.getElementById('contactsContainer');
-        const contactosMostrar = contactosFiltrados.length > 0 ? contactosFiltrados : contactos;
-        
-        document.getElementById('contactCount').textContent = contactosMostrar.length;
-        
-        if (contactosMostrar.length === 0) {
-            container.innerHTML = `
-                <div style="text-align: center; padding: 40px; color: #666;">
-                    <p>📭 No hay contactos registrados.</p>
-                    <button onclick="agregarContacto()" class="btn btn-success" style="margin-top: 15px;">
-                        ➕ Agregar Primer Contacto
-                    </button>
-                </div>
-            `;
-            return;
-        }
-        
-        let html = `
-            <div style="margin-bottom: 15px; padding: 15px; background: #f0f8ff; border-radius: 8px; font-size: 0.9em; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-                <span>📊 Mostrando ${contactosMostrar.length} de ${contactos.length} contactos</span>
-                <div>
-                    <button onclick="exportarExcel()" class="btn" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 8px 15px;">
-                        📊 Exportar Excel
-                    </button>
-                </div>
-            </div>
-            <div style="overflow-x: auto;">
-                <table class="contacts-table">
-                    <thead>
-                        <tr>
-                            <th>📅 Fecha</th>
-                            <th>👤 Nombre</th>
-                            <th>📧 Email</th>
-                            <th>📱 Teléfono</th>
-                            <th>💬 Tipo</th>
-                            <th>📝 Mensaje</th>
-                            <th>🏷️ Estado</th>
-                            <th>⚡ Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
-        
-        contactosMostrar.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).forEach((contacto, index) => {
-            const fecha = new Date(contacto.timestamp).toLocaleString('es-AR');
-            const mensajeCorto = (contacto.mensaje || '').substring(0, 50) + '...';
-            const tipo = (contacto.tipo_consulta || contacto.interes || 'general').toUpperCase();
-            const estado = contacto.estado || 'nuevo';
-            const estadoClass = `status-${estado}`;
-            const estadoText = estado === 'nuevo' ? 'NUEVO' : estado === 'atendido' ? 'ATENDIDO' : 'IMPORTANTE';
-            
-            // Usar índice como ID para evitar problemas
-            const contactoId = contacto.id || contacto.localId || index;
-            
-            html += `
-                <tr data-id="${contactoId}">
-                    <td style="font-size: 0.85em; white-space: nowrap;">${fecha}</td>
-                    <td><strong>${contacto.nombre || 'N/A'}</strong></td>
-                    <td style="font-size: 0.85em;">${contacto.email || 'N/A'}</td>
-                    <td style="font-size: 0.85em;">${contacto.telefono || 'N/A'}</td>
-                    <td><span style="background: #e3f2fd; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">${tipo}</span></td>
-                    <td title="${contacto.mensaje || ''}" style="font-size: 0.85em;">${mensajeCorto}</td>
-                    <td><span class="status-badge ${estadoClass}">${estadoText}</span></td>
-                    <td>
-                        <div class="action-buttons">
-                            <button onclick="verContacto(${contactoId})" class="action-btn view-btn" title="Ver detalles">
-                                👁️ Ver
-                            </button>
-                            <button onclick="editarContacto(${contactoId})" class="action-btn edit-btn" title="Editar">
-                                ✏️ Editar
-                            </button>
-                            <button onclick="eliminarContacto(${contactoId})" class="action-btn delete-btn" title="Eliminar">
-                                🗑️ Eliminar
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        });
-        
-        html += `
-                    </tbody>
-                </table>
-            </div>
-        `;
-        
-        container.innerHTML = html;
-    }
-    
-    // Agregar nuevo contacto
-    function agregarContacto() {
-        document.getElementById('modalTitle').textContent = '➕ Agregar Nuevo Contacto';
-        document.getElementById('contactForm').reset();
-        document.getElementById('contactId').value = '';
-        document.getElementById('editEstado').value = 'nuevo';
-        
-        const modal = document.getElementById('contactModal');
-        modal.style.display = 'flex';
-    }
-    
-    // Ver detalles completos del contacto
-    function verContacto(id) {
-        const contacto = contactos.find(c => 
-            (c.id && c.id.toString() === id.toString()) || 
-            (c.localId && c.localId.toString() === id.toString()) || 
-            contactos.indexOf(c) == id
-        );
-        
-        if (!contacto) {
-            mostrarMensaje('Contacto no encontrado', 'error');
-            return;
-        }
-        
-        const fecha = new Date(contacto.timestamp).toLocaleString('es-AR');
-        const tipo = (contacto.tipo_consulta || contacto.interes || 'general').toUpperCase();
-        const estado = contacto.estado || 'nuevo';
-        const estadoClass = `status-${estado}`;
-        const estadoText = estado === 'nuevo' ? 'NUEVO' : estado === 'atendido' ? 'ATENDIDO' : 'IMPORTANTE';
-        
-        document.getElementById('contactDetails').innerHTML = `
-            <div style="padding: 20px; background: #f9f9f9; border-radius: 8px;">
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px;">
-                    <div>
-                        <h3 style="margin-bottom: 5px;">${contacto.nombre || 'Sin nombre'}</h3>
-                        <p style="color: #666; margin-bottom: 10px;">${fecha}</p>
-                        <span class="status-badge ${estadoClass}" style="font-size: 0.9em;">${estadoText}</span>
-                        <span style="background: #e3f2fd; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; margin-left: 10px;">${tipo}</span>
-                    </div>
-                    <div>
-                        <button onclick="editarContacto(${id})" class="btn" style="background: #4CAF50; color: white; padding: 6px 12px;">
-                            ✏️ Editar
-                        </button>
-                    </div>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                    <div>
-                        <h4 style="margin-bottom: 5px; color: #555;">📧 Email</h4>
-                        <p style="font-size: 1.1em;">${contacto.email || 'No especificado'}</p>
-                    </div>
-                    <div>
-                        <h4 style="margin-bottom: 5px; color: #555;">📱 Teléfono</h4>
-                        <p style="font-size: 1.1em;">${contacto.telefono || 'No especificado'}</p>
-                    </div>
-                    <div>
-                        <h4 style="margin-bottom: 5px; color: #555;">🌐 Origen</h4>
-                        <p style="font-size: 1.1em;">${contacto.pagina_origen || 'Dante Propiedades'}</p>
-                    </div>
-                </div>
-                
-                <div style="margin-bottom: 20px;">
-                    <h4 style="margin-bottom: 5px; color: #555;">📝 Mensaje</h4>
-                    <div style="padding: 15px; background: white; border: 1px solid #eee; border-radius: 5px;">
-                        ${contacto.mensaje || '<i>Sin mensaje</i>'}
-                    </div>
-                </div>
-                
-                ${contacto.notas ? `
-                <div style="margin-bottom: 20px;">
-                    <h4 style="margin-bottom: 5px; color: #555;">📋 Notas Internas</h4>
-                    <div style="padding: 15px; background: #fffde7; border: 1px solid #ffe082; border-radius: 5px;">
-                        ${contacto.notas}
-                    </div>
-                </div>
-                ` : ''}
-                
-                ${contacto.presupuesto ? `
-                <div style="margin-bottom: 20px;">
-                    <h4 style="margin-bottom: 5px; color: #555;">💰 Presupuesto</h4>
-                    <p style="font-size: 1.1em;">${contacto.presupuesto}</p>
-                </div>
-                ` : ''}
-                
-                <div style="font-size: 0.85em; color: #888; padding-top: 15px; border-top: 1px solid #eee;">
-                    ID: ${contacto.id || contacto.localId || 'N/A'}<br>
-                    Registrado: ${new Date(contacto.timestamp).toLocaleString('es-AR')}
-                </div>
-            </div>
-        `;
-        
-        const modal = document.getElementById('viewModal');
-        modal.style.display = 'flex';
-    }
-    
-    // Editar contacto existente
-    function editarContacto(id) {
-        const contacto = contactos.find(c => 
-            (c.id && c.id.toString() === id.toString()) || 
-            (c.localId && c.localId.toString() === id.toString()) || 
-            contactos.indexOf(c) == id
-        );
-        
-        if (!contacto) {
-            mostrarMensaje('Contacto no encontrado', 'error');
-            return;
-        }
-        
-        document.getElementById('modalTitle').textContent = '📝 Editar Contacto';
-        document.getElementById('contactId').value = id;
-        document.getElementById('editNombre').value = contacto.nombre || '';
-        document.getElementById('editEmail').value = contacto.email || '';
-        document.getElementById('editTelefono').value = contacto.telefono || '';
-        document.getElementById('editTipo').value = contacto.tipo_consulta || contacto.interes || 'general';
-        document.getElementById('editMensaje').value = contacto.mensaje || '';
-        document.getElementById('editOrigen').value = contacto.pagina_origen || 'Dante Propiedades';
-        document.getElementById('editEstado').value = contacto.estado || 'nuevo';
-        document.getElementById('editNotas').value = contacto.notas || '';
-        
-        const modal = document.getElementById('contactModal');
-        modal.style.display = 'flex';
-    }
-    
-    // Guardar contacto (crear o actualizar)
-    async function guardarContacto(e) {
-        e.preventDefault();
-        
-        const id = document.getElementById('contactId').value;
-        const isNew = !id;
-        
-        const contacto = {
-            nombre: document.getElementById('editNombre').value,
-            email: document.getElementById('editEmail').value,
-            telefono: document.getElementById('editTelefono').value,
-            tipo_consulta: document.getElementById('editTipo').value,
-            mensaje: document.getElementById('editMensaje').value,
-            pagina_origen: document.getElementById('editOrigen').value,
-            estado: document.getElementById('editEstado').value,
-            notas: document.getElementById('editNotas').value,
-            timestamp: isNew ? new Date().toISOString() : contactos.find(c => 
-                (c.id && c.id.toString() === id.toString()) || 
-                (c.localId && c.localId.toString() === id.toString()) || 
-                contactos.indexOf(c) == id
-            )?.timestamp || new Date().toISOString()
-        };
-        
-        try {
-            if (isNew) {
-                // Crear nuevo contacto
-                await apiRequest('add', 'POST', contacto);
-                mostrarMensaje('Contacto agregado correctamente', 'success');
-            } else {
-                // Actualizar contacto existente
-                await apiRequest('update', 'PUT', { id: id, ...contacto });
-                mostrarMensaje('Contacto actualizado correctamente', 'success');
-            }
-            
-            // Recargar datos
-            await cargarDatos();
-            cerrarModal();
-        } catch (error) {
-            console.error('Error guardando contacto:', error);
-            mostrarMensaje('Error al guardar el contacto', 'error');
-        }
-    }
-    
-    // Eliminar contacto
-    async function eliminarContacto(id) {
-        if (!confirm('¿Estás seguro de eliminar este contacto? Esta acción no se puede deshacer.')) {
-            return;
-        }
-        
-        try {
-            await apiRequest('delete', 'DELETE', { id: id });
-            mostrarMensaje('Contacto eliminado correctamente', 'success');
-            
-            // Recargar datos
-            await cargarDatos();
-        } catch (error) {
-            console.error('Error eliminando contacto:', error);
-            mostrarMensaje('Error al eliminar el contacto', 'error');
-        }
-    }
-    
-    // Limpiar todos los datos
-    async function limpiarDatos() {
-        if (!confirm('⚠️ ¿ESTÁS SEGURO DE ELIMINAR TODOS LOS CONTACTOS?\n\nEsta acción eliminará permanentemente todos los datos y no se puede deshacer.')) {
-            return;
-        }
-        
-        try {
-            await apiRequest('clear', 'DELETE');
-            mostrarMensaje('Todos los datos han sido eliminados', 'success');
-            
-            // Recargar datos
-            await cargarDatos();
-        } catch (error) {
-            console.error('Error limpiando datos:', error);
-            mostrarMensaje('Error al limpiar los datos', 'error');
-        }
-    }
-    
-    // Filtrar contactos
-    function filtrarContactos() {
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        const filterStatus = document.getElementById('filterStatus').value;
-        const filterTipo = document.getElementById('filterTipo').value;
-        const filterOrigen = document.getElementById('filterOrigen').value;
-        const filterFecha = document.getElementById('filterFecha').value;
-        
-        contactosFiltrados = contactos.filter(contacto => {
-            // Búsqueda general
-            if (searchTerm && !(
-                contacto.nombre?.toLowerCase().includes(searchTerm) ||
-                contacto.email?.toLowerCase().includes(searchTerm) ||
-                contacto.telefono?.includes(searchTerm) ||
-                contacto.mensaje?.toLowerCase().includes(searchTerm)
-            )) {
-                return false;
-            }
-            
-            // Filtro por estado
-            if (filterStatus && contacto.estado !== filterStatus) {
-                return false;
-            }
-            
-            // Filtro por tipo
-            if (filterTipo && contacto.tipo_consulta !== filterTipo && contacto.interes !== filterTipo) {
-                return false;
-            }
-            
-            // Filtro por origen
-            if (filterOrigen && contacto.pagina_origen !== filterOrigen) {
-                return false;
-            }
-            
-            // Filtro por fecha
-            if (filterFecha) {
-                const fechaContacto = new Date(contacto.timestamp).toISOString().split('T')[0];
-                if (fechaContacto !== filterFecha) {
-                    return false;
+            try {
+                if (id) {
+                    // Editar contacto existente
+                    datos.timestamp = id;
+                    await apiRequest('update', 'PUT', datos);
+                    alert('✅ Contacto actualizado correctamente');
+                } else {
+                    // Crear nuevo contacto
+                    await apiRequest('add', 'POST', datos);
+                    alert('✅ Contacto creado correctamente');
                 }
+                
+                cerrarFormulario();
+                await cargarDatos();
+            } catch (error) {
+                console.error('Error guardando contacto:', error);
+                alert('❌ Error guardando contacto');
             }
-            
-            return true;
         });
-        
-        mostrarContactos();
-    }
-    
-    // Limpiar filtros
-    function limpiarFiltros() {
-        document.getElementById('searchInput').value = '';
-        document.getElementById('filterStatus').value = '';
-        document.getElementById('filterTipo').value = '';
-        document.getElementById('filterOrigen').value = '';
-        document.getElementById('filterFecha').value = '';
-        
-        contactosFiltrados = [];
-        mostrarContactos();
-    }
-    
-    // Mostrar/ocultar filtros
-    function mostrarFiltros() {
-        const filterBar = document.getElementById('filterBar');
-        filterBar.style.display = filterBar.style.display === 'none' ? 'block' : 'none';
-    }
-    
-    // Exportar datos
-    function exportarDatos() {
-        const dataStr = JSON.stringify(contactos, null, 2);
-        const dataBlob = new Blob([dataStr], {type: 'application/json'});
-        const url = URL.createObjectURL(dataBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `contactos_dante_${new Date().toISOString().split('T')[0]}.json`;
-        link.click();
-        URL.revokeObjectURL(url);
-        
-        mostrarMensaje('Datos exportados correctamente', 'success');
-    }
-    
-    // Exportar Excel (usando backend)
-    async function exportarExcel() {
-        try {
-            window.open(`/admin/download/${token}`, '_blank');
-            mostrarMensaje('Descargando archivo Excel...', 'success');
-        } catch (error) {
-            console.error('Error exportando Excel:', error);
-            mostrarMensaje('Error al exportar Excel', 'error');
-        }
-    }
-    
-    // Funciones de modal
-    function cerrarModal() {
-        document.getElementById('contactModal').style.display = 'none';
-    }
-    
-    function cerrarViewModal() {
-        document.getElementById('viewModal').style.display = 'none';
-    }
-    
-    // Cerrar modal al hacer clic fuera
-    window.onclick = function(event) {
-        const contactModal = document.getElementById('contactModal');
-        const viewModal = document.getElementById('viewModal');
-        
-        if (event.target === contactModal) {
-            contactModal.style.display = 'none';
-        }
-        if (event.target === viewModal) {
-            viewModal.style.display = 'none';
-        }
-    }
-    
-    // Mostrar mensajes de estado
-    function mostrarMensaje(mensaje, tipo = 'info') {
-        const statusDiv = document.getElementById('status');
-        statusDiv.innerHTML = `<div class="${tipo}">${mensaje}</div>`;
-        
-        // Auto-ocultar después de 5 segundos
-        setTimeout(() => {
-            statusDiv.innerHTML = '';
-        }, 5000);
-    }
-    
-    function mostrarEstado(mensaje = '', tipo = 'info') {
-        if (mensaje) {
-            mostrarMensaje(mensaje, tipo);
-        }
-    }
     </script>
 </body>
 </html>
