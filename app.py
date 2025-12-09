@@ -16,6 +16,7 @@ from psycopg2.extras import RealDictCursor
 import json
 from datetime import datetime
 import logging
+import time
 
 # Configuración de logging
 logging.basicConfig(
