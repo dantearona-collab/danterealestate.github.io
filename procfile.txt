@@ -1,1 +1,1 @@
-web: gunicorn servidor_excel:app
+web: gunicorn main:app
