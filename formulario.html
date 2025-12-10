@@ -527,12 +527,11 @@
                 console.log('✅ Guardado en localStorage:', datosFormulario.nombre);
                 console.log('📊 Total en localStorage:', existingData.length, 'registros');
 
-                // ✅ INTENTAR ENVIAR AL SERVIDOR EXCEL
-                // const enviadoAServidor = await enviarAlServidorExcel(datosFormulario);
-                const enviadoAServidor = false; // Función no definida - comentada temporalmente
+                // ✅ ENVIAR AL BACKEND ADMINISTRADOR
+                const enviadoABackend = await enviarAlBackend(datosFormulario);
 
                 // ✅ MOSTRAR MENSAJE DE ÉXITO
-                if (!enviadoAServidor) {
+                if (!enviadoABackend) {
                     successMessage.innerHTML = `
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <div style="font-size: 24px;">✅</div>
