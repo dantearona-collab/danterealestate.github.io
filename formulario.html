@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacto - Dante Propiedades</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(35, 45, 235, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .header .phone {
+            font-size: 0.6em;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 12px;
+        }
+
+        .logo-key {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .logo-key img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+        }
+
+        .form-section h2 {
+            color: #232deb;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin: 20px 0;
+            padding: 12px 24px;
+            background: #232deb;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #1a1db4;
+            transform: translateY(-2px);
+        }
+
+        /* FORMULARIO FUNCIONAL */
+        .contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #232deb;
+            box-shadow: 0 0 0 3px rgba(35, 45, 235, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .submit-btn {
+            background: #232deb;
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            display: block;
+            margin: 30px auto 0;
+        }
+
+        .submit-btn:hover {
+            background: #1a1db4;
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* WHATSAPP FLOTANTE */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: #25d366;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: white;
+            font-size: 30px;
+            box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(37, 211, 102, 0.6);
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .contact-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .contact-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .contact-card h3 {
+            color: #232deb;
+            margin-bottom: 10px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .server-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 1001;
+        }
+
+        .server-connected {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .server-disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .server-local {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .whatsapp-float {
+                width: 50px;
+                height: 50px;
+                font-size: 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Indicador de estado del servidor -->
+    <div class="server-status server-local" id="serverStatus">
+        📱 Modo Local
+    </div>
+
+    <div class="header">
+        <h1>
+            <span class="logo-key">
+                <img src="llave.png" alt="Logo Dante Propiedades">
+            </span>
+            Dante Propiedades
+            <span class="phone">📞 +54 11 2536-8595</span>
+        </h1>
+    </div>
+
+    <div class="container">
+        <a href="index.html" class="back-btn">← Volver al Inicio</a>
+
+        <div class="form-section">
+            <h2>📋 Formulario de Contacto</h2>
+            <p style="text-align: center; margin-bottom: 30px; color: #666;">
+                Completa el formulario y nos pondremos en contacto contigo a la brevedad
+            </p>
+
+            <div class="success-message" id="successMessage">
+                ✅ ¡Consulta enviada con éxito! Los datos fueron guardados en tu dispositivo.
+            </div>
+
+            <div class="error-message" id="errorMessage">
+                ❌ Error al guardar. Intenta nuevamente.
+            </div>
+
+            <form class="contact-form" id="contactForm">
+                <div class="form-group">
+                    <label for="nombre">Nombre completo *</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="telefono">Teléfono</label>
+                    <input type="tel" id="telefono" name="telefono" placeholder="+54 11 XXXX-XXXX">
+                </div>
+
+                <div class="form-group">
+                    <label for="interes">Interés</label>
+                    <select id="interes" name="interes">
+                        <option value="">Seleccionar...</option>
+                        <option value="compra">Comprar propiedad</option>
+                        <option value="venta">Vender propiedad</option>
+                        <option value="alquiler">Alquilar propiedad</option>
+                        <option value="consulta">Consulta general</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="presupuesto">Presupuesto aproximado</label>
+                    <select id="presupuesto" name="presupuesto">
+                        <option value="">Seleccionar...</option>
+                        <option value="hasta-100k">Hasta $100.000 USD</option>
+                        <option value="100k-200k">$100.000 - $200.000 USD</option>
+                        <option value="200k-300k">$200.000 - $300.000 USD</option>
+                        <option value="300k-500k">$300.000 - $500.000 USD</option>
+                        <option value="mas-500k">Más de $500.000 USD</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="mensaje">Mensaje *</label>
+                    <textarea id="mensaje" name="mensaje" required
+                        placeholder="Contanos qué propiedad te interesa o qué consulta tenés..."></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    📧 Enviar Mensaje
+                </button>
+            </form>
+        </div>
+
+        <div class="contact-info">
+            <div class="contact-card">
+                <h3>📞 Teléfono</h3>
+                <p>+54 11 2536-8595</p>
+                <p style="font-size: 0.9em; color: #666;">Lunes a Viernes 9:00 - 18:00</p>
+            </div>
+            <div class="contact-card">
+                <h3>📧 Email</h3>
+                <p>info@dantepropiedades.com.ar</p>
+                <p style="font-size: 0.9em; color: #666;">Respuesta en 24 horas</p>
+            </div>
+            <div class="contact-card">
+                <h3>📍 Dirección</h3>
+                <p>Capital Federal, Argentina</p>
+                <p style="font-size: 0.9em; color: #666;">Citas con agenda</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- WhatsApp Flotante -->
+    <a href="https://wa.me/5491125368595?text=Hola,%20me%20interesa%20obtener%20información%20sobre%20propiedades"
+        class="whatsapp-float" target="_blank" title="Contactar por WhatsApp">
+        💬
+    </a>
+
+    <script>
+        // URL del servidor - BACKEND ADMINISTRADOR
+        const SERVER_URL = 'https://administrador-63nc.onrender.com';
+
+        // Función simple para verificar servidor
+        function verificarServidor() {
+            const statusElement = document.getElementById('serverStatus');
+            if (statusElement) {
+                statusElement.textContent = '📱 Modo Local';
+                statusElement.className = 'server-status server-local';
+            }
+            return false;
+        }
+
+
+        // Función para enviar datos al backend administrador
+        async function enviarAlBackend(datos) {
+            try {
+                console.log('📤 Enviando al backend administrador...');
+
+                const datosBackend = {
+                    nombre: datos.nombre,
+                    email: datos.email,
+                    telefono: datos.telefono || '',
+                    interes: datos.interes || '',
+                    presupuesto: datos.presupuesto || '',
+                    mensaje: datos.mensaje || ''
+                };
+
+                const response = await fetch(`${SERVER_URL}/api/contacto`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(datosBackend)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('✅ Guardado en base de datos:', result);
+
+                    document.getElementById('successMessage').innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="font-size: 24px;">✅</div>
+                            <div>
+                                <strong>¡Consulta enviada con éxito!</strong><br>
+                                <small>Datos guardados en nuestro sistema.</small><br>
+                                <small>Abriendo WhatsApp...</small>
+                            </div>
+                        </div>
+                    `;
+                    return true;
+                } else {
+                    console.error('❌ Error del servidor:', response.status);
+                    const error = await response.json();
+                    console.error('Detalles:', error);
+                    return false;
+                }
+
+            } catch (error) {
+                console.error('❌ Error enviando al backend:', error);
+                return false;
+            }
+        }
+
+        // Formulario de contacto funcional - VERSIÓN SIMPLE
+        document.getElementById('contactForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            console.log('📱 Iniciando envío del formulario...');
+            document.getElementById('serverStatus').textContent = '📱 Guardando...';
+
+            // Obtener datos del formulario
+            const nombre = document.getElementById('nombre').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const telefono = document.getElementById('telefono').value.trim();
+            const interes = document.getElementById('interes').value;
+            const presupuesto = document.getElementById('presupuesto').value;
+            const mensaje = document.getElementById('mensaje').value.trim();
+
+            // Validación básica
+            if (!nombre || !email || !mensaje) {
+                document.getElementById('errorMessage').innerHTML =
+                    '❌ Por favor, completá los campos obligatorios (Nombre, Email y Mensaje)';
+                document.getElementById('errorMessage').style.display = 'block';
+                return;
+            }
+
+            // Validar email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                document.getElementById('errorMessage').innerHTML =
+                    '❌ Por favor, ingresá un email válido';
+                document.getElementById('errorMessage').style.display = 'block';
+                return;
+            }
+
+            // Ocultar mensajes de error
+            document.getElementById('errorMessage').style.display = 'none';
+
+            // Mostrar carga
+            const submitBtn = document.getElementById('submitBtn');
+            const successMessage = document.getElementById('successMessage');
+            const originalBtnText = submitBtn.textContent;
+            submitBtn.textContent = '⏳ Guardando...';
+            submitBtn.disabled = true;
+
+            // Preparar datos
+            const datosFormulario = {
+                nombre,
+                email,
+                telefono: telefono || 'No especificado',
+                interes: interes || 'Consulta general',
+                presupuesto: presupuesto || 'No especificado',
+                mensaje,
+                timestamp: new Date().toISOString(),
+                fecha: new Date().toLocaleDateString('es-AR'),
+                hora: new Date().toLocaleTimeString('es-AR')
+            };
+
+            try {
+                // ✅ GUARDAR EN LOCALSTORAGE (clave única)
+                const localKey = 'consultas_dante_propiedades';
+                const existingData = JSON.parse(localStorage.getItem(localKey) || '[]');
+
+                // Limitar a 200 registros máximo
+                if (existingData.length >= 200) {
+                    existingData.shift();
+                }
+
+                existingData.push(datosFormulario);
+                localStorage.setItem(localKey, JSON.stringify(existingData));
+
+                console.log('✅ Guardado en localStorage:', datosFormulario.nombre);
+                console.log('📊 Total en localStorage:', existingData.length, 'registros');
+
+                // ✅ ENVIAR AL BACKEND ADMINISTRADOR
+                const enviadoABackend = await enviarAlBackend(datosFormulario);
+
+                // ✅ MOSTRAR MENSAJE DE ÉXITO
+                if (!enviadoABackend) {
+                    successMessage.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="font-size: 24px;">✅</div>
+                            <div>
+                                <strong>¡Consulta enviada con éxito!</strong><br>
+                                <small>Los datos fueron guardados en tu dispositivo.</small><br>
+                                <small>Abriendo WhatsApp...</small>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                successMessage.style.display = 'block';
+
+            } catch (error) {
+                console.error('❌ Error:', error);
+                successMessage.innerHTML = '⚠️ Error guardando, pero WhatsApp se abrirá igual';
+                successMessage.style.display = 'block';
+            }
+
+            // ✅ CREAR Y ENVIAR WHATSAPP
+            const whatsappMessage = `*NUEVA CONSULTA - DANTE PROPIEDADES*
+
+    👤 *Nombre:* ${nombre}
+    📧 *Email:* ${email}
+    📱 *Teléfono:* ${telefono || 'No especificado'}
+    🎯 *Interés:* ${interes || 'Consulta general'}
+    💰 *Presupuesto:* ${presupuesto || 'No especificado'}
+
+    💬 *Mensaje:*
+    ${mensaje}
+
+    ---
+    📅 *Fecha:* ${new Date().toLocaleDateString('es-AR')}
+    ⏰ *Hora:* ${new Date().toLocaleTimeString('es-AR')}
+    🌐 *Enviado desde:* Formulario Web Dante Propiedades`;
+
+            const whatsappURL = `https://wa.me/5491125368595?text=${encodeURIComponent(whatsappMessage)}`;
+
+            // ✅ ABRIR WHATSAPP
+            setTimeout(() => {
+                console.log('💬 Abriendo WhatsApp...');
+                window.open(whatsappURL, '_blank');
+
+                setTimeout(() => {
+                    document.getElementById('contactForm').reset();
+                    successMessage.style.display = 'none';
+                    submitBtn.textContent = originalBtnText;
+                    submitBtn.disabled = false;
+                    document.getElementById('serverStatus').textContent = '📱 Modo Local';
+                    console.log('🔄 Formulario reiniciado');
+                }, 3000);
+            }, 1500);
+        });
+
+        // ✅ INICIALIZAR
+        document.addEventListener('DOMContentLoaded', function () {
+            verificarServidor();
+            console.log('✅ Formulario listo - Backend Administrador + localStorage + WhatsApp');
+
+            // Solo un enlace discreto al panel admin (opcional)
+            const adminLink = document.createElement('a');
+            adminLink.href = 'admin_excel.html';
+            adminLink.innerHTML = '📊';
+            adminLink.style.cssText = `
+                position: fixed; bottom: 20px; left: 20px;
+                width: 30px; height: 30px; opacity: 0.3;
+                background: #6c757d; color: white; border: none;
+                border-radius: 50%; cursor: pointer; z-index: 1000;
+                font-size: 16px; display: flex; align-items: center;
+                justify-content: center; text-decoration: none;
+                transition: opacity 0.3s;
+            `;
+            adminLink.title = 'Panel de administración';
+            document.body.appendChild(adminLink);
+        });
+    </script>
+
+</body>
+
+</html>
