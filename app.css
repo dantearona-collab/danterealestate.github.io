@@ -3579,3 +3579,21 @@ button {
     font-size: 15px;
     border-radius: 30px;
 }
+
+/* STYLES FOR PANNELLUM 360 VIEWER */
+.btn-360 {
+    background-color: #ff5722;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin-top: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+    transition: background-color 0.3s;
+}
+
+.btn-360:hover {
+    background-color: #e64a19;
+}

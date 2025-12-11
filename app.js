@@ -764,6 +764,13 @@ function createPropertyCard(property) {
                 ${createMultimediaSection(property)}
             </div>
 
+            <!-- BOTÓN 360 -->
+            ${(property.imagenes_360 && property.imagenes_360.length > 0) ? `
+            <button class="btn-360" data-image="${property.imagenes_360[0]}" data-title="${property.titulo}">
+                🔄 Ver recorrido 360
+            </button>
+            ` : ''}
+
             <!-- NUEVA SECCIÓN: MAPA DE UBICACIÓN - CON ESTILOS INLINE -->
             <div style="border-top: 1px solid #e1e5e9 !important; margin-top: 15px !important; padding-top: 15px !important;">
                 <div style="font-size: 14px !important; color: #6c757d !important; margin-bottom: 10px !important; text-align: center !important;">
@@ -2688,3 +2695,47 @@ console.log('✅ Sin dependencias de Font Awesome');
 console.log('🚀 Distribución inteligente aplicada - Sin tamaños iguales - Fondo blanco garantizado');
 console.log('📄 Sistema de PDFs integrado');
 console.log('🎥 Sistema de videos integrado');
+
+// ========================================
+// PANNELLUM 360 VIEWER
+// ========================================
+
+let pannellumViewer = null;
+
+document.addEventListener('click', function (e) {
+    if (e.target && e.target.classList.contains('btn-360')) {
+        const imageUrl = e.target.dataset.image;
+        const title = e.target.dataset.title;
+        const pannellumModal = document.getElementById('pannellum-modal');
+        
+        if (pannellumModal) {
+            pannellumModal.style.display = 'block';
+            
+            // Destruir instancia anterior si existe
+            if (pannellumViewer) {
+                pannellumViewer.destroy();
+            }
+            
+            pannellumViewer = pannellum.viewer('pannellum-container', {
+                "type": "equirectangular",
+                "panorama": imageUrl,
+                "title": title,
+                "autoLoad": true,
+                "autoRotate": -2,
+                "showControls": true
+            });
+        }
+    }
+});
+
+function closePannellumModal() {
+    const pannellumModal = document.getElementById('pannellum-modal');
+    if (pannellumModal) {
+        pannellumModal.style.display = 'none';
+        if (pannellumViewer) {
+            pannellumViewer.destroy();
+            pannellumViewer = null;
+        }
+    }
+}
+
