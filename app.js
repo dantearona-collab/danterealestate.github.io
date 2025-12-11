@@ -765,8 +765,8 @@ function createPropertyCard(property) {
             </div>
 
             <!-- BOTÓN 360 -->
-            ${(property.imagenes_360 && property.imagenes_360.length > 0) ? `
-            <button class="btn-360" data-image="${property.imagenes_360[0]}" data-title="${property.titulo}">
+            ${(property.imagenes_360 && Array.isArray(property.imagenes_360) && property.imagenes_360.length > 0) ? `
+            <button class="btn-360" data-images='${JSON.stringify(property.imagenes_360)}' data-title="${property.titulo}">
                 🔄 Ver recorrido 360
             </button>
             ` : ''}
@@ -2697,33 +2697,88 @@ console.log('📄 Sistema de PDFs integrado');
 console.log('🎥 Sistema de videos integrado');
 
 // ========================================
-// PANNELLUM 360 VIEWER
+// PANNELLUM 360 VIEWER - CON GALERÍA
 // ========================================
 
 let pannellumViewer = null;
 
+// Función para cambiar la imagen en el visor Pannellum activo
+function setPannellumImage(imageUrl) {
+    if (pannellumViewer) {
+        console.log(`🔄 Cambiando panorama a: ${imageUrl}`);
+        pannellumViewer.loadPanorama(imageUrl);
+    }
+}
+
 document.addEventListener('click', function (e) {
     if (e.target && e.target.classList.contains('btn-360')) {
-        const imageUrl = e.target.dataset.image;
-        const title = e.target.dataset.title;
-        const pannellumModal = document.getElementById('pannellum-modal');
-        
-        if (pannellumModal) {
-            pannellumModal.style.display = 'block';
-            
-            // Destruir instancia anterior si existe
-            if (pannellumViewer) {
-                pannellumViewer.destroy();
+        const imagesAttr = e.target.dataset.images;
+        if (!imagesAttr) {
+            console.warn('⚠️ Botón 360 sin atributo data-images.');
+            return;
+        }
+
+        try {
+            const images = JSON.parse(imagesAttr);
+            if (!Array.isArray(images) || images.length === 0) {
+                console.warn('⚠️ data-images no es un array válido o está vacío.');
+                return;
             }
+
+            const title = e.target.dataset.title;
+            const pannellumModal = document.getElementById('pannellum-modal');
             
-            pannellumViewer = pannellum.viewer('pannellum-container', {
-                "type": "equirectangular",
-                "panorama": imageUrl,
-                "title": title,
-                "autoLoad": true,
-                "autoRotate": -2,
-                "showControls": true
-            });
+            if (pannellumModal) {
+                pannellumModal.style.display = 'block';
+                document.body.style.overflow = 'hidden'; // Bloquear scroll del body
+                
+                if (pannellumViewer) {
+                    pannellumViewer.destroy();
+                }
+
+                const thumbnailsContainer = document.getElementById('pannellum-thumbnails');
+                if (thumbnailsContainer) {
+                    thumbnailsContainer.innerHTML = ''; // Limpiar
+
+                    if (images.length > 1) {
+                        thumbnailsContainer.style.display = 'flex';
+                        images.forEach((imgUrl, index) => {
+                            const thumb = document.createElement('div');
+                            thumb.className = 'pannellum-thumb';
+                            thumb.style.backgroundImage = `url('${imgUrl}')`;
+                            thumb.title = `Ver imagen ${index + 1}`;
+                            thumb.onclick = (event) => {
+                                event.stopPropagation();
+                                setPannellumImage(imgUrl);
+                                // Marcar thumbnail activo
+                                Array.from(thumbnailsContainer.children).forEach(t => t.classList.remove('active'));
+                                thumb.classList.add('active');
+                            };
+                            thumbnailsContainer.appendChild(thumb);
+                        });
+                    } else {
+                        thumbnailsContainer.style.display = 'none';
+                    }
+                } else {
+                    console.warn('⚠️ Contenedor de miniaturas #pannellum-thumbnails no encontrado.');
+                }
+                
+                pannellumViewer = pannellum.viewer('pannellum-container', {
+                    "type": "equirectangular",
+                    "panorama": images[0],
+                    "title": title,
+                    "autoLoad": true,
+                    "autoRotate": -2,
+                    "showControls": true
+                });
+
+                // Marcar primer thumbnail como activo
+                if (thumbnailsContainer && thumbnailsContainer.firstChild) {
+                    thumbnailsContainer.firstChild.classList.add('active');
+                }
+            }
+        } catch (error) {
+            console.error('❌ Error al procesar data-images o inicializar Pannellum:', error);
         }
     }
 });
@@ -2732,6 +2787,7 @@ function closePannellumModal() {
     const pannellumModal = document.getElementById('pannellum-modal');
     if (pannellumModal) {
         pannellumModal.style.display = 'none';
+        document.body.style.overflow = 'auto'; // Restaurar scroll del body
         if (pannellumViewer) {
             pannellumViewer.destroy();
             pannellumViewer = null;
