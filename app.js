@@ -2705,9 +2705,22 @@ let pannellumViewer = null;
 // Función para cambiar la imagen en el visor Pannellum activo
 function setPannellumImage(imageUrl) {
     if (pannellumViewer) {
-        console.log(`🔄 Cambiando panorama a: ${imageUrl}`);
-        pannellumViewer.loadPanorama(imageUrl);
+        console.log(`🔄 Recreando visor para: ${imageUrl}`);
+        pannellumViewer.destroy();
     }
+
+    // Obtenemos el título desde el botón que abrió el modal. 
+    // Es un poco indirecto, pero funciona sin cambiar mucho el resto del código.
+    const title = document.querySelector('.btn-360[data-images]').dataset.title || 'Visor 360';
+
+    pannellumViewer = pannellum.viewer('pannellum-container', {
+        "type": "equirectangular",
+        "panorama": imageUrl,
+        "title": title,
+        "autoLoad": true,
+        "autoRotate": -2,
+        "showControls": true
+    });
 }
 
 document.addEventListener('click', function (e) {
