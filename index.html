@@ -2548,6 +2548,45 @@
         integrity="sha512-EmZuy6vd0ns9wP+3l1hETKq/vNGELFRuLfazPnKKBbDpgZL0sZ7qyao5KgVbGJKOWlAFPNn6G9naB/8WnKN43Q=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
+        // ========================================
+        // CONFIGURACIÓN DEL BACKEND
+        // ========================================
+        const API_BASE_URL = "https://danterealestate-github-io.onrender.com";
+        const CHAT_URL = `${API_BASE_URL}/api/chat`;
+        const STATUS_URL = `${API_BASE_URL}/api/status`;
+        const FILTERS_URL = `${API_BASE_URL}/properties/filter-options`;
+
+        // Variables Globales
+        let chatBox, input, button, typingIndicator, statusText;
+        let conversacionActual = [];
+        let filtrosDinamicos = { operaciones: [], tipos: [], barrios: [] };
+        let contextoActual = { tipo: null, resultados: [], propiedad_focus: null, filtros_usados: {}, timestamp: null };
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function () {
+            chatBox = document.querySelector('#ai-chat-container .chat-box');
+            input = document.querySelector('#ai-chat-container #userInput');
+            button = document.querySelector('#ai-chat-container #sendBtn');
+            typingIndicator = document.querySelector('#ai-chat-container #typingIndicator');
+            statusText = document.querySelector('#ai-chat-container #statusText');
+
+            if (button) {
+                button.addEventListener('click', send);
+                console.log('✅ Event Listener asignado al botón Enviar');
+            } else {
+                console.error('❌ Botón Enviar no encontrado');
+            }
+
+            if (input) {
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') send();
+                });
+            }
+
+            checkServerStatus();
+            cargarFiltrosDinamicos();
+        });
+
         function mostrarImagenesByIndex(index) {
             const fotos = contextoActual.resultados[index]?.fotos;
 
