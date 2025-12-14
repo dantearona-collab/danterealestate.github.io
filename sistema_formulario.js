@@ -15,10 +15,10 @@
 const FormSystemConfig = {
     // URLs del servidor
     serverEndpoints: {
-        save: '/api/guardar-contacto',
-        getConsultas: '/api/obtener-consultas',
-        resumen: '/api/resumen',
-        health: '/health'
+        save: 'https://danterealestate-github-io.onrender.com/api/guardar-contacto',
+        getConsultas: 'https://danterealestate-github-io.onrender.com/api/obtener-consultas',
+        resumen: 'https://danterealestate-github-io.onrender.com/api/resumen',
+        health: 'https://danterealestate-github-io.onrender.com/health'
     },
 
     // Configuración de almacenamiento

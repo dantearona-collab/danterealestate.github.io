@@ -2,7 +2,7 @@
 // ===== CÓDIGO DEL ASISTENTE DE IA =====
 // ========================================
 
-const AI_API_BASE_URL = ""; // API calls will be relative to the current domain
+const AI_API_BASE_URL = "https://danterealestate-github-io.onrender.com"; // API calls will be relative to the current domain
 const AI_CHAT_URL = `${AI_API_BASE_URL}/api/chat`;
 const AI_FILTERS_URL = `${AI_API_BASE_URL}/api/properties/filter-options`; // Point to existing endpoint
 const AI_STATUS_URL = `${AI_API_BASE_URL}/api/properties/stats`; // Re-use existing endpoint
