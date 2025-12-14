@@ -2103,6 +2103,7 @@
                             <span id="statusText">Conectado</span>
                         </div>
                     </div>
+                    <button class="minimize-chat" onclick="toggleChatWidget()" title="Minimizar">_</button>
                     <button class="reset-chat" onclick="resetearChat()">Nueva Consulta</button>
                 </div>
                 <!-- Elemento de carga para filtros -->
@@ -2249,6 +2250,24 @@
             border-radius: 50%;
             background: #00ff00;
             animation: pulse 2s infinite;
+        }
+
+        #ai-chat-container .minimize-chat {
+            background: none;
+            border: 1px solid white;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.8em;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            padding-bottom: 5px;
+            /* Ajuste visual para el guion bajo */
         }
 
         #ai-chat-container .reset-chat {
