@@ -2923,63 +2923,50 @@
             button.disabled = true;
             showTypingIndicator(true);
 
-            <script>
-        // ========================================
-                // CONFIGURACIÓN DEL BACKEND
-                // ========================================
-                const API_BASE_URL = "https://danterealestate-github-io.onrender.com";
-                const CHAT_URL = `${API_BASE_URL}/api/chat`; // Full URL
-                const STATUS_URL = `${API_BASE_URL}/api/status`; // Full URL
 
-                let chatBox, input, button, typingIndicator, statusText; // Variables globales
-                let contextoActual = null; // Para mantener el hilo de la conversación
+            // ========================================
 
-                // ... resto de las funciones ...
+            try {
+                const payload = { message: msg, channel: 'web', filters: filtrosSeleccionados, contexto_anterior: contextoActual };
+                const response = await fetch(CHAT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
 
-                function addMessage(text, from = "bot") {
-            const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${from === 'user' ? 'msg-user' : 'msg-bot'}`;
-                if (from === 'user') {
-                    messageDiv.textContent = text;
-            } else {
-                if (window.markdownit) {
-                    const md = window.markdownit();
-                messageDiv.innerHTML = `<b>ASISTENTE VIRTUAL</b><br>${md.render(text)}`;
+                if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+
+                const data = await response.json();
+
+                if (data.response) {
+                    addMessage(data.response);
+                    if (data.propiedades && data.propiedades.length > 0) {
+                        actualizarContexto(data.propiedades, filtrosSeleccionados, 'busqueda');
+                        mostrarPropiedadesEnInterfaz(data.propiedades);
+                    } else {
+                        actualizarContexto([], filtrosSeleccionados, 'busqueda_sin_resultados');
+                    }
+                } else if (data.error) {
+                    addMessage(`⚠️ Error: ${data.error}`);
                 } else {
-                        messageDiv.innerHTML = `<b>ASISTENTE VIRTUAL</b><br>${text}`; // Fallback si markdown-it no carga
+                    addMessage('❌ Respuesta inesperada del servidor');
                 }
-            }
-                    chatBox.appendChild(messageDiv);
-                    chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-                    async function checkServerStatus() {
-            if (!statusText) return;
-                    try {
-                const response = await fetch(STATUS_URL);
-                    if (response.ok) {
-                        statusText.textContent = 'Conectado';
-                    statusText.style.color = 'green';
-                } else {
-                        statusText.textContent = 'Servidor inactivo';
-                    statusText.style.color = 'orange';
-                }
+                statusText.textContent = 'Conectado';
             } catch (error) {
-                        statusText.textContent = 'Sin conexión';
-                    statusText.style.color = 'red';
+                console.error('Error:', error);
+                addMessage('⚠️ No se pudo conectar con el servidor. Por favor, intentá nuevamente más tarde.');
+                statusText.textContent = 'Error de conexión';
+            } finally {
+                showTypingIndicator(false);
+                button.disabled = false;
+                input.focus();
             }
         }
 
-
-        setTimeout(() => {
-                        addMessage('¡Hola! 👋 Soy tu asistente de Dante Propiedades. Te ayudo a encontrar la propiedad ideal. ¿En qué puedo ayudarte hoy?', 'bot');
-        }, 1000);
-    });
-
-                    async function checkServerStatus() {
+        async function checkServerStatus() {
             try {
                 const response = await fetch(STATUS_URL);
-                    if (statusText) statusText.textContent = response.ok ? 'Conectado' : 'Servidor inactivo';
+                if (statusText) statusText.textContent = response.ok ? 'Conectado' : 'Servidor inactivo';
             } catch (error) {
                 if (statusText) statusText.textContent = 'Sin conexión';
             }
