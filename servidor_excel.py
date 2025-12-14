@@ -1,589 +1,345 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-PARCHE URGENTE - Corregir error 'Fecha' en API de estadísticas
-Dante Propiedades - Solución para problema "desconectado"
-"""
+# pip install -r requirements.txt
 
-from flask import Flask, request, jsonify, send_file, send_from_directory
-import pandas as pd
-from datetime import datetime
+import sys
 import os
+import json
+from flask import Flask, request, jsonify
 from flask_cors import CORS
-# Importar mimetypes para asegurar tipos de contenido correctos
-import mimetypes
+from openpyxl import Workbook, load_workbook
+from datetime import datetime
+
+# Importar lógica de la base de datos de la IA
+from logic.database import query_properties, initialize_databases, get_historial_canal, log_conversation
+from logic.filters import detect_filters
+from logic.gemini_client import call_gemini_with_rotation, build_prompt
+import time
 
 app = Flask(__name__)
+# Add the new Render URL to CORS
+CORS(app, resources={r"/api/*": {"origins": ["null", "http://dantepropiedades.com.ar", "http://www.dantepropiedades.com.ar", "https://dantepropiedades.com.ar", "https://www.dantepropiedades.com.ar", "http://dantepropiedades.com", "https://danterealestate-github-io.onrender.com", "https://danterealestate.github.io", "https://pagina-web-g82d.onrender.com", "https://artar1.github.io"]}})
 
-# ✅ ELIMINA UNA DE LAS DOS - DEJA SOLO ESTA:
-CORS(app)  # ← Esta permite todo (bueno para pruebas)
-
-# Configuración
 EXCEL_FILE = 'contactos_dante_propiedades.xlsx'
-LOG_FILE = 'registro_contactos.log'
 
-# Agregar tipos MIME adicionales por si acaso
-mimetypes.add_type('application/javascript', '.js')
-mimetypes.add_type('text/css', '.css')
+def safe_print(message):
+    safe_message = message.encode('ascii', 'ignore').decode('ascii')
+    print(safe_message)
 
-def log_contacto(mensaje):
-    """Registra actividad en archivo de log"""
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+def init_excel():
+    if not os.path.exists(EXCEL_FILE):
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Contactos"
+        ws['A1'] = 'Fecha/Hora'
+        ws['B1'] = 'Nombre'
+        ws['C1'] = 'Firma'
+        ws['D1'] = 'Teléfono'
+        ws['E1'] = 'Propiedad'
+        ws.column_dimensions['A'].width = 20
+        ws.column_dimensions['B'].width = 25
+        ws.column_dimensions['C'].width = 15
+        ws.column_dimensions['D'].width = 15
+        ws.column_dimensions['E'].width = 15
+        wb.save(EXCEL_FILE)
+        safe_print(f"SUCCESS: Archivo {EXCEL_FILE} creado exitosamente")
+    else:
+        safe_print(f"INFO: Archivo {EXCEL_FILE} encontrado")
+
+def serve_static_file(filename):
     try:
-        with open(LOG_FILE, 'a', encoding='utf-8') as f:
-            f.write(f"[{timestamp}] {mensaje}\n")
-    except:
-        pass  # Si no puede escribir al log, continuar
-
-def guardar_contacto_excel(datos):
-    """
-    Guarda un nuevo contacto en el archivo Excel
-    """
-    try:
-        fecha_hora = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        if filename.startswith('api/') or filename in ['contactos_dante_propiedades.xlsx', 'propiedades.json']:
+            safe_print(f"Archivo {filename} no se sirve como estático - será manejado por endpoint específico")
+            return jsonify({"error": f"Archivo {filename} no encontrado"}), 404
         
-        # Nuevo registro
-        nuevo_registro = {
-            'Fecha': fecha_hora,
-            'Nombre': datos.get('nombre', ''),
-            'Email': datos.get('email', ''),
-            'Teléfono': datos.get('telefono', ''),
-            'Interés': datos.get('interes', ''),
-            'Presupuesto': datos.get('presupuesto', ''),
-            'Mensaje': datos.get('mensaje', ''),
-            'Página_Origen': datos.get('pagina_origen', ''),
-            'IP_Cliente': request.remote_addr,
-            'User_Agent': request.headers.get('User-Agent', '')[:100] + '...'
-        }
+        file_path = os.path.join(os.getcwd(), filename)
+        safe_print(f"Buscando archivo: {file_path}")
         
-        # Verificar si el archivo existe
-        if os.path.exists(EXCEL_FILE):
-            # Leer archivo existente y agregar nuevo registro
+        if os.path.exists(file_path):
             try:
-                df = pd.read_excel(EXCEL_FILE)
-                df_nuevo = pd.DataFrame([nuevo_registro])
-                df_completo = pd.concat([df, df_nuevo], ignore_index=True)
-            except Exception as e:
-                # Si hay error, crear nuevo archivo
-                log_contacto(f"⚠️ Error leyendo Excel: {str(e)}. Creando nuevo archivo.")
-                df_completo = pd.DataFrame([nuevo_registro])
-        else:
-            # Crear nuevo archivo con encabezados
-            df_completo = pd.DataFrame([nuevo_registro])
-        
-        # Guardar archivo Excel
-        df_completo.to_excel(EXCEL_FILE, index=False, engine='openpyxl')
-        
-        log_contacto(f"✅ Contacto guardado: {datos.get('nombre', 'Sin nombre')} - {datos.get('email', 'Sin email')}")
-        
-        return True, f"Contacto registrado exitosamente: {nuevo_registro['Nombre']}"
-        
-    except Exception as e:
-        error_msg = f"❌ Error al guardar contacto: {str(e)}"
-        log_contacto(error_msg)
-        return False, error_msg
-
-def obtener_contactos():
-    """
-    Función para obtener la lista de contactos guardados
-    """
-    try:
-        if not os.path.exists(EXCEL_FILE):
-            return jsonify({
-                'success': True,
-                'contactos': [],
-                'total': 0,
-                'mensaje': 'No hay contactos registrados aún'
-            })
-        
-        try:
-            # Leer el archivo Excel
-            df = pd.read_excel(EXCEL_FILE)
-        except Exception as e:
-            log_contacto(f"⚠️ Error leyendo Excel en obtener_contactos: {str(e)}")
-            return jsonify({
-                'success': True,
-                'contactos': [],
-                'total': 0,
-                'mensaje': f'Error leyendo datos: {str(e)}'
-            })
-        
-        if df.empty:
-            return jsonify({
-                'success': True,
-                'contactos': [],
-                'total': 0,
-                'mensaje': 'No hay contactos registrados aún'
-            })
-        
-        # Convertir DataFrame a lista de diccionarios
-        contactos = []
-        for _, row in df.iterrows():
-            try:
-                contacto = {
-                    'nombre': str(row.get('Nombre', 'N/A')),
-                    'email': str(row.get('Email', 'N/A')),
-                    'telefono': str(row.get('Teléfono', 'N/A')),
-                    'mensaje': str(row.get('Mensaje', 'N/A')),
-                    'fecha': str(row.get('Fecha', 'N/A'))
-                }
-                contactos.append(contacto)
-            except Exception as e:
-                log_contacto(f"⚠️ Error procesando fila: {str(e)}")
-                continue
-        
-        return jsonify({
-            'success': True,
-            'contactos': contactos,
-            'total': len(contactos),
-            'mensaje': f'Total de contactos: {len(contactos)}'
-        })
-        
-    except Exception as e:
-        error_msg = f"❌ Error al obtener contactos: {str(e)}"
-        log_contacto(error_msg)
-        return jsonify({
-            'success': False,
-            'error': str(e),
-            'mensaje': 'Error al obtener la lista de contactos'
-        }), 500
-
-@app.route('/api/guardar-contacto', methods=['GET', 'POST', 'OPTIONS'])  # ✅ AGREGAR OPTIONS
-def guardar_contacto():
-    """
-    Endpoint para recibir y guardar datos del formulario (POST)
-    o obtener la lista de contactos (GET)
-    """
-    # ✅ MANEJAR PREFLIGHT REQUEST (CORS)
-    if request.method == 'OPTIONS':
-        return '', 200
-    
-    if request.method == 'GET':
-        return obtener_contactos()
-    
-    # POST: Guardar contacto
-    try:
-        # Obtener datos JSON
-        datos = request.get_json()
-        
-        if not datos:
-            return jsonify({
-                'success': False,
-                'message': 'No se recibieron datos'
-            }), 400
-        
-        # Validar campos obligatorios
-        campos_obligatorios = ['nombre', 'email', 'mensaje']
-        for campo in campos_obligatorios:
-            if not datos.get(campo, '').strip():
-                return jsonify({
-                    'success': False,
-                    'message': f'Campo obligatorio faltante: {campo}'
-                }), 400
-        
-        # Agregar información adicional
-        datos['pagina_origen'] = request.headers.get('Origin', '')
-        
-        # Guardar en Excel
-        exito, mensaje = guardar_contacto_excel(datos)
-        
-        if exito:
-            # ✅ AGREGAR WHATSAPP URL A LA RESPUESTA
-            telefono_whatsapp = "+5491125368595"
-            mensaje_whatsapp = f"Hola, soy {datos['nombre']}. Estoy interesado en: {datos.get('interes', '')}. {datos['mensaje']}"
-            mensaje_codificado = mensaje_whatsapp.replace(' ', '%20').replace('\n', '%0A')
-            url_whatsapp = f"https://wa.me/{telefono_whatsapp}?text={mensaje_codificado}"
-            
-            return jsonify({
-                'success': True,
-                'message': '✅ Contacto guardado exitosamente en Excel',
-                'whatsapp': url_whatsapp,  # ✅ AGREGAR ESTO
-                'datos_guardados': {
-                    'nombre': datos['nombre'],
-                    'email': datos['email'],
-                    'fecha': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                }
-            })
-        else:
-            return jsonify({
-                'success': False,
-                'message': mensaje
-            }), 500
-            
-    except Exception as e:
-        error_msg = f"Error en endpoint: {str(e)}"
-        log_contacto(error_msg)
-        return jsonify({
-            'success': False,
-            'message': 'Error interno del servidor'
-        }), 500
-# API ESTADÍSTICAS CORREGIDA - SIN ERROR DE 'FECHA'
-@app.route('/api/estadisticas', methods=['GET'])
-def obtener_estadisticas():
-    """
-    Endpoint para obtener estadísticas de contactos - VERSIÓN CORREGIDA
-    """
-    try:
-        if not os.path.exists(EXCEL_FILE):
-            return jsonify({
-                'total_contactos': 0,
-                'contactos_hoy': 0,
-                'mensaje': 'No hay datos registrados aún'
-            })
-        
-        try:
-            # Leer archivo Excel
-            df = pd.read_excel(EXCEL_FILE)
-        except Exception as e:
-            log_contacto(f"⚠️ Error leyendo Excel en estadísticas: {str(e)}")
-            return jsonify({
-                'total_contactos': 0,
-                'contactos_hoy': 0,
-                'mensaje': f'Error leyendo datos: {str(e)}'
-            })
-        
-        if df.empty:
-            return jsonify({
-                'total_contactos': 0,
-                'contactos_hoy': 0,
-                'mensaje': 'No hay datos registrados aún'
-            })
-        
-        # Estadísticas básicas - CON MANEJO SEGURO DE ERRORES
-        total = len(df)
-        hoy = datetime.now().date()
-        contactos_hoy = 0
-        ultimo_contacto = None
-        
-        try:
-            # Verificar si existe la columna 'Fecha' con manejo de errores
-            columnas = df.columns.tolist()
-            fecha_col = None
-            
-            # Buscar columna de fecha con diferentes variaciones
-            for col in columnas:
-                if 'fecha' in col.lower() or col == 'Fecha':
-                    fecha_col = col
-                    break
-            
-            if fecha_col and fecha_col in df.columns:
-                # Contar contactos de hoy
-                try:
-                    contactos_hoy = len(df[df[fecha_col].astype(str).str.startswith(str(hoy), na=False)])
-                    ultimo_contacto = str(df[fecha_col].iloc[-1]) if len(df) > 0 else None
-                except Exception as e:
-                    log_contacto(f"⚠️ Error procesando fechas: {str(e)}")
-                    contactos_hoy = 0
-                    ultimo_contacto = None
-            else:
-                log_contacto(f"⚠️ No se encontró columna 'Fecha'. Columnas disponibles: {columnas}")
-                contactos_hoy = 0
-                ultimo_contacto = None
+                with open(file_path, 'rb') as f:
+                    content = f.read()
                 
-        except Exception as e:
-            log_contacto(f"⚠️ Error en cálculo de estadísticas: {str(e)}")
-            contactos_hoy = 0
-            ultimo_contacto = None
-        
-        return jsonify({
-            'total_contactos': total,
-            'contactos_hoy': contactos_hoy,
-            'ultimo_contacto': ultimo_contacto,
-            'mensaje': f'Total: {total}, Hoy: {contactos_hoy}'
-        })
-        
-    except Exception as e:
-        log_contacto(f"❌ Error crítico en estadísticas: {str(e)}")
-        return jsonify({
-            'total_contactos': 0,
-            'contactos_hoy': 0,
-            'error': str(e),
-            'mensaje': 'Error interno del servidor'
-        }), 500
-
-# RUTA ADMIN - VERSIÓN MEJORADA
-@app.route('/admin')
-def admin_panel():
-    """Panel de administración embebido - VERSIÓN CORREGIDA"""
-    return '''<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración - Dante Propiedades</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f0f0f0; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 30px; color: #333; }
-        .stats { display: flex; gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: white; padding: 20px; border-radius: 10px; text-align: center; flex: 1; }
-        .btn { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; margin: 5px; }
-        .btn:hover { background: #0056b3; }
-        .btn.connected { background: #28a745; }
-        .btn.disconnected { background: #dc3545; }
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background: #f8f9fa; }
-        .loading { text-align: center; padding: 20px; color: #666; }
-        .error { color: #dc3545; background: #f8d7da; padding: 10px; border-radius: 5px; margin: 10px 0; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🏢 Panel de Administración</h1>
-            <p>Dante Propiedades - Gestión de Contactos</p>
-            <div id="conexionStatus" class="loading">Verificando conexión...</div>
-        </div>
-        
-        <div class="stats">
-            <div class="stat-card">
-                <h3>Total Contactos</h3>
-                <div id="totalContactos">-</div>
-            </div>
-            <div class="stat-card">
-                <h3>Hoy</h3>
-                <div id="contactosHoy">-</div>
-            </div>
-            <div class="stat-card">
-                <h3>Último</h3>
-                <div id="ultimoContacto">-</div>
-            </div>
-        </div>
-        
-        <div style="text-align: center; margin-bottom: 20px;">
-            <a href="/api/descargar-excel" class="btn">📊 Descargar Excel</a>
-            <button class="btn" onclick="actualizarDatos()">🔄 Actualizar</button>
-            <a href="/" class="btn">🏠 Sitio Principal</a>
-            <button class="btn" onclick="testearConexion()">🔍 Probar Conexión</button>
-        </div>
-        
-        <div id="contactosContainer">
-            <div class="loading">Cargando contactos...</div>
-        </div>
-    </div>
-    
-    <script>
-        let conectado = false;
-        
-        function actualizarStatusConexion(status, mensaje) {
-            const statusDiv = document.getElementById('conexionStatus');
-            const botonProbar = document.querySelector('button[onclick="testearConexion()"]');
-            
-            if (status) {
-                statusDiv.innerHTML = '✅ Conectado - ' + mensaje;
-                statusDiv.style.color = '#28a745';
-                botonProbar.className = 'btn connected';
-                botonProbar.innerHTML = '✅ Conectado';
-            } else {
-                statusDiv.innerHTML = '❌ Desconectado - ' + mensaje;
-                statusDiv.style.color = '#dc3545';
-                botonProbar.className = 'btn disconnected';
-                botonProbar.innerHTML = '❌ Desconectado';
-            }
-        }
-        
-        function testearConexion() {
-            console.log('🔍 Probando conexión...');
-            actualizarStatusConexion(false, 'Probando...');
-            
-            fetch('/debug')
-                .then(response => response.json())
-                .then(data => {
-                    console.log('✅ Conexión OK:', data);
-                    actualizarStatusConexion(true, 'Backend funcionando');
-                    conectado = true;
-                })
-                .catch(error => {
-                    console.error('❌ Error de conexión:', error);
-                    actualizarStatusConexion(false, 'Error de conexión');
-                    conectado = false;
-                });
-        }
-        
-        function cargarEstadisticas() {
-            console.log('📊 Cargando estadísticas...');
-            fetch('/api/estadisticas')
-                .then(response => {
-                    console.log('📊 Status respuesta:', response.status);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('📊 Datos recibidos:', data);
-                    document.getElementById('totalContactos').textContent = data.total_contactos || 0;
-                    document.getElementById('contactosHoy').textContent = data.contactos_hoy || 0;
-                    if (data.ultimo_contacto && data.ultimo_contacto !== 'None') {
-                        try {
-                            const fecha = new Date(data.ultimo_contacto);
-                            document.getElementById('ultimoContacto').textContent = 
-                                fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
-                        } catch (e) {
-                            document.getElementById('ultimoContacto').textContent = 
-                                String(data.ultimo_contacto).substring(0, 10);
-                        }
-                    } else {
-                        document.getElementById('ultimoContacto').textContent = 'Sin datos';
-                    }
-                })
-                .catch(error => {
-                    console.error('❌ Error cargando estadísticas:', error);
-                    document.getElementById('totalContactos').textContent = 'Error';
-                    document.getElementById('contactosHoy').textContent = 'Error';
-                    document.getElementById('ultimoContacto').textContent = 'Error';
-                });
-        }
-        
-        function cargarContactos() {
-            console.log('📋 Cargando contactos...');
-            fetch('/api/guardar-contacto')
-                .then(response => {
-                    console.log('📋 Status respuesta:', response.status);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('📋 Datos recibidos:', data);
-                    const container = document.getElementById('contactosContainer');
+                # Determinar el tipo de contenido
+                if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.ico', '.svg')):
+                    from flask import Response
+                    return Response(content, mimetype=f'image/{filename.split(".")[-1].lower()}')
+                elif filename.lower().endswith('.css'):
+                    from flask import Response
+                    return Response(content, mimetype='text/css')
+                elif filename.lower().endswith('.js'):
+                    from flask import Response
+                    return Response(content, mimetype='application/javascript')
+                elif filename.lower().endswith('.html'):
+                    from flask import Response
+                    return Response(content, mimetype='text/html')
+                elif filename.lower().endswith('.json'):
+                    from flask import Response
+                    return Response(content, mimetype='application/json')
+                else:
+                    from flask import Response
+                    return Response(content, mimetype='application/octet-stream')
                     
-                    if (data.contactos && data.contactos.length === 0) {
-                        container.innerHTML = '<div class="loading">📭 No hay contactos registrados</div>';
-                        return;
-                    }
-                    
-                    if (!data.contactos || data.contactos.length === undefined) {
-                        container.innerHTML = '<div class="error">❌ Error en respuesta del servidor</div>';
-                        return;
-                    }
-                    
-                    let html = '<table><tr><th>Fecha</th><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Mensaje</th></tr>';
-                    
-                    data.contactos.slice(-10).reverse().forEach(contacto => {
-                        html += '<tr>' +
-                            '<td>' + (contacto.fecha || 'N/A') + '</td>' +
-                            '<td>' + (contacto.nombre || 'N/A') + '</td>' +
-                            '<td>' + (contacto.email || 'N/A') + '</td>' +
-                            '<td>' + (contacto.telefono || 'N/A') + '</td>' +
-                            '<td>' + ((contacto.mensaje || '').substring(0, 30) + ((contacto.mensaje || '').length > 30 ? '...' : '')) + '</td>' +
-                        '</tr>';
-                    });
-                    
-                    html += '</table>';
-                    container.innerHTML = html;
-                })
-                .catch(error => {
-                    console.error('❌ Error cargando contactos:', error);
-                    document.getElementById('contactosContainer').innerHTML = 
-                        '<div class="error">❌ Error cargando contactos: ' + error.message + '</div>';
-                });
-        }
-        
-        function actualizarDatos() {
-            document.getElementById('contactosContainer').innerHTML = '<div class="loading">Actualizando...</div>';
-            testearConexion();
-            setTimeout(() => {
-                cargarEstadisticas();
-                cargarContactos();
-            }, 1000);
-        }
-        
-        // Cargar datos al iniciar
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Inicializando admin panel...');
-            testearConexion();
-            setTimeout(() => {
-                cargarEstadisticas();
-                cargarContactos();
-            }, 1000);
-            
-            // Actualizar cada 30 segundos
-            setInterval(actualizarDatos, 30000);
-        });
-    </script>
-</body>
-</html>'''
-
-# RUTA DEBUG - VERSIÓN MEJORADA
-@app.route('/debug', methods=['GET', 'OPTIONS'])  # ✅ AGREGAR OPTIONS
-def debug():
-    """Ruta de diagnóstico - CON CORS"""
-    if request.method == 'OPTIONS':
-        return '', 200  # ✅ RESPONDER PREFLIGHT
-    
-    try:
-        excel_existe = os.path.exists(EXCEL_FILE)
-        archivos = []
-        try:
-            if os.path.exists('.'):
-                archivos = os.listdir('.')[:10]
-        except:
-            archivos = ['Error listando archivos']
-            
-        return jsonify({
-            'status': 'ok',
-            'message': 'Flask funcionando correctamente',
-            'timestamp': datetime.now().isoformat(),
-            'directorio': os.getcwd() if os.path.exists('.') else 'No accesible',
-            'archivos_disponibles': archivos,
-            'excel_existe': excel_existe,
-            'excel_path': EXCEL_FILE if excel_existe else 'No existe',
-            'cors_enabled': True  # ✅ AGREGAR ESTO
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-    
-    
-@app.route('/api/descargar-excel', methods=['GET'])
-def api_descargar_excel():
-    """API para descargar archivo Excel"""
-    try:
-        if os.path.exists(EXCEL_FILE):
-            return send_file(EXCEL_FILE, as_attachment=True, download_name='contactos_dante_propiedades.xlsx')
+            except Exception as e:
+                safe_print(f"Error leyendo {filename}: {str(e)}")
+                return jsonify({"error": f"Error al leer archivo {filename}"}), 500
         else:
-            return jsonify({'error': 'Archivo no encontrado'}), 404
+            safe_print(f"Archivo NO encontrado: {file_path}")
+            return jsonify({"error": f"Archivo {filename} no encontrado"}), 404
+            
     except Exception as e:
-        log_contacto(f"Error en descarga Excel: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        safe_print(f"Error sirviendo {filename}: {str(e)}")
+        return jsonify({"error": f"Error al servir {filename}"}), 500
 
-# RUTAS PARA ARCHIVOS
-@app.route('/', methods=['GET'])
-def index():
-    """Página principal"""
+@app.route('/')
+def home():
+    return serve_static_file('index.html')
+
+@app.route('/api/guardar_contacto', methods=['POST'])
+def guardar_contacto():
     try:
-        return send_file('index.html')
-    except:
-        return "Página principal no disponible", 404
+        data = request.get_json()
+        
+        if not data or 'nombre' not in data:
+            return jsonify({"error": "Datos incompletos"}), 400
+        
+        init_excel()
+        wb = load_workbook(EXCEL_FILE)
+        ws = wb.active
+        next_row = ws.max_row + 1
+        now = datetime.now()
+        fecha_hora = now.strftime("%Y-%m-%d %H:%M:%S")
+        
+        ws[f'A{next_row}'] = fecha_hora
+        ws[f'B{next_row}'] = data.get('nombre', '')
+        ws[f'C{next_row}'] = data.get('email', '')
+        ws[f'D{next_row}'] = data.get('telefono', '')
+        ws[f'E{next_row}'] = data.get('propiedad_interes', '')
+        
+        wb.save(EXCEL_FILE)
+        safe_print(f"Contacto guardado: {data.get('nombre')} - {data.get('email')}")
+        
+        return jsonify({
+            "message": "Contacto guardado exitosamente",
+            "fecha_hora": fecha_hora
+        }), 200
+        
+    except Exception as e:
+        safe_print(f"Error guardando contacto: {str(e)}")
+        return jsonify({"error": f"Error al guardar contacto: {str(e)}"}), 500
 
-@app.route('/formulario', methods=['GET'])
-def formulario():
-    """Página del formulario"""
+@app.route('/api/properties', methods=['GET'])
+def get_all_properties():
     try:
-        return send_file('formulario.html')
-    except:
-        return "Formulario no disponible", 404
+        properties = query_properties({})
+        return jsonify({
+            "total": len(properties),
+            "properties": properties
+        }), 200
+    except Exception as e:
+        safe_print(f"Error obteniendo propiedades: {str(e)}")
+        return jsonify({"error": f"Error al obtener propiedades"}), 500
 
-@app.route('/<path:filename>')
-def serve_static(filename):
-    """Servir archivos estáticos de forma genérica"""
-    return send_from_directory('.', filename)
+def get_filter_options():
+    try:
+        properties = query_properties({})
+        barrios = []
+        tipos = []
+        
+        for prop in properties:
+            if not isinstance(prop, dict):
+                safe_print(f"ADVERTENCIA: Elemento no es diccionario: {prop}")
+                continue
+            
+            if prop.get('barrio') and prop['barrio'] not in barrios:
+                barrios.append(prop['barrio'])
+            
+            if prop.get('tipo') and prop['tipo'] not in tipos:
+                tipos.append(prop['tipo'])
+        
+        return {
+            "barrios": sorted(barrios),
+            "tipos": sorted(tipos),
+            "total": len(properties)
+        }
+        
+    except Exception as e:
+        safe_print(f"Error en get_filter_options: {str(e)}")
+        return {"error": f"Error obteniendo opciones de filtros: {str(e)}"}
 
-# ✅ AGREGAR ESTO AL FINAL DEL ARCHIVO, ANTES DEL if __name__...
+@app.route('/api/properties/filter-options', methods=['GET'])
+def get_filter_options_endpoint():
+    try:
+        options = get_filter_options()
+        if "error" in options:
+            return jsonify(options), 500
+        
+        return jsonify(options), 200
+        
+    except Exception as e:
+        safe_print(f"Error en endpoint filter-options: {str(e)}")
+        return jsonify({"error": f"Error en servidor: {str(e)}"}), 500
 
-# Health check endpoint (Render lo necesita)
-@app.route('/health', methods=['GET'])
-def health_check():
-    """Health check para Render"""
+@app.route('/api/properties/search', methods=['GET'])
+def search_properties_endpoint():
+    try:
+        # Mapeo de los parámetros del frontend a las claves de filtro de la BD
+        filters = {
+            'operacion': request.args.get('ope'),
+            'tipo': request.args.get('tipo'),
+            'barrio': request.args.get('loc')
+        }
+        
+        # Añadir filtros numéricos solo si tienen valor
+        precio_max = request.args.get('precio_max')
+        if precio_max:
+            try:
+                filters['max_price'] = float(precio_max)
+            except ValueError:
+                pass # Ignorar si no es un número válido
+
+        ambientes = request.args.get('ambientes')
+        if ambientes:
+            try:
+                filters['min_rooms'] = int(ambientes)
+            except ValueError:
+                pass # Ignorar si no es un número válido
+
+        # Limpiar filtros nulos
+        active_filters = {k: v for k, v in filters.items() if v is not None}
+        
+        safe_print(f"--- Nueva Búsqueda ---")
+        safe_print(f"Filtros activos: {active_filters}")
+        
+        results = query_properties(active_filters)
+        
+        safe_print(f"Propiedades encontradas: {len(results)}")
+        
+        return jsonify({
+            "total": len(results),
+            "properties": results,
+            "filters": active_filters
+        }), 200
+        
+    except Exception as e:
+        safe_print(f"Error en endpoint search: {str(e)}")
+        return jsonify({"error": f"Error en servidor: {str(e)}"}), 500
+
+class Metrics:
+    def __init__(self):
+        self.requests_count = 0
+        self.successful_requests = 0
+        self.failed_requests = 0
+        self.gemini_calls = 0
+        self.search_queries = 0
+        self.start_time = time.time()
+    
+    def increment_requests(self): self.requests_count += 1
+    def increment_success(self): self.successful_requests += 1
+    def increment_failures(self): self.failed_requests += 1
+    def increment_gemini_calls(self): self.gemini_calls += 1
+    def increment_searches(self): self.search_queries += 1
+    def get_uptime(self): return time.time() - self.start_time
+
+metrics = Metrics()
+
+@app.route('/api/status')
+def status():
     return jsonify({
-        'status': 'healthy',
-        'service': 'Dante Propiedades Backend',
-        'timestamp': datetime.now().isoformat(),
-        'python_version': '3.11'
+        "status": "activo",
+        "uptime_seconds": metrics.get_uptime(),
+        "total_requests": metrics.requests_count,
+        "gemini_calls": metrics.gemini_calls,
+        "search_queries": metrics.search_queries
+    })
+
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    start_time = time.time()
+    try:
+        data = request.get_json()
+        if not data or not data.get('message'):
+            return jsonify({"error": "El mensaje no puede estar vacío"}), 400
+
+        user_text = data.get('message', '').strip()
+        channel = data.get('channel', 'web').strip()
+        filters_from_frontend = data.get('filters', {})
+        contexto_anterior = data.get('contexto_anterior')
+
+        text_lower = user_text.lower()
+        filters = filters_from_frontend.copy()
+        detected_filters = detect_filters(text_lower)
+        filters.update(detected_filters)
+
+        safe_print(f"--- Nueva Consulta de Chat ---")
+        safe_print(f"Usuario: '{user_text}'")
+        safe_print(f"Filtros combinados: {filters}")
+
+        results = None
+        search_performed = False
+        
+        if filters:
+            search_performed = True
+            results = query_properties(filters)
+            safe_print(f"Resultados de la búsqueda: {len(results) if results else 0} propiedades")
+
+        historial = get_historial_canal(channel)
+        
+        prompt = build_prompt(user_text, results, filters, channel, historial)
+        answer = call_gemini_with_rotation(prompt)
+        
+        response_time = time.time() - start_time
+        log_conversation(user_text, answer, channel, response_time, search_performed, len(results) if results else 0)
+        
+        response_data = {
+            "response": answer,
+            "results_count": len(results) if results is not None else None,
+            "search_performed": search_performed,
+            "propiedades": results
+        }
+        
+        return jsonify(response_data), 200
+    
+    except Exception as e:
+        safe_print(f"❌ ERROR en endpoint /api/chat: {type(e).__name__}: {e}")
+        return jsonify({"error": "Ocurrió un error procesando tu consulta."}), 500
+
+@app.route('/api/debug-images')
+def debug_images():
+    """Endpoint para verificar qué imágenes están disponibles"""
+    import os
+    try:
+        if os.path.exists("imgs"):
+            image_files = os.listdir("imgs")
+            return jsonify({
+                "message": "Carpeta imgs encontrada",
+                "path_absoluto": os.path.abspath("imgs"),
+                "total_images": len(image_files),
+                "images": sorted(image_files)[:20]  # Primeras 20 imágenes ordenadas
+            })
+        else:
+            return jsonify({"error": "Carpeta 'imgs' no encontrada en el servidor"})
+    except Exception as e:
+        return jsonify({"error": f"Error al leer carpeta: {str(e)}"})
+
+
+@app.route('/api/status', methods=['GET'])
+def api_status():
+    """Endpoint para verificar el estado del servidor"""
+    return jsonify({
+        "status": "online",
+        "message": "Servidor funcionando correctamente",
+        "timestamp": datetime.now().isoformat()
     }), 200
 
-# ✅ MODIFICA EL BLOQUE FINAL:
+# **RUTA GENÉRICA AL FINAL** - Debe ser la última
+@app.route('/<path:filename>')
+def serve_any_file(filename):
+    return serve_static_file(filename)
+
 if __name__ == '__main__':
-    # Render asigna el puerto automáticamente
-    port = int(os.environ.get('PORT', 5000))
-    print(f"🚀 Iniciando servidor Flask en puerto {port}")
-    print(f"🌐 URL: http://0.0.0.0:{port}")
+    safe_print("Iniciando servidor Flask...")
+    initialize_databases() # Asegura que la BD SQLite esté lista
+    init_excel()
+    safe_print("Servidor listo para recibir solicitudes")
     
-    # NO usar debug en producción
+    port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
