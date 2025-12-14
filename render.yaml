@@ -3,4 +3,4 @@ services:
     name: dante-propiedades
     env: python
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "python main.py"
+    startCommand: "gunicorn --worker-tmp-dir /dev/shm servidor_excel:app"
