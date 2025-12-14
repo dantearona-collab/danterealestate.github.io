@@ -1897,6 +1897,11 @@
     </script>
     
     <script>
+    function toggleChatWidget() {
+        const chatWindow = document.getElementById('ai-chat-window');
+        chatWindow.classList.toggle('open');
+    }
+
     // Función para WhatsApp flotante
     function setupWhatsAppFloat() {
         const whatsappBtn = document.querySelector('.whatsapp-float');
@@ -1983,6 +1988,281 @@
             <div class="modal-counter" id="modalCounter"></div>
         </div>
     </div>
+
+    <!-- WIDGET DE CHAT DE IA -->
+    <div id="ai-chat-container">
+        <!-- Botón para abrir el chat -->
+        <div id="ai-chat-bubble" onclick="toggleChatWidget()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9.48 15.18c.18.33.38.65.6.96-1.28-1.04-2.2-2.36-2.58-3.84.58.26 1.2.45 1.85.55.08.39.19.78.33 1.15-.09.02-.18.04-.28.06-.07.2-.13.4-.19.59-.09.28-.17.56-.23.83zm4.99-2.37c0-1.65-1.35-3-3-3s-3 1.35-3 3 1.35 3 3 3 3-1.35 3-3zm-2.01-7.16c.49 1.01.78 2.1.84 3.26.85-.35 1.59-.93 2.1-1.66-.45-.42-.96-.78-1.52-1.07-.47-.24-.96-.44-1.42-.53zM8.3 6.09c.56.29 1.07.65 1.52 1.07.51.73 1.25 1.31 2.1 1.66.06-1.16.35-2.25.84-3.26-.46.09-.95.29-1.42.53-.57.29-1.09.67-1.54 1.12-1.28.09-2.53.51-3.61 1.2-.23-.69-.35-1.41-.35-2.15 0-.21.02-.42.04-.63 1.55.42 3.01 1.15 4.29 2.16zM4 12c0-.74.12-1.46.35-2.15C4.12 10.54 4 11.26 4 12zm8.52 3.18c-.18-.33-.38-.65-.6-.96 1.28 1.04 2.2 2.36 2.58 3.84-.58-.26-1.2-.45-1.85-.55-.08-.39-.19-.78-.33-1.15.09-.02.18-.04.28-.06.07-.2.13-.4.19-.59.09-.28.17-.56.23-.83z"/></svg>
+            <span>Asistente IA</span>
+        </div>
+
+        <!-- Ventana del Chat -->
+        <div id="ai-chat-window">
+            <div class="chat-area">
+                <div class="chat-header">
+                    <img src="llave.png" alt="Logo Inmobiliario" class="chat-logo">
+                    <div class="chat-info">
+                        <h2>Dante Propiedades</h2>
+                        <div class="chat-subtitle">Asistente Inmobiliario</div>
+                        <div class="status-indicator">
+                            <div class="status-dot"></div>
+                            <span id="statusText">Conectado</span>
+                        </div>
+                    </div>
+                    <button class="reset-chat" onclick="resetearChat()">Nueva Consulta</button>
+                </div>
+                <div class="chat-box" id="chatBox">
+                    <!-- Mensajes se agregarán aquí -->
+                </div>
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                    <span>Escribiendo...</span>
+                </div>
+                <div class="input-area">
+                    <div class="input-row">
+                        <input type="text" id="userInput" placeholder="Busco depto en Almagro..." autocomplete="off">
+                        <button id="sendBtn">Enviar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+    /* Estilos para el contenedor del widget de IA */
+    #ai-chat-container {
+        position: fixed;
+        bottom: 20px;
+        right: 100px;
+        z-index: 1001;
+    }
+
+    /* Burbuja del chat */
+    #ai-chat-bubble {
+        width: 65px;
+        height: 65px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+    }
+    #ai-chat-bubble svg {
+        width: 28px;
+        height: 28px;
+    }
+    #ai-chat-bubble span {
+        font-size: 9px;
+        font-weight: bold;
+    }
+    #ai-chat-bubble:hover {
+        transform: scale(1.1);
+    }
+
+    /* Ventana del chat */
+    #ai-chat-window {
+        display: none;
+        position: absolute;
+        bottom: 80px;
+        right: 0;
+        width: 400px;
+        height: 600px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        overflow: hidden;
+        flex-direction: column;
+        animation: slideIn 0.3s ease-out;
+    }
+    #ai-chat-window.open {
+        display: flex;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Estilos específicos para el chat de IA, con ID para evitar conflictos */
+    #ai-chat-container .chat-area {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    #ai-chat-container .chat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
+        padding: 10px 15px;
+        color: white;
+        flex-shrink: 0;
+    }
+    #ai-chat-container .chat-logo {
+        height: 40px;
+        margin-right: 10px;
+    }
+    #ai-chat-container .chat-info h2 {
+        font-size: 1.1em;
+        margin: 0;
+    }
+    #ai-chat-container .chat-subtitle {
+        font-size: 0.8em;
+        opacity: 0.9;
+    }
+    #ai-chat-container .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.7em;
+        background: rgba(255,255,255,0.1);
+        padding: 3px 8px;
+        border-radius: 10px;
+        margin-top: 4px;
+    }
+    #ai-chat-container .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #00ff00;
+        animation: pulse 2s infinite;
+    }
+    #ai-chat-container .reset-chat {
+        background: none;
+        border: 1px solid white;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.8em;
+    }
+    #ai-chat-container .chat-box {
+        flex: 1;
+        padding: 15px;
+        overflow-y: auto;
+        background: #f8f9fa;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    #ai-chat-container .message {
+        max-width: 85%;
+        padding: 10px 15px;
+        border-radius: 15px;
+        line-height: 1.4;
+        animation: fadeIn 0.3s ease-in;
+    }
+    #ai-chat-container .msg-user {
+        align-self: flex-end;
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        border-bottom-right-radius: 5px;
+    }
+    #ai-chat-container .msg-bot {
+        align-self: flex-start;
+        background: white;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        border-bottom-left-radius: 5px;
+    }
+     #ai-chat-container .msg-bot b {
+        color: #2c3e50;
+        display: block;
+        margin-bottom: 5px;
+        font-size: 12px;
+        opacity: 0.7;
+    }
+    #ai-chat-container .input-area {
+        padding: 15px;
+        background: white;
+        border-top: 1px solid #e9ecef;
+        flex-shrink: 0;
+    }
+    #ai-chat-container .input-row {
+        display: flex;
+        gap: 10px;
+    }
+    #ai-chat-container input[type="text"] {
+        flex: 1;
+        padding: 12px 15px;
+        font-size: 14px;
+        border: 2px solid #e9ecef;
+        border-radius: 20px;
+        outline: none;
+    }
+    #ai-chat-container #sendBtn {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    #ai-chat-container .typing-indicator {
+        display: none;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 15px;
+        background: white;
+        border-radius: 15px;
+        border: 1px solid #e9ecef;
+        align-self: flex-start;
+        max-width: 120px;
+    }
+    #ai-chat-container .typing-dots { display: flex; gap: 4px; }
+    #ai-chat-container .typing-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #6c757d;
+        animation: typing 1.4s infinite ease-in-out;
+    }
+    #ai-chat-container .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    #ai-chat-container .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes typing { 0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Estilos para las tarjetas de propiedad dentro del chat */
+    #ai-chat-container .propiedades-container {
+        align-self: center;
+        width: 100%;
+        max-width: 98%;
+        margin: 10px 0;
+        border-radius: 8px;
+        padding: 5px;
+        background: #f0f2f5;
+    }
+    #ai-chat-container .propiedad-card {
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 12px;
+        margin: 8px 0;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    #ai-chat-container .propiedad-header h4 { font-size: 1em; margin-bottom: 8px; }
+    #ai-chat-container .precio { font-size: 1em; }
+    #ai-chat-container .propiedad-info { font-size: 0.85em; gap: 10px; }
+    #ai-chat-container .btn-imagenes { padding: 5px 10px; font-size: 0.8em; }
+
+    </style>
     
 
 <script>
@@ -2083,5 +2363,454 @@ document.addEventListener('click', function(event) {
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pannellum/2.5.6/pannellum.js" integrity="sha512-EmZuy6vd0ns9wP+3l1hETKq/vNGELFRuLfazPnKKBbDpgZL0sZ7qyao5KgVbGJKOWlAFPNn6G9naB/8WnKN43Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    const API_BASE_URL = "/api";
+    const CHAT_URL = `${API_BASE_URL}/chat`;
+    const FILTERS_URL = `${API_BASE_URL}/properties/filter-options`;
+    const STATUS_URL = `${API_BASE_URL}/status`;
+    
+    let chatBox, input, button, typingIndicator, statusText;
+
+    let conversacionActual = [];
+    let filtrosDinamicos = { operaciones: [], tipos: [], barrios: [] };
+    let contextoActual = { tipo: null, resultados: [], propiedad_focus: null, filtros_usados: {}, timestamp: null };
+
+    function mostrarImagenesByIndex(index) {
+        const fotos = contextoActual.resultados[index]?.fotos;
+        
+        console.log(`[Diagnóstico] Intentando cargar imágenes para propiedad índice ${index}. URLs:`, fotos);
+
+        const modal = document.getElementById('imageModal');
+        const modalImages = document.getElementById('modalImagesContainer');
+        
+        // Mostrar loading mientras cargan
+        modalImages.innerHTML = `
+            <div style="text-align: center; color: white; padding: 40px;">
+                <div style="font-size: 24px; margin-bottom: 20px;">🔄</div>
+                <p>Cargando imágenes...</p>
+            </div>
+        `;
+        
+        modal.style.display = 'block';
+
+        const counter = document.createElement('div');
+        counter.style.cssText = `
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 1000;
+            font-weight: bold;
+        `;
+        counter.textContent = `📸 ${fotos ? fotos.length : 0} fotos`;
+        modal.appendChild(counter);
+
+        // Limpiar y cargar imágenes después de un breve delay
+        setTimeout(() => {
+            modalImages.innerHTML = '';
+            
+            if (fotos && fotos.length > 0) {
+                let imagenesCargadas = 0;
+                const totalImagenes = fotos.length;
+                
+                fotos.forEach((fotoUrl, i) => {
+                    const imgContainer = document.createElement('div');
+                    imgContainer.style.cssText = `
+                        position: relative;
+                        width: 100%;
+                        margin-bottom: 25px;
+                    `;
+                    
+                    const imgNumber = document.createElement('div');
+                    imgNumber.style.cssText = `
+                        position: absolute;
+                        top: 10px;
+                        left: 10px;
+                        background: rgba(0,0,0,0.7);
+                        color: white;
+                        padding: 5px 12px;
+                        border-radius: 15px;
+                        font-size: 12px;
+                        z-index: 10;
+                        font-weight: bold;
+                    `;
+                    imgNumber.textContent = `${i + 1} / ${totalImagenes}`;
+                    imgContainer.appendChild(imgNumber);
+                    
+                    const img = document.createElement('img');
+                    
+                    // Construir URL correcta
+                    let imagenSrc = fotoUrl;
+                    if (fotoUrl.startsWith('imgs/')) {
+                        imagenSrc = `${API_BASE_URL}/${fotoUrl}`;
+                    } else if (!fotoUrl.includes('/') && fotoUrl.includes('.')) {
+                        imagenSrc = `${API_BASE_URL}/imgs/${fotoUrl}`;
+                    }
+                    
+                    img.src = imagenSrc;
+                    img.alt = `Imagen ${i + 1} de ${totalImagenes}`;
+                    img.style.maxWidth = '100%';
+                    img.style.height = 'auto';
+                    img.style.borderRadius = '8px';
+                    img.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+                    img.style.display = 'block';
+                    
+                    img.onload = () => {
+                        imagenesCargadas++;
+                        console.log(`✅ Imagen ${imagenesCargadas}/${totalImagenes} cargada: ${imagenSrc}`);
+                        
+                        if (imagenesCargadas === totalImagenes) {
+                            counter.textContent = `📸 ${totalImagenes} fotos - Todas cargadas ✅`;
+                            modalImages.scrollTop = 0;
+                        }
+                    };
+                    
+                    img.onerror = () => {
+                        imagenesCargadas++;
+                        console.log(`⚠️ Imagen no disponible: ${imagenSrc}`);
+                        
+                        img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMzMzIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGRvbWluYW50LWJhc2VsaW5lPSJjZW50cmFsIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjODg4IiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCI+SW1hZ2VuIG5vIGRpc3BvbmlibGU8L3RleHQ+PC9zdmc+';
+                        img.alt = 'Imagen no disponible';
+                        
+                        imgNumber.innerHTML = `${i + 1} / ${totalImagenes} <span style="color: #ff6b6b;">⚠️</span>`;
+                    };
+                    
+                    imgContainer.appendChild(img);
+                    modalImages.appendChild(imgContainer);
+                });
+            } else {
+                modalImages.innerHTML = `
+                    <div style="text-align: center; color: white; padding: 40px;">
+                        <div style="font-size: 48px; margin-bottom: 20px;">📷</div>
+                        <h3>No hay imágenes disponibles</h3>
+                        <p>Esta propiedad no cuenta con fotos en este momento.</p>
+                    </div>
+                `;
+            }
+        }, 100);
+        
+        const cleanUp = () => {
+            if (modal.contains(counter)) {
+                modal.removeChild(counter);
+            }
+        };
+        
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const originalOnClick = closeModalBtn.onclick;
+        closeModalBtn.onclick = () => {
+            cleanUp();
+            cerrarModal();
+            if (originalOnClick) originalOnClick();
+        };
+        
+        const originalWindowOnClick = window.onclick;
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                cleanUp();
+                cerrarModal();
+            }
+            if (originalWindowOnClick) originalWindowOnClick(event);
+        };
+    }
+
+
+    function cerrarModal() {
+        const modal = document.getElementById('imageModal');
+        
+        const counters = modal.querySelectorAll('[style*="position: fixed"][style*="top: 20px"]');
+        counters.forEach(counter => {
+            if (modal.contains(counter)) {
+                modal.removeChild(counter);
+            }
+        });
+    
+        modal.style.display = 'none';
+    }
+
+    async function cargarFiltrosDinamicos() {
+        const loadingElement = document.getElementById('filtersLoading');
+        try {
+            loadingElement.innerHTML = '<small>🔄 Cargando filtros...</small>';
+            const response = await fetch(FILTERS_URL);
+            if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+            
+            const data = await response.json();
+            if (data.operaciones && data.tipos && data.barrios) {
+                filtrosDinamicos = {
+                    operaciones: data.operaciones.filter(op => op && op.trim()),
+                    tipos: data.tipos.filter(tipo => tipo && tipo.trim()),
+                    barrios: data.barrios.filter(barrio => barrio && barrio.trim())
+                };
+                actualizarSelectoresFiltros();
+                loadingElement.innerHTML = '<small>✅ Filtros cargados</small>';
+            } else {
+                throw new Error('Estructura de datos inválida');
+            }
+        } catch (error) {
+            console.error('❌ Error cargando filtros:', error);
+            filtrosDinamicos = {
+                operaciones: ["alquiler", "venta"],
+                tipos: ["casa", "departamento", "ph", "terreno", "oficina", "casaquinta"],
+                barrios: ["Parque Avellaneda", "Boedo", "Microcentro", "Pilar"]
+            };
+            actualizarSelectoresFiltros();
+            loadingElement.innerHTML = '<small>⚠️ Usando filtros predeterminados</small>';
+        } finally {
+            setTimeout(() => { loadingElement.innerHTML = ''; }, 2500);
+        }
+    }
+
+    function actualizarSelectoresFiltros() {
+        const poblarSelect = (id, options, defaultText) => {
+            const select = document.getElementById(id);
+            if (select) {
+                select.innerHTML = `<option value="">${defaultText}</option>`;
+                options.forEach(optionText => {
+                    const option = document.createElement('option');
+                    option.value = optionText.toLowerCase();
+                    option.textContent = optionText.charAt(0).toUpperCase() + optionText.slice(1);
+                    select.appendChild(option);
+                });
+            }
+        };
+        poblarSelect('operacion', filtrosDinamicos.operaciones, 'Todas las operaciones');
+        poblarSelect('barrio', filtrosDinamicos.barrios, 'Todos los barrios');
+        poblarSelect('tipo', filtrosDinamicos.tipos, 'Todos los tipos');
+    }
+
+    function actualizarContexto(resultados, filtros = {}, tipo = 'busqueda') {
+        contextoActual = {
+            tipo: tipo,
+            resultados: resultados || [],
+            propiedad_focus: resultados && resultados.length === 1 ? resultados[0] : null,
+            filtros_usados: filtros,
+            timestamp: new Date().toISOString()
+        };
+    }
+
+    function addMessage(text, from = "bot") {
+        if (!chatBox) return;
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${from === 'user' ? 'msg-user' : 'msg-bot'}`;
+        messageDiv.innerHTML = from === 'bot' ? `<b>ASISTENTE VIRTUAL</b><br>${text.replace(/\n/g, '<br>')}` : text;
+        chatBox.appendChild(messageDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function formatPrecio(precio, moneda) {
+    if (!precio || isNaN(precio) || precio === 0) return 'Consultar';
+    const currency = moneda === 'ARS' ? 'ARS' : 'USD';
+    const formatter = new Intl.NumberFormat('es-AR', {
+        style: 'currency',
+        currency: currency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    });
+    
+    let precioFormateado = formatter.format(precio);
+    if (currency === 'USD') {
+        precioFormateado = precioFormateado.replace('USD', '').trim();
+    } else {
+        precioFormateado = precioFormateado.replace('ARS', '').replace('$', '').trim();
+    }
+    
+    return precioFormateado;
+}
+    function mostrarPropiedadesEnInterfaz(propiedades) {
+    const container = document.createElement('div');
+    container.className = 'propiedades-container';
+
+    const titulo = document.createElement('h3');
+    titulo.textContent = `📊 ${propiedades.length} Propiedad(es) Encontrada(s)`;
+    titulo.style.marginBottom = '20px';
+    titulo.style.color = '#2c3e50';
+    titulo.style.textAlign = 'center';
+    container.appendChild(titulo);
+
+    const propertyEmojis = {
+        'casa': '🏠', 'departamento': '🏢', 'ph': '🏡',
+        'terreno': '📐', 'oficina': '💼', 'casaquinta': '🏘️',
+        'local': '🏪', 'galpon': '🏭'
+    };
+
+    propiedades.forEach((prop, index) => {
+        const emoji = propertyEmojis[prop.tipo?.toLowerCase()] || '🏠';
+        const card = document.createElement('div');
+        card.className = 'propiedad-card';
+
+        card.innerHTML = `
+            <div class="propiedad-header">
+                <h4>${emoji} ${prop.titulo}</h4>
+                <span class="precio">💰 ${formatPrecio(prop.precio, prop.moneda_precio)}</span>
+            </div>
+            <div class="propiedad-info">
+                <span>📍 ${prop.barrio}</span>
+                <span>🏠 ${prop.ambientes} amb</span>
+                <span>📏 ${prop.metros_cuadrados} m²</span>
+                <span>📋 ${prop.operacion}</span>
+            </div>
+            ${prop.descripcion ? `
+                <div class="descripcion">
+                    💬 ${prop.descripcion.substring(0, 120)}...
+                </div>
+            ` : ''}
+            <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+                <button class="btn-imagenes" onclick='mostrarImagenesByIndex(${index})'>
+                    🖼️ Ver Fotos
+                </button>
+                <small style="color: #666; font-size: 12px;">
+                    ${prop.fotos && prop.fotos.length > 0 ? 
+                      `📸 ${prop.fotos.length} foto(s)` : 
+                      '📷 Fotos próximamente'}
+                </small>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+
+    chatBox.appendChild(container);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+
+    function showTypingIndicator(show) {
+        typingIndicator.style.display = show ? 'flex' : 'none';
+        if(show) chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function resetearChat() {
+        if (confirm('¿Estás seguro de que querés empezar una nueva conversación?')) {
+            chatBox.innerHTML = '';
+            conversacionActual = [];
+            actualizarContexto([], {}, null);
+            limpiarFiltros();
+            addMessage('¡Perfecto! Empecemos de nuevo. ¿Qué propiedad estás buscando?', 'bot');
+        }
+    }
+
+    function obtenerFiltrosSeleccionados() {
+        const filtros = {};
+        ['operacion', 'barrio', 'tipo', 'ambientes', 'precioMin', 'precioMax', 'metrosMin', 'metrosMax'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el && el.value) {
+                const keyMap = { 'barrio': 'neighborhood', 'ambientes': 'min_rooms', 'precioMin': 'min_price', 'precioMax': 'max_price', 'metrosMin': 'min_sqm', 'metrosMax': 'max_sqm' };
+                filtros[keyMap[id] || id] = ['min_price', 'max_price', 'min_sqm', 'max_sqm'].includes(id) ? parseFloat(el.value) : el.value;
+            }
+        });
+        return filtros;
+    }
+    
+    function aplicarFiltros() {
+        const filtros = obtenerFiltrosSeleccionados();
+        if (Object.keys(filtros).length === 0) return alert('Seleccioná al menos un filtro para buscar.');
+        
+        let mensajeNatural = "Buscar con filtros: " + Object.entries(filtros).map(([k,v]) => `${k}: ${v}`).join(', ');
+        input.value = mensajeNatural;
+        send();
+    }
+
+    function limpiarFiltros() {
+        ['operacion', 'barrio', 'tipo', 'ambientes', 'precioMin', 'precioMax', 'metrosMin', 'metrosMax'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.value = '';
+        });
+    }
+
+    async function send() {
+        let msg = input.value.trim();
+        const filtrosSeleccionados = obtenerFiltrosSeleccionados();
+        if (!msg && Object.keys(filtrosSeleccionados).length > 0) {
+            msg = "Busqueda desde filtros"; // Mensaje genérico cuando se usan filtros
+        }
+        if (!msg) return;
+
+        addMessage(msg, 'user');
+        input.value = '';
+        button.disabled = true;
+        showTypingIndicator(true);
+
+        try {
+            const payload = { message: msg, channel: 'web', filters: filtrosSeleccionados, contexto_anterior: contextoActual };
+            const response = await fetch(CHAT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+            
+            const data = await response.json();
+
+            if (data.response) {
+                addMessage(data.response);
+                if (data.propiedades && data.propiedades.length > 0) {
+                    actualizarContexto(data.propiedades, filtrosSeleccionados, 'busqueda');
+                    mostrarPropiedadesEnInterfaz(data.propiedades);
+                } else {
+                    actualizarContexto([], filtrosSeleccionados, 'busqueda_sin_resultados');
+                }
+            } else if (data.error) {
+                addMessage(`⚠️ Error: ${data.error}`);
+            } else {
+                addMessage('❌ Respuesta inesperada del servidor');
+            }
+            statusText.textContent = 'Conectado';
+        } catch (error) {
+            console.error('Error:', error);
+            addMessage('⚠️ No se pudo conectar con el servidor. Por favor, intentá nuevamente más tarde.');
+            statusText.textContent = 'Error de conexión';
+        } finally {
+            showTypingIndicator(false);
+            button.disabled = false;
+            input.focus();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        chatBox = document.querySelector('#ai-chat-container .chat-box');
+        input = document.querySelector('#ai-chat-container #userInput');
+        button = document.querySelector('#ai-chat-container #sendBtn');
+        typingIndicator = document.querySelector('#ai-chat-container #typingIndicator');
+        statusText = document.querySelector('#ai-chat-container #statusText');
+        
+        button.addEventListener('click', send);
+        input.addEventListener('keypress', (e) => { if (e.key === 'Enter') send(); });
+        
+        const modal = document.getElementById('imageModal');
+        if (modal) {
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            if(closeModalBtn) closeModalBtn.onclick = cerrarModal;
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    cerrarModal();
+                }
+            };
+        }
+
+        // No se cargan filtros dinámicos aquí, se usan los de la página principal
+        // cargarFiltrosDinamicos(); 
+        
+        checkServerStatus();
+        setInterval(checkServerStatus, 30000);
+        
+        setTimeout(() => {
+            addMessage('¡Hola! 👋 Soy tu asistente de Dante Propiedades. Te ayudo a encontrar la propiedad ideal. ¿En qué puedo ayudarte hoy?', 'bot');
+        }, 1000);
+    });
+
+    async function checkServerStatus() {
+        try {
+            const response = await fetch(STATUS_URL);
+            if(statusText) statusText.textContent = response.ok ? 'Conectado' : 'Servidor inactivo';
+        } catch (error) {
+            if(statusText) statusText.textContent = 'Sin conexión';
+        }
+    }
+</script>
 </body>
 </html>
