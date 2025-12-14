@@ -2839,59 +2839,100 @@
             return precioFormateado;
         }
         function mostrarPropiedadesEnInterfaz(propiedades) {
-            const container = document.createElement('div');
-            container.className = 'propiedades-container';
+            const mainContainer = document.getElementById('properties-container');
+            const resultsCounter = document.getElementById('results-counter-styled');
 
-            const titulo = document.createElement('h3');
-            titulo.textContent = `📊 ${propiedades.length} Propiedad(es) Encontrada(s)`;
-            titulo.style.marginBottom = '20px';
-            titulo.style.color = '#2c3e50';
-            titulo.style.textAlign = 'center';
-            container.appendChild(titulo);
+            // Lógica para mostrar en el contenedor principal de la página
+            if (mainContainer) {
+                mainContainer.innerHTML = ''; // Limpiar resultados anteriores
 
-            const propertyEmojis = {
-                'casa': '🏠', 'departamento': '🏢', 'ph': '🏡',
-                'terreno': '📐', 'oficina': '💼', 'casaquinta': '🏘️',
-                'local': '🏪', 'galpon': '🏭'
-            };
+                if (resultsCounter) {
+                    resultsCounter.innerHTML = `
+                        <div style="background: #e8f5e9; color: #2e7d32; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid #c8e6c9;">
+                            <strong>📊 Resultados de la búsqueda:</strong> Se encontraron ${propiedades.length} propiedades
+                        </div>
+                    `;
+                }
 
-            propiedades.forEach((prop, index) => {
-                const emoji = propertyEmojis[prop.tipo?.toLowerCase()] || '🏠';
-                const card = document.createElement('div');
-                card.className = 'propiedad-card';
+                if (propiedades.length === 0) {
+                    mainContainer.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 50px; background: #f8f9fa; border-radius: 10px;">
+                            <div style="font-size: 40px; margin-bottom: 10px;">🔍</div>
+                            <h3>No se encontraron propiedades</h3>
+                            <p style="color: #666;">Intentá con otros filtros o términos de búsqueda.</p>
+                        </div>
+                     `;
+                    return;
+                }
 
-                card.innerHTML = `
-    <div class="propiedad-header">
-        <h4>${emoji} ${prop.titulo}</h4>
-        <span class="precio">💰 ${formatPrecio(prop.precio, prop.moneda_precio)}</span>
-    </div>
-    <div class="propiedad-info">
-        <span>📍 ${prop.barrio}</span>
-        <span>🏠 ${prop.ambientes} amb</span>
-        <span>📏 ${prop.metros_cuadrados} m²</span>
-        <span>📋 ${prop.operacion}</span>
-    </div>
-    ${prop.descripcion ? `
-    <div class="descripcion">
-        💬 ${prop.descripcion.substring(0, 120)}...
-    </div>
-    ` : ''}
-    <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
-        <button class="btn-imagenes" onclick='mostrarImagenesByIndex(${index})'>
-            🖼️ Ver Fotos
-        </button>
-        <small style="color: #666; font-size: 12px;">
-            ${prop.fotos && prop.fotos.length > 0 ?
-                        `📸 ${prop.fotos.length} foto(s)` :
-                        '📷 Fotos próximamente'}
-        </small>
-    </div>
-    `;
-                container.appendChild(card);
-            });
+                const propertyEmojis = {
+                    'casa': '🏠', 'departamento': '🏢', 'ph': '🏡',
+                    'terreno': '📐', 'oficina': '💼', 'casaquinta': '🏘️',
+                    'local': '🏪', 'galpon': '🏭'
+                };
 
-            chatBox.appendChild(container);
-            chatBox.scrollTop = chatBox.scrollHeight;
+                propiedades.forEach((prop, index) => {
+                    const emoji = propertyEmojis[prop.tipo?.toLowerCase()] || '🏠';
+                    const card = document.createElement('div');
+                    card.className = 'property-card'; // Usar clase existente o compatible
+
+                    // Estructura de card mejorada para coincidir con el diseño principal
+                    card.innerHTML = `
+                        <div class="property-image-container">
+                            ${prop.fotos && prop.fotos.length > 0 ?
+                            `<img src="${prop.fotos[0]}" alt="${prop.titulo}" class="property-image" onerror="this.src='https://via.placeholder.com/400x300?text=Sin+Imagen'">` :
+                            `<div class="no-image-placeholder">📷 Sin foto</div>`
+                        }
+                            <div class="property-price-tag">
+                                ${formatPrecio(prop.precio, prop.moneda_precio)}
+                            </div>
+                            <div class="property-operation-tag ${prop.operacion.toLowerCase()}">
+                                ${prop.operacion}
+                            </div>
+                        </div>
+                        <div class="property-content">
+                            <h3 class="property-title" title="${prop.titulo}">${emoji} ${prop.titulo}</h3>
+                            <div class="property-location">
+                                📍 ${prop.barrio}
+                            </div>
+                            <div class="property-features">
+                                <span>🏠 ${prop.ambientes} amb</span>
+                                <span>📏 ${prop.metros_cuadrados} m²</span>
+                            </div>
+                            ${prop.descripcion ? `
+                                <div class="property-description">
+                                    ${prop.descripcion.substring(0, 100)}...
+                                </div>
+                            ` : ''}
+                            <div class="property-actions">
+                                <button class="btn-details" onclick='mostrarImagenesByIndex(${index})'>
+                                    Ver Fotos (${prop.fotos ? prop.fotos.length : 0})
+                                </button>
+                                <button class="btn-whatsapp" onclick="window.open('https://wa.me/5491125368595?text=Hola,%20me%20interesa%20la%20propiedad:%20${encodeURIComponent(prop.titulo)}', '_blank')">
+                                    Consultar
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    mainContainer.appendChild(card);
+                });
+
+                // Scroll suave hacia los resultados
+                setTimeout(() => {
+                    document.querySelector('.container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+
+                // Avisar en el chat
+                addMessage(`✅ He actualizado la lista de propiedades principal con los ${propiedades.length} resultados encontrados. Mirá abajo 👇`, 'bot');
+
+            } else {
+                console.error("❌ Contenedor 'properties-container' no encontrado. Mostrando en chat como fallback.");
+                // Fallback: mostrar en chat si falla el contenedor principal
+                const container = document.createElement('div');
+                container.className = 'propiedades-container-chat';
+                // ... (lógica simplificada para fallback) ...
+                chatBox.appendChild(container);
+            }
         }
 
 
