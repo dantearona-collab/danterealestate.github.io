@@ -319,6 +319,16 @@ def debug_images():
     except Exception as e:
         return jsonify({"error": f"Error al leer carpeta: {str(e)}"})
 
+
+@app.route('/api/status', methods=['GET'])
+def api_status():
+    """Endpoint para verificar el estado del servidor"""
+    return jsonify({
+        "status": "online",
+        "message": "Servidor funcionando correctamente",
+        "timestamp": datetime.now().isoformat()
+    }), 200
+
 # **RUTA GENÉRICA AL FINAL** - Debe ser la última
 @app.route('/<path:filename>')
 def serve_any_file(filename):
