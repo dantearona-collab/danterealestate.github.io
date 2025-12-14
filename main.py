@@ -15,7 +15,7 @@ from logic.gemini_client import call_gemini_with_rotation, build_prompt
 import time
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": ["null", "http://dantepropiedades.com.ar", "http://www.dantepropiedades.com.ar", "https://dantepropiedades.com.ar", "https://www.dantepropiedades.com.ar", "http://dantepropiedades.com", "https://danterealestate-github-io.onrender.com"]}})
+CORS(app, resources={r"/api/*": {"origins": ["null", "http://dantepropiedades.com.ar", "http://www.dantepropiedades.com.ar", "https://dantepropiedades.com.ar", "https://www.dantepropiedades.com.ar", "http://dantepropiedades.com", "https://danterealestate-github-io.onrender.com", "https://danterealestate.github.io"]}})
 
 EXCEL_FILE = 'contactos_dante_propiedades.xlsx'
 
