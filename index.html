@@ -2202,22 +2202,30 @@
         }
 
         /* Responsive para móvil */
-        /* Responsive para móvil */
+        /* Responsive para móvil - CORREGIDO */
         @media (max-width: 480px) {
             #ai-chat-container {
-                right: 20px;
-                bottom: 20px;
+                right: 15px;
+                bottom: 15px;
             }
 
             #ai-chat-window {
                 position: fixed !important;
-                width: 90% !important;
-                left: 5% !important;
-                right: 5% !important;
-                bottom: 100px !important;
+                width: 90vw !important;
+                max-width: 90vw !important;
                 height: 70vh !important;
-                margin: 0 auto;
-                z-index: 10002;
+                left: 5vw !important;
+                right: auto !important;
+                bottom: 90px !important;
+                margin: 0 !important;
+                z-index: 20000 !important;
+                border-radius: 15px !important;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.2) !important;
+            }
+
+            #ai-chat-bubble {
+                width: 55px;
+                height: 55px;
             }
         }
 
