@@ -686,18 +686,70 @@ function populateFilters(properties) {
     const barrioSelect = document.getElementById('barrio-select-styled');
     const tipoSelect = document.getElementById('tipo-select-styled');
     
-    if (barrioSelect) {
+    // Solo poblar si el select está vacío o tiene solo la opción por defecto
+    // Esto previene que se reseteen las opciones seleccionadas si se llama accidentalmente
+    if (barrioSelect && barrioSelect.options.length <= 1) {
         barrioSelect.innerHTML = '<option value="">Todos los barrios</option>' + 
             barrios.map(barrio => `<option value="${barrio}">${barrio}</option>`).join('');
     }
     
-    if (tipoSelect) {
+    if (tipoSelect && tipoSelect.options.length <= 1) {
         tipoSelect.innerHTML = '<option value="">Todos los tipos</option>' + 
             tipos.map(tipo => `<option value="${tipo}">${tipo}</option>`).join('');
     }
     
     console.log('🔧 Filtros poblados - Barrios:', barrios.length, 'Tipos:', tipos.length);
 }
+
+// Nueva función de filtrado que NO recarga los datos desde cero
+// Mantiene la persistencia de los filtros seleccionados
+window.filterGlobalProperties = function() {
+    console.log('🔍 Filtrando propiedades globalmente (Sin recargar)...');
+    
+    // Obtener valores actuales de los selectores styled
+    const operacionVal = document.getElementById('operacion-select-styled')?.value || '';
+    const barrioVal = document.getElementById('barrio-select-styled')?.value || '';
+    const tipoVal = document.getElementById('tipo-select-styled')?.value || '';
+    
+    console.log('📊 Filtros aplicados:', { operacionVal, barrioVal, tipoVal });
+    
+    // Filtrar sobre los datos globales originales
+    const filtered = globalData.properties.filter(p => {
+        const matchOperacion = !operacionVal || (p.operacion && p.operacion.toLowerCase() === operacionVal.toLowerCase());
+        const matchBarrio = !barrioVal || (p.barrio && p.barrio === barrioVal);
+        const matchTipo = !tipoVal || (p.tipo && p.tipo === tipoVal);
+        
+        return matchOperacion && matchBarrio && matchTipo;
+    });
+    
+    console.log(`✅ ${filtered.length} propiedades encontradas de ${globalData.properties.length}`);
+    
+    // Actualizar datos filtrados globales
+    globalData.filteredProperties = filtered;
+    globalData.filters = {
+        operacion: operacionVal,
+        barrio: barrioVal,
+        tipo: tipoVal
+    };
+    
+    // Mostrar resultados
+    displayProperties(filtered);
+    
+    // Si tenemos la función de conteo en app.js
+    if (typeof updateResultsCount === 'function') {
+        updateResultsCount(filtered.length);
+    } else {
+        // Fallback manualmente
+        const counter = document.getElementById('results-counter-styled');
+        if (counter) {
+             counter.innerHTML = `
+                <div style="background: #e8f5e9; color: #2e7d32; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid #c8e6c9;">
+                    <strong>📊 Resultados de la búsqueda:</strong> Se encontraron ${filtered.length} propiedades
+                </div>
+            `;
+        }
+    }
+};
 
 
 
