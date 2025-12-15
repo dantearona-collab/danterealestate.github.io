@@ -2202,18 +2202,22 @@
         }
 
         /* Responsive para móvil */
+        /* Responsive para móvil */
         @media (max-width: 480px) {
-            #ai-chat-window {
-                width: 94% !important;
-                right: 3% !important;
-                left: 3% !important;
-                bottom: 90px !important;
-                height: 70vh !important;
+            #ai-chat-container {
+                right: 20px;
+                bottom: 20px;
             }
 
-            #ai-chat-bubble {
-                right: 20px !important;
-                bottom: 20px !important;
+            #ai-chat-window {
+                position: fixed !important;
+                width: 90% !important;
+                left: 5% !important;
+                right: 5% !important;
+                bottom: 100px !important;
+                height: 70vh !important;
+                margin: 0 auto;
+                z-index: 10002;
             }
         }
 
