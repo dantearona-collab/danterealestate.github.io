@@ -2955,6 +2955,15 @@
                 // Avisar en el chat
                 addMessage(`✅ He actualizado la lista de propiedades principal con los ${propiedades.length} resultados encontrados. Mirá abajo 👇`, 'bot');
 
+                // AUTO-OCULTAR CHAT (Mejor experiencia de usuario solicitada)
+                setTimeout(() => {
+                    const chatWindow = document.getElementById('ai-chat-window');
+                    if (chatWindow && chatWindow.classList.contains('open')) {
+                        console.log('🔽 Auto-minimizando chat para mostrar resultados');
+                        chatWindow.classList.remove('open');
+                    }
+                }, 1500); // 1.5 segundos de delay para leer el mensaje de confirmación
+
             } else {
                 console.error("❌ Contenedor 'properties-container' no encontrado. Mostrando en chat como fallback.");
                 // Fallback: mostrar en chat si falla el contenedor principal
