@@ -264,17 +264,20 @@
         }
 
         .reset-chat {
-            background: none;
-            border: 1px solid var(--rojo);
-            color: var(--rojo);
-            padding: 6px 12px;
-            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 15px;
             cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
         }
 
         .reset-chat:hover {
-            background-color: var(--rojo);
-            color: #fff;
+            background: rgba(255, 255, 255, 0.4);
+            transform: translateY(-1px);
         }
 
 
@@ -330,6 +333,7 @@
             line-height: 1.5;
             position: relative;
             animation: fadeIn 0.3s ease-in;
+            overflow-wrap: break-word;
         }
 
         @keyframes fadeIn {
@@ -469,24 +473,7 @@
             }
         }
 
-        /* Reset chat */
-        .reset-chat {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 15px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: background 0.3s ease;
-        }
 
-        .reset-chat:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
 
         /* Responsive */
         @media (max-width: 1024px) {
@@ -502,6 +489,8 @@
             .chat-area {
                 order: 1;
                 height: 70vh;
+                width: 100%;
+                margin: 0 auto;
             }
         }
 
