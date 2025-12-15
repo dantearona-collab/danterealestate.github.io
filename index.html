@@ -2173,9 +2173,11 @@
         /* Ventana del chat */
         #ai-chat-window {
             display: none;
-            position: absolute;
-            bottom: 80px;
-            right: 0;
+            position: fixed;
+            /* Cambiado a fixed para que se vea siempre */
+            bottom: 100px;
+            right: 100px;
+            /* Alineado con el botón de escritorio */
             width: 400px;
             height: 600px;
             background: white;
@@ -2184,6 +2186,7 @@
             overflow: hidden;
             flex-direction: column;
             animation: slideIn 0.3s ease-out;
+            z-index: 10002;
         }
 
         #ai-chat-window.open {
@@ -2202,26 +2205,24 @@
             }
         }
 
-        /* Responsive para móvil */
         /* Responsive para móvil - CORREGIDO */
         @media (max-width: 480px) {
             #ai-chat-container {
-                right: 15px;
-                bottom: 15px;
+                left: 20px;
+                /* Mover a la izquierda para no tapar WhatsApp */
+                right: auto;
+                bottom: 20px;
             }
 
             #ai-chat-window {
-                position: fixed !important;
                 width: 90vw !important;
                 max-width: 90vw !important;
                 height: 70vh !important;
                 left: 5vw !important;
                 right: auto !important;
-                bottom: 90px !important;
+                bottom: 100px !important;
                 margin: 0 !important;
-                z-index: 20000 !important;
                 border-radius: 15px !important;
-                box-shadow: 0 0 20px rgba(0, 0, 0, 0.2) !important;
             }
 
             #ai-chat-bubble {
