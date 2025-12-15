@@ -2090,42 +2090,43 @@
             <span>Asistente IA</span>
         </div>
 
-        <!-- Ventana del Chat -->
-        <div id="ai-chat-window">
-            <div class="chat-area">
-                <div class="chat-header">
-                    <img src="llave.png" alt="Logo Inmobiliario" class="chat-logo">
-                    <div class="chat-info">
-                        <h2>Dante Propiedades</h2>
-                        <div class="chat-subtitle">Asistente Inmobiliario</div>
-                        <div class="status-indicator">
-                            <div class="status-dot"></div>
-                            <span id="statusText">Conectado</span>
-                        </div>
-                    </div>
-                    <button class="minimize-chat" onclick="toggleChatWidget()" title="Minimizar">_</button>
-                    <button class="reset-chat" onclick="resetearChat()">Nueva Consulta</button>
-                </div>
-                <!-- Elemento de carga para filtros -->
-                <div id="filtersLoading" style="text-align: center; color: #666; font-size: 0.8em; margin-top: 5px;">
-                </div>
+    </div>
 
-                <div class="chat-box" id="chatBox">
-                    <!-- Mensajes se agregarán aquí -->
-                </div>
-                <div class="typing-indicator" id="typingIndicator">
-                    <div class="typing-dots">
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
+    <!-- Ventana del Chat (Movida fuera del container para mejor responsive) -->
+    <div id="ai-chat-window">
+        <div class="chat-area">
+            <div class="chat-header">
+                <img src="llave.png" alt="Logo Inmobiliario" class="chat-logo">
+                <div class="chat-info">
+                    <h2>Dante Propiedades</h2>
+                    <div class="chat-subtitle">Asistente Inmobiliario</div>
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <span id="statusText">Conectado</span>
                     </div>
-                    <span>Escribiendo...</span>
                 </div>
-                <div class="input-area">
-                    <div class="input-row">
-                        <input type="text" id="userInput" placeholder="Busco depto en Almagro..." autocomplete="off">
-                        <button id="sendBtn">Enviar</button>
-                    </div>
+                <button class="minimize-chat" onclick="toggleChatWidget()" title="Minimizar">_</button>
+                <button class="reset-chat" onclick="resetearChat()">Nueva Consulta</button>
+            </div>
+            <!-- Elemento de carga para filtros -->
+            <div id="filtersLoading" style="text-align: center; color: #666; font-size: 0.8em; margin-top: 5px;">
+            </div>
+
+            <div class="chat-box" id="chatBox">
+                <!-- Mensajes se agregarán aquí -->
+            </div>
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+                <span>Escribiendo...</span>
+            </div>
+            <div class="input-area">
+                <div class="input-row">
+                    <input type="text" id="userInput" placeholder="Busco depto en Almagro..." autocomplete="off">
+                    <button id="sendBtn">Enviar</button>
                 </div>
             </div>
         </div>
@@ -2230,13 +2231,13 @@
         }
 
         /* Estilos específicos para el chat de IA, con ID para evitar conflictos */
-        #ai-chat-container .chat-area {
+        #ai-chat-window .chat-area {
             display: flex;
             flex-direction: column;
             height: 100%;
         }
 
-        #ai-chat-container .chat-header {
+        #ai-chat-window .chat-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -2246,22 +2247,22 @@
             flex-shrink: 0;
         }
 
-        #ai-chat-container .chat-logo {
+        #ai-chat-window .chat-logo {
             height: 40px;
             margin-right: 10px;
         }
 
-        #ai-chat-container .chat-info h2 {
+        #ai-chat-window .chat-info h2 {
             font-size: 1.1em;
             margin: 0;
         }
 
-        #ai-chat-container .chat-subtitle {
+        #ai-chat-window .chat-subtitle {
             font-size: 0.8em;
             opacity: 0.9;
         }
 
-        #ai-chat-container .status-indicator {
+        #ai-chat-window .status-indicator {
             display: inline-flex;
             align-items: center;
             gap: 6px;
@@ -2272,7 +2273,7 @@
             margin-top: 4px;
         }
 
-        #ai-chat-container .status-dot {
+        #ai-chat-window .status-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
@@ -2280,7 +2281,7 @@
             animation: pulse 2s infinite;
         }
 
-        #ai-chat-container .minimize-chat {
+        #ai-chat-window .minimize-chat {
             background: none;
             border: 1px solid white;
             color: white;
@@ -2298,7 +2299,7 @@
             /* Ajuste visual para el guion bajo */
         }
 
-        #ai-chat-container .reset-chat {
+        #ai-chat-window .reset-chat {
             background: none;
             border: 1px solid white;
             color: white;
@@ -2308,7 +2309,7 @@
             font-size: 0.8em;
         }
 
-        #ai-chat-container .chat-box {
+        #ai-chat-window .chat-box {
             flex: 1;
             padding: 15px;
             overflow-y: auto;
@@ -2318,7 +2319,7 @@
             gap: 12px;
         }
 
-        #ai-chat-container .message {
+        #ai-chat-window .message {
             max-width: 85%;
             padding: 10px 15px;
             border-radius: 15px;
@@ -2326,14 +2327,14 @@
             animation: fadeIn 0.3s ease-in;
         }
 
-        #ai-chat-container .msg-user {
+        #ai-chat-window .msg-user {
             align-self: flex-end;
             background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
             color: white;
             border-bottom-right-radius: 5px;
         }
 
-        #ai-chat-container .msg-bot {
+        #ai-chat-window .msg-bot {
             align-self: flex-start;
             background: white;
             border: 1px solid #e9ecef;
@@ -2341,7 +2342,7 @@
             border-bottom-left-radius: 5px;
         }
 
-        #ai-chat-container .msg-bot b {
+        #ai-chat-window .msg-bot b {
             color: #2c3e50;
             display: block;
             margin-bottom: 5px;
@@ -2349,19 +2350,19 @@
             opacity: 0.7;
         }
 
-        #ai-chat-container .input-area {
+        #ai-chat-window .input-area {
             padding: 15px;
             background: white;
             border-top: 1px solid #e9ecef;
             flex-shrink: 0;
         }
 
-        #ai-chat-container .input-row {
+        #ai-chat-window .input-row {
             display: flex;
             gap: 10px;
         }
 
-        #ai-chat-container input[type="text"] {
+        #ai-chat-window input[type="text"] {
             flex: 1;
             padding: 12px 15px;
             font-size: 14px;
@@ -2370,7 +2371,7 @@
             outline: none;
         }
 
-        #ai-chat-container #sendBtn {
+        #ai-chat-window #sendBtn {
             background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
             color: white;
             border: none;
@@ -2380,7 +2381,7 @@
             font-weight: 600;
         }
 
-        #ai-chat-container .typing-indicator {
+        #ai-chat-window .typing-indicator {
             display: none;
             align-items: center;
             gap: 8px;
@@ -2392,12 +2393,12 @@
             max-width: 120px;
         }
 
-        #ai-chat-container .typing-dots {
+        #ai-chat-window .typing-dots {
             display: flex;
             gap: 4px;
         }
 
-        #ai-chat-container .typing-dot {
+        #ai-chat-window .typing-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
@@ -2405,11 +2406,11 @@
             animation: typing 1.4s infinite ease-in-out;
         }
 
-        #ai-chat-container .typing-dot:nth-child(1) {
+        #ai-chat-window .typing-dot:nth-child(1) {
             animation-delay: -0.32s;
         }
 
-        #ai-chat-container .typing-dot:nth-child(2) {
+        #ai-chat-window .typing-dot:nth-child(2) {
             animation-delay: -0.16s;
         }
 
@@ -2455,7 +2456,7 @@
         }
 
         /* Estilos para las tarjetas de propiedad dentro del chat */
-        #ai-chat-container .propiedades-container {
+        #ai-chat-window .propiedades-container {
             align-self: center;
             width: 100%;
             max-width: 98%;
@@ -2465,7 +2466,7 @@
             background: #f0f2f5;
         }
 
-        #ai-chat-container .propiedad-card {
+        #ai-chat-window .propiedad-card {
             border: 1px solid #ddd;
             border-radius: 12px;
             padding: 12px;
@@ -2474,21 +2475,21 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
-        #ai-chat-container .propiedad-header h4 {
+        #ai-chat-window .propiedad-header h4 {
             font-size: 1em;
             margin-bottom: 8px;
         }
 
-        #ai-chat-container .precio {
+        #ai-chat-window .precio {
             font-size: 1em;
         }
 
-        #ai-chat-container .propiedad-info {
+        #ai-chat-window .propiedad-info {
             font-size: 0.85em;
             gap: 10px;
         }
 
-        #ai-chat-container .btn-imagenes {
+        #ai-chat-window .btn-imagenes {
             padding: 5px 10px;
             font-size: 0.8em;
         }
@@ -2615,11 +2616,11 @@
 
         // Inicialización
         document.addEventListener('DOMContentLoaded', function () {
-            chatBox = document.querySelector('#ai-chat-container .chat-box');
-            input = document.querySelector('#ai-chat-container #userInput');
-            button = document.querySelector('#ai-chat-container #sendBtn');
-            typingIndicator = document.querySelector('#ai-chat-container #typingIndicator');
-            statusText = document.querySelector('#ai-chat-container #statusText');
+            chatBox = document.querySelector('#ai-chat-window .chat-box');
+            input = document.querySelector('#ai-chat-window #userInput');
+            button = document.querySelector('#ai-chat-window #sendBtn');
+            typingIndicator = document.querySelector('#ai-chat-window #typingIndicator');
+            statusText = document.querySelector('#ai-chat-window #statusText');
 
             if (button) {
                 button.addEventListener('click', send);
