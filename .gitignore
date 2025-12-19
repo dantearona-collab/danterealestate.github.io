@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.xlsx
+*.db
+*.log
+.env
+venv/
+env/
+contactos_dante_propiedades.xlsx
+registro_contactos.log

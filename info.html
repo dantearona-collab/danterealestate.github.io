@@ -1,3 +1,4 @@
+ <!-- <info.html> -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -92,14 +93,24 @@
         </div>
     </header>
 
+    <!-- Oculta mensaje imageTitle-->
+    <script>
+    window.addEventListener("DOMContentLoaded", function () {
+        const title = document.getElementById("imageTitle");
+        if (title) {
+        title.style.display = "none";
+        }
+    });
+    </script>
+
     <div class="container">
         <a href="details.html?image=" id="imageLink">
             <img id="displayImage" src="" alt="Imagen de Propiedad" class="property-image">
         </a>
-        <h1 id="imageTitle">Información Detallada de la Propiedad</h1>
-        <p>3 AMBIENTES.</p>
-        <p>RINCON 336, precio, características, descripción extendida, etc.</p>
-        <p>La imagen mostrada es: <span id="imageName"></span></p>
+        <h1 id="imageTitle"> </h1>
+        <p>          </p>
+        <p>Inmueble sobre Avda. La Plata, Boedo, apto para desarrollo Inmobiliario.</p>
+        <p style="display: none;">La imagen mostrada es: <span id="imageName"></span></p>
         <a href="index.html" class="back-button">Volver al Inicio</a>
     </div>
 
@@ -114,7 +125,7 @@
                 
                 displayImage.src = imageName;
                 imageLink.href = "details.html?image=" + imageName; // Update the link's href
-                document.getElementById('imageTitle').textContent = 'Propiedad: ' + imageName.replace('.JPG', '');
+                document.getElementById('imageTitle').textContent = '' + imageName.replace('', '');
                 document.getElementById('imageName').textContent = imageName;
             } else {
                 document.getElementById('imageTitle').textContent = 'No se encontró información de la propiedad.';
@@ -122,5 +133,6 @@
             }
         });
     </script>
+    
 </body>
 </html>
