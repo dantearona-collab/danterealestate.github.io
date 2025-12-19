@@ -47,12 +47,7 @@
       "imgs/UF000-20.jpeg",
       "imgs/UF000-21.jpeg"
     ],
-    "imagenes_360": [
-      "imgs/360/UF004-11.jpg",
-      "imgs/360/UF004-12.jpg",
-      "imgs/360/UF004-13.jpg",
-      "imgs/360/UF004-14.jpg"
-    ],
+    "imagenes_360": [],
     "moneda_precio": "USD",
     "moneda_expensas": "ARS",
     "fecha_procesamiento": "2025-11-09T08:33:51.258324"
@@ -96,10 +91,7 @@
       "imgs/UF001-6.jpg",
       "imgs/UF001-7.jpg"
     ],
-    "imagenes_360": [
-      "imgs/360/UF004-14.jpg",
-      "imgs/360/UF004-16.jpg"
-    ],
+    "imagenes_360": [],
     "moneda_precio": "USD",
     "moneda_expensas": "ARS",
     "fecha_procesamiento": "2025-11-09T08:33:51.258324"
@@ -141,10 +133,7 @@
       "imgs/UF023-6.jpg",
       "imgs/UF023-7.jpg"
     ],
-    "imagenes_360": [
-      "imgs/360/UF004-13.jpg",
-      "imgs/360/UF004-16.jpg"
-    ],
+    "imagenes_360": [],
     "fecha_procesamiento": "2025-11-08T15:22:30.123456"
   },
   {
@@ -189,17 +178,14 @@
       "imgs/OFI-12.jpg",
       "imgs/OFI-13.jpg"
     ],
-       "imagenes_360": [
-      "imgs/360/UF004-15.jpg",
-      "imgs/360/UF004-16.jpg"
-    ],
+       "imagenes_360": [],
     "fecha_procesamiento": "2025-11-07T10:45:20.789123"
   },
   {
     "id_temporal": "UF004",
     "titulo": "Barrio Privado, Km- 50 Pilar, 2.000 m2 de terreno propios",
     "barrio": "Pilar",
-    "precio": 1250,
+    "precio": 1500000,
     "ambientes": 8,
     "metros_cuadrados": 200,
     "operacion": "alquiler",
@@ -211,7 +197,7 @@
     "estado": "bueno",
     "orientacion": "norte",
     "expensas": 400000,
-    "moneda_precio": "USD",
+    "moneda_precio": "ARS",
     "moneda_expensas": "ARS",
     "amenities": "Pileta enorme terreno",
     "cochera": "Si",
@@ -221,10 +207,7 @@
     "aire_acondicionado": "Si",
     "info_multimedia": "Fotos de la propiedad y terraza",
     "documentos": [],
-    "videos": [
-      "imgs/UF003-VIDEO.mp4",
-      "imgs/UF003-VIDEO1.mp4"
-    ],
+    "videos": [],
     "fotos": [
       "imgs/UF004-1.jpg",
       "imgs/UF004-2.jpg",
@@ -247,7 +230,9 @@
       "imgs/UF004-19.jpg"
     ],
     "imagenes_360": [
-      "imgs/360/UF004-13.jpg",
+      "imgs/360/UF004-13.png",
+      "imgs/360/UF004-14.png",
+      "imgs/360/UF004-15.jpg",
       "imgs/360/UF004-14.jpg"
     ],
     "fecha_procesamiento": "2025-11-06T14:30:15.456789"
