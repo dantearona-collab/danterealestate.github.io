@@ -2,5 +2,6 @@ services:
   - type: web
     name: dante-propiedades
     env: python
+    pythonVersion: 3.12.3
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn main-ai:app --host 0.0.0.0 --port $PORT"
