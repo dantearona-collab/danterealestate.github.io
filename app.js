@@ -703,6 +703,8 @@ function populateFilters(properties) {
 
 // Nueva función de filtrado que NO recarga los datos desde cero
 // Mantiene la persistencia de los filtros seleccionados
+// Nueva función de filtrado que NO recarga los datos desde cero
+// Mantiene la persistencia de los filtros seleccionados
 window.filterGlobalProperties = function() {
     console.log('🔍 Filtrando propiedades globalmente (Sin recargar)...');
     
@@ -715,9 +717,15 @@ window.filterGlobalProperties = function() {
     
     // Filtrar sobre los datos globales originales
     const filtered = globalData.properties.filter(p => {
+        // Comparación insensible a mayúsculas/minúsculas y espacios
         const matchOperacion = !operacionVal || (p.operacion && p.operacion.toLowerCase() === operacionVal.toLowerCase());
-        const matchBarrio = !barrioVal || (p.barrio && p.barrio === barrioVal);
-        const matchTipo = !tipoVal || (p.tipo && p.tipo === tipoVal);
+        
+        // CORRECCIÓN PARA BARRIO: Comparación insensible a mayúsculas/minúsculas
+        const matchBarrio = !barrioVal || (p.barrio && 
+            p.barrio.toLowerCase().trim() === barrioVal.toLowerCase().trim());
+        
+        const matchTipo = !tipoVal || (p.tipo && 
+            p.tipo.toLowerCase().trim() === tipoVal.toLowerCase().trim());
         
         return matchOperacion && matchBarrio && matchTipo;
     });
@@ -735,14 +743,13 @@ window.filterGlobalProperties = function() {
     // Mostrar resultados
     displayProperties(filtered);
     
-    // Si tenemos la función de conteo en app.js
+    // Actualizar contador
     if (typeof updateResultsCount === 'function') {
         updateResultsCount(filtered.length);
     } else {
-        // Fallback manualmente
         const counter = document.getElementById('results-counter-styled');
         if (counter) {
-             counter.innerHTML = `
+            counter.innerHTML = `
                 <div style="background: #e8f5e9; color: #2e7d32; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid #c8e6c9;">
                     <strong>📊 Resultados de la búsqueda:</strong> Se encontraron ${filtered.length} propiedades
                 </div>
@@ -750,7 +757,6 @@ window.filterGlobalProperties = function() {
         }
     }
 };
-
 
 
 
