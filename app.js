@@ -610,43 +610,70 @@ let globalData = {
 
 // Cargar propiedades - Solo desde archivo externo propiedades.json
 async function loadProperties() {
-    console.log('🔄 Iniciando carga de propiedades desde propiedades.json...');
+    console.log('🔄 Cargando propiedades desde propiedades.json...');
     
     try {
+        // 1. Cargar datos
         const response = await fetch('propiedades.json');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
         const data = await response.json();
-        console.log('✅ Datos cargados exitosamente:', data.length, 'propiedades');
+        console.log('✅ Datos cargados:', data.length, 'propiedades');
         
-        // Datos cargados exitosamente
+        // 2. Guardar en variables globales
         globalData.properties = data;
         globalData.filteredProperties = data;
         
-        // Llenar filtros y mostrar
+        // 3. DEBUG: Verificar que hay datos
+        console.log('📊 Primeras 2 propiedades para verificar:');
+        data.slice(0, 2).forEach((p, i) => {
+            console.log(`   ${i+1}. ${p.titulo} - ${p.operacion} - ${p.barrio}`);
+        });
+        
+        // 4. Poblar filtros INMEDIATAMENTE
+        console.log('🔧 Llamando a populateFilters()...');
         populateFilters(data);
+        
+        // 5. Mostrar propiedades
         displayProperties(data);
         
-        // DEBUG: Verificar que los filtros se cargaron
+        // 6. VERIFICACIÓN: Comprobar que los filtros se cargaron
         setTimeout(() => {
             console.log('🔍 Verificación de filtros cargados:');
-            const operacionSelect = document.getElementById('operacion-select-styled');
-            if (operacionSelect && operacionSelect.options.length > 1) {
-                console.log('✅ Filtro de operaciones cargado correctamente');
-                console.log('   Opciones:', Array.from(operacionSelect.options).map(o => o.value));
+            
+            const ops = document.getElementById('operacion-select-styled');
+            const barrios = document.getElementById('barrio-select-styled');
+            const tipos = document.getElementById('tipo-select-styled');
+            
+            if (ops && ops.options.length >= 3) {
+                console.log('✅ Operaciones cargadas correctamente');
+                console.log('   Opciones:', Array.from(ops.options).map(o => o.value).join(', '));
             } else {
-                console.log('❌ Filtro de operaciones NO se cargó correctamente');
+                console.error('❌ ERROR: Operaciones NO cargadas');
+                console.log('   Forzando carga de operaciones...');
+                if (ops) {
+                    ops.innerHTML = `
+                        <option value="">Todas las operaciones</option>
+                        <option value="venta">Venta</option>
+                        <option value="alquiler">Alquiler</option>
+                    `;
+                }
             }
-        }, 500);
+            
+            if (barrios && barrios.options.length > 1) {
+                console.log('✅ Barrios cargados:', barrios.options.length, 'opciones');
+            }
+            
+            if (tipos && tipos.options.length > 1) {
+                console.log('✅ Tipos cargados:', tipos.options.length, 'opciones');
+            }
+        }, 1000);
         
     } catch (error) {
-        console.error('❌ Error al cargar propiedades.json:', error.message);
+        console.error('❌ Error cargando propiedades:', error);
         showErrorMessage();
     }
 }
-
 // Mostrar mensaje de error cuando no se puede cargar el archivo
 function showErrorMessage() {
     console.log('🔧 Mostrando mensaje de error en la interfaz...');
@@ -694,18 +721,18 @@ function populateFilters(properties) {
     const barrios = [...new Set(properties.map(p => p.barrio).filter(Boolean))].sort();
     const tipos = [...new Set(properties.map(p => p.tipo).filter(Boolean))].sort();
     
-    console.log('📊 Valores disponibles:', {
+    console.log('📊 Valores originales:', {
         operaciones: operaciones,
         barrios: barrios,
         tipos: tipos
     });
     
-    // Configurar selectores styled
+    // Configurar selectores
     const operacionSelect = document.getElementById('operacion-select-styled');
     const barrioSelect = document.getElementById('barrio-select-styled');
     const tipoSelect = document.getElementById('tipo-select-styled');
     
-    // POBLAR OPERACIONES (Venta/Alquiler)
+    // POBLAR OPERACIONES - CORREGIDO
     if (operacionSelect) {
         console.log('🔄 Poblando operaciones:', operaciones);
         operacionSelect.innerHTML = '<option value="">Todas las operaciones</option>';
@@ -713,16 +740,26 @@ function populateFilters(properties) {
         operaciones.forEach(operacion => {
             if (operacion) {
                 const option = document.createElement('option');
+                // VALOR en minúsculas para consistencia
                 option.value = operacion.toLowerCase();
+                // TEXTO con formato bonito
                 option.textContent = operacion.charAt(0).toUpperCase() + operacion.slice(1);
                 operacionSelect.appendChild(option);
+                
+                console.log(`   ✅ Opción: ${option.value} -> ${option.textContent}`);
             }
         });
         
         console.log('✅ Operaciones cargadas:', operacionSelect.options.length, 'opciones');
+        
+        // DEBUG: Mostrar opciones actuales
+        console.log('🔍 Opciones actuales en operaciones:');
+        Array.from(operacionSelect.options).forEach((opt, i) => {
+            console.log(`   ${i}. "${opt.value}" -> "${opt.text}"`);
+        });
     }
     
-    // POBLAR BARRIOS
+    // POBLAR BARRIOS - CORREGIDO
     if (barrioSelect) {
         console.log('🔄 Poblando barrios:', barrios.length);
         barrioSelect.innerHTML = '<option value="">Todos los barrios</option>';
@@ -730,7 +767,9 @@ function populateFilters(properties) {
         barrios.forEach(barrio => {
             if (barrio) {
                 const option = document.createElement('option');
-                option.value = barrio;
+                // ¡IMPORTANTE! VALOR en minúsculas
+                option.value = barrio.toLowerCase();
+                // TEXTO con formato original
                 option.textContent = barrio;
                 barrioSelect.appendChild(option);
             }
@@ -739,7 +778,7 @@ function populateFilters(properties) {
         console.log('✅ Barrios cargados:', barrioSelect.options.length, 'opciones');
     }
     
-    // POBLAR TIPOS
+    // POBLAR TIPOS - CORREGIDO
     if (tipoSelect) {
         console.log('🔄 Poblando tipos:', tipos.length);
         tipoSelect.innerHTML = '<option value="">Todos los tipos</option>';
@@ -747,7 +786,9 @@ function populateFilters(properties) {
         tipos.forEach(tipo => {
             if (tipo) {
                 const option = document.createElement('option');
-                option.value = tipo;
+                // ¡IMPORTANTE! VALOR en minúsculas
+                option.value = tipo.toLowerCase();
+                // TEXTO con formato original
                 option.textContent = tipo;
                 tipoSelect.appendChild(option);
             }
@@ -756,11 +797,16 @@ function populateFilters(properties) {
         console.log('✅ Tipos cargados:', tipoSelect.options.length, 'opciones');
     }
     
-    // Guardar datos globalmente para acceso desde consola
+    // DEBUG FINAL: Verificar consistencia
+    console.log('🔍 Verificación final de consistencia:');
+    console.log('   - Operaciones en minúsculas?', operacionSelect ? Array.from(operacionSelect.options).every(o => o.value === o.value.toLowerCase()) : 'N/A');
+    console.log('   - Barrios en minúsculas?', barrioSelect ? Array.from(barrioSelect.options).every(o => o.value === o.value.toLowerCase()) : 'N/A');
+    console.log('   - Tipos en minúsculas?', tipoSelect ? Array.from(tipoSelect.options).every(o => o.value === o.value.toLowerCase()) : 'N/A');
+    
+    // Guardar datos globalmente
     window.globalProperties = properties;
-    console.log('🌍 Datos disponibles globalmente como window.globalProperties');
+    console.log('🌍 Datos disponibles globalmente');
 }
-
 
 // Nueva función de filtrado que NO recarga los datos desde cero
 // Mantiene la persistencia de los filtros seleccionados
