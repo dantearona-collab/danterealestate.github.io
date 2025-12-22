@@ -1499,50 +1499,51 @@ function updateResultsCount(count) {
 // ========================================
 
 function setupFilterEvents() {
-    console.log('⚙️ Configurando eventos de filtros...');
+    console.log('🔧 Configurando eventos con debounce...');
     
-    // Lista de todos los selectores
-    const filterSelectors = [
+    // Variable para el timeout del debounce
+    let filterTimeout;
+    
+    const filterConfig = [
         { id: 'operacion-select-styled', name: 'Operación' },
         { id: 'barrio-select-styled', name: 'Barrio' },
         { id: 'tipo-select-styled', name: 'Tipo' }
     ];
     
-    filterSelectors.forEach(filter => {
-        const element = document.getElementById(filter.id);
+    filterConfig.forEach(config => {
+        const element = document.getElementById(config.id);
         if (element) {
-            // Limpiar eventos anteriores
-            element.removeEventListener('change', window.filterGlobalProperties);
+            // Clonar para limpiar eventos
+            const newElement = element.cloneNode(true);
+            element.parentNode.replaceChild(newElement, element);
             
-            // Agregar nuevo evento
-            element.addEventListener('change', function() {
-                console.log(`🎯 ${filter.name} seleccionado: "${this.value}"`);
+            // Nueva referencia
+            const freshElement = document.getElementById(config.id);
+            
+            // Evento CON DEBOUNCE
+            freshElement.addEventListener('change', function() {
+                console.log(`🎯 ${config.name} cambiado: "${this.value}" (debounce activado)`);
                 
-                // Pequeño delay para asegurar que el valor se actualizó
-                setTimeout(() => {
-                    if (window.filterGlobalProperties && typeof window.filterGlobalProperties === 'function') {
+                // CANCELAR ejecución anterior
+                clearTimeout(filterTimeout);
+                
+                // PROGRAMAR nueva ejecución en 400ms
+                filterTimeout = setTimeout(() => {
+                    if (window.filterGlobalProperties) {
                         window.filterGlobalProperties();
-                    } else {
-                        console.error(`❌ filterGlobalProperties no disponible`);
                     }
-                }, 50);
+                }, 400); // 400ms es el sweet spot
             });
             
-            console.log(`✅ ${filter.name}: Filtro automático activado`);
+            console.log(`✅ ${config.name}: Debounce activado (400ms)`);
         }
     });
     
-    // También configurar el botón "Buscar" (por si alguien prefiere usarlo)
-    const searchBtn = document.getElementById('search-btn-styled');
-    if (searchBtn) {
-        searchBtn.addEventListener('click', function() {
-            console.log('🔍 Botón Buscar clickeado');
-            if (window.filterGlobalProperties) window.filterGlobalProperties();
-        });
-    }
-    
-    console.log('🎯 Todos los filtros configurados para filtro automático');
+    console.log('🎯 Sistema con debounce configurado');
 }
+
+
+
 
 // ========================================
 // ELIMINAR applyFilters SI EXISTE
@@ -1558,6 +1559,11 @@ if (typeof applyFilters === 'function') {
 if (typeof filterGlobalProperties === 'function' && !window.filterGlobalProperties) {
     window.filterGlobalProperties = filterGlobalProperties;
 }
+
+
+
+
+
 // ========================================
 // FUNCIONES AUXILIARES
 // ========================================
