@@ -2866,98 +2866,90 @@
             const loadingElement = document.getElementById('filtersLoading');
             
             try {
-                loadingElement.innerHTML = '<small>🔄 Cargando filtros...</small>';
+                loadingElement.innerHTML = '<small>🔄 Cargando filtros dinámicos...</small>';
                 
-                // INTENTO 1: Servidor externo
-                console.log('🔗 Intentando conectar al servidor de filtros...');
-                const FILTERS_URL = "https://pagina-web-g82d.onrender.com/api/properties/filter-options";
+                console.log('🔗 Intentando obtener filtros dinámicos...');
                 
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 3000);
+                // INTENTO 1: Extraer de propiedades cargadas en app.js
+                console.log('🔄 Extrayendo de propiedades globales...');
                 
-                let response;
-                try {
-                    response = await fetch(FILTERS_URL, {
-                        signal: controller.signal,
-                        headers: { 'Accept': 'application/json' }
+                // Verificar si app.js ya cargó las propiedades
+                if (typeof globalData !== 'undefined' && 
+                    globalData.properties && 
+                    globalData.properties.length > 0) {
+                    
+                    const propiedades = globalData.properties;
+                    console.log('✅ Usando', propiedades.length, 'propiedades de globalData');
+                    
+                    const operacionesSet = new Set();
+                    const tiposSet = new Set();
+                    const barriosSet = new Set();
+                    
+                    propiedades.forEach(prop => {
+                        if (prop.operacion) operacionesSet.add(prop.operacion);
+                        if (prop.tipo) tiposSet.add(prop.tipo);
+                        if (prop.barrio) barriosSet.add(prop.barrio);
                     });
-                    clearTimeout(timeoutId);
                     
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    
-                    const data = await response.json();
-                    console.log('📊 Respuesta del servidor:', data);
-                    
-                    const operaciones = data.operaciones || data.operations || [];
-                    const tipos = data.tipos || data.types || [];
-                    const barrios = data.barrios || data.neighborhoods || [];
-                    
-                    if (Array.isArray(operaciones) && Array.isArray(tipos) && Array.isArray(barrios)) {
-                        filtrosDinamicos = {
-                            operaciones: operaciones.filter(op => op && String(op).trim()),
-                            tipos: tipos.filter(tipo => tipo && String(tipo).trim()),
-                            barrios: barrios.filter(barrio => barrio && String(barrio).trim())
-                        };
-                        loadingElement.innerHTML = '<small>✅ Filtros cargados del servidor</small>';
-                        console.log('✅ Filtros del servidor:', filtrosDinamicos);
-                    } else {
-                        throw new Error('Estructura de datos inválida');
-                    }
-                    
-                } catch (serverError) {
-                    clearTimeout(timeoutId);
-                    console.log('❌ Servidor de filtros no disponible:', serverError.message);
-                    throw new Error('Servidor no disponible');
-                }
-                
-            } catch (serverError) {
-                // INTENTO 2: Extraer de propiedades locales
-                console.log('🔄 Intentando extraer de propiedades locales...');
-                
-                try {
-                    const propiedadesDisponibles = await verificarPropiedadesCargadas();
-                    
-                    if (propiedadesDisponibles && window.allProperties && window.allProperties.length > 0) {
-                        const propiedades = window.allProperties;
-                        
-                        const operacionesSet = new Set();
-                        const tiposSet = new Set();
-                        const barriosSet = new Set();
-                        
-                        propiedades.forEach(prop => {
-                            if (prop.operacion) operacionesSet.add(prop.operacion);
-                            if (prop.tipo) tiposSet.add(prop.tipo);
-                            if (prop.barrio) barriosSet.add(prop.barrio);
-                        });
-                        
-                        filtrosDinamicos = {
-                            operaciones: Array.from(operacionesSet).filter(op => op && String(op).trim()),
-                            tipos: Array.from(tiposSet).filter(tipo => tipo && String(tipo).trim()),
-                            barrios: Array.from(barriosSet).filter(barrio => barrio && String(barrio).trim())
-                        };
-                        
-                        console.log('✅ Filtros extraídos de propiedades locales:', filtrosDinamicos);
-                        loadingElement.innerHTML = '<small>✅ Filtros generados localmente</small>';
-                        
-                    } else {
-                        throw new Error('No hay propiedades disponibles');
-                    }
-                    
-                } catch (localError) {
-                    console.log('❌ No se pudieron extraer filtros locales:', localError.message);
-                    
-                    // INTENTO 3: Datos predeterminados
-                    console.log('🔄 Usando filtros predeterminados...');
                     filtrosDinamicos = {
-                        operaciones: ["alquiler", "venta"],
-                        tipos: ["casa", "departamento", "ph", "terreno", "oficina", "casaquinta"],
-                        barrios: ["Parque Avellaneda", "Boedo", "Microcentro", "Pilar"]
+                        operaciones: Array.from(operacionesSet).filter(op => op && String(op).trim()),
+                        tipos: Array.from(tiposSet).filter(tipo => tipo && String(tipo).trim()),
+                        barrios: Array.from(barriosSet).filter(barrio => barrio && String(barrio).trim())
                     };
                     
-                    loadingElement.innerHTML = '<small>⚠️ Usando filtros predeterminados</small>';
-                    console.log('✅ Filtros predeterminados:', filtrosDinamicos);
+                    console.log('✅ Filtros dinámicos extraídos:', filtrosDinamicos);
+                    loadingElement.innerHTML = '<small>✅ Filtros dinámicos cargados</small>';
+                    
+                } 
+                // INTENTO 2: Usar window.globalProperties si existe
+                else if (typeof window.globalProperties !== 'undefined' && 
+                        window.globalProperties.length > 0) {
+                    
+                    console.log('✅ Usando window.globalProperties');
+                    const propiedades = window.globalProperties;
+                    
+                    const operacionesSet = new Set();
+                    const tiposSet = new Set();
+                    const barriosSet = new Set();
+                    
+                    propiedades.forEach(prop => {
+                        if (prop.operacion) operacionesSet.add(prop.operacion);
+                        if (prop.tipo) tiposSet.add(prop.tipo);
+                        if (prop.barrio) barriosSet.add(prop.barrio);
+                    });
+                    
+                    filtrosDinamicos = {
+                        operaciones: Array.from(operacionesSet).filter(op => op && String(op).trim()),
+                        tipos: Array.from(tiposSet).filter(tipo => tipo && String(tipo).trim()),
+                        barrios: Array.from(barriosSet).filter(barrio => barrio && String(barrio).trim())
+                    };
+                    
+                    console.log('✅ Filtros de window.globalProperties:', filtrosDinamicos);
+                    loadingElement.innerHTML = '<small>✅ Filtros dinámicos cargados</small>';
+                    
+                } 
+                // INTENTO 3: Si no hay datos disponibles, esperar y reintentar
+                else {
+                    console.log('⏳ Esperando datos de propiedades...');
+                    loadingElement.innerHTML = '<small>⏳ Esperando datos...</small>';
+                    
+                    // Reintentar después de 2 segundos
+                    setTimeout(cargarFiltrosDinamicos, 2000);
+                    return;
                 }
                 
+            } catch (error) {
+                console.log('❌ Error cargando filtros dinámicos:', error);
+                
+                // Datos predeterminados SOLO como último recurso
+                filtrosDinamicos = {
+                    operaciones: ["alquiler", "venta"],
+                    tipos: ["casa", "departamento", "ph", "terreno", "oficina", "casaquinta"],
+                    barrios: ["Parque Avellaneda", "Boedo", "Microcentro", "Pilar"]
+                };
+                
+                loadingElement.innerHTML = '<small>⚠️ Usando filtros predeterminados</small>';
+                console.log('🔄 Filtros predeterminados cargados como fallback');
             } finally {
                 actualizarSelectoresFiltros();
                 
@@ -2966,10 +2958,9 @@
                 }, 2000);
             }
         }
-
         // 3. Función para actualizar selectores
         function actualizarSelectoresFiltros() {
-            console.log('🔄 Actualizando selectores con:', filtrosDinamicos);
+            console.log('🔄 Actualizando selectores con filtros dinámicos:', filtrosDinamicos);
             
             const poblarSelect = (id, options, defaultText) => {
                 const select = document.getElementById(id);
@@ -2982,12 +2973,15 @@
                     optionsArray.forEach(optionText => {
                         if (optionText) {
                             const option = document.createElement('option');
+                            // VALOR en minúsculas para consistencia
                             option.value = String(optionText).toLowerCase().trim();
+                            // TEXTO con formato original
                             option.textContent = String(optionText).charAt(0).toUpperCase() + String(optionText).slice(1);
                             select.appendChild(option);
                         }
                     });
                     
+                    // Restaurar valor seleccionado si existe
                     if (currentValue && optionsArray.some(opt => 
                         String(opt).toLowerCase().trim() === currentValue.toLowerCase().trim())) {
                         select.value = currentValue;
@@ -2995,7 +2989,7 @@
                 }
             };
             
-            // Actualizar selectores del chat
+            // Actualizar selectores del chat de IA
             if (document.getElementById('operacion')) {
                 poblarSelect('operacion', filtrosDinamicos.operaciones || [], 'Todas las operaciones');
             }
@@ -3008,21 +3002,12 @@
                 poblarSelect('tipo', filtrosDinamicos.tipos || [], 'Todos los tipos');
             }
             
-            // Actualizar selectores principales (styled)
-            if (document.getElementById('operacion-select-styled')) {
-                poblarSelect('operacion-select-styled', filtrosDinamicos.operaciones || [], 'Todas las operaciones');
-            }
-            
-            if (document.getElementById('barrio-select-styled')) {
-                poblarSelect('barrio-select-styled', filtrosDinamicos.barrios || [], 'Todos los barrios');
-            }
-            
-            if (document.getElementById('tipo-select-styled')) {
-                poblarSelect('tipo-select-styled', filtrosDinamicos.tipos || [], 'Todos los tipos');
-            }
+            // Los selectores principales (styled) se actualizan por populateFilters() en app.js
+            // NO los actualices aquí para evitar conflictos
         }
-
         // 4. En DOMContentLoaded (al final del archivo, donde ya tienes ese código)
+        
+        
         document.addEventListener('DOMContentLoaded', function () {
             console.log('🎬 Sistema de multimedia inicializado');
             console.log('📄 Soporte para PDFs activado');
