@@ -808,13 +808,28 @@ function populateFilters(properties) {
     console.log('🌍 Datos disponibles globalmente');
 }
 
-// Nueva función de filtrado que NO recarga los datos desde cero
-// Mantiene la persistencia de los filtros seleccionados
-// Nueva función de filtrado que NO recarga los datos desde cero
-// Mantiene la persistencia de los filtros seleccionados
-// Función de filtrado corregida con comparación insensible a mayúsculas/minúsculas
+// Agregar indicador visual de "cargando" durante el filtrado
+function showLoadingIndicator(show) {
+    const loading = document.getElementById('loading-indicator');
+    if (!loading && show) {
+        const loader = document.createElement('div');
+        loader.id = 'loading-indicator';
+        loader.innerHTML = '🔍 Buscando propiedades...';
+        loader.style.cssText = `
+            position: fixed; top: 20px; right: 20px; 
+            background: #232deb; color: white; padding: 10px 20px;
+            border-radius: 20px; z-index: 9999; font-size: 14px;
+        `;
+        document.body.appendChild(loader);
+    } else if (loading && !show) {
+        loading.remove();
+    }
+}
+
+
 // Función de filtrado con comparación más flexible
 window.filterGlobalProperties = function() {
+    showLoadingIndicator(true);
     console.log('🔍 Filtrando propiedades globalmente...');
     
     // Obtener valores actuales
