@@ -1492,49 +1492,72 @@ function updateResultsCount(count) {
     }
 }
 
+
+
 // ========================================
-// EVENTOS DE FILTROS
+// CONFIGURACIÓN ÚNICA DE EVENTOS
 // ========================================
 
 function setupFilterEvents() {
-    // Event listeners para filtros
-    const operacionSelect = document.getElementById('operacion-select-styled');
-    const barrioSelect = document.getElementById('barrio-select-styled');
-    const tipoSelect = document.getElementById('tipo-select-styled');
+    console.log('⚙️ Configurando eventos de filtros...');
     
-    if (operacionSelect) {
-        operacionSelect.addEventListener('change', applyFilters);
-    }
-    if (barrioSelect) {
-        barrioSelect.addEventListener('change', applyFilters);
-    }
-    if (tipoSelect) {
-        tipoSelect.addEventListener('change', applyFilters);
-    }
-}
-
-function applyFilters() {
-    const operacionSelect = document.getElementById('operacion-select-styled');
-    const barrioSelect = document.getElementById('barrio-select-styled');
-    const tipoSelect = document.getElementById('tipo-select-styled');
+    // Lista de todos los selectores
+    const filterSelectors = [
+        { id: 'operacion-select-styled', name: 'Operación' },
+        { id: 'barrio-select-styled', name: 'Barrio' },
+        { id: 'tipo-select-styled', name: 'Tipo' }
+    ];
     
-    const selectedOperacion = operacionSelect ? operacionSelect.value : '';
-    const selectedBarrio = barrioSelect ? barrioSelect.value : '';
-    const selectedTipo = tipoSelect ? tipoSelect.value : '';
-    
-    console.log('🔍 Aplicando filtros:', { selectedOperacion, selectedBarrio, selectedTipo });
-    
-    const filtered = globalData.properties.filter(property => {
-        if (selectedOperacion && property.operacion !== selectedOperacion) return false;
-        if (selectedBarrio && property.barrio !== selectedBarrio) return false;
-        if (selectedTipo && property.tipo !== selectedTipo) return false;
-        return true;
+    filterSelectors.forEach(filter => {
+        const element = document.getElementById(filter.id);
+        if (element) {
+            // Limpiar eventos anteriores
+            element.removeEventListener('change', window.filterGlobalProperties);
+            
+            // Agregar nuevo evento
+            element.addEventListener('change', function() {
+                console.log(`🎯 ${filter.name} seleccionado: "${this.value}"`);
+                
+                // Pequeño delay para asegurar que el valor se actualizó
+                setTimeout(() => {
+                    if (window.filterGlobalProperties && typeof window.filterGlobalProperties === 'function') {
+                        window.filterGlobalProperties();
+                    } else {
+                        console.error(`❌ filterGlobalProperties no disponible`);
+                    }
+                }, 50);
+            });
+            
+            console.log(`✅ ${filter.name}: Filtro automático activado`);
+        }
     });
     
-    globalData.filteredProperties = filtered;
-    displayProperties(filtered);
+    // También configurar el botón "Buscar" (por si alguien prefiere usarlo)
+    const searchBtn = document.getElementById('search-btn-styled');
+    if (searchBtn) {
+        searchBtn.addEventListener('click', function() {
+            console.log('🔍 Botón Buscar clickeado');
+            if (window.filterGlobalProperties) window.filterGlobalProperties();
+        });
+    }
+    
+    console.log('🎯 Todos los filtros configurados para filtro automático');
 }
 
+// ========================================
+// ELIMINAR applyFilters SI EXISTE
+// ========================================
+
+// Busca si existe applyFilters y reemplázala
+if (typeof applyFilters === 'function') {
+    console.log('🔄 Reemplazando applyFilters por filterGlobalProperties...');
+    // La función applyFilters será sobreescrita o eliminada
+}
+
+// Asegurar que filterGlobalProperties esté disponible
+if (typeof filterGlobalProperties === 'function' && !window.filterGlobalProperties) {
+    window.filterGlobalProperties = filterGlobalProperties;
+}
 // ========================================
 // FUNCIONES AUXILIARES
 // ========================================
