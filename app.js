@@ -767,6 +767,7 @@ function populateFilters(properties) {
 // Nueva función de filtrado que NO recarga los datos desde cero
 // Mantiene la persistencia de los filtros seleccionados
 // Función de filtrado corregida con comparación insensible a mayúsculas/minúsculas
+// Función de filtrado con comparación más flexible
 window.filterGlobalProperties = function() {
     console.log('🔍 Filtrando propiedades globalmente...');
     
@@ -775,28 +776,62 @@ window.filterGlobalProperties = function() {
     const barrioVal = document.getElementById('barrio-select-styled')?.value || '';
     const tipoVal = document.getElementById('tipo-select-styled')?.value || '';
     
-    console.log('📊 Filtros aplicados:', {
+    console.log('📊 Filtros aplicados (sin normalizar):', {
         operacion: operacionVal,
         barrio: barrioVal,
         tipo: tipoVal
     });
     
+    // Normalizar valores de búsqueda
+    const normalizedOperacion = operacionVal.toLowerCase().trim();
+    const normalizedBarrio = barrioVal.toLowerCase().trim();
+    const normalizedTipo = tipoVal.toLowerCase().trim();
+    
+    console.log('📊 Filtros aplicados (normalizados):', {
+        operacion: normalizedOperacion,
+        barrio: normalizedBarrio,
+        tipo: normalizedTipo
+    });
+    
     // Filtrar propiedades
     const filtered = globalData.properties.filter(p => {
-        // Comparación insensible a mayúsculas/minúsculas
-        const matchOperacion = !operacionVal || 
-            (p.operacion && p.operacion.toLowerCase() === operacionVal.toLowerCase());
+        // Comparación insensible y más flexible
+        const matchOperacion = !normalizedOperacion || 
+            (p.operacion && p.operacion.toLowerCase().trim() === normalizedOperacion);
         
-        const matchBarrio = !barrioVal || 
-            (p.barrio && p.barrio.toLowerCase() === barrioVal.toLowerCase());
+        // CORRECCIÓN PRINCIPAL: Búsqueda flexible de barrio
+        const matchBarrio = !normalizedBarrio || 
+            (p.barrio && p.barrio.toLowerCase().trim().includes(normalizedBarrio));
         
-        const matchTipo = !tipoVal || 
-            (p.tipo && p.tipo.toLowerCase() === tipoVal.toLowerCase());
+        const matchTipo = !normalizedTipo || 
+            (p.tipo && p.tipo.toLowerCase().trim() === normalizedTipo);
         
-        return matchOperacion && matchBarrio && matchTipo;
+        const matches = matchOperacion && matchBarrio && matchTipo;
+        
+        // DEBUG: Mostrar coincidencias
+        if (normalizedBarrio && p.barrio) {
+            console.log(`🔍 Comparando barrio: "${p.barrio}" (normalizado: "${p.barrio.toLowerCase().trim()}") con "${normalizedBarrio}" = ${p.barrio.toLowerCase().trim().includes(normalizedBarrio)}`);
+        }
+        
+        return matches;
     });
     
     console.log(`✅ ${filtered.length} propiedades encontradas de ${globalData.properties.length}`);
+    
+    // DEBUG: Mostrar propiedades encontradas
+    if (filtered.length > 0) {
+        console.log('🏠 Propiedades encontradas:');
+        filtered.forEach((prop, index) => {
+            console.log(`  ${index+1}. ${prop.titulo} - Barrio: ${prop.barrio} - Tipo: ${prop.tipo}`);
+        });
+    } else {
+        console.log('❌ NO se encontraron propiedades');
+        // Mostrar todas las propiedades para debug
+        console.log('📋 Todas las propiedades disponibles:');
+        globalData.properties.forEach((prop, index) => {
+            console.log(`  ${index+1}. ${prop.titulo} - Barrio: "${prop.barrio}" (tipo: ${typeof prop.barrio})`);
+        });
+    }
     
     // Actualizar datos globales
     globalData.filteredProperties = filtered;
@@ -823,7 +858,6 @@ window.filterGlobalProperties = function() {
         }
     }
 };
-
 
 function createPropertyCard(property) {
     const card = document.createElement('div');
@@ -2918,6 +2952,116 @@ document.addEventListener('click', function (e) {
         }
     }
 });
+
+// ========================================
+// FUNCIÓN PARA VERIFICAR VALORES DE BARRIOS
+// ========================================
+
+window.verificarBarrios = function() {
+    console.log('🔍 VERIFICANDO BARRIOS EN DATOS');
+    
+    if (!globalData.properties || globalData.properties.length === 0) {
+        console.log('❌ No hay propiedades cargadas');
+        return;
+    }
+    
+    // Obtener todos los barrios únicos
+    const barrios = globalData.properties.map(p => p.barrio).filter(Boolean);
+    const barriosUnicos = [...new Set(barrios)];
+    
+    console.log(`📍 Total de propiedades: ${globalData.properties.length}`);
+    console.log(`📍 Propiedades con barrio definido: ${barrios.length}`);
+    console.log(`📍 Barrios únicos (${barriosUnicos.length}):`, barriosUnicos);
+    
+    // Mostrar cada barrio con su formato exacto
+    console.log('📋 Formato exacto de cada barrio:');
+    barriosUnicos.forEach((barrio, index) => {
+        console.log(`  ${index+1}. "${barrio}" (tipo: ${typeof barrio}, longitud: ${barrio.length})`);
+        
+        // Buscar propiedades con este barrio
+        const propsConEsteBarrio = globalData.properties.filter(p => p.barrio === barrio);
+        console.log(`     Propiedades: ${propsConEsteBarrio.length}`);
+        propsConEsteBarrio.slice(0, 2).forEach(prop => {
+            console.log(`     - ${prop.titulo} (${prop.operacion})`);
+        });
+    });
+    
+    // Verificar coincidencias con "boedo"
+    console.log('\n🔍 Buscando coincidencias con "boedo":');
+    const busqueda = 'boedo';
+    const coincidencias = globalData.properties.filter(p => 
+        p.barrio && p.barrio.toLowerCase().includes(busqueda)
+    );
+    
+    console.log(`✅ Coincidencias con "${busqueda}": ${coincidencias.length}`);
+    coincidencias.forEach((prop, index) => {
+        console.log(`  ${index+1}. ${prop.titulo} - Barrio: "${prop.barrio}"`);
+    });
+    
+    if (coincidencias.length === 0) {
+        console.log('❌ No se encontraron coincidencias');
+        console.log('💡 Intentando búsqueda más amplia...');
+        
+        // Búsqueda más flexible
+        globalData.properties.forEach((prop, index) => {
+            if (prop.barrio) {
+                const barrioLower = prop.barrio.toLowerCase();
+                const distancia = calcularDistanciaLevenshtein(barrioLower, busqueda);
+                console.log(`  ${index+1}. "${prop.barrio}" -> distancia con "${busqueda}": ${distancia}`);
+            }
+        });
+    }
+};
+
+// Función auxiliar para calcular distancia entre strings
+function calcularDistanciaLevenshtein(a, b) {
+    if (a.length === 0) return b.length;
+    if (b.length === 0) return a.length;
+    
+    const matrix = [];
+    for (let i = 0; i <= b.length; i++) {
+        matrix[i] = [i];
+    }
+    for (let j = 0; j <= a.length; j++) {
+        matrix[0][j] = j;
+    }
+    
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            const cost = a[j - 1] === b[i - 1] ? 0 : 1;
+            matrix[i][j] = Math.min(
+                matrix[i - 1][j] + 1,
+                matrix[i][j - 1] + 1,
+                matrix[i - 1][j - 1] + cost
+            );
+        }
+    }
+    
+    return matrix[b.length][a.length];
+}
+
+// Función para ver qué hay en el selector de barrios
+window.verificarSelectorBarrios = function() {
+    const select = document.getElementById('barrio-select-styled');
+    if (!select) {
+        console.log('❌ Selector de barrios no encontrado');
+        return;
+    }
+    
+    console.log('🎯 Opciones en el selector de barrios:');
+    console.log(`   Total opciones: ${select.options.length}`);
+    
+    Array.from(select.options).forEach((option, index) => {
+        console.log(`   ${index}. Valor: "${option.value}", Texto: "${option.text}"`);
+    });
+    
+    // Verificar si "boedo" está en el selector
+    const tieneBoedo = Array.from(select.options).some(option => 
+        option.value.toLowerCase().includes('boedo')
+    );
+    
+    console.log(`🔍 ¿El selector contiene "boedo"? ${tieneBoedo ? '✅ SÍ' : '❌ NO'}`);
+};
 
 function closePannellumModal() {
     const pannellumModal = document.getElementById('pannellum-modal');
