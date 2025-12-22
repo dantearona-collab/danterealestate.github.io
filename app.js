@@ -918,6 +918,7 @@ window.filterGlobalProperties = function() {
             `;
         }
     }
+    setTimeout(() => showLoadingIndicator(false), 500);
 };
 
 function createPropertyCard(property) {
