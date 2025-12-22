@@ -613,8 +613,6 @@ async function loadProperties() {
     console.log('🔄 Iniciando carga de propiedades desde propiedades.json...');
     
     try {
-        console.log('📂 Cargando propiedades.json desde servidor...');
-        
         const response = await fetch('propiedades.json');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -631,12 +629,20 @@ async function loadProperties() {
         populateFilters(data);
         displayProperties(data);
         
-    } catch (error) {
-        // Error - archivo no encontrado o no accesible
-        console.error('❌ Error al cargar propiedades.json:', error.message);
-        console.log('💡 Asegúrate de que el archivo propiedades.json esté disponible');
+        // DEBUG: Verificar que los filtros se cargaron
+        setTimeout(() => {
+            console.log('🔍 Verificación de filtros cargados:');
+            const operacionSelect = document.getElementById('operacion-select-styled');
+            if (operacionSelect && operacionSelect.options.length > 1) {
+                console.log('✅ Filtro de operaciones cargado correctamente');
+                console.log('   Opciones:', Array.from(operacionSelect.options).map(o => o.value));
+            } else {
+                console.log('❌ Filtro de operaciones NO se cargó correctamente');
+            }
+        }, 500);
         
-        // Mostrar mensaje de error en la interfaz
+    } catch (error) {
+        console.error('❌ Error al cargar propiedades.json:', error.message);
         showErrorMessage();
     }
 }
@@ -679,60 +685,120 @@ function showErrorMessage() {
 }
 
 // Llenar filtros con datos únicos
+// Llenar filtros con datos únicos - VERSIÓN CORREGIDA
 function populateFilters(properties) {
+    console.log('🔧 Poblando filtros con', properties.length, 'propiedades');
+    
+    // Obtener valores únicos
+    const operaciones = [...new Set(properties.map(p => p.operacion).filter(Boolean))].sort();
     const barrios = [...new Set(properties.map(p => p.barrio).filter(Boolean))].sort();
     const tipos = [...new Set(properties.map(p => p.tipo).filter(Boolean))].sort();
     
+    console.log('📊 Valores disponibles:', {
+        operaciones: operaciones,
+        barrios: barrios,
+        tipos: tipos
+    });
+    
+    // Configurar selectores styled
+    const operacionSelect = document.getElementById('operacion-select-styled');
     const barrioSelect = document.getElementById('barrio-select-styled');
     const tipoSelect = document.getElementById('tipo-select-styled');
     
-    // Solo poblar si el select está vacío o tiene solo la opción por defecto
-    // Esto previene que se reseteen las opciones seleccionadas si se llama accidentalmente
-    if (barrioSelect && barrioSelect.options.length <= 1) {
-        barrioSelect.innerHTML = '<option value="">Todos los barrios</option>' + 
-            barrios.map(barrio => `<option value="${barrio}">${barrio}</option>`).join('');
+    // POBLAR OPERACIONES (Venta/Alquiler)
+    if (operacionSelect) {
+        console.log('🔄 Poblando operaciones:', operaciones);
+        operacionSelect.innerHTML = '<option value="">Todas las operaciones</option>';
+        
+        operaciones.forEach(operacion => {
+            if (operacion) {
+                const option = document.createElement('option');
+                option.value = operacion.toLowerCase();
+                option.textContent = operacion.charAt(0).toUpperCase() + operacion.slice(1);
+                operacionSelect.appendChild(option);
+            }
+        });
+        
+        console.log('✅ Operaciones cargadas:', operacionSelect.options.length, 'opciones');
     }
     
-    if (tipoSelect && tipoSelect.options.length <= 1) {
-        tipoSelect.innerHTML = '<option value="">Todos los tipos</option>' + 
-            tipos.map(tipo => `<option value="${tipo}">${tipo}</option>`).join('');
+    // POBLAR BARRIOS
+    if (barrioSelect) {
+        console.log('🔄 Poblando barrios:', barrios.length);
+        barrioSelect.innerHTML = '<option value="">Todos los barrios</option>';
+        
+        barrios.forEach(barrio => {
+            if (barrio) {
+                const option = document.createElement('option');
+                option.value = barrio;
+                option.textContent = barrio;
+                barrioSelect.appendChild(option);
+            }
+        });
+        
+        console.log('✅ Barrios cargados:', barrioSelect.options.length, 'opciones');
     }
     
-    console.log('🔧 Filtros poblados - Barrios:', barrios.length, 'Tipos:', tipos.length);
+    // POBLAR TIPOS
+    if (tipoSelect) {
+        console.log('🔄 Poblando tipos:', tipos.length);
+        tipoSelect.innerHTML = '<option value="">Todos los tipos</option>';
+        
+        tipos.forEach(tipo => {
+            if (tipo) {
+                const option = document.createElement('option');
+                option.value = tipo;
+                option.textContent = tipo;
+                tipoSelect.appendChild(option);
+            }
+        });
+        
+        console.log('✅ Tipos cargados:', tipoSelect.options.length, 'opciones');
+    }
+    
+    // Guardar datos globalmente para acceso desde consola
+    window.globalProperties = properties;
+    console.log('🌍 Datos disponibles globalmente como window.globalProperties');
 }
+
 
 // Nueva función de filtrado que NO recarga los datos desde cero
 // Mantiene la persistencia de los filtros seleccionados
 // Nueva función de filtrado que NO recarga los datos desde cero
 // Mantiene la persistencia de los filtros seleccionados
+// Función de filtrado corregida con comparación insensible a mayúsculas/minúsculas
 window.filterGlobalProperties = function() {
-    console.log('🔍 Filtrando propiedades globalmente (Sin recargar)...');
+    console.log('🔍 Filtrando propiedades globalmente...');
     
-    // Obtener valores actuales de los selectores styled
+    // Obtener valores actuales
     const operacionVal = document.getElementById('operacion-select-styled')?.value || '';
     const barrioVal = document.getElementById('barrio-select-styled')?.value || '';
     const tipoVal = document.getElementById('tipo-select-styled')?.value || '';
     
-    console.log('📊 Filtros aplicados:', { operacionVal, barrioVal, tipoVal });
+    console.log('📊 Filtros aplicados:', {
+        operacion: operacionVal,
+        barrio: barrioVal,
+        tipo: tipoVal
+    });
     
-    // Filtrar sobre los datos globales originales
+    // Filtrar propiedades
     const filtered = globalData.properties.filter(p => {
-        // Comparación insensible a mayúsculas/minúsculas y espacios
-        const matchOperacion = !operacionVal || (p.operacion && p.operacion.toLowerCase() === operacionVal.toLowerCase());
+        // Comparación insensible a mayúsculas/minúsculas
+        const matchOperacion = !operacionVal || 
+            (p.operacion && p.operacion.toLowerCase() === operacionVal.toLowerCase());
         
-        // CORRECCIÓN PARA BARRIO: Comparación insensible a mayúsculas/minúsculas
-        const matchBarrio = !barrioVal || (p.barrio && 
-            p.barrio.toLowerCase().trim() === barrioVal.toLowerCase().trim());
+        const matchBarrio = !barrioVal || 
+            (p.barrio && p.barrio.toLowerCase() === barrioVal.toLowerCase());
         
-        const matchTipo = !tipoVal || (p.tipo && 
-            p.tipo.toLowerCase().trim() === tipoVal.toLowerCase().trim());
+        const matchTipo = !tipoVal || 
+            (p.tipo && p.tipo.toLowerCase() === tipoVal.toLowerCase());
         
         return matchOperacion && matchBarrio && matchTipo;
     });
     
     console.log(`✅ ${filtered.length} propiedades encontradas de ${globalData.properties.length}`);
     
-    // Actualizar datos filtrados globales
+    // Actualizar datos globales
     globalData.filteredProperties = filtered;
     globalData.filters = {
         operacion: operacionVal,
@@ -757,7 +823,6 @@ window.filterGlobalProperties = function() {
         }
     }
 };
-
 
 
 function createPropertyCard(property) {
