@@ -2144,14 +2144,19 @@ function openDirectionsFromDetails(propertyId, address, title) {
 
         const encodedAddress = encodeURIComponent(decodedAddress);
 
-        // 4. MOSTRAR EL BOTÓN VOLVER PRIMERO
+        // 4. PREPARAR LA VISTA (IMPORTANTE: ocultar vista principal para que se vea el botón volver)
+        if (typeof ocultarVistaPrincipal === 'function') {
+            ocultarVistaPrincipal();
+        }
+
+        // 5. MOSTRAR EL BOTÓN VOLVER PRIMERO
         showBackButtonNow(`${tituloFinal || 'Propiedad'} - Cómo llegar`);
 
-        // 5. Abrir Google Maps DIRECTIONS en nueva pestaña
+        // 6. Abrir Google Maps DIRECTIONS en nueva pestaña
         const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
         window.open(directionsUrl, '_blank');
 
-        console.log('✅ Google Maps Directions abierto');
+        console.log('✅ Google Maps Directions abierto + Vista preparada');
 
     }, 300);
 }
