@@ -1243,11 +1243,14 @@ function switchToDirectionsMode(propertyId, address, title) {
 
 
 // Función para mostrar el botón Volver
-function showBackButton(title, show = true) {
+// En tu app.js, modifica showBackButton (alrededor de línea 660):
+
+function showBackButton(title) {
     try {
         let backButton = document.getElementById('mapBackButton');
         
         if (!backButton) {
+            // Crear el botón si no existe
             backButton = document.createElement('div');
             backButton.id = 'mapBackButton';
             backButton.className = 'map-back-button';
@@ -1257,32 +1260,51 @@ function showBackButton(title, show = true) {
                 </button>
             `;
             document.body.appendChild(backButton);
+            
+            console.log('✅ Botón Volver creado (inicialmente oculto)');
+            
+            // ¡IMPORTANTE! Crearlo OCULTO
+            backButton.style.display = 'none';
         }
         
-        // Mostrar u ocultar según parámetro
-        if (show) {
-            backButton.style.cssText = `
-                position: fixed !important;
-                top: 20px !important;
-                left: 20px !important;
-                right: auto !important;
-                z-index: 10000 !important;
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-            `;
-            console.log('✅ Botón Volver MOSTRADO');
-        } else {
-            backButton.style.display = 'none';
-            console.log('✅ Botón Volver OCULTADO');
-        }
+        // SOLO aplicar estilos si vamos a MOSTRARLO
+        // (esta función ahora se llama solo cuando realmente necesitamos el botón)
+        
+        console.log('ℹ️ showBackButton llamado para:', title);
         
     } catch (error) {
-        console.error('❌ Error:', error);
+        console.error('❌ Error en showBackButton:', error);
     }
 }
-// Función para volver a las propiedades
-// Busca la función backToProperties en tu app.js (alrededor de línea 690):
+
+// NUEVA FUNCIÓN para MOSTRAR el botón (cuando se necesita)
+function showBackButtonNow(title) {
+    const backButton = document.getElementById('mapBackButton');
+    if (!backButton) {
+        // Si no existe, crearlo
+        showBackButton(title);
+    }
+    
+    // Aplicar estilos para MOSTRARLO
+    backButton.style.cssText = `
+        position: fixed !important;
+        top: 20px !important;
+        left: 20px !important;
+        right: auto !important;
+        z-index: 10000 !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    `;
+    
+    // También arreglar el botón interno
+    const innerButton = backButton.querySelector('.back-to-properties-btn');
+    if (innerButton && title) {
+        innerButton.innerHTML = `<span>←</span> ${title}`;
+    }
+    
+    console.log('✅ Botón Volver MOSTRADO para:', title || 'Mapa');
+}
 
 function backToProperties() {
     console.log('🏠 Volviendo a propiedades');
@@ -1297,7 +1319,7 @@ function backToProperties() {
         if (filters) filters.style.display = 'block';
         if (resultsCounter) resultsCounter.style.display = 'block';
         
-        // 2. ¡¡¡OCULTAR EL BOTÓN VOLVER!!!
+        // 2. OCULTAR EL BOTÓN VOLVER
         const backButton = document.getElementById('mapBackButton');
         if (backButton) {
             backButton.style.display = 'none';
@@ -1310,7 +1332,7 @@ function backToProperties() {
         // 4. Remover clase del body
         document.body.classList.remove('map-view-active');
         
-        // 5. Scroll al inicio suavemente
+        // 5. Scroll al inicio
         window.scrollTo({ top: 0, behavior: 'smooth' });
         
         console.log('✅ Vuelta a propiedades exitosa');
@@ -2139,22 +2161,61 @@ function initializeDetailsTabs() {
 // FUNCIÓN PARA MOSTRAR MAPA DESDE DETALLES
 // ========================================
 
-function showPropertyMapFromDetails(propertyId, address, title) {
-    console.log('🗺️ Mostrando mapa desde detalles:', propertyId);
+// En showPropertyMap (alrededor de línea 580), cambia:
+
+function showPropertyMap(propertyId, address, title) {
+    console.log('🗺️ Mostrando mapa para propiedad:', propertyId, address, title);
     
-    // 1. Cerrar primero el modal de detalles
-    closeDetailsModal();
+    try {
+        // 1. Ocultar el contenedor de propiedades
+        const propertiesContainer = document.getElementById('properties-container');
+        const filters = document.querySelector('.filters');
+        const resultsCounter = document.getElementById('results-counter-styled');
+        
+        if (propertiesContainer) propertiesContainer.style.display = 'none';
+        if (filters) filters.style.display = 'none';
+        if (resultsCounter) resultsCounter.style.display = 'none';
+        
+        // 2. Mostrar el botón Volver (¡USANDO LA NUEVA FUNCIÓN!)
+        showBackButtonNow(title || 'Propiedad');
+        
+        // 3. Integrar el mapa (sin API key problemática)
+        showActualMap(propertyId, address, title);
+        
+        // 4. Añadir clase al body para modo mapa
+        document.body.classList.add('map-view-active');
+        
+        console.log('✅ Mapa mostrado correctamente');
+    } catch (error) {
+        console.error('❌ Error al mostrar mapa:', error);
+    }
+}
+
+// Agrega esta función en app.js:
+
+function openDirectionsFromDetails(propertyId, address, title) {
+    console.log('🚗 Abriendo "Cómo llegar" para:', propertyId);
     
-    // 2. Esperar un momento para que se cierre el modal
+    // 1. Cerrar modal de detalles si está abierto
+    if (typeof closeDetailsModal === 'function') {
+        closeDetailsModal();
+    }
+    
+    // 2. Esperar un momento para transición
     setTimeout(() => {
-        // 3. Usar la función existente showPropertyMap
-        if (typeof showPropertyMap === 'function') {
-            showPropertyMap(propertyId, decodeURIComponent(address), title);
-        } else {
-            // Fallback: abrir Google Maps directamente
-            window.open(`https://www.google.com/maps/search/?api=1&query=${address}`, '_blank');
-        }
-    }, 300); // 300ms para que se cierre suavemente
+        // 3. Codificar la dirección
+        const encodedAddress = encodeURIComponent(decodeURIComponent(address));
+        
+        // 4. MOSTRAR EL BOTÓN VOLVER PRIMERO
+        showBackButtonNow(`${title} - Cómo llegar`);
+        
+        // 5. Abrir Google Maps DIRECTIONS en nueva pestaña
+        const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
+        window.open(directionsUrl, '_blank');
+        
+        console.log('✅ Google Maps Directions abierto');
+        
+    }, 300);
 }
 
 
