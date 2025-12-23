@@ -54,7 +54,7 @@ function initializeVariables() {
     pdfViewer = document.getElementById('pdfViewer');
     modalTitle = document.getElementById('modalTitle');
     pdfModal = document.getElementById('pdfModal');
-    
+
     // Log para depuración
     console.log('🔍 Elementos del DOM inicializados:', {
         planoPdf: !!planoPdf,
@@ -63,7 +63,7 @@ function initializeVariables() {
         datosParcelaPdf: !!datosParcelaPdf,
         pdfModal: !!pdfModal
     });
-    
+
     // Configurar event listeners para PDFs
     setupPdfEventListeners();
 }
@@ -75,7 +75,7 @@ function setupPdfEventListeners() {
     // ========== EVENT LISTENERS PARA PDFs ==========
     // (aquí van los event listeners de PDFs que ya teníamos)
     if (entornosPdf && typeof entornosPdf.addEventListener === 'function') {
-        entornosPdf.addEventListener('click', function(e) {
+        entornosPdf.addEventListener('click', function (e) {
             e.stopPropagation();
             console.log('📄 Click en Entornos PDF');
             openPdf('entornos', 'Estudio de Entornos');
@@ -86,21 +86,21 @@ function setupPdfEventListeners() {
     // ========== EVENT LISTENERS PARA MULTIMEDIA ==========
     // Eventos para los iconos de multimedia con verificación
     if (photosIcon && typeof photosIcon.addEventListener === 'function') {
-        photosIcon.addEventListener('click', function(e) {
+        photosIcon.addEventListener('click', function (e) {
             e.stopPropagation();
             alert('Mostrando: ' + propiedadesJSON.propiedad.archivos.fotos);
         });
     }
 
     if (tourIcon && typeof tourIcon.addEventListener === 'function') {
-        tourIcon.addEventListener('click', function(e) {
+        tourIcon.addEventListener('click', function (e) {
             e.stopPropagation();
             alert('Abriendo: ' + propiedadesJSON.propiedad.archivos.tour);
         });
     }
 
     if (videoIcon && typeof videoIcon.addEventListener === 'function') {
-        videoIcon.addEventListener('click', function(e) {
+        videoIcon.addEventListener('click', function (e) {
             e.stopPropagation();
             alert('Reproduciendo: ' + propiedadesJSON.propiedad.archivos.video);
         });
@@ -109,7 +109,7 @@ function setupPdfEventListeners() {
     // ========== EVENT LISTENERS PARA BOTONES ==========
     // Evento para el botón de contacto con verificación
     if (contactButton && typeof contactButton.addEventListener === 'function') {
-        contactButton.addEventListener('click', function(e) {
+        contactButton.addEventListener('click', function (e) {
             e.stopPropagation();
             alert('Redirigiendo al formulario de contacto...');
         });
@@ -118,7 +118,7 @@ function setupPdfEventListeners() {
     // ========== EVENT LISTENERS PARA MODAL ==========
     // Cerrar modal con verificación
     if (closeModal && typeof closeModal.addEventListener === 'function') {
-        closeModal.addEventListener('click', function() {
+        closeModal.addEventListener('click', function () {
             if (pdfModal) {
                 pdfModal.style.display = 'none';
             }
@@ -130,7 +130,7 @@ function setupPdfEventListeners() {
 
     // Cerrar modal al hacer clic fuera del contenido con verificación
     if (pdfModal && typeof pdfModal.addEventListener === 'function') {
-        pdfModal.addEventListener('click', function(e) {
+        pdfModal.addEventListener('click', function (e) {
             if (e.target === pdfModal) {
                 pdfModal.style.display = 'none';
                 if (pdfViewer) {
@@ -146,9 +146,9 @@ function setupPdfEventListeners() {
 function createMultimediaSection(property) {
     const documentos = property.documentos || [];
     const videos = property.videos || [];
-    
+
     let multimediaHTML = '';
-    
+
     // PDFs
     if (documentos.length > 0) {
         multimediaHTML += `
@@ -171,7 +171,7 @@ function createMultimediaSection(property) {
             </div>
         `;
     }
-    
+
     // Videos
     if (videos.length > 0) {
         multimediaHTML += `
@@ -194,7 +194,7 @@ function createMultimediaSection(property) {
             </div>
         `;
     }
-    
+
     return multimediaHTML;
 }
 
@@ -205,7 +205,7 @@ function createMultimediaSection(property) {
 // Función para cerrar modal multimedia - DEFINIR ANTES DE viewPDF
 function closeMultimediaModal() {
     console.log('🔧 DEBUG closeMultimediaModal - multimediaModal:', multimediaModal);
-    
+
     if (multimediaModal) {
         // Detener videos antes de cerrar
         const videos = multimediaModal.querySelectorAll('video');
@@ -213,7 +213,7 @@ function closeMultimediaModal() {
             video.pause();
             video.currentTime = 0;
         });
-        
+
         multimediaModal.remove();
         multimediaModal = null;
         console.log('✅ Modal multimedia cerrado');
@@ -234,27 +234,27 @@ function viewPDF(pdfUrl, titulo) {
 // Función para visualizar PDFs - VERSIÓN CON MANEJO DE ERRORES
 function viewPDF(pdfUrl, titulo) {
     console.log('🔧 DEBUG viewPDF - INICIANDO...');
-    
+
     // Verificar que multimediaModal esté disponible
     if (typeof multimediaModal === 'undefined') {
         console.warn('⚠️ multimediaModal no definida, inicializando...');
         window.multimediaModal = null;
     }
-    
+
     // CORRECCIÓN: Cambiar cualquier extensión .PDF a .pdf
     const pdfUrlCorregido = pdfUrl.replace(/\.PDF$/i, '.pdf');
     const fileName = pdfUrlCorregido.split('/').pop();
-    
+
     console.log('📄 URL original:', pdfUrl);
     console.log('📄 URL corregida:', pdfUrlCorregido);
     console.log('📄 multimediaModal estado:', multimediaModal);
-    
+
     // Crear o reutilizar modal de PDF
     if (multimediaModal) {
         console.log('🔄 Reutilizando modal existente');
         multimediaModal.remove();
     }
-    
+
     try {
         multimediaModal = document.createElement('div');
         multimediaModal.id = 'pdf-modal';
@@ -271,7 +271,7 @@ function viewPDF(pdfUrl, titulo) {
             align-items: center !important;
             padding: 20px !important;
         `;
-        
+
         multimediaModal.innerHTML = `
             <div style="position: relative; width: 90%; max-width: 1000px; height: 90%; background: white; 
                         border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;">
@@ -294,13 +294,13 @@ function viewPDF(pdfUrl, titulo) {
                 </div>
             </div>
         `;
-        
+
         document.body.appendChild(multimediaModal);
         document.body.style.overflow = 'hidden';
-        
+
         console.log('✅ PDF modal creado exitosamente');
         console.log('📄 Abriendo PDF:', pdfUrlCorregido);
-        
+
     } catch (error) {
         console.error('❌ Error creando modal PDF:', error);
         // Fallback: abrir en nueva pestaña
@@ -315,12 +315,12 @@ function viewVideo(videoUrl, titulo) {
     // CORRECCIÓN: Cambiar extensiones de video a minúsculas
     const videoUrlCorregido = videoUrl.replace(/\.(MP4|WEBM|OGG|AVI|MOV)$/i, (match) => match.toLowerCase());
     const fileName = videoUrlCorregido.split('/').pop();
-    
+
     // Crear o reutilizar modal de video
     if (multimediaModal) {
         multimediaModal.remove();
     }
-    
+
     multimediaModal = document.createElement('div');
     multimediaModal.id = 'video-modal';
     multimediaModal.style.cssText = `
@@ -336,7 +336,7 @@ function viewVideo(videoUrl, titulo) {
         align-items: center !important;
         padding: 20px !important;
     `;
-    
+
     multimediaModal.innerHTML = `
         <div style="position: relative; width: 90%; max-width: 1000px; height: 70%; background: white; 
                     border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;">
@@ -361,23 +361,23 @@ function viewVideo(videoUrl, titulo) {
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(multimediaModal);
     document.body.style.overflow = 'hidden';
-    
+
     console.log('🎥 Abriendo video:', videoUrlCorregido);
 }
 
 
 // Cerrar modal con tecla Escape
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape') {
         closeMultimediaModal();
     }
 });
 
 // Cerrar modal al hacer clic fuera
-document.addEventListener('click', function(event) {
+document.addEventListener('click', function (event) {
     if (multimediaModal && event.target === multimediaModal) {
         closeMultimediaModal();
     }
@@ -393,7 +393,7 @@ let tituloPropiedad = '';
 // Función para crear el slider de imágenes (Ahora clickeable para abrir modal)
 function createImageSlider(property) {
     const fotos = property.fotos || [];
-    
+
     if (fotos.length === 0) {
         // Sin imágenes - usar imagen por defecto
         return `
@@ -410,7 +410,7 @@ function createImageSlider(property) {
             </div>
         `;
     }
-    
+
     if (fotos.length === 1) {
         // Una sola imagen - hacer clickeable
         return `
@@ -427,7 +427,7 @@ function createImageSlider(property) {
             </div>
         `;
     }
-    
+
     // Múltiples imágenes - crear slider clickeable
     const imageSlides = fotos.map((foto, index) => `
         <div class="property-slide ${index === 0 ? 'active' : ''}" data-slide="${index}">
@@ -437,11 +437,11 @@ function createImageSlider(property) {
                  onerror="this.src='INSTITUCIONAL 3.png'">
         </div>
     `).join('');
-    
+
     const navigationDots = fotos.map((_, index) => `
         <span class="property-nav-dot ${index === 0 ? 'active' : ''}" onclick="showSlide('${property.id_temporal}', ${index})"></span>
     `).join('');
-    
+
     return `
         <div class="property-slider" data-property="${property.id_temporal}" style="position: relative; cursor: pointer;" 
              onclick="expandPropertyImages('${property.id_temporal}')">
@@ -493,24 +493,24 @@ function createImageSlider(property) {
 function showSlide(propertyId, slideIndex) {
     const slider = document.querySelector(`[data-property="${propertyId}"]`);
     if (!slider) return;
-    
+
     const slides = slider.querySelectorAll('.property-slide');
     const dots = slider.querySelectorAll('.property-nav-dot');
-    
+
     slides.forEach((slide, index) => {
         slide.classList.remove('active');
         if (index === slideIndex) {
             slide.classList.add('active');
         }
     });
-    
+
     dots.forEach((dot, index) => {
         dot.classList.remove('active');
         if (index === slideIndex) {
             dot.classList.add('active');
         }
     });
-    
+
     currentSlides[propertyId] = slideIndex;
 }
 
@@ -518,11 +518,11 @@ function showSlide(propertyId, slideIndex) {
 function prevSlide(propertyId) {
     const slider = document.querySelector(`[data-property="${propertyId}"]`);
     if (!slider) return;
-    
+
     const current = currentSlides[propertyId] || 0;
     const totalSlides = slider.querySelectorAll('.property-slide').length;
     const newIndex = current > 0 ? current - 1 : totalSlides - 1;
-    
+
     showSlide(propertyId, newIndex);
 }
 
@@ -530,11 +530,11 @@ function prevSlide(propertyId) {
 function nextSlide(propertyId) {
     const slider = document.querySelector(`[data-property="${propertyId}"]`);
     if (!slider) return;
-    
+
     const current = currentSlides[propertyId] || 0;
     const totalSlides = slider.querySelectorAll('.property-slide').length;
     const newIndex = current < totalSlides - 1 ? current + 1 : 0;
-    
+
     showSlide(propertyId, newIndex);
 }
 
@@ -611,40 +611,40 @@ let globalData = {
 // Cargar propiedades - Solo desde archivo externo propiedades.json
 async function loadProperties() {
     console.log('🔄 Cargando propiedades desde propiedades.json...');
-    
+
     try {
         // 1. Cargar datos
         const response = await fetch('propiedades.json');
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        
+
         const data = await response.json();
         console.log('✅ Datos cargados:', data.length, 'propiedades');
-        
+
         // 2. Guardar en variables globales
         globalData.properties = data;
         globalData.filteredProperties = data;
-        
+
         // 3. DEBUG: Verificar que hay datos
         console.log('📊 Primeras 2 propiedades para verificar:');
         data.slice(0, 2).forEach((p, i) => {
-            console.log(`   ${i+1}. ${p.titulo} - ${p.operacion} - ${p.barrio}`);
+            console.log(`   ${i + 1}. ${p.titulo} - ${p.operacion} - ${p.barrio}`);
         });
-        
+
         // 4. Poblar filtros INMEDIATAMENTE
         console.log('🔧 Llamando a populateFilters()...');
         populateFilters(data);
-        
+
         // 5. Mostrar propiedades
         displayProperties(data);
-        
+
         // 6. VERIFICACIÓN: Comprobar que los filtros se cargaron
         setTimeout(() => {
             console.log('🔍 Verificación de filtros cargados:');
-            
+
             const ops = document.getElementById('operacion-select-styled');
             const barrios = document.getElementById('barrio-select-styled');
             const tipos = document.getElementById('tipo-select-styled');
-            
+
             if (ops && ops.options.length >= 3) {
                 console.log('✅ Operaciones cargadas correctamente');
                 console.log('   Opciones:', Array.from(ops.options).map(o => o.value).join(', '));
@@ -659,16 +659,16 @@ async function loadProperties() {
                     `;
                 }
             }
-            
+
             if (barrios && barrios.options.length > 1) {
                 console.log('✅ Barrios cargados:', barrios.options.length, 'opciones');
             }
-            
+
             if (tipos && tipos.options.length > 1) {
                 console.log('✅ Tipos cargados:', tipos.options.length, 'opciones');
             }
         }, 1000);
-        
+
     } catch (error) {
         console.error('❌ Error cargando propiedades:', error);
         showErrorMessage();
@@ -677,13 +677,13 @@ async function loadProperties() {
 // Mostrar mensaje de error cuando no se puede cargar el archivo
 function showErrorMessage() {
     console.log('🔧 Mostrando mensaje de error en la interfaz...');
-    
+
     // Ocultar spinner de carga
     const loadingSpinner = document.getElementById('loadingSpinner');
     if (loadingSpinner) {
         loadingSpinner.style.display = 'none';
     }
-    
+
     // Mostrar mensaje de error en la interfaz
     const errorDiv = document.createElement('div');
     errorDiv.id = 'errorMessage';
@@ -701,7 +701,7 @@ function showErrorMessage() {
         <p>No se pudo cargar el archivo <strong>propiedades.json</strong></p>
         <p>Verifica que el archivo esté disponible en el servidor</p>
     `;
-    
+
     // Insertar después del header
     const header = document.querySelector('header');
     if (header && header.nextSibling) {
@@ -715,28 +715,28 @@ function showErrorMessage() {
 // Llenar filtros con datos únicos - VERSIÓN CORREGIDA
 function populateFilters(properties) {
     console.log('🔧 Poblando filtros con', properties.length, 'propiedades');
-    
+
     // Obtener valores únicos
     const operaciones = [...new Set(properties.map(p => p.operacion).filter(Boolean))].sort();
     const barrios = [...new Set(properties.map(p => p.barrio).filter(Boolean))].sort();
     const tipos = [...new Set(properties.map(p => p.tipo).filter(Boolean))].sort();
-    
+
     console.log('📊 Valores originales:', {
         operaciones: operaciones,
         barrios: barrios,
         tipos: tipos
     });
-    
+
     // Configurar selectores
     const operacionSelect = document.getElementById('operacion-select-styled');
     const barrioSelect = document.getElementById('barrio-select-styled');
     const tipoSelect = document.getElementById('tipo-select-styled');
-    
+
     // POBLAR OPERACIONES - CORREGIDO
     if (operacionSelect) {
         console.log('🔄 Poblando operaciones:', operaciones);
         operacionSelect.innerHTML = '<option value="">Todas las operaciones</option>';
-        
+
         operaciones.forEach(operacion => {
             if (operacion) {
                 const option = document.createElement('option');
@@ -745,25 +745,25 @@ function populateFilters(properties) {
                 // TEXTO con formato bonito
                 option.textContent = operacion.charAt(0).toUpperCase() + operacion.slice(1);
                 operacionSelect.appendChild(option);
-                
+
                 console.log(`   ✅ Opción: ${option.value} -> ${option.textContent}`);
             }
         });
-        
+
         console.log('✅ Operaciones cargadas:', operacionSelect.options.length, 'opciones');
-        
+
         // DEBUG: Mostrar opciones actuales
         console.log('🔍 Opciones actuales en operaciones:');
         Array.from(operacionSelect.options).forEach((opt, i) => {
             console.log(`   ${i}. "${opt.value}" -> "${opt.text}"`);
         });
     }
-    
+
     // POBLAR BARRIOS - CORREGIDO
     if (barrioSelect) {
         console.log('🔄 Poblando barrios:', barrios.length);
         barrioSelect.innerHTML = '<option value="">Todos los barrios</option>';
-        
+
         barrios.forEach(barrio => {
             if (barrio) {
                 const option = document.createElement('option');
@@ -774,15 +774,15 @@ function populateFilters(properties) {
                 barrioSelect.appendChild(option);
             }
         });
-        
+
         console.log('✅ Barrios cargados:', barrioSelect.options.length, 'opciones');
     }
-    
+
     // POBLAR TIPOS - CORREGIDO
     if (tipoSelect) {
         console.log('🔄 Poblando tipos:', tipos.length);
         tipoSelect.innerHTML = '<option value="">Todos los tipos</option>';
-        
+
         tipos.forEach(tipo => {
             if (tipo) {
                 const option = document.createElement('option');
@@ -793,16 +793,16 @@ function populateFilters(properties) {
                 tipoSelect.appendChild(option);
             }
         });
-        
+
         console.log('✅ Tipos cargados:', tipoSelect.options.length, 'opciones');
     }
-    
+
     // DEBUG FINAL: Verificar consistencia
     console.log('🔍 Verificación final de consistencia:');
     console.log('   - Operaciones en minúsculas?', operacionSelect ? Array.from(operacionSelect.options).every(o => o.value === o.value.toLowerCase()) : 'N/A');
     console.log('   - Barrios en minúsculas?', barrioSelect ? Array.from(barrioSelect.options).every(o => o.value === o.value.toLowerCase()) : 'N/A');
     console.log('   - Tipos en minúsculas?', tipoSelect ? Array.from(tipoSelect.options).every(o => o.value === o.value.toLowerCase()) : 'N/A');
-    
+
     // Guardar datos globalmente
     window.globalProperties = properties;
     console.log('🌍 Datos disponibles globalmente');
@@ -828,72 +828,72 @@ function showLoadingIndicator(show) {
 
 
 // Función de filtrado con comparación más flexible
-window.filterGlobalProperties = function() {
+window.filterGlobalProperties = function () {
     showLoadingIndicator(true);
     console.log('🔍 Filtrando propiedades globalmente...');
-    
+
     // Obtener valores actuales
     const operacionVal = document.getElementById('operacion-select-styled')?.value || '';
     const barrioVal = document.getElementById('barrio-select-styled')?.value || '';
     const tipoVal = document.getElementById('tipo-select-styled')?.value || '';
-    
+
     console.log('📊 Filtros aplicados (sin normalizar):', {
         operacion: operacionVal,
         barrio: barrioVal,
         tipo: tipoVal
     });
-    
+
     // Normalizar valores de búsqueda
     const normalizedOperacion = operacionVal.toLowerCase().trim();
     const normalizedBarrio = barrioVal.toLowerCase().trim();
     const normalizedTipo = tipoVal.toLowerCase().trim();
-    
+
     console.log('📊 Filtros aplicados (normalizados):', {
         operacion: normalizedOperacion,
         barrio: normalizedBarrio,
         tipo: normalizedTipo
     });
-    
+
     // Filtrar propiedades
     const filtered = globalData.properties.filter(p => {
         // Comparación insensible y más flexible
-        const matchOperacion = !normalizedOperacion || 
+        const matchOperacion = !normalizedOperacion ||
             (p.operacion && p.operacion.toLowerCase().trim() === normalizedOperacion);
-        
+
         // CORRECCIÓN PRINCIPAL: Búsqueda flexible de barrio
-        const matchBarrio = !normalizedBarrio || 
+        const matchBarrio = !normalizedBarrio ||
             (p.barrio && p.barrio.toLowerCase().trim().includes(normalizedBarrio));
-        
-        const matchTipo = !normalizedTipo || 
+
+        const matchTipo = !normalizedTipo ||
             (p.tipo && p.tipo.toLowerCase().trim() === normalizedTipo);
-        
+
         const matches = matchOperacion && matchBarrio && matchTipo;
-        
+
         // DEBUG: Mostrar coincidencias
         if (normalizedBarrio && p.barrio) {
             console.log(`🔍 Comparando barrio: "${p.barrio}" (normalizado: "${p.barrio.toLowerCase().trim()}") con "${normalizedBarrio}" = ${p.barrio.toLowerCase().trim().includes(normalizedBarrio)}`);
         }
-        
+
         return matches;
     });
-    
+
     console.log(`✅ ${filtered.length} propiedades encontradas de ${globalData.properties.length}`);
-    
+
     // DEBUG: Mostrar propiedades encontradas
     if (filtered.length > 0) {
         console.log('🏠 Propiedades encontradas:');
         filtered.forEach((prop, index) => {
-            console.log(`  ${index+1}. ${prop.titulo} - Barrio: ${prop.barrio} - Tipo: ${prop.tipo}`);
+            console.log(`  ${index + 1}. ${prop.titulo} - Barrio: ${prop.barrio} - Tipo: ${prop.tipo}`);
         });
     } else {
         console.log('❌ NO se encontraron propiedades');
         // Mostrar todas las propiedades para debug
         console.log('📋 Todas las propiedades disponibles:');
         globalData.properties.forEach((prop, index) => {
-            console.log(`  ${index+1}. ${prop.titulo} - Barrio: "${prop.barrio}" (tipo: ${typeof prop.barrio})`);
+            console.log(`  ${index + 1}. ${prop.titulo} - Barrio: "${prop.barrio}" (tipo: ${typeof prop.barrio})`);
         });
     }
-    
+
     // Actualizar datos globales
     globalData.filteredProperties = filtered;
     globalData.filters = {
@@ -901,10 +901,10 @@ window.filterGlobalProperties = function() {
         barrio: barrioVal,
         tipo: tipoVal
     };
-    
+
     // Mostrar resultados
     displayProperties(filtered);
-    
+
     // Actualizar contador
     if (typeof updateResultsCount === 'function') {
         updateResultsCount(filtered.length);
@@ -933,10 +933,10 @@ function createPropertyCard(property) {
         transition: transform 0.3s ease !important;
         border: 1px solid #e1e5e9 !important;
     `;
-    
+
     // Crear galería de imágenes inicial
     const imageSection = createExpandableGallery(property);
-    
+
     card.innerHTML = `
         ${imageSection}
         <div style="position: absolute; top: 10px; left: 10px;">
@@ -1009,7 +1009,7 @@ function createPropertyCard(property) {
             </button>
         </div>
     `;
-    
+
     return card;
 }
 
@@ -1021,7 +1021,7 @@ function toggleMap(button, direccionCompleta, titulo) {
     const propertyId = propertyCard.getAttribute('data-property-card');
     const mapContainer = document.getElementById(`map-container-${propertyId}`);
     const mapPlaceholder = document.getElementById(`map-placeholder-${propertyId}`);
-    
+
     if (mapContainer.style.height === '200px') {
         // Ocultar mapa
         mapContainer.style.height = '0';
@@ -1040,7 +1040,7 @@ function toggleMap(button, direccionCompleta, titulo) {
         button.style.background = '#232deb';
         button.style.borderColor = '#232deb';
         button.style.color = 'white';
-        
+
         // Cargar mapa si no está cargado (PASANDO EL propertyId)
         if (!mapPlaceholder.classList.contains('loaded')) {
             loadGoogleMap(mapPlaceholder, direccionCompleta, titulo, propertyId);
@@ -1052,7 +1052,7 @@ function toggleMap(button, direccionCompleta, titulo) {
 
 function loadGoogleMap(placeholder, direccionCompleta, titulo, propertyId) {
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccionCompleta)}`;
-    
+
     placeholder.innerHTML = `
         <div style="text-align: center; padding: 15px; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8f9fa; border-radius: 8px;">
             <div style="margin-bottom: 15px;">
@@ -1103,38 +1103,6 @@ function loadGoogleMap(placeholder, direccionCompleta, titulo, propertyId) {
 // Busca la función showPropertyMap en tu app.js (alrededor de línea 580)
 // Y modifícala así:
 
-function showPropertyMap(propertyId, address, title, mode = 'search') {
-    console.log('🗺️ Mostrando mapa para propiedad:', propertyId, 'Modo:', mode);
-    
-    try {
-        // 1. Ocultar el contenedor de propiedades
-        const propertiesContainer = document.getElementById('properties-container');
-        const filters = document.querySelector('.filters');
-        const resultsCounter = document.getElementById('results-counter-styled');
-        
-        if (propertiesContainer) propertiesContainer.style.display = 'none';
-        if (filters) filters.style.display = 'none';
-        if (resultsCounter) resultsCounter.style.display = 'none';
-        
-        // 2. Mostrar el botón Volver
-        showBackButton(title || 'Propiedad');
-        
-        // 3. Integrar el mapa según el modo
-        if (mode === 'directions') {
-            showDirectionsMap(propertyId, address, title);
-        } else {
-            showSearchMap(propertyId, address, title);
-        }
-        
-        // 4. Añadir clase al body para modo mapa
-        document.body.classList.add('map-view-active');
-        
-        console.log('✅ Mapa mostrado correctamente en modo:', mode);
-    } catch (error) {
-        console.error('❌ Error al mostrar mapa:', error);
-    }
-}
-// Función para mostrar mapa en modo "Cómo llegar"
 function showDirectionsMap(propertyId, address, title) {
     try {
         // Remover mapa anterior si existe
@@ -1142,7 +1110,7 @@ function showDirectionsMap(propertyId, address, title) {
         if (existingMap) {
             existingMap.remove();
         }
-        
+
         // Crear contenedor del mapa
         const mapContainer = document.createElement('div');
         mapContainer.id = 'fullscreen-map-container';
@@ -1155,13 +1123,13 @@ function showDirectionsMap(propertyId, address, title) {
             background: white !important;
             z-index: 9998 !important;
         `;
-        
+
         // Codificar la dirección
         const encodedAddress = encodeURIComponent(address);
-        
+
         // URL para Google Maps DIRECTIONS (modo indicaciones)
         const directionsUrl = `https://www.google.com/maps/embed/v1/directions?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&origin=${encodedAddress}&destination=${encodedAddress}&mode=driving&zoom=15`;
-        
+
         // Crear iframe de Google Maps Directions
         mapContainer.innerHTML = `
             <iframe 
@@ -1207,10 +1175,10 @@ function showDirectionsMap(propertyId, address, title) {
                 </div>
             </div>
         `;
-        
+
         document.body.appendChild(mapContainer);
         console.log('✅ Mapa de indicaciones creado');
-        
+
     } catch (error) {
         console.error('❌ Error al crear mapa de indicaciones:', error);
         // Fallback: abrir Google Maps Directions en nueva pestaña
@@ -1222,10 +1190,10 @@ function showDirectionsMap(propertyId, address, title) {
 // Función para cambiar a modo "Ubicación" (search)
 function switchToSearchMode(propertyId, address, title) {
     console.log('🔄 Cambiando a modo Ubicación');
-    
+
     // Cerrar mapa actual
     closeMap();
-    
+
     // Mostrar en modo búsqueda
     showPropertyMap(propertyId, address, title, 'search');
 }
@@ -1233,10 +1201,10 @@ function switchToSearchMode(propertyId, address, title) {
 // Función para cambiar a modo "Cómo llegar" (directions)
 function switchToDirectionsMode(propertyId, address, title) {
     console.log('🔄 Cambiando a modo Cómo llegar');
-    
+
     // Cerrar mapa actual
     closeMap();
-    
+
     // Mostrar en modo indicaciones
     showPropertyMap(propertyId, address, title, 'directions');
 }
@@ -1248,7 +1216,7 @@ function switchToDirectionsMode(propertyId, address, title) {
 function showBackButton(title) {
     try {
         let backButton = document.getElementById('mapBackButton');
-        
+
         if (!backButton) {
             // Crear el botón si no existe
             backButton = document.createElement('div');
@@ -1260,18 +1228,18 @@ function showBackButton(title) {
                 </button>
             `;
             document.body.appendChild(backButton);
-            
+
             console.log('✅ Botón Volver creado (inicialmente oculto)');
-            
+
             // ¡IMPORTANTE! Crearlo OCULTO
             backButton.style.display = 'none';
         }
-        
+
         // SOLO aplicar estilos si vamos a MOSTRARLO
         // (esta función ahora se llama solo cuando realmente necesitamos el botón)
-        
+
         console.log('ℹ️ showBackButton llamado para:', title);
-        
+
     } catch (error) {
         console.error('❌ Error en showBackButton:', error);
     }
@@ -1284,7 +1252,7 @@ function showBackButtonNow(title) {
         // Si no existe, crearlo
         showBackButton(title);
     }
-    
+
     // Aplicar estilos para MOSTRARLO
     backButton.style.cssText = `
         position: fixed !important;
@@ -1296,51 +1264,16 @@ function showBackButtonNow(title) {
         visibility: visible !important;
         opacity: 1 !important;
     `;
-    
+
     // También arreglar el botón interno
     const innerButton = backButton.querySelector('.back-to-properties-btn');
     if (innerButton && title) {
         innerButton.innerHTML = `<span>←</span> ${title}`;
     }
-    
+
     console.log('✅ Botón Volver MOSTRADO para:', title || 'Mapa');
 }
 
-function backToProperties() {
-    console.log('🏠 Volviendo a propiedades');
-    
-    try {
-        // 1. Mostrar el contenedor de propiedades
-        const propertiesContainer = document.getElementById('properties-container');
-        const filters = document.querySelector('.filters');
-        const resultsCounter = document.getElementById('results-counter-styled');
-        
-        if (propertiesContainer) propertiesContainer.style.display = 'grid';
-        if (filters) filters.style.display = 'block';
-        if (resultsCounter) resultsCounter.style.display = 'block';
-        
-        // 2. OCULTAR EL BOTÓN VOLVER
-        const backButton = document.getElementById('mapBackButton');
-        if (backButton) {
-            backButton.style.display = 'none';
-            console.log('✅ Botón Volver OCULTADO');
-        }
-        
-        // 3. Cerrar/limpiar el mapa
-        closeMap();
-        
-        // 4. Remover clase del body
-        document.body.classList.remove('map-view-active');
-        
-        // 5. Scroll al inicio
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        
-        console.log('✅ Vuelta a propiedades exitosa');
-        
-    } catch (error) {
-        console.error('❌ Error al volver a propiedades:', error);
-    }
-}
 
 
 
@@ -1352,7 +1285,7 @@ function showSearchMap(propertyId, address, title) {
         if (existingMap) {
             existingMap.remove();
         }
-        
+
         // Crear contenedor del mapa
         const mapContainer = document.createElement('div');
         mapContainer.id = 'fullscreen-map-container';
@@ -1365,13 +1298,13 @@ function showSearchMap(propertyId, address, title) {
             background: white !important;
             z-index: 9998 !important;
         `;
-        
+
         // Codificar la dirección para Google Maps (sin API key)
         const encodedAddress = encodeURIComponent(address);
-        
+
         // Usar Google Maps Embed sin API key (modo place)
         const mapUrl = `https://www.google.com/maps/embed/v1/place?q=${encodedAddress}&zoom=15&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`;
-        
+
         // Crear iframe de Google Maps
         mapContainer.innerHTML = `
             <iframe 
@@ -1390,7 +1323,7 @@ function showSearchMap(propertyId, address, title) {
                 <p style="margin: 0; color: #666; font-size: 14px; line-height: 1.4;">${address}</p>
             </div>
         `;
-        
+
         document.body.appendChild(mapContainer);
         console.log('✅ Mapa creado correctamente');
     } catch (error) {
@@ -1415,7 +1348,7 @@ function closeMap() {
     }
 }
 // Cerrar con tecla Escape
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape' && document.body.classList.contains('map-view-active')) {
         console.log('⎋ Tecla Escape presionada - Volviendo a propiedades');
         backToProperties();
@@ -1423,7 +1356,7 @@ document.addEventListener('keydown', function(event) {
 });
 
 // Inicializar estilos cuando se carga la página
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Verificar que los estilos estén presentes
     if (!document.querySelector('#map-back-styles')) {
         const styles = document.createElement('style');
@@ -1525,7 +1458,7 @@ function openDirectionsFromCard(propertyId, address) {
 }
 
 // Cerrar con tecla Escape
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape' && document.body.classList.contains('map-view-active')) {
         backToProperties();
     }
@@ -1548,7 +1481,7 @@ function scrollToProperty(propertyId) {
         // Cerrar el mapa primero
         const mapContainer = document.getElementById(`map-container-${propertyId}`);
         const mapButton = propertyCard.querySelector('button[onclick*="toggleMap"]');
-        
+
         if (mapContainer && mapButton) {
             mapContainer.style.height = '0';
             mapContainer.style.opacity = '0';
@@ -1558,17 +1491,17 @@ function scrollToProperty(propertyId) {
             mapButton.style.borderColor = '#dee2e6';
             mapButton.style.color = '#495057';
         }
-        
+
         // Scroll suave a la propiedad
-        propertyCard.scrollIntoView({ 
-            behavior: 'smooth', 
+        propertyCard.scrollIntoView({
+            behavior: 'smooth',
             block: 'center'
         });
-        
+
         // Efecto visual de highlight
         propertyCard.style.boxShadow = '0 0 0 3px rgba(35, 45, 235, 0.3)';
         propertyCard.style.transition = 'box-shadow 0.5s ease';
-        
+
         setTimeout(() => {
             propertyCard.style.boxShadow = '0 4px 16px rgba(0,0,0,0.1)';
         }, 2000);
@@ -1618,20 +1551,20 @@ document.addEventListener('DOMContentLoaded', initializeMapStyles);
 function displayProperties(properties) {
     const container = document.getElementById('properties-container');
     if (!container) return;
-    
+
     container.innerHTML = '';
-    
+
     if (properties.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #666;">No se encontraron propiedades</p>';
         updateResultsCount(0);
         return;
     }
-    
+
     properties.forEach(property => {
         const card = createPropertyCard(property);
         container.appendChild(card);
     });
-    
+
     updateResultsCount(properties.length);
     console.log('📋 Mostrando', properties.length, 'propiedades');
 }
@@ -1639,7 +1572,7 @@ function displayProperties(properties) {
 function updateResultsCount(count) {
     const counter = document.getElementById('results-counter-styled');
     if (!counter) return;
-    
+
     if (count === 0) {
         counter.innerHTML = '<div>No se encontraron propiedades</div>';
     } else {
@@ -1655,33 +1588,33 @@ function updateResultsCount(count) {
 
 function setupFilterEvents() {
     console.log('🔧 Configurando eventos con debounce...');
-    
+
     // Variable para el timeout del debounce
     let filterTimeout;
-    
+
     const filterConfig = [
         { id: 'operacion-select-styled', name: 'Operación' },
         { id: 'barrio-select-styled', name: 'Barrio' },
         { id: 'tipo-select-styled', name: 'Tipo' }
     ];
-    
+
     filterConfig.forEach(config => {
         const element = document.getElementById(config.id);
         if (element) {
             // Clonar para limpiar eventos
             const newElement = element.cloneNode(true);
             element.parentNode.replaceChild(newElement, element);
-            
+
             // Nueva referencia
             const freshElement = document.getElementById(config.id);
-            
+
             // Evento CON DEBOUNCE
-            freshElement.addEventListener('change', function() {
+            freshElement.addEventListener('change', function () {
                 console.log(`🎯 ${config.name} cambiado: "${this.value}" (debounce activado)`);
-                
+
                 // CANCELAR ejecución anterior
                 clearTimeout(filterTimeout);
-                
+
                 // PROGRAMAR nueva ejecución en 400ms
                 filterTimeout = setTimeout(() => {
                     if (window.filterGlobalProperties) {
@@ -1689,11 +1622,11 @@ function setupFilterEvents() {
                     }
                 }, 400); // 400ms es el sweet spot
             });
-            
+
             console.log(`✅ ${config.name}: Debounce activado (400ms)`);
         }
     });
-    
+
     console.log('🎯 Sistema con debounce configurado');
 }
 
@@ -1730,7 +1663,7 @@ if (typeof filterGlobalProperties === 'function' && !window.filterGlobalProperti
 // REEMPLAZA LA FUNCIÓN showPropertyDetails EXISTENTE CON ESTA:
 async function showPropertyDetails(propertyId) {
     console.log('🔍 Mostrando detalles para:', propertyId);
-    
+
     // Buscar propiedad en datos globales
     const property = globalData.properties.find(p => p.id_temporal === propertyId);
     if (!property) {
@@ -1738,7 +1671,7 @@ async function showPropertyDetails(propertyId) {
         alert('Propiedad no encontrada');
         return;
     }
-    
+
     // Intentar cargar detalles específicos desde JSON externo
     let detallesEspecificos = {};
     try {
@@ -1752,7 +1685,7 @@ async function showPropertyDetails(propertyId) {
     } catch (error) {
         console.log('ℹ️ No se pudieron cargar detalles específicos:', error.message);
     }
-    
+
     // Crear modal de detalles
     createDetailsModal(property, detallesEspecificos);
 }
@@ -1766,13 +1699,13 @@ function createDetailsModal(property, detalles = {}) {
     if (existingModal) {
         existingModal.remove();
     }
-    
+
     // Formatear precio
     const precioFormateado = formatPrecio(property.precio, property.moneda_precio);
-    const expensasFormateadas = property.expensas > 0 ? 
-        `+ $${property.expensas.toLocaleString()} ${property.moneda_expensas || 'ARS'} expensas` : 
+    const expensasFormateadas = property.expensas > 0 ?
+        `+ $${property.expensas.toLocaleString()} ${property.moneda_expensas || 'ARS'} expensas` :
         'Sin expensas';
-    
+
     // Crear HTML del modal
     const modalHTML = `
         <div class="property-details-modal" id="property-details-modal">
@@ -1878,14 +1811,14 @@ function createDetailsModal(property, detalles = {}) {
                                 <h3>Características</h3>
                                 <ul class="features-list">
                                     ${(detalles.caracteristicas || [
-                                        property.ambientes ? `${property.ambientes} ambientes` : null,
-                                        property.metros_cuadrados ? `${property.metros_cuadrados} m²` : null,
-                                        property.cochera === 'Sí' || property.cochera === 'Si' ? 'Cochera' : null,
-                                        property.pileta === 'Sí' || property.pileta === 'Si' ? 'Pileta' : null,
-                                        property.balcon === 'Sí' || property.balcon === 'Si' ? 'Balcón' : null,
-                                        property.aire_acondicionado === 'Sí' || property.aire_acondicionado === 'Si' ? 'Aire acondicionado' : null,
-                                        property.acepta_mascotas === 'Sí' || property.acepta_mascotas === 'Si' ? 'Acepta mascotas' : null
-                                    ].filter(Boolean)).map(item => `
+            property.ambientes ? `${property.ambientes} ambientes` : null,
+            property.metros_cuadrados ? `${property.metros_cuadrados} m²` : null,
+            property.cochera === 'Sí' || property.cochera === 'Si' ? 'Cochera' : null,
+            property.pileta === 'Sí' || property.pileta === 'Si' ? 'Pileta' : null,
+            property.balcon === 'Sí' || property.balcon === 'Si' ? 'Balcón' : null,
+            property.aire_acondicionado === 'Sí' || property.aire_acondicionado === 'Si' ? 'Aire acondicionado' : null,
+            property.acepta_mascotas === 'Sí' || property.acepta_mascotas === 'Si' ? 'Acepta mascotas' : null
+        ].filter(Boolean)).map(item => `
                                         <li>
                                             <span class="feature-check">✓</span>
                                             <span class="feature-text">${item}</span>
@@ -1927,14 +1860,12 @@ function createDetailsModal(property, detalles = {}) {
                                 </div>
                                 
                                 <div class="map-button-container">
-                                    // En createDetailsModal, cambia el botón:
-                                    <button onclick="showPropertyMap('${property.id_temporal}', '${property.direccion_completa || property.direccion || property.barrio}', '${property.titulo}')" 
+                                    <button onclick="showPropertyMap('${property.id_temporal}')" 
                                             class="btn-map-primary">
                                         🗺️ Ver mapa completo
                                     </button>
                                     
-                                    <!-- AQUÍ VA EL NUEVO BOTÓN "CÓMO LLEGAR" -->
-                                    <button onclick="openDirectionsFromDetails('${property.id_temporal}', '${encodeURIComponent(property.direccion_completa || property.direccion || property.barrio)}', '${property.titulo}')" 
+                                    <button onclick="openDirectionsFromDetails('${property.id_temporal}')" 
                                             class="btn-directions">
                                         🚗 Cómo llegar
                                     </button>
@@ -1996,9 +1927,9 @@ function createDetailsModal(property, detalles = {}) {
                                     </div>
                                     <div class="documents-grid">
                                         ${property.documentos.map((doc, index) => {
-                                            const fileName = doc.split('/').pop();
-                                            const docType = getDocumentType(fileName);
-                                            return `
+            const fileName = doc.split('/').pop();
+            const docType = getDocumentType(fileName);
+            return `
                                                 <div class="document-item" onclick="viewPDF('${doc}', '${property.titulo}')">
                                                     <div class="doc-icon">${docType.icon}</div>
                                                     <div class="doc-info">
@@ -2008,7 +1939,7 @@ function createDetailsModal(property, detalles = {}) {
                                                     <div class="doc-action">📄 Ver</div>
                                                 </div>
                                             `;
-                                        }).join('')}
+        }).join('')}
                                     </div>
                                 </div>
                                 ` : ''}
@@ -2021,8 +1952,8 @@ function createDetailsModal(property, detalles = {}) {
                                     </div>
                                     <div class="videos-grid">
                                         ${property.videos.map((video, index) => {
-                                            const fileName = video.split('/').pop();
-                                            return `
+            const fileName = video.split('/').pop();
+            return `
                                                 <div class="video-item" onclick="viewVideo('${video}', '${property.titulo}')">
                                                     <div class="video-icon">▶️</div>
                                                     <div class="video-info">
@@ -2031,7 +1962,7 @@ function createDetailsModal(property, detalles = {}) {
                                                     </div>
                                                 </div>
                                             `;
-                                        }).join('')}
+        }).join('')}
                                     </div>
                                 </div>
                                 ` : ''}
@@ -2075,10 +2006,10 @@ function createDetailsModal(property, detalles = {}) {
 
 
 
-    
+
     // Insertar modal en el body
     document.body.insertAdjacentHTML('beforeend', modalHTML);
-    
+
     // Inicializar tabs
     initializeDetailsTabs();
 
@@ -2088,14 +2019,14 @@ function createDetailsModal(property, detalles = {}) {
     setTimeout(() => {
         const btn360 = document.querySelector('.btn-360-detailed');
         if (btn360) {
-            btn360.addEventListener('click', function(e) {
+            btn360.addEventListener('click', function (e) {
                 e.stopPropagation();
                 const images = JSON.parse(this.dataset.images);
                 const title = this.dataset.title;
-                
+
                 // Cerrar modal de detalles primero
                 closeDetailsModal();
-                
+
                 // Esperar un momento para que se cierre
                 setTimeout(() => {
                     // Usar tu función existente para abrir el visor 360
@@ -2117,12 +2048,12 @@ function createDetailsModal(property, detalles = {}) {
             });
         }
     }, 100);
-    
 
-    
+
+
     // Bloquear scroll del body
     document.body.style.overflow = 'hidden';
-    
+
     console.log('✅ Modal de detalles creado');
 }
 
@@ -2140,18 +2071,18 @@ function openDirections(propertyId, address) {
 function initializeDetailsTabs() {
     const tabs = document.querySelectorAll('.detail-tab');
     const tabContents = document.querySelectorAll('.tab-content');
-    
+
     tabs.forEach(tab => {
-        tab.addEventListener('click', function() {
+        tab.addEventListener('click', function () {
             const tabId = this.getAttribute('data-tab');
-            
+
             // Remover clase active
             tabs.forEach(t => t.classList.remove('active'));
             tabContents.forEach(c => c.classList.remove('active'));
-            
+
             // Agregar clase active
             this.classList.add('active');
-            
+
             // Mostrar contenido
             const targetContent = document.getElementById(`tab-${tabId}`);
             if (targetContent) {
@@ -2167,58 +2098,61 @@ function initializeDetailsTabs() {
 
 // En showPropertyMap (alrededor de línea 580), cambia:
 
-function showPropertyMap(propertyId, address, title) {
-    console.log('🗺️ Mostrando mapa para propiedad:', propertyId, address, title);
-    
-    try {
-        // 1. Ocultar el contenedor de propiedades
-        const propertiesContainer = document.getElementById('properties-container');
-        const filters = document.querySelector('.filters');
-        const resultsCounter = document.getElementById('results-counter-styled');
-        
-        if (propertiesContainer) propertiesContainer.style.display = 'none';
-        if (filters) filters.style.display = 'none';
-        if (resultsCounter) resultsCounter.style.display = 'none';
-        
-        // 2. Mostrar el botón Volver (¡USANDO LA NUEVA FUNCIÓN!)
-        showBackButtonNow(title || 'Propiedad');
-        
-        // 3. Integrar el mapa (sin API key problemática)
-        showActualMap(propertyId, address, title);
-        
-        // 4. Añadir clase al body para modo mapa
-        document.body.classList.add('map-view-active');
-        
-        console.log('✅ Mapa mostrado correctamente');
-    } catch (error) {
-        console.error('❌ Error al mostrar mapa:', error);
-    }
-}
 
 // Agrega esta función en app.js:
 
 function openDirectionsFromDetails(propertyId, address, title) {
     console.log('🚗 Abriendo "Cómo llegar" para:', propertyId);
-    
+
+    // LOOKUP PROPERTY IF NEEDED
+    let direccionFinal = address;
+    let tituloFinal = title;
+
+    // Si no se pasó dirección o título (o si son undefined/null), buscarlos
+    if (!direccionFinal || !tituloFinal) {
+        const property = globalData.properties.find(p => p.id_temporal === propertyId);
+        if (property) {
+            direccionFinal = property.direccion_completa || property.direccion || property.barrio;
+            tituloFinal = property.titulo;
+            console.log('✅ Datos recuperados por ID:', { direccionFinal, tituloFinal });
+        } else {
+            console.error('❌ Propiedad no encontrada para indicaciones:', propertyId);
+        }
+    }
+
     // 1. Cerrar modal de detalles si está abierto
     if (typeof closeDetailsModal === 'function') {
         closeDetailsModal();
     }
-    
+
     // 2. Esperar un momento para transición
     setTimeout(() => {
+        if (!direccionFinal) {
+            alert('No se pudo determinar la dirección.');
+            return;
+        }
+
         // 3. Codificar la dirección
-        const encodedAddress = encodeURIComponent(decodeURIComponent(address));
-        
+        // decodeURIComponent primero por si ya venía codificada (evitar doble codificación)
+        let decodedAddress = direccionFinal;
+        try {
+            decodedAddress = decodeURIComponent(direccionFinal);
+        } catch (e) {
+            // Si falla, asumir que no estaba codificada
+            decodedAddress = direccionFinal;
+        }
+
+        const encodedAddress = encodeURIComponent(decodedAddress);
+
         // 4. MOSTRAR EL BOTÓN VOLVER PRIMERO
-        showBackButtonNow(`${title} - Cómo llegar`);
-        
+        showBackButtonNow(`${tituloFinal || 'Propiedad'} - Cómo llegar`);
+
         // 5. Abrir Google Maps DIRECTIONS en nueva pestaña
         const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
         window.open(directionsUrl, '_blank');
-        
+
         console.log('✅ Google Maps Directions abierto');
-        
+
     }, 300);
 }
 
@@ -2227,58 +2161,301 @@ function openDirectionsFromDetails(propertyId, address, title) {
 
 // Agrega esta función en tu app.js, después de showPropertyDetails:
 
-function showPropertyMapFromDetails(propertyId, address, title) {
-    console.log('🗺️ showPropertyMapFromDetails llamado para:', propertyId);
-    
-    // 1. Cerrar modal de detalles si está abierto
-    if (typeof closeDetailsModal === 'function') {
-        closeDetailsModal();
-    }
-    
-    // 2. Esperar un momento
-    setTimeout(() => {
-        // 3. Decodificar la dirección
-        const decodedAddress = decodeURIComponent(address);
-        
-        // 4. Llamar a showPropertyMap (que YA EXISTE)
-        if (typeof showPropertyMap === 'function') {
-            showPropertyMap(propertyId, decodedAddress, title);
+
+// ========================================
+// FUNCIÓN ÚNICA Y UNIFICADA PARA MOSTRAR MAPAS
+// ========================================
+function showPropertyMap(propertyId, address, title, mode = 'search') {
+    console.log('🗺️ showPropertyMap llamada con:', { propertyId, address, title, mode });
+
+    try {
+        // 1. Buscar la propiedad para obtener datos completos
+        const property = globalData.properties.find(p => p.id_temporal === propertyId);
+        if (!property) {
+            console.error('❌ Propiedad no encontrada:', propertyId);
+            alert('Propiedad no encontrada');
+            return;
+        }
+
+        // 2. Usar direcciones prioritarias
+        const direccionFinal = address || property.direccion_completa || property.direccion || property.barrio;
+        const tituloFinal = title || property.titulo;
+
+        console.log('📍 Dirección para mapa:', direccionFinal);
+
+        // 3. Ocultar elementos de la vista principal
+        ocultarVistaPrincipal();
+
+        // 4. Mostrar el botón Volver
+        mostrarBotonVolver(tituloFinal);
+
+        // 5. Mostrar el mapa según el modo
+        if (mode === 'directions') {
+            mostrarMapaIndicaciones(propertyId, direccionFinal, tituloFinal);
         } else {
-            console.error('❌ showPropertyMap no existe');
-            // Fallback
-            window.open(`https://www.google.com/maps/search/?api=1&query=${address}`, '_blank');
+            mostrarMapaBusqueda(propertyId, direccionFinal, tituloFinal);
         }
-    }, 300);
-}
 
+        // 6. Activar modo mapa
+        activarModoMapa();
 
+        console.log('✅ Mapa mostrado correctamente en modo:', mode);
 
-function openDirectionsFromDetails(propertyId, address, title) {
-    console.log('🚗 Abriendo "Cómo llegar" para:', propertyId);
-    
-    // 1. Cerrar modal de detalles si está abierto
-    if (typeof closeDetailsModal === 'function') {
-        closeDetailsModal();
+    } catch (error) {
+        console.error('❌ Error crítico en showPropertyMap:', error);
+        // Fallback: abrir Google Maps en nueva pestaña
+        const encodedAddress = encodeURIComponent(address || '');
+        window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+
+        // Volver a propiedades si falla
+        setTimeout(backToProperties, 500);
     }
-    
-    // 2. Esperar un momento para transición
-    setTimeout(() => {
-        // 3. Codificar la dirección para Google Maps
-        const encodedAddress = encodeURIComponent(decodeURIComponent(address));
-        
-        // 4. Abrir Google Maps DIRECTIONS en nueva pestaña
-        const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
-        window.open(directionsUrl, '_blank');
-        
-        console.log('✅ Google Maps Directions abierto en nueva pestaña');
-        
-        // 5. MOSTRAR EL BOTÓN VOLVER (para que el usuario pueda volver)
-        if (typeof showBackButton === 'function') {
-            showBackButton(`${title} - Cómo llegar`);
-        }
-        
-    }, 300);
 }
+
+// ========================================
+// FUNCIONES AUXILIARES PARA MAPAS
+// ========================================
+
+function ocultarVistaPrincipal() {
+    const elementsToHide = [
+        '#properties-container',
+        '.filters',
+        '#results-counter-styled',
+        '#property-details-modal'  // Ocultar modal de detalles si está abierto
+    ];
+
+    elementsToHide.forEach(selector => {
+        const element = document.querySelector(selector);
+        if (element) {
+            element.style.display = 'none';
+            console.log(`📦 Ocultando: ${selector}`);
+        }
+    });
+}
+
+function mostrarBotonVolver(titulo) {
+    let backButton = document.getElementById('mapBackButton');
+
+    if (!backButton) {
+        // Crear el botón si no existe
+        backButton = document.createElement('div');
+        backButton.id = 'mapBackButton';
+        backButton.className = 'map-back-button';
+        backButton.innerHTML = `
+            <button class="back-to-properties-btn" onclick="backToProperties()">
+                <span>←</span> ${titulo || 'Volver a Propiedades'}
+            </button>
+        `;
+        document.body.appendChild(backButton);
+    }
+
+    // Aplicar estilos para mostrarlo
+    backButton.style.cssText = `
+        position: fixed !important;
+        top: 20px !important;
+        left: 20px !important;
+        z-index: 10000 !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        animation: slideInFromLeft 0.3s ease !important;
+    `;
+
+    console.log('✅ Botón Volver mostrado para:', titulo);
+}
+
+function mostrarMapaBusqueda(propertyId, direccion, titulo) {
+    console.log('📍 Mostrando mapa de búsqueda para:', direccion);
+
+    // Limpiar mapa anterior si existe
+    const existingMap = document.getElementById('fullscreen-map-container');
+    if (existingMap) existingMap.remove();
+
+    // Crear contenedor del mapa
+    const mapContainer = document.createElement('div');
+    mapContainer.id = 'fullscreen-map-container';
+    mapContainer.style.cssText = `
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: white !important;
+        z-index: 9998 !important;
+    `;
+
+    // Codificar dirección para URL
+    const encodedAddress = encodeURIComponent(direccion);
+
+    // URL para Google Maps Embed (con API key válida)
+    const mapUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodedAddress}&zoom=15`;
+
+    mapContainer.innerHTML = `
+        <iframe 
+            src="${mapUrl}"
+            width="100%" 
+            height="100%" 
+            style="border:0;" 
+            allowfullscreen 
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Ubicación de ${titulo}">
+        </iframe>
+        
+        <!-- Panel de información -->
+        <div style="position: absolute; top: 80px; right: 20px; z-index: 9999;">
+            <div style="background: rgba(255,255,255,0.95); padding: 15px; border-radius: 8px; 
+                        box-shadow: 0 4px 20px rgba(0,0,0,0.2); max-width: 300px; border-left: 4px solid #232deb;">
+                <h4 style="margin: 0 0 8px 0; color: #232deb; font-size: 16px; font-weight: 600;">${titulo}</h4>
+                <p style="margin: 0; color: #666; font-size: 14px; line-height: 1.4;">${direccion}</p>
+                
+                <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button onclick="cambiarModoMapa('${propertyId}', '${encodeURIComponent(direccion)}', '${encodeURIComponent(titulo)}', 'directions')"
+                            style="background: #28a745; color: white; border: none; padding: 8px 12px; 
+                                   border-radius: 4px; font-size: 12px; cursor: pointer; flex: 1;">
+                        🚗 Cómo llegar
+                    </button>
+                    
+                    <button onclick="backToProperties()"
+                            style="background: #6c757d; color: white; border: none; padding: 8px 12px; 
+                                   border-radius: 4px; font-size: 12px; cursor: pointer; flex: 1;">
+                        🏠 Volver
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(mapContainer);
+}
+
+function mostrarMapaIndicaciones(propertyId, direccion, titulo) {
+    console.log('🚗 Mostrando mapa de indicaciones para:', direccion);
+
+    // Limpiar mapa anterior
+    const existingMap = document.getElementById('fullscreen-map-container');
+    if (existingMap) existingMap.remove();
+
+    // Crear contenedor
+    const mapContainer = document.createElement('div');
+    mapContainer.id = 'fullscreen-map-container';
+    mapContainer.style.cssText = `
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: white !important;
+        z-index: 9998 !important;
+    `;
+
+    const encodedAddress = encodeURIComponent(direccion);
+
+    // URL para Google Maps Directions
+    const directionsUrl = `https://www.google.com/maps/embed/v1/directions?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&origin=${encodedAddress}&destination=${encodedAddress}&mode=driving&zoom=15`;
+
+    mapContainer.innerHTML = `
+        <iframe 
+            src="${directionsUrl}"
+            width="100%" 
+            height="100%" 
+            style="border:0;" 
+            allowfullscreen 
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Cómo llegar a ${titulo}">
+        </iframe>
+        
+        <!-- Panel de información -->
+        <div style="position: absolute; top: 80px; right: 20px; z-index: 9999;">
+            <div style="background: rgba(255,255,255,0.95); padding: 15px; border-radius: 8px; 
+                        box-shadow: 0 4px 20px rgba(0,0,0,0.2); max-width: 300px; border-left: 4px solid #28a745;">
+                <h4 style="margin: 0 0 8px 0; color: #28a745; font-size: 16px; font-weight: 600;">🚗 Cómo llegar</h4>
+                <p style="margin: 0; color: #666; font-size: 14px; line-height: 1.4;">${titulo}</p>
+                <p style="margin: 8px 0 0 0; color: #666; font-size: 13px;">${direccion}</p>
+                
+                <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button onclick="cambiarModoMapa('${propertyId}', '${encodeURIComponent(direccion)}', '${encodeURIComponent(titulo)}', 'search')"
+                            style="background: #232deb; color: white; border: none; padding: 8px 12px; 
+                                   border-radius: 4px; font-size: 12px; cursor: pointer; flex: 1;">
+                        🗺️ Ver ubicación
+                    </button>
+                    
+                    <button onclick="backToProperties()"
+                            style="background: #6c757d; color: white; border: none; padding: 8px 12px; 
+                                   border-radius: 4px; font-size: 12px; cursor: pointer; flex: 1;">
+                        🏠 Volver
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(mapContainer);
+}
+
+function cambiarModoMapa(propertyId, direccionCodificada, tituloCodificado, nuevoModo) {
+    // Decodificar parámetros
+    const direccion = decodeURIComponent(direccionCodificada);
+    const titulo = decodeURIComponent(tituloCodificado);
+
+    // Cerrar mapa actual
+    const mapContainer = document.getElementById('fullscreen-map-container');
+    if (mapContainer) mapContainer.remove();
+
+    // Mostrar en nuevo modo
+    showPropertyMap(propertyId, direccion, titulo, nuevoModo);
+}
+
+function activarModoMapa() {
+    document.body.classList.add('map-view-active');
+    console.log('🌍 Modo mapa activado');
+}
+
+// ========================================
+// FUNCIÓN PARA VOLVER A PROPIEDADES (MANTENER EXISTENTE)
+// ========================================
+
+function backToProperties() {
+    console.log('🏠 Volviendo a propiedades');
+
+    try {
+        // 1. Mostrar elementos ocultos
+        const elementsToShow = [
+            '#properties-container',
+            '.filters',
+            '#results-counter-styled'
+        ];
+
+        elementsToShow.forEach(selector => {
+            const element = document.querySelector(selector);
+            if (element) element.style.display = '';
+        });
+
+        // 2. Ocultar botón Volver
+        const backButton = document.getElementById('mapBackButton');
+        if (backButton) {
+            backButton.style.display = 'none';
+            console.log('✅ Botón Volver ocultado');
+        }
+
+        // 3. Eliminar mapa
+        const mapContainer = document.getElementById('fullscreen-map-container');
+        if (mapContainer) mapContainer.remove();
+
+        // 4. Desactivar modo mapa
+        document.body.classList.remove('map-view-active');
+
+        // 5. Scroll al inicio
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        console.log('✅ Vuelta a propiedades exitosa');
+
+    } catch (error) {
+        console.error('❌ Error al volver a propiedades:', error);
+    }
+}
+
 
 // Función para cerrar el modal
 function closeDetailsModal() {
@@ -2292,7 +2469,7 @@ function closeDetailsModal() {
 // Función helper para formatear precio (si no existe)
 function formatPrecio(precio, moneda) {
     if (!precio || precio === 0) return 'Consultar';
-    
+
     if (moneda === 'USD') {
         return `USD ${precio.toLocaleString()}`;
     } else {
@@ -2304,7 +2481,7 @@ function formatPrecio(precio, moneda) {
 // Función para detectar tipo de documento por nombre
 function getDocumentType(fileName) {
     const lowerName = fileName.toLowerCase();
-    
+
     if (lowerName.includes('plano')) {
         return { icon: '📐', name: 'Plano' };
     } else if (lowerName.includes('reglamento')) {
@@ -2328,19 +2505,19 @@ function getDocumentType(fileName) {
 // INICIALIZACIÓN
 // ========================================
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('🏠 Sistema Dante Propiedades - Sin errores + Slider cargando...');
     console.log('🎯 Sistema de slider de múltiples fotos incluido');
     console.log('✅ Sin dependencias de Font Awesome');
     console.log('🎬 Sistema de multimedia activado');
-    
+
     // Cargar CSS del slider
     addSliderStyles();
-    
+
     // Cargar propiedades
     loadProperties();
-    
-    
+
+
     console.log('✅ Sistema inicializado sin errores de consola');
     console.log('🎠 Slider de múltiples fotos disponible');
     console.log('📄 Soporte para PDFs activado');
@@ -2353,20 +2530,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function checkResourceErrors() {
     const imageErrors = [];
-    
+
     // Verificar imágenes que no cargan
     document.querySelectorAll('img').forEach(img => {
-        img.addEventListener('error', function() {
+        img.addEventListener('error', function () {
             imageErrors.push(this.src);
             console.warn('⚠️ Imagen no encontrada:', this.src);
         });
     });
-    
+
     return imageErrors;
 }
 
 // Verificar errores al cargar
-window.addEventListener('load', function() {
+window.addEventListener('load', function () {
     setTimeout(() => {
         const errors = checkResourceErrors();
         if (errors.length === 0) {
@@ -2376,7 +2553,7 @@ window.addEventListener('load', function() {
             console.log('⚠️ Errores de recursos:', errors.length);
         }
     }, 1000);
-    
+
     setTimeout(setupFilterEvents, 100);
 });
 
@@ -2388,25 +2565,25 @@ window.addEventListener('load', function() {
 // Función principal para abrir el modal con verificación completa
 function abrirModalImagenesComplete(propertyId) {
     console.log('📸 Iniciando apertura de modal para propiedad:', propertyId);
-    
+
     try {
         const property = globalData.properties.find(p => p.id_temporal === propertyId);
-        
+
         if (!property) {
             console.error('❌ Propiedad no encontrada:', propertyId);
             return;
         }
-        
+
         console.log('✅ Propiedad encontrada:', property.titulo, 'con', property.fotos?.length || 0, 'imágenes');
-        
+
         if (!property.fotos || property.fotos.length === 0) {
             console.log('⚠️ La propiedad no tiene imágenes disponibles');
             alert('Esta propiedad no tiene imágenes disponibles.');
             return;
         }
-        
+
         abrirModalImagenes(property);
-        
+
     } catch (error) {
         console.error('❌ Error al abrir modal:', error);
         alert('Error al abrir la galería de imágenes.');
@@ -2416,63 +2593,63 @@ function abrirModalImagenesComplete(propertyId) {
 // Función principal para abrir el modal
 function abrirModalImagenes(property) {
     console.log('🔍 Abriendo modal para:', property.titulo);
-    
+
     // Configurar datos del modal
     imagenesModal = property.fotos || [];
     imagenActual = 0;
     tituloPropiedad = property.titulo || 'Galería de Imágenes';
-    
+
     // Verificar elementos del DOM
     const modalElement = document.getElementById('modal-imagenes');
     const imagenPrincipalElement = document.getElementById('imagen-principal');
     const contadorElement = document.getElementById('imagen-contador');
     const tituloElement = document.getElementById('imagen-titulo-display');
-    
+
     if (!modalElement) {
         console.error('❌ Elemento modal-imagenes no encontrado en el DOM');
         alert('Error: No se pudo encontrar el elemento del modal.');
         return;
     }
-    
+
     if (!imagenPrincipalElement) {
         console.error('❌ Elemento imagen-principal no encontrado en el DOM');
         alert('Error: No se pudo encontrar el elemento de imagen principal.');
         return;
     }
-    
+
     if (!contadorElement) {
         console.error('❌ Elemento imagen-contador no encontrado en el DOM');
         alert('Error: No se pudo encontrar el contador de imágenes.');
         return;
     }
-    
+
     if (!tituloElement) {
         console.error('❌ Elemento imagen-titulo-display no encontrado en el DOM');
         alert('Error: No se pudo encontrar el título de imagen.');
         return;
     }
-    
+
     // Actualizar información del modal
     tituloElement.textContent = tituloPropiedad;
-    
+
     // Mostrar la primera imagen
     mostrarImagenActual();
-    
+
     // Mostrar modal
     modalElement.style.display = 'block';
-    
+
     // Aplicar layout específico para móviles
     if (window.innerWidth <= 480) {
         modalElement.style.display = 'flex';
         modalElement.style.alignItems = 'center';
         modalElement.style.justifyContent = 'center';
     }
-    
+
     document.body.style.overflow = 'hidden';
-    
+
     // Agregar event listener para teclado
     document.addEventListener('keydown', manejarTecladoModal);
-    
+
     console.log('✅ Modal abierto para:', property.titulo);
 }
 
@@ -2480,37 +2657,37 @@ function abrirModalImagenes(property) {
 function mostrarImagenActual() {
     const imagenPrincipalElement = document.getElementById('imagen-principal');
     const contadorElement = document.getElementById('imagen-contador');
-    
+
     if (!imagenPrincipalElement || !contadorElement) {
         console.error('❌ Elementos del modal no disponibles para mostrar imagen');
         return;
     }
-    
+
     if (imagenesModal.length === 0) {
         imagenPrincipalElement.style.backgroundImage = 'none';
         imagenPrincipalElement.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666; font-size: 18px;">No hay imágenes disponibles</div>';
         contadorElement.textContent = '0 / 0';
         return;
     }
-    
+
     const imagenUrl = imagenesModal[imagenActual];
-    
+
     // Configurar imagen de fondo
     imagenPrincipalElement.style.backgroundImage = `url('${imagenUrl}')`;
     imagenPrincipalElement.style.backgroundSize = 'contain';
     imagenPrincipalElement.style.backgroundRepeat = 'no-repeat';
     imagenPrincipalElement.style.backgroundPosition = 'center';
-    
+
     // Actualizar contador
     contadorElement.textContent = `${imagenActual + 1} / ${imagenesModal.length}`;
-    
+
     console.log('🖼️ Imagen mostrada:', imagenActual + 1, '/', imagenesModal.length);
 }
 
 // Función para cerrar el modal
 function cerrarModalImagenes() {
     const modalElement = document.getElementById('modal-imagenes');
-    
+
     if (modalElement) {
         modalElement.style.display = 'none';
         // Resetear estilos específicos de móviles
@@ -2520,10 +2697,10 @@ function cerrarModalImagenes() {
         }
         document.body.style.overflow = 'auto';
     }
-    
+
     // Remover event listener
     document.removeEventListener('keydown', manejarTecladoModal);
-    
+
     console.log('🔒 Modal cerrado');
 }
 
@@ -2554,7 +2731,7 @@ function imagenSiguiente() {
 // Función para crear galería expandible (una imagen que se expande al hacer clic)
 function createExpandableGallery(property) {
     const fotos = property.fotos || [];
-    
+
     if (fotos.length === 0) {
         // Sin imágenes - usar imagen por defecto
         return `
@@ -2572,11 +2749,11 @@ function createExpandableGallery(property) {
             </div>
         `;
     }
-    
+
     // Mostrar la primera imagen como vista inicial
     const firstImage = fotos[0];
     const totalPhotos = fotos.length;
-    
+
     return `
         <div class="expandable-gallery-container" style="position: relative; cursor: pointer;" 
              onclick="expandPropertyImages('${property.id_temporal}')" 
@@ -2610,15 +2787,15 @@ function createExpandableGallery(property) {
 function calcularDistribucionMasonry(totalFotos, anchoDisponible, altoDisponible) {
     console.log('🏗️ Calculando distribución MASONRY para', totalFotos, 'fotos');
     console.log('📐 Espacio disponible:', anchoDisponible, 'x', altoDisponible, 'px');
-    
+
     // CONFIGURACIÓN MASONRY OPTIMIZADA
     const esMobile = anchoDisponible < 768;
     const columnas = esMobile ? 2 : 4;
     const gap = 8;
     const anchoColumna = Math.floor((anchoDisponible - (columnas - 1) * gap) / columnas);
-    
+
     console.log('🔧 Masonry: ' + columnas + ' columnas, gap: ' + gap + 'px, ancho columna: ' + anchoColumna + 'px');
-    
+
     // ALTURAS VARIADAS PARA EFECTO MASONRY
     const alturasPosibles = [
         Math.floor(anchoColumna * 0.8),   // Pequeña
@@ -2626,20 +2803,20 @@ function calcularDistribucionMasonry(totalFotos, anchoDisponible, altoDisponible
         Math.floor(anchoColumna * 1.6),   // Grande
         Math.floor(anchoColumna * 2.0)    // Extra grande
     ];
-    
+
     // INICIALIZAR COLUMNAS
     const alturasColumnas = new Array(columnas).fill(0);
     const patrones = [];
-    
+
     // GENERAR PATRONES MASONRY
     for (let i = 0; i < totalFotos; i++) {
         // Encontrar la columna con menor altura
         const columnaMasBaja = alturasColumnas.indexOf(Math.min(...alturasColumnas));
-        
+
         // VARIEDAD DE TAMAÑOS - distribución 30% pequeñas, 40% medianas, 20% grandes, 10% extra grandes
         let alturaFoto;
         const random = Math.random();
-        
+
         if (random < 0.3) {
             alturaFoto = alturasPosibles[0]; // Pequeña
         } else if (random < 0.7) {
@@ -2649,14 +2826,14 @@ function calcularDistribucionMasonry(totalFotos, anchoDisponible, altoDisponible
         } else {
             alturaFoto = alturasPosibles[3]; // Extra grande
         }
-        
+
         // POSICIÓN EN LA COLUMNA SELECCIONADA
         const left = columnaMasBaja * (anchoColumna + gap);
         const top = alturasColumnas[columnaMasBaja];
-        
+
         // ACTUALIZAR ALTURA DE LA COLUMNA
         alturasColumnas[columnaMasBaja] += alturaFoto + gap;
-        
+
         patrones.push({
             ancho: anchoColumna,
             alto: alturaFoto,
@@ -2666,18 +2843,18 @@ function calcularDistribucionMasonry(totalFotos, anchoDisponible, altoDisponible
             fila: Math.floor(top / (alturaFoto + gap)),
             proporcion: parseFloat((alturaFoto / anchoColumna).toFixed(2))
         });
-        
+
         console.log('📐 FOTO ' + (i + 1) + ': Columna ' + columnaMasBaja + ' - ' + anchoColumna + 'x' + alturaFoto + 'px (top: ' + top + 'px)');
     }
-    
+
     // CALCULAR ALTURA TOTAL
     const alturaTotal = Math.max(...alturasColumnas) - gap;
-    
+
     console.log('✅ Distribución MASONRY completa:');
     console.log('- Alturas finales columnas: [' + alturasColumnas.map(h => Math.floor(h)).join(', ') + ']px');
     console.log('- Altura total: ' + alturaTotal + 'px');
     console.log('- Variedad de tamaños aplicada');
-    
+
     return {
         patrones: patrones,
         columnas: columnas,
@@ -2695,19 +2872,19 @@ function calcularDistribucionMasonry(totalFotos, anchoDisponible, altoDisponible
 function expandPropertyImages(propertyId) {
     const property = globalData.properties.find(p => p.id_temporal === propertyId);
     if (!property || !property.fotos) return;
-    
+
     const fotos = property.fotos;
     const totalPhotos = fotos.length;
-    
+
     // Calcular dimensiones disponibles
     const anchoVentana = window.innerWidth;
     const altoVentana = window.innerHeight;
     const anchoDisponible = anchoVentana - 40;
     const altoDisponible = altoVentana - 120;
-    
+
     // USAR ALGORITMO MASONRY MEJORADO
     const distribucionMasonry = calcularDistribucionMasonry(totalPhotos, anchoDisponible, altoDisponible);
-    
+
     // Crear overlay
     const overlay = document.createElement('div');
     overlay.id = `image-expansion-${propertyId}`;
@@ -2724,7 +2901,7 @@ function expandPropertyImages(propertyId) {
         flex-direction: column;
         overflow: hidden;
     `;
-    
+
     // Header
     const header = `
         <div style="
@@ -2764,7 +2941,7 @@ function expandPropertyImages(propertyId) {
             </button>
         </div>
     `;
-    
+
     // Contenedor Masonry
     const masonryContainer = `
         <div id="masonry-gallery-${propertyId}" style="
@@ -2782,18 +2959,18 @@ function expandPropertyImages(propertyId) {
                 height: ${distribucionMasonry.alturaTotal}px;
             ">
                 ${fotos.map((foto, index) => {
-                    const patron = distribucionMasonry.patrones[index];
-                    const ancho = patron.ancho;
-                    const alto = patron.alto;
-                    const left = patron.left;
-                    const top = patron.top;
-                    
-                    // Determinar clase de tamaño para estilos CSS
-                    let claseTamaño = 'masonry-small';
-                    if (alto > ancho * 1.5) claseTamaño = 'masonry-large';
-                    else if (alto > ancho * 1.2) claseTamaño = 'masonry-medium';
-                    
-                    return `
+        const patron = distribucionMasonry.patrones[index];
+        const ancho = patron.ancho;
+        const alto = patron.alto;
+        const left = patron.left;
+        const top = patron.top;
+
+        // Determinar clase de tamaño para estilos CSS
+        let claseTamaño = 'masonry-small';
+        if (alto > ancho * 1.5) claseTamaño = 'masonry-large';
+        else if (alto > ancho * 1.2) claseTamaño = 'masonry-medium';
+
+        return `
                         <div class="masonry-item ${claseTamaño}" 
                              style="
                                  position: absolute;
@@ -2824,19 +3001,19 @@ function expandPropertyImages(propertyId) {
                                  onerror="this.src='INSTITUCIONAL 3.png'">
                         </div>
                     `;
-                }).join('')}
+    }).join('')}
             </div>
         </div>
     `;
-    
+
     overlay.innerHTML = header + masonryContainer;
     document.body.appendChild(overlay);
-    
+
     // === EN TU ARCHIVO JAVASCRIPT - Donde están los event listeners ===
 
     // Eventos para los PDFs individuales (AGREGA ESTOS NUEVOS)
     if (planoPdf) {
-        planoPdf.addEventListener('click', function(e) {
+        planoPdf.addEventListener('click', function (e) {
             e.stopPropagation();
             openPdf('plano', 'Plano del Departamento');
         });
@@ -2844,14 +3021,14 @@ function expandPropertyImages(propertyId) {
 
     // --- AGREGAR AQUÍ LOS NUEVOS EVENT LISTENERS ---
     if (document.getElementById('entornosPdf')) {
-        document.getElementById('entornosPdf').addEventListener('click', function(e) {
+        document.getElementById('entornosPdf').addEventListener('click', function (e) {
             e.stopPropagation();
             openPdf('entornos', 'Estudio de Entornos');
         });
     }
 
     if (document.getElementById('datosParcelaPdf')) {
-        document.getElementById('datosParcelaPdf').addEventListener('click', function(e) {
+        document.getElementById('datosParcelaPdf').addEventListener('click', function (e) {
             e.stopPropagation();
             openPdf('datos_parcela', 'Datos de la Parcela');
         });
@@ -2859,62 +3036,62 @@ function expandPropertyImages(propertyId) {
     // --- FIN DE NUEVOS EVENT LISTENERS ---
 
     if (reglamentoPdf) {
-        reglamentoPdf.addEventListener('click', function(e) {
+        reglamentoPdf.addEventListener('click', function (e) {
             e.stopPropagation();
             openPdf('reglamento', 'Reglamento de Copropiedad');
         });
     }
 
     if (expensasPdf) {
-        expensasPdf.addEventListener('click', function(e) {
+        expensasPdf.addEventListener('click', function (e) {
             e.stopPropagation();
             openPdf('expensas', 'Detalle de Expensas');
         });
     }
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
     // Agregar event listeners para overlay
-    overlay.addEventListener('click', function(e) {
+    overlay.addEventListener('click', function (e) {
         if (e.target === overlay) {
             closeImageExpansion(propertyId);
         }
     });
-    
+
     // Evento para cerrar con Escape
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             closeImageExpansion(propertyId);
         }
     });
-    
+
     document.body.style.overflow = 'hidden';
-    
+
     console.log('🎨 Galería Masonry creada para', property.titulo);
 }
 
 // Función para expandir una foto dentro de la misma galería
 function expandirFotoEnGaleria(propertyId, fotoIndex) {
     console.log('🔍 DEBUG: expandirFotoEnGaleria llamada con propertyId:', propertyId, 'fotoIndex:', fotoIndex);
-    
+
     const property = globalData.properties.find(p => p.id_temporal === propertyId);
     if (!property || !property.fotos) {
         console.log('❌ DEBUG: Propiedad no encontrada o sin fotos', { property: !!property, fotos: property?.fotos?.length });
         return;
     }
     console.log('✅ DEBUG: Propiedad encontrada:', property.titulo, 'Fotos:', property.fotos.length);
-    
+
     const fotoSeleccionada = property.fotos[fotoIndex];
     if (!fotoSeleccionada) {
         console.log('❌ DEBUG: Foto no encontrada en índice', fotoIndex);
         return;
     }
     console.log('✅ DEBUG: Foto seleccionada:', fotoSeleccionada);
-    
+
     // Obtener la galería actual
     const galeriaOverlay = document.getElementById(`image-expansion-${propertyId}`);
     if (!galeriaOverlay) {
@@ -2922,13 +3099,13 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
         return;
     }
     console.log('✅ DEBUG: Overlay de galería encontrado');
-    
+
     // Limpiar cualquier vista expandida anterior
     const vistaExpandidaAnterior = galeriaOverlay.querySelector('.vista-foto-expandida');
     if (vistaExpandidaAnterior) {
         vistaExpandidaAnterior.remove();
     }
-    
+
     // Crear la vista expandida de la foto DENTRO de la galería
     const vistaExpandida = document.createElement('div');
     vistaExpandida.className = 'vista-foto-expandida';
@@ -2944,7 +3121,7 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
         flex-direction: column;
         backdrop-filter: blur(15px);
     `;
-    
+
     vistaExpandida.innerHTML = `
         <!-- Header con título y controles -->
         <div style="
@@ -3114,33 +3291,33 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
             <div style="font-size: 14px; font-weight: 600;">Foto ${fotoIndex + 1} de ${property.fotos.length}</div>
         </div>
     `;
-    
+
     // Agregar la vista expandida a la galería
     galeriaOverlay.appendChild(vistaExpandida);
-    
+
     // Ocultar temporalmente el grid
     const gridImages = galeriaOverlay.querySelector('div[style*="display: grid"]');
     if (gridImages) {
         gridImages.style.opacity = '0.3';
         gridImages.style.pointerEvents = 'none';
     }
-    
+
     // Evento para volver al grid con Escape
-    const escapeHandler = function(e) {
+    const escapeHandler = function (e) {
         if (e.key === 'Escape') {
             volverAGaleriaGrid(propertyId);
             document.removeEventListener('keydown', escapeHandler);
         }
     };
     document.addEventListener('keydown', escapeHandler);
-    
+
     // Evento para volver al grid al hacer clic en el fondo de la imagen
-    vistaExpandida.addEventListener('click', function(e) {
+    vistaExpandida.addEventListener('click', function (e) {
         if (e.target === vistaExpandida.querySelector('div[style*="flex: 1"]')) {
             volverAGaleriaGrid(propertyId);
         }
     });
-    
+
     console.log(`📸 Expandiendo foto ${fotoIndex + 1} en la galería`);
 }
 
@@ -3148,27 +3325,27 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
 function volverAGaleriaGrid(propertyId) {
     const galeriaOverlay = document.getElementById(`image-expansion-${propertyId}`);
     if (!galeriaOverlay) return;
-    
+
     // Remover la vista expandida
     const vistaExpandida = galeriaOverlay.querySelector('.vista-foto-expandida');
     if (vistaExpandida) {
         vistaExpandida.remove();
     }
-    
+
     // Restaurar la visibilidad del grid
     const gridImages = galeriaOverlay.querySelector('div[style*="display: grid"]');
     if (gridImages) {
         gridImages.style.opacity = '1';
         gridImages.style.pointerEvents = 'auto';
     }
-    
+
     // Remover listeners específicos
-    document.removeEventListener('keydown', function(e) {
+    document.removeEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             volverAGaleriaGrid(propertyId);
         }
     });
-    
+
     console.log('🔄 Volviendo al grid de fotos en la galería');
 }
 
@@ -3178,10 +3355,10 @@ function closeImageExpansion(propertyId) {
     if (overlay) {
         overlay.remove();
     }
-    
+
     // Restaurar scroll del body
     document.body.style.overflow = 'auto';
-    
+
     console.log('🔒 Galería expandida cerrada');
 }
 
@@ -3189,7 +3366,7 @@ function closeImageExpansion(propertyId) {
 
 // Función para manejar eventos de teclado
 function manejarTecladoModal(event) {
-    switch(event.key) {
+    switch (event.key) {
         case 'Escape':
             event.preventDefault();
             cerrarModalImagenes();
@@ -3206,7 +3383,7 @@ function manejarTecladoModal(event) {
 }
 
 // Cerrar modal al hacer clic fuera de él
-window.addEventListener('click', function(event) {
+window.addEventListener('click', function (event) {
     const modalElement = document.getElementById('modal-imagenes');
     if (event.target === modalElement) {
         cerrarModalImagenes();
@@ -3233,10 +3410,10 @@ function createImageCollage(property) {
 
     const fotos = property.fotos;
     const totalFotos = fotos.length;
-    
+
     // Seleccionar imágenes para el collage
     let collageHtml = '';
-    
+
     if (totalFotos >= 5) {
         // Para 5+ fotos: 2 arriba, 1 grande en medio, 2 abajo
         collageHtml = `
@@ -3383,7 +3560,7 @@ function openImageModal(propertyId, imageIndex) {
     currentImageIndex = imageIndex;
 
     showImageInModal();
-    
+
     // Mostrar modal
     const modal = document.getElementById('imageModal');
     modal.style.display = 'block';
@@ -3436,7 +3613,7 @@ function closeImageModal() {
     const modal = document.getElementById('imageModal');
     modal.style.display = 'none';
     document.body.style.overflow = 'auto';
-    
+
     // Limpiar variables
     currentImageIndex = 0;
     currentPropertyId = '';
@@ -3444,10 +3621,10 @@ function closeImageModal() {
 }
 
 // Event listeners para modal
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
     const modal = document.getElementById('imageModal');
     if (modal.style.display === 'block') {
-        switch(event.key) {
+        switch (event.key) {
             case 'Escape':
                 closeImageModal();
                 break;
@@ -3464,10 +3641,10 @@ document.addEventListener('keydown', function(event) {
 // Sistema de galería expandible - Una imagen que se expande al hacer clic
 
 // Cerrar modal al hacer clic fuera de la imagen
-document.addEventListener('click', function(event) {
+document.addEventListener('click', function (event) {
     const modal = document.getElementById('imageModal');
     const modalContent = document.querySelector('.modal-content');
-    
+
     if (event.target === modal && !modalContent.contains(event.target)) {
         closeImageModal();
     }
@@ -3504,14 +3681,14 @@ const propiedadesJSON = {
 
 
 
-    function openPdf(pdfName, title) {
+function openPdf(pdfName, title) {
     console.log('📂 Buscando PDF:', pdfName);
-    
+
     const documentos = propiedadesJSON.documentos || [];
     console.log('📄 Documentos disponibles:', documentos);
-    
+
     let rutaArchivo = '';
-    
+
     // Buscar inteligentemente en el array de documentos - CORREGIDO
     if (pdfName === 'entornos') {
         rutaArchivo = documentos.find(doc => doc.toLowerCase().includes('entornos'));
@@ -3523,18 +3700,18 @@ const propiedadesJSON = {
         rutaArchivo = documentos.find(doc => doc.toLowerCase().includes('reglamento'));
     } else {
         // Búsqueda genérica
-        rutaArchivo = documentos.find(doc => 
+        rutaArchivo = documentos.find(doc =>
             doc.toLowerCase().includes(pdfName.toLowerCase())
         );
     }
-    
+
     console.log('🔍 Ruta encontrada:', rutaArchivo);
-    
+
     if (rutaArchivo) {
         // Asegurar que la ruta use minúsculas para la extensión
         const rutaFinal = rutaArchivo.replace(/\.PDF$/, '.pdf');
         console.log('🚀 Abriendo PDF:', rutaFinal);
-        
+
         pdfViewer.src = rutaFinal;
         modalTitle.textContent = title;
         pdfModal.style.display = 'flex';
@@ -3544,97 +3721,97 @@ const propiedadesJSON = {
     }
 }
 
-    // Evento para hacer clic en cualquier parte de la tarjeta
-    // if (propertyCard) {
-    //     propertyCard.addEventListener('click', function(e) {
-    //         // Evitar que se active cuando se hace clic en elementos específicos
-    //         if (!e.target.closest('.media-icon') && 
-    //             !e.target.closest('.pdf-item') && 
-    //             !e.target.closest('.action-button')) {
-    //             openPdf('plano', 'Plano del Departamento');
-    //         }
-    //     });
-    // }
+// Evento para hacer clic en cualquier parte de la tarjeta
+// if (propertyCard) {
+//     propertyCard.addEventListener('click', function(e) {
+//         // Evitar que se active cuando se hace clic en elementos específicos
+//         if (!e.target.closest('.media-icon') && 
+//             !e.target.closest('.pdf-item') && 
+//             !e.target.closest('.action-button')) {
+//             openPdf('plano', 'Plano del Departamento');
+//         }
+//     });
+// }
 
-    // Eventos para los PDFs individuales
-    if (planoPdf) {
-        planoPdf.addEventListener('click', function(e) {
-            e.stopPropagation();
-            openPdf('plano', 'Plano del Departamento');
-        });
-    }
+// Eventos para los PDFs individuales
+if (planoPdf) {
+    planoPdf.addEventListener('click', function (e) {
+        e.stopPropagation();
+        openPdf('plano', 'Plano del Departamento');
+    });
+}
 
-    if (reglamentoPdf) {
-        reglamentoPdf.addEventListener('click', function(e) {
-            e.stopPropagation();
-            openPdf('reglamento', 'Reglamento de Copropiedad');
-        });
-    }
+if (reglamentoPdf) {
+    reglamentoPdf.addEventListener('click', function (e) {
+        e.stopPropagation();
+        openPdf('reglamento', 'Reglamento de Copropiedad');
+    });
+}
 
-    if (expensasPdf) {
-        expensasPdf.addEventListener('click', function(e) {
-            e.stopPropagation();
-            openPdf('expensas', 'Detalle de Expensas');
-        });
-    }
+if (expensasPdf) {
+    expensasPdf.addEventListener('click', function (e) {
+        e.stopPropagation();
+        openPdf('expensas', 'Detalle de Expensas');
+    });
+}
 
-    // Eventos para los iconos de multimedia
-    if (photosIcon) {
-        photosIcon.addEventListener('click', function(e) {
-            e.stopPropagation();
-            alert('Mostrando: ' + propiedadesJSON.propiedad.archivos.fotos);
-        });
-    }
+// Eventos para los iconos de multimedia
+if (photosIcon) {
+    photosIcon.addEventListener('click', function (e) {
+        e.stopPropagation();
+        alert('Mostrando: ' + propiedadesJSON.propiedad.archivos.fotos);
+    });
+}
 
-    if (tourIcon) {
-        tourIcon.addEventListener('click', function(e) {
-            e.stopPropagation();
-            alert('Abriendo: ' + propiedadesJSON.propiedad.archivos.tour);
-        });
-    }
+if (tourIcon) {
+    tourIcon.addEventListener('click', function (e) {
+        e.stopPropagation();
+        alert('Abriendo: ' + propiedadesJSON.propiedad.archivos.tour);
+    });
+}
 
-    if (videoIcon) {
-        videoIcon.addEventListener('click', function(e) {
-            e.stopPropagation();
-            alert('Reproduciendo: ' + propiedadesJSON.propiedad.archivos.video);
-        });
-    }
+if (videoIcon) {
+    videoIcon.addEventListener('click', function (e) {
+        e.stopPropagation();
+        alert('Reproduciendo: ' + propiedadesJSON.propiedad.archivos.video);
+    });
+}
 
-    // Evento para el botón de contacto
-    if (contactButton) {
-        contactButton.addEventListener('click', function(e) {
-            e.stopPropagation();
-            alert('Redirigiendo al formulario de contacto...');
-        });
-    }
+// Evento para el botón de contacto
+if (contactButton) {
+    contactButton.addEventListener('click', function (e) {
+        e.stopPropagation();
+        alert('Redirigiendo al formulario de contacto...');
+    });
+}
 
-    // Cerrar modal
-    if (closeModal) {
-        closeModal.addEventListener('click', function() {
-            if (pdfModal) {
-                pdfModal.style.display = 'none';
-            }
+// Cerrar modal
+if (closeModal) {
+    closeModal.addEventListener('click', function () {
+        if (pdfModal) {
+            pdfModal.style.display = 'none';
+        }
+        if (pdfViewer) {
+            pdfViewer.src = '';
+        }
+    });
+}
+
+// Cerrar modal al hacer clic fuera del contenido
+if (pdfModal) {
+    pdfModal.addEventListener('click', function (e) {
+        if (e.target === pdfModal) {
+            pdfModal.style.display = 'none';
             if (pdfViewer) {
                 pdfViewer.src = '';
             }
-        });
-    }
+        }
+    });
+}
 
-    // Cerrar modal al hacer clic fuera del contenido
-    if (pdfModal) {
-        pdfModal.addEventListener('click', function(e) {
-            if (e.target === pdfModal) {
-                pdfModal.style.display = 'none';
-                if (pdfViewer) {
-                    pdfViewer.src = '';
-                }
-            }
-        });
-    }
-
-    // CSS FORZADO: Asegurar fondo blanco en todas las galerías
-    const cssInteligenteForzado = document.createElement('style');
-    cssInteligenteForzado.textContent = `
+// CSS FORZADO: Asegurar fondo blanco en todas las galerías
+const cssInteligenteForzado = document.createElement('style');
+cssInteligenteForzado.textContent = `
         .image-expansion-overlay {
             background: white !important;
             background-color: white !important;
@@ -3656,13 +3833,13 @@ const propiedadesJSON = {
     `;
 
 
-    // Cerrar con tecla Escape
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape' && document.body.classList.contains('map-view-active')) {
-            console.log('⎋ Tecla Escape presionada - Volviendo a propiedades');
-            backToProperties();
-        }
-    });
+// Cerrar con tecla Escape
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && document.body.classList.contains('map-view-active')) {
+        console.log('⎋ Tecla Escape presionada - Volviendo a propiedades');
+        backToProperties();
+    }
+});
 
 console.log('✅ Sistema de botón Volver para mapas cargado');
 document.head.appendChild(cssInteligenteForzado);
@@ -3721,11 +3898,11 @@ document.addEventListener('click', function (e) {
 
             const title = e.target.dataset.title;
             const pannellumModal = document.getElementById('pannellum-modal');
-            
+
             if (pannellumModal) {
                 pannellumModal.style.display = 'block';
                 document.body.style.overflow = 'hidden'; // Bloquear scroll del body
-                
+
                 if (pannellumViewer) {
                     pannellumViewer.destroy();
                 }
@@ -3756,7 +3933,7 @@ document.addEventListener('click', function (e) {
                 } else {
                     console.warn('⚠️ Contenedor de miniaturas #pannellum-thumbnails no encontrado.');
                 }
-                
+
                 pannellumViewer = pannellum.viewer('pannellum-container', {
                     "type": "equirectangular",
                     "panorama": images[0],
@@ -3781,27 +3958,27 @@ document.addEventListener('click', function (e) {
 // FUNCIÓN PARA VERIFICAR VALORES DE BARRIOS
 // ========================================
 
-window.verificarBarrios = function() {
+window.verificarBarrios = function () {
     console.log('🔍 VERIFICANDO BARRIOS EN DATOS');
-    
+
     if (!globalData.properties || globalData.properties.length === 0) {
         console.log('❌ No hay propiedades cargadas');
         return;
     }
-    
+
     // Obtener todos los barrios únicos
     const barrios = globalData.properties.map(p => p.barrio).filter(Boolean);
     const barriosUnicos = [...new Set(barrios)];
-    
+
     console.log(`📍 Total de propiedades: ${globalData.properties.length}`);
     console.log(`📍 Propiedades con barrio definido: ${barrios.length}`);
     console.log(`📍 Barrios únicos (${barriosUnicos.length}):`, barriosUnicos);
-    
+
     // Mostrar cada barrio con su formato exacto
     console.log('📋 Formato exacto de cada barrio:');
     barriosUnicos.forEach((barrio, index) => {
-        console.log(`  ${index+1}. "${barrio}" (tipo: ${typeof barrio}, longitud: ${barrio.length})`);
-        
+        console.log(`  ${index + 1}. "${barrio}" (tipo: ${typeof barrio}, longitud: ${barrio.length})`);
+
         // Buscar propiedades con este barrio
         const propsConEsteBarrio = globalData.properties.filter(p => p.barrio === barrio);
         console.log(`     Propiedades: ${propsConEsteBarrio.length}`);
@@ -3809,29 +3986,29 @@ window.verificarBarrios = function() {
             console.log(`     - ${prop.titulo} (${prop.operacion})`);
         });
     });
-    
+
     // Verificar coincidencias con "boedo"
     console.log('\n🔍 Buscando coincidencias con "boedo":');
     const busqueda = 'boedo';
-    const coincidencias = globalData.properties.filter(p => 
+    const coincidencias = globalData.properties.filter(p =>
         p.barrio && p.barrio.toLowerCase().includes(busqueda)
     );
-    
+
     console.log(`✅ Coincidencias con "${busqueda}": ${coincidencias.length}`);
     coincidencias.forEach((prop, index) => {
-        console.log(`  ${index+1}. ${prop.titulo} - Barrio: "${prop.barrio}"`);
+        console.log(`  ${index + 1}. ${prop.titulo} - Barrio: "${prop.barrio}"`);
     });
-    
+
     if (coincidencias.length === 0) {
         console.log('❌ No se encontraron coincidencias');
         console.log('💡 Intentando búsqueda más amplia...');
-        
+
         // Búsqueda más flexible
         globalData.properties.forEach((prop, index) => {
             if (prop.barrio) {
                 const barrioLower = prop.barrio.toLowerCase();
                 const distancia = calcularDistanciaLevenshtein(barrioLower, busqueda);
-                console.log(`  ${index+1}. "${prop.barrio}" -> distancia con "${busqueda}": ${distancia}`);
+                console.log(`  ${index + 1}. "${prop.barrio}" -> distancia con "${busqueda}": ${distancia}`);
             }
         });
     }
@@ -3841,7 +4018,7 @@ window.verificarBarrios = function() {
 function calcularDistanciaLevenshtein(a, b) {
     if (a.length === 0) return b.length;
     if (b.length === 0) return a.length;
-    
+
     const matrix = [];
     for (let i = 0; i <= b.length; i++) {
         matrix[i] = [i];
@@ -3849,7 +4026,7 @@ function calcularDistanciaLevenshtein(a, b) {
     for (let j = 0; j <= a.length; j++) {
         matrix[0][j] = j;
     }
-    
+
     for (let i = 1; i <= b.length; i++) {
         for (let j = 1; j <= a.length; j++) {
             const cost = a[j - 1] === b[i - 1] ? 0 : 1;
@@ -3860,30 +4037,30 @@ function calcularDistanciaLevenshtein(a, b) {
             );
         }
     }
-    
+
     return matrix[b.length][a.length];
 }
 
 // Función para ver qué hay en el selector de barrios
-window.verificarSelectorBarrios = function() {
+window.verificarSelectorBarrios = function () {
     const select = document.getElementById('barrio-select-styled');
     if (!select) {
         console.log('❌ Selector de barrios no encontrado');
         return;
     }
-    
+
     console.log('🎯 Opciones en el selector de barrios:');
     console.log(`   Total opciones: ${select.options.length}`);
-    
+
     Array.from(select.options).forEach((option, index) => {
         console.log(`   ${index}. Valor: "${option.value}", Texto: "${option.text}"`);
     });
-    
+
     // Verificar si "boedo" está en el selector
-    const tieneBoedo = Array.from(select.options).some(option => 
+    const tieneBoedo = Array.from(select.options).some(option =>
         option.value.toLowerCase().includes('boedo')
     );
-    
+
     console.log(`🔍 ¿El selector contiene "boedo"? ${tieneBoedo ? '✅ SÍ' : '❌ NO'}`);
 };
 
@@ -3902,7 +4079,7 @@ function closePannellumModal() {
 // Agrega esto al final de tu app.js:
 
 // Ocultar botón "Volver a Propiedades" al cargar la página
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     setTimeout(() => {
         const backButton = document.getElementById('mapBackButton');
         if (backButton) {
