@@ -4079,12 +4079,5 @@ function closePannellumModal() {
 // Agrega esto al final de tu app.js:
 
 // Ocultar botón "Volver a Propiedades" al cargar la página
-document.addEventListener('DOMContentLoaded', function () {
-    setTimeout(() => {
-        const backButton = document.getElementById('mapBackButton');
-        if (backButton) {
-            backButton.style.display = 'none';
-            console.log('✅ Botón Volver ocultado al cargar página');
-        }
-    }, 1000);
-});
+// Hack removed: Ocultar botón "Volver a Propiedades" manual
+// document.addEventListener('DOMContentLoaded', ...);
