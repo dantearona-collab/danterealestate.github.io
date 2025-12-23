@@ -1341,6 +1341,9 @@ function backToProperties() {
         console.error('❌ Error al volver a propiedades:', error);
     }
 }
+
+
+
 // Función para mostrar el mapa (SIN API KEY problemática)
 function showSearchMap(propertyId, address, title) {
     try {
@@ -1924,7 +1927,8 @@ function createDetailsModal(property, detalles = {}) {
                                 </div>
                                 
                                 <div class="map-button-container">
-                                    <button onclick="showPropertyMapFromDetails('${property.id_temporal}', '${encodeURIComponent(property.direccion_completa || property.direccion || property.barrio)}', '${property.titulo}')" 
+                                    // En createDetailsModal, cambia el botón:
+                                    <button onclick="showPropertyMap('${property.id_temporal}', '${property.direccion_completa || property.direccion || property.barrio}', '${property.titulo}')" 
                                             class="btn-map-primary">
                                         🗺️ Ver mapa completo
                                     </button>
@@ -2220,6 +2224,34 @@ function openDirectionsFromDetails(propertyId, address, title) {
 
 
 // Agrega esto en tu app.js, después de showPropertyMapFromDetails:
+
+// Agrega esta función en tu app.js, después de showPropertyDetails:
+
+function showPropertyMapFromDetails(propertyId, address, title) {
+    console.log('🗺️ showPropertyMapFromDetails llamado para:', propertyId);
+    
+    // 1. Cerrar modal de detalles si está abierto
+    if (typeof closeDetailsModal === 'function') {
+        closeDetailsModal();
+    }
+    
+    // 2. Esperar un momento
+    setTimeout(() => {
+        // 3. Decodificar la dirección
+        const decodedAddress = decodeURIComponent(address);
+        
+        // 4. Llamar a showPropertyMap (que YA EXISTE)
+        if (typeof showPropertyMap === 'function') {
+            showPropertyMap(propertyId, decodedAddress, title);
+        } else {
+            console.error('❌ showPropertyMap no existe');
+            // Fallback
+            window.open(`https://www.google.com/maps/search/?api=1&query=${address}`, '_blank');
+        }
+    }, 300);
+}
+
+
 
 function openDirectionsFromDetails(propertyId, address, title) {
     console.log('🚗 Abriendo "Cómo llegar" para:', propertyId);
