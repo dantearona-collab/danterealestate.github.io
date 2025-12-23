@@ -1243,55 +1243,47 @@ function switchToDirectionsMode(propertyId, address, title) {
 
 
 // Función para mostrar el botón Volver
-function showBackButton(title) {
+function showBackButton(title, show = true) {
     try {
         let backButton = document.getElementById('mapBackButton');
         
         if (!backButton) {
-            // Crear el botón si no existe
             backButton = document.createElement('div');
             backButton.id = 'mapBackButton';
             backButton.className = 'map-back-button';
             backButton.innerHTML = `
                 <button class="back-to-properties-btn" onclick="backToProperties()">
-                    <span>←</span> Volver a Propiedades
+                    <span>←</span> ${title || 'Volver a Propiedades'}
                 </button>
             `;
             document.body.appendChild(backButton);
-            
-            console.log('✅ Botón Volver creado');
         }
         
-        // ¡¡¡SOLUCIÓN 1: ESTO ES LO NUEVO!!!
-        backButton.style.cssText = `
-            position: fixed !important;
-            top: 20px !important;
-            left: 20px !important;
-            right: auto !important;
-            z-index: 10000 !important;
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-        `;
-        
-        console.log('✅ Botón Volver mostrado (posición corregida)');
-        
-        // DEBUG: Verificar que se aplicó
-        setTimeout(() => {
-            const computed = window.getComputedStyle(backButton);
-            console.log('🔍 Estado del botón:', {
-                left: computed.left,
-                right: computed.right,
-                display: computed.display
-            });
-        }, 100);
+        // Mostrar u ocultar según parámetro
+        if (show) {
+            backButton.style.cssText = `
+                position: fixed !important;
+                top: 20px !important;
+                left: 20px !important;
+                right: auto !important;
+                z-index: 10000 !important;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            `;
+            console.log('✅ Botón Volver MOSTRADO');
+        } else {
+            backButton.style.display = 'none';
+            console.log('✅ Botón Volver OCULTADO');
+        }
         
     } catch (error) {
-        console.error('❌ Error al mostrar botón volver:', error);
+        console.error('❌ Error:', error);
     }
 }
-
 // Función para volver a las propiedades
+// Busca la función backToProperties en tu app.js (alrededor de línea 690):
+
 function backToProperties() {
     console.log('🏠 Volviendo a propiedades');
     
@@ -1305,10 +1297,11 @@ function backToProperties() {
         if (filters) filters.style.display = 'block';
         if (resultsCounter) resultsCounter.style.display = 'block';
         
-        // 2. Ocultar el botón Volver
+        // 2. ¡¡¡OCULTAR EL BOTÓN VOLVER!!!
         const backButton = document.getElementById('mapBackButton');
         if (backButton) {
             backButton.style.display = 'none';
+            console.log('✅ Botón Volver OCULTADO');
         }
         
         // 3. Cerrar/limpiar el mapa
@@ -1321,11 +1314,11 @@ function backToProperties() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         
         console.log('✅ Vuelta a propiedades exitosa');
+        
     } catch (error) {
         console.error('❌ Error al volver a propiedades:', error);
     }
 }
-
 // Función para mostrar el mapa (SIN API KEY problemática)
 function showSearchMap(propertyId, address, title) {
     try {
@@ -2165,33 +2158,31 @@ function showPropertyMapFromDetails(propertyId, address, title) {
 }
 
 
-function openDirectionsFromDetailsFixed(propertyId, address, title) {
-    console.log('🚗 Cómo llegar (con botón forzado)');
+// Agrega esto en tu app.js, después de showPropertyMapFromDetails:
+
+function openDirectionsFromDetails(propertyId, address, title) {
+    console.log('🚗 Abriendo "Cómo llegar" para:', propertyId);
     
-    // 1. Cerrar modal de detalles
-    closeDetailsModal();
+    // 1. Cerrar modal de detalles si está abierto
+    if (typeof closeDetailsModal === 'function') {
+        closeDetailsModal();
+    }
     
-    // 2. Esperar
+    // 2. Esperar un momento para transición
     setTimeout(() => {
-        // 3. Usar showPropertyMap
-        if (typeof showPropertyMap === 'function') {
-            showPropertyMap(propertyId, decodeURIComponent(address), title, 'directions');
-        }
+        // 3. Codificar la dirección para Google Maps
+        const encodedAddress = encodeURIComponent(decodeURIComponent(address));
         
-        // 4. ¡FORZAR BOTÓN después de 200ms!
-        setTimeout(() => {
-            forceShowBackButton();
-            
-            // Debug extra
-            const btn = document.getElementById('mapBackButton');
-            if (btn) {
-                console.log('🔍 Debug botón después de forzar:', {
-                    style: btn.style.cssText,
-                    computed: window.getComputedStyle(btn).display,
-                    visible: btn.offsetParent !== null
-                });
-            }
-        }, 200);
+        // 4. Abrir Google Maps DIRECTIONS en nueva pestaña
+        const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
+        window.open(directionsUrl, '_blank');
+        
+        console.log('✅ Google Maps Directions abierto en nueva pestaña');
+        
+        // 5. MOSTRAR EL BOTÓN VOLVER (para que el usuario pueda volver)
+        if (typeof showBackButton === 'function') {
+            showBackButton(`${title} - Cómo llegar`);
+        }
         
     }, 300);
 }
@@ -3815,3 +3806,15 @@ function closePannellumModal() {
     }
 }
 
+// Agrega esto al final de tu app.js:
+
+// Ocultar botón "Volver a Propiedades" al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        const backButton = document.getElementById('mapBackButton');
+        if (backButton) {
+            backButton.style.display = 'none';
+            console.log('✅ Botón Volver ocultado al cargar página');
+        }
+    }, 1000);
+});
