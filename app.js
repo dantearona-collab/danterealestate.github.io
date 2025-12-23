@@ -978,17 +978,15 @@ function createPropertyCard(property) {
                 </span>
             </div>
             
-            <!-- Sección de multimedia (PDFs y Videos) -->
-            <div id="multimedia-section-${property.id_temporal}">
-                ${createMultimediaSection(property)}
+            <!-- Indicador de multimedia disponible (sin botones) -->
+            <div style="margin-bottom: 10px !important;">
+                <div style="font-size: 12px !important; color: #6c757d !important;">
+                    ${property.fotos && property.fotos.length > 0 ? `📷 ${property.fotos.length} fotos` : ''}
+                    ${property.documentos && property.documentos.length > 0 ? ` | 📄 ${property.documentos.length} documentos` : ''}
+                    ${property.videos && property.videos.length > 0 ? ` | 🎥 ${property.videos.length} videos` : ''}
+                    ${property.imagenes_360 && property.imagenes_360.length > 0 ? ` | 🔄 Recorrido 360°` : ''}
+                </div>
             </div>
-
-            <!-- BOTÓN 360 -->
-            ${(property.imagenes_360 && Array.isArray(property.imagenes_360) && property.imagenes_360.length > 0) ? `
-            <button class="btn-360" data-images='${JSON.stringify(property.imagenes_360)}' data-title="${property.titulo}">
-                🔄 Ver recorrido 360
-            </button>
-            ` : ''}
 
             
             
@@ -1809,18 +1807,97 @@ function createDetailsModal(property, detalles = {}) {
                             </div>
                         </div>
                         
-                        <!-- TAB 4: MULTIMEDIA -->
+                        <!-- TAB 4: MULTIMEDIA COMPLETA -->
                         <div class="tab-content" id="tab-multimedia">
                             <div class="multimedia-section">
-                                <h3>Multimedia</h3>
-                                ${createMultimediaSection(property)}
+                                <h3>🎬 Multimedia Completa</h3>
                                 
+                                <!-- GALERÍA DE FOTOS -->
                                 ${property.fotos && property.fotos.length > 0 ? `
-                                <div class="photos-preview">
-                                    <button onclick="expandPropertyImages('${property.id_temporal}')" 
-                                            class="btn-view-photos">
-                                        🔍 Ver todas las fotos (${property.fotos.length})
-                                    </button>
+                                <div class="multimedia-category">
+                                    <div class="category-header">
+                                        <h4>📷 Galería de Fotos (${property.fotos.length})</h4>
+                                        <button onclick="expandPropertyImages('${property.id_temporal}')" 
+                                                class="btn-view-all">
+                                            Ver todas
+                                        </button>
+                                    </div>
+                                    <div class="photos-preview-grid">
+                                        ${property.fotos.slice(0, 4).map((foto, index) => `
+                                            <div class="preview-photo" onclick="expandPropertyImages('${property.id_temporal}', ${index})">
+                                                <img src="${foto}" alt="Foto ${index + 1}" 
+                                                    onerror="this.src='INSTITUCIONAL 3.png'">
+                                                ${index === 3 && property.fotos.length > 4 ? `
+                                                    <div class="more-photos">+${property.fotos.length - 4}</div>
+                                                ` : ''}
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                                ` : '<p>No hay fotos disponibles</p>'}
+                                
+                                <!-- RECORRIDO 360° -->
+                                ${property.imagenes_360 && property.imagenes_360.length > 0 ? `
+                                <div class="multimedia-category">
+                                    <div class="category-header">
+                                        <h4>🔄 Recorrido Virtual 360°</h4>
+                                    </div>
+                                    <div class="tour-360-section">
+                                        <p>Explorá la propiedad con nuestro recorrido virtual interactivo.</p>
+                                        <button class="btn-360-detailed" 
+                                                data-images='${JSON.stringify(property.imagenes_360)}' 
+                                                data-title="${property.titulo}">
+                                            🎬 Iniciar recorrido 360°
+                                        </button>
+                                    </div>
+                                </div>
+                                ` : ''}
+                                
+                                <!-- DOCUMENTOS PDF -->
+                                ${property.documentos && property.documentos.length > 0 ? `
+                                <div class="multimedia-category">
+                                    <div class="category-header">
+                                        <h4>📄 Documentos (${property.documentos.length})</h4>
+                                    </div>
+                                    <div class="documents-grid">
+                                        ${property.documentos.map((doc, index) => {
+                                            const fileName = doc.split('/').pop();
+                                            const docType = getDocumentType(fileName);
+                                            return `
+                                                <div class="document-item" onclick="viewPDF('${doc}', '${property.titulo}')">
+                                                    <div class="doc-icon">${docType.icon}</div>
+                                                    <div class="doc-info">
+                                                        <div class="doc-name">${fileName}</div>
+                                                        <div class="doc-type">${docType.name}</div>
+                                                    </div>
+                                                    <div class="doc-action">📄 Ver</div>
+                                                </div>
+                                            `;
+                                        }).join('')}
+                                    </div>
+                                </div>
+                                ` : ''}
+                                
+                                <!-- VIDEOS -->
+                                ${property.videos && property.videos.length > 0 ? `
+                                <div class="multimedia-category">
+                                    <div class="category-header">
+                                        <h4>🎥 Videos (${property.videos.length})</h4>
+                                    </div>
+                                    <div class="videos-grid">
+                                        ${property.videos.map((video, index) => {
+                                            const fileName = video.split('/').pop();
+                                            return `
+                                                <div class="video-item" onclick="viewVideo('${video}', '${property.titulo}')">
+                                                    <div class="video-icon">▶️</div>
+                                                    <div class="video-info">
+                                                        <div class="video-name">${fileName}</div>
+                                                        <div class="video-action">Reproducir video</div>
+                                                    </div>
+                                                </div>
+                                            `;
+                                        }).join('')}
+                                    </div>
                                 </div>
                                 ` : ''}
                             </div>
@@ -1859,12 +1936,54 @@ function createDetailsModal(property, detalles = {}) {
             </div>
         </div>
     `;
+
+
+
+
     
     // Insertar modal en el body
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     
     // Inicializar tabs
     initializeDetailsTabs();
+
+    // ========================================
+    // PASO 6: INICIALIZAR BOTÓN 360 EN EL MODAL
+    // ========================================
+    setTimeout(() => {
+        const btn360 = document.querySelector('.btn-360-detailed');
+        if (btn360) {
+            btn360.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const images = JSON.parse(this.dataset.images);
+                const title = this.dataset.title;
+                
+                // Cerrar modal de detalles primero
+                closeDetailsModal();
+                
+                // Esperar un momento para que se cierre
+                setTimeout(() => {
+                    // Usar tu función existente para abrir el visor 360
+                    if (typeof openPannellumModal === 'function') {
+                        openPannellumModal(images, title);
+                    } else if (typeof setPannellumImage === 'function') {
+                        // Fallback a tu sistema actual
+                        const pannellumModal = document.getElementById('pannellum-modal');
+                        if (pannellumModal) {
+                            pannellumModal.style.display = 'block';
+                            document.body.style.overflow = 'hidden';
+                            setPannellumImage(images[0]);
+                        }
+                    } else {
+                        // Último fallback: alert
+                        alert(`Abriendo recorrido 360° para: ${title}`);
+                    }
+                }, 300);
+            });
+        }
+    }, 100);
+    
+
     
     // Bloquear scroll del body
     document.body.style.overflow = 'hidden';
@@ -1945,6 +2064,30 @@ function formatPrecio(precio, moneda) {
         return `$${precio.toLocaleString()}`;
     }
 }
+
+
+// Función para detectar tipo de documento por nombre
+function getDocumentType(fileName) {
+    const lowerName = fileName.toLowerCase();
+    
+    if (lowerName.includes('plano')) {
+        return { icon: '📐', name: 'Plano' };
+    } else if (lowerName.includes('reglamento')) {
+        return { icon: '📋', name: 'Reglamento' };
+    } else if (lowerName.includes('expensas')) {
+        return { icon: '💰', name: 'Expensas' };
+    } else if (lowerName.includes('entorno') || lowerName.includes('entornos')) {
+        return { icon: '🏞️', name: 'Entornos' };
+    } else if (lowerName.includes('parcela')) {
+        return { icon: '📊', name: 'Parcela' };
+    } else if (lowerName.includes('boleto')) {
+        return { icon: '📜', name: 'Boleto' };
+    } else {
+        return { icon: '📄', name: 'Documento' };
+    }
+}
+
+
 
 // ========================================
 // INICIALIZACIÓN
