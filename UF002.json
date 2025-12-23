@@ -1,0 +1,34 @@
+{
+  "descripcion_completa": "Descripción ampliada y detallada de la propiedad.",
+  
+  "caracteristicas": [
+    "Característica 1",
+    "Característica 2",
+    "Característica 3"
+  ],
+  
+  "puntos_fuertes": [
+    "Punto fuerte 1",
+    "Punto fuerte 2"
+  ],
+  
+  "detalles_tecnicos": {
+    "certificaciones": [],
+    "instalaciones": [],
+    "conservacion": ""
+  },
+  
+  "ubicacion_detallada": {
+    "transporte_cercano": "",
+    "comercios": "",
+    "escuelas": ""
+  },
+  
+  "notas_internas": "Información para el equipo interno (no visible al cliente)",
+  
+  "contacto": {
+    "asesor_asignado": "",
+    "telefono_directo": "",
+    "horario_visitas": ""
+  }
+}
