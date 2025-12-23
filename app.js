@@ -1248,6 +1248,7 @@ function showBackButton(title) {
         let backButton = document.getElementById('mapBackButton');
         
         if (!backButton) {
+            // Crear el botón si no existe
             backButton = document.createElement('div');
             backButton.id = 'mapBackButton';
             backButton.className = 'map-back-button';
@@ -1257,9 +1258,11 @@ function showBackButton(title) {
                 </button>
             `;
             document.body.appendChild(backButton);
+            
+            console.log('✅ Botón Volver creado');
         }
         
-        // ¡ESTO ES LO NUEVO! Limpiar right y forzar left
+        // ¡¡¡SOLUCIÓN 1: ESTO ES LO NUEVO!!!
         backButton.style.cssText = `
             position: fixed !important;
             top: 20px !important;
@@ -1268,12 +1271,26 @@ function showBackButton(title) {
             z-index: 10000 !important;
             display: block !important;
             visibility: visible !important;
+            opacity: 1 !important;
         `;
         
+        console.log('✅ Botón Volver mostrado (posición corregida)');
+        
+        // DEBUG: Verificar que se aplicó
+        setTimeout(() => {
+            const computed = window.getComputedStyle(backButton);
+            console.log('🔍 Estado del botón:', {
+                left: computed.left,
+                right: computed.right,
+                display: computed.display
+            });
+        }, 100);
+        
     } catch (error) {
-        console.error('Error:', error);
+        console.error('❌ Error al mostrar botón volver:', error);
     }
 }
+
 // Función para volver a las propiedades
 function backToProperties() {
     console.log('🏠 Volviendo a propiedades');
