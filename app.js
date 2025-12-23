@@ -1262,8 +1262,19 @@ function showBackButton(title) {
             console.log('✅ Botón Volver creado');
         }
         
+        // ¡ESTA ES LA LÍNEA CLAVE! Forzar display: block
         backButton.style.display = 'block';
-        console.log('✅ Botón Volver mostrado');
+        backButton.style.visibility = 'visible';
+        backButton.style.opacity = '1';
+        
+        console.log('✅ Botón Volver MOSTRADO (forzado)');
+        
+        // DEBUG: Verificar en consola
+        console.log('🔍 Estado del botón:', {
+            display: backButton.style.display,
+            visibility: backButton.style.visibility,
+            opacity: backButton.style.opacity
+        });
     } catch (error) {
         console.error('❌ Error al mostrar botón volver:', error);
     }
@@ -2143,27 +2154,36 @@ function showPropertyMapFromDetails(propertyId, address, title) {
 }
 
 
-function openDirectionsFromDetails(propertyId, address, title) {
-    console.log('🚗 Abriendo indicaciones para:', propertyId);
+function openDirectionsFromDetailsFixed(propertyId, address, title) {
+    console.log('🚗 Cómo llegar (con botón forzado)');
     
-    // 1. Cerrar primero el modal de detalles
+    // 1. Cerrar modal de detalles
     closeDetailsModal();
     
-    // 2. Esperar un momento
+    // 2. Esperar
     setTimeout(() => {
-        // 3. Usar showPropertyMap CON el parámetro 'directions'
+        // 3. Usar showPropertyMap
         if (typeof showPropertyMap === 'function') {
-            // Aquí necesitamos modificar showPropertyMap para aceptar el modo
             showPropertyMap(propertyId, decodeURIComponent(address), title, 'directions');
-        } else {
-            // Fallback: abrir Google Maps Directions
-            window.open(`https://www.google.com/maps/dir/?api=1&destination=${address}`, '_blank');
         }
         
-        console.log('✅ "Cómo llegar" usando el mismo sistema');
+        // 4. ¡FORZAR BOTÓN después de 200ms!
+        setTimeout(() => {
+            forceShowBackButton();
+            
+            // Debug extra
+            const btn = document.getElementById('mapBackButton');
+            if (btn) {
+                console.log('🔍 Debug botón después de forzar:', {
+                    style: btn.style.cssText,
+                    computed: window.getComputedStyle(btn).display,
+                    visible: btn.offsetParent !== null
+                });
+            }
+        }, 200);
+        
     }, 300);
 }
-
 
 // Función para cerrar el modal
 function closeDetailsModal() {
