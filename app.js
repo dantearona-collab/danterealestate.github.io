@@ -1584,10 +1584,317 @@ if (typeof filterGlobalProperties === 'function' && !window.filterGlobalProperti
 // FUNCIONES AUXILIARES
 // ========================================
 
-function showPropertyDetails(propertyId) {
+// ========================================
+// SISTEMA DE DETALLES MEJORADO - FASE 1
+// ========================================
+
+// REEMPLAZA LA FUNCIÓN showPropertyDetails EXISTENTE CON ESTA:
+async function showPropertyDetails(propertyId) {
+    console.log('🔍 Mostrando detalles para:', propertyId);
+    
+    // Buscar propiedad en datos globales
     const property = globalData.properties.find(p => p.id_temporal === propertyId);
-    if (property) {
-        alert(`Detalles de ${property.titulo}\n\nPrecio: USD ${property.precio.toLocaleString()}\nBarrio: ${property.barrio}\nAmbientes: ${property.ambientes}\nDirección: ${property.direccion}\n\nFotos disponibles: ${property.fotos?.length || 0}`);
+    if (!property) {
+        console.error('❌ Propiedad no encontrada:', propertyId);
+        alert('Propiedad no encontrada');
+        return;
+    }
+    
+    // Intentar cargar detalles específicos desde JSON externo
+    let detallesEspecificos = {};
+    try {
+        const response = await fetch(`detalles/${propertyId}.json`);
+        if (response.ok) {
+            detallesEspecificos = await response.json();
+            console.log('✅ Detalles específicos cargados para', propertyId);
+        } else {
+            console.log('ℹ️ No hay detalles específicos para', propertyId);
+        }
+    } catch (error) {
+        console.log('ℹ️ No se pudieron cargar detalles específicos:', error.message);
+    }
+    
+    // Crear modal de detalles
+    createDetailsModal(property, detallesEspecificos);
+}
+
+// AGREGAR ESTAS FUNCIONES NUEVAS DESPUÉS DE showPropertyDetails:
+
+// Función para crear el modal de detalles
+function createDetailsModal(property, detalles = {}) {
+    // Limpiar modal anterior si existe
+    const existingModal = document.getElementById('property-details-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Formatear precio
+    const precioFormateado = formatPrecio(property.precio, property.moneda_precio);
+    const expensasFormateadas = property.expensas > 0 ? 
+        `+ $${property.expensas.toLocaleString()} ${property.moneda_expensas || 'ARS'} expensas` : 
+        'Sin expensas';
+    
+    // Crear HTML del modal
+    const modalHTML = `
+        <div class="property-details-modal" id="property-details-modal">
+            <div class="details-modal-overlay" onclick="closeDetailsModal()"></div>
+            
+            <div class="details-modal-content">
+                <!-- HEADER -->
+                <div class="details-modal-header">
+                    <div class="details-header-left">
+                        <div class="details-badges">
+                            <span class="badge-operation">${property.operacion}</span>
+                            <span class="badge-type">${property.tipo}</span>
+                        </div>
+                        <h2 class="details-title">${property.titulo}</h2>
+                        <div class="details-subtitle">
+                            <span>📍 ${property.direccion || property.barrio}</span>
+                            <span>🏙️ ${property.barrio}</span>
+                        </div>
+                    </div>
+                    <button class="details-close-btn" onclick="closeDetailsModal()">&times;</button>
+                </div>
+                
+                <!-- CONTENIDO CON TABS -->
+                <div class="details-modal-body">
+                    <div class="details-tabs" id="details-tabs">
+                        <button class="detail-tab active" data-tab="general">
+                            <span>📋</span> Información
+                        </button>
+                        <button class="detail-tab" data-tab="features">
+                            <span>⭐</span> Características
+                        </button>
+                        <button class="detail-tab" data-tab="location">
+                            <span>📍</span> Ubicación
+                        </button>
+                        <button class="detail-tab" data-tab="multimedia">
+                            <span>🎬</span> Multimedia
+                        </button>
+                        <button class="detail-tab" data-tab="contact">
+                            <span>📞</span> Contacto
+                        </button>
+                    </div>
+                    
+                    <div class="details-content">
+                        
+                        <!-- TAB 1: INFORMACIÓN GENERAL -->
+                        <div class="tab-content active" id="tab-general">
+                            <div class="info-section">
+                                <h3>Descripción</h3>
+                                <p class="description-text">
+                                    ${detalles.descripcion_completa || property.descripcion || 'Descripción no disponible.'}
+                                </p>
+                            </div>
+                            
+                            <div class="info-section">
+                                <h3>Precio y Condiciones</h3>
+                                <div class="price-display">
+                                    <div class="main-price">
+                                        <span class="currency">${property.moneda_precio || 'USD'}</span>
+                                        <span class="amount">${precioFormateado}</span>
+                                    </div>
+                                    <div class="secondary-price">${expensasFormateadas}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="info-grid">
+                                <div class="info-card">
+                                    <div class="info-icon">🏠</div>
+                                    <div class="info-text">
+                                        <div class="info-label">Ambientes</div>
+                                        <div class="info-value">${property.ambientes || 'N/A'}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="info-card">
+                                    <div class="info-icon">📐</div>
+                                    <div class="info-text">
+                                        <div class="info-label">Superficie</div>
+                                        <div class="info-value">${property.metros_cuadrados || 'N/A'} m²</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="info-card">
+                                    <div class="info-icon">📅</div>
+                                    <div class="info-text">
+                                        <div class="info-label">Antigüedad</div>
+                                        <div class="info-value">${property.antiguedad || 'N/A'} años</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="info-card">
+                                    <div class="info-icon">🧭</div>
+                                    <div class="info-text">
+                                        <div class="info-label">Orientación</div>
+                                        <div class="info-value">${property.orientacion || 'N/A'}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- TAB 2: CARACTERÍSTICAS -->
+                        <div class="tab-content" id="tab-features">
+                            <div class="features-section">
+                                <h3>Características</h3>
+                                <ul class="features-list">
+                                    ${(detalles.caracteristicas || [
+                                        property.ambientes ? `${property.ambientes} ambientes` : null,
+                                        property.metros_cuadrados ? `${property.metros_cuadrados} m²` : null,
+                                        property.cochera === 'Sí' || property.cochera === 'Si' ? 'Cochera' : null,
+                                        property.pileta === 'Sí' || property.pileta === 'Si' ? 'Pileta' : null,
+                                        property.balcon === 'Sí' || property.balcon === 'Si' ? 'Balcón' : null,
+                                        property.aire_acondicionado === 'Sí' || property.aire_acondicionado === 'Si' ? 'Aire acondicionado' : null,
+                                        property.acepta_mascotas === 'Sí' || property.acepta_mascotas === 'Si' ? 'Acepta mascotas' : null
+                                    ].filter(Boolean)).map(item => `
+                                        <li>
+                                            <span class="feature-check">✓</span>
+                                            <span class="feature-text">${item}</span>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                            
+                            ${detalles.puntos_fuertes && detalles.puntos_fuertes.length > 0 ? `
+                            <div class="features-section">
+                                <h3>Puntos Fuertes</h3>
+                                <div class="strengths-grid">
+                                    ${detalles.puntos_fuertes.map(punto => `
+                                        <div class="strength-item">
+                                            <span class="strength-icon">💪</span>
+                                            <span class="strength-text">${punto}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                        
+                        <!-- TAB 3: UBICACIÓN -->
+                        <div class="tab-content" id="tab-location">
+                            <div class="location-section">
+                                <h3>Ubicación</h3>
+                                <div class="address-display">
+                                    <div class="address-icon">📍</div>
+                                    <div class="address-text">
+                                        <strong>${property.direccion_completa || property.direccion || property.barrio}</strong>
+                                    </div>
+                                </div>
+                                
+                                <div class="map-button-container">
+                                    <button onclick="showPropertyMap('${property.id_temporal}', '${property.direccion_completa ? encodeURIComponent(property.direccion_completa) : encodeURIComponent(property.direccion || property.barrio)}', '${property.titulo}')" 
+                                            class="btn-map-primary">
+                                        🗺️ Ver en Mapa
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- TAB 4: MULTIMEDIA -->
+                        <div class="tab-content" id="tab-multimedia">
+                            <div class="multimedia-section">
+                                <h3>Multimedia</h3>
+                                ${createMultimediaSection(property)}
+                                
+                                ${property.fotos && property.fotos.length > 0 ? `
+                                <div class="photos-preview">
+                                    <button onclick="expandPropertyImages('${property.id_temporal}')" 
+                                            class="btn-view-photos">
+                                        🔍 Ver todas las fotos (${property.fotos.length})
+                                    </button>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        
+                        <!-- TAB 5: CONTACTO -->
+                        <div class="tab-content" id="tab-contact">
+                            <div class="contact-section">
+                                <h3>Contactar</h3>
+                                
+                                <div class="contact-actions">
+                                    <a href="https://wa.me/5491125368595?text=Hola,%20me%20interesa%20la%20propiedad%20${encodeURIComponent(property.titulo)}%20(ID:%20${property.id_temporal})" 
+                                       target="_blank" 
+                                       class="btn-whatsapp">
+                                        💬 Contactar por WhatsApp
+                                    </a>
+                                </div>
+                                
+                                <div class="contact-note">
+                                    <p><small>💡 Mencioná el ID <code>${property.id_temporal}</code> para una atención más rápida.</small></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- FOOTER -->
+                <div class="details-modal-footer">
+                    <div class="property-id">
+                        <small>ID: ${property.id_temporal}</small>
+                    </div>
+                    <button onclick="closeDetailsModal()" class="btn-close-modal">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Insertar modal en el body
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Inicializar tabs
+    initializeDetailsTabs();
+    
+    // Bloquear scroll del body
+    document.body.style.overflow = 'hidden';
+    
+    console.log('✅ Modal de detalles creado');
+}
+
+// Función para inicializar tabs
+function initializeDetailsTabs() {
+    const tabs = document.querySelectorAll('.detail-tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabId = this.getAttribute('data-tab');
+            
+            // Remover clase active
+            tabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            
+            // Agregar clase active
+            this.classList.add('active');
+            
+            // Mostrar contenido
+            const targetContent = document.getElementById(`tab-${tabId}`);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
+        });
+    });
+}
+
+// Función para cerrar el modal
+function closeDetailsModal() {
+    const modal = document.getElementById('property-details-modal');
+    if (modal) {
+        modal.remove();
+    }
+    document.body.style.overflow = 'auto';
+}
+
+// Función helper para formatear precio (si no existe)
+function formatPrecio(precio, moneda) {
+    if (!precio || precio === 0) return 'Consultar';
+    
+    if (moneda === 'USD') {
+        return `USD ${precio.toLocaleString()}`;
+    } else {
+        return `$${precio.toLocaleString()}`;
     }
 }
 
