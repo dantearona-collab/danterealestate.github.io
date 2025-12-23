@@ -990,26 +990,13 @@ function createPropertyCard(property) {
             </button>
             ` : ''}
 
+            
+            
             <!-- NUEVA SECCIÓN: MAPA DE UBICACIÓN - CON ESTILOS INLINE -->
+            <!-- Dirección simplificada (sin botón de mapa) -->
             <div style="border-top: 1px solid #e1e5e9 !important; margin-top: 15px !important; padding-top: 15px !important;">
-                <div style="font-size: 14px !important; color: #6c757d !important; margin-bottom: 10px !important; text-align: center !important;">
-                    📍 ${property.direccion_completa || `${property.direccion}, ${property.barrio}, Argentina`}
-                </div>
-                <div style="text-align: center !important; margin-bottom: 10px !important;">
-                    <button onclick="showPropertyMap('${property.id_temporal}', '${property.direccion_completa ? property.direccion_completa.replace(/'/g, "\\'") : `${property.direccion}, ${property.barrio}, Argentina`.replace(/'/g, "\\'")}', '${property.titulo.replace(/'/g, "\\'")}')"
-                            style="background: #232deb !important; color: white !important; border: none !important; padding: 10px 20px !important; border-radius: 6px !important; cursor: pointer !important; font-size: 14px !important; font-weight: 600 !important; transition: all 0.3s ease !important; display: inline-flex !important; align-items: center !important; gap: 8px !important;"
-                            onmouseover="this.style.background='#1a1db4' !important; transform: 'translateY(-2px)' !important" 
-                            onmouseout="this.style.background='#232deb' !important; transform: 'translateY(0)' !important">
-                        🗺️ Ver en el Mapa
-                    </button>
-                </div>
-                <div id="map-container-${property.id_temporal}" style="height: 0 !important; border-radius: 8px !important; overflow: hidden !important; box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important; transition: all 0.3s ease !important; opacity: 0 !important;">
-                    <div id="map-placeholder-${property.id_temporal}" style="height: 100% !important; display: flex !important; align-items: center !important; justify-content: center !important; background: #f8f9fa !important; color: #6c757d !important; font-size: 14px !important;">
-                        <div style="display: flex !important; align-items: center !important; justify-content: center !important;">
-                            <img src="llave.png" alt="Cargando" style="width: 20px !important; height: 20px !important; margin-right: 8px !important;">
-                            <span>Cargando mapa...</span>
-                        </div>
-                    </div>
+                <div style="font-size: 14px !important; color: #6c757d !important; text-align: center !important;">
+                    📍 ${property.direccion_completa || `${property.direccion || ''}, ${property.barrio || ''}`}
                 </div>
             </div>
             
@@ -1770,23 +1757,55 @@ function createDetailsModal(property, detalles = {}) {
                             ` : ''}
                         </div>
                         
+
+
+                        // Modifica el tab-location para incluir un mini mapa:
+
                         <!-- TAB 3: UBICACIÓN -->
                         <div class="tab-content" id="tab-location">
                             <div class="location-section">
-                                <h3>Ubicación</h3>
+                                <h3>📍 Ubicación</h3>
+                                
                                 <div class="address-display">
-                                    <div class="address-icon">📍</div>
+                                    <div class="address-icon">🏠</div>
                                     <div class="address-text">
-                                        <strong>${property.direccion_completa || property.direccion || property.barrio}</strong>
+                                        <h4>Dirección exacta</h4>
+                                        <p>${property.direccion_completa || property.direccion || property.barrio}</p>
                                     </div>
                                 </div>
                                 
-                                <div class="map-button-container">
-                                    <button onclick="showPropertyMap('${property.id_temporal}', '${property.direccion_completa ? encodeURIComponent(property.direccion_completa) : encodeURIComponent(property.direccion || property.barrio)}', '${property.titulo}')" 
+                                <!-- Mini mapa estático -->
+                                <div class="mini-map-container">
+                                    <div class="mini-map-placeholder" id="mini-map-${property.id_temporal}">
+                                        <div class="map-loading">
+                                            <div class="spinner"></div>
+                                            <p>Cargando vista previa del mapa...</p>
+                                        </div>
+                                    </div>
+                                    <div class="map-attribution">
+                                        <small>Powered by Google Maps</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="map-actions">
+                                    <button onclick="showPropertyMapFromDetails('${property.id_temporal}', '${encodeURIComponent(property.direccion_completa || property.direccion || property.barrio)}', '${property.titulo}')" 
                                             class="btn-map-primary">
-                                        🗺️ Ver en Mapa
+                                        🗺️ Ver mapa completo
+                                    </button>
+                                    
+                                    <button onclick="openDirections('${property.id_temporal}', '${encodeURIComponent(property.direccion_completa || property.direccion || property.barrio)}')" 
+                                            class="btn-directions">
+                                        🚗 Cómo llegar
                                     </button>
                                 </div>
+                                
+                                <!-- Información de transporte si existe -->
+                                ${detalles.ubicacion_detallada && detalles.ubicacion_detallada.transporte_cercano ? `
+                                <div class="transport-info">
+                                    <h4>🚌 Transporte cercano</h4>
+                                    <p>${detalles.ubicacion_detallada.transporte_cercano}</p>
+                                </div>
+                                ` : ''}
                             </div>
                         </div>
                         
@@ -1853,6 +1872,13 @@ function createDetailsModal(property, detalles = {}) {
     console.log('✅ Modal de detalles creado');
 }
 
+// Función para abrir indicaciones
+function openDirections(propertyId, address) {
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${address}`;
+    window.open(url, '_blank');
+}
+
+
 // Función para inicializar tabs
 function initializeDetailsTabs() {
     const tabs = document.querySelectorAll('.detail-tab');
@@ -1876,6 +1902,28 @@ function initializeDetailsTabs() {
             }
         });
     });
+}
+
+// ========================================
+// FUNCIÓN PARA MOSTRAR MAPA DESDE DETALLES
+// ========================================
+
+function showPropertyMapFromDetails(propertyId, address, title) {
+    console.log('🗺️ Mostrando mapa desde detalles:', propertyId);
+    
+    // 1. Cerrar primero el modal de detalles
+    closeDetailsModal();
+    
+    // 2. Esperar un momento para que se cierre el modal
+    setTimeout(() => {
+        // 3. Usar la función existente showPropertyMap
+        if (typeof showPropertyMap === 'function') {
+            showPropertyMap(propertyId, decodeURIComponent(address), title);
+        } else {
+            // Fallback: abrir Google Maps directamente
+            window.open(`https://www.google.com/maps/search/?api=1&query=${address}`, '_blank');
+        }
+    }, 300); // 300ms para que se cierre suavemente
 }
 
 // Función para cerrar el modal
