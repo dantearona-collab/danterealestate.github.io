@@ -2144,6 +2144,18 @@ function openDirectionsFromDetails(propertyId, address, title) {
 
         const encodedAddress = encodeURIComponent(decodedAddress);
 
+        // VALIDACIÓN ADICIONAL: Si la dirección es muy corta o inválida, usar titulo + ciudad
+        if (!decodedAddress || decodedAddress.length < 5) {
+            // Fallback robusto para evitar mapa mundial
+            const fallbackAddress = `${tituloFinal || 'Propiedad'}, Buenos Aires, Argentina`;
+            console.warn('⚠️ Dirección inválida o corta, usando fallback:', fallbackAddress);
+            window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(fallbackAddress)}`, '_blank');
+        } else {
+            // 6. Abrir Google Maps DIRECTIONS en nueva pestaña
+            const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
+            window.open(directionsUrl, '_blank');
+        }
+
         // 4. PREPARAR LA VISTA (IMPORTANTE: ocultar vista principal para que se vea el botón volver)
         if (typeof ocultarVistaPrincipal === 'function') {
             ocultarVistaPrincipal();
@@ -2151,10 +2163,6 @@ function openDirectionsFromDetails(propertyId, address, title) {
 
         // 5. MOSTRAR EL BOTÓN VOLVER PRIMERO
         showBackButtonNow(`${tituloFinal || 'Propiedad'} - Cómo llegar`);
-
-        // 6. Abrir Google Maps DIRECTIONS en nueva pestaña
-        const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
-        window.open(directionsUrl, '_blank');
 
         console.log('✅ Google Maps Directions abierto + Vista preparada');
 
@@ -2454,10 +2462,16 @@ function backToProperties() {
         // 5. Scroll al inicio
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
+        // 6. IMPORTANTE: Restaurar scroll del body por si quedó trabado
+        document.body.style.overflow = 'auto';
+        document.body.style.height = 'auto';
+
         console.log('✅ Vuelta a propiedades exitosa');
 
     } catch (error) {
         console.error('❌ Error al volver a propiedades:', error);
+        // Intentar restaurar scroll de emergencia
+        document.body.style.overflow = 'auto';
     }
 }
 
