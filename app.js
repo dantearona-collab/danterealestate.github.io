@@ -1100,8 +1100,11 @@ function loadGoogleMap(placeholder, direccionCompleta, titulo, propertyId) {
 
 
 // Función para mostrar el mapa en pantalla completa con botón Volver
-function showPropertyMap(propertyId, address, title) {
-    console.log('🗺️ Mostrando mapa para propiedad:', propertyId, address, title);
+// Busca la función showPropertyMap en tu app.js (alrededor de línea 580)
+// Y modifícala así:
+
+function showPropertyMap(propertyId, address, title, mode = 'search') {
+    console.log('🗺️ Mostrando mapa para propiedad:', propertyId, 'Modo:', mode);
     
     try {
         // 1. Ocultar el contenedor de propiedades
@@ -1116,17 +1119,128 @@ function showPropertyMap(propertyId, address, title) {
         // 2. Mostrar el botón Volver
         showBackButton(title || 'Propiedad');
         
-        // 3. Integrar el mapa (sin API key problemática)
-        showActualMap(propertyId, address, title);
+        // 3. Integrar el mapa según el modo
+        if (mode === 'directions') {
+            showDirectionsMap(propertyId, address, title);
+        } else {
+            showSearchMap(propertyId, address, title);
+        }
         
         // 4. Añadir clase al body para modo mapa
         document.body.classList.add('map-view-active');
         
-        console.log('✅ Mapa mostrado correctamente');
+        console.log('✅ Mapa mostrado correctamente en modo:', mode);
     } catch (error) {
         console.error('❌ Error al mostrar mapa:', error);
     }
 }
+// Función para mostrar mapa en modo "Cómo llegar"
+function showDirectionsMap(propertyId, address, title) {
+    try {
+        // Remover mapa anterior si existe
+        const existingMap = document.getElementById('fullscreen-map-container');
+        if (existingMap) {
+            existingMap.remove();
+        }
+        
+        // Crear contenedor del mapa
+        const mapContainer = document.createElement('div');
+        mapContainer.id = 'fullscreen-map-container';
+        mapContainer.style.cssText = `
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: white !important;
+            z-index: 9998 !important;
+        `;
+        
+        // Codificar la dirección
+        const encodedAddress = encodeURIComponent(address);
+        
+        // URL para Google Maps DIRECTIONS (modo indicaciones)
+        const directionsUrl = `https://www.google.com/maps/embed/v1/directions?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&origin=${encodedAddress}&destination=${encodedAddress}&mode=driving&zoom=15`;
+        
+        // Crear iframe de Google Maps Directions
+        mapContainer.innerHTML = `
+            <iframe 
+                src="${directionsUrl}"
+                width="100%" 
+                height="100%" 
+                style="border:0;" 
+                allowfullscreen 
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                title="Cómo llegar a ${title}">
+            </iframe>
+            
+            <div style="position: absolute; top: 80px; right: 20px; background: rgba(255,255,255,0.95); padding: 15px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); z-index: 9999; max-width: 300px; border-left: 4px solid #28a745;">
+                <h4 style="margin: 0 0 8px 0; color: #28a745; font-size: 16px; font-weight: 600;">🚗 Cómo llegar</h4>
+                <p style="margin: 0; color: #666; font-size: 14px; line-height: 1.4;">${title}</p>
+                <p style="margin: 8px 0 0 0; color: #666; font-size: 13px;">${address}</p>
+                
+                <div style="margin-top: 15px; display: flex; gap: 10px;">
+                    <button onclick="switchToSearchMode('${propertyId}', '${address.replace(/'/g, "\\'")}', '${title.replace(/'/g, "\\'")}')"
+                            style="background: #232deb; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 12px; cursor: pointer;">
+                        🗺️ Ver ubicación
+                    </button>
+                    
+                    <button onclick="backToProperties()"
+                            style="background: #6c757d; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 12px; cursor: pointer;">
+                        🏠 Volver
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Modo selector -->
+            <div style="position: absolute; top: 20px; left: 20px; z-index: 9999;">
+                <div style="background: rgba(255,255,255,0.95); padding: 10px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: flex; gap: 5px;">
+                    <button onclick="switchToSearchMode('${propertyId}', '${address.replace(/'/g, "\\'")}', '${title.replace(/'/g, "\\'")}')"
+                            style="padding: 8px 12px; background: ${mode === 'search' ? '#232deb' : '#6c757d'}; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">
+                        🗺️ Ubicación
+                    </button>
+                    <button onclick="switchToDirectionsMode('${propertyId}', '${address.replace(/'/g, "\\'")}', '${title.replace(/'/g, "\\'")}')"
+                            style="padding: 8px 12px; background: ${mode === 'directions' ? '#28a745' : '#6c757d'}; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">
+                        🚗 Cómo llegar
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(mapContainer);
+        console.log('✅ Mapa de indicaciones creado');
+        
+    } catch (error) {
+        console.error('❌ Error al crear mapa de indicaciones:', error);
+        // Fallback: abrir Google Maps Directions en nueva pestaña
+        window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`, '_blank');
+        backToProperties(); // Volver ya que el mapa falló
+    }
+}
+
+// Función para cambiar a modo "Ubicación" (search)
+function switchToSearchMode(propertyId, address, title) {
+    console.log('🔄 Cambiando a modo Ubicación');
+    
+    // Cerrar mapa actual
+    closeMap();
+    
+    // Mostrar en modo búsqueda
+    showPropertyMap(propertyId, address, title, 'search');
+}
+
+// Función para cambiar a modo "Cómo llegar" (directions)
+function switchToDirectionsMode(propertyId, address, title) {
+    console.log('🔄 Cambiando a modo Cómo llegar');
+    
+    // Cerrar mapa actual
+    closeMap();
+    
+    // Mostrar en modo indicaciones
+    showPropertyMap(propertyId, address, title, 'directions');
+}
+
 
 // Función para mostrar el botón Volver
 function showBackButton(title) {
@@ -1191,7 +1305,7 @@ function backToProperties() {
 }
 
 // Función para mostrar el mapa (SIN API KEY problemática)
-function showActualMap(propertyId, address, title) {
+function showSearchMap(propertyId, address, title) {
     try {
         // Remover mapa anterior si existe
         const existingMap = document.getElementById('fullscreen-map-container');
@@ -1759,51 +1873,31 @@ function createDetailsModal(property, detalles = {}) {
 
                         // Modifica el tab-location para incluir un mini mapa:
 
+                        // En createDetailsModal(), alrededor de donde está el tab "Ubicación":
+
                         <!-- TAB 3: UBICACIÓN -->
                         <div class="tab-content" id="tab-location">
                             <div class="location-section">
-                                <h3>📍 Ubicación</h3>
-                                
+                                <h3>Ubicación</h3>
                                 <div class="address-display">
-                                    <div class="address-icon">🏠</div>
+                                    <div class="address-icon">📍</div>
                                     <div class="address-text">
-                                        <h4>Dirección exacta</h4>
-                                        <p>${property.direccion_completa || property.direccion || property.barrio}</p>
+                                        <strong>${property.direccion_completa || property.direccion || property.barrio}</strong>
                                     </div>
                                 </div>
                                 
-                                <!-- Mini mapa estático -->
-                                <div class="mini-map-container">
-                                    <div class="mini-map-placeholder" id="mini-map-${property.id_temporal}">
-                                        <div class="map-loading">
-                                            <div class="spinner"></div>
-                                            <p>Cargando vista previa del mapa...</p>
-                                        </div>
-                                    </div>
-                                    <div class="map-attribution">
-                                        <small>Powered by Google Maps</small>
-                                    </div>
-                                </div>
-                                
-                                <div class="map-actions">
+                                <div class="map-button-container">
                                     <button onclick="showPropertyMapFromDetails('${property.id_temporal}', '${encodeURIComponent(property.direccion_completa || property.direccion || property.barrio)}', '${property.titulo}')" 
                                             class="btn-map-primary">
                                         🗺️ Ver mapa completo
                                     </button>
                                     
-                                    <button onclick="openDirections('${property.id_temporal}', '${encodeURIComponent(property.direccion_completa || property.direccion || property.barrio)}')" 
+                                    <!-- AQUÍ VA EL NUEVO BOTÓN "CÓMO LLEGAR" -->
+                                    <button onclick="openDirectionsFromDetails('${property.id_temporal}', '${encodeURIComponent(property.direccion_completa || property.direccion || property.barrio)}', '${property.titulo}')" 
                                             class="btn-directions">
                                         🚗 Cómo llegar
                                     </button>
                                 </div>
-                                
-                                <!-- Información de transporte si existe -->
-                                ${detalles.ubicacion_detallada && detalles.ubicacion_detallada.transporte_cercano ? `
-                                <div class="transport-info">
-                                    <h4>🚌 Transporte cercano</h4>
-                                    <p>${detalles.ubicacion_detallada.transporte_cercano}</p>
-                                </div>
-                                ` : ''}
                             </div>
                         </div>
                         
@@ -1991,6 +2085,9 @@ function createDetailsModal(property, detalles = {}) {
     console.log('✅ Modal de detalles creado');
 }
 
+
+
+
 // Función para abrir indicaciones
 function openDirections(propertyId, address) {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${address}`;
@@ -2044,6 +2141,29 @@ function showPropertyMapFromDetails(propertyId, address, title) {
         }
     }, 300); // 300ms para que se cierre suavemente
 }
+
+
+function openDirectionsFromDetails(propertyId, address, title) {
+    console.log('🚗 Abriendo indicaciones para:', propertyId);
+    
+    // 1. Cerrar primero el modal de detalles
+    closeDetailsModal();
+    
+    // 2. Esperar un momento
+    setTimeout(() => {
+        // 3. Usar showPropertyMap CON el parámetro 'directions'
+        if (typeof showPropertyMap === 'function') {
+            // Aquí necesitamos modificar showPropertyMap para aceptar el modo
+            showPropertyMap(propertyId, decodeURIComponent(address), title, 'directions');
+        } else {
+            // Fallback: abrir Google Maps Directions
+            window.open(`https://www.google.com/maps/dir/?api=1&destination=${address}`, '_blank');
+        }
+        
+        console.log('✅ "Cómo llegar" usando el mismo sistema');
+    }, 300);
+}
+
 
 // Función para cerrar el modal
 function closeDetailsModal() {

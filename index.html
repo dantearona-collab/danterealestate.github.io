@@ -2466,6 +2466,51 @@
         }
 
 
+        /* Agrega esto al CSS del modal */
+        .map-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn-map-primary, .btn-directions {
+            flex: 1;
+            min-width: 140px;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-map-primary {
+            background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
+            color: white;
+        }
+
+        .btn-directions {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            color: white;
+        }
+
+        .btn-map-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(35, 45, 235, 0.3);
+        }
+
+        .btn-directions:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+
     </style>
 
     
