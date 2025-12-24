@@ -539,9 +539,6 @@ function nextSlide(propertyId) {
 }
 
 // CSS para el slider (agregar al head)
-// ========================================
-// 12. SISTEMA DE SLIDER - ESTILOS
-// ========================================
 function addSliderStyles() {
     const style = document.createElement('style');
     style.textContent = `
@@ -615,113 +612,68 @@ let globalData = {
 async function loadProperties() {
     console.log('🔄 Cargando propiedades desde propiedades.json...');
     
-    // PRIMERO: Verificar que el archivo existe
-    console.log('🔍 Verificando acceso a propiedades.json...');
-    
     try {
-        // Intentar acceder al archivo primero
-        const testResponse = await fetch('propiedades.json', { 
-            method: 'HEAD',
-            cache: 'no-cache'
-        });
-        
-        console.log('📄 Estado del archivo:', {
-            ok: testResponse.ok,
-            status: testResponse.status,
-            statusText: testResponse.statusText,
-            url: testResponse.url
-        });
-        
-        if (!testResponse.ok) {
-            throw new Error(`Archivo no encontrado: ${testResponse.status} ${testResponse.statusText}`);
-        }
-        
-        // Ahora cargar el contenido
+        // 1. Cargar datos
         const response = await fetch('propiedades.json');
-        console.log('📦 Response recibido:', response);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
         const data = await response.json();
-        console.log('✅ Datos cargados CORRECTAMENTE:', {
-            cantidad: data.length,
-            primerElemento: data[0] ? data[0].titulo : 'No hay datos',
-            tieneFotos: data[0] ? (data[0].fotos || []).length : 0
-        });
+        console.log('✅ Datos cargados:', data.length, 'propiedades');
         
-        // DEBUG: Mostrar todas las propiedades
-        console.log('📋 Lista completa de propiedades:');
-        data.forEach((prop, index) => {
-            console.log(`  ${index + 1}. ${prop.titulo} - Fotos: ${(prop.fotos || []).length}`);
-        });
-        
+        // 2. Guardar en variables globales
         globalData.properties = data;
         globalData.filteredProperties = data;
         
+        // 3. DEBUG: Verificar que hay datos
+        console.log('📊 Primeras 2 propiedades para verificar:');
+        data.slice(0, 2).forEach((p, i) => {
+            console.log(`   ${i+1}. ${p.titulo} - ${p.operacion} - ${p.barrio}`);
+        });
+        
+        // 4. Poblar filtros INMEDIATAMENTE
+        console.log('🔧 Llamando a populateFilters()...');
         populateFilters(data);
+        
+        // 5. Mostrar propiedades
         displayProperties(data);
         
+        // 6. VERIFICACIÓN: Comprobar que los filtros se cargaron
+        setTimeout(() => {
+            console.log('🔍 Verificación de filtros cargados:');
+            
+            const ops = document.getElementById('operacion-select-styled');
+            const barrios = document.getElementById('barrio-select-styled');
+            const tipos = document.getElementById('tipo-select-styled');
+            
+            if (ops && ops.options.length >= 3) {
+                console.log('✅ Operaciones cargadas correctamente');
+                console.log('   Opciones:', Array.from(ops.options).map(o => o.value).join(', '));
+            } else {
+                console.error('❌ ERROR: Operaciones NO cargadas');
+                console.log('   Forzando carga de operaciones...');
+                if (ops) {
+                    ops.innerHTML = `
+                        <option value="">Todas las operaciones</option>
+                        <option value="venta">Venta</option>
+                        <option value="alquiler">Alquiler</option>
+                    `;
+                }
+            }
+            
+            if (barrios && barrios.options.length > 1) {
+                console.log('✅ Barrios cargados:', barrios.options.length, 'opciones');
+            }
+            
+            if (tipos && tipos.options.length > 1) {
+                console.log('✅ Tipos cargados:', tipos.options.length, 'opciones');
+            }
+        }, 1000);
+        
     } catch (error) {
-        console.error('❌ ERROR CRÍTICO cargando propiedades:', error);
-        
-        // Mostrar error detallado
-        const errorDetails = `
-            ERROR: ${error.message}
-            
-            Posibles causas:
-            1. El archivo 'propiedades.json' no existe en el servidor
-            2. Ruta incorrecta: verifica que esté en la misma carpeta
-            3. Error de sintaxis en el JSON
-            4. Permisos de acceso
-            
-            Solución:
-            1. Verifica que el archivo exista
-            2. Revisa la consola de Network en DevTools
-            3. Verifica que el JSON sea válido
-        `;
-        
-        console.error(errorDetails);
-        showErrorMessage(error.message);
-        
-        // Cargar datos de ejemplo para debugging
-        cargarDatosDeEjemplo();
+        console.error('❌ Error cargando propiedades:', error);
+        showErrorMessage();
     }
 }
-
-// Función para cargar datos de ejemplo si falla la carga
-function cargarDatosDeEjemplo() {
-    console.log('🔄 Cargando datos de ejemplo para debugging...');
-    
-    const datosEjemplo = [
-        {
-            id_temporal: "EJ001",
-            titulo: "Ejemplo de Propiedad",
-            operacion: "Venta",
-            tipo: "Departamento",
-            barrio: "Palermo",
-            direccion: "Av. Santa Fe 1234",
-            precio: 250000,
-            moneda_precio: "USD",
-            expensas: 15000,
-            ambientes: 3,
-            metros_cuadrados: 85,
-            estado: "Excelente",
-            fotos: ["INSTITUCIONAL 1.jpg", "INSTITUCIONAL 3.png"],
-            descripcion: "Propiedad de ejemplo para debugging"
-        }
-    ];
-    
-    globalData.properties = datosEjemplo;
-    globalData.filteredProperties = datosEjemplo;
-    
-    populateFilters(datosEjemplo);
-    displayProperties(datosEjemplo);
-    
-    console.log('✅ Datos de ejemplo cargados');
-}
-
 // Mostrar mensaje de error cuando no se puede cargar el archivo
 function showErrorMessage() {
     console.log('🔧 Mostrando mensaje de error en la interfaz...');
@@ -970,9 +922,6 @@ window.filterGlobalProperties = function() {
 };
 
 function createPropertyCard(property) {
-    console.log(`🛠️ Creando tarjeta para: ${property.titulo}`);
-    console.log('📸 Datos de fotos:', property.fotos);
-    
     const card = document.createElement('div');
     card.className = 'property-card';
     card.setAttribute('data-property-card', property.id_temporal);
@@ -983,80 +932,77 @@ function createPropertyCard(property) {
         box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
         transition: transform 0.3s ease !important;
         border: 1px solid #e1e5e9 !important;
-        margin-bottom: 20px !important;
     `;
     
-    // VERIFICAR: ¿property.fotos existe?
-    const tieneFotos = property.fotos && Array.isArray(property.fotos) && property.fotos.length > 0;
-    console.log(`   ¿Tiene fotos? ${tieneFotos} (cantidad: ${property.fotos ? property.fotos.length : 0})`);
+    // Crear galería de imágenes inicial
+    const imageSection = createExpandableGallery(property);
     
-    // Usar una imagen por defecto si no hay fotos
-    const primeraImagen = tieneFotos ? property.fotos[0] : 'INSTITUCIONAL 1.jpg';
-    
-    const imageSection = `
-        <div style="position: relative; height: 200px; overflow: hidden; background: #f8f9fa;">
-            <img src="${primeraImagen}" 
-                 alt="${property.titulo}" 
-                 style="width: 100% !important; height: 100% !important; object-fit: cover !important;"
-                 onerror="
-                    console.error('❌ Error cargando imagen:', this.src);
-                    this.onerror = null;
-                    this.src = 'INSTITUCIONAL 3.png';
-                 "
-                 onload="console.log('✅ Imagen cargada:', this.src)">
-            
-            <!-- Indicador de cantidad de fotos -->
-            ${tieneFotos && property.fotos.length > 1 ? `
-                <div style="position: absolute; bottom: 10px; right: 10px; background: rgba(35, 45, 235, 0.8); 
-                            color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
-                    📸 ${property.fotos.length} fotos
-                </div>
-            ` : ''}
-            
-            <!-- Badges -->
-            <div style="position: absolute; top: 10px; left: 10px; display: flex; gap: 5px;">
-                <span style="background: #232deb !important; color: white !important; padding: 4px 8px !important; 
-                             border-radius: 4px !important; font-size: 12px !important; font-weight: 600 !important;">
-                    ${property.operacion || 'Venta'}
-                </span>
-            </div>
+    card.innerHTML = `
+        ${imageSection}
+        <div style="position: absolute; top: 10px; left: 10px;">
+            <span style="background: #232deb !important; color: white !important; padding: 4px 8px !important; border-radius: 4px !important; font-size: 12px !important; font-weight: 600 !important;">
+                ${property.operacion}
+            </span>
         </div>
-    `;
-    
-    card.innerHTML = imageSection + `
+        <div style="position: absolute; top: 10px; right: 10px;">
+            <span style="background: ${property.operacion === 'Venta' ? '#232deb' : '#ff0101'} !important; color: white !important; padding: 4px 8px !important; border-radius: 4px !important; font-size: 12px !important; font-weight: 600 !important;">
+                ${property.tipo}
+            </span>
+        </div>
+        
         <div style="padding: 20px !important;">
-            <h3 style="margin: 0 0 10px 0 !important; color: #495057 !important; font-size: 18px !important; 
-                       font-weight: 600 !important; line-height: 1.3 !important;">
-                ${property.titulo || 'Propiedad sin título'}
+            <h3 style="margin: 0 0 10px 0 !important; color: #495057 !important; font-size: 18px !important; font-weight: 600 !important; line-height: 1.3 !important;">
+                ${property.titulo}
             </h3>
             
             <div style="color: #6c757d !important; font-size: 14px !important; margin-bottom: 10px !important;">
-                📍 ${property.direccion || ''} ${property.barrio ? `- ${property.barrio}` : ''}
+                📍 ${property.direccion} - ${property.barrio}
             </div>
             
             <div style="margin-bottom: 15px !important;">
                 <span style="font-size: 24px !important; font-weight: 700 !important; color: #232deb !important;">
-                    ${property.moneda_precio || 'USD'} ${property.precio ? property.precio.toLocaleString() : 'Consultar'}
+                    ${property.moneda_precio || 'USD'} ${property.precio?.toLocaleString() || '0'}
                 </span>
-                ${property.expensas > 0 ? `
-                    <div style="font-size: 12px !important; color: #6c757d !important;">
-                        + ${property.moneda_expensas || 'ARS'} ${property.expensas.toLocaleString()} expensas
-                    </div>
-                ` : ''}
+                ${property.expensas > 0 ? `<div style="font-size: 12px !important; color: #6c757d !important;">+ ${property.moneda_expensas || 'ARS'} ${property.expensas.toLocaleString()} expensas</div>` : ''}
             </div>
             
-            <div style="display: flex !important; justify-content: space-between !important; 
-                        margin-bottom: 15px !important; font-size: 14px !important; color: #495057 !important;">
-                ${property.ambientes ? `<span>🏠 ${property.ambientes} amb.</span>` : ''}
-                ${property.metros_cuadrados ? `<span>📏 ${property.metros_cuadrados} m²</span>` : ''}
-                ${property.estado ? `<span>📅 ${property.estado}</span>` : ''}
+            <div style="display: flex !important; justify-content: space-between !important; margin-bottom: 15px !important; font-size: 14px !important; color: #495057 !important;">
+                <span>🏠 ${property.ambientes} amb.</span>
+                <span>📏 ${property.metros_cuadrados} m²</span>
+                <span>📅 ${property.estado}</span>
+            </div>
+            
+            <div style="margin-bottom: 15px !important;">
+                <span style="color: #232deb !important; font-size: 14px !important; font-weight: 600 !important;">
+                    ${property.info_multimedia || 'Fotos disponibles'}
+                </span>
+            </div>
+            
+            <!-- Indicador de multimedia disponible (sin botones) -->
+            <div style="margin-bottom: 10px !important;">
+                <div style="font-size: 12px !important; color: #6c757d !important;">
+                    ${property.fotos && property.fotos.length > 0 ? `📷 ${property.fotos.length} fotos` : ''}
+                    ${property.documentos && property.documentos.length > 0 ? ` | 📄 ${property.documentos.length} documentos` : ''}
+                    ${property.videos && property.videos.length > 0 ? ` | 🎥 ${property.videos.length} videos` : ''}
+                    ${property.imagenes_360 && property.imagenes_360.length > 0 ? ` | 🔄 Recorrido 360°` : ''}
+                </div>
+            </div>
+
+            
+            
+            <!-- NUEVA SECCIÓN: MAPA DE UBICACIÓN - CON ESTILOS INLINE -->
+            <!-- Dirección simplificada (sin botón de mapa) -->
+            <div style="border-top: 1px solid #e1e5e9 !important; margin-top: 15px !important; padding-top: 15px !important;">
+                <div style="font-size: 14px !important; color: #6c757d !important; text-align: center !important;">
+                    📍 ${property.direccion_completa || `${property.direccion || ''}, ${property.barrio || ''}`}
+                </div>
             </div>
             
             <button onclick="showPropertyDetails('${property.id_temporal}')" 
                     style="width: 100% !important; background: #232deb !important; color: white !important; 
                            border: none !important; padding: 12px !important; border-radius: 6px !important; 
                            font-size: 14px !important; font-weight: 600 !important; cursor: pointer !important; 
-                           transition: all 0.3s ease !important; margin-top: 10px !important;"
+                           transition: all 0.3s ease !important; margin-top: 15px !important;"
                     onmouseover="this.style.background='#1a1db4' !important" 
                     onmouseout="this.style.background='#232deb' !important">
                 Ver Detalles
@@ -1066,6 +1012,7 @@ function createPropertyCard(property) {
     
     return card;
 }
+
 
 
 // FUNCIONES PARA MAPAS - VERSIÓN CON IDS
@@ -1571,9 +1518,7 @@ function scrollToProperty(propertyId) {
 
 
 
-// ========================================
-// 12.1 ESTILOS PARA MAPAS
-// ========================================
+// Función para manejar estilos del mapa container
 function initializeMapStyles() {
     const style = document.createElement('style');
     style.textContent = `
@@ -1605,47 +1550,23 @@ document.addEventListener('DOMContentLoaded', initializeMapStyles);
 
 function displayProperties(properties) {
     const container = document.getElementById('properties-container');
-    if (!container) {
-        console.error('❌ ERROR: No se encontró #properties-container');
-        return;
-    }
-    
-    console.log(`📊 Displaying ${properties.length} properties`);
+    if (!container) return;
     
     container.innerHTML = '';
     
     if (properties.length === 0) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: #666;">
-                <div style="font-size: 48px; margin-bottom: 20px;">🏠</div>
-                <h3>No se encontraron propiedades</h3>
-                <p>Intenta con otros filtros de búsqueda</p>
-            </div>
-        `;
+        container.innerHTML = '<p style="text-align: center; color: #666;">No se encontraron propiedades</p>';
         updateResultsCount(0);
         return;
     }
     
-    // DEBUG: Mostrar qué propiedades se van a mostrar
-    console.log('🎯 Propiedades a mostrar:');
-    properties.forEach((prop, index) => {
-        console.log(`  ${index + 1}. ${prop.titulo} - Fotos: ${prop.fotos ? prop.fotos.length : 0}`);
-    });
-    
     properties.forEach(property => {
-        try {
-            const card = createPropertyCard(property);
-            if (card) {
-                container.appendChild(card);
-                console.log(`✅ Tarjeta creada: ${property.titulo}`);
-            }
-        } catch (error) {
-            console.error(`❌ Error creando tarjeta para ${property.titulo}:`, error);
-        }
+        const card = createPropertyCard(property);
+        container.appendChild(card);
     });
     
     updateResultsCount(properties.length);
-    console.log('✅ Display completado');
+    console.log('📋 Mostrando', properties.length, 'propiedades');
 }
 
 function updateResultsCount(count) {
@@ -1927,8 +1848,6 @@ function createDetailsModal(property, detalles = {}) {
 
                         // En createDetailsModal(), alrededor de donde está el tab "Ubicación":
 
-                        // En la sección del tab-location dentro de createDetailsModal:
-                        // En la sección del tab-location dentro de createDetailsModal:
                         <!-- TAB 3: UBICACIÓN -->
                         <div class="tab-content" id="tab-location">
                             <div class="location-section">
@@ -1940,31 +1859,22 @@ function createDetailsModal(property, detalles = {}) {
                                     </div>
                                 </div>
                                 
-                                <div class="map-button-container" style="display: flex; gap: 10px; margin-top: 15px;">
-                                    <!-- BOTÓN 1: Ver mapa completo (INTERNO) -->
-                                    <button onclick="showPropertyMapFromDetails('${property.id_temporal}', '${property.direccion_completa || property.direccion || property.barrio}', '${property.titulo}')" 
-                                            class="btn-map-primary"
-                                            style="flex: 1; padding: 12px; background: #232deb; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.3s;"
-                                            onmouseover="this.style.background='#1a1db4'; this.style.transform='translateY(-2px)'"
-                                            onmouseout="this.style.background='#232deb'; this.style.transform='translateY(0)'">
+                                <div class="map-button-container">
+                                    // En createDetailsModal, cambia el botón:
+                                    <button onclick="showPropertyMap('${property.id_temporal}', '${property.direccion_completa || property.direccion || property.barrio}', '${property.titulo}')" 
+                                            class="btn-map-primary">
                                         🗺️ Ver mapa completo
                                     </button>
                                     
-                                    <!-- BOTÓN 2: Cómo llegar (EXTERNO - NUEVO) -->
+                                    <!-- AQUÍ VA EL NUEVO BOTÓN "CÓMO LLEGAR" -->
                                     <button onclick="openDirectionsFromDetails('${property.id_temporal}', '${encodeURIComponent(property.direccion_completa || property.direccion || property.barrio)}', '${property.titulo}')" 
-                                            class="btn-directions"
-                                            style="flex: 1; padding: 12px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.3s;"
-                                            onmouseover="this.style.background='#218838'; this.style.transform='translateY(-2px)'"
-                                            onmouseout="this.style.background='#28a745'; this.style.transform='translateY(0)'">
+                                            class="btn-directions">
                                         🚗 Cómo llegar
                                     </button>
                                 </div>
-                                
-                                <div style="margin-top: 10px; font-size: 12px; color: #6c757d; text-align: center;">
-                                    <small>"Ver mapa completo" abre dentro del sitio | "Cómo llegar" abre Google Maps en nueva pestaña</small>
-                                </div>
                             </div>
                         </div>
+                        
                         <!-- TAB 4: MULTIMEDIA COMPLETA -->
                         <div class="tab-content" id="tab-multimedia">
                             <div class="multimedia-section">
@@ -2149,107 +2059,15 @@ function createDetailsModal(property, detalles = {}) {
     console.log('✅ Modal de detalles creado');
 }
 
-// ========================================
-// AGREGAR ESTOS ESTILOS A addBackButtonStyles O UNA FUNCIÓN SEPARADA
-// ========================================
-function addMapButtonStyles() {
-    if (!document.querySelector('#map-button-styles')) {
-        const styles = document.createElement('style');
-        styles.id = 'map-button-styles';
-        styles.textContent = `
-            /* Estilos para botones de mapa en modal de detalles */
-            .map-button-container {
-                display: flex;
-                gap: 10px;
-                margin-top: 15px;
-                flex-wrap: wrap;
-            }
-            
-            .btn-map-primary, .btn-directions {
-                flex: 1;
-                min-width: 150px;
-                padding: 12px 16px;
-                border: none;
-                border-radius: 6px;
-                cursor: pointer;
-                font-weight: 600;
-                font-size: 14px;
-                transition: all 0.3s ease;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 8px;
-            }
-            
-            .btn-map-primary {
-                background: #232deb;
-                color: white;
-            }
-            
-            .btn-map-primary:hover {
-                background: #1a1db4;
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(35, 45, 235, 0.3);
-            }
-            
-            .btn-directions {
-                background: #28a745;
-                color: white;
-            }
-            
-            .btn-directions:hover {
-                background: #218838;
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-            }
-            
-            /* Responsive */
-            @media (max-width: 480px) {
-                .map-button-container {
-                    flex-direction: column;
-                }
-                
-                .btn-map-primary, .btn-directions {
-                    width: 100%;
-                }
-            }
-        `;
-        document.head.appendChild(styles);
-        console.log('✅ Estilos de botones de mapa cargados');
-    }
+
+
+
+// Función para abrir indicaciones
+function openDirections(propertyId, address) {
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${address}`;
+    window.open(url, '_blank');
 }
 
-// ========================================
-// FUNCIÓN showPropertyMapFromDetails - ACTUALIZADA
-// ========================================
-function showPropertyMapFromDetails(propertyId, address, title) {
-    console.log('📍 showPropertyMapFromDetails invocada para:', propertyId);
-    
-    try {
-        // 1. Buscar la propiedad
-        const property = globalData.properties.find(p => p.id_temporal === propertyId);
-        if (!property) {
-            alert('Propiedad no encontrada');
-            return;
-        }
-        
-        const direccionFinal = address || property.direccion_completa || property.direccion || property.barrio;
-        const tituloFinal = title || property.titulo;
-        
-        // 2. Cerrar modal de detalles
-        closeDetailsModal();
-        
-        // 3. Esperar un momento para transición
-        setTimeout(() => {
-            // 4. Abrir mapa en modo búsqueda (fromDetails = true para no mostrar "Cómo llegar" duplicado)
-            showPropertyMap(propertyId, direccionFinal, tituloFinal, 'search', true);
-        }, 300);
-        
-    } catch (error) {
-        console.error('❌ Error en showPropertyMapFromDetails:', error);
-        alert('Error al abrir el mapa');
-    }
-}
 
 // Función para inicializar tabs
 function initializeDetailsTabs() {
@@ -2283,735 +2101,89 @@ function initializeDetailsTabs() {
 // En showPropertyMap (alrededor de línea 580), cambia:
 
 
-// ========================================
-// FUNCIÓN SIMPLIFICADA PARA MOSTRAR OVERLAY
-// ========================================
-function mostrarOverlaySimple(propertyId, titulo, direccion) {
-    console.log('🎨 Mostrando overlay simple...');
+// Agrega esta función en app.js:
+
+function openDirectionsFromDetails(propertyId, address, title) {
+    console.log('🚗 Abriendo "Cómo llegar" para:', propertyId);
     
-    // 1. Eliminar overlay anterior si existe
-    const overlayAnterior = document.getElementById('overlay-directions');
-    if (overlayAnterior) {
-        overlayAnterior.remove();
+    // 1. Cerrar modal de detalles si está abierto
+    if (typeof closeDetailsModal === 'function') {
+        closeDetailsModal();
     }
     
-    // 2. Crear overlay
-    const overlay = document.createElement('div');
-    overlay.id = 'overlay-directions';
-    
-    // 3. ESTILOS DIRECTOS E INLINE (sin CSS externo)
-    overlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.85);
-        z-index: 99999;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-        box-sizing: border-box;
-    `;
-    
-    // 4. Contenido del overlay
-    overlay.innerHTML = `
-        <div style="
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            max-width: 500px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-            animation: fadeIn 0.4s ease-out;
-        ">
-            <!-- Icono grande -->
-            <div style="font-size: 60px; margin-bottom: 15px; color: #28a745;">🚗</div>
-            
-            <!-- Título -->
-            <h2 style="margin: 0 0 10px 0; color: #232deb; font-size: 22px;">
-                Abriendo Google Maps...
-            </h2>
-            
-            <!-- Información de la propiedad -->
-            <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 10px;">
-                <p style="margin: 0 0 8px 0; color: #495057; font-weight: 600; font-size: 16px;">
-                    ${titulo}
-                </p>
-                <p style="margin: 0; color: #6c757d; font-size: 14px;">
-                    📍 ${direccion}
-                </p>
-            </div>
-            
-            <!-- Mensaje informativo -->
-            <div style="margin: 25px 0;">
-                <p style="color: #495057; font-size: 15px; line-height: 1.5; margin-bottom: 15px;">
-                    <strong>Google Maps</strong> se abrirá en una nueva pestaña con las indicaciones.
-                </p>
-                <p style="color: #6c757d; font-size: 14px;">
-                    Puedes consultar la ruta y luego volver aquí usando el botón de abajo.
-                </p>
-            </div>
-            
-            <!-- CONTENEDOR DE BOTONES -->
-            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 25px;">
-                <!-- Botón PRINCIPAL: Volver a Detalles -->
-                <button onclick="volverDesdeOverlay('${propertyId}')" 
-                        style="
-                            background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
-                            color: white;
-                            border: none;
-                            padding: 16px 24px;
-                            border-radius: 10px;
-                            font-size: 16px;
-                            font-weight: 700;
-                            cursor: pointer;
-                            transition: all 0.3s;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            gap: 10px;
-                            box-shadow: 0 6px 20px rgba(35, 45, 235, 0.3);
-                        "
-                        onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 10px 25px rgba(35, 45, 235, 0.4)'"
-                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 20px rgba(35, 45, 235, 0.3)'">
-                    <span style="font-size: 22px; font-weight: bold;">←</span>
-                    <span>Volver a los Detalles</span>
-                </button>
-                
-                <!-- Botón SECUNDARIO: Cerrar -->
-                <button onclick="cerrarOverlayActual()" 
-                        style="
-                            background: #6c757d;
-                            color: white;
-                            border: none;
-                            padding: 12px 20px;
-                            border-radius: 8px;
-                            font-size: 14px;
-                            font-weight: 600;
-                            cursor: pointer;
-                            transition: all 0.3s;
-                        "
-                        onmouseover="this.style.background='#5a6268'"
-                        onmouseout="this.style.background='#6c757d'">
-                    Cerrar este mensaje
-                </button>
-            </div>
-            
-            <!-- Pie informativo -->
-            <div style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #e9ecef;">
-                <p style="color: #adb5bd; font-size: 12px; margin: 0; line-height: 1.4;">
-                    💡 <strong>Tip:</strong> Mantén presionada Ctrl (o Cmd en Mac) al hacer clic en enlaces 
-                    para abrirlos en pestañas sin salir de esta página.
-                </p>
-            </div>
-        </div>
-    `;
-    
-    // 5. Agregar al DOM
-    document.body.appendChild(overlay);
-    document.body.style.overflow = 'hidden';
-    
-    console.log('✅ Overlay MOSTRADO correctamente');
-    
-    // 6. Agregar animación de entrada
+    // 2. Esperar un momento para transición
     setTimeout(() => {
-        const content = overlay.querySelector('div');
-        if (content) {
-            content.style.animation = 'fadeIn 0.4s ease-out';
-        }
-    }, 10);
-}
-
-// ========================================
-// FUNCIÓN PARA CERRAR OVERLAY ACTUAL
-// ========================================
-function cerrarOverlayActual() {
-    const overlay = document.getElementById('overlay-directions');
-    if (overlay) {
-        // Animación de salida
-        overlay.style.opacity = '0';
-        overlay.style.transition = 'opacity 0.3s ease';
+        // 3. Codificar la dirección
+        const encodedAddress = encodeURIComponent(decodeURIComponent(address));
         
-        setTimeout(() => {
-            overlay.remove();
-            document.body.style.overflow = 'auto';
-            console.log('✅ Overlay cerrado');
-        }, 300);
-    }
-}
-
-// ========================================
-// FUNCIÓN PARA VOLVER DESDE OVERLAY
-// ========================================
-function volverDesdeOverlay(propertyId) {
-    console.log('↩️ Volviendo desde overlay para propiedad:', propertyId);
-    
-    // 1. Cerrar overlay
-    cerrarOverlayActual();
-    
-    // 2. Buscar propiedad
-    const property = globalData.properties.find(p => p.id_temporal === propertyId);
-    if (property) {
-        // 3. Pequeño delay para transición suave
-        setTimeout(() => {
-            // 4. Volver a abrir los detalles
-            showPropertyDetails(propertyId);
-            console.log('✅ Volviendo a detalles de:', property.titulo);
-        }, 300);
-    } else {
-        console.error('❌ Propiedad no encontrada:', propertyId);
-        // Fallback: volver a la lista
-        backToProperties();
-    }
-}
-
-/ ========================================
-// FUNCIÓN PARA CERRAR MODAL DE DETALLES
-// ========================================
-function cerrarModalDetalles() {
-    const detallesModal = document.getElementById('property-details-modal');
-    if (detallesModal) {
-        detallesModal.remove();
-        document.body.style.overflow = 'auto';
-        console.log('✅ Modal de detalles cerrado');
-    }
-}
-
-
-// ========================================
-// FUNCIÓN openDirectionsFromDetails - CON BOTÓN VOLVER
-// ========================================
-function openDirectionsFromDetails(propertyId, encodedAddress, title) {
-    console.log('🚗 openDirectionsFromDetails - INICIANDO');
-    
-    try {
-        // 1. Decodificar la dirección
-        const direccion = decodeURIComponent(encodedAddress);
-        console.log('📍 Dirección decodificada:', direccion);
+        // 4. MOSTRAR EL BOTÓN VOLVER PRIMERO
+        showBackButtonNow(`${title} - Cómo llegar`);
         
-        // 2. Buscar la propiedad
-        const property = globalData.properties.find(p => p.id_temporal === propertyId);
-        if (!property) {
-            console.error('❌ Propiedad no encontrada');
-            alert('No se pudo encontrar la propiedad');
-            return;
-        }
+        // 5. Abrir Google Maps DIRECTIONS en nueva pestaña
+        const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
+        window.open(directionsUrl, '_blank');
         
-        // 3. Usar dirección de la propiedad
-        const direccionFinal = direccion || property.direccion_completa || property.direccion || property.barrio;
-        const tituloFinal = title || property.titulo;
+        console.log('✅ Google Maps Directions abierto');
         
-        console.log('✅ Datos preparados:', { tituloFinal, direccionFinal });
-        
-        // 4. Cerrar modal de detalles si existe
-        cerrarModalDetalles();
-        
-        // 5. MOSTRAR OVERLAY INMEDIATAMENTE (antes de abrir Google Maps)
-        mostrarOverlaySimple(propertyId, tituloFinal, direccionFinal);
-        
-        // 6. Crear URL para Google Maps
-        const direccionCodificada = encodeURIComponent(direccionFinal);
-        const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${direccionCodificada}`;
-        
-        console.log('🔗 URL de Google Maps:', directionsUrl);
-        
-        // 7. Abrir Google Maps en nueva pestaña (con retardo para que se vea el overlay)
-        setTimeout(() => {
-            const nuevaPestaña = window.open(directionsUrl, '_blank');
-            
-            if (nuevaPestaña) {
-                console.log('✅ Google Maps abierto en nueva pestaña');
-            } else {
-                console.warn('⚠️ Bloqueador detectado - Mostrar alternativa');
-                mostrarAlternativaManual(propertyId, tituloFinal, direccionFinal, directionsUrl);
-            }
-        }, 500); // Pequeño retardo para que se vea el overlay
-        
-    } catch (error) {
-        console.error('❌ Error crítico:', error);
-        mostrarErrorSimple(propertyId, title);
-    }
+    }, 300);
 }
 
 
-// ========================================
-// FUNCIÓN PARA MOSTRAR ERROR SIMPLE
-// ========================================
-function mostrarErrorSimple(propertyId, title) {
-    alert(`Error al abrir Google Maps para: ${title}\n\nPuedes buscar manualmente la dirección en maps.google.com`);
-    
-    // Intentar volver a los detalles
-    setTimeout(() => {
-        const property = globalData.properties.find(p => p.id_temporal === propertyId);
-        if (property) {
-            showPropertyDetails(propertyId);
-        }
-    }, 1000);
-}
+// Agrega esto en tu app.js, después de showPropertyMapFromDetails:
 
-// ========================================
-// AGREGAR ANIMACIÓN CSS (crítica para que funcione)
-// ========================================
-function agregarAnimacionesCSS() {
-    if (!document.querySelector('#animaciones-css')) {
-        const style = document.createElement('style');
-        style.id = 'animaciones-css';
-        style.textContent = `
-            @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(-30px) scale(0.95);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0) scale(1);
-                }
-            }
-            
-            @keyframes pulse {
-                0% { transform: scale(1); }
-                50% { transform: scale(1.05); }
-                100% { transform: scale(1); }
-            }
-            
-            .pulse-animation {
-                animation: pulse 2s infinite;
-            }
-        `;
-        document.head.appendChild(style);
-        console.log('✅ Animaciones CSS agregadas');
-    }
-}
+// Agrega esta función en tu app.js, después de showPropertyDetails:
 
-
-// ========================================
-// FUNCIÓN AUXILIAR: CREAR OVERLAY CON BOTÓN VOLVER
-// ========================================
-function crearOverlayConVolver(propertyId, titulo, direccion) {
-    // Limpiar overlay anterior si existe
-    const overlayAnterior = document.getElementById('directions-overlay');
-    if (overlayAnterior) {
-        overlayAnterior.remove();
-    }
-    
-    // Crear overlay
-    const overlay = document.createElement('div');
-    overlay.id = 'directions-overlay';
-    overlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.7);
-        z-index: 10000;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        backdrop-filter: blur(5px);
-    `;
-    
-    overlay.innerHTML = `
-        <div style="
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            animation: fadeIn 0.3s ease;
-        ">
-            <div style="margin-bottom: 20px;">
-                <div style="font-size: 48px; margin-bottom: 10px;">🚗</div>
-                <h3 style="margin: 0 0 10px 0; color: #28a745;">Cómo llegar</h3>
-                <p style="margin: 0; color: #666; font-size: 16px; font-weight: 600;">${titulo}</p>
-                <p style="margin: 5px 0 0 0; color: #888; font-size: 14px;">${direccion}</p>
-            </div>
-            
-            <div style="margin: 20px 0;">
-                <p style="color: #666; font-size: 14px; margin-bottom: 15px;">
-                    Se ha abierto Google Maps en una nueva pestaña.
-                    <br>Puedes consultar las indicaciones y luego volver aquí.
-                </p>
-            </div>
-            
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                <button onclick="volverADetallesDesdeDirections('${propertyId}')" 
-                        style="
-                            background: #232deb;
-                            color: white;
-                            border: none;
-                            padding: 14px;
-                            border-radius: 8px;
-                            font-size: 16px;
-                            font-weight: 600;
-                            cursor: pointer;
-                            transition: all 0.3s;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            gap: 10px;
-                        "
-                        onmouseover="this.style.background='#1a1db4'; this.style.transform='translateY(-2px)'"
-                        onmouseout="this.style.background='#232deb'; this.style.transform='translateY(0)'">
-                    <span style="font-size: 18px;">←</span> Volver a Detalles
-                </button>
-                
-                <button onclick="cerrarOverlayVolver()" 
-                        style="
-                            background: #6c757d;
-                            color: white;
-                            border: none;
-                            padding: 12px;
-                            border-radius: 8px;
-                            font-size: 14px;
-                            cursor: pointer;
-                            transition: all 0.3s;
-                        "
-                        onmouseover="this.style.background='#5a6268'"
-                        onmouseout="this.style.background='#6c757d'">
-                    Cerrar
-                </button>
-            </div>
-            
-            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
-                <p style="color: #999; font-size: 12px; margin: 0;">
-                    💡 <strong>Consejo:</strong> Mantén esta ventana abierta mientras usas Google Maps
-                </p>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(overlay);
-    document.body.style.overflow = 'hidden';
-    console.log('✅ Overlay con botón Volver creado');
-}
-
-
-// ========================================
-// FUNCIÓN PARA MOSTRAR ALTERNATIVA MANUAL
-// ========================================
-function mostrarAlternativaManual(propertyId, titulo, direccion, url) {
-    console.log('🔄 Mostrando alternativa manual');
-    
-    // Primero cerrar overlay anterior si existe
-    cerrarOverlayActual();
-    
-    const overlay = document.createElement('div');
-    overlay.id = 'overlay-alternativa';
-    overlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.9);
-        z-index: 99999;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-    `;
-    
-    overlay.innerHTML = `
-        <div style="
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            max-width: 500px;
-            width: 100%;
-            text-align: center;
-        ">
-            <div style="font-size: 60px; margin-bottom: 15px; color: #dc3545;">⚠️</div>
-            <h2 style="margin: 0 0 10px 0; color: #dc3545;">Bloqueador detectado</h2>
-            <p style="color: #666; margin-bottom: 20px;">Tu navegador bloqueó la ventana emergente.</p>
-            
-            <div style="margin: 20px 0; padding: 15px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
-                <p style="margin: 0; color: #856404; font-weight: 600;">${titulo}</p>
-                <p style="margin: 5px 0 0 0; color: #856404; font-size: 14px;">${direccion}</p>
-            </div>
-            
-            <a href="${url}" target="_blank" 
-               style="display: block; background: #28a745; color: white; 
-                      padding: 16px; border-radius: 8px; text-decoration: none;
-                      font-weight: 700; font-size: 16px; margin-bottom: 15px;
-                      transition: all 0.3s;"
-               onmouseover="this.style.background='#218838'; this.style.transform='translateY(-2px)'"
-               onmouseout="this.style.background='#28a745'; this.style.transform='translateY(0)'">
-                🔗 HAZ CLIC AQUÍ para abrir Google Maps
-            </a>
-            
-            <p style="color: #666; font-size: 13px; margin-bottom: 20px;">
-                Después de hacer clic, usa el botón de abajo para volver
-            </p>
-            
-            <div style="display: flex; gap: 10px;">
-                <button onclick="volverDesdeOverlay('${propertyId}')" 
-                        style="flex: 1; background: #232deb; color: white; border: none; 
-                               padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer;">
-                    ← Volver a Detalles
-                </button>
-                
-                <button onclick="cerrarOverlayActual()" 
-                        style="flex: 1; background: #6c757d; color: white; border: none; 
-                               padding: 12px; border-radius: 6px; cursor: pointer;">
-                    Cerrar
-                </button>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(overlay);
-}
-
-
-// ========================================
-// FUNCIÓN AUXILIAR: VOLVER A DETALLES
-// ========================================
-function volverADetallesDesdeDirections(propertyId) {
-    console.log('↩️ Volviendo a detalles desde Directions para:', propertyId);
-    
-    // 1. Cerrar overlay
-    cerrarOverlayVolver();
-    
-    // 2. Volver a mostrar la propiedad
-    const property = globalData.properties.find(p => p.id_temporal === propertyId);
-    if (property) {
-        // 3. Pequeño delay para transición suave
-        setTimeout(() => {
-            showPropertyDetails(propertyId);
-        }, 300);
-    } else {
-        console.error('❌ Propiedad no encontrada al volver:', propertyId);
-        backToProperties();
-    }
-}
-
-// ========================================
-// FUNCIÓN AUXILIAR: CERRAR OVERLAY
-// ========================================
-function cerrarOverlayVolver() {
-    const overlay = document.getElementById('directions-overlay');
-    if (overlay) {
-        overlay.remove();
-        document.body.style.overflow = 'auto';
-        console.log('✅ Overlay cerrado');
-    }
-}
-
-// ========================================
-// FUNCIÓN AUXILIAR: MOSTRAR FALLBACK MANUAL
-// ========================================
-function mostrarFallbackManual(propertyId, titulo, direccion, directionsUrl) {
-    const overlay = document.createElement('div');
-    overlay.id = 'directions-fallback';
-    overlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.8);
-        z-index: 10001;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        backdrop-filter: blur(8px);
-    `;
-    
-    overlay.innerHTML = `
-        <div style="
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            max-width: 450px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
-        ">
-            <div style="margin-bottom: 20px;">
-                <div style="font-size: 48px; margin-bottom: 10px;">⚠️</div>
-                <h3 style="margin: 0 0 10px 0; color: #dc3545;">Bloqueador detectado</h3>
-                <p style="margin: 0; color: #666;">Tu navegador bloqueó la ventana emergente.</p>
-            </div>
-            
-            <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-                <p style="margin: 0 0 10px 0; color: #495057; font-weight: 600;">${titulo}</p>
-                <p style="margin: 0; color: #6c757d; font-size: 14px;">${direccion}</p>
-            </div>
-            
-            <div style="margin: 20px 0;">
-                <a href="${directionsUrl}" target="_blank" 
-                   style="display: inline-block; background: #28a745; color: white; 
-                          padding: 14px 28px; border-radius: 8px; text-decoration: none;
-                          font-weight: 600; font-size: 16px; margin-bottom: 15px; width: 100%; box-sizing: border-box;"
-                   onmouseover="this.style.background='#218838'; this.style.transform='translateY(-2px)'"
-                   onmouseout="this.style.background='#28a745'; this.style.transform='translateY(0)'">
-                    🔗 Haz clic para abrir Google Maps
-                </a>
-                
-                <p style="color: #666; font-size: 13px; margin-top: 10px;">
-                    Después de hacer clic, usa "Volver a Detalles" para regresar
-                </p>
-            </div>
-            
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button onclick="volverADetallesDesdeDirections('${propertyId}')" 
-                        style="
-                            flex: 1;
-                            background: #232deb;
-                            color: white;
-                            border: none;
-                            padding: 12px;
-                            border-radius: 6px;
-                            font-weight: 600;
-                            cursor: pointer;
-                        ">
-                    ← Volver a Detalles
-                </button>
-                
-                <button onclick="this.parentElement.parentElement.parentElement.remove()" 
-                        style="
-                            flex: 1;
-                            background: #6c757d;
-                            color: white;
-                            border: none;
-                            padding: 12px;
-                            border-radius: 6px;
-                            cursor: pointer;
-                        ">
-                    Cerrar
-                </button>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(overlay);
-}
-
-// ========================================
-// FUNCIÓN AUXILIAR: MOSTRAR ERROR FALLBACK
-// ========================================
-function mostrarErrorFallback(propertyId, title) {
-    const fallback = document.createElement('div');
-    fallback.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 5px 30px rgba(0,0,0,0.3);
-        z-index: 10001;
-        text-align: center;
-        max-width: 400px;
-    `;
-    
-    fallback.innerHTML = `
-        <h3 style="margin-top: 0; color: #dc3545;">❌ Error</h3>
-        <p>No se pudo abrir Google Maps.</p>
-        
-        <div style="margin: 20px 0;">
-            <button onclick="volverADetallesDesdeDirections('${propertyId}')" 
-                    style="background: #232deb; color: white; border: none; 
-                           padding: 12px 24px; border-radius: 6px; cursor: pointer;
-                           font-weight: 600; margin-right: 10px;">
-                ← Volver a Detalles
-            </button>
-            
-            <button onclick="window.open('https://www.google.com/maps', '_blank')" 
-                    style="background: #28a745; color: white; border: none; 
-                           padding: 12px 24px; border-radius: 6px; cursor: pointer;">
-                🗺️ Abrir Google Maps
-            </button>
-        </div>
-        
-        <button onclick="this.parentElement.remove()" 
-                style="background: #6c757d; color: white; border: none; 
-                       padding: 8px 16px; border-radius: 4px; cursor: pointer;">
-            Cerrar
-        </button>
-    `;
-    
-    document.body.appendChild(fallback);
-}
-
-// ========================================
-// AGREGAR ESTILOS DE ANIMACIÓN
-// ========================================
-function agregarEstilosDirections() {
-    if (!document.querySelector('#directions-styles')) {
-        const styles = document.createElement('style');
-        styles.id = 'directions-styles';
-        styles.textContent = `
-            @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(-20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-            
-            #directions-overlay div, #directions-fallback div {
-                animation: fadeIn 0.3s ease;
-            }
-            
-            /* Efecto de pulsación para el botón principal */
-            @keyframes pulse {
-                0% { transform: scale(1); }
-                50% { transform: scale(1.05); }
-                100% { transform: scale(1); }
-            }
-            
-            .pulse-once {
-                animation: pulse 0.5s ease;
-            }
-        `;
-        document.head.appendChild(styles);
-        console.log('✅ Estilos de Directions cargados');
-    }
-}
 
 // ========================================
 // FUNCIÓN ÚNICA Y UNIFICADA PARA MOSTRAR MAPAS
 // ========================================
-function showPropertyMap(propertyId, address, title, mode = 'search', fromDetails = false) {
+function showPropertyMap(propertyId, address, title, mode = 'search') {
+    console.log('🗺️ showPropertyMap llamada con:', { propertyId, address, title, mode });
+    
     try {
+        // 1. Buscar la propiedad para obtener datos completos
         const property = globalData.properties.find(p => p.id_temporal === propertyId);
         if (!property) {
+            console.error('❌ Propiedad no encontrada:', propertyId);
             alert('Propiedad no encontrada');
             return;
         }
         
+        // 2. Usar direcciones prioritarias
         const direccionFinal = address || property.direccion_completa || property.direccion || property.barrio;
         const tituloFinal = title || property.titulo;
         
-        ocultarVistaPrincipal();
-        mostrarBotonVolverNow(tituloFinal);
+        console.log('📍 Dirección para mapa:', direccionFinal);
         
+        // 3. Ocultar elementos de la vista principal
+        ocultarVistaPrincipal();
+        
+        // 4. Mostrar el botón Volver
+        mostrarBotonVolver(tituloFinal);
+        
+        // 5. Mostrar el mapa según el modo
         if (mode === 'directions') {
-            mostrarMapaIndicaciones(propertyId, direccionFinal, tituloFinal, fromDetails);
+            mostrarMapaIndicaciones(propertyId, direccionFinal, tituloFinal);
         } else {
-            mostrarMapaBusqueda(propertyId, direccionFinal, tituloFinal, fromDetails);
+            mostrarMapaBusqueda(propertyId, direccionFinal, tituloFinal);
         }
         
+        // 6. Activar modo mapa
         activarModoMapa();
         
+        console.log('✅ Mapa mostrado correctamente en modo:', mode);
+        
     } catch (error) {
-        console.error('❌ Error en showPropertyMap:', error);
+        console.error('❌ Error crítico en showPropertyMap:', error);
+        // Fallback: abrir Google Maps en nueva pestaña
         const encodedAddress = encodeURIComponent(address || '');
         window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+        
+        // Volver a propiedades si falla
         setTimeout(backToProperties, 500);
     }
 }
+
 // ========================================
 // FUNCIONES AUXILIARES PARA MAPAS
 // ========================================
@@ -3034,51 +2206,44 @@ function ocultarVistaPrincipal() {
 }
 
 function mostrarBotonVolver(titulo) {
-    // Limpiar primero cualquier botón existente
-    limpiarBotonVolver();
+    let backButton = document.getElementById('mapBackButton');
     
-    // Crear nuevo botón
-    mapBackButton = document.createElement('div');
-    mapBackButton.id = 'mapBackButton';
-    mapBackButton.className = 'map-back-button';
-    mapBackButton.innerHTML = `
-        <button class="back-to-properties-btn" onclick="backToProperties()">
-            <span>←</span> ${titulo || 'Volver a Propiedades'}
-        </button>
+    if (!backButton) {
+        // Crear el botón si no existe
+        backButton = document.createElement('div');
+        backButton.id = 'mapBackButton';
+        backButton.className = 'map-back-button';
+        backButton.innerHTML = `
+            <button class="back-to-properties-btn" onclick="backToProperties()">
+                <span>←</span> ${titulo || 'Volver a Propiedades'}
+            </button>
+        `;
+        document.body.appendChild(backButton);
+    }
+    
+    // Aplicar estilos para mostrarlo
+    backButton.style.cssText = `
+        position: fixed !important;
+        top: 20px !important;
+        left: 20px !important;
+        z-index: 10000 !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        animation: slideInFromLeft 0.3s ease !important;
     `;
-    document.body.appendChild(mapBackButton);
     
-    // IMPORTANTE: NO mostrar todavía, solo agregar
-    console.log('✅ Botón Volver creado (inicialmente oculto)');
+    console.log('✅ Botón Volver mostrado para:', titulo);
 }
 
-// Y cuando realmente necesites MOSTRARLO:
-function mostrarBotonVolverNow(titulo) {
-    // Primero asegurar que exista
-    if (!mapBackButton) {
-        mostrarBotonVolver(titulo);
-    }
+function mostrarMapaBusqueda(propertyId, direccion, titulo) {
+    console.log('📍 Mostrando mapa de búsqueda para:', direccion);
     
-    // Ahora agregar la clase active para mostrarlo
-    if (mapBackButton) {
-        mapBackButton.classList.add('active');
-        mapBackButton.style.cssText = `
-            position: fixed !important;
-            top: 20px !important;
-            left: 20px !important;
-            z-index: 10000 !important;
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            animation: slideInFromLeft 0.3s ease !important;
-        `;
-        console.log('✅ Botón Volver MOSTRADO para:', titulo);
-    }
-}
-function mostrarMapaBusqueda(propertyId, direccion, titulo, fromDetails = false) {
+    // Limpiar mapa anterior si existe
     const existingMap = document.getElementById('fullscreen-map-container');
     if (existingMap) existingMap.remove();
     
+    // Crear contenedor del mapa
     const mapContainer = document.createElement('div');
     mapContainer.id = 'fullscreen-map-container';
     mapContainer.style.cssText = `
@@ -3091,17 +2256,11 @@ function mostrarMapaBusqueda(propertyId, direccion, titulo, fromDetails = false)
         z-index: 9998 !important;
     `;
     
+    // Codificar dirección para URL
     const encodedAddress = encodeURIComponent(direccion);
-    const mapUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodedAddress}&zoom=15`;
     
-    // SOLO mostrar "Cómo llegar" si NO viene del modal de detalles
-    const botonesAdicionales = fromDetails ? '' : `
-        <button onclick="cambiarModoMapa('${propertyId}', '${encodeURIComponent(direccion)}', '${encodeURIComponent(titulo)}', 'directions', true)"
-                style="background: #28a745; color: white; border: none; padding: 8px 12px; 
-                       border-radius: 4px; font-size: 12px; cursor: pointer; flex: 1;">
-            🚗 Cómo llegar
-        </button>
-    `;
+    // URL para Google Maps Embed (con API key válida)
+    const mapUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodedAddress}&zoom=15`;
     
     mapContainer.innerHTML = `
         <iframe 
@@ -3115,6 +2274,7 @@ function mostrarMapaBusqueda(propertyId, direccion, titulo, fromDetails = false)
             title="Ubicación de ${titulo}">
         </iframe>
         
+        <!-- Panel de información -->
         <div style="position: absolute; top: 80px; right: 20px; z-index: 9999;">
             <div style="background: rgba(255,255,255,0.95); padding: 15px; border-radius: 8px; 
                         box-shadow: 0 4px 20px rgba(0,0,0,0.2); max-width: 300px; border-left: 4px solid #232deb;">
@@ -3122,7 +2282,11 @@ function mostrarMapaBusqueda(propertyId, direccion, titulo, fromDetails = false)
                 <p style="margin: 0; color: #666; font-size: 14px; line-height: 1.4;">${direccion}</p>
                 
                 <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
-                    ${botonesAdicionales}
+                    <button onclick="cambiarModoMapa('${propertyId}', '${encodeURIComponent(direccion)}', '${encodeURIComponent(titulo)}', 'directions')"
+                            style="background: #28a745; color: white; border: none; padding: 8px 12px; 
+                                   border-radius: 4px; font-size: 12px; cursor: pointer; flex: 1;">
+                        🚗 Cómo llegar
+                    </button>
                     
                     <button onclick="backToProperties()"
                             style="background: #6c757d; color: white; border: none; padding: 8px 12px; 
@@ -3137,10 +2301,14 @@ function mostrarMapaBusqueda(propertyId, direccion, titulo, fromDetails = false)
     document.body.appendChild(mapContainer);
 }
 
-function mostrarMapaIndicaciones(propertyId, direccion, titulo, fromDetails = false) {
+function mostrarMapaIndicaciones(propertyId, direccion, titulo) {
+    console.log('🚗 Mostrando mapa de indicaciones para:', direccion);
+    
+    // Limpiar mapa anterior
     const existingMap = document.getElementById('fullscreen-map-container');
     if (existingMap) existingMap.remove();
     
+    // Crear contenedor
     const mapContainer = document.createElement('div');
     mapContainer.id = 'fullscreen-map-container';
     mapContainer.style.cssText = `
@@ -3154,16 +2322,9 @@ function mostrarMapaIndicaciones(propertyId, direccion, titulo, fromDetails = fa
     `;
     
     const encodedAddress = encodeURIComponent(direccion);
-    const directionsUrl = `https://www.google.com/maps/embed/v1/directions?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&origin=${encodedAddress}&destination=${encodedAddress}&mode=driving&zoom=15`;
     
-    // SOLO mostrar "Ver ubicación" si NO viene del modal de detalles
-    const botonesAdicionales = fromDetails ? '' : `
-        <button onclick="cambiarModoMapa('${propertyId}', '${encodeURIComponent(direccion)}', '${encodeURIComponent(titulo)}', 'search', true)"
-                style="background: #232deb; color: white; border: none; padding: 8px 12px; 
-                       border-radius: 4px; font-size: 12px; cursor: pointer; flex: 1;">
-            🗺️ Ver ubicación
-        </button>
-    `;
+    // URL para Google Maps Directions
+    const directionsUrl = `https://www.google.com/maps/embed/v1/directions?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&origin=${encodedAddress}&destination=${encodedAddress}&mode=driving&zoom=15`;
     
     mapContainer.innerHTML = `
         <iframe 
@@ -3177,6 +2338,7 @@ function mostrarMapaIndicaciones(propertyId, direccion, titulo, fromDetails = fa
             title="Cómo llegar a ${titulo}">
         </iframe>
         
+        <!-- Panel de información -->
         <div style="position: absolute; top: 80px; right: 20px; z-index: 9999;">
             <div style="background: rgba(255,255,255,0.95); padding: 15px; border-radius: 8px; 
                         box-shadow: 0 4px 20px rgba(0,0,0,0.2); max-width: 300px; border-left: 4px solid #28a745;">
@@ -3185,7 +2347,11 @@ function mostrarMapaIndicaciones(propertyId, direccion, titulo, fromDetails = fa
                 <p style="margin: 8px 0 0 0; color: #666; font-size: 13px;">${direccion}</p>
                 
                 <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
-                    ${botonesAdicionales}
+                    <button onclick="cambiarModoMapa('${propertyId}', '${encodeURIComponent(direccion)}', '${encodeURIComponent(titulo)}', 'search')"
+                            style="background: #232deb; color: white; border: none; padding: 8px 12px; 
+                                   border-radius: 4px; font-size: 12px; cursor: pointer; flex: 1;">
+                        🗺️ Ver ubicación
+                    </button>
                     
                     <button onclick="backToProperties()"
                             style="background: #6c757d; color: white; border: none; padding: 8px 12px; 
@@ -3200,14 +2366,17 @@ function mostrarMapaIndicaciones(propertyId, direccion, titulo, fromDetails = fa
     document.body.appendChild(mapContainer);
 }
 
-function cambiarModoMapa(propertyId, direccionCodificada, tituloCodificado, nuevoModo, fromDetails = false) {
+function cambiarModoMapa(propertyId, direccionCodificada, tituloCodificado, nuevoModo) {
+    // Decodificar parámetros
     const direccion = decodeURIComponent(direccionCodificada);
     const titulo = decodeURIComponent(tituloCodificado);
     
+    // Cerrar mapa actual
     const mapContainer = document.getElementById('fullscreen-map-container');
     if (mapContainer) mapContainer.remove();
     
-    showPropertyMap(propertyId, direccion, titulo, nuevoModo, fromDetails);
+    // Mostrar en nuevo modo
+    showPropertyMap(propertyId, direccion, titulo, nuevoModo);
 }
 
 function activarModoMapa() {
@@ -3220,9 +2389,9 @@ function activarModoMapa() {
 // ========================================
 
 function backToProperties() {
+    console.log('🏠 Volviendo a propiedades');
+    
     try {
-        console.log('🏠 Volviendo a propiedades - INICIANDO');
-        
         // 1. Mostrar elementos ocultos
         const elementsToShow = [
             '#properties-container',
@@ -3232,34 +2401,19 @@ function backToProperties() {
         
         elementsToShow.forEach(selector => {
             const element = document.querySelector(selector);
-            if (element) {
-                element.style.display = '';
-                console.log(`✅ Mostrando: ${selector}`);
-            }
+            if (element) element.style.display = '';
         });
         
-        // 2. OCULTAR COMPLETAMENTE el botón Volver
-        if (mapBackButton) {
-            mapBackButton.style.display = 'none';
-            mapBackButton.style.visibility = 'hidden';
-            mapBackButton.style.opacity = '0';
-            console.log('✅ Botón Volver OCULTADO completamente');
-        } else {
-            // También intentar ocultar por ID por si acaso
-            const backButtonById = document.getElementById('mapBackButton');
-            if (backButtonById) {
-                backButtonById.style.display = 'none';
-                backButtonById.style.visibility = 'hidden';
-                backButtonById.style.opacity = '0';
-            }
+        // 2. Ocultar botón Volver
+        const backButton = document.getElementById('mapBackButton');
+        if (backButton) {
+            backButton.style.display = 'none';
+            console.log('✅ Botón Volver ocultado');
         }
         
-        // 3. Eliminar mapa si existe
+        // 3. Eliminar mapa
         const mapContainer = document.getElementById('fullscreen-map-container');
-        if (mapContainer) {
-            mapContainer.remove();
-            console.log('🗺️ Mapa eliminado');
-        }
+        if (mapContainer) mapContainer.remove();
         
         // 4. Desactivar modo mapa
         document.body.classList.remove('map-view-active');
@@ -3267,19 +2421,13 @@ function backToProperties() {
         // 5. Scroll al inicio
         window.scrollTo({ top: 0, behavior: 'smooth' });
         
-        // 6. También ocultar cualquier modal de detalles que esté abierto
-        const detailsModal = document.getElementById('property-details-modal');
-        if (detailsModal) {
-            detailsModal.remove();
-            document.body.style.overflow = 'auto';
-        }
-        
         console.log('✅ Vuelta a propiedades exitosa');
         
     } catch (error) {
         console.error('❌ Error al volver a propiedades:', error);
     }
 }
+
 
 // Función para cerrar el modal
 function closeDetailsModal() {
@@ -3330,43 +2478,24 @@ function getDocumentType(fileName) {
 // ========================================
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🏠 Sistema Dante Propiedades cargando...');
+    console.log('🏠 Sistema Dante Propiedades - Sin errores + Slider cargando...');
+    console.log('🎯 Sistema de slider de múltiples fotos incluido');
+    console.log('✅ Sin dependencias de Font Awesome');
+    console.log('🎬 Sistema de multimedia activado');
     
-    // Cargar estilos
+    // Cargar CSS del slider
     addSliderStyles();
-    initializeMapStyles();
-    addBackButtonStyles();
-    addMapButtonStyles(); 
-    agregarEstilosDirections();
-    agregarAnimacionesCSS();
     
-    // Inicializar variables DOM
-    initializeVariables();
-    
-    // Cargar datos
+    // Cargar propiedades
     loadProperties();
     
-    // Configurar eventos
-    setupFilterEvents();
-    setupPdfEventListeners();
     
-    // Asegurar que el botón Volver NO exista al inicio
-    setTimeout(() => {
-        // Eliminar cualquier botón que pueda existir
-        const existingButton = document.getElementById('mapBackButton');
-        if (existingButton) {
-            existingButton.remove();
-            console.log('🗑️ Botón Volver existente eliminado');
-        }
-        
-        // Inicializar la variable como null
-        mapBackButton = null;
-        
-        console.log('✅ Inicialización completa - Botón Volver asegurado como null');
-    }, 100);
-    
-    console.log('✅ Sistema inicializado sin errores');
+    console.log('✅ Sistema inicializado sin errores de consola');
+    console.log('🎠 Slider de múltiples fotos disponible');
+    console.log('📄 Soporte para PDFs activado');
+    console.log('🎥 Soporte para videos activado');
 });
+
 // ========================================
 // VERIFICACIÓN DE RECURSOS
 // ========================================
@@ -3399,137 +2528,6 @@ window.addEventListener('load', function() {
     
     setTimeout(setupFilterEvents, 100);
 });
-
-// Función para limpiar completamente el botón Volver
-function limpiarBotonVolver() {
-    console.log('🧹 Limpiando botón Volver...');
-    
-    // 1. Remover por variable
-    if (mapBackButton) {
-        mapBackButton.remove();
-        mapBackButton = null;
-        console.log('✅ Botón Volver eliminado (variable)');
-    }
-    
-    // 2. Remover por ID por si acaso
-    const btnById = document.getElementById('mapBackButton');
-    if (btnById) {
-        btnById.remove();
-        console.log('✅ Botón Volver eliminado (por ID)');
-    }
-    
-    // 3. Remover cualquier otro elemento con clase similar
-    const btnByClass = document.querySelector('.map-back-button');
-    if (btnByClass) {
-        btnByClass.remove();
-        console.log('✅ Botón Volver eliminado (por clase)');
-    }
-}
-
-// ========================================
-// 12.2 ESTILOS PARA BOTÓN VOLVER (AQUÍ VA addBackButtonStyles)
-// ========================================
-function addBackButtonStyles() {
-    if (!document.querySelector('#map-back-styles')) {
-        const styles = document.createElement('style');
-        styles.id = 'map-back-styles';
-        styles.textContent = `
-            /* ========================================
-               BOTÓN VOLVER DESDE MAPA - VERSIÓN SEGURA
-               ======================================== */
-            
-            .map-back-button {
-                position: fixed !important;
-                top: 20px !important;
-                left: 20px !important;
-                z-index: 10000 !important;
-                animation: slideInFromLeft 0.3s ease !important;
-                /* IMPORTANTE: Inicialmente oculto */
-                display: none !important;
-                visibility: hidden !important;
-                opacity: 0 !important;
-            }
-            
-            /* Solo mostrar cuando tenga la clase active */
-            .map-back-button.active {
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-            }
-            
-            @keyframes slideInFromLeft {
-                from {
-                    opacity: 0;
-                    transform: translateX(-20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateX(0);
-                }
-            }
-            
-            .back-to-properties-btn {
-                background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
-                color: white;
-                border: none;
-                padding: 12px 20px;
-                border-radius: 25px;
-                font-size: 14px;
-                font-weight: 600;
-                cursor: pointer;
-                box-shadow: 0 4px 20px rgba(35, 45, 235, 0.4);
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                transition: all 0.3s ease;
-                backdrop-filter: blur(10px);
-                border: 2px solid rgba(255, 255, 255, 0.2);
-            }
-            
-            .back-to-properties-btn:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 6px 25px rgba(35, 45, 235, 0.6);
-                background: linear-gradient(135deg, #1a1db4 0%, #232deb 100%);
-            }
-            
-            .back-to-properties-btn:active {
-                transform: translateY(0);
-            }
-            
-            .back-to-properties-btn span {
-                font-size: 18px;
-                font-weight: bold;
-            }
-            
-            /* Responsive para móviles */
-            @media (max-width: 768px) {
-                .map-back-button {
-                    top: 15px !important;
-                    left: 15px !important;
-                }
-                
-                .back-to-properties-btn {
-                    padding: 10px 16px;
-                    font-size: 13px;
-                    border-radius: 20px;
-                }
-                
-                .back-to-properties-btn span {
-                    font-size: 16px;
-                }
-            }
-            
-            .map-view-active {
-                overflow: hidden;
-            }
-        `;
-        document.head.appendChild(styles);
-        console.log('✅ Estilos SEGUROS del botón Volver cargados');
-    }
-}
-
-
-
 
 // ========================================
 // SISTEMA DE MODAL DE IMÁGENES
@@ -5053,41 +4051,12 @@ function closePannellumModal() {
 // Agrega esto al final de tu app.js:
 
 // Ocultar botón "Volver a Propiedades" al cargar la página
-// ========================================
-// 2. INICIALIZACIÓN PRINCIPAL
-// ========================================
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🏠 Sistema Dante Propiedades cargando...');
-    
-    // Cargar estilos (EN ESTE ORDEN)
-    addSliderStyles();          // Primero estilos del slider
-    initializeMapStyles();      // Luego estilos de mapas
-    addBackButtonStyles();      // FINALMENTE estilos del botón Volver (aquí va)
-    
-    // Inicializar variables DOM
-    initializeVariables();
-    
-    // Cargar datos
-    loadProperties();
-    
-    // Configurar eventos
-    setupFilterEvents();
-    setupPdfEventListeners();
-    
-    // Asegurar que el botón Volver NO exista al inicio
     setTimeout(() => {
-        // Eliminar cualquier botón que pueda existir
-        const existingButton = document.getElementById('mapBackButton');
-        if (existingButton) {
-            existingButton.remove();
-            console.log('🗑️ Botón Volver existente eliminado');
+        const backButton = document.getElementById('mapBackButton');
+        if (backButton) {
+            backButton.style.display = 'none';
+            console.log('✅ Botón Volver ocultado al cargar página');
         }
-        
-        // Inicializar la variable como null
-        mapBackButton = null;
-        
-        console.log('✅ Inicialización completa - Botón Volver asegurado como null');
-    }, 100);
-    
-    console.log('✅ Sistema inicializado sin errores');
+    }, 1000);
 });
