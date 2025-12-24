@@ -3083,6 +3083,52 @@ function generateFallbackResults(queries) {
     };
 }
 
+// FUNCIÓN DE TEST PARA DIAGNOSTICAR EL PROBLEMA
+function testAIEnvironment() {
+    console.log('🧪 INICIANDO TEST DE IA...');
+    
+    // Simular datos de una propiedad
+    const testDireccion = "Av. Santa Fe 1234";
+    const testBarrio = "Palermo";
+    
+    console.log('🔍 Test para:', testBarrio);
+    
+    // Test de performParallelSearches
+    const testQueries = [
+        `${testBarrio} Buenos Aires servicios cerca farmacias heladerías`,
+        `${testBarrio} transporte público subte colectivo líneas`,
+        `${testBarrio} escuelas colegios universidades educación`,
+        `${testBarrio} hospitales clínicas centros médicos salud`,
+        `${testBarrio} supermercados centros comerciales compras`,
+        `${testBarrio} restaurantes cafeterías gastronomía comida`,
+        `${testBarrio} parques plazas espacios verdes recreación`,
+        `${testBarrio} bancos cajeros automáticos servicios financieros`
+    ];
+    
+    console.log('🔍 Consultas de test:', testQueries);
+    
+    // Ejecutar performParallelSearches
+    performParallelSearches(testQueries).then(testResults => {
+        console.log('✅ Test resultados de IA:', testResults);
+        console.log('🔧 Test - Resultados servicios:', testResults.servicios);
+        console.log('🔧 Test - Resultados transporte:', testResults.transporte);
+        
+        // Test de processEnvironmentData
+        const testEnvironmentData = processEnvironmentData(testResults, testDireccion, testBarrio);
+        console.log('🎯 Test - Datos procesados:', testEnvironmentData);
+        console.log('📊 Test - Categorías:', Object.keys(testEnvironmentData.categories));
+        
+        // Test de items por categoría
+        Object.keys(testEnvironmentData.categories).forEach(cat => {
+            console.log(`✅ ${cat}:`, testEnvironmentData.categories[cat].items);
+        });
+        
+        console.log('🎉 TEST COMPLETADO - Si ves datos diferentes arriba, la IA está funcionando');
+    }).catch(error => {
+        console.error('❌ Error en test:', error);
+    });
+}
+
 // Procesar y estructurar datos del entorno (AHORA USA RESPUESTAS REALES DE IA)
 function processEnvironmentData(searchResults, direccion, barrio) {
     console.log('🔧 PROCESANDO DATOS REALES DE IA:', searchResults);
@@ -3925,3 +3971,10 @@ window.createPropertyPanelSimple = createPropertyPanelSimple;
 window.closePropertyPanelSimple = closePropertyPanelSimple;
 
 console.log('✅ Panel simple de respaldo cargado');
+
+// Inicialización automática para testing de IA
+console.log('🚀 Sistema de IA iniciado. Ejecutando test automático...');
+setTimeout(() => {
+    console.log('🧪 Ejecutando test de IA automáticamente...');
+    testAIEnvironment();
+}, 2000);
