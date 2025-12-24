@@ -846,7 +846,7 @@ function createPropertyCard(property) {
                 </div>
             </div>
             
-            onclick="openSlidingPanel('${property.id_temporal}')"
+            onclick="testPanelFunction('${property.id_temporal}')"
                     style="width: 100% !important; background: #232deb !important; color: white !important; 
                            border: none !important; padding: 12px !important; border-radius: 6px !important; 
                            font-size: 14px !important; font-weight: 600 !important; cursor: pointer !important; 
@@ -3559,6 +3559,72 @@ function logPanelState() {
     });
 }
 
+
+
+function testPanelFunction(propertyId) {
+    console.log('🧪 Test function called for:', propertyId);
+    
+    // Verificar datos
+    if (typeof globalData === 'undefined') {
+        alert('Error: globalData no disponible');
+        return;
+    }
+    
+    const property = globalData.properties?.find(p => p.id_temporal === propertyId);
+    if (!property) {
+        alert('Propiedad no encontrada: ' + propertyId);
+        return;
+    }
+    
+    // Crear panel simple
+    createSimplePanel(property);
+}
+
+function createSimplePanel(property) {
+    // Crear overlay
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;';
+    
+    // Crear panel
+    const panel = document.createElement('div');
+    panel.style.cssText = 'position: fixed; top: 0; right: 0; width: 400px; height: 100%; background: white; z-index: 1001; padding: 20px; overflow-y: auto;';
+    
+    panel.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0; color: #232deb;">${property.titulo}</h2>
+            <button onclick="this.closest('[style*=position\\: fixed]').remove()" 
+                    style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
+        </div>
+        <div style="margin-bottom: 20px;">
+            <strong>Precio:</strong> ${property.moneda_precio} ${property.precio?.toLocaleString() || 'Consultar'}
+        </div>
+        <div style="margin-bottom: 20px;">
+            <strong>Ubicación:</strong> ${property.direccion}, ${property.barrio}
+        </div>
+        <div style="margin-bottom: 20px;">
+            <strong>Características:</strong><br>
+            • ${property.ambientes} ambientes<br>
+            • ${property.metros_cuadrados} m²<br>
+            • ${property.estado}<br>
+            • ${property.tipo}
+        </div>
+        <div style="margin-top: 20px;">
+            <button onclick="alert('Función en desarrollo')" 
+                    style="background: #232deb; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; width: 100%;">
+                Ver Detalles Completos
+            </button>
+        </div>
+    `;
+    
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) {
+            overlay.remove();
+        }
+    });
+    
+    document.body.appendChild(overlay);
+    document.body.appendChild(panel);
+}
 // Exportar funciones para uso global
 window.openSlidingPanel = openSlidingPanel;
 window.closeSlidingPanel = closeSlidingPanel;
