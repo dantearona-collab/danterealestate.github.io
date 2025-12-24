@@ -3298,7 +3298,6 @@ function processEnvironmentData(searchResults, direccion, barrio) {
         aiGenerated: true // Flag para indicar que se usó IA real
     };
 }
-}
 
 // Mostrar loading mientras carga información
 function showEnvironmentLoading() {
