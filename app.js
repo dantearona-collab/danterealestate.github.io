@@ -539,6 +539,9 @@ function nextSlide(propertyId) {
 }
 
 // CSS para el slider (agregar al head)
+// ========================================
+// 12. SISTEMA DE SLIDER - ESTILOS
+// ========================================
 function addSliderStyles() {
     const style = document.createElement('style');
     style.textContent = `
@@ -1518,7 +1521,9 @@ function scrollToProperty(propertyId) {
 
 
 
-// Función para manejar estilos del mapa container
+// ========================================
+// 12.1 ESTILOS PARA MAPAS
+// ========================================
 function initializeMapStyles() {
     const style = document.createElement('style');
     style.textContent = `
@@ -2138,52 +2143,36 @@ function openDirectionsFromDetails(propertyId, address, title) {
 // FUNCIÓN ÚNICA Y UNIFICADA PARA MOSTRAR MAPAS
 // ========================================
 function showPropertyMap(propertyId, address, title, mode = 'search') {
-    console.log('🗺️ showPropertyMap llamada con:', { propertyId, address, title, mode });
-    
     try {
-        // 1. Buscar la propiedad para obtener datos completos
         const property = globalData.properties.find(p => p.id_temporal === propertyId);
         if (!property) {
-            console.error('❌ Propiedad no encontrada:', propertyId);
             alert('Propiedad no encontrada');
             return;
         }
         
-        // 2. Usar direcciones prioritarias
         const direccionFinal = address || property.direccion_completa || property.direccion || property.barrio;
         const tituloFinal = title || property.titulo;
         
-        console.log('📍 Dirección para mapa:', direccionFinal);
-        
-        // 3. Ocultar elementos de la vista principal
         ocultarVistaPrincipal();
         
-        // 4. Mostrar el botón Volver
-        mostrarBotonVolver(tituloFinal);
+        // USAR LA NUEVA FUNCIÓN QUE SOLO MUESTRA CUANDO ES NECESARIO
+        mostrarBotonVolverNow(tituloFinal);
         
-        // 5. Mostrar el mapa según el modo
         if (mode === 'directions') {
             mostrarMapaIndicaciones(propertyId, direccionFinal, tituloFinal);
         } else {
             mostrarMapaBusqueda(propertyId, direccionFinal, tituloFinal);
         }
         
-        // 6. Activar modo mapa
         activarModoMapa();
         
-        console.log('✅ Mapa mostrado correctamente en modo:', mode);
-        
     } catch (error) {
-        console.error('❌ Error crítico en showPropertyMap:', error);
-        // Fallback: abrir Google Maps en nueva pestaña
+        console.error('❌ Error en showPropertyMap:', error);
         const encodedAddress = encodeURIComponent(address || '');
         window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
-        
-        // Volver a propiedades si falla
         setTimeout(backToProperties, 500);
     }
 }
-
 // ========================================
 // FUNCIONES AUXILIARES PARA MAPAS
 // ========================================
@@ -2206,36 +2195,47 @@ function ocultarVistaPrincipal() {
 }
 
 function mostrarBotonVolver(titulo) {
-    let backButton = document.getElementById('mapBackButton');
+    // Limpiar primero cualquier botón existente
+    limpiarBotonVolver();
     
-    if (!backButton) {
-        // Crear el botón si no existe
-        backButton = document.createElement('div');
-        backButton.id = 'mapBackButton';
-        backButton.className = 'map-back-button';
-        backButton.innerHTML = `
-            <button class="back-to-properties-btn" onclick="backToProperties()">
-                <span>←</span> ${titulo || 'Volver a Propiedades'}
-            </button>
-        `;
-        document.body.appendChild(backButton);
-    }
-    
-    // Aplicar estilos para mostrarlo
-    backButton.style.cssText = `
-        position: fixed !important;
-        top: 20px !important;
-        left: 20px !important;
-        z-index: 10000 !important;
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        animation: slideInFromLeft 0.3s ease !important;
+    // Crear nuevo botón
+    mapBackButton = document.createElement('div');
+    mapBackButton.id = 'mapBackButton';
+    mapBackButton.className = 'map-back-button';
+    mapBackButton.innerHTML = `
+        <button class="back-to-properties-btn" onclick="backToProperties()">
+            <span>←</span> ${titulo || 'Volver a Propiedades'}
+        </button>
     `;
+    document.body.appendChild(mapBackButton);
     
-    console.log('✅ Botón Volver mostrado para:', titulo);
+    // IMPORTANTE: NO mostrar todavía, solo agregar
+    console.log('✅ Botón Volver creado (inicialmente oculto)');
 }
 
+// Y cuando realmente necesites MOSTRARLO:
+function mostrarBotonVolverNow(titulo) {
+    // Primero asegurar que exista
+    if (!mapBackButton) {
+        mostrarBotonVolver(titulo);
+    }
+    
+    // Ahora agregar la clase active para mostrarlo
+    if (mapBackButton) {
+        mapBackButton.classList.add('active');
+        mapBackButton.style.cssText = `
+            position: fixed !important;
+            top: 20px !important;
+            left: 20px !important;
+            z-index: 10000 !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            animation: slideInFromLeft 0.3s ease !important;
+        `;
+        console.log('✅ Botón Volver MOSTRADO para:', titulo);
+    }
+}
 function mostrarMapaBusqueda(propertyId, direccion, titulo) {
     console.log('📍 Mostrando mapa de búsqueda para:', direccion);
     
@@ -2389,9 +2389,9 @@ function activarModoMapa() {
 // ========================================
 
 function backToProperties() {
-    console.log('🏠 Volviendo a propiedades');
-    
     try {
+        console.log('🏠 Volviendo a propiedades - INICIANDO');
+        
         // 1. Mostrar elementos ocultos
         const elementsToShow = [
             '#properties-container',
@@ -2401,19 +2401,34 @@ function backToProperties() {
         
         elementsToShow.forEach(selector => {
             const element = document.querySelector(selector);
-            if (element) element.style.display = '';
+            if (element) {
+                element.style.display = '';
+                console.log(`✅ Mostrando: ${selector}`);
+            }
         });
         
-        // 2. Ocultar botón Volver
-        const backButton = document.getElementById('mapBackButton');
-        if (backButton) {
-            backButton.style.display = 'none';
-            console.log('✅ Botón Volver ocultado');
+        // 2. OCULTAR COMPLETAMENTE el botón Volver
+        if (mapBackButton) {
+            mapBackButton.style.display = 'none';
+            mapBackButton.style.visibility = 'hidden';
+            mapBackButton.style.opacity = '0';
+            console.log('✅ Botón Volver OCULTADO completamente');
+        } else {
+            // También intentar ocultar por ID por si acaso
+            const backButtonById = document.getElementById('mapBackButton');
+            if (backButtonById) {
+                backButtonById.style.display = 'none';
+                backButtonById.style.visibility = 'hidden';
+                backButtonById.style.opacity = '0';
+            }
         }
         
-        // 3. Eliminar mapa
+        // 3. Eliminar mapa si existe
         const mapContainer = document.getElementById('fullscreen-map-container');
-        if (mapContainer) mapContainer.remove();
+        if (mapContainer) {
+            mapContainer.remove();
+            console.log('🗺️ Mapa eliminado');
+        }
         
         // 4. Desactivar modo mapa
         document.body.classList.remove('map-view-active');
@@ -2421,13 +2436,19 @@ function backToProperties() {
         // 5. Scroll al inicio
         window.scrollTo({ top: 0, behavior: 'smooth' });
         
+        // 6. También ocultar cualquier modal de detalles que esté abierto
+        const detailsModal = document.getElementById('property-details-modal');
+        if (detailsModal) {
+            detailsModal.remove();
+            document.body.style.overflow = 'auto';
+        }
+        
         console.log('✅ Vuelta a propiedades exitosa');
         
     } catch (error) {
         console.error('❌ Error al volver a propiedades:', error);
     }
 }
-
 
 // Función para cerrar el modal
 function closeDetailsModal() {
@@ -2478,24 +2499,40 @@ function getDocumentType(fileName) {
 // ========================================
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🏠 Sistema Dante Propiedades - Sin errores + Slider cargando...');
-    console.log('🎯 Sistema de slider de múltiples fotos incluido');
-    console.log('✅ Sin dependencias de Font Awesome');
-    console.log('🎬 Sistema de multimedia activado');
+    console.log('🏠 Sistema Dante Propiedades cargando...');
     
-    // Cargar CSS del slider
+    // Cargar estilos
     addSliderStyles();
+    initializeMapStyles();
+    addBackButtonStyles();
     
-    // Cargar propiedades
+    // Inicializar variables DOM
+    initializeVariables();
+    
+    // Cargar datos
     loadProperties();
     
+    // Configurar eventos
+    setupFilterEvents();
+    setupPdfEventListeners();
     
-    console.log('✅ Sistema inicializado sin errores de consola');
-    console.log('🎠 Slider de múltiples fotos disponible');
-    console.log('📄 Soporte para PDFs activado');
-    console.log('🎥 Soporte para videos activado');
+    // Asegurar que el botón Volver NO exista al inicio
+    setTimeout(() => {
+        // Eliminar cualquier botón que pueda existir
+        const existingButton = document.getElementById('mapBackButton');
+        if (existingButton) {
+            existingButton.remove();
+            console.log('🗑️ Botón Volver existente eliminado');
+        }
+        
+        // Inicializar la variable como null
+        mapBackButton = null;
+        
+        console.log('✅ Inicialización completa - Botón Volver asegurado como null');
+    }, 100);
+    
+    console.log('✅ Sistema inicializado sin errores');
 });
-
 // ========================================
 // VERIFICACIÓN DE RECURSOS
 // ========================================
@@ -2528,6 +2565,137 @@ window.addEventListener('load', function() {
     
     setTimeout(setupFilterEvents, 100);
 });
+
+// Función para limpiar completamente el botón Volver
+function limpiarBotonVolver() {
+    console.log('🧹 Limpiando botón Volver...');
+    
+    // 1. Remover por variable
+    if (mapBackButton) {
+        mapBackButton.remove();
+        mapBackButton = null;
+        console.log('✅ Botón Volver eliminado (variable)');
+    }
+    
+    // 2. Remover por ID por si acaso
+    const btnById = document.getElementById('mapBackButton');
+    if (btnById) {
+        btnById.remove();
+        console.log('✅ Botón Volver eliminado (por ID)');
+    }
+    
+    // 3. Remover cualquier otro elemento con clase similar
+    const btnByClass = document.querySelector('.map-back-button');
+    if (btnByClass) {
+        btnByClass.remove();
+        console.log('✅ Botón Volver eliminado (por clase)');
+    }
+}
+
+// ========================================
+// 12.2 ESTILOS PARA BOTÓN VOLVER (AQUÍ VA addBackButtonStyles)
+// ========================================
+function addBackButtonStyles() {
+    if (!document.querySelector('#map-back-styles')) {
+        const styles = document.createElement('style');
+        styles.id = 'map-back-styles';
+        styles.textContent = `
+            /* ========================================
+               BOTÓN VOLVER DESDE MAPA - VERSIÓN SEGURA
+               ======================================== */
+            
+            .map-back-button {
+                position: fixed !important;
+                top: 20px !important;
+                left: 20px !important;
+                z-index: 10000 !important;
+                animation: slideInFromLeft 0.3s ease !important;
+                /* IMPORTANTE: Inicialmente oculto */
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+            }
+            
+            /* Solo mostrar cuando tenga la clase active */
+            .map-back-button.active {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+            
+            @keyframes slideInFromLeft {
+                from {
+                    opacity: 0;
+                    transform: translateX(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+            
+            .back-to-properties-btn {
+                background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
+                color: white;
+                border: none;
+                padding: 12px 20px;
+                border-radius: 25px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                box-shadow: 0 4px 20px rgba(35, 45, 235, 0.4);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+                border: 2px solid rgba(255, 255, 255, 0.2);
+            }
+            
+            .back-to-properties-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 25px rgba(35, 45, 235, 0.6);
+                background: linear-gradient(135deg, #1a1db4 0%, #232deb 100%);
+            }
+            
+            .back-to-properties-btn:active {
+                transform: translateY(0);
+            }
+            
+            .back-to-properties-btn span {
+                font-size: 18px;
+                font-weight: bold;
+            }
+            
+            /* Responsive para móviles */
+            @media (max-width: 768px) {
+                .map-back-button {
+                    top: 15px !important;
+                    left: 15px !important;
+                }
+                
+                .back-to-properties-btn {
+                    padding: 10px 16px;
+                    font-size: 13px;
+                    border-radius: 20px;
+                }
+                
+                .back-to-properties-btn span {
+                    font-size: 16px;
+                }
+            }
+            
+            .map-view-active {
+                overflow: hidden;
+            }
+        `;
+        document.head.appendChild(styles);
+        console.log('✅ Estilos SEGUROS del botón Volver cargados');
+    }
+}
+
+
+
 
 // ========================================
 // SISTEMA DE MODAL DE IMÁGENES
@@ -4051,12 +4219,41 @@ function closePannellumModal() {
 // Agrega esto al final de tu app.js:
 
 // Ocultar botón "Volver a Propiedades" al cargar la página
+// ========================================
+// 2. INICIALIZACIÓN PRINCIPAL
+// ========================================
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('🏠 Sistema Dante Propiedades cargando...');
+    
+    // Cargar estilos (EN ESTE ORDEN)
+    addSliderStyles();          // Primero estilos del slider
+    initializeMapStyles();      // Luego estilos de mapas
+    addBackButtonStyles();      // FINALMENTE estilos del botón Volver (aquí va)
+    
+    // Inicializar variables DOM
+    initializeVariables();
+    
+    // Cargar datos
+    loadProperties();
+    
+    // Configurar eventos
+    setupFilterEvents();
+    setupPdfEventListeners();
+    
+    // Asegurar que el botón Volver NO exista al inicio
     setTimeout(() => {
-        const backButton = document.getElementById('mapBackButton');
-        if (backButton) {
-            backButton.style.display = 'none';
-            console.log('✅ Botón Volver ocultado al cargar página');
+        // Eliminar cualquier botón que pueda existir
+        const existingButton = document.getElementById('mapBackButton');
+        if (existingButton) {
+            existingButton.remove();
+            console.log('🗑️ Botón Volver existente eliminado');
         }
-    }, 1000);
+        
+        // Inicializar la variable como null
+        mapBackButton = null;
+        
+        console.log('✅ Inicialización completa - Botón Volver asegurado como null');
+    }, 100);
+    
+    console.log('✅ Sistema inicializado sin errores');
 });
