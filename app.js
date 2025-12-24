@@ -853,7 +853,7 @@ function createPropertyCard(property) {
                            transition: all 0.3s ease !important; margin-top: 15px !important;"
                     onmouseover="this.style.background='#1a1db4' !important" 
                     onmouseout="this.style.background='#232deb' !important">
-                Ver Detalles
+                🔍 Ver Detalles
             </button>
         </div>
     `;
@@ -1388,10 +1388,43 @@ function applyFilters() {
 // FUNCIONES AUXILIARES
 // ========================================
 
+// REEMPLAZADA POR createPropertyPanel() - CON RESPALDO
 function showPropertyDetails(propertyId) {
+    console.log('🔧 showPropertyDetails llamada - Intentando panel completo');
+    
     const property = globalData.properties.find(p => p.id_temporal === propertyId);
     if (property) {
-        alert(`Detalles de ${property.titulo}\n\nPrecio: USD ${property.precio.toLocaleString()}\nBarrio: ${property.barrio}\nAmbientes: ${property.ambientes}\nDirección: ${property.direccion}\n\nFotos disponibles: ${property.fotos?.length || 0}`);
+        try {
+            // Intentar panel completo primero
+            console.log('🚀 Intentando createPropertyPanel completo...');
+            createPropertyPanel(
+                property.id_temporal, 
+                property.titulo, 
+                property.precio, 
+                property.moneda_precio || 'USD', 
+                property.direccion, 
+                property.barrio, 
+                property.ambientes, 
+                property.metros_cuadrados, 
+                property.estado, 
+                property.tipo
+            );
+        } catch (error) {
+            console.warn('⚠️ Panel completo falló, usando panel simple:', error);
+            // Fallback a panel simple
+            createPropertyPanelSimple(
+                property.id_temporal, 
+                property.titulo, 
+                property.precio, 
+                property.moneda_precio || 'USD', 
+                property.direccion, 
+                property.barrio, 
+                property.ambientes, 
+                property.metros_cuadrados, 
+                property.estado, 
+                property.tipo
+            );
+        }
     }
 }
 
@@ -3529,4 +3562,146 @@ function closePropertyPanel() {
 window.createPropertyPanel = createPropertyPanel;
 window.closePropertyPanel = closePropertyPanel;
 
-console.log('✅ Panel deslizable con entorno IA cargado');
+console.log('✅ Panel deslizable con entorno IA cargado');// ========================================
+// PANEL DESLIZABLE - VERSIÓN SIMPLE DE RESPALDO
+// ========================================
+
+// Versión simplificada por si la principal falla
+function createPropertyPanelSimple(id, titulo, precio, moneda, direccion, barrio, ambientes, metros, estado, tipo) {
+    console.log('🏠 Creando panel simple para:', titulo);
+    
+    // Cerrar panel anterior si existe
+    const existingPanel = document.getElementById('property-panel-simple');
+    if (existingPanel) {
+        existingPanel.remove();
+    }
+    
+    // Crear overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'property-panel-overlay-simple';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    `;
+    
+    // Crear panel
+    const panel = document.createElement('div');
+    panel.id = 'property-panel-simple';
+    panel.style.cssText = `
+        position: fixed;
+        top: 0;
+        right: -400px;
+        width: 400px;
+        height: 100%;
+        background: white;
+        box-shadow: -8px 0 25px rgba(0,0,0,0.15);
+        transition: right 0.4s ease;
+        z-index: 1000;
+        overflow-y: auto;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    `;
+    
+    panel.innerHTML = `
+        <!-- Header -->
+        <div style="padding: 20px; background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%); color: white; position: sticky; top: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; font-size: 18px;">${titulo}</h3>
+                <button onclick="closePropertyPanelSimple()" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 24px; cursor: pointer; padding: 5px; border-radius: 4px;">×</button>
+            </div>
+        </div>
+        
+        <!-- Contenido -->
+        <div style="padding: 20px;">
+            <!-- Precio -->
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+                <div style="font-size: 28px; font-weight: 700; color: #232deb;">${moneda} ${precio ? parseInt(precio).toLocaleString() : 'Consultar'}</div>
+            </div>
+            
+            <!-- Ubicación -->
+            <div style="margin-bottom: 20px;">
+                <div style="font-weight: 600; color: #495057; margin-bottom: 8px;">📍 ${direccion}</div>
+                <div style="color: #6c757d; font-size: 14px;">${barrio}, Argentina</div>
+            </div>
+            
+            <!-- Características -->
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px;">
+                <div style="text-align: center; padding: 10px; background: white; border: 1px solid #e9ecef; border-radius: 6px;">
+                    <div style="font-size: 20px; font-weight: 700; color: #232deb;">${ambientes}</div>
+                    <div style="font-size: 12px; color: #6c757d;">Ambientes</div>
+                </div>
+                <div style="text-align: center; padding: 10px; background: white; border: 1px solid #e9ecef; border-radius: 6px;">
+                    <div style="font-size: 20px; font-weight: 700; color: #232deb;">${metros}</div>
+                    <div style="font-size: 12px; color: #6c757d;">m²</div>
+                </div>
+                <div style="text-align: center; padding: 10px; background: white; border: 1px solid #e9ecef; border-radius: 6px;">
+                    <div style="font-size: 20px; font-weight: 700; color: #232deb;">${estado}</div>
+                    <div style="font-size: 12px; color: #6c757d;">Estado</div>
+                </div>
+                <div style="text-align: center; padding: 10px; background: white; border: 1px solid #e9ecef; border-radius: 6px;">
+                    <div style="font-size: 20px; font-weight: 700; color: #232deb;">${tipo}</div>
+                    <div style="font-size: 12px; color: #6c757d;">Tipo</div>
+                </div>
+            </div>
+            
+            <!-- Entorno del Barrio -->
+            <div style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%); border-radius: 8px; text-align: center;">
+                <div style="font-size: 32px; margin-bottom: 10px;">🌍</div>
+                <h4 style="margin: 0 0 10px 0; font-size: 16px; color: #495057;">¿Qué hay cerca?</h4>
+                <p style="margin: 0; font-size: 13px; color: #6c757d; margin-bottom: 10px;">Descubre servicios, transporte y más en el entorno.</p>
+                <button onclick="loadEnvironmentInfo('${direccion}', '${barrio}')" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none; padding: 10px 15px; border-radius: 6px; font-size: 13px; cursor: pointer;">
+                    🌍 Analizar Entorno con IA
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Agregar al DOM
+    document.body.appendChild(overlay);
+    document.body.appendChild(panel);
+    
+    // Mostrar con animación
+    setTimeout(() => {
+        overlay.style.opacity = '1';
+        overlay.style.visibility = 'visible';
+        panel.style.right = '0';
+        document.body.style.overflow = 'hidden';
+    }, 10);
+    
+    // Event listeners
+    overlay.addEventListener('click', closePropertyPanelSimple);
+    
+    console.log('✅ Panel simple creado para:', titulo);
+}
+
+function closePropertyPanelSimple() {
+    const overlay = document.getElementById('property-panel-overlay-simple');
+    const panel = document.getElementById('property-panel-simple');
+    
+    if (overlay && panel) {
+        overlay.style.opacity = '0';
+        overlay.style.visibility = 'hidden';
+        panel.style.right = '-400px';
+        
+        setTimeout(() => {
+            if (overlay.parentNode) overlay.remove();
+            if (panel.parentNode) panel.remove();
+            document.body.style.overflow = '';
+        }, 400);
+    }
+    
+    console.log('🔒 Panel simple cerrado');
+}
+
+// Hacer función disponible globalmente
+window.createPropertyPanelSimple = createPropertyPanelSimple;
+window.closePropertyPanelSimple = closePropertyPanelSimple;
+
+console.log('✅ Panel simple de respaldo cargado');
