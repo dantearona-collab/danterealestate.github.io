@@ -2146,50 +2146,51 @@ function openDirectionsFromDetails(propertyId, address, title) {
 // ========================================
 // FUNCIÓN ÚNICA Y UNIFICADA PARA MOSTRAR MAPAS
 // ========================================
-function showPropertyMap(propertyId, address, title, mode = 'search') {
-    console.log('🗺️ showPropertyMap llamada con:', { propertyId, address, title, mode });
+function showPropertyMap(propertyId, address, title, mode = 'search', fromDetails = false) {
+    console.log('🗺️ showPropertyMap - INICIANDO');
     
     try {
-        // 1. Buscar la propiedad para obtener datos completos
+        // PRIMERO: Asegurar que el scroll esté habilitado antes de cambiarlo
+        document.body.style.overflow = 'auto';
+        document.documentElement.style.overflow = 'auto';
+        
         const property = globalData.properties.find(p => p.id_temporal === propertyId);
         if (!property) {
-            console.error('❌ Propiedad no encontrada:', propertyId);
             alert('Propiedad no encontrada');
             return;
         }
         
-        // 2. Usar direcciones prioritarias
         const direccionFinal = address || property.direccion_completa || property.direccion || property.barrio;
         const tituloFinal = title || property.titulo;
         
-        console.log('📍 Dirección para mapa:', direccionFinal);
+        // Ocultar vista principal CON TIMEOUT para prevenir bloqueo
+        setTimeout(() => {
+            ocultarVistaPrincipal();
+        }, 50);
         
-        // 3. Ocultar elementos de la vista principal
-        ocultarVistaPrincipal();
+        // Mostrar botón Volver
+        mostrarBotonVolverNow(tituloFinal);
         
-        // 4. Mostrar el botón Volver
-        mostrarBotonVolver(tituloFinal);
-        
-        // 5. Mostrar el mapa según el modo
+        // Mostrar mapa
         if (mode === 'directions') {
-            mostrarMapaIndicaciones(propertyId, direccionFinal, tituloFinal);
+            mostrarMapaIndicaciones(propertyId, direccionFinal, tituloFinal, fromDetails);
         } else {
-            mostrarMapaBusqueda(propertyId, direccionFinal, tituloFinal);
+            mostrarMapaBusqueda(propertyId, direccionFinal, tituloFinal, fromDetails);
         }
         
-        // 6. Activar modo mapa
-        activarModoMapa();
-        
-        console.log('✅ Mapa mostrado correctamente en modo:', mode);
+        // Activar modo mapa CON RETRASO controlado
+        setTimeout(() => {
+            activarModoMapa();
+        }, 100);
         
     } catch (error) {
-        console.error('❌ Error crítico en showPropertyMap:', error);
-        // Fallback: abrir Google Maps en nueva pestaña
+        console.error('❌ Error en showPropertyMap:', error);
+        
+        // Asegurar restaurar scroll si hay error
+        backToProperties();
+        
         const encodedAddress = encodeURIComponent(address || '');
         window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
-        
-        // Volver a propiedades si falla
-        setTimeout(backToProperties, 500);
     }
 }
 
@@ -2198,20 +2199,28 @@ function showPropertyMap(propertyId, address, title, mode = 'search') {
 // ========================================
 
 function ocultarVistaPrincipal() {
+    console.log('📦 Ocultando vista principal...');
+    
     const elementsToHide = [
         '#properties-container',
         '.filters',
-        '#results-counter-styled',
-        '#property-details-modal'  // Ocultar modal de detalles si está abierto
+        '#results-counter-styled'
     ];
     
     elementsToHide.forEach(selector => {
         const element = document.querySelector(selector);
         if (element) {
-            element.style.display = 'none';
-            console.log(`📦 Ocultando: ${selector}`);
+            // Usar visibility en lugar de display para no romper layout
+            element.style.visibility = 'hidden';
+            element.style.opacity = '0';
+            element.style.height = '0';
+            element.style.overflow = 'hidden';
+            element.style.transition = 'opacity 0.3s, height 0.3s';
+            console.log(`   📌 Ocultado (visibilidad): ${selector}`);
         }
     });
+    
+    // NO BLOQUEAR EL SCROLL AQUÍ - se hará en activarModoMapa con control
 }
 
 function mostrarBotonVolver(titulo) {
@@ -2389,52 +2398,249 @@ function cambiarModoMapa(propertyId, direccionCodificada, tituloCodificado, nuev
 }
 
 function activarModoMapa() {
-    document.body.classList.add('map-view-active');
-    console.log('🌍 Modo mapa activado');
+    console.log('🌍 Activando modo mapa (con control de scroll)...');
+    
+    // Solo bloquear scroll si realmente es necesario
+    if (document.getElementById('fullscreen-map-container')) {
+        document.body.classList.add('map-view-active');
+        
+        // Bloquear scroll PERO con manejo especial
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        document.body.style.height = '100%';
+        document.body.style.top = `-${window.scrollY}px`;
+        
+        console.log('✅ Modo mapa activado (scroll controlado)');
+    } else {
+        console.warn('⚠️ No se activó modo mapa - no hay contenedor');
+    }
+}
+function restaurarScrollPosicion() {
+    console.log('🔧 Restaurando posición de scroll...');
+    
+    if (document.body.style.position === 'fixed') {
+        const scrollY = document.body.style.top;
+        document.body.style.position = '';
+        document.body.style.top = '';
+        
+        // Restaurar la posición de scroll
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+    }
 }
 
-// ========================================
-// FUNCIÓN PARA VOLVER A PROPIEDADES (MANTENER EXISTENTE)
-// ========================================
 
+// ========================================
+// FUNCIÓN backToProperties - VERSIÓN CORREGIDA
+// ========================================
 function backToProperties() {
-    console.log('🏠 Volviendo a propiedades');
+    console.log('🏠 backToProperties - INICIANDO');
+    restaurarScrollPosicion();
     
     try {
-        // 1. Mostrar elementos ocultos
+        // 1. RESTAURAR SCROLL DEL BODY INMEDIATAMENTE
+        document.body.style.overflow = 'auto';
+        document.body.style.position = 'static';
+        document.body.style.height = 'auto';
+        
+        // 2. Asegurar que todos los elementos de scroll estén habilitados
+        const allElements = document.querySelectorAll('*');
+        allElements.forEach(el => {
+            if (el.style.overflow === 'hidden') {
+                el.style.overflow = '';
+            }
+        });
+        
+        // 3. Mostrar elementos ocultos
         const elementsToShow = [
             '#properties-container',
             '.filters', 
-            '#results-counter-styled'
+            '#results-counter-styled',
+            '.filter-section',
+            '.filters-container',
+            '#main-content'
         ];
         
+        let elementsShown = 0;
         elementsToShow.forEach(selector => {
-            const element = document.querySelector(selector);
-            if (element) element.style.display = '';
+            const elements = document.querySelectorAll(selector);
+            elements.forEach(element => {
+                if (element) {
+                    element.style.display = '';
+                    element.style.visibility = 'visible';
+                    element.style.opacity = '1';
+                    element.style.position = 'relative';
+                    elementsShown++;
+                    console.log(`✅ Mostrando: ${selector}`);
+                }
+            });
         });
         
-        // 2. Ocultar botón Volver
-        const backButton = document.getElementById('mapBackButton');
-        if (backButton) {
-            backButton.style.display = 'none';
+        console.log(`📊 Elementos mostrados: ${elementsShown}`);
+        
+        // 4. OCULTAR COMPLETAMENTE el botón Volver
+        if (window.mapBackButton) {
+            window.mapBackButton.style.display = 'none';
+            window.mapBackButton.style.visibility = 'hidden';
+            window.mapBackButton.style.opacity = '0';
             console.log('✅ Botón Volver ocultado');
         }
         
-        // 3. Eliminar mapa
+        // También por ID por si acaso
+        const backButtonById = document.getElementById('mapBackButton');
+        if (backButtonById) {
+            backButtonById.style.display = 'none';
+            backButtonById.style.visibility = 'hidden';
+            backButtonById.style.opacity = '0';
+        }
+        
+        // 5. Eliminar mapa si existe
         const mapContainer = document.getElementById('fullscreen-map-container');
-        if (mapContainer) mapContainer.remove();
+        if (mapContainer) {
+            mapContainer.remove();
+            console.log('🗺️ Mapa eliminado');
+        }
         
-        // 4. Desactivar modo mapa
+        // 6. También eliminar cualquier overlay de mapa residual
+        const mapOverlays = document.querySelectorAll('[id*="map"], [class*="map-overlay"], [class*="fullscreen-map"]');
+        mapOverlays.forEach(el => {
+            if (el.id !== 'mapBackButton') {
+                el.remove();
+                console.log(`🗑️ Eliminado overlay: ${el.id || el.className}`);
+            }
+        });
+        
+        // 7. Desactivar modo mapa
         document.body.classList.remove('map-view-active');
+        document.documentElement.classList.remove('map-view-active');
         
-        // 5. Scroll al inicio
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // 8. También cerrar cualquier modal de detalles abierto
+        const detailsModal = document.getElementById('property-details-modal');
+        if (detailsModal) {
+            detailsModal.remove();
+            console.log('✅ Modal de detalles cerrado');
+        }
         
-        console.log('✅ Vuelta a propiedades exitosa');
+        // 9. Cerrar cualquier overlay de directions
+        const directionsOverlay = document.getElementById('directions-overlay');
+        if (directionsOverlay) {
+            directionsOverlay.remove();
+            console.log('✅ Overlay de directions cerrado');
+        }
+        
+        // 10. Scroll al inicio con timeout para asegurar
+        setTimeout(() => {
+            window.scrollTo({
+                top: 0,
+                left: 0,
+                behavior: 'smooth'
+            });
+            
+            // Forzar reflow para asegurar que el scroll se restablezca
+            document.body.getBoundingClientRect();
+            
+            console.log('🔧 Scroll restaurado y forzado reflow');
+        }, 100);
+        
+        // 11. Verificar que el scroll esté funcionando
+        setTimeout(() => {
+            console.log('🔍 Verificando estado del scroll:');
+            console.log('   - body.overflow:', document.body.style.overflow);
+            console.log('   - html.overflow:', document.documentElement.style.overflow);
+            console.log('   - window.scrollY:', window.scrollY);
+            console.log('   - body.scrollHeight:', document.body.scrollHeight);
+            
+            // Si aún hay problema, forzar más
+            if (document.body.style.overflow !== 'auto') {
+                console.log('⚠️ Scroll aún bloqueado, forzando...');
+                document.body.style.overflow = 'auto !important';
+                document.documentElement.style.overflow = 'auto !important';
+                document.body.style.position = 'relative';
+            }
+        }, 200);
+        
+        console.log('✅ backToProperties completado exitosamente');
         
     } catch (error) {
-        console.error('❌ Error al volver a propiedades:', error);
+        console.error('❌ Error en backToProperties:', error);
+        
+        // Fallback nuclear - restablecer todo
+        document.body.style.cssText = 'overflow: auto !important; position: static !important; height: auto !important;';
+        document.documentElement.style.cssText = 'overflow: auto !important;';
+        
+        // Mostrar todos los elementos
+        document.querySelectorAll('*').forEach(el => {
+            el.style.display = '';
+            el.style.visibility = '';
+        });
+        
+        // Recargar si es muy grave
+        setTimeout(() => {
+            if (document.body.style.overflow !== 'auto') {
+                console.warn('⚠️ Scroll críticamente bloqueado, recargando...');
+                window.location.reload();
+            }
+        }, 500);
     }
+}
+
+// ========================================
+// FUNCIÓN AUXILIAR PARA LIMPIAR COMPLETAMENTE
+// ========================================
+function limpiarEstadoMapaCompletamente() {
+    console.log('🧹 LIMPIANDO ESTADO DEL MAPA COMPLETAMENTE');
+    
+    // 1. Restaurar scroll en todos los niveles
+    document.body.style.overflow = 'auto';
+    document.body.style.position = 'static';
+    document.body.style.height = 'auto';
+    document.documentElement.style.overflow = 'auto';
+    
+    // 2. Remover todas las clases relacionadas con mapa
+    document.body.classList.remove('map-view-active', 'no-scroll', 'scroll-locked');
+    document.documentElement.classList.remove('map-view-active', 'no-scroll', 'scroll-locked');
+    
+    // 3. Remover todos los elementos de mapa/overlay
+    const elementosAEliminar = [
+        '#fullscreen-map-container',
+        '#mapBackButton',
+        '#directions-overlay',
+        '.map-overlay',
+        '.fullscreen-map',
+        '[id*="map-overlay"]',
+        '[class*="map-modal"]'
+    ];
+    
+    elementosAEliminar.forEach(selector => {
+        const elementos = document.querySelectorAll(selector);
+        elementos.forEach(el => el.remove());
+    });
+    
+    // 4. Mostrar todos los elementos principales
+    const elementosAMostrar = [
+        '#properties-container',
+        '.filters',
+        '#results-counter-styled',
+        'header',
+        'footer',
+        'main'
+    ];
+    
+    elementosAMostrar.forEach(selector => {
+        const elementos = document.querySelectorAll(selector);
+        elementos.forEach(el => {
+            if (el) {
+                el.style.display = '';
+                el.style.visibility = '';
+                el.style.opacity = '';
+            }
+        });
+    });
+    
+    // 5. Forzar reflow
+    document.body.getBoundingClientRect();
+    
+    console.log('✅ Estado del mapa limpiado completamente');
 }
 
 
@@ -2487,22 +2693,70 @@ function getDocumentType(fileName) {
 // ========================================
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🏠 Sistema Dante Propiedades - Sin errores + Slider cargando...');
-    console.log('🎯 Sistema de slider de múltiples fotos incluido');
-    console.log('✅ Sin dependencias de Font Awesome');
-    console.log('🎬 Sistema de multimedia activado');
+    // Detectar intentos de scroll cuando está bloqueado
+    let lastScrollAttempt = 0;
     
-    // Cargar CSS del slider
-    addSliderStyles();
+    window.addEventListener('scroll', function(e) {
+        const now = Date.now();
+        
+        // Si el scroll está bloqueado pero se intenta hacer scroll
+        if (document.body.style.overflow === 'hidden' && 
+            (now - lastScrollAttempt) > 1000) {
+            
+            console.warn('⚠️ Intento de scroll detectado mientras está bloqueado');
+            console.log('   body.overflow:', document.body.style.overflow);
+            console.log('   Desbloqueando automáticamente...');
+            
+            // Auto-corrección
+            document.body.style.overflow = 'auto';
+            document.documentElement.style.overflow = 'auto';
+            
+            lastScrollAttempt = now;
+        }
+    });
     
-    // Cargar propiedades
-    loadProperties();
+    // También escuchar rueda del mouse
+    window.addEventListener('wheel', function(e) {
+        if (document.body.style.overflow === 'hidden') {
+            console.log('🖱️ Rueda detectada con scroll bloqueado');
+            // Permitir el scroll si el usuario intenta hacer scroll con rueda
+            document.body.style.overflow = 'auto';
+        }
+    }, { passive: true });
     
+    // Botón de emergencia para desbloquear scroll
+    const emergencyButton = document.createElement('button');
+    emergencyButton.id = 'scroll-emergency-btn';
+    emergencyButton.innerHTML = '🔓 Desbloquear Scroll';
+    emergencyButton.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        z-index: 99999;
+        font-weight: bold;
+        display: none;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+    `;
+    emergencyButton.onclick = limpiarEstadoMapaCompletamente;
+    document.body.appendChild(emergencyButton);
     
-    console.log('✅ Sistema inicializado sin errores de consola');
-    console.log('🎠 Slider de múltiples fotos disponible');
-    console.log('📄 Soporte para PDFs activado');
-    console.log('🎥 Soporte para videos activado');
+    // Monitorear estado del scroll
+    setInterval(() => {
+        const isScrollBlocked = document.body.style.overflow === 'hidden' && 
+                               document.body.classList.contains('map-view-active');
+        
+        if (isScrollBlocked) {
+            emergencyButton.style.display = 'block';
+        } else {
+            emergencyButton.style.display = 'none';
+        }
+    }, 1000);
 });
 
 // ========================================
