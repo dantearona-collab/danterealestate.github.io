@@ -8,24 +8,6 @@
     <link rel="icon" href="/logo.png" type="image/png">
 
     <style>
-
-
-        /* REGLA !important para el botón Volver */
-        #mapBackButton {
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            position: fixed !important;
-            top: 20px !important;
-            left: 20px !important;
-            z-index: 10000 !important;
-        }
-
-        .map-back-button {
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-        }
         /* RESET Y BASE */
         * {
             margin: 0;
@@ -736,8 +718,8 @@
         }
 
         /* ========================================
-            BOTÓN VOLVER DESDE MAPA
-        ======================================== */
+   BOTÓN VOLVER DESDE MAPA
+   ======================================== */
 
         .map-back-button {
             position: fixed;
@@ -815,40 +797,7 @@
             overflow: hidden;
         }
 
-        /* Botón Inicio mejorado */
-        .btn-inicio {
-            padding: 12px 20px !important;
-            border: none !important;
-            border-radius: 6px !important;
-            cursor: pointer !important;
-            font-weight: 600 !important;
-            font-size: 14px !important;
-            transition: all 0.3s ease !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 8px !important;
-            background: linear-gradient(135deg, #ff0101 0%, #cc0000 100%) !important;
-            color: white !important;
-            min-width: 120px !important;
-            height: 44px !important; /* Misma altura que Buscar */
-        }
 
-        .btn-inicio:hover {
-            background: linear-gradient(135deg, #cc0000 0%, #990000 100%) !important;
-            transform: translateY(-2px) !important;
-            box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3) !important;
-        }
-
-        .btn-inicio:active {
-            transform: translateY(0) !important;
-        }
-
-        .btn-inicio img {
-            width: 18px !important;
-            height: 18px !important;
-            filter: brightness(0) invert(1) !important; /* Hace la llave blanca */
-        }
 
 
 
@@ -1489,1052 +1438,10 @@
         .masonry-item:nth-child(6) {
             animation-delay: 0.6s;
         }
-
-        /* ========================================
-        MODAL DE DETALLES DE PROPIEDAD - FASE 1
-        ======================================== */
-
-        .property-details-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10001;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .details-modal-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
-        }
-
-        .details-modal-content {
-            position: relative;
-            width: 90%;
-            max-width: 1000px;
-            max-height: 90vh;
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            display: flex;
-            flex-direction: column;
-            animation: slideUp 0.4s ease;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* HEADER */
-        .details-modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            padding: 20px 30px;
-            background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
-            color: white;
-            border-bottom: 3px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .details-header-left {
-            flex: 1;
-        }
-
-        .details-badges {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-
-        .badge-operation,
-        .badge-type {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .badge-operation {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .badge-type {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px dashed rgba(255, 255, 255, 0.2);
-        }
-
-        .details-title {
-            margin: 0 0 8px 0;
-            font-size: 24px;
-            font-weight: 700;
-            line-height: 1.3;
-        }
-
-        .details-subtitle {
-            display: flex;
-            gap: 15px;
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        .details-subtitle span {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .details-close-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            font-size: 24px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            margin-left: 15px;
-        }
-
-        .details-close-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: rotate(90deg);
-        }
-
-        /* TABS */
-        .details-tabs {
-            display: flex;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
-            padding: 0 30px;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-
-        .details-tabs::-webkit-scrollbar {
-            display: none;
-        }
-
-        .detail-tab {
-            padding: 15px 20px;
-            background: none;
-            border: none;
-            border-bottom: 3px solid transparent;
-            font-size: 14px;
-            font-weight: 600;
-            color: #6c757d;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            white-space: nowrap;
-            transition: all 0.3s ease;
-        }
-
-        .detail-tab:hover {
-            color: #232deb;
-            background: rgba(35, 45, 235, 0.05);
-        }
-
-        .detail-tab.active {
-            color: #232deb;
-            border-bottom-color: #232deb;
-            background: rgba(35, 45, 235, 0.08);
-        }
-
-        /* CONTENIDO */
-        .details-modal-body {
-            flex: 1;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .details-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 30px;
-        }
-
-        .tab-content {
-            display: none;
-            animation: fadeInTab 0.3s ease;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        @keyframes fadeInTab {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* ESTILOS PARA CADA SECCIÓN */
-        .info-section {
-            margin-bottom: 25px;
-        }
-
-        .info-section h3 {
-            margin: 0 0 15px 0;
-            color: #495057;
-            font-size: 18px;
-            border-bottom: 2px solid #e9ecef;
-            padding-bottom: 8px;
-        }
-
-        .description-text {
-            line-height: 1.6;
-            color: #495057;
-            font-size: 15px;
-        }
-
-        .price-display {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            border-left: 4px solid #232deb;
-        }
-
-        .main-price {
-            display: flex;
-            align-items: baseline;
-            gap: 5px;
-            margin-bottom: 8px;
-        }
-
-        .currency {
-            font-size: 16px;
-            color: #6c757d;
-            font-weight: 500;
-        }
-
-        .amount {
-            font-size: 32px;
-            font-weight: 700;
-            color: #232deb;
-        }
-
-        .secondary-price {
-            font-size: 14px;
-            color: #6c757d;
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .info-card {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: transform 0.3s ease;
-        }
-
-        .info-card:hover {
-            transform: translateY(-3px);
-            background: #e9ecef;
-        }
-
-        .info-icon {
-            font-size: 24px;
-            width: 50px;
-            height: 50px;
-            background: white;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        .info-text {
-            flex: 1;
-        }
-
-        .info-label {
-            font-size: 12px;
-            color: #6c757d;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-
-        .info-value {
-            font-size: 18px;
-            font-weight: 600;
-            color: #495057;
-        }
-
-        /* CARACTERÍSTICAS */
-        .features-list {
-            list-style: none;
-            padding: 0;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 10px;
-        }
-
-        .features-list li {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 0;
-        }
-
-        .feature-check {
-            color: #28a745;
-            font-weight: bold;
-        }
-
-        .feature-text {
-            color: #495057;
-        }
-
-        .strengths-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .strength-item {
-            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-            border-radius: 8px;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-left: 4px solid #2196f3;
-        }
-
-        .strength-icon {
-            font-size: 20px;
-        }
-
-        .strength-text {
-            font-size: 14px;
-            color: #1565c0;
-            font-weight: 500;
-        }
-
-        /* UBICACIÓN */
-        .address-display {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .address-icon {
-            font-size: 24px;
-        }
-
-        .address-text {
-            flex: 1;
-        }
-
-        .map-button-container {
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .btn-map-primary {
-            background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-map-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(35, 45, 235, 0.3);
-        }
-
-        .location-details {
-            margin-top: 25px;
-        }
-
-        .location-item {
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .location-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-
-        .location-item h4 {
-            margin: 0 0 10px 0;
-            color: #495057;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .location-item p {
-            margin: 0;
-            color: #6c757d;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        /* MULTIMEDIA */
-        .photos-preview,
-        .tour-360-section {
-            margin-top: 25px;
-        }
-
-        .btn-view-photos {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-view-photos:hover {
-            background: #218838;
-            transform: translateY(-2px);
-        }
-
-        /* CONTACTO */
-        .assigned-agent {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-left: 4px solid #232deb;
-        }
-
-        .agent-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .agent-icon {
-            font-size: 32px;
-            width: 60px;
-            height: 60px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        .agent-details h4 {
-            margin: 0 0 5px 0;
-            color: #495057;
-            font-size: 16px;
-        }
-
-        .agent-details p {
-            margin: 0;
-            color: #6c757d;
-        }
-
-        .agent-phone {
-            color: #232deb !important;
-            font-weight: 600;
-            margin-top: 5px !important;
-        }
-
-        .visit-schedule {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-
-        .visit-schedule h4 {
-            margin: 0 0 8px 0;
-            color: #856404;
-            font-size: 15px;
-        }
-
-        .visit-schedule p {
-            margin: 0;
-            color: #856404;
-            font-size: 14px;
-        }
-
-        .contact-actions {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin: 25px 0;
-        }
-
-        .btn-whatsapp,
-        .btn-email {
-            flex: 1;
-            min-width: 200px;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            text-decoration: none;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-        }
-
-        .btn-whatsapp {
-            background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
-            color: white;
-        }
-
-        .btn-whatsapp:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(37, 211, 102, 0.3);
-        }
-
-        .btn-email {
-            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
-            color: white;
-        }
-
-        .btn-email:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(108, 117, 125, 0.3);
-        }
-
-        .contact-note {
-            margin-top: 20px;
-            padding: 15px;
-            background: #e8f5e9;
-            border-radius: 8px;
-            border-left: 4px solid #28a745;
-        }
-
-        .contact-note small {
-            color: #2e7d32;
-        }
-
-        /* FOOTER DEL MODAL */
-        .details-modal-footer {
-            padding: 15px 30px;
-            background: #f8f9fa;
-            border-top: 1px solid #e9ecef;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .property-id {
-            color: #6c757d;
-            font-size: 12px;
-            font-family: monospace;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-close-modal,
-        .btn-share {
-            padding: 8px 20px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-        }
-
-        .btn-close-modal {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-close-modal:hover {
-            background: #5a6268;
-        }
-
-        .btn-share {
-            background: #232deb;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-share:hover {
-            background: #1a1db4;
-            transform: translateY(-1px);
-        }
-
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .details-modal-content {
-                width: 95%;
-                max-height: 95vh;
-                border-radius: 8px;
-            }
-            
-            .details-modal-header {
-                padding: 15px 20px;
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .details-title {
-                font-size: 20px;
-            }
-            
-            .details-tabs {
-                padding: 0 15px;
-                flex-wrap: nowrap;
-                overflow-x: auto;
-            }
-            
-            .detail-tab {
-                padding: 12px 15px;
-                font-size: 13px;
-                white-space: nowrap;
-            }
-            
-            .details-content {
-                padding: 20px;
-            }
-            
-            .info-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            
-            .features-list {
-                grid-template-columns: 1fr;
-            }
-            
-            .strengths-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .contact-actions {
-                flex-direction: column;
-            }
-            
-            .btn-whatsapp,
-            .btn-email {
-                min-width: 100%;
-            }
-            
-            .details-modal-footer {
-                padding: 15px 20px;
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            
-            .modal-actions {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .details-modal-content {
-                width: 100%;
-                height: 100vh;
-                max-height: 100vh;
-                border-radius: 0;
-            }
-            
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Mejorar el botón de mapa en el modal */
-        .btn-map-primary {
-            background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 25px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-            width: 100%;
-            max-width: 250px;
-            margin: 15px auto;
-            box-shadow: 0 4px 12px rgba(35, 45, 235, 0.2);
-        }
-
-        .btn-map-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(35, 45, 235, 0.4);
-            background: linear-gradient(135deg, #1a1db4 0%, #232deb 100%);
-        }
-
-        /* Mejorar la sección de ubicación */
-        .location-section {
-            text-align: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        .address-display {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid #232deb;
-            text-align: left;
-        }
-
-
-
-        /* ========================================
-        TAB MULTIMEDIA MEJORADO
-        ======================================== */
-
-        .multimedia-category {
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .multimedia-category:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-        }
-
-        .category-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .category-header h4 {
-            margin: 0;
-            color: #495057;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-view-all {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-        /* PREVIEW DE FOTOS */
-        .photos-preview-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .preview-photo {
-            position: relative;
-            aspect-ratio: 1;
-            border-radius: 8px;
-            overflow: hidden;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .preview-photo:hover {
-            transform: scale(1.05);
-            border-color: #232deb;
-        }
-
-        .preview-photo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .more-photos {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(35, 45, 235, 0.8);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        /* BOTÓN 360 MEJORADO */
-        .btn-360-detailed {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 25px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin: 10px 0;
-            width: 100%;
-            max-width: 300px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-360-detailed:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
-        }
-
-        /* DOCUMENTOS */
-        .documents-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 10px;
-        }
-
-        .document-item {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 1px solid #e9ecef;
-        }
-
-        .document-item:hover {
-            background: #e9ecef;
-            transform: translateY(-2px);
-            border-color: #232deb;
-        }
-
-        .doc-icon {
-            font-size: 24px;
-            width: 40px;
-            height: 40px;
-            background: white;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .doc-info {
-            flex: 1;
-        }
-
-        .doc-name {
-            font-size: 13px;
-            font-weight: 600;
-            color: #495057;
-            margin-bottom: 2px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .doc-type {
-            font-size: 11px;
-            color: #6c757d;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .doc-action {
-            font-size: 12px;
-            color: #232deb;
-            font-weight: 600;
-        }
-
-        /* VIDEOS */
-        .videos-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 10px;
-        }
-
-        .video-item {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 1px solid #e9ecef;
-        }
-
-        .video-item:hover {
-            background: #e9ecef;
-            transform: translateY(-2px);
-            border-color: #232deb;
-        }
-
-        .video-icon {
-            font-size: 20px;
-        }
-
-        .video-info {
-            flex: 1;
-        }
-
-        .video-name {
-            font-size: 13px;
-            font-weight: 600;
-            color: #495057;
-            margin-bottom: 2px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .video-action {
-            font-size: 11px;
-            color: #232deb;
-            font-weight: 600;
-        }
-
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .photos-preview-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .documents-grid,
-            .videos-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-
-        /* Agrega esto al CSS del modal */
-        .map-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-
-        .btn-map-primary, .btn-directions {
-            flex: 1;
-            min-width: 140px;
-            padding: 12px 15px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-map-primary {
-            background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
-            color: white;
-        }
-
-        .btn-directions {
-            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
-            color: white;
-        }
-
-        .btn-map-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(35, 45, 235, 0.3);
-        }
-
-        .btn-directions:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
-        }
-
     </style>
-
-    
-    <link rel="stylesheet" href="https://unpkg.com/pannellum@2.5.6/build/pannellum.css">
-    <script src="https://unpkg.com/pannellum@2.5.6/build/pannellum.js"></script>
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pannellum/2.5.6/pannellum.css"
+        integrity="sha512-UoT/Ca6+2kRekuB1IDZgwtDt0ZUfsweWmyNhMqhG4hpnf7sFnhrLrO0zHJr2vFp7eZEvJ3FN58dhVx+YMJMt2A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 
 <body>
@@ -2705,7 +1612,6 @@
         </div>
 
         <!-- Filtros de búsqueda -->
-        <!-- Filtros de búsqueda -->
         <div class="filters">
             <h3>🔍 Buscar Propiedades</h3>
             <div class="filter-row">
@@ -2730,30 +1636,27 @@
                     </select>
                 </div>
                 <div class="filter-group" style="display: flex; gap: 10px; align-items: end;">
-                    
-                    <!-- Botón Buscar - Versión mejorada con logo -->
-                    <button id="search-btn-styled" class="btn-search" onclick="window.filterGlobalProperties()"
-                            style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-                        <img src="llave.png" alt="Buscar" style="width: 18px; height: 18px; filter: brightness(0) invert(1);">
-                        Buscar
+                    <button id="search-btn-styled" class="btn-search" onclick="filterGlobalProperties()">
+                        🔍 Buscar
                     </button>
-                    
-                    <button id="reset-btn-styled" class="btn-inicio" onclick="resetFilters()">
-                        <img src="llave.png" alt="Logo">
-                        Empezar
+                    <button id="reset-btn-styled" class="btn-reset" onclick="resetFilters()"
+                        style="background: #6c757d;">
+                        🏠 Inicio
                     </button>
-                    
                     <!-- BOTÓN ASISTENTE IA INTEGRADO -->
                     <button id="ai-chat-btn-integrated" class="btn-search" onclick="toggleChatWidget()"
-                            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; gap: 8px;">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9.48 15.18c.18.33.38.65.6.96-1.28-1.04-2.2-2.36-2.58-3.84.58.26 1.2.45 1.85.55.08.39.19.78.33 1.15-.09.02-.18.04-.28.06-.07.2-.13.4-.19.59-.09.28-.17.56-.23.83zm4.99-2.37c0-1.65-1.35-3-3-3s-3 1.35-3 3 1.35 3 3 3 3-1.35 3-3zm-2.01-7.16c.49 1.01.78 2.1.84 3.26.85-.35 1.59-.93 2.1-1.66-.45-.42-.96-.78-1.52-1.07-.47-.24-.96-.44-1.42-.53zM8.3 6.09c.56.29 1.07.65 1.52 1.07.51.73 1.25 1.31 2.1 1.66.06-1.16.35-2.25.84-3.26-.46.09-.95.29-1.42.53-.57.29-1.09.67-1.54 1.12-1.28.09-2.53.51-3.61 1.2-.23-.69-.35-1.41-.35-2.15 0-.21.02-.42.04-.63 1.55.42 3.01 1.15 4.29 2.16zM4 12c0-.74.12-1.46.35-2.15C4.12 10.54 4 11.26 4 12zm8.52 3.18c-.18-.33-.38-.65-.6-.96 1.28 1.04 2.2 2.36 2.58 3.84-.58-.26-1.2-.45-1.85-.55-.08-.39-.19-.78-.33-1.15.09-.02.18-.04.28-.06.07-.2.13-.4.19-.59.09-.28.17-.56.23-.83z"/>
+                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; gap: 8px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20"
+                            height="20">
+                            <path
+                                d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9.48 15.18c.18.33.38.65.6.96-1.28-1.04-2.2-2.36-2.58-3.84.58.26 1.2.45 1.85.55.08.39.19.78.33 1.15-.09.02-.18.04-.28.06-.07.2-.13.4-.19.59-.09.28-.17.56-.23.83zm4.99-2.37c0-1.65-1.35-3-3-3s-3 1.35-3 3 1.35 3 3 3 3-1.35 3-3zm-2.01-7.16c.49 1.01.78 2.1.84 3.26.85-.35 1.59-.93 2.1-1.66-.45-.42-.96-.78-1.52-1.07-.47-.24-.96-.44-1.42-.53zM8.3 6.09c.56.29 1.07.65 1.52 1.07.51.73 1.25 1.31 2.1 1.66.06-1.16.35-2.25.84-3.26-.46.09-.95.29-1.42.53-.57.29-1.09.67-1.54 1.12-1.28.09-2.53.51-3.61 1.2-.23-.69-.35-1.41-.35-2.15 0-.21.02-.42.04-.63 1.55.42 3.01 1.15 4.29 2.16zM4 12c0-.74.12-1.46.35-2.15C4.12 10.54 4 11.26 4 12zm8.52 3.18c-.18-.33-.38-.65-.6-.96 1.28 1.04 2.2 2.36 2.58 3.84-.58-.26-1.2-.45-1.85-.55-.08-.39-.19-.78-.33-1.15.09-.02.18-.04.28-.06.07-.2.13-.4.19-.59.09-.28.17-.56.23-.83z" />
                         </svg>
                         Asistente IA
                     </button>
                 </div>
             </div>
         </div>
+
         <!-- Footer -->
         <footer class="site-footer"
             style="background: #2c3e50; color: white; padding: 30px 20px; margin-top: 40px; text-align: center;">
@@ -3132,30 +2035,11 @@
         }
 
         // Inicializar funciones cuando el DOM esté listo
-       // En la parte de inicialización del DOM, cambia esto:
-        
-        // Función para verificar si app.js ya cargó las propiedades
-        function verificarPropiedadesCargadas() {
-            return new Promise((resolve) => {
-                const checkInterval = setInterval(() => {
-                    if (typeof window.allProperties !== 'undefined' && window.allProperties.length > 0) {
-                        clearInterval(checkInterval);
-                        resolve(true);
-                    }
-                }, 100);
-                
-                // Timeout después de 5 segundos
-                setTimeout(() => {
-                    clearInterval(checkInterval);
-                    resolve(false);
-                }, 5000);
-            });
-        }
-        
-        
-        
-        
-        
+        document.addEventListener('DOMContentLoaded', function () {
+            setupWhatsAppFloat();
+            console.log('💬 Botón WhatsApp flotante configurado correctamente');
+        });
+
         // FUNCIONES TÉRMINOS Y CONDICIONES - DESHABILITADAS
         /*
         function mostrarTerminos() {
@@ -3187,8 +2071,6 @@
     </script>
 
     <!-- Botón Volver para Mapas -->
-    <!-- Botón Volver para Mapas -->
-    <!-- En tu index.html, el botón debería estar así: -->
     <div class="map-back-button" id="mapBackButton" style="display: none;">
         <button class="back-to-properties-btn" onclick="backToProperties()">
             <span>←</span> Volver a Propiedades
@@ -3616,7 +2498,12 @@
 
 
     <script>
-
+        // Inicializar sistema de multimedia cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('🎬 Sistema de multimedia inicializado');
+            console.log('📄 Soporte para PDFs activado');
+            console.log('🎥 Soporte para videos activado');
+        });
 
         // Función global para cerrar modales multimedia
         function closeMultimediaModal() {
@@ -3731,8 +2618,7 @@
         const API_BASE_URL = "https://pagina-web-g82d.onrender.com";
         const CHAT_URL = `${API_BASE_URL}/api/chat`;
         const STATUS_URL = `${API_BASE_URL}/api/status`;
-        //const FILTERS_URL = `${API_BASE_URL}/properties/filter-options`;
-        const FILTERS_URL = `${API_BASE_URL}/api/properties/filter-options`;
+        const FILTERS_URL = `${API_BASE_URL}/properties/filter-options`;
 
         // Variables Globales
         let chatBox, input, button, typingIndicator, statusText;
@@ -3923,220 +2809,56 @@
             modal.style.display = 'none';
         }
 
-        
-        // 1. Primero coloca la función verificarPropiedadesCargadas
-        // 1. Primero las funciones auxiliares (arriba en el archivo, antes de DOMContentLoaded)
-        function verificarPropiedadesCargadas() {
-            return new Promise((resolve) => {
-                if (typeof window.allProperties !== 'undefined' && 
-                    Array.isArray(window.allProperties) && 
-                    window.allProperties.length > 0) {
-                    console.log('✅ Propiedades ya cargadas en app.js');
-                    return resolve(true);
-                }
-                
-                const maxAttempts = 30;
-                let attempts = 0;
-                
-                const checkInterval = setInterval(() => {
-                    attempts++;
-                    
-                    if (typeof window.allProperties !== 'undefined' && 
-                        Array.isArray(window.allProperties) && 
-                        window.allProperties.length > 0) {
-                        clearInterval(checkInterval);
-                        console.log(`✅ Propiedades cargadas después de ${attempts * 100}ms`);
-                        resolve(true);
-                    } 
-                    else if (attempts >= maxAttempts) {
-                        clearInterval(checkInterval);
-                        console.log('❌ Timeout: Propiedades no cargadas después de 3 segundos');
-                        resolve(false);
-                    }
-                }, 100);
-            });
-        }
-
-        // 2. La función cargarFiltrosDinamicos (completa)
         async function cargarFiltrosDinamicos() {
             const loadingElement = document.getElementById('filtersLoading');
-            
             try {
-                loadingElement.innerHTML = '<small>🔄 Cargando filtros dinámicos...</small>';
-                
-                console.log('🔗 Intentando obtener filtros dinámicos...');
-                
-                // INTENTO 1: Extraer de propiedades cargadas en app.js
-                console.log('🔄 Extrayendo de propiedades globales...');
-                
-                // Verificar si app.js ya cargó las propiedades
-                if (typeof globalData !== 'undefined' && 
-                    globalData.properties && 
-                    globalData.properties.length > 0) {
-                    
-                    const propiedades = globalData.properties;
-                    console.log('✅ Usando', propiedades.length, 'propiedades de globalData');
-                    
-                    const operacionesSet = new Set();
-                    const tiposSet = new Set();
-                    const barriosSet = new Set();
-                    
-                    propiedades.forEach(prop => {
-                        if (prop.operacion) operacionesSet.add(prop.operacion);
-                        if (prop.tipo) tiposSet.add(prop.tipo);
-                        if (prop.barrio) barriosSet.add(prop.barrio);
-                    });
-                    
+                loadingElement.innerHTML = '<small>🔄 Cargando filtros...</small>';
+                const response = await fetch(FILTERS_URL);
+                if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+
+                const data = await response.json();
+                if (data.operaciones && data.tipos && data.barrios) {
                     filtrosDinamicos = {
-                        operaciones: Array.from(operacionesSet).filter(op => op && String(op).trim()),
-                        tipos: Array.from(tiposSet).filter(tipo => tipo && String(tipo).trim()),
-                        barrios: Array.from(barriosSet).filter(barrio => barrio && String(barrio).trim())
+                        operaciones: data.operaciones.filter(op => op && op.trim()),
+                        tipos: data.tipos.filter(tipo => tipo && tipo.trim()),
+                        barrios: data.barrios.filter(barrio => barrio && barrio.trim())
                     };
-                    
-                    console.log('✅ Filtros dinámicos extraídos:', filtrosDinamicos);
-                    loadingElement.innerHTML = '<small>✅ Filtros dinámicos cargados</small>';
-                    
-                } 
-                // INTENTO 2: Usar window.globalProperties si existe
-                else if (typeof window.globalProperties !== 'undefined' && 
-                        window.globalProperties.length > 0) {
-                    
-                    console.log('✅ Usando window.globalProperties');
-                    const propiedades = window.globalProperties;
-                    
-                    const operacionesSet = new Set();
-                    const tiposSet = new Set();
-                    const barriosSet = new Set();
-                    
-                    propiedades.forEach(prop => {
-                        if (prop.operacion) operacionesSet.add(prop.operacion);
-                        if (prop.tipo) tiposSet.add(prop.tipo);
-                        if (prop.barrio) barriosSet.add(prop.barrio);
-                    });
-                    
-                    filtrosDinamicos = {
-                        operaciones: Array.from(operacionesSet).filter(op => op && String(op).trim()),
-                        tipos: Array.from(tiposSet).filter(tipo => tipo && String(tipo).trim()),
-                        barrios: Array.from(barriosSet).filter(barrio => barrio && String(barrio).trim())
-                    };
-                    
-                    console.log('✅ Filtros de window.globalProperties:', filtrosDinamicos);
-                    loadingElement.innerHTML = '<small>✅ Filtros dinámicos cargados</small>';
-                    
-                } 
-                // INTENTO 3: Si no hay datos disponibles, esperar y reintentar
-                else {
-                    console.log('⏳ Esperando datos de propiedades...');
-                    loadingElement.innerHTML = '<small>⏳ Esperando datos...</small>';
-                    
-                    // Reintentar después de 2 segundos
-                    setTimeout(cargarFiltrosDinamicos, 2000);
-                    return;
+                    actualizarSelectoresFiltros();
+                    loadingElement.innerHTML = '<small>✅ Filtros cargados</small>';
+                } else {
+                    throw new Error('Estructura de datos inválida');
                 }
-                
             } catch (error) {
-                console.log('❌ Error cargando filtros dinámicos:', error);
-                
-                // Datos predeterminados SOLO como último recurso
+                console.error('❌ Error cargando filtros:', error);
                 filtrosDinamicos = {
                     operaciones: ["alquiler", "venta"],
                     tipos: ["casa", "departamento", "ph", "terreno", "oficina", "casaquinta"],
                     barrios: ["Parque Avellaneda", "Boedo", "Microcentro", "Pilar"]
                 };
-                
-                loadingElement.innerHTML = '<small>⚠️ Usando filtros predeterminados</small>';
-                console.log('🔄 Filtros predeterminados cargados como fallback');
-            } finally {
                 actualizarSelectoresFiltros();
-                
-                setTimeout(() => { 
-                    if (loadingElement) loadingElement.innerHTML = ''; 
-                }, 2000);
+                loadingElement.innerHTML = '<small>⚠️ Usando filtros predeterminados</small>';
+            } finally {
+                setTimeout(() => { loadingElement.innerHTML = ''; }, 2500);
             }
         }
-        // 3. Función para actualizar selectores
+
         function actualizarSelectoresFiltros() {
-            console.log('🔄 Actualizando selectores con filtros dinámicos:', filtrosDinamicos);
-            
             const poblarSelect = (id, options, defaultText) => {
                 const select = document.getElementById(id);
                 if (select) {
-                    const currentValue = select.value;
                     select.innerHTML = `<option value="">${defaultText}</option>`;
-                    
-                    const optionsArray = Array.isArray(options) ? options : [];
-                    
-                    optionsArray.forEach(optionText => {
-                        if (optionText) {
-                            const option = document.createElement('option');
-                            // VALOR en minúsculas para consistencia
-                            option.value = String(optionText).toLowerCase().trim();
-                            // TEXTO con formato original
-                            option.textContent = String(optionText).charAt(0).toUpperCase() + String(optionText).slice(1);
-                            select.appendChild(option);
-                        }
+                    options.forEach(optionText => {
+                        const option = document.createElement('option');
+                        option.value = optionText.toLowerCase();
+                        option.textContent = optionText.charAt(0).toUpperCase() + optionText.slice(1);
+                        select.appendChild(option);
                     });
-                    
-                    // Restaurar valor seleccionado si existe
-                    if (currentValue && optionsArray.some(opt => 
-                        String(opt).toLowerCase().trim() === currentValue.toLowerCase().trim())) {
-                        select.value = currentValue;
-                    }
                 }
             };
-            
-            // Actualizar selectores del chat de IA
-            if (document.getElementById('operacion')) {
-                poblarSelect('operacion', filtrosDinamicos.operaciones || [], 'Todas las operaciones');
-            }
-            
-            if (document.getElementById('barrio')) {
-                poblarSelect('barrio', filtrosDinamicos.barrios || [], 'Todos los barrios');
-            }
-            
-            if (document.getElementById('tipo')) {
-                poblarSelect('tipo', filtrosDinamicos.tipos || [], 'Todos los tipos');
-            }
-            
-            // Los selectores principales (styled) se actualizan por populateFilters() en app.js
-            // NO los actualices aquí para evitar conflictos
+            poblarSelect('operacion', filtrosDinamicos.operaciones, 'Todas las operaciones');
+            poblarSelect('barrio', filtrosDinamicos.barrios, 'Todos los barrios');
+            poblarSelect('tipo', filtrosDinamicos.tipos, 'Todos los tipos');
         }
-        // 4. En DOMContentLoaded (al final del archivo, donde ya tienes ese código)
-        
-        
-        document.addEventListener('DOMContentLoaded', function () {
-            console.log('🎬 Sistema de multimedia inicializado');
-            console.log('📄 Soporte para PDFs activado');
-            console.log('🎥 Soporte para videos activado');
-
-            // Inicializar el asistente de IA
-            chatBox = document.querySelector('#ai-chat-window .chat-box');
-            input = document.querySelector('#ai-chat-window #userInput');
-            button = document.querySelector('#ai-chat-window #sendBtn');
-            typingIndicator = document.querySelector('#ai-chat-window #typingIndicator');
-            statusText = document.querySelector('#ai-chat-window #statusText');
-
-            if (button) {
-                button.addEventListener('click', send);
-                console.log('✅ Event Listener asignado al botón Enviar');
-            }
-
-            if (input) {
-                input.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') send();
-                });
-            }
-
-            checkServerStatus();
-            
-            // Cargar filtros después de 500ms (da tiempo a que app.js cargue)
-            setTimeout(() => {
-                cargarFiltrosDinamicos();
-            }, 500);
-        });
-        
-        
-
 
         function actualizarContexto(resultados, filtros = {}, tipo = 'busqueda') {
             contextoActual = {
