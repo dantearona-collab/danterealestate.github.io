@@ -846,7 +846,7 @@ function createPropertyCard(property) {
                 </div>
             </div>
             
-            <button onclick="showPropertyDetails('${property.id_temporal}')" 
+            onclick="openSlidingPanel('${property.id_temporal}')"
                     style="width: 100% !important; background: #232deb !important; color: white !important; 
                            border: none !important; padding: 12px !important; border-radius: 6px !important; 
                            font-size: 14px !important; font-weight: 600 !important; cursor: pointer !important; 
