@@ -395,13 +395,13 @@ function createImageSlider(property) {
     const fotos = property.fotos || [];
     
     if (fotos.length === 0) {
-        // Sin imágenes - usar imagen por defecto con ruta correcta
+        // Sin imágenes - usar imagen por defecto
         return `
             <div style="position: relative; cursor: pointer;" onclick="expandPropertyImages('${property.id_temporal}')" class="modal-trigger">
-                <img src="imgs/INSTITUCIONAL 1.jpg" 
+                <img src="INSTITUCIONAL 1.jpg" 
                      alt="${property.titulo}" 
                      style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
-                     onerror="this.src='imgs/INSTITUCIONAL 3.png'">
+                     onerror="this.src='INSTITUCIONAL 3.png'">
                 <!-- Botón para ver modal completo -->
                 <div style="position: absolute; top: 5px; right: 5px; background: rgba(35, 45, 235, 0.8); color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer;" 
                      onclick="event.stopPropagation(); abrirModalImagenesComplete('${property.id_temporal}')">
@@ -412,14 +412,13 @@ function createImageSlider(property) {
     }
     
     if (fotos.length === 1) {
-        // Una sola imagen - hacer clickeable con ruta correcta
-        const imgUrl = fotos[0].startsWith('imgs/') || fotos[0].startsWith('http') ? fotos[0] : 'imgs/' + fotos[0];
+        // Una sola imagen - hacer clickeable
         return `
             <div style="position: relative; cursor: pointer;" onclick="expandPropertyImages('${property.id_temporal}')" class="modal-trigger">
-                <img src="${imgUrl}" 
+                <img src="${fotos[0]}" 
                      alt="${property.titulo}" 
                      style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
-                     onerror="this.src='imgs/INSTITUCIONAL 3.png'">
+                     onerror="this.src='INSTITUCIONAL 3.png'">
                 <!-- Botón para ver modal completo -->
                 <div style="position: absolute; top: 5px; right: 5px; background: rgba(35, 45, 235, 0.8); color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer;" 
                      onclick="event.stopPropagation(); abrirModalImagenesComplete('${property.id_temporal}')">
@@ -430,21 +429,14 @@ function createImageSlider(property) {
     }
     
     // Múltiples imágenes - crear slider clickeable
-    const imageSlides = fotos.map((foto, index) => {
-        // Construir URL correcta para cada imagen
-        let fotoUrl = foto;
-        if (!foto.startsWith('http')) {
-            fotoUrl = foto.startsWith('imgs/') ? foto : 'imgs/' + foto;
-        }
-        return `
+    const imageSlides = fotos.map((foto, index) => `
         <div class="property-slide ${index === 0 ? 'active' : ''}" data-slide="${index}">
-            <img src="${fotoUrl}" 
+            <img src="${foto}" 
                  alt="${property.titulo} - Foto ${index + 1}" 
                  style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
-                 onerror="this.src='imgs/INSTITUCIONAL 3.png'">
+                 onerror="this.src='INSTITUCIONAL 3.png'">
         </div>
-    `;
-    }).join('');
+    `).join('');
     
     const navigationDots = fotos.map((_, index) => `
         <span class="property-nav-dot ${index === 0 ? 'active' : ''}" onclick="showSlide('${property.id_temporal}', ${index})"></span>
@@ -1366,15 +1358,6 @@ document.addEventListener('keydown', function(event) {
 // Inicializar estilos cuando se carga la página
 document.addEventListener('DOMContentLoaded', function() {
     // Verificar que los estilos estén presentes
-    console.log('🏠 Sistema Dante Propiedades cargando...');
-    
-    // Cargar estilos
-    addSliderStyles();
-    initializeMapStyles();
-    addBackButtonStyles();
-    addMapButtonStyles();
-    agregarEstilosPannellum();
-    
     if (!document.querySelector('#map-back-styles')) {
         const styles = document.createElement('style');
         styles.id = 'map-back-styles';
@@ -2154,51 +2137,50 @@ function openDirectionsFromDetails(propertyId, address, title) {
 // ========================================
 // FUNCIÓN ÚNICA Y UNIFICADA PARA MOSTRAR MAPAS
 // ========================================
-function showPropertyMap(propertyId, address, title, mode = 'search', fromDetails = false) {
-    console.log('🗺️ showPropertyMap - INICIANDO');
+function showPropertyMap(propertyId, address, title, mode = 'search') {
+    console.log('🗺️ showPropertyMap llamada con:', { propertyId, address, title, mode });
     
     try {
-        // PRIMERO: Asegurar que el scroll esté habilitado antes de cambiarlo
-        document.body.style.overflow = 'auto';
-        document.documentElement.style.overflow = 'auto';
-        
+        // 1. Buscar la propiedad para obtener datos completos
         const property = globalData.properties.find(p => p.id_temporal === propertyId);
         if (!property) {
+            console.error('❌ Propiedad no encontrada:', propertyId);
             alert('Propiedad no encontrada');
             return;
         }
         
+        // 2. Usar direcciones prioritarias
         const direccionFinal = address || property.direccion_completa || property.direccion || property.barrio;
         const tituloFinal = title || property.titulo;
         
-        // Ocultar vista principal CON TIMEOUT para prevenir bloqueo
-        setTimeout(() => {
-            ocultarVistaPrincipal();
-        }, 50);
+        console.log('📍 Dirección para mapa:', direccionFinal);
         
-        // Mostrar botón Volver
-        mostrarBotonVolverNow(tituloFinal);
+        // 3. Ocultar elementos de la vista principal
+        ocultarVistaPrincipal();
         
-        // Mostrar mapa
+        // 4. Mostrar el botón Volver
+        mostrarBotonVolver(tituloFinal);
+        
+        // 5. Mostrar el mapa según el modo
         if (mode === 'directions') {
-            mostrarMapaIndicaciones(propertyId, direccionFinal, tituloFinal, fromDetails);
+            mostrarMapaIndicaciones(propertyId, direccionFinal, tituloFinal);
         } else {
-            mostrarMapaBusqueda(propertyId, direccionFinal, tituloFinal, fromDetails);
+            mostrarMapaBusqueda(propertyId, direccionFinal, tituloFinal);
         }
         
-        // Activar modo mapa CON RETRASO controlado
-        setTimeout(() => {
-            activarModoMapa();
-        }, 100);
+        // 6. Activar modo mapa
+        activarModoMapa();
+        
+        console.log('✅ Mapa mostrado correctamente en modo:', mode);
         
     } catch (error) {
-        console.error('❌ Error en showPropertyMap:', error);
-        
-        // Asegurar restaurar scroll si hay error
-        backToProperties();
-        
+        console.error('❌ Error crítico en showPropertyMap:', error);
+        // Fallback: abrir Google Maps en nueva pestaña
         const encodedAddress = encodeURIComponent(address || '');
         window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+        
+        // Volver a propiedades si falla
+        setTimeout(backToProperties, 500);
     }
 }
 
@@ -2207,28 +2189,20 @@ function showPropertyMap(propertyId, address, title, mode = 'search', fromDetail
 // ========================================
 
 function ocultarVistaPrincipal() {
-    console.log('📦 Ocultando vista principal...');
-    
     const elementsToHide = [
         '#properties-container',
         '.filters',
-        '#results-counter-styled'
+        '#results-counter-styled',
+        '#property-details-modal'  // Ocultar modal de detalles si está abierto
     ];
     
     elementsToHide.forEach(selector => {
         const element = document.querySelector(selector);
         if (element) {
-            // Usar visibility en lugar de display para no romper layout
-            element.style.visibility = 'hidden';
-            element.style.opacity = '0';
-            element.style.height = '0';
-            element.style.overflow = 'hidden';
-            element.style.transition = 'opacity 0.3s, height 0.3s';
-            console.log(`   📌 Ocultado (visibilidad): ${selector}`);
+            element.style.display = 'none';
+            console.log(`📦 Ocultando: ${selector}`);
         }
     });
-    
-    // NO BLOQUEAR EL SCROLL AQUÍ - se hará en activarModoMapa con control
 }
 
 function mostrarBotonVolver(titulo) {
@@ -2406,249 +2380,52 @@ function cambiarModoMapa(propertyId, direccionCodificada, tituloCodificado, nuev
 }
 
 function activarModoMapa() {
-    console.log('🌍 Activando modo mapa (con control de scroll)...');
-    
-    // Solo bloquear scroll si realmente es necesario
-    if (document.getElementById('fullscreen-map-container')) {
-        document.body.classList.add('map-view-active');
-        
-        // Bloquear scroll PERO con manejo especial
-        document.body.style.overflow = 'hidden';
-        document.body.style.position = 'fixed';
-        document.body.style.width = '100%';
-        document.body.style.height = '100%';
-        document.body.style.top = `-${window.scrollY}px`;
-        
-        console.log('✅ Modo mapa activado (scroll controlado)');
-    } else {
-        console.warn('⚠️ No se activó modo mapa - no hay contenedor');
-    }
-}
-function restaurarScrollPosicion() {
-    console.log('🔧 Restaurando posición de scroll...');
-    
-    if (document.body.style.position === 'fixed') {
-        const scrollY = document.body.style.top;
-        document.body.style.position = '';
-        document.body.style.top = '';
-        
-        // Restaurar la posición de scroll
-        window.scrollTo(0, parseInt(scrollY || '0') * -1);
-    }
+    document.body.classList.add('map-view-active');
+    console.log('🌍 Modo mapa activado');
 }
 
+// ========================================
+// FUNCIÓN PARA VOLVER A PROPIEDADES (MANTENER EXISTENTE)
+// ========================================
 
-// ========================================
-// FUNCIÓN backToProperties - VERSIÓN CORREGIDA
-// ========================================
 function backToProperties() {
-    console.log('🏠 backToProperties - INICIANDO');
-    restaurarScrollPosicion();
+    console.log('🏠 Volviendo a propiedades');
     
     try {
-        // 1. RESTAURAR SCROLL DEL BODY INMEDIATAMENTE
-        document.body.style.overflow = 'auto';
-        document.body.style.position = 'static';
-        document.body.style.height = 'auto';
-        
-        // 2. Asegurar que todos los elementos de scroll estén habilitados
-        const allElements = document.querySelectorAll('*');
-        allElements.forEach(el => {
-            if (el.style.overflow === 'hidden') {
-                el.style.overflow = '';
-            }
-        });
-        
-        // 3. Mostrar elementos ocultos
+        // 1. Mostrar elementos ocultos
         const elementsToShow = [
             '#properties-container',
             '.filters', 
-            '#results-counter-styled',
-            '.filter-section',
-            '.filters-container',
-            '#main-content'
+            '#results-counter-styled'
         ];
         
-        let elementsShown = 0;
         elementsToShow.forEach(selector => {
-            const elements = document.querySelectorAll(selector);
-            elements.forEach(element => {
-                if (element) {
-                    element.style.display = '';
-                    element.style.visibility = 'visible';
-                    element.style.opacity = '1';
-                    element.style.position = 'relative';
-                    elementsShown++;
-                    console.log(`✅ Mostrando: ${selector}`);
-                }
-            });
+            const element = document.querySelector(selector);
+            if (element) element.style.display = '';
         });
         
-        console.log(`📊 Elementos mostrados: ${elementsShown}`);
-        
-        // 4. OCULTAR COMPLETAMENTE el botón Volver
-        if (window.mapBackButton) {
-            window.mapBackButton.style.display = 'none';
-            window.mapBackButton.style.visibility = 'hidden';
-            window.mapBackButton.style.opacity = '0';
+        // 2. Ocultar botón Volver
+        const backButton = document.getElementById('mapBackButton');
+        if (backButton) {
+            backButton.style.display = 'none';
             console.log('✅ Botón Volver ocultado');
         }
         
-        // También por ID por si acaso
-        const backButtonById = document.getElementById('mapBackButton');
-        if (backButtonById) {
-            backButtonById.style.display = 'none';
-            backButtonById.style.visibility = 'hidden';
-            backButtonById.style.opacity = '0';
-        }
-        
-        // 5. Eliminar mapa si existe
+        // 3. Eliminar mapa
         const mapContainer = document.getElementById('fullscreen-map-container');
-        if (mapContainer) {
-            mapContainer.remove();
-            console.log('🗺️ Mapa eliminado');
-        }
+        if (mapContainer) mapContainer.remove();
         
-        // 6. También eliminar cualquier overlay de mapa residual
-        const mapOverlays = document.querySelectorAll('[id*="map"], [class*="map-overlay"], [class*="fullscreen-map"]');
-        mapOverlays.forEach(el => {
-            if (el.id !== 'mapBackButton') {
-                el.remove();
-                console.log(`🗑️ Eliminado overlay: ${el.id || el.className}`);
-            }
-        });
-        
-        // 7. Desactivar modo mapa
+        // 4. Desactivar modo mapa
         document.body.classList.remove('map-view-active');
-        document.documentElement.classList.remove('map-view-active');
         
-        // 8. También cerrar cualquier modal de detalles abierto
-        const detailsModal = document.getElementById('property-details-modal');
-        if (detailsModal) {
-            detailsModal.remove();
-            console.log('✅ Modal de detalles cerrado');
-        }
+        // 5. Scroll al inicio
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         
-        // 9. Cerrar cualquier overlay de directions
-        const directionsOverlay = document.getElementById('directions-overlay');
-        if (directionsOverlay) {
-            directionsOverlay.remove();
-            console.log('✅ Overlay de directions cerrado');
-        }
-        
-        // 10. Scroll al inicio con timeout para asegurar
-        setTimeout(() => {
-            window.scrollTo({
-                top: 0,
-                left: 0,
-                behavior: 'smooth'
-            });
-            
-            // Forzar reflow para asegurar que el scroll se restablezca
-            document.body.getBoundingClientRect();
-            
-            console.log('🔧 Scroll restaurado y forzado reflow');
-        }, 100);
-        
-        // 11. Verificar que el scroll esté funcionando
-        setTimeout(() => {
-            console.log('🔍 Verificando estado del scroll:');
-            console.log('   - body.overflow:', document.body.style.overflow);
-            console.log('   - html.overflow:', document.documentElement.style.overflow);
-            console.log('   - window.scrollY:', window.scrollY);
-            console.log('   - body.scrollHeight:', document.body.scrollHeight);
-            
-            // Si aún hay problema, forzar más
-            if (document.body.style.overflow !== 'auto') {
-                console.log('⚠️ Scroll aún bloqueado, forzando...');
-                document.body.style.overflow = 'auto !important';
-                document.documentElement.style.overflow = 'auto !important';
-                document.body.style.position = 'relative';
-            }
-        }, 200);
-        
-        console.log('✅ backToProperties completado exitosamente');
+        console.log('✅ Vuelta a propiedades exitosa');
         
     } catch (error) {
-        console.error('❌ Error en backToProperties:', error);
-        
-        // Fallback nuclear - restablecer todo
-        document.body.style.cssText = 'overflow: auto !important; position: static !important; height: auto !important;';
-        document.documentElement.style.cssText = 'overflow: auto !important;';
-        
-        // Mostrar todos los elementos
-        document.querySelectorAll('*').forEach(el => {
-            el.style.display = '';
-            el.style.visibility = '';
-        });
-        
-        // Recargar si es muy grave
-        setTimeout(() => {
-            if (document.body.style.overflow !== 'auto') {
-                console.warn('⚠️ Scroll críticamente bloqueado, recargando...');
-                window.location.reload();
-            }
-        }, 500);
+        console.error('❌ Error al volver a propiedades:', error);
     }
-}
-
-// ========================================
-// FUNCIÓN AUXILIAR PARA LIMPIAR COMPLETAMENTE
-// ========================================
-function limpiarEstadoMapaCompletamente() {
-    console.log('🧹 LIMPIANDO ESTADO DEL MAPA COMPLETAMENTE');
-    
-    // 1. Restaurar scroll en todos los niveles
-    document.body.style.overflow = 'auto';
-    document.body.style.position = 'static';
-    document.body.style.height = 'auto';
-    document.documentElement.style.overflow = 'auto';
-    
-    // 2. Remover todas las clases relacionadas con mapa
-    document.body.classList.remove('map-view-active', 'no-scroll', 'scroll-locked');
-    document.documentElement.classList.remove('map-view-active', 'no-scroll', 'scroll-locked');
-    
-    // 3. Remover todos los elementos de mapa/overlay
-    const elementosAEliminar = [
-        '#fullscreen-map-container',
-        '#mapBackButton',
-        '#directions-overlay',
-        '.map-overlay',
-        '.fullscreen-map',
-        '[id*="map-overlay"]',
-        '[class*="map-modal"]'
-    ];
-    
-    elementosAEliminar.forEach(selector => {
-        const elementos = document.querySelectorAll(selector);
-        elementos.forEach(el => el.remove());
-    });
-    
-    // 4. Mostrar todos los elementos principales
-    const elementosAMostrar = [
-        '#properties-container',
-        '.filters',
-        '#results-counter-styled',
-        'header',
-        'footer',
-        'main'
-    ];
-    
-    elementosAMostrar.forEach(selector => {
-        const elementos = document.querySelectorAll(selector);
-        elementos.forEach(el => {
-            if (el) {
-                el.style.display = '';
-                el.style.visibility = '';
-                el.style.opacity = '';
-            }
-        });
-    });
-    
-    // 5. Forzar reflow
-    document.body.getBoundingClientRect();
-    
-    console.log('✅ Estado del mapa limpiado completamente');
 }
 
 
@@ -2701,70 +2478,22 @@ function getDocumentType(fileName) {
 // ========================================
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Detectar intentos de scroll cuando está bloqueado
-    let lastScrollAttempt = 0;
+    console.log('🏠 Sistema Dante Propiedades - Sin errores + Slider cargando...');
+    console.log('🎯 Sistema de slider de múltiples fotos incluido');
+    console.log('✅ Sin dependencias de Font Awesome');
+    console.log('🎬 Sistema de multimedia activado');
     
-    window.addEventListener('scroll', function(e) {
-        const now = Date.now();
-        
-        // Si el scroll está bloqueado pero se intenta hacer scroll
-        if (document.body.style.overflow === 'hidden' && 
-            (now - lastScrollAttempt) > 1000) {
-            
-            console.warn('⚠️ Intento de scroll detectado mientras está bloqueado');
-            console.log('   body.overflow:', document.body.style.overflow);
-            console.log('   Desbloqueando automáticamente...');
-            
-            // Auto-corrección
-            document.body.style.overflow = 'auto';
-            document.documentElement.style.overflow = 'auto';
-            
-            lastScrollAttempt = now;
-        }
-    });
+    // Cargar CSS del slider
+    addSliderStyles();
     
-    // También escuchar rueda del mouse
-    window.addEventListener('wheel', function(e) {
-        if (document.body.style.overflow === 'hidden') {
-            console.log('🖱️ Rueda detectada con scroll bloqueado');
-            // Permitir el scroll si el usuario intenta hacer scroll con rueda
-            document.body.style.overflow = 'auto';
-        }
-    }, { passive: true });
+    // Cargar propiedades
+    loadProperties();
     
-    // Botón de emergencia para desbloquear scroll
-    const emergencyButton = document.createElement('button');
-    emergencyButton.id = 'scroll-emergency-btn';
-    emergencyButton.innerHTML = '🔓 Desbloquear Scroll';
-    emergencyButton.style.cssText = `
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        background: #dc3545;
-        color: white;
-        border: none;
-        padding: 10px 15px;
-        border-radius: 5px;
-        z-index: 99999;
-        font-weight: bold;
-        display: none;
-        cursor: pointer;
-        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
-    `;
-    emergencyButton.onclick = limpiarEstadoMapaCompletamente;
-    document.body.appendChild(emergencyButton);
     
-    // Monitorear estado del scroll
-    setInterval(() => {
-        const isScrollBlocked = document.body.style.overflow === 'hidden' && 
-                               document.body.classList.contains('map-view-active');
-        
-        if (isScrollBlocked) {
-            emergencyButton.style.display = 'block';
-        } else {
-            emergencyButton.style.display = 'none';
-        }
-    }, 1000);
+    console.log('✅ Sistema inicializado sin errores de consola');
+    console.log('🎠 Slider de múltiples fotos disponible');
+    console.log('📄 Soporte para PDFs activado');
+    console.log('🎥 Soporte para videos activado');
 });
 
 // ========================================
@@ -2976,14 +2705,14 @@ function createExpandableGallery(property) {
     const fotos = property.fotos || [];
     
     if (fotos.length === 0) {
-        // Sin imágenes - usar imagen por defecto con ruta correcta
+        // Sin imágenes - usar imagen por defecto
         return `
             <div class="expandable-gallery" style="position: relative; cursor: pointer; height: 200px;" 
                  onclick="expandPropertyImages('${property.id_temporal}')">
-                <img src="imgs/INSTITUCIONAL 1.jpg" 
+                <img src="INSTITUCIONAL 1.jpg" 
                      alt="${property.titulo}" 
                      style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
-                     onerror="this.src='imgs/INSTITUCIONAL 3.png'">
+                     onerror="this.src='INSTITUCIONAL 3.png'">
                 <div class="gallery-expand-indicator" style="position: absolute; bottom: 10px; right: 10px; 
                         background: rgba(35, 45, 235, 0.8); color: white; padding: 4px 8px; border-radius: 4px; 
                         font-size: 10px; opacity: 0.8;">
@@ -2994,7 +2723,7 @@ function createExpandableGallery(property) {
     }
     
     // Mostrar la primera imagen como vista inicial
-    const firstImage = fotos[0].startsWith('imgs/') || fotos[0].startsWith('http') ? fotos[0] : 'imgs/' + fotos[0];
+    const firstImage = fotos[0];
     const totalPhotos = fotos.length;
     
     return `
@@ -3007,7 +2736,7 @@ function createExpandableGallery(property) {
                 <img src="${firstImage}" 
                      alt="${property.titulo}" 
                      style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
-                     onerror="this.src='imgs/INSTITUCIONAL 3.png'">
+                     onerror="this.src='INSTITUCIONAL 3.png'">
                 <div class="gallery-overlay">
                     <span>🔍 Click para ver ${totalPhotos} foto${totalPhotos > 1 ? 's' : ''}</span>
                 </div>
@@ -4101,795 +3830,27 @@ console.log('🎥 Sistema de videos integrado');
 // PANNELLUM 360 VIEWER - CON GALERÍA
 // ========================================
 
-
+let pannellumViewer = null;
 
 // Función para cambiar la imagen en el visor Pannellum activo
-let pannellumViewer = null;
-let pannellumCurrentImages = [];
-let pannellumCurrentTitle = '';
-
-// ========================================
-// MODIFICAR setPannellumImage PARA MEJOR MANEJO DE ERRORES
-// ========================================
 function setPannellumImage(imageUrl) {
-    console.log(`🔄 setPannellumImage llamada con:`, imageUrl);
-    
-    try {
-        if (pannellumViewer) {
-            console.log('🔄 Destruyendo visor anterior');
-            pannellumViewer.destroy();
-            pannellumViewer = null;
-        }
-
-        // Usar título global o por defecto
-        const title = pannellumCurrentTitle || 'Recorrido 360°';
-
-        console.log(`🎬 Creando visor Pannellum para: ${imageUrl}`);
-        
-        // Verificar que la imagen existe antes de crear el visor
-        const testImage = new Image();
-        testImage.onload = () => {
-            console.log('✅ Imagen verificada, creando visor...');
-            
-            pannellumViewer = pannellum.viewer('pannellum-container', {
-                "type": "equirectangular",
-                "panorama": imageUrl,
-                "title": title,
-                "autoLoad": true,
-                "autoRotate": -1,
-                "showControls": true,
-                "compass": true,
-                "hotSpotDebug": false,
-                "mouseZoom": true,
-                "onError": function(error) {
-                    console.error('❌ Error en Pannellum:', error);
-                    manejarErrorCargaPannellum(imageUrl, title);
-                }
-            });
-            
-            console.log('✅ Visor Pannellum creado exitosamente');
-        };
-        
-        testImage.onerror = () => {
-            console.error(`❌ La imagen no se puede cargar: ${imageUrl}`);
-            
-            // Intentar con siguiente imagen si hay
-            const currentIndex = pannellumCurrentImages.indexOf(imageUrl);
-            if (currentIndex < pannellumCurrentImages.length - 1) {
-                console.log(`🔄 Intentando con siguiente imagen: ${currentIndex + 2}/${pannellumCurrentImages.length}`);
-                setPannellumImage(pannellumCurrentImages[currentIndex + 1]);
-            } else {
-                manejarErrorCargaPannellum(imageUrl, title);
-            }
-        };
-        
-        testImage.src = imageUrl;
-        
-    } catch (error) {
-        console.error('❌ Error en setPannellumImage:', error);
-        manejarErrorCargaPannellum(imageUrl, pannellumCurrentTitle);
-    }
-}
-
-// ========================================
-// MANEJAR ERROR DE CARGA PANNELLUM
-// ========================================
-function manejarErrorCargaPannellum(imageUrl, title) {
-    console.error('❌ Error cargando imagen para Pannellum:', imageUrl);
-    
-    const container = document.getElementById('pannellum-container');
-    if (!container) return;
-    
-    container.innerHTML = `
-        <div style="display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column;">
-            <div style="font-size: 60px; margin-bottom: 20px;">❌</div>
-            <h3 style="color: white; margin: 0 0 15px 0;">Error cargando imagen 360°</h3>
-            <p style="color: #ddd; margin: 0 0 10px 0; text-align: center;">
-                No se pudo cargar: <code>${imageUrl.split('/').pop()}</code>
-            </p>
-            <p style="color: #aaa; font-size: 14px; margin: 0 0 20px 0; text-align: center;">
-                Verifica que el archivo exista en la carpeta <code>/imgs/360/</code>
-            </p>
-            <button onclick="closePannellumModal()" 
-                    style="background: #232deb; color: white; border: none; 
-                           padding: 12px 24px; border-radius: 6px; cursor: pointer;
-                           font-weight: 600;">
-                Cerrar
-            </button>
-        </div>
-    `;
-}
-
-// Función principal para abrir el modal 360
-function openPannellumModal(images, title) {
-    console.log('🎬 openPannellumModal llamada con:', { images, title });
-    
-    try {
-        if (!images || !Array.isArray(images) || images.length === 0) {
-            console.warn('⚠️ No hay imágenes para el recorrido 360°');
-            alert('No hay imágenes disponibles para el recorrido 360°');
-            return;
-        }
-
-        // Guardar datos globalmente
-        pannellumCurrentImages = images;
-        pannellumCurrentTitle = title || 'Recorrido 360°';
-        
-        const pannellumModal = document.getElementById('pannellum-modal');
-        
-        if (!pannellumModal) {
-            console.error('❌ Modal Pannellum no encontrado en el DOM');
-            // Crear modal dinámicamente
-            crearModalPannellumDinamico(images, title);
-            return;
-        }
-
-        // Mostrar modal
-        pannellumModal.style.display = 'block';
-        document.body.style.overflow = 'hidden';
-        
-        // Destruir visor anterior si existe
-        if (pannellumViewer) {
-            pannellumViewer.destroy();
-            pannellumViewer = null;
-        }
-
-        // Configurar thumbnails
-        const thumbnailsContainer = document.getElementById('pannellum-thumbnails');
-        if (thumbnailsContainer) {
-            thumbnailsContainer.innerHTML = ''; // Limpiar
-
-            if (images.length > 1) {
-                thumbnailsContainer.style.display = 'flex';
-                
-                images.forEach((imgUrl, index) => {
-                    const thumb = document.createElement('div');
-                    thumb.className = 'pannellum-thumb';
-                    thumb.style.backgroundImage = `url('${imgUrl}')`;
-                    thumb.title = `Vista ${index + 1}`;
-                    
-                    // Usar evento onclick en lugar de onclick directo
-                    thumb.addEventListener('click', (event) => {
-                        event.stopPropagation();
-                        console.log(`🖼️ Cambiando a imagen ${index + 1}`);
-                        setPannellumImage(imgUrl);
-                        
-                        // Marcar thumbnail activo
-                        Array.from(thumbnailsContainer.children).forEach(t => 
-                            t.classList.remove('active')
-                        );
-                        thumb.classList.add('active');
-                    });
-                    
-                    thumbnailsContainer.appendChild(thumb);
-                });
-            } else {
-                thumbnailsContainer.style.display = 'none';
-            }
-        }
-        
-        // Crear visor con primera imagen
-        console.log('🎬 Inicializando visor con primera imagen');
-        setPannellumImage(images[0]);
-        
-        // Marcar primer thumbnail como activo
-        if (thumbnailsContainer && thumbnailsContainer.firstChild) {
-            thumbnailsContainer.firstChild.classList.add('active');
-        }
-        
-        console.log('✅ Modal 360° abierto correctamente');
-        
-    } catch (error) {
-        console.error('❌ Error crítico en openPannellumModal:', error);
-        
-        // Fallback: mostrar primera imagen en modal simple
-        if (images && images.length > 0) {
-            mostrarImagen360Fallback(images[0], title);
-        } else {
-            alert('Error al abrir el recorrido 360°');
-        }
-    }
-}
-
-// Función para crear modal Pannellum dinámicamente si no existe
-function crearModalPannellumDinamico(images, title) {
-    console.log('🏗️ Creando modal Pannellum dinámicamente');
-    
-    // Crear modal
-    const modal = document.createElement('div');
-    modal.id = 'pannellum-modal';
-    modal.style.cssText = `
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.95);
-        z-index: 10001;
-        overflow: hidden;
-    `;
-    
-    modal.innerHTML = `
-        <div style="position: relative; width: 100%; height: 100%;">
-            <!-- Botón cerrar -->
-            <button onclick="closePannellumModal()" 
-                    style="position: absolute; top: 20px; right: 20px; z-index: 10002;
-                           background: rgba(255,255,255,0.2); color: white; border: none;
-                           width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
-                           font-size: 20px; font-weight: bold; backdrop-filter: blur(10px);">
-                ✕
-            </button>
-            
-            <!-- Título -->
-            <div style="position: absolute; top: 20px; left: 20px; z-index: 10002;
-                        background: rgba(0,0,0,0.7); color: white; padding: 10px 20px;
-                        border-radius: 20px; font-weight: 600; backdrop-filter: blur(10px);">
-                🎬 ${title || 'Recorrido 360°'}
-            </div>
-            
-            <!-- Contenedor Pannellum -->
-            <div id="pannellum-container" style="width: 100%; height: 100%;"></div>
-            
-            <!-- Thumbnails -->
-            <div id="pannellum-thumbnails" 
-                 style="position: absolute; bottom: 20px; left: 0; right: 0;
-                        display: flex; justify-content: center; gap: 10px; 
-                        padding: 10px; z-index: 10002; overflow-x: auto;"></div>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-    
-    // Ahora abrir el modal
-    setTimeout(() => {
-        openPannellumModal(images, title);
-    }, 100);
-}
-
-// Función para mostrar fallback de imagen 360
-function mostrarImagen360Fallback(imageUrl, title) {
-    console.log('🔄 Mostrando fallback para imagen 360');
-    
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.95);
-        z-index: 10001;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    `;
-    
-    modal.innerHTML = `
-        <div style="position: relative; max-width: 90%; max-height: 90%;">
-            <button onclick="this.parentElement.parentElement.remove(); document.body.style.overflow='auto'" 
-                    style="position: absolute; top: -40px; right: 0;
-                           background: rgba(255,255,255,0.2); color: white; border: none;
-                           padding: 10px 20px; border-radius: 20px; cursor: pointer;">
-                ✕ Cerrar
-            </button>
-            
-            <img src="${imageUrl}" 
-                 alt="${title || 'Imagen 360°'}"
-                 style="max-width: 100%; max-height: 80vh; border-radius: 10px;">
-                 
-            <div style="color: white; text-align: center; margin-top: 15px; font-size: 14px;">
-                ${title || 'Vista 360°'} (Imagen estática - Visor no disponible)
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-    document.body.style.overflow = 'hidden';
-}
-
-// Cerrar modal Pannellum
-function closePannellumModal() {
-    console.log('🔒 Cerrando modal Pannellum');
-    
-    const pannellumModal = document.getElementById('pannellum-modal');
-    if (pannellumModal) {
-        pannellumModal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-    
     if (pannellumViewer) {
+        console.log(`🔄 Recreando visor para: ${imageUrl}`);
         pannellumViewer.destroy();
-        pannellumViewer = null;
     }
-    
-    // Limpiar datos
-    pannellumCurrentImages = [];
-    pannellumCurrentTitle = '';
-}
 
-// Event listener para botones 360 en el modal de detalles
-document.addEventListener('click', function (e) {
-    // Buscar botón 360 en cualquier parte del documento
-    if (e.target && (
-        e.target.classList.contains('btn-360') ||
-        e.target.classList.contains('btn-360-detailed') ||
-        e.target.closest('.btn-360') ||
-        e.target.closest('.btn-360-detailed')
-    )) {
-        console.log('🎯 Botón 360° detectado');
-        
-        // Encontrar el elemento del botón
-        const button = e.target.classList.contains('btn-360') || 
-                      e.target.classList.contains('btn-360-detailed') ? 
-                      e.target : e.target.closest('.btn-360') || e.target.closest('.btn-360-detailed');
-        
-        if (!button) {
-            console.warn('⚠️ Botón 360 no encontrado');
-            return;
-        }
-        
-        const imagesAttr = button.dataset.images;
-        if (!imagesAttr) {
-            console.warn('⚠️ Botón 360 sin atributo data-images');
-            alert('No hay imágenes configuradas para el recorrido 360°');
-            return;
-        }
+    // Obtenemos el título desde el botón que abrió el modal. 
+    // Es un poco indirecto, pero funciona sin cambiar mucho el resto del código.
+    const title = document.querySelector('.btn-360[data-images]').dataset.title || 'Visor 360';
 
-        try {
-            const images = JSON.parse(imagesAttr);
-            if (!Array.isArray(images) || images.length === 0) {
-                console.warn('⚠️ data-images no es un array válido o está vacío');
-                alert('No hay imágenes disponibles para el recorrido 360°');
-                return;
-            }
-
-            const title = button.dataset.title || 'Recorrido 360°';
-            
-            // Cerrar modal de detalles primero si está abierto
-            const detallesModal = document.getElementById('property-details-modal');
-            if (detallesModal) {
-                detallesModal.remove();
-                document.body.style.overflow = 'auto';
-            }
-            
-            // Pequeño delay para transición
-            setTimeout(() => {
-                openPannellumModal(images, title);
-            }, 300);
-            
-        } catch (error) {
-            console.error('❌ Error al procesar data-images:', error);
-            alert('Error al cargar el recorrido 360°');
-        }
-    }
-});
-
-// ========================================
-// FUNCIÓN DE DIAGNÓSTICO RÁPIDO
-// ========================================
-function diagnostico360() {
-    console.clear();
-    console.log('🔧 DIAGNÓSTICO SISTEMA 360°');
-    console.log('===========================');
-    
-    // Verificar Pannellum cargado
-    console.log('📦 Pannellum cargado:', typeof pannellum !== 'undefined' ? '✅' : '❌');
-    
-    // Verificar propiedades con imágenes 360
-    if (globalData.properties && globalData.properties.length > 0) {
-        console.log(`\n🏠 Propiedades con imágenes 360:`);
-        
-        globalData.properties.forEach((prop, index) => {
-            if (prop.imagenes_360 && prop.imagenes_360.length > 0) {
-                console.log(`\n${index + 1}. ${prop.titulo} (${prop.id_temporal})`);
-                console.log(`   Imágenes originales: ${prop.imagenes_360.length}`);
-                console.log(`   Imágenes:`, prop.imagenes_360);
-                
-                const corregidas = corregirRutas360(prop.imagenes_360);
-                console.log(`   Imágenes corregidas:`, corregidas);
-                
-                // Verificar acceso
-                verificarImagenes360(corregidas).then(accesibles => {
-                    console.log(`   ✅ Accesibles: ${accesibles.length}/${corregidas.length}`);
-                });
-            }
-        });
-    } else {
-        console.log('❌ No hay propiedades cargadas');
-    }
-    
-    // Verificar modal existente
-    const modal = document.getElementById('pannellum-modal');
-    console.log(`\n🎬 Modal Pannellum:`, modal ? '✅ Encontrado' : '❌ No encontrado');
-    
-    // Probar con ejemplo
-    console.log('\n🎯 Ejemplo de prueba:');
-    const ejemploRutas = ['imagen1.jpg', '/imgs/360/imagen2.jpg', 'http://ejemplo.com/imagen.jpg'];
-    console.log('   Rutas ejemplo:', ejemploRutas);
-    console.log('   Corregidas:', corregirRutas360(ejemploRutas));
-}
-
-// Hacerla accesible globalmente
-window.diagnostico360 = diagnostico360;
-
-// Cerrar con tecla Escape
-document.addEventListener('keydown', function(event) {
-    const pannellumModal = document.getElementById('pannellum-modal');
-    if (event.key === 'Escape' && pannellumModal && pannellumModal.style.display === 'block') {
-        closePannellumModal();
-    }
-});
-
-// ========================================
-// FUNCIÓN PARA CORREGIR RUTAS DE IMÁGENES 360
-// ========================================
-function corregirRutas360(imagenes) {
-    console.log('🔄 Corrigiendo rutas 360:', imagenes);
-    
-    if (!imagenes || !Array.isArray(imagenes)) {
-        console.log('❌ No hay imágenes para corregir');
-        return [];
-    }
-    
-    const corregidas = imagenes.map(img => {
-        // Si ya es una URL completa, mantenerla
-        if (img.startsWith('http://') || img.startsWith('https://')) {
-            return img;
-        }
-        
-        // Si empieza con /, mantenerla
-        if (img.startsWith('/')) {
-            return img;
-        }
-        
-        // Si ya tiene imgs/360/, mantenerla
-        if (img.includes('imgs/360/')) {
-            return img;
-        }
-        
-        // Si está en la raíz, agregar imgs/360/
-        if (!img.includes('/')) {
-            return `imgs/360/${img}`;
-        }
-        
-        // Si tiene otra ruta pero no imgs/360/, intentar corregir
-        const partes = img.split('/');
-        const nombreArchivo = partes[partes.length - 1];
-        return `imgs/360/${nombreArchivo}`;
+    pannellumViewer = pannellum.viewer('pannellum-container', {
+        "type": "equirectangular",
+        "panorama": imageUrl,
+        "title": title,
+        "autoLoad": true,
+        "autoRotate": -2,
+        "showControls": true
     });
-    
-    console.log('✅ Rutas corregidas:', corregidas);
-    return corregidas;
-}
-
-// ========================================
-// FUNCIÓN PARA VERIFICAR ACCESO A IMÁGENES
-// ========================================
-function verificarImagenes360(imagenes) {
-    return new Promise((resolve) => {
-        console.log('🔍 Verificando acceso a imágenes 360...');
-        
-        const imagenesAccesibles = [];
-        let verificadas = 0;
-        
-        if (!imagenes || imagenes.length === 0) {
-            resolve([]);
-            return;
-        }
-        
-        imagenes.forEach(img => {
-            const imgTest = new Image();
-            imgTest.onload = () => {
-                console.log(`✅ Imagen accesible: ${img}`);
-                imagenesAccesibles.push(img);
-                verificadas++;
-                if (verificadas === imagenes.length) {
-                    console.log(`🎯 Total accesibles: ${imagenesAccesibles.length}/${imagenes.length}`);
-                    resolve(imagenesAccesibles);
-                }
-            };
-            imgTest.onerror = () => {
-                console.log(`❌ Imagen NO accesible: ${img}`);
-                verificadas++;
-                if (verificadas === imagenes.length) {
-                    console.log(`🎯 Total accesibles: ${imagenesAccesibles.length}/${imagenes.length}`);
-                    resolve(imagenesAccesibles);
-                }
-            };
-            imgTest.src = img;
-        });
-    });
-}
-
-// Función principal para abrir el modal 360 - VERSIÓN CORREGIDA
-function openPannellumModal(images, title) {
-    console.log('🎬 openPannellumModal llamada con:', { images, title });
-    
-    try {
-        // 1. CORREGIR RUTAS DE IMÁGENES
-        const imagenesCorregidas = corregirRutas360(images);
-        
-        if (!imagenesCorregidas || imagenesCorregidas.length === 0) {
-            console.warn('⚠️ No hay imágenes para el recorrido 360°');
-            alert('No hay imágenes disponibles para el recorrido 360°');
-            return;
-        }
-        
-        console.log('📁 Imágenes después de corregir rutas:', imagenesCorregidas);
-        
-        // 2. VERIFICAR QUE LAS IMÁGENES SEAN ACCESIBLES
-        verificarImagenes360(imagenesCorregidas).then(imagenesAccesibles => {
-            if (imagenesAccesibles.length === 0) {
-                console.error('❌ Ninguna imagen 360 es accesible');
-                
-                // Mostrar error detallado
-                mostrarErrorImagenesNoEncontradas(imagenesCorregidas, title);
-                return;
-            }
-            
-            console.log(`✅ ${imagenesAccesibles.length} imágenes accesibles de ${imagenesCorregidas.length}`);
-            
-            // 3. Continuar con el flujo normal usando imágenes accesibles
-            continuarAperturaModal360(imagenesAccesibles, title);
-            
-        }).catch(error => {
-            console.error('❌ Error verificando imágenes:', error);
-            alert('Error al verificar las imágenes 360°');
-        });
-        
-    } catch (error) {
-        console.error('❌ Error crítico en openPannellumModal:', error);
-        
-        // Fallback: mostrar primera imagen en modal simple
-        if (images && images.length > 0) {
-            mostrarImagen360Fallback(images[0], title);
-        } else {
-            alert('Error al abrir el recorrido 360°');
-        }
-    }
-}
-
-// ========================================
-// FUNCIÓN PARA CONTINUAR APERTURA DESPUÉS DE VERIFICAR
-// ========================================
-function continuarAperturaModal360(images, title) {
-    // Guardar datos globalmente
-    pannellumCurrentImages = images;
-    pannellumCurrentTitle = title || 'Recorrido 360°';
-    
-    const pannellumModal = document.getElementById('pannellum-modal');
-    
-    if (!pannellumModal) {
-        console.error('❌ Modal Pannellum no encontrado en el DOM');
-        crearModalPannellumDinamico(images, title);
-        return;
-    }
-
-    // Mostrar modal
-    pannellumModal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-    
-    // Destruir visor anterior si existe
-    if (pannellumViewer) {
-        pannellumViewer.destroy();
-        pannellumViewer = null;
-    }
-
-    // Configurar thumbnails
-    const thumbnailsContainer = document.getElementById('pannellum-thumbnails');
-    if (thumbnailsContainer) {
-        thumbnailsContainer.innerHTML = ''; // Limpiar
-
-        if (images.length > 1) {
-            thumbnailsContainer.style.display = 'flex';
-            
-            images.forEach((imgUrl, index) => {
-                const thumb = document.createElement('div');
-                thumb.className = 'pannellum-thumb';
-                thumb.style.backgroundImage = `url('${imgUrl}')`;
-                thumb.title = `Vista ${index + 1}`;
-                
-                // Pre-cargar imagen para el thumbnail
-                const preloadImg = new Image();
-                preloadImg.src = imgUrl;
-                preloadImg.onload = () => {
-                    console.log(`✅ Thumbnail ${index + 1} cargado: ${imgUrl}`);
-                };
-                preloadImg.onerror = () => {
-                    console.log(`❌ Thumbnail ${index + 1} falló: ${imgUrl}`);
-                    thumb.style.backgroundImage = "url('data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" width=\"60\" height=\"40\" viewBox=\"0 0 60 40\"%3E%3Crect width=\"60\" height=\"40\" fill=\"%236c757d\"/%3E%3Ctext x=\"30\" y=\"20\" text-anchor=\"middle\" fill=\"white\" font-family=\"Arial\" font-size=\"10\"%3EImagen%3C/text%3E%3Ctext x=\"30\" y=\"30\" text-anchor=\"middle\" fill=\"white\" font-family=\"Arial\" font-size=\"8\"%3E${index + 1}%3C/text%3E%3C/svg%3E')";
-                };
-                
-                thumb.addEventListener('click', (event) => {
-                    event.stopPropagation();
-                    console.log(`🖼️ Cambiando a imagen ${index + 1}`);
-                    setPannellumImage(imgUrl);
-                    
-                    // Marcar thumbnail activo
-                    Array.from(thumbnailsContainer.children).forEach(t => 
-                        t.classList.remove('active')
-                    );
-                    thumb.classList.add('active');
-                });
-                
-                thumbnailsContainer.appendChild(thumb);
-            });
-        } else {
-            thumbnailsContainer.style.display = 'none';
-        }
-    }
-    
-    // Crear visor con primera imagen
-    console.log('🎬 Inicializando visor con primera imagen:', images[0]);
-    setPannellumImage(images[0]);
-    
-    // Marcar primer thumbnail como activo
-    if (thumbnailsContainer && thumbnailsContainer.firstChild) {
-        thumbnailsContainer.firstChild.classList.add('active');
-    }
-    
-    console.log('✅ Modal 360° abierto correctamente');
-}
-
-// ========================================
-// FUNCIÓN PARA MOSTRAR ERROR DE IMÁGENES NO ENCONTRADAS
-// ========================================
-function mostrarErrorImagenesNoEncontradas(imagenes, title) {
-    console.error('❌ Mostrando error de imágenes no encontradas');
-    
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.95);
-        z-index: 10001;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-    `;
-    
-    modal.innerHTML = `
-        <div style="background: white; border-radius: 15px; padding: 30px; max-width: 600px; width: 100%; text-align: center;">
-            <div style="font-size: 60px; margin-bottom: 20px; color: #dc3545;">⚠️</div>
-            <h2 style="margin: 0 0 15px 0; color: #495057;">Imágenes 360° no encontradas</h2>
-            
-            <div style="text-align: left; margin: 20px 0; background: #f8f9fa; padding: 15px; border-radius: 8px;">
-                <p style="margin: 0 0 10px 0; font-weight: 600;">Se intentaron cargar:</p>
-                <ul style="margin: 0; padding-left: 20px; color: #666;">
-                    ${imagenes.map(img => `<li style="margin-bottom: 5px;"><code>${img}</code></li>`).join('')}
-                </ul>
-            </div>
-            
-            <div style="margin: 25px 0; text-align: left;">
-                <h4 style="margin: 0 0 10px 0; color: #495057;">📁 Verifica la estructura de carpetas:</h4>
-                <div style="background: #e9ecef; padding: 15px; border-radius: 6px; font-family: monospace; font-size: 13px;">
-                    tu-proyecto/<br>
-                    ├── index.html<br>
-                    ├── app.js<br>
-                    ├── <strong style="color: #28a745;">imgs/</strong><br>
-                    │   └── <strong style="color: #28a745;">360/</strong><br>
-                    │       ├── <strong style="color: #28a745;">imagen1.jpg</strong><br>
-                    │       ├── <strong style="color: #28a745;">imagen2.jpg</strong><br>
-                    │       └── ...<br>
-                    └── propiedades.json
-                </div>
-            </div>
-            
-            <div style="margin: 20px 0; padding: 15px; background: #fff3cd; border-radius: 8px; text-align: left;">
-                <h4 style="margin: 0 0 10px 0; color: #856404;">💡 Solución:</h4>
-                <p style="margin: 0 0 10px 0; color: #856404;">
-                    1. Asegúrate de que las imágenes existan en <code>/imgs/360/</code>
-                </p>
-                <p style="margin: 0 0 10px 0; color: #856404;">
-                    2. Verifica los nombres en <code>propiedades.json</code>
-                </p>
-                <p style="margin: 0; color: #856404;">
-                    3. Las rutas deben ser: <code>"imgs/360/nombre-imagen.jpg"</code>
-                </p>
-            </div>
-            
-            <button onclick="this.parentElement.parentElement.remove();" 
-                    style="background: #232deb; color: white; border: none; padding: 12px 24px; 
-                           border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 16px;">
-                Entendido
-            </button>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-    document.body.style.overflow = 'hidden';
-}
-
-
-// ========================================
-// CORREGIR EL BOTÓN EN EL MODAL DE DETALLES
-// ========================================
-
-// En la función createDetailsModal, asegúrate de que el botón tenga este formato:
-
-/*
-<div class="tour-360-section">
-    <p>Explorá la propiedad con nuestro recorrido virtual interactivo.</p>
-    <button class="btn-360-detailed" 
-            data-images='${JSON.stringify(property.imagenes_360)}' 
-            data-title="${property.titulo}">
-        🎬 Iniciar recorrido 360°
-    </button>
-</div>
-*/
-
-// ========================================
-// ESTILOS PARA PANNELLUM
-// ========================================
-function agregarEstilosPannellum() {
-    if (!document.querySelector('#pannellum-estilos')) {
-        const styles = document.createElement('style');
-        styles.id = 'pannellum-estilos';
-        styles.textContent = `
-            /* Thumbnails */
-            .pannellum-thumb {
-                width: 60px;
-                height: 40px;
-                background-size: cover;
-                background-position: center;
-                border-radius: 4px;
-                cursor: pointer;
-                border: 2px solid transparent;
-                transition: all 0.3s ease;
-                opacity: 0.7;
-            }
-            
-            .pannellum-thumb:hover {
-                opacity: 1;
-                transform: scale(1.1);
-                border-color: #232deb;
-            }
-            
-            .pannellum-thumb.active {
-                opacity: 1;
-                border-color: #28a745;
-                transform: scale(1.1);
-                box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
-            }
-            
-            /* Ajustes para Pannellum */
-            #pannellum-container .pnlm-panorama-info {
-                background: rgba(0,0,0,0.7) !important;
-                border-radius: 10px !important;
-                padding: 10px 15px !important;
-            }
-            
-            /* Botón 360 en detalles */
-            .btn-360-detailed {
-                background: linear-gradient(135deg, #6f42c1 0%, #6610f2 100%);
-                color: white;
-                border: none;
-                padding: 12px 24px;
-                border-radius: 8px;
-                font-size: 15px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.3s;
-                display: inline-flex;
-                align-items: center;
-                gap: 8px;
-                margin-top: 10px;
-            }
-            
-            .btn-360-detailed:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 8px 20px rgba(111, 66, 193, 0.4);
-                background: linear-gradient(135deg, #6610f2 0%, #6f42c1 100%);
-            }
-        `;
-        document.head.appendChild(styles);
-        console.log('✅ Estilos Pannellum cargados');
-    }
 }
 
 document.addEventListener('click', function (e) {
