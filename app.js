@@ -2917,11 +2917,18 @@ async function loadEnvironmentInfo(direccion, barrio) {
             `${barrio} bancos cajeros automáticos servicios financieros`
         ];
         
+        console.log('🔍 Consultas preparadas:', searchQueries);
+        
         // Realizar búsquedas en paralelo (AHORA CON IA REAL)
         const searchResults = await performParallelSearches(searchQueries);
         
+        console.log('✅ Resultados de IA recibidos:', Object.keys(searchResults));
+        
         // Procesar y estructurar la información
         const environmentData = processEnvironmentData(searchResults, direccion, barrio);
+        
+        console.log('🎯 Datos procesados con IA:', environmentData.aiGenerated);
+        console.log('📊 Categorías generadas:', Object.keys(environmentData.categories));
         
         // Mostrar resultados
         displayEnvironmentInfo(environmentData);
@@ -3076,87 +3083,175 @@ function generateFallbackResults(queries) {
     };
 }
 
-// Procesar y estructurar datos del entorno
+// Procesar y estructurar datos del entorno (AHORA USA RESPUESTAS REALES DE IA)
 function processEnvironmentData(searchResults, direccion, barrio) {
-    const categories = {
-        transporte: {
-            icon: '🚇',
-            title: 'Transporte Público',
-            items: [
-                'Múltiples líneas de colectivo',
-                'Estación de subte cercana',
-                'Acceso a autopistas',
-                'Taxis y remises disponibles'
+    console.log('🔧 PROCESANDO DATOS REALES DE IA:', searchResults);
+    
+    // Función para extraer elementos clave de las respuestas de la IA
+    function extractItemsFromAIResponse(response, category) {
+        if (!response) return ['Información no disponible'];
+        
+        // Dividir la respuesta en oraciones y extraer elementos clave
+        const sentences = response.split(/[.!]/);
+        const items = [];
+        
+        // Patrones específicos por categoría para extraer información útil
+        const extractionPatterns = {
+            servicios: [
+                /farmacias? como ([^,.]+)/gi,
+                /heladerías? (?:artesanales |como )?([^,.]+)/gi,
+                /centros? de estética/gi,
+                /lavanderías?/gi,
+                /tintorerías?/gi,
+                /peluquerías?/gi,
+                /sucursales bancarias/gi
+            ],
+            transporte: [
+                /líneas? de colectivo.*?(\d+[, \d]*)/gi,
+                /subte.*?línea ([a-h])/gi,
+                /autopistas? ([^,.]+)/gi,
+                /taxis?/gi,
+                /remises/gi
+            ],
+            salud: [
+                /hospitales? ([^,.]+)/gi,
+                /clínicas? ([^,.]+)/gi,
+                /farmacias? 24h/gi,
+                /centros? de diagnóstico/gi,
+                /consultorios médicos/gi
+            ],
+            comercio: [
+                /supermercados? ([^,.]+)/gi,
+                /centros comerciales? ([^,.]+)/gi,
+                /tiendas de ([^,.]+)/gi,
+                /librerías? ([^,.]+)/gi,
+                /jugueterías?/gi
+            ],
+            gastronomia: [
+                /restaurantes? (?:premium |como )?([^,.]+)/gi,
+                /cafeterías? (?:specialty |como )?([^,.]+)/gi,
+                /pizzerías? ([^,.]+)/gi,
+                /heladerías? (?:artesanales |como )?([^,.]+)/gi,
+                /bares?/gi
+            ],
+            recreacion: [
+                /plazas? ([^,.]+)/gi,
+                /parques? ([^,.]+)/gi,
+                /teatros? ([^,.]+)/gi,
+                /museos? ([^,.]+)/gi,
+                /canchas/gi
+            ],
+            servicios_financieros: [
+                /sucursales de ([^,.]+)/gi,
+                /cajeros automáticos/gi,
+                /casas de cambio ([^,.]+)/gi,
+                /seguros ([^,.]+)/gi
+            ],
+            educacion: [
+                /colegios? (?:privados |como )?([^,.]+)/gi,
+                /universidades? ([^,.]+)/gi,
+                /institutos de ([^,.]+)/gi,
+                /centros de idiomas/gi,
+                /academias?/gi
             ]
-        },
-        educacion: {
-            icon: '🎓',
-            title: 'Educación',
-            items: [
-                'Colegios primarios y secundarios',
-                'Universidades cercanas',
-                'Instituto de idiomas',
-                'Centros de formación'
-            ]
-        },
-        salud: {
-            icon: '🏥',
-            title: 'Salud',
-            items: [
-                'Hospitales y clínicas',
-                'Centros de diagnóstico',
-                'Farmacias 24 horas',
-                'Consultorios médicos'
-            ]
-        },
-        comercio: {
-            icon: '🛒',
-            title: 'Comercio',
-            items: [
-                'Supermercados',
-                'Centros comerciales',
-                'Tiendas especializadas',
-                'Servicios básicos'
-            ]
-        },
-        gastronomia: {
-            icon: '🍽️',
-            title: 'Gastronomía',
-            items: [
-                'Restaurantes variados',
-                'Cafeterías',
-                'Bares y pubs',
-                'Pizzerías'
-            ]
-        },
-        recreacion: {
-            icon: '🌳',
-            title: 'Recreación',
-            items: [
-                'Parques y plazas',
-                'Centros culturales',
-                'Gimnasios',
-                'Espacios deportivos'
-            ]
-        },
-        servicios_financieros: {
-            icon: '🏦',
-            title: 'Servicios Financieros',
-            items: [
-                'Bancos principales',
-                'Cajeros automáticos',
-                'Casas de cambio',
-                'Consultores financieros'
-            ]
+        };
+        
+        const patterns = extractionPatterns[category] || [];
+        
+        // Extraer información usando los patrones
+        patterns.forEach(pattern => {
+            const matches = response.match(pattern);
+            if (matches) {
+                matches.forEach(match => {
+                    // Limpiar y formatear la coincidencia
+                    const cleanMatch = match.replace(/^(?:como |tales como |de |como )?/gi, '').trim();
+                    if (cleanMatch.length > 3 && !items.includes(cleanMatch)) {
+                        items.push(cleanMatch);
+                    }
+                });
+            }
+        });
+        
+        // Si no encontramos patrones específicos, dividir la respuesta en fragmentos útiles
+        if (items.length === 0) {
+            const fragments = response.split(/, | y | además /);
+            fragments.forEach(fragment => {
+                const trimmed = fragment.trim();
+                if (trimmed.length > 5 && trimmed.length < 50) {
+                    items.push(trimmed);
+                }
+            });
         }
+        
+        // Si aún no tenemos items, crear algunos basados en la respuesta
+        if (items.length === 0) {
+            const shortResponse = response.substring(0, 100).trim();
+            items.push(shortResponse + '...');
+        }
+        
+        return items.slice(0, 4); // Máximo 4 elementos por categoría
+    }
+    
+    // Construir categorías usando las respuestas reales de la IA
+    const categories = {};
+    
+    // Mapear las respuestas de IA a las categorías
+    const aiResponseMapping = {
+        servicios: searchResults.servicios,
+        transporte: searchResults.transporte,
+        educacion: searchResults.educacion,
+        salud: searchResults.salud,
+        comercio: searchResults.comercio,
+        gastronomia: searchResults.gastronomia,
+        recreacion: searchResults.recreacion,
+        servicios_financieros: searchResults.servicios_financieros
     };
+    
+    const categoryIcons = {
+        servicios: '🏪',
+        transporte: '🚇',
+        educacion: '🎓',
+        salud: '🏥',
+        comercio: '🛒',
+        gastronomia: '🍽️',
+        recreacion: '🌳',
+        servicios_financieros: '🏦'
+    };
+    
+    const categoryTitles = {
+        servicios: 'Servicios Urbanos',
+        transporte: 'Transporte Público',
+        educacion: 'Educación',
+        salud: 'Salud',
+        comercio: 'Comercio',
+        gastronomia: 'Gastronomía',
+        recreacion: 'Recreación',
+        servicios_financieros: 'Servicios Financieros'
+    };
+    
+    // Generar categorías dinámicamente usando las respuestas de IA
+    Object.keys(aiResponseMapping).forEach(category => {
+        const aiResponse = aiResponseMapping[category];
+        const items = extractItemsFromAIResponse(aiResponse, category);
+        
+        categories[category] = {
+            icon: categoryIcons[category],
+            title: categoryTitles[category],
+            items: items,
+            aiResponse: aiResponse // Guardar la respuesta completa para referencia
+        };
+        
+        console.log(`✅ ${category}: Extraídos ${items.length} elementos de la respuesta de IA`);
+    });
     
     return {
         barrio: barrio,
         direccion: direccion,
         categories: categories,
-        lastUpdated: new Date().toLocaleDateString('es-AR')
+        lastUpdated: new Date().toLocaleDateString('es-AR'),
+        aiGenerated: true // Flag para indicar que se usó IA real
     };
+}
 }
 
 // Mostrar loading mientras carga información
