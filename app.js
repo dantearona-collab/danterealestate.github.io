@@ -2214,15 +2214,17 @@ function initializeDetailsTabs() {
 // ========================================
 // FUNCIÓN openDirectionsFromDetails - VERSIÓN COMPLETA
 // ========================================
+// ========================================
+// FUNCIÓN openDirectionsFromDetails - CON BOTÓN VOLVER
+// ========================================
 function openDirectionsFromDetails(propertyId, encodedAddress, title) {
     console.log('🚗 openDirectionsFromDetails invocada para:', { propertyId, encodedAddress, title });
     
     try {
-        // 1. Decodificar la dirección (viene codificada desde el botón)
+        // 1. Decodificar la dirección
         const direccion = decodeURIComponent(encodedAddress);
-        console.log('📍 Dirección decodificada:', direccion);
         
-        // 2. Buscar la propiedad para obtener datos completos
+        // 2. Buscar la propiedad
         const property = globalData.properties.find(p => p.id_temporal === propertyId);
         if (!property) {
             console.error('❌ Propiedad no encontrada:', propertyId);
@@ -2234,9 +2236,7 @@ function openDirectionsFromDetails(propertyId, encodedAddress, title) {
         const direccionFinal = direccion || property.direccion_completa || property.direccion || property.barrio;
         const tituloFinal = title || property.titulo;
         
-        console.log('📍 Dirección final para Google Maps:', direccionFinal);
-        
-        // 4. Cerrar modal de detalles si está abierto
+        // 4. Cerrar modal de detalles
         const detallesModal = document.getElementById('property-details-modal');
         if (detallesModal) {
             detallesModal.remove();
@@ -2244,71 +2244,356 @@ function openDirectionsFromDetails(propertyId, encodedAddress, title) {
             console.log('✅ Modal de detalles cerrado');
         }
         
-        // 5. Crear URL para Google Maps Directions
+        // 5. CREAR OVERLAY CON BOTÓN VOLVER
+        crearOverlayConVolver(propertyId, tituloFinal, direccionFinal);
+        
+        // 6. Crear URL para Google Maps Directions
         const direccionCodificada = encodeURIComponent(direccionFinal);
         const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${direccionCodificada}&travelmode=driving`;
         
         console.log('🔗 URL de Google Maps:', directionsUrl);
         
-        // 6. Abrir en nueva pestaña
+        // 7. Abrir en nueva pestaña
         const nuevaPestaña = window.open(directionsUrl, '_blank');
         
         if (nuevaPestaña) {
             console.log('✅ Google Maps abierto en nueva pestaña');
             
-            // 7. Opcional: Mostrar mensaje de confirmación
-            setTimeout(() => {
-                // Puedes agregar un toast o notificación aquí si quieres
-                console.log('✅ Navegación a Google Maps completada');
+            // 8. Escuchar cuando se cierre la pestaña (opcional)
+            const verificarCierre = setInterval(() => {
+                if (nuevaPestaña.closed) {
+                    clearInterval(verificarCierre);
+                    cerrarOverlayVolver();
+                    console.log('✅ Pestaña de Google Maps cerrada');
+                }
             }, 1000);
+            
         } else {
             // Si el bloqueador de ventanas emergentes bloqueó la apertura
             console.warn('⚠️ Bloqueador de ventanas emergentes detectado');
-            
-            // Fallback: Mostrar enlace para hacer clic manualmente
-            const fallbackHTML = `
-                <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                            background: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 30px rgba(0,0,0,0.3); 
-                            z-index: 10001; text-align: center; max-width: 400px;">
-                    <h3 style="margin-top: 0; color: #232deb;">🚗 Cómo llegar</h3>
-                    <p>Se abrió una nueva ventana. Si no ves Google Maps:</p>
-                    <p><strong>${tituloFinal}</strong></p>
-                    <p style="color: #666; font-size: 14px;">${direccionFinal}</p>
-                    
-                    <div style="margin: 20px 0;">
-                        <a href="${directionsUrl}" target="_blank" 
-                           style="display: inline-block; background: #28a745; color: white; 
-                                  padding: 12px 24px; border-radius: 6px; text-decoration: none;
-                                  font-weight: 600; font-size: 16px;">
-                            🔗 Abrir Google Maps
-                        </a>
-                    </div>
-                    
-                    <button onclick="this.parentElement.remove()" 
-                            style="background: #6c757d; color: white; border: none; 
-                                   padding: 8px 16px; border-radius: 4px; cursor: pointer;">
-                        Cerrar
-                    </button>
-                </div>
-            `;
-            
-            const fallbackDiv = document.createElement('div');
-            fallbackDiv.innerHTML = fallbackHTML;
-            document.body.appendChild(fallbackDiv);
+            mostrarFallbackManual(propertyId, tituloFinal, direccionFinal, directionsUrl);
         }
         
     } catch (error) {
         console.error('❌ Error en openDirectionsFromDetails:', error);
-        
-        // Fallback simple
-        alert('Redirigiendo a Google Maps...');
-        window.open('https://www.google.com/maps', '_blank');
+        mostrarErrorFallback(propertyId, title);
     }
 }
-// Agrega esto en tu app.js, después de showPropertyMapFromDetails:
 
-// Agrega esta función en tu app.js, después de showPropertyDetails:
+// ========================================
+// FUNCIÓN AUXILIAR: CREAR OVERLAY CON BOTÓN VOLVER
+// ========================================
+function crearOverlayConVolver(propertyId, titulo, direccion) {
+    // Limpiar overlay anterior si existe
+    const overlayAnterior = document.getElementById('directions-overlay');
+    if (overlayAnterior) {
+        overlayAnterior.remove();
+    }
+    
+    // Crear overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'directions-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 10000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(5px);
+    `;
+    
+    overlay.innerHTML = `
+        <div style="
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.3s ease;
+        ">
+            <div style="margin-bottom: 20px;">
+                <div style="font-size: 48px; margin-bottom: 10px;">🚗</div>
+                <h3 style="margin: 0 0 10px 0; color: #28a745;">Cómo llegar</h3>
+                <p style="margin: 0; color: #666; font-size: 16px; font-weight: 600;">${titulo}</p>
+                <p style="margin: 5px 0 0 0; color: #888; font-size: 14px;">${direccion}</p>
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <p style="color: #666; font-size: 14px; margin-bottom: 15px;">
+                    Se ha abierto Google Maps en una nueva pestaña.
+                    <br>Puedes consultar las indicaciones y luego volver aquí.
+                </p>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button onclick="volverADetallesDesdeDirections('${propertyId}')" 
+                        style="
+                            background: #232deb;
+                            color: white;
+                            border: none;
+                            padding: 14px;
+                            border-radius: 8px;
+                            font-size: 16px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 10px;
+                        "
+                        onmouseover="this.style.background='#1a1db4'; this.style.transform='translateY(-2px)'"
+                        onmouseout="this.style.background='#232deb'; this.style.transform='translateY(0)'">
+                    <span style="font-size: 18px;">←</span> Volver a Detalles
+                </button>
+                
+                <button onclick="cerrarOverlayVolver()" 
+                        style="
+                            background: #6c757d;
+                            color: white;
+                            border: none;
+                            padding: 12px;
+                            border-radius: 8px;
+                            font-size: 14px;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                        "
+                        onmouseover="this.style.background='#5a6268'"
+                        onmouseout="this.style.background='#6c757d'">
+                    Cerrar
+                </button>
+            </div>
+            
+            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
+                <p style="color: #999; font-size: 12px; margin: 0;">
+                    💡 <strong>Consejo:</strong> Mantén esta ventana abierta mientras usas Google Maps
+                </p>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+    console.log('✅ Overlay con botón Volver creado');
+}
 
+// ========================================
+// FUNCIÓN AUXILIAR: VOLVER A DETALLES
+// ========================================
+function volverADetallesDesdeDirections(propertyId) {
+    console.log('↩️ Volviendo a detalles desde Directions para:', propertyId);
+    
+    // 1. Cerrar overlay
+    cerrarOverlayVolver();
+    
+    // 2. Volver a mostrar la propiedad
+    const property = globalData.properties.find(p => p.id_temporal === propertyId);
+    if (property) {
+        // 3. Pequeño delay para transición suave
+        setTimeout(() => {
+            showPropertyDetails(propertyId);
+        }, 300);
+    } else {
+        console.error('❌ Propiedad no encontrada al volver:', propertyId);
+        backToProperties();
+    }
+}
+
+// ========================================
+// FUNCIÓN AUXILIAR: CERRAR OVERLAY
+// ========================================
+function cerrarOverlayVolver() {
+    const overlay = document.getElementById('directions-overlay');
+    if (overlay) {
+        overlay.remove();
+        document.body.style.overflow = 'auto';
+        console.log('✅ Overlay cerrado');
+    }
+}
+
+// ========================================
+// FUNCIÓN AUXILIAR: MOSTRAR FALLBACK MANUAL
+// ========================================
+function mostrarFallbackManual(propertyId, titulo, direccion, directionsUrl) {
+    const overlay = document.createElement('div');
+    overlay.id = 'directions-fallback';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 10001;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(8px);
+    `;
+    
+    overlay.innerHTML = `
+        <div style="
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+        ">
+            <div style="margin-bottom: 20px;">
+                <div style="font-size: 48px; margin-bottom: 10px;">⚠️</div>
+                <h3 style="margin: 0 0 10px 0; color: #dc3545;">Bloqueador detectado</h3>
+                <p style="margin: 0; color: #666;">Tu navegador bloqueó la ventana emergente.</p>
+            </div>
+            
+            <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                <p style="margin: 0 0 10px 0; color: #495057; font-weight: 600;">${titulo}</p>
+                <p style="margin: 0; color: #6c757d; font-size: 14px;">${direccion}</p>
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <a href="${directionsUrl}" target="_blank" 
+                   style="display: inline-block; background: #28a745; color: white; 
+                          padding: 14px 28px; border-radius: 8px; text-decoration: none;
+                          font-weight: 600; font-size: 16px; margin-bottom: 15px; width: 100%; box-sizing: border-box;"
+                   onmouseover="this.style.background='#218838'; this.style.transform='translateY(-2px)'"
+                   onmouseout="this.style.background='#28a745'; this.style.transform='translateY(0)'">
+                    🔗 Haz clic para abrir Google Maps
+                </a>
+                
+                <p style="color: #666; font-size: 13px; margin-top: 10px;">
+                    Después de hacer clic, usa "Volver a Detalles" para regresar
+                </p>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="volverADetallesDesdeDirections('${propertyId}')" 
+                        style="
+                            flex: 1;
+                            background: #232deb;
+                            color: white;
+                            border: none;
+                            padding: 12px;
+                            border-radius: 6px;
+                            font-weight: 600;
+                            cursor: pointer;
+                        ">
+                    ← Volver a Detalles
+                </button>
+                
+                <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                        style="
+                            flex: 1;
+                            background: #6c757d;
+                            color: white;
+                            border: none;
+                            padding: 12px;
+                            border-radius: 6px;
+                            cursor: pointer;
+                        ">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(overlay);
+}
+
+// ========================================
+// FUNCIÓN AUXILIAR: MOSTRAR ERROR FALLBACK
+// ========================================
+function mostrarErrorFallback(propertyId, title) {
+    const fallback = document.createElement('div');
+    fallback.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 5px 30px rgba(0,0,0,0.3);
+        z-index: 10001;
+        text-align: center;
+        max-width: 400px;
+    `;
+    
+    fallback.innerHTML = `
+        <h3 style="margin-top: 0; color: #dc3545;">❌ Error</h3>
+        <p>No se pudo abrir Google Maps.</p>
+        
+        <div style="margin: 20px 0;">
+            <button onclick="volverADetallesDesdeDirections('${propertyId}')" 
+                    style="background: #232deb; color: white; border: none; 
+                           padding: 12px 24px; border-radius: 6px; cursor: pointer;
+                           font-weight: 600; margin-right: 10px;">
+                ← Volver a Detalles
+            </button>
+            
+            <button onclick="window.open('https://www.google.com/maps', '_blank')" 
+                    style="background: #28a745; color: white; border: none; 
+                           padding: 12px 24px; border-radius: 6px; cursor: pointer;">
+                🗺️ Abrir Google Maps
+            </button>
+        </div>
+        
+        <button onclick="this.parentElement.remove()" 
+                style="background: #6c757d; color: white; border: none; 
+                       padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+            Cerrar
+        </button>
+    `;
+    
+    document.body.appendChild(fallback);
+}
+
+// ========================================
+// AGREGAR ESTILOS DE ANIMACIÓN
+// ========================================
+function agregarEstilosDirections() {
+    if (!document.querySelector('#directions-styles')) {
+        const styles = document.createElement('style');
+        styles.id = 'directions-styles';
+        styles.textContent = `
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            #directions-overlay div, #directions-fallback div {
+                animation: fadeIn 0.3s ease;
+            }
+            
+            /* Efecto de pulsación para el botón principal */
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+            
+            .pulse-once {
+                animation: pulse 0.5s ease;
+            }
+        `;
+        document.head.appendChild(styles);
+        console.log('✅ Estilos de Directions cargados');
+    }
+}
 
 // ========================================
 // FUNCIÓN ÚNICA Y UNIFICADA PARA MOSTRAR MAPAS
@@ -2667,6 +2952,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeMapStyles();
     addBackButtonStyles();
     addMapButtonStyles(); 
+    agregarEstilosDirections();
     
     // Inicializar variables DOM
     initializeVariables();
