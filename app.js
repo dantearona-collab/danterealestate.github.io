@@ -615,68 +615,113 @@ let globalData = {
 async function loadProperties() {
     console.log('🔄 Cargando propiedades desde propiedades.json...');
     
+    // PRIMERO: Verificar que el archivo existe
+    console.log('🔍 Verificando acceso a propiedades.json...');
+    
     try {
-        // 1. Cargar datos
+        // Intentar acceder al archivo primero
+        const testResponse = await fetch('propiedades.json', { 
+            method: 'HEAD',
+            cache: 'no-cache'
+        });
+        
+        console.log('📄 Estado del archivo:', {
+            ok: testResponse.ok,
+            status: testResponse.status,
+            statusText: testResponse.statusText,
+            url: testResponse.url
+        });
+        
+        if (!testResponse.ok) {
+            throw new Error(`Archivo no encontrado: ${testResponse.status} ${testResponse.statusText}`);
+        }
+        
+        // Ahora cargar el contenido
         const response = await fetch('propiedades.json');
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        console.log('📦 Response recibido:', response);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
         
         const data = await response.json();
-        console.log('✅ Datos cargados:', data.length, 'propiedades');
+        console.log('✅ Datos cargados CORRECTAMENTE:', {
+            cantidad: data.length,
+            primerElemento: data[0] ? data[0].titulo : 'No hay datos',
+            tieneFotos: data[0] ? (data[0].fotos || []).length : 0
+        });
         
-        // 2. Guardar en variables globales
+        // DEBUG: Mostrar todas las propiedades
+        console.log('📋 Lista completa de propiedades:');
+        data.forEach((prop, index) => {
+            console.log(`  ${index + 1}. ${prop.titulo} - Fotos: ${(prop.fotos || []).length}`);
+        });
+        
         globalData.properties = data;
         globalData.filteredProperties = data;
         
-        // 3. DEBUG: Verificar que hay datos
-        console.log('📊 Primeras 2 propiedades para verificar:');
-        data.slice(0, 2).forEach((p, i) => {
-            console.log(`   ${i+1}. ${p.titulo} - ${p.operacion} - ${p.barrio}`);
-        });
-        
-        // 4. Poblar filtros INMEDIATAMENTE
-        console.log('🔧 Llamando a populateFilters()...');
         populateFilters(data);
-        
-        // 5. Mostrar propiedades
         displayProperties(data);
         
-        // 6. VERIFICACIÓN: Comprobar que los filtros se cargaron
-        setTimeout(() => {
-            console.log('🔍 Verificación de filtros cargados:');
-            
-            const ops = document.getElementById('operacion-select-styled');
-            const barrios = document.getElementById('barrio-select-styled');
-            const tipos = document.getElementById('tipo-select-styled');
-            
-            if (ops && ops.options.length >= 3) {
-                console.log('✅ Operaciones cargadas correctamente');
-                console.log('   Opciones:', Array.from(ops.options).map(o => o.value).join(', '));
-            } else {
-                console.error('❌ ERROR: Operaciones NO cargadas');
-                console.log('   Forzando carga de operaciones...');
-                if (ops) {
-                    ops.innerHTML = `
-                        <option value="">Todas las operaciones</option>
-                        <option value="venta">Venta</option>
-                        <option value="alquiler">Alquiler</option>
-                    `;
-                }
-            }
-            
-            if (barrios && barrios.options.length > 1) {
-                console.log('✅ Barrios cargados:', barrios.options.length, 'opciones');
-            }
-            
-            if (tipos && tipos.options.length > 1) {
-                console.log('✅ Tipos cargados:', tipos.options.length, 'opciones');
-            }
-        }, 1000);
-        
     } catch (error) {
-        console.error('❌ Error cargando propiedades:', error);
-        showErrorMessage();
+        console.error('❌ ERROR CRÍTICO cargando propiedades:', error);
+        
+        // Mostrar error detallado
+        const errorDetails = `
+            ERROR: ${error.message}
+            
+            Posibles causas:
+            1. El archivo 'propiedades.json' no existe en el servidor
+            2. Ruta incorrecta: verifica que esté en la misma carpeta
+            3. Error de sintaxis en el JSON
+            4. Permisos de acceso
+            
+            Solución:
+            1. Verifica que el archivo exista
+            2. Revisa la consola de Network en DevTools
+            3. Verifica que el JSON sea válido
+        `;
+        
+        console.error(errorDetails);
+        showErrorMessage(error.message);
+        
+        // Cargar datos de ejemplo para debugging
+        cargarDatosDeEjemplo();
     }
 }
+
+// Función para cargar datos de ejemplo si falla la carga
+function cargarDatosDeEjemplo() {
+    console.log('🔄 Cargando datos de ejemplo para debugging...');
+    
+    const datosEjemplo = [
+        {
+            id_temporal: "EJ001",
+            titulo: "Ejemplo de Propiedad",
+            operacion: "Venta",
+            tipo: "Departamento",
+            barrio: "Palermo",
+            direccion: "Av. Santa Fe 1234",
+            precio: 250000,
+            moneda_precio: "USD",
+            expensas: 15000,
+            ambientes: 3,
+            metros_cuadrados: 85,
+            estado: "Excelente",
+            fotos: ["INSTITUCIONAL 1.jpg", "INSTITUCIONAL 3.png"],
+            descripcion: "Propiedad de ejemplo para debugging"
+        }
+    ];
+    
+    globalData.properties = datosEjemplo;
+    globalData.filteredProperties = datosEjemplo;
+    
+    populateFilters(datosEjemplo);
+    displayProperties(datosEjemplo);
+    
+    console.log('✅ Datos de ejemplo cargados');
+}
+
 // Mostrar mensaje de error cuando no se puede cargar el archivo
 function showErrorMessage() {
     console.log('🔧 Mostrando mensaje de error en la interfaz...');
@@ -925,6 +970,9 @@ window.filterGlobalProperties = function() {
 };
 
 function createPropertyCard(property) {
+    console.log(`🛠️ Creando tarjeta para: ${property.titulo}`);
+    console.log('📸 Datos de fotos:', property.fotos);
+    
     const card = document.createElement('div');
     card.className = 'property-card';
     card.setAttribute('data-property-card', property.id_temporal);
@@ -935,77 +983,80 @@ function createPropertyCard(property) {
         box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
         transition: transform 0.3s ease !important;
         border: 1px solid #e1e5e9 !important;
+        margin-bottom: 20px !important;
     `;
     
-    // Crear galería de imágenes inicial
-    const imageSection = createExpandableGallery(property);
+    // VERIFICAR: ¿property.fotos existe?
+    const tieneFotos = property.fotos && Array.isArray(property.fotos) && property.fotos.length > 0;
+    console.log(`   ¿Tiene fotos? ${tieneFotos} (cantidad: ${property.fotos ? property.fotos.length : 0})`);
     
-    card.innerHTML = `
-        ${imageSection}
-        <div style="position: absolute; top: 10px; left: 10px;">
-            <span style="background: #232deb !important; color: white !important; padding: 4px 8px !important; border-radius: 4px !important; font-size: 12px !important; font-weight: 600 !important;">
-                ${property.operacion}
-            </span>
+    // Usar una imagen por defecto si no hay fotos
+    const primeraImagen = tieneFotos ? property.fotos[0] : 'INSTITUCIONAL 1.jpg';
+    
+    const imageSection = `
+        <div style="position: relative; height: 200px; overflow: hidden; background: #f8f9fa;">
+            <img src="${primeraImagen}" 
+                 alt="${property.titulo}" 
+                 style="width: 100% !important; height: 100% !important; object-fit: cover !important;"
+                 onerror="
+                    console.error('❌ Error cargando imagen:', this.src);
+                    this.onerror = null;
+                    this.src = 'INSTITUCIONAL 3.png';
+                 "
+                 onload="console.log('✅ Imagen cargada:', this.src)">
+            
+            <!-- Indicador de cantidad de fotos -->
+            ${tieneFotos && property.fotos.length > 1 ? `
+                <div style="position: absolute; bottom: 10px; right: 10px; background: rgba(35, 45, 235, 0.8); 
+                            color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+                    📸 ${property.fotos.length} fotos
+                </div>
+            ` : ''}
+            
+            <!-- Badges -->
+            <div style="position: absolute; top: 10px; left: 10px; display: flex; gap: 5px;">
+                <span style="background: #232deb !important; color: white !important; padding: 4px 8px !important; 
+                             border-radius: 4px !important; font-size: 12px !important; font-weight: 600 !important;">
+                    ${property.operacion || 'Venta'}
+                </span>
+            </div>
         </div>
-        <div style="position: absolute; top: 10px; right: 10px;">
-            <span style="background: ${property.operacion === 'Venta' ? '#232deb' : '#ff0101'} !important; color: white !important; padding: 4px 8px !important; border-radius: 4px !important; font-size: 12px !important; font-weight: 600 !important;">
-                ${property.tipo}
-            </span>
-        </div>
-        
+    `;
+    
+    card.innerHTML = imageSection + `
         <div style="padding: 20px !important;">
-            <h3 style="margin: 0 0 10px 0 !important; color: #495057 !important; font-size: 18px !important; font-weight: 600 !important; line-height: 1.3 !important;">
-                ${property.titulo}
+            <h3 style="margin: 0 0 10px 0 !important; color: #495057 !important; font-size: 18px !important; 
+                       font-weight: 600 !important; line-height: 1.3 !important;">
+                ${property.titulo || 'Propiedad sin título'}
             </h3>
             
             <div style="color: #6c757d !important; font-size: 14px !important; margin-bottom: 10px !important;">
-                📍 ${property.direccion} - ${property.barrio}
+                📍 ${property.direccion || ''} ${property.barrio ? `- ${property.barrio}` : ''}
             </div>
             
             <div style="margin-bottom: 15px !important;">
                 <span style="font-size: 24px !important; font-weight: 700 !important; color: #232deb !important;">
-                    ${property.moneda_precio || 'USD'} ${property.precio?.toLocaleString() || '0'}
+                    ${property.moneda_precio || 'USD'} ${property.precio ? property.precio.toLocaleString() : 'Consultar'}
                 </span>
-                ${property.expensas > 0 ? `<div style="font-size: 12px !important; color: #6c757d !important;">+ ${property.moneda_expensas || 'ARS'} ${property.expensas.toLocaleString()} expensas</div>` : ''}
+                ${property.expensas > 0 ? `
+                    <div style="font-size: 12px !important; color: #6c757d !important;">
+                        + ${property.moneda_expensas || 'ARS'} ${property.expensas.toLocaleString()} expensas
+                    </div>
+                ` : ''}
             </div>
             
-            <div style="display: flex !important; justify-content: space-between !important; margin-bottom: 15px !important; font-size: 14px !important; color: #495057 !important;">
-                <span>🏠 ${property.ambientes} amb.</span>
-                <span>📏 ${property.metros_cuadrados} m²</span>
-                <span>📅 ${property.estado}</span>
-            </div>
-            
-            <div style="margin-bottom: 15px !important;">
-                <span style="color: #232deb !important; font-size: 14px !important; font-weight: 600 !important;">
-                    ${property.info_multimedia || 'Fotos disponibles'}
-                </span>
-            </div>
-            
-            <!-- Indicador de multimedia disponible (sin botones) -->
-            <div style="margin-bottom: 10px !important;">
-                <div style="font-size: 12px !important; color: #6c757d !important;">
-                    ${property.fotos && property.fotos.length > 0 ? `📷 ${property.fotos.length} fotos` : ''}
-                    ${property.documentos && property.documentos.length > 0 ? ` | 📄 ${property.documentos.length} documentos` : ''}
-                    ${property.videos && property.videos.length > 0 ? ` | 🎥 ${property.videos.length} videos` : ''}
-                    ${property.imagenes_360 && property.imagenes_360.length > 0 ? ` | 🔄 Recorrido 360°` : ''}
-                </div>
-            </div>
-
-            
-            
-            <!-- NUEVA SECCIÓN: MAPA DE UBICACIÓN - CON ESTILOS INLINE -->
-            <!-- Dirección simplificada (sin botón de mapa) -->
-            <div style="border-top: 1px solid #e1e5e9 !important; margin-top: 15px !important; padding-top: 15px !important;">
-                <div style="font-size: 14px !important; color: #6c757d !important; text-align: center !important;">
-                    📍 ${property.direccion_completa || `${property.direccion || ''}, ${property.barrio || ''}`}
-                </div>
+            <div style="display: flex !important; justify-content: space-between !important; 
+                        margin-bottom: 15px !important; font-size: 14px !important; color: #495057 !important;">
+                ${property.ambientes ? `<span>🏠 ${property.ambientes} amb.</span>` : ''}
+                ${property.metros_cuadrados ? `<span>📏 ${property.metros_cuadrados} m²</span>` : ''}
+                ${property.estado ? `<span>📅 ${property.estado}</span>` : ''}
             </div>
             
             <button onclick="showPropertyDetails('${property.id_temporal}')" 
                     style="width: 100% !important; background: #232deb !important; color: white !important; 
                            border: none !important; padding: 12px !important; border-radius: 6px !important; 
                            font-size: 14px !important; font-weight: 600 !important; cursor: pointer !important; 
-                           transition: all 0.3s ease !important; margin-top: 15px !important;"
+                           transition: all 0.3s ease !important; margin-top: 10px !important;"
                     onmouseover="this.style.background='#1a1db4' !important" 
                     onmouseout="this.style.background='#232deb' !important">
                 Ver Detalles
@@ -1015,7 +1066,6 @@ function createPropertyCard(property) {
     
     return card;
 }
-
 
 
 // FUNCIONES PARA MAPAS - VERSIÓN CON IDS
@@ -1555,23 +1605,47 @@ document.addEventListener('DOMContentLoaded', initializeMapStyles);
 
 function displayProperties(properties) {
     const container = document.getElementById('properties-container');
-    if (!container) return;
+    if (!container) {
+        console.error('❌ ERROR: No se encontró #properties-container');
+        return;
+    }
+    
+    console.log(`📊 Displaying ${properties.length} properties`);
     
     container.innerHTML = '';
     
     if (properties.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #666;">No se encontraron propiedades</p>';
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #666;">
+                <div style="font-size: 48px; margin-bottom: 20px;">🏠</div>
+                <h3>No se encontraron propiedades</h3>
+                <p>Intenta con otros filtros de búsqueda</p>
+            </div>
+        `;
         updateResultsCount(0);
         return;
     }
     
+    // DEBUG: Mostrar qué propiedades se van a mostrar
+    console.log('🎯 Propiedades a mostrar:');
+    properties.forEach((prop, index) => {
+        console.log(`  ${index + 1}. ${prop.titulo} - Fotos: ${prop.fotos ? prop.fotos.length : 0}`);
+    });
+    
     properties.forEach(property => {
-        const card = createPropertyCard(property);
-        container.appendChild(card);
+        try {
+            const card = createPropertyCard(property);
+            if (card) {
+                container.appendChild(card);
+                console.log(`✅ Tarjeta creada: ${property.titulo}`);
+            }
+        } catch (error) {
+            console.error(`❌ Error creando tarjeta para ${property.titulo}:`, error);
+        }
     });
     
     updateResultsCount(properties.length);
-    console.log('📋 Mostrando', properties.length, 'propiedades');
+    console.log('✅ Display completado');
 }
 
 function updateResultsCount(count) {
