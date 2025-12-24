@@ -395,13 +395,13 @@ function createImageSlider(property) {
     const fotos = property.fotos || [];
     
     if (fotos.length === 0) {
-        // Sin imágenes - usar imagen por defecto
+        // Sin imágenes - usar imagen por defecto con ruta correcta
         return `
             <div style="position: relative; cursor: pointer;" onclick="expandPropertyImages('${property.id_temporal}')" class="modal-trigger">
-                <img src="INSTITUCIONAL 1.jpg" 
+                <img src="imgs/INSTITUCIONAL 1.jpg" 
                      alt="${property.titulo}" 
                      style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
-                     onerror="this.src='INSTITUCIONAL 3.png'">
+                     onerror="this.src='imgs/INSTITUCIONAL 3.png'">
                 <!-- Botón para ver modal completo -->
                 <div style="position: absolute; top: 5px; right: 5px; background: rgba(35, 45, 235, 0.8); color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer;" 
                      onclick="event.stopPropagation(); abrirModalImagenesComplete('${property.id_temporal}')">
@@ -412,13 +412,14 @@ function createImageSlider(property) {
     }
     
     if (fotos.length === 1) {
-        // Una sola imagen - hacer clickeable
+        // Una sola imagen - hacer clickeable con ruta correcta
+        const imgUrl = fotos[0].startsWith('imgs/') || fotos[0].startsWith('http') ? fotos[0] : 'imgs/' + fotos[0];
         return `
             <div style="position: relative; cursor: pointer;" onclick="expandPropertyImages('${property.id_temporal}')" class="modal-trigger">
-                <img src="${fotos[0]}" 
+                <img src="${imgUrl}" 
                      alt="${property.titulo}" 
                      style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
-                     onerror="this.src='INSTITUCIONAL 3.png'">
+                     onerror="this.src='imgs/INSTITUCIONAL 3.png'">
                 <!-- Botón para ver modal completo -->
                 <div style="position: absolute; top: 5px; right: 5px; background: rgba(35, 45, 235, 0.8); color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer;" 
                      onclick="event.stopPropagation(); abrirModalImagenesComplete('${property.id_temporal}')">
@@ -429,14 +430,21 @@ function createImageSlider(property) {
     }
     
     // Múltiples imágenes - crear slider clickeable
-    const imageSlides = fotos.map((foto, index) => `
+    const imageSlides = fotos.map((foto, index) => {
+        // Construir URL correcta para cada imagen
+        let fotoUrl = foto;
+        if (!foto.startsWith('http')) {
+            fotoUrl = foto.startsWith('imgs/') ? foto : 'imgs/' + foto;
+        }
+        return `
         <div class="property-slide ${index === 0 ? 'active' : ''}" data-slide="${index}">
-            <img src="${foto}" 
+            <img src="${fotoUrl}" 
                  alt="${property.titulo} - Foto ${index + 1}" 
                  style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
-                 onerror="this.src='INSTITUCIONAL 3.png'">
+                 onerror="this.src='imgs/INSTITUCIONAL 3.png'">
         </div>
-    `).join('');
+    `;
+    }).join('');
     
     const navigationDots = fotos.map((_, index) => `
         <span class="property-nav-dot ${index === 0 ? 'active' : ''}" onclick="showSlide('${property.id_temporal}', ${index})"></span>
@@ -2968,14 +2976,14 @@ function createExpandableGallery(property) {
     const fotos = property.fotos || [];
     
     if (fotos.length === 0) {
-        // Sin imágenes - usar imagen por defecto
+        // Sin imágenes - usar imagen por defecto con ruta correcta
         return `
             <div class="expandable-gallery" style="position: relative; cursor: pointer; height: 200px;" 
                  onclick="expandPropertyImages('${property.id_temporal}')">
-                <img src="INSTITUCIONAL 1.jpg" 
+                <img src="imgs/INSTITUCIONAL 1.jpg" 
                      alt="${property.titulo}" 
                      style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
-                     onerror="this.src='INSTITUCIONAL 3.png'">
+                     onerror="this.src='imgs/INSTITUCIONAL 3.png'">
                 <div class="gallery-expand-indicator" style="position: absolute; bottom: 10px; right: 10px; 
                         background: rgba(35, 45, 235, 0.8); color: white; padding: 4px 8px; border-radius: 4px; 
                         font-size: 10px; opacity: 0.8;">
@@ -2986,7 +2994,7 @@ function createExpandableGallery(property) {
     }
     
     // Mostrar la primera imagen como vista inicial
-    const firstImage = fotos[0];
+    const firstImage = fotos[0].startsWith('imgs/') || fotos[0].startsWith('http') ? fotos[0] : 'imgs/' + fotos[0];
     const totalPhotos = fotos.length;
     
     return `
@@ -2999,7 +3007,7 @@ function createExpandableGallery(property) {
                 <img src="${firstImage}" 
                      alt="${property.titulo}" 
                      style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
-                     onerror="this.src='INSTITUCIONAL 3.png'">
+                     onerror="this.src='imgs/INSTITUCIONAL 3.png'">
                 <div class="gallery-overlay">
                     <span>🔍 Click para ver ${totalPhotos} foto${totalPhotos > 1 ? 's' : ''}</span>
                 </div>
