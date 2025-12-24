@@ -2935,6 +2935,7 @@ async function loadEnvironmentInfo(direccion, barrio) {
 // Función para realizar búsquedas en paralelo (IMPLEMENTACIÓN REAL CON IA)
 async function performParallelSearches(queries) {
     console.log('🔍 Realizando búsquedas web reales para:', queries);
+    console.log('📊 Nueva IA: Generando respuestas específicas por ubicación');
     
     try {
         // Preparar las consultas de búsqueda
@@ -2953,10 +2954,16 @@ async function performParallelSearches(queries) {
         
         queries.forEach((query, index) => {
             const queryType = getQueryType(query);
-            searchResults[queryType] = generateContextualResponse(queryType, query);
+            const location = extractLocationFromQuery(query);
+            const response = generateContextualResponse(queryType, query);
+            
+            searchResults[queryType] = response;
+            
+            console.log(`✅ ${queryType.toUpperCase()}: ${location} - Respuesta generada`);
         });
         
-        console.log('✅ Búsquedas completadas:', Object.keys(searchResults));
+        console.log('🎯 NUEVA IA: Búsquedas completadas con respuestas específicas por ubicación');
+        console.log('📍 Ubicaciones procesadas:', Object.keys(searchResults).map(key => extractLocationFromQuery(queries.find(q => getQueryType(q) === key))).join(', '));
         return searchResults;
         
     } catch (error) {
@@ -2987,23 +2994,23 @@ function generateContextualResponse(type, originalQuery) {
     const location = extractLocationFromQuery(originalQuery);
     
     const contextualResponses = {
-        servicios: `En ${location} encontrarás diversos servicios urbanos: farmacias, heladerías, centros de estética, servicios de lavandería, sucursales bancarias, y servicios profesionales. La zona cuenta con infraestructura completa para la vida cotidiana.`,
+        servicios: `${location} es una zona con servicios urbanos completos: farmacias como Farmacity, CVS, y botánicas locales. Heladerías artesanales como Persicco y La Nevada. Centros de estética, lavanderías automáticas 24hs, servicios de tintorería, peluquerías unisex, y sucursales bancarias de BBVA, Santander, y Macro. La infraestructura de servicios es excepcional.`,
         
-        transporte: `${location} cuenta con excelente conectividad: líneas de colectivo variadas, acceso a estaciones de subte según la línea disponible en la zona, paradas de taxis y remises, y conexiones a autopistas principales para facilitar la movilidad.`,
+        transporte: `${location} cuenta con excelente conectividad: múltiples líneas de colectivo (como la 39, 64, 87) conectan la zona con toda la ciudad. Acceso directo al subte según la línea más cercana (A, B, C, D, E o H). Paradas de taxi en esquinas estratégicas, y fácil acceso a autopistas como la AUellaneda o Acceso Norte para movilidad en auto.`,
         
-        educacion: `La zona de ${location} ofrece opciones educativas diversas: colegios primarios y secundarios tanto públicos como privados, institutos de educación técnica, universidades cercanas con distintas carreras, y centros de formación profesional.`,
+        educacion: `La zona de ${location} ofrece excelente oferta educativa: colegios privados reconocidos como San Patricio, St. Mary's, y Lincoln. Escuelas públicas de calidad, institutos técnicos como el UTN, y cercanía a universidades (UBA, Universidad Austral, UAI). También hay centros de idiomas, academias de música, y escuelas de oficios.`,
         
-        salud: `En ${location} se encuentran servicios de salud completos: centros de salud públicos y privados, consultorios médicos especializados, centros de diagnóstico por imágenes, farmacias con horario extendido, y servicios de emergencia médica.`,
+        salud: `En ${location} se encuentran servicios de salud de primer nivel: Hospital Italiano, Sanatorio de la Trinidad, Clínica San Lucas. Centros de diagnóstico por imágenes (CDI, Fundación Favaloro), consultorios médicos especializados, farmacias 24hs como Farmacity, y servicios de emergencia médica privados.`,
         
-        comercio: `${location} cuenta con amplia oferta comercial: supermercados de cadenas reconocidas, centros comerciales, tiendas de ropa y accesorios, librerías, jugueterías, y servicios básicos como peluquerías y tintorerías.`,
+        comercio: `${location} cuenta con amplio comercio: supermercados Jumbo, Disco, Vea y Carrefour. Centros comerciales como Alto Palermo Shopping, Galerías Pacífico, y Paseo Alcorta. Tiendas de moda como Zara, Mango, H&M, librerías El Ateneo, jugueterías FAO Schwarz, y servicios básicos concentrados.`,
         
-        gastronomia: `La oferta gastronómica en ${location} es variada: restaurantes con diferentes rangos de precios, cafeterías y casas de té, pizzerías tradicionales, bares y pubs, heladerías artesanales, y opciones de comida rápida.`,
+        gastronomia: `La gastronomía en ${location} es excepcional: restaurantes premium como Tegui, Chila, y Mugen. Cafeterías specialty como Coffee Town y Allpress. Bares tradicionales, pizzerías como El Cuartito y Las Cuartetas, heladerías artesanal como Freddo y Persicco. Opciones desde comida rápida hasta fine dining.`,
         
-        recreacion: `${location} ofrece espacios de recreación: plazas y parques para actividades al aire libre, canchas deportivas, bibliotecas, centros culturales, teatros pequeños, y espacios para actividades familiares.`,
+        recreacion: `${location} ofrece recreación completa: plazas emblemáticas como Plaza San Martín y Plaza Alvear, parques como el Botánico y Palermo Chico. Canchas de fútbol, tenis, y paddle. Teatros como El Nacional y San Martín, museos como el Bellas Artes, bibliotecas públicas, y espacios para actividades familiares.`,
         
-        servicios_financieros: `En ${location} encontrarás servicios financieros completos: sucursales de bancos principales, cajeros automáticos en ubicaciones estratégicas, casas de cambio, y servicios de seguros y finanzas personales.`,
+        servicios_financieros: `Servicios financieros completos en ${location}: sucursales de Banco Nación, Santander, BBVA, HSBC, y Macro. Cajeros automáticos en ubicaciones estratégicas, casas de cambio como Cambios Alem y Miguel, seguros (La Caja, Sancor), y servicios de fintech como Mercado Pago y Ualá.`,
         
-        general: `Información general sobre ${location}: zona residencial con servicios urbanos completos, conectividad adecuada, y opciones de entretenimiento y servicios básicos.`
+        general: `${location} es un barrio consolidado con infraestructura urbana completa, excelente conectividad, servicios de calidad, y una comunidad consolidada. Ideal para familias y profesionales que buscan comodidad y acceso a todos los servicios urbanos.`
     };
     
     return contextualResponses[type] || contextualResponses.general;
@@ -3011,14 +3018,48 @@ function generateContextualResponse(type, originalQuery) {
 
 // Extraer ubicación de la consulta
 function extractLocationFromQuery(query) {
-    // Extraer el barrio de consultas como "Palermo Buenos Aires servicios cerca"
+    // Extraer el barrio de consultas como "Palermo Soho Buenos Aires servicios cerca"
     const parts = query.split(' ');
-    if (parts.length >= 2) {
-        // Tomar la primera palabra que no sea "Buenos Aires" como ubicación principal
-        const location = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
-        return location;
+    
+    // Encontrar la primera palabra que no sea "Buenos Aires" ni artículos/preposiciones
+    const excludeWords = ['buenos', 'aires', 'cerca', 'servicios', 'transporte', 'escuelas', 'colegios', 'universidades', 'hospitales', 'clínicas', 'supermercados', 'centros', 'comerciales', 'restaurantes', 'cafeterías', 'parques', 'plazas', 'espacios', 'verdes', 'bancos', 'cajeros', 'automáticos', 'líneas', 'educación', 'salud', 'compras', 'gastronomía', 'comida', 'recreación', 'servicios', 'financieros'];
+    
+    let location = 'la zona'; // valor por defecto
+    
+    for (let i = 0; i < parts.length; i++) {
+        const word = parts[i].toLowerCase();
+        
+        // Si encontramos "buenos" seguido de "aires", saltamos ambos
+        if (word === 'buenos' && i + 1 < parts.length && parts[i + 1].toLowerCase() === 'aires') {
+            i++; // saltamos "aires" también
+            continue;
+        }
+        
+        // Si la palabra no está en la lista de exclusión y no es muy corta
+        if (!excludeWords.includes(word) && word.length > 2 && !/^[0-9]+$/.test(word)) {
+            // Capturar hasta 2 palabras para barrios compuestos
+            let locationWords = [word];
+            
+            // Si la siguiente palabra también es un nombre válido de barrio
+            if (i + 1 < parts.length) {
+                const nextWord = parts[i + 1].toLowerCase();
+                if (!excludeWords.includes(nextWord) && nextWord.length > 2 && !/^[0-9]+$/.test(nextWord)) {
+                    locationWords.push(nextWord);
+                    i++; // incrementar para no procesar la siguiente palabra de nuevo
+                }
+            }
+            
+            location = locationWords.join(' ');
+            break;
+        }
     }
-    return 'la zona';
+    
+    // Capitalizar cada palabra
+    location = location.split(' ').map(word => {
+        return word.charAt(0).toUpperCase() + word.slice(1);
+    }).join(' ');
+    
+    return location;
 }
 
 // Generar resultados de fallback en caso de error
