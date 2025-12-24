@@ -1,0 +1,4425 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dante Propiedades - Galería con Múltiples Imágenes</title>
+    <link rel="icon" href="/logo.png" type="image/png">
+
+    <style>
+
+
+        /* REGLA !important para el botón Volver */
+        #mapBackButton {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: fixed !important;
+            top: 20px !important;
+            left: 20px !important;
+            z-index: 10000 !important;
+        }
+
+        .map-back-button {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        /* RESET Y BASE */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* HEADER REDUCIDO 35% */
+        .header {
+            background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
+            color: white;
+            padding: 26px 20px;
+            /* Reducido de 40px a 26px (35% menos) */
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(35, 45, 235, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            /* Reducido ligeramente para mantener proporción */
+            margin-bottom: 8px;
+            /* Reducido de 10px */
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .header .company-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header .phone {
+            font-size: 0.4em;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            /* Reducido ligeramente */
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .header .logo-key {
+            width: 45px;
+            /* Reducido de 50px */
+            height: 45px;
+            /* Reducido de 50px */
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .header .logo-key img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px 15px;
+                /* Reducido también en móvil */
+            }
+
+            .header h1 {
+                font-size: 1.6em;
+                /* Ajustado para móvil */
+            }
+
+            .header .phone {
+                font-size: 0.35em;
+                padding: 5px 10px;
+            }
+
+            .whatsapp-float {
+                width: 55px;
+                height: 55px;
+                bottom: 15px;
+                right: 15px;
+            }
+
+            .whatsapp-float svg {
+                width: 24px;
+                height: 24px;
+            }
+        }
+
+        /* ELIMINADO: Estilos para .header p (texto removido) */
+
+        /* BOTONES DE ACCIÓN */
+        .btn-search,
+        .btn-reset {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-search {
+            background: #232deb;
+            color: white;
+        }
+
+        .btn-search:hover {
+            background: #1a1db4;
+            transform: translateY(-2px);
+        }
+
+        .btn-reset:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        /* WHATSAPP FLOTANTE */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: white;
+            font-size: 30px;
+            box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            animation: pulse-whatsapp 2.5s infinite;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .whatsapp-float:hover {
+            transform: scale(1.15);
+            box-shadow: 0 8px 30px rgba(37, 211, 102, 0.7);
+            background: linear-gradient(135deg, #128c7e 0%, #25d366 100%);
+        }
+
+        .whatsapp-float svg {
+            width: 28px;
+            height: 28px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        @keyframes pulse-whatsapp {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+            }
+
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 6px 25px rgba(37, 211, 102, 0.6);
+            }
+
+            100% {
+                transform: scale(1);
+                box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+            }
+        }
+
+        /* CONTAINER PRINCIPAL */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* FILTROS */
+        .filters {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .filters h3 {
+            color: #232deb;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            color: #495057;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .filter-group select {
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            color: #495057;
+            transition: border-color 0.3s ease;
+        }
+
+        .filter-group select:focus {
+            outline: none;
+            border-color: #232deb;
+        }
+
+        /* CONTADOR DE RESULTADOS */
+        .results-counter {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(35, 45, 235, 0.1);
+            border-radius: 8px;
+            color: #232deb;
+            font-weight: 600;
+        }
+
+        /* GRID DE PROPIEDADES */
+        .properties-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .property-card {
+            position: relative;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            border: 1px solid #e1e5e9;
+        }
+
+        .property-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* GALERÍA DE MÚLTIPLES IMÁGENES - COLLAGAGE */
+        .property-gallery {
+            position: relative;
+            height: 200px;
+            cursor: pointer;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .property-gallery-collage {
+            display: grid;
+            grid-template-rows: 1fr 2fr 1fr;
+            height: 100%;
+            gap: 1px;
+        }
+
+        .collage-top-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+        }
+
+        .collage-bottom-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+        }
+
+        .collage-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .collage-image:hover {
+            transform: scale(1.05);
+            filter: brightness(1.1);
+        }
+
+        .collage-main {
+            grid-column: 1 / -1;
+            height: 100%;
+            position: relative;
+        }
+
+        .collage-thumbnail {
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .collage-main .collage-image {
+            object-fit: cover;
+        }
+
+        .gallery-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(35, 45, 235, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .property-gallery:hover .gallery-overlay {
+            opacity: 1;
+        }
+
+        .gallery-overlay span {
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.9);
+            color: #232deb;
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+
+        /* GALERÍA EXPANDIBLE */
+        .expandable-gallery-container:hover .gallery-initial-view .gallery-overlay {
+            opacity: 1;
+        }
+
+        .expanded-image-item:hover .image-hover-overlay {
+            opacity: 1 !important;
+        }
+
+        .expanded-images-grid .expanded-image-item {
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .expanded-controls button {
+            transition: background-color 0.3s ease;
+        }
+
+        .expanded-controls button:hover {
+            background: rgba(35, 45, 235, 1) !important;
+        }
+
+        .gallery-expand-indicator {
+            pointer-events: none;
+        }
+
+        /* MODAL PARA IMAGEN INDIVIDUAL */
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-image {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+            animation: zoomIn 0.3s ease;
+        }
+
+        .modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-nav:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .modal-prev {
+            left: 20px;
+        }
+
+        .modal-next {
+            right: 20px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .modal-counter {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-info {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+
+        .property-nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .property-nav-dot.active {
+            background: #232deb;
+            transform: scale(1.2);
+        }
+
+        .property-nav-dot:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: scale(1.1);
+        }
+
+        /* BADGES */
+        .badges {
+            position: absolute;
+            z-index: 1;
+        }
+
+        .badge-left {
+            top: 10px;
+            left: 10px;
+        }
+
+        .badge-right {
+            top: 10px;
+            right: 10px;
+        }
+
+        .property-badge {
+            background: #232deb;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .property-badge.alquiler {
+            background: #ff0101;
+        }
+
+        .property-badge.venta {
+            background: #232deb;
+        }
+
+        /* CONTENIDO DE LA TARJETA */
+        .property-content {
+            padding: 20px;
+        }
+
+        .property-title {
+            margin: 0 0 10px 0;
+            color: #495057;
+            font-size: 18px;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        .property-location {
+            color: #6c757d;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .property-price {
+            font-size: 24px;
+            font-weight: 700;
+            color: #232deb;
+            margin-bottom: 5px;
+        }
+
+        .property-expenses {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+
+        .property-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #495057;
+        }
+
+        .property-multimedia {
+            color: #232deb;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .btn-details {
+            width: 100%;
+            background: #232deb;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-details:hover {
+            background: #1a1db4;
+        }
+
+        /* MENSAJE DE CARGA */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-size: 18px;
+        }
+
+        /* SPINNER CON LOGO ROTANDO */
+        .logo-spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: #6c757d;
+            font-size: 18px;
+        }
+
+        .spinning-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin-bottom: 15px;
+            animation: spin 2s linear infinite;
+            filter: drop-shadow(0 2px 8px rgba(35, 45, 235, 0.3));
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* SPINNER PARA EL CONTADOR DE RESULTADOS */
+        .results-counter .logo-spinner {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 0;
+            margin-right: 10px;
+            animation: spin 1.5s linear infinite;
+        }
+
+        .loading-with-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .properties-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ESTILOS ADICIONALES PARA EMOJIS */
+        .emoji {
+            display: inline-block;
+            font-size: 1em;
+        }
+
+        /* ESTILOS PARA MINIATURAS DEL VISOR 360 */
+        .pannellum-thumb {
+            width: 80px;
+            height: 45px;
+            border: 2px solid #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .pannellum-thumb:hover,
+        .pannellum-thumb.active {
+            opacity: 1;
+            border-color: #232deb;
+            transform: scale(1.1);
+        }
+
+        /* ========================================
+            BOTÓN VOLVER DESDE MAPA
+        ======================================== */
+
+        .map-back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 10000;
+            animation: slideInFromLeft 0.3s ease;
+            display: none;
+        }
+
+        @keyframes slideInFromLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .back-to-properties-btn {
+            background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(35, 45, 235, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .back-to-properties-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(35, 45, 235, 0.6);
+            background: linear-gradient(135deg, #1a1db4 0%, #232deb 100%);
+        }
+
+        .back-to-properties-btn:active {
+            transform: translateY(0);
+        }
+
+        .back-to-properties-btn span {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* Responsive para móviles */
+        @media (max-width: 768px) {
+            .map-back-button {
+                top: 15px;
+                left: 15px;
+            }
+
+            .back-to-properties-btn {
+                padding: 10px 16px;
+                font-size: 13px;
+                border-radius: 20px;
+            }
+
+            .back-to-properties-btn span {
+                font-size: 16px;
+            }
+        }
+
+        .map-view-active {
+            overflow: hidden;
+        }
+
+        /* Botón Inicio mejorado */
+        .btn-inicio {
+            padding: 12px 20px !important;
+            border: none !important;
+            border-radius: 6px !important;
+            cursor: pointer !important;
+            font-weight: 600 !important;
+            font-size: 14px !important;
+            transition: all 0.3s ease !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 8px !important;
+            background: linear-gradient(135deg, #ff0101 0%, #cc0000 100%) !important;
+            color: white !important;
+            min-width: 120px !important;
+            height: 44px !important; /* Misma altura que Buscar */
+        }
+
+        .btn-inicio:hover {
+            background: linear-gradient(135deg, #cc0000 0%, #990000 100%) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3) !important;
+        }
+
+        .btn-inicio:active {
+            transform: translateY(0) !important;
+        }
+
+        .btn-inicio img {
+            width: 18px !important;
+            height: 18px !important;
+            filter: brightness(0) invert(1) !important; /* Hace la llave blanca */
+        }
+
+
+
+
+
+
+
+
+
+
+        /* ========================================
+           MODAL DE IMÁGENES - GALERÍA COMPLETA
+           ======================================== */
+
+        .modal-imagenes {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-contenido {
+            position: relative;
+            background-color: #fefefe;
+            margin: 0.5% auto;
+            padding: 0;
+            width: 95%;
+            max-width: 1000px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-header {
+            background: #232deb;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(35, 45, 235, 0.3);
+        }
+
+        .modal-logo-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 50%;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .btn-cerrar {
+            color: white;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-cerrar:hover,
+        .btn-cerrar:focus {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .imagen-principal {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-color: #f8f9fa;
+        }
+
+        .modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            z-index: 1001;
+            box-shadow: 0 4px 16px rgba(35, 45, 235, 0.4);
+        }
+
+        .modal-nav:hover {
+            background: linear-gradient(135deg, #1a1db4 0%, #232deb 100%);
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 6px 20px rgba(35, 45, 235, 0.6);
+        }
+
+        .nav-anterior {
+            left: 20px;
+        }
+
+        .nav-siguiente {
+            right: 20px;
+        }
+
+        .modal-info {
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .imagen-contador {
+            background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(35, 45, 235, 0.3);
+        }
+
+        .imagen-titulo {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        /* Responsive para modal */
+        @media (max-width: 768px) {
+            .modal-contenido {
+                width: 98%;
+                margin: 2% auto;
+                max-height: 95vh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .imagen-principal {
+                height: 300px;
+                flex: 1;
+            }
+
+            .modal-nav {
+                padding: 10px 15px;
+                font-size: 16px;
+            }
+
+            .nav-anterior {
+                left: 10px;
+            }
+
+            .nav-siguiente {
+                right: 10px;
+            }
+        }
+
+        /* Responsive para galería de imágenes en celulares */
+        @media (max-width: 480px) {
+            .modal-imagenes {
+                padding: 0;
+            }
+
+            .modal-contenido {
+                width: 100%;
+                height: 100vh;
+                margin: 0;
+                border-radius: 0;
+                max-width: none;
+                max-height: none;
+                display: flex;
+                flex-direction: column;
+                animation: none;
+            }
+
+            .modal-header {
+                padding: 15px;
+                flex-shrink: 0;
+            }
+
+            .imagen-principal {
+                height: calc(100vh - 140px);
+                background-size: contain;
+                background-repeat: no-repeat;
+                background-position: center;
+            }
+
+            .modal-logo-title {
+                gap: 10px;
+            }
+
+            .modal-logo {
+                width: 28px;
+                height: 28px;
+                padding: 3px;
+            }
+
+            .modal-header h3 {
+                font-size: 1.1em;
+            }
+
+            .modal-nav {
+                padding: 12px 18px;
+                font-size: 18px;
+                z-index: 1002;
+            }
+
+            .nav-anterior {
+                left: 15px;
+            }
+
+            .nav-siguiente {
+                right: 15px;
+            }
+
+            .modal-nav {
+                padding: 14px 20px;
+                box-shadow: 0 6px 20px rgba(35, 45, 235, 0.5);
+            }
+
+            .modal-nav:hover {
+                transform: translateY(-50%) scale(1.15);
+            }
+
+            .modal-info {
+                padding: 12px 15px;
+                flex-shrink: 0;
+                position: relative;
+                z-index: 1001;
+            }
+
+            .btn-cerrar {
+                width: 40px;
+                height: 40px;
+                font-size: 24px;
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+
+            .btn-cerrar:hover,
+            .btn-cerrar:focus {
+                background-color: rgba(255, 255, 255, 0.25);
+            }
+        }
+
+        /* ========================================
+           ESTILOS PARA SLIDER CLICKEABLE
+           ======================================== */
+
+        /* Asegurar que los controles del slider no interfieran con el clic del modal */
+        .property-slider-btn {
+            z-index: 3 !important;
+        }
+
+        .property-nav-dots {
+            z-index: 3 !important;
+        }
+
+        .property-nav-dot {
+            z-index: 3 !important;
+        }
+
+        /* ANIMACIONES */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* RESPONSIVE - COLLAGAGE MÓVIL */
+        @media (max-width: 768px) {
+            .property-gallery {
+                height: 150px;
+            }
+
+            .collage-top-row,
+            .collage-bottom-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .modal-nav {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+
+            .modal-prev {
+                left: 10px;
+            }
+
+            .modal-next {
+                right: 10px;
+            }
+
+            .modal-close {
+                top: 20px;
+                right: 20px;
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+        }
+
+        /* ========================================
+        ESTILOS PARA GALERÍA MASONRY
+        ======================================== */
+
+        .masonry-item {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        .masonry-item:hover {
+            z-index: 10 !important;
+        }
+
+        .masonry-small {
+            /* Tamaño pequeño - ya definido en JS */
+        }
+
+        .masonry-medium {
+            /* Tamaño mediano - ya definido en JS */
+        }
+
+        .masonry-large {
+            /* Tamaño grande - ya definido en JS */
+        }
+
+        /* Efectos de hover mejorados */
+        .masonry-item:hover img {
+            transform: scale(1.05);
+            transition: transform 0.4s ease !important;
+        }
+
+        /* Responsive para masonry */
+        @media (max-width: 768px) {
+            #masonry-gallery-container {
+                padding: 10px !important;
+            }
+
+            .masonry-item {
+                border-radius: 8px !important;
+            }
+        }
+
+        /* Scrollbar personalizado para el contenedor masonry */
+        #masonry-gallery-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #masonry-gallery-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        #masonry-gallery-container::-webkit-scrollbar-thumb {
+            background: #232deb;
+            border-radius: 4px;
+        }
+
+        #masonry-gallery-container::-webkit-scrollbar-thumb:hover {
+            background: #1a1db4;
+        }
+
+        /* Animación de entrada para items masonry */
+        @keyframes masonryItemFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .masonry-item {
+            animation: masonryItemFadeIn 0.5s ease-out;
+        }
+
+        /* Efecto de carga progresiva */
+        .masonry-item:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .masonry-item:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .masonry-item:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .masonry-item:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .masonry-item:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        .masonry-item:nth-child(6) {
+            animation-delay: 0.6s;
+        }
+
+        /* ... continuar según necesidad */
+
+
+        /* ========================================
+    ESTILOS PARA MODALES DE MULTIMEDIA (PDFs y VIDEOS)
+    ======================================== */
+
+        #pdf-modal,
+        #video-modal {
+            animation: fadeIn 0.3s ease !important;
+        }
+
+        #pdf-modal iframe,
+        #video-modal video {
+            border-radius: 0 0 8px 8px !important;
+        }
+
+        /* Botones de multimedia en las tarjetas */
+        .multimedia-btn {
+            transition: all 0.3s ease !important;
+        }
+
+        .multimedia-btn:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        /* Responsive para modales de video */
+        @media (max-width: 768px) {
+            #video-modal>div {
+                width: 95% !important;
+                height: 60% !important;
+            }
+
+            #pdf-modal>div {
+                width: 95% !important;
+                height: 80% !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #video-modal>div {
+                width: 98% !important;
+                height: 50% !important;
+            }
+
+            #pdf-modal>div {
+                width: 98% !important;
+                height: 70% !important;
+            }
+
+            .multimedia-section {
+                font-size: 12px !important;
+            }
+
+            .multimedia-section button {
+                padding: 4px 8px !important;
+                font-size: 11px !important;
+            }
+        }
+
+        /* Efectos de hover para botones de multimedia */
+        .multimedia-section button:hover {
+            background: #e9ecef !important;
+            border-color: #232deb !important;
+            color: #232deb !important;
+        }
+
+        /* ========================================
+    ESTILOS PARA GALERÍA MASONRY
+    ======================================== */
+
+        .masonry-item {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        .masonry-item:hover {
+            z-index: 10 !important;
+        }
+
+        .masonry-small {
+            /* Tamaño pequeño - ya definido en JS */
+        }
+
+        .masonry-medium {
+            /* Tamaño mediano - ya definido en JS */
+        }
+
+        .masonry-large {
+            /* Tamaño grande - ya definido en JS */
+        }
+
+        /* Efectos de hover mejorados */
+        .masonry-item:hover img {
+            transform: scale(1.05);
+            transition: transform 0.4s ease !important;
+        }
+
+        /* Responsive para masonry */
+        @media (max-width: 768px) {
+            #masonry-gallery-container {
+                padding: 10px !important;
+            }
+
+            .masonry-item {
+                border-radius: 8px !important;
+            }
+        }
+
+        /* Scrollbar personalizado para el contenedor masonry */
+        #masonry-gallery-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #masonry-gallery-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        #masonry-gallery-container::-webkit-scrollbar-thumb {
+            background: #232deb;
+            border-radius: 4px;
+        }
+
+        #masonry-gallery-container::-webkit-scrollbar-thumb:hover {
+            background: #1a1db4;
+        }
+
+        /* Animación de entrada para items masonry */
+        @keyframes masonryItemFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .masonry-item {
+            animation: masonryItemFadeIn 0.5s ease-out;
+        }
+
+        /* Efecto de carga progresiva */
+        .masonry-item:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .masonry-item:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .masonry-item:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .masonry-item:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .masonry-item:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        .masonry-item:nth-child(6) {
+            animation-delay: 0.6s;
+        }
+
+        /* ========================================
+        MODAL DE DETALLES DE PROPIEDAD - FASE 1
+        ======================================== */
+
+        .property-details-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .details-modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+        }
+
+        .details-modal-content {
+            position: relative;
+            width: 90%;
+            max-width: 1000px;
+            max-height: 90vh;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* HEADER */
+        .details-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 20px 30px;
+            background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
+            color: white;
+            border-bottom: 3px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .details-header-left {
+            flex: 1;
+        }
+
+        .details-badges {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .badge-operation,
+        .badge-type {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-operation {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .badge-type {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+        }
+
+        .details-title {
+            margin: 0 0 8px 0;
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .details-subtitle {
+            display: flex;
+            gap: 15px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .details-subtitle span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .details-close-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            margin-left: 15px;
+        }
+
+        .details-close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+
+        /* TABS */
+        .details-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            padding: 0 30px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .details-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .detail-tab {
+            padding: 15px 20px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-size: 14px;
+            font-weight: 600;
+            color: #6c757d;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .detail-tab:hover {
+            color: #232deb;
+            background: rgba(35, 45, 235, 0.05);
+        }
+
+        .detail-tab.active {
+            color: #232deb;
+            border-bottom-color: #232deb;
+            background: rgba(35, 45, 235, 0.08);
+        }
+
+        /* CONTENIDO */
+        .details-modal-body {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .details-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeInTab 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeInTab {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* ESTILOS PARA CADA SECCIÓN */
+        .info-section {
+            margin-bottom: 25px;
+        }
+
+        .info-section h3 {
+            margin: 0 0 15px 0;
+            color: #495057;
+            font-size: 18px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 8px;
+        }
+
+        .description-text {
+            line-height: 1.6;
+            color: #495057;
+            font-size: 15px;
+        }
+
+        .price-display {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #232deb;
+        }
+
+        .main-price {
+            display: flex;
+            align-items: baseline;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+
+        .currency {
+            font-size: 16px;
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .amount {
+            font-size: 32px;
+            font-weight: 700;
+            color: #232deb;
+        }
+
+        .secondary-price {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-3px);
+            background: #e9ecef;
+        }
+
+        .info-icon {
+            font-size: 24px;
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .info-text {
+            flex: 1;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        /* CARACTERÍSTICAS */
+        .features-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+        }
+
+        .features-list li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+        }
+
+        .feature-check {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .feature-text {
+            color: #495057;
+        }
+
+        .strengths-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .strength-item {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 4px solid #2196f3;
+        }
+
+        .strength-icon {
+            font-size: 20px;
+        }
+
+        .strength-text {
+            font-size: 14px;
+            color: #1565c0;
+            font-weight: 500;
+        }
+
+        /* UBICACIÓN */
+        .address-display {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .address-icon {
+            font-size: 24px;
+        }
+
+        .address-text {
+            flex: 1;
+        }
+
+        .map-button-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .btn-map-primary {
+            background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-map-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(35, 45, 235, 0.3);
+        }
+
+        .location-details {
+            margin-top: 25px;
+        }
+
+        .location-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .location-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .location-item h4 {
+            margin: 0 0 10px 0;
+            color: #495057;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .location-item p {
+            margin: 0;
+            color: #6c757d;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* MULTIMEDIA */
+        .photos-preview,
+        .tour-360-section {
+            margin-top: 25px;
+        }
+
+        .btn-view-photos {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-view-photos:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        /* CONTACTO */
+        .assigned-agent {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #232deb;
+        }
+
+        .agent-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .agent-icon {
+            font-size: 32px;
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .agent-details h4 {
+            margin: 0 0 5px 0;
+            color: #495057;
+            font-size: 16px;
+        }
+
+        .agent-details p {
+            margin: 0;
+            color: #6c757d;
+        }
+
+        .agent-phone {
+            color: #232deb !important;
+            font-weight: 600;
+            margin-top: 5px !important;
+        }
+
+        .visit-schedule {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .visit-schedule h4 {
+            margin: 0 0 8px 0;
+            color: #856404;
+            font-size: 15px;
+        }
+
+        .visit-schedule p {
+            margin: 0;
+            color: #856404;
+            font-size: 14px;
+        }
+
+        .contact-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 25px 0;
+        }
+
+        .btn-whatsapp,
+        .btn-email {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-whatsapp {
+            background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+            color: white;
+        }
+
+        .btn-whatsapp:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(37, 211, 102, 0.3);
+        }
+
+        .btn-email {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+        }
+
+        .btn-email:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(108, 117, 125, 0.3);
+        }
+
+        .contact-note {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+
+        .contact-note small {
+            color: #2e7d32;
+        }
+
+        /* FOOTER DEL MODAL */
+        .details-modal-footer {
+            padding: 15px 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .property-id {
+            color: #6c757d;
+            font-size: 12px;
+            font-family: monospace;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-close-modal,
+        .btn-share {
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-close-modal {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-close-modal:hover {
+            background: #5a6268;
+        }
+
+        .btn-share {
+            background: #232deb;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-share:hover {
+            background: #1a1db4;
+            transform: translateY(-1px);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .details-modal-content {
+                width: 95%;
+                max-height: 95vh;
+                border-radius: 8px;
+            }
+            
+            .details-modal-header {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .details-title {
+                font-size: 20px;
+            }
+            
+            .details-tabs {
+                padding: 0 15px;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+            }
+            
+            .detail-tab {
+                padding: 12px 15px;
+                font-size: 13px;
+                white-space: nowrap;
+            }
+            
+            .details-content {
+                padding: 20px;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .features-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .strengths-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .contact-actions {
+                flex-direction: column;
+            }
+            
+            .btn-whatsapp,
+            .btn-email {
+                min-width: 100%;
+            }
+            
+            .details-modal-footer {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .modal-actions {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .details-modal-content {
+                width: 100%;
+                height: 100vh;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Mejorar el botón de mapa en el modal */
+        .btn-map-primary {
+            background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 250px;
+            margin: 15px auto;
+            box-shadow: 0 4px 12px rgba(35, 45, 235, 0.2);
+        }
+
+        .btn-map-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(35, 45, 235, 0.4);
+            background: linear-gradient(135deg, #1a1db4 0%, #232deb 100%);
+        }
+
+        /* Mejorar la sección de ubicación */
+        .location-section {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .address-display {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #232deb;
+            text-align: left;
+        }
+
+
+
+        /* ========================================
+        TAB MULTIMEDIA MEJORADO
+        ======================================== */
+
+        .multimedia-category {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .multimedia-category:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .category-header h4 {
+            margin: 0;
+            color: #495057;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-view-all {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        /* PREVIEW DE FOTOS */
+        .photos-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .preview-photo {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .preview-photo:hover {
+            transform: scale(1.05);
+            border-color: #232deb;
+        }
+
+        .preview-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .more-photos {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(35, 45, 235, 0.8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* BOTÓN 360 MEJORADO */
+        .btn-360-detailed {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+            width: 100%;
+            max-width: 300px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-360-detailed:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        /* DOCUMENTOS */
+        .documents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+        }
+
+        .document-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+
+        .document-item:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+            border-color: #232deb;
+        }
+
+        .doc-icon {
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .doc-info {
+            flex: 1;
+        }
+
+        .doc-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .doc-type {
+            font-size: 11px;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .doc-action {
+            font-size: 12px;
+            color: #232deb;
+            font-weight: 600;
+        }
+
+        /* VIDEOS */
+        .videos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+        }
+
+        .video-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+
+        .video-item:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+            border-color: #232deb;
+        }
+
+        .video-icon {
+            font-size: 20px;
+        }
+
+        .video-info {
+            flex: 1;
+        }
+
+        .video-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .video-action {
+            font-size: 11px;
+            color: #232deb;
+            font-weight: 600;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .photos-preview-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .documents-grid,
+            .videos-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+
+        /* Agrega esto al CSS del modal */
+        .map-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn-map-primary, .btn-directions {
+            flex: 1;
+            min-width: 140px;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-map-primary {
+            background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
+            color: white;
+        }
+
+        .btn-directions {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            color: white;
+        }
+
+        .btn-map-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(35, 45, 235, 0.3);
+        }
+
+        .btn-directions:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+
+    </style>
+
+    
+    <link rel="stylesheet" href="https://unpkg.com/pannellum@2.5.6/build/pannellum.css">
+    <script src="https://unpkg.com/pannellum@2.5.6/build/pannellum.js"></script>
+    
+</head>
+
+<body>
+    <div class="header">
+        <h1>
+            <span class="logo-key">
+                <img src="llave.png" alt="Logo Dante Propiedades">
+            </span>
+            <div class="company-info">
+                <span>Dante Propiedades </span>
+                <span class="phone">📞 +54 11 2536-8595</span>
+            </div>
+        </h1>
+        <!-- ELIMINADO: Texto "Sistema sin errores de consola + Slider de múltiples fotos" -->
+    </div>
+
+
+    <!-- === SECCIÓN PROPIEDAD INTERACTIVA === -->
+    <!-- <div class="property-interactive-container">
+        <div class="property-card" id="propertyCard">
+            <div class="property-header">
+                <h1 class="property-title">Monoambiente Microcentro</h1>
+                <div class="property-address">
+                    <span>📍</span> Avda. Corrientes 848 - Microcentro
+                </div>
+                <div class="property-price">ARS 400.000</div>
+                <div class="expenses">+ ARS 95.000 expensas</div>
+            </div>
+            
+            <div class="property-details">
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <div class="detail-value">1</div>
+                        <div class="detail-label">Ambiente</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-value">23 m²</div>
+                        <div class="detail-label">Superficie</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-value">4°</div>
+                        <div class="detail-label">Piso</div>
+                    </div>
+                </div>
+                
+                <div class="property-condition">
+                    <span>✓</span> Estado: Bueno
+                </div>
+            </div>
+            
+            <div class="media-section">
+                <div class="section-title">
+                    <span>📸</span> Multimedia Disponible
+                </div>
+                <div class="media-icons">
+                    <div class="media-icon" id="photosIcon">
+                        <div class="icon icon-camera">📷</div>
+                        <div class="icon-label">Fotos Profesionales</div>
+                    </div>
+                    <div class="media-icon" id="tourIcon">
+                        <div class="icon icon-tour">🔄</div>
+                        <div class="icon-label">Tour 360°</div>
+                    </div>
+                    <div class="media-icon" id="videoIcon">
+                        <div class="icon icon-video">🎥</div>
+                        <div class="icon-label">Video</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pdf-section">
+                <div class="section-title">
+                    <span>📄</span> Documentos PDF
+                </div>
+                <div class="pdf-item" id="planoPdf">
+                    <div class="pdf-icon">📐</div>
+                    <div class="pdf-info">
+                        <div class="pdf-title">Plano del Departamento</div>
+                        <div class="pdf-size">Tamaño: 1.2 MB</div>
+                    </div>
+                </div>
+                <div class="pdf-item" id="reglamentoPdf">
+                    <div class="pdf-icon">📋</div>
+                    <div class="pdf-info">
+                        <div class="pdf-title">Reglamento de Copropiedad</div>
+                        <div class="pdf-size">Tamaño: 850 KB</div>
+                    </div>
+                </div>
+                <div class="pdf-item" id="expensasPdf">
+                    <div class="pdf-icon">💰</div>
+                    <div class="pdf-info">
+                        <div class="pdf-title">Detalle de Expensas</div>
+                        <div class="pdf-size">Tamaño: 720 KB</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="property-details">
+                <button class="action-button" id="contactButton">Contactar para más información</button>
+            </div>
+        </div> -->
+
+    <!-- <div class="json-display">
+            <div class="json-title">
+                <span>⚙️</span> Archivo propiedades.json (simulado)
+            </div>
+            <pre class="json-pre" id="jsonData"></pre>
+        </div> -->
+    </div>
+
+    <!-- Modal para PDFs -->
+    <!-- <div class="property-modal" id="pdfModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Documento PDF</h2>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            <iframe class="pdf-viewer" id="pdfViewer" frameborder="0"></iframe>
+        </div>
+    </div> -->
+
+    <!-- <div class="pdf-section">
+        <div class="section-title">
+            <span>📄</span> Documentos PDF
+        </div>
+        
+        <div class="pdf-item" id="entornosPdf">
+            <div class="pdf-icon">🏞️</div>
+            <div class="pdf-info">
+                <div class="pdf-title">Estudio de Entornos</div>
+                <div class="pdf-size">Tamaño: 1.5 MB</div>
+            </div>
+        </div>
+        
+        <div class="pdf-item" id="datosParcelaPdf">
+            <div class="pdf-icon">📊</div>
+            <div class="pdf-info">
+                <div class="pdf-title">Datos de la Parcela</div>
+                <div class="pdf-size">Tamaño: 2.1 MB</div>
+            </div>
+        </div>
+        
+        
+        <div class="pdf-item" id="planoPdf">
+            <div class="pdf-icon">📐</div>
+            <div class="pdf-info">
+                <div class="pdf-title">Plano del Departamento</div>
+                <div class="pdf-size">Tamaño: 1.2 MB</div>
+            </div>
+        </div>
+    </div> -->
+
+    <div class="container">
+        <!-- Contador de resultados -->
+        <div class="results-counter" id="results-counter-styled">
+            <div class="loading-with-logo">
+                <img src="llave.png" alt="Logo" class="spinning-logo">
+                <span>Cargando propiedades...</span>
+            </div>
+        </div>
+
+        <!-- Grid de propiedades -->
+        <div class="properties-grid" id="properties-container">
+            <div class="logo-spinner">
+                <img src="llave.png" alt="Logo" class="spinning-logo">
+                <div>Cargando propiedades con galería de imágenes...</div>
+            </div>
+        </div>
+
+        <!-- Filtros de búsqueda -->
+        <!-- Filtros de búsqueda -->
+        <div class="filters">
+            <h3>🔍 Buscar Propiedades</h3>
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="operacion-select-styled">Operación</label>
+                    <select id="operacion-select-styled">
+                        <option value="">Todas las operaciones</option>
+                        <option value="venta">Venta</option>
+                        <option value="alquiler">Alquiler</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="barrio-select-styled">Barrio</label>
+                    <select id="barrio-select-styled">
+                        <option value="">Todos los barrios</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="tipo-select-styled">Tipo</label>
+                    <select id="tipo-select-styled">
+                        <option value="">Todos los tipos</option>
+                    </select>
+                </div>
+                <div class="filter-group" style="display: flex; gap: 10px; align-items: end;">
+                    
+                    <!-- Botón Buscar - Versión mejorada con logo -->
+                    <button id="search-btn-styled" class="btn-search" onclick="window.filterGlobalProperties()"
+                            style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <img src="llave.png" alt="Buscar" style="width: 18px; height: 18px; filter: brightness(0) invert(1);">
+                        Buscar
+                    </button>
+                    
+                    <button id="reset-btn-styled" class="btn-inicio" onclick="resetFilters()">
+                        <img src="llave.png" alt="Logo">
+                        Empezar
+                    </button>
+                    
+                    <!-- BOTÓN ASISTENTE IA INTEGRADO -->
+                    <button id="ai-chat-btn-integrated" class="btn-search" onclick="toggleChatWidget()"
+                            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; gap: 8px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9.48 15.18c.18.33.38.65.6.96-1.28-1.04-2.2-2.36-2.58-3.84.58.26 1.2.45 1.85.55.08.39.19.78.33 1.15-.09.02-.18.04-.28.06-.07.2-.13.4-.19.59-.09.28-.17.56-.23.83zm4.99-2.37c0-1.65-1.35-3-3-3s-3 1.35-3 3 1.35 3 3 3 3-1.35 3-3zm-2.01-7.16c.49 1.01.78 2.1.84 3.26.85-.35 1.59-.93 2.1-1.66-.45-.42-.96-.78-1.52-1.07-.47-.24-.96-.44-1.42-.53zM8.3 6.09c.56.29 1.07.65 1.52 1.07.51.73 1.25 1.31 2.1 1.66.06-1.16.35-2.25.84-3.26-.46.09-.95.29-1.42.53-.57.29-1.09.67-1.54 1.12-1.28.09-2.53.51-3.61 1.2-.23-.69-.35-1.41-.35-2.15 0-.21.02-.42.04-.63 1.55.42 3.01 1.15 4.29 2.16zM4 12c0-.74.12-1.46.35-2.15C4.12 10.54 4 11.26 4 12zm8.52 3.18c-.18-.33-.38-.65-.6-.96 1.28 1.04 2.2 2.36 2.58 3.84-.58-.26-1.2-.45-1.85-.55-.08-.39-.19-.78-.33-1.15.09-.02.18-.04.28-.06.07-.2.13-.4.19-.59.09-.28.17-.56.23-.83z"/>
+                        </svg>
+                        Asistente IA
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Footer -->
+        <footer class="site-footer"
+            style="background: #2c3e50; color: white; padding: 30px 20px; margin-top: 40px; text-align: center;">
+            <div style="max-width: 1200px; margin: 0 auto;">
+                <div
+                    style="display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; align-items: center; margin-bottom: 20px;">
+                    <div>
+                        <img src="llave.png" alt="Dante Propiedades"
+                            style="width: 40px; height: 40px; margin-right: 10px; vertical-align: middle;">
+                        <strong style="font-size: 18px;">Dante Propiedades</strong>
+                    </div>
+                    <div style="color: #bdc3c7;">
+                        <strong>Contacto:</strong> +54 11 6656 2078 | <a href="/cdn-cgi/l/email-protection"
+                            class="__cf_email__"
+                            data-cfemail="3f565159507f5b5e514b5a4f4d504f565a5b5e5b5a4c115c5052115e4d">[email&#160;protected]</a>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
+                    <a href="formulario.html"
+                        style="color: #3498db; text-decoration: none; padding: 8px 15px; border: 1px solid #3498db; border-radius: 5px; transition: all 0.3s ease;">📋
+                        Formulario de Contacto</a>
+                    <!-- <a href="#" onclick="mostrarTerminos(); return false;" style="color: #3498db; text-decoration: none; padding: 8px 15px; border: 1px solid #3498db; border-radius: 5px; transition: all 0.3s ease;">📜 Términos y Condiciones</a> -->
+                </div>
+
+                <div style="border-top: 1px solid #34495e; padding-top: 15px; color: #95a5a6; font-size: 14px;">
+                    © 2025 Dante Propiedades - Todos los derechos reservados | Capital Federal, Argentina
+                </div>
+            </div>
+        </footer>
+
+        <!-- Bloque de Información Legal -->
+        <div
+            style="background: #dc3545; color: white; padding: 25px 20px; text-align: center; font-size: 13px; line-height: 1.5;">
+            <div style="max-width: 1200px; margin: 0 auto;">
+                <p style="margin: 0 0 15px 0; font-weight: 600;">
+                    Todas las medidas enunciadas son meramente orientativas, las medidas exactas serán las que se
+                    expresen en el respectivo título de propiedad de cada inmueble. Todas las fotos, imágenes y videos
+                    son meramente ilustrativos y no contractuales. Los precios enunciados son meramente orientativos y
+                    no contractuales.
+                </p>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.3);">
+                    <p style="margin: 0 0 10px 0; font-weight: 600;">
+                        CIAColegio Profesional Inmobiliario Leyes Nº 3588, 2340 art. 11 y 57, Ley Nº 3588 art. 1 y 2<br>
+                        Artículo 5°.- Incorpórese como inciso 9 del artículo 10 de la Ley 2340 (texto consolidado según
+                        Ley 5666)
+                    </p>
+                    <p style="margin: 0; font-weight: 600;">
+                        <strong>LEY 5859 – ART. 5</strong><br>
+                        "Se encuentra prohibido cobrar comisiones inmobiliarias y gastos de gestoría de informes a los
+                        inquilinos que sean personas físicas. Para los casos de alquiler de vivienda, el monto máximo de
+                        comisión que se le puede requerir a los propietarios será el equivalente al cuatro con quince
+                        centésimos por ciento (4,15%) del valor total del respectivo contrato"
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WhatsApp Flotante -->
+    <a href="https://wa.me/5491125368595?text=Hola,%20me%20interesa%20obtener%20información%20sobre%20propiedades"
+        class="whatsapp-float" target="_blank" title="Contactar por WhatsApp">
+        <svg viewBox="0 0 24 24" fill="white" width="24" height="24">
+            <path
+                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.071z" />
+        </svg>
+    </a>
+
+    <!-- JavaScript del sistema -->
+    <!-- <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="app.js"></script> -->
+
+    <script>
+        // console.log('🏠 Sistema Dante Propiedades - Versión Sin Errores + Slider cargando...');
+        // console.log('✅ Sin dependencias de Font Awesome');
+        // console.log('🎠 Slider de múltiples fotos incluido');
+        // console.log('🔧 Sistema de emojis para iconos');
+        // console.log('📄 Sistema de PDFs integrado');
+        // console.log('🎥 Sistema de videos integrado');
+        // console.log('🏗️ Galería Masonry activada');
+
+
+
+        // Función para buscar propiedades
+        function searchProperties() {
+            const operacion = document.getElementById('operacion-select-styled').value;
+            const barrio = document.getElementById('barrio-select-styled').value;
+            const tipo = document.getElementById('tipo-select-styled').value;
+
+            console.log('🔍 Buscando propiedades con filtros:', { operacion, barrio, tipo });
+
+            // Llamar a la función de búsqueda del app.js si existe
+            if (typeof window.loadProperties === 'function') {
+                window.loadProperties();
+            }
+        }
+
+        // Función para resetear filtros
+        function resetFilters() {
+            document.getElementById('operacion-select-styled').value = '';
+            document.getElementById('barrio-select-styled').value = '';
+            document.getElementById('tipo-select-styled').value = '';
+
+            console.log('🏠 Filtros reseteados - Mostrando todas las propiedades');
+
+            // Llamar a la función de mostrar todas las propiedades
+            if (typeof window.loadProperties === 'function') {
+                window.loadProperties();
+            }
+        }
+
+        // Verificación de carga de recursos
+        window.addEventListener('load', function () {
+            console.log('✅ Todos los recursos cargados correctamente');
+            console.log('🎯 Sistema completamente funcional');
+        });
+    </script>
+
+    <!-- Modal de Términos y Condiciones - DESHABILITADO -->
+    <!--
+    <div id="modal-terminos" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📜 Términos y Condiciones</h2>
+                <span class="close" onclick="cerrarModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="last-updated">
+                    <strong>Última actualización:</strong> 10 de Noviembre de 2025
+                </div>
+                
+                <h3>1. Información General</h3>
+                <p>Dante Propiedades es una empresa inmobiliaria con sede en Capital Federal, Argentina, dedicada a la intermediación en operaciones de compra, venta y alquiler de propiedades inmuebles.</p>
+                
+                <h3>2. Aceptación de Términos</h3>
+                <p>Al utilizar nuestros servicios y sitio web, usted acepta estar sujeto a estos Términos y Condiciones. Si no está de acuerdo con alguna parte de estos términos, no utilice nuestros servicios.</p>
+                
+                <h3>3. Servicios Ofrecidos</h3>
+                <ul>
+                    <li>Intermediación en compra y venta de propiedades</li>
+                    <li>Gestión de alquileres residenciales y comerciales</li>
+                    <li>Asesoramiento inmobiliario personalizado</li>
+                    <li>Evaluación y tasación de propiedades</li>
+                </ul>
+                
+                <h3>4. Uso del Sitio Web</h3>
+                <p>Este sitio web está destinado exclusivamente para fines informativos y de contacto. La información publicada es de carácter general y puede estar sujeta a cambios sin previo aviso.</p>
+                
+                <h3>5. Protección de Datos</h3>
+                <p>La información personal que nos proporcione será utilizada únicamente para contactarlo y brindarle nuestros servicios. No compartimos su información con terceros sin su consentimiento explícito.</p>
+                
+                <h3>6. Limitación de Responsabilidad</h3>
+                <p>Dante Propiedades no se hace responsable por daños directos, indirectos, incidentales o consecuentes derivados del uso de este sitio web o de la información contenida en él.</p>
+                
+                <h3>7. Contacto</h3>
+                <p>Para consultas sobre estos términos, puede contactarnos a través de nuestro formulario de contacto o WhatsApp: +54 9 11 2536-8595</p>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button onclick="cerrarModal()" class="btn btn-primary">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    -->
+
+    <!-- Modal de Galería de Imágenes -->
+    <div id="modal-imagenes" class="modal-imagenes">
+        <div class="modal-contenido">
+            <div class="modal-header">
+                <div class="modal-logo-title">
+                    <div class="modal-logo">
+                        <img src="llave.png" alt="Dante Propiedades">
+                    </div>
+                    <h3 id="imagen-titulo">Galería de Imágenes</h3>
+                </div>
+                <button class="btn-cerrar" onclick="cerrarModalImagenes()">&times;</button>
+            </div>
+            <div id="imagen-principal" class="imagen-principal"></div>
+            <button class="modal-nav nav-anterior" onclick="imagenAnterior()">&#10094;</button>
+            <button class="modal-nav nav-siguiente" onclick="imagenSiguiente()">&#10095;</button>
+            <div class="modal-info">
+                <span id="imagen-contador" class="imagen-contador">1 / 1</span>
+                <span id="imagen-titulo-display" class="imagen-titulo"></span>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            animation: modalAppear 0.3s ease;
+        }
+
+        @keyframes modalAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.7);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-header {
+            background: #232deb;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(35, 45, 235, 0.3);
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.8em;
+        }
+
+        .close {
+            color: white;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover {
+            opacity: 0.8;
+        }
+
+        .modal-body {
+            padding: 30px;
+            max-height: 60vh;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+
+        .last-updated {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+
+        .modal-body h3 {
+            color: #333;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 5px;
+        }
+
+        .modal-body p {
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .modal-body ul {
+            margin-bottom: 15px;
+            padding-left: 20px;
+        }
+
+        .modal-body li {
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+
+    <script>
+        function mostrarTerminos() {
+            document.getElementById('modal-terminos').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal-terminos').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Cerrar modal al hacer clic fuera de él
+        window.onclick = function (event) {
+            const modal = document.getElementById('modal-terminos');
+            if (event.target == modal) {
+                cerrarModal();
+            }
+        }
+
+        // Cerrar modal con tecla Escape
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                cerrarModal();
+            }
+        });
+    </script>
+
+    <script>
+        function toggleChatWidget() {
+            const chatWindow = document.getElementById('ai-chat-window');
+            chatWindow.classList.toggle('open');
+        }
+
+        // Función para WhatsApp flotante
+        function setupWhatsAppFloat() {
+            const whatsappBtn = document.querySelector('.whatsapp-float');
+            if (whatsappBtn) {
+                // Agregar animación especial en primer clic
+                whatsappBtn.addEventListener('click', function () {
+                    // Efecto visual de confirmación
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+
+                    // Log para seguimiento
+                    console.log('💬 WhatsApp: Redirigiendo a chat...');
+
+                    // Mensaje de confirmación
+                    setTimeout(() => {
+                        const message = '💬 Abriendo WhatsApp para chatear sobre propiedades...';
+                        console.log(message);
+
+                        // Mostrar notificación visual (si el navegador lo permite)
+                        if ('Notification' in window && Notification.permission === 'granted') {
+                            new Notification('WhatsApp', {
+                                body: 'Redirigiendo al chat...',
+                                icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2325d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.071z"/></svg>'
+                            });
+                        }
+                    }, 100);
+                });
+            }
+        }
+
+        // Inicializar funciones cuando el DOM esté listo
+       // En la parte de inicialización del DOM, cambia esto:
+        
+        // Función para verificar si app.js ya cargó las propiedades
+        function verificarPropiedadesCargadas() {
+            return new Promise((resolve) => {
+                const checkInterval = setInterval(() => {
+                    if (typeof window.allProperties !== 'undefined' && window.allProperties.length > 0) {
+                        clearInterval(checkInterval);
+                        resolve(true);
+                    }
+                }, 100);
+                
+                // Timeout después de 5 segundos
+                setTimeout(() => {
+                    clearInterval(checkInterval);
+                    resolve(false);
+                }, 5000);
+            });
+        }
+        
+        
+        
+        
+        
+        // FUNCIONES TÉRMINOS Y CONDICIONES - DESHABILITADAS
+        /*
+        function mostrarTerminos() {
+            document.getElementById('modal-terminos').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function cerrarModal() {
+            document.getElementById('modal-terminos').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Cerrar modal al hacer clic fuera de él
+        window.onclick = function(event) {
+            const modal = document.getElementById('modal-terminos');
+            if (event.target == modal) {
+                cerrarModal();
+            }
+        }
+        
+        // Cerrar modal con tecla Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                cerrarModal();
+            }
+        });
+        */
+
+    </script>
+
+    <!-- Botón Volver para Mapas -->
+    <!-- Botón Volver para Mapas -->
+    <!-- En tu index.html, el botón debería estar así: -->
+    <div class="map-back-button" id="mapBackButton" style="display: none;">
+        <button class="back-to-properties-btn" onclick="backToProperties()">
+            <span>←</span> Volver a Propiedades
+        </button>
+    </div>
+
+    <!-- MODAL PARA GALERÍA DE IMÁGENES -->
+    <div class="image-modal" id="imageModal">
+        <div class="modal-content">
+            <div class="modal-info" id="modalInfo"></div>
+            <img class="modal-image" id="modalImage" src="" alt="">
+            <button class="modal-nav modal-prev" onclick="previousImage()">‹</button>
+            <button class="modal-nav modal-next" onclick="nextImage()">›</button>
+            <button class="modal-close" onclick="closeImageModal()">×</button>
+            <div class="modal-counter" id="modalCounter"></div>
+        </div>
+    </div>
+
+    <!-- WIDGET DE CHAT DE IA - MOVIDO AL SECTION DE FILTROS -->
+    <div id="ai-chat-container" style="display: none;"></div>
+
+    <!-- Ventana del Chat (Movida fuera del container para mejor responsive) -->
+    <div id="ai-chat-window">
+        <div class="chat-area">
+            <div class="chat-header">
+                <img src="llave.png" alt="Logo Inmobiliario" class="chat-logo">
+                <div class="chat-info">
+                    <h2>Dante Propiedades</h2>
+                    <div class="chat-subtitle">Asistente Inmobiliario</div>
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <span id="statusText">Conectado</span>
+                    </div>
+                </div>
+                <button class="minimize-chat" onclick="toggleChatWidget()" title="Minimizar">_</button>
+                <button class="reset-chat" onclick="resetearChat()">Nueva Consulta</button>
+            </div>
+            <!-- Elemento de carga para filtros -->
+            <div id="filtersLoading" style="text-align: center; color: #666; font-size: 0.8em; margin-top: 5px;">
+            </div>
+
+            <div class="chat-box" id="chatBox">
+                <!-- Mensajes se agregarán aquí -->
+            </div>
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+                <span>Escribiendo...</span>
+            </div>
+            <div class="input-area">
+                <div class="input-row">
+                    <input type="text" id="userInput" placeholder="Busco depto en Almagro..." autocomplete="off">
+                    <button id="sendBtn">Enviar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+        /* Estilos para el contenedor del widget de IA */
+        #ai-chat-container {
+            position: fixed;
+            bottom: 20px;
+            right: 100px;
+            z-index: 1001;
+        }
+
+        /* Burbuja del chat */
+        #ai-chat-bubble {
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        #ai-chat-bubble svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        #ai-chat-bubble span {
+            font-size: 9px;
+            font-weight: bold;
+        }
+
+        #ai-chat-bubble:hover {
+            transform: scale(1.1);
+        }
+
+        /* Ventana del chat */
+        #ai-chat-window {
+            display: none;
+            position: fixed;
+            /* Cambiado a fixed para que se vea siempre */
+            bottom: 100px;
+            right: 100px;
+            /* Alineado con el botón de escritorio */
+            width: 400px;
+            height: 600px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            flex-direction: column;
+            animation: slideIn 0.3s ease-out;
+            z-index: 10002;
+        }
+
+        #ai-chat-window.open {
+            display: flex;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive para móvil - CORREGIDO */
+        @media (max-width: 480px) {
+            #ai-chat-container {
+                left: 20px;
+                /* Mover a la izquierda para no tapar WhatsApp */
+                right: auto;
+                bottom: 20px;
+            }
+
+            #ai-chat-window {
+                width: 90vw !important;
+                max-width: 90vw !important;
+                height: 70vh !important;
+                left: 5vw !important;
+                right: auto !important;
+                bottom: 100px !important;
+                margin: 0 !important;
+                border-radius: 15px !important;
+            }
+
+            #ai-chat-bubble {
+                width: 55px;
+                height: 55px;
+            }
+        }
+
+        /* Estilos específicos para el chat de IA, con ID para evitar conflictos */
+        #ai-chat-window .chat-area {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        #ai-chat-window .chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
+            padding: 10px 15px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        #ai-chat-window .chat-logo {
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        #ai-chat-window .chat-info h2 {
+            font-size: 1.1em;
+            margin: 0;
+        }
+
+        #ai-chat-window .chat-subtitle {
+            font-size: 0.8em;
+            opacity: 0.9;
+        }
+
+        #ai-chat-window .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.7em;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 3px 8px;
+            border-radius: 10px;
+            margin-top: 4px;
+        }
+
+        #ai-chat-window .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00ff00;
+            animation: pulse 2s infinite;
+        }
+
+        #ai-chat-window .minimize-chat {
+            background: none;
+            border: 1px solid white;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.8em;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            padding-bottom: 5px;
+            /* Ajuste visual para el guion bajo */
+        }
+
+        #ai-chat-window .reset-chat {
+            background: none;
+            border: 1px solid white;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        #ai-chat-window .chat-box {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        #ai-chat-window .message {
+            max-width: 85%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            line-height: 1.4;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        #ai-chat-window .msg-user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        #ai-chat-window .msg-bot {
+            align-self: flex-start;
+            background: white;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            border-bottom-left-radius: 5px;
+        }
+
+        #ai-chat-window .msg-bot b {
+            color: #2c3e50;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        #ai-chat-window .input-area {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            flex-shrink: 0;
+        }
+
+        #ai-chat-window .input-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        #ai-chat-window input[type="text"] {
+            flex: 1;
+            padding: 12px 15px;
+            font-size: 14px;
+            border: 2px solid #e9ecef;
+            border-radius: 20px;
+            outline: none;
+        }
+
+        #ai-chat-window #sendBtn {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        #ai-chat-window .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 15px;
+            background: white;
+            border-radius: 15px;
+            border: 1px solid #e9ecef;
+            align-self: flex-start;
+            max-width: 120px;
+        }
+
+        #ai-chat-window .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        #ai-chat-window .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #6c757d;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        #ai-chat-window .typing-dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        #ai-chat-window .typing-dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Estilos para las tarjetas de propiedad dentro del chat */
+        #ai-chat-window .propiedades-container {
+            align-self: center;
+            width: 100%;
+            max-width: 98%;
+            margin: 10px 0;
+            border-radius: 8px;
+            padding: 5px;
+            background: #f0f2f5;
+        }
+
+        #ai-chat-window .propiedad-card {
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 12px;
+            margin: 8px 0;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        #ai-chat-window .propiedad-header h4 {
+            font-size: 1em;
+            margin-bottom: 8px;
+        }
+
+        #ai-chat-window .precio {
+            font-size: 1em;
+        }
+
+        #ai-chat-window .propiedad-info {
+            font-size: 0.85em;
+            gap: 10px;
+        }
+
+        #ai-chat-window .btn-imagenes {
+            padding: 5px 10px;
+            font-size: 0.8em;
+        }
+    </style>
+
+
+    <script>
+
+
+        // Función global para cerrar modales multimedia
+        function closeMultimediaModal() {
+            const modals = document.querySelectorAll('#pdf-modal, #video-modal');
+            modals.forEach(modal => {
+                // Detener videos antes de remover
+                const videos = modal.querySelectorAll('video');
+                videos.forEach(video => {
+                    video.pause();
+                    video.currentTime = 0;
+                });
+                modal.remove();
+            });
+            document.body.style.overflow = 'auto';
+        }
+
+        // Cerrar modales multimedia con tecla Escape
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeMultimediaModal();
+            }
+        });
+
+        // Cerrar modales multimedia al hacer clic fuera
+        document.addEventListener('click', function (event) {
+            const pdfModal = document.getElementById('pdf-modal');
+            const videoModal = document.getElementById('video-modal');
+
+            if (pdfModal && event.target === pdfModal) {
+                closeMultimediaModal();
+            }
+            if (videoModal && event.target === videoModal) {
+                closeMultimediaModal();
+            }
+        });
+    </script>
+
+    <!-- JavaScript del sistema -->
+    <script src="app.js"></script>
+
+    <script>
+        console.log('🏠 Sistema Dante Propiedades - Versión Sin Errores + Slider cargando...');
+        console.log('✅ Sin dependencias de Font Awesome');
+        console.log('🎠 Slider de múltiples fotos incluido');
+        console.log('🔧 Sistema de emojis para iconos');
+
+        // Función para buscar propiedades
+        function searchProperties() {
+            // DEPRECATED: Usar filterGlobalProperties() directamente desde el botón
+            console.log('⚠️ Función searchProperties llamada - redirigiendo a filterGlobalProperties');
+            if (typeof window.filterGlobalProperties === 'function') {
+                window.filterGlobalProperties();
+            } else {
+                console.log('⚠️ filterGlobalProperties no disponible, cargando datos...');
+                if (typeof window.loadProperties === 'function') {
+                    window.loadProperties();
+                }
+            }
+        }
+
+        // Wrapper para llamar desde el HTML si es necesario
+        function filterGlobalPropertiesWrapper() {
+            if (typeof window.filterGlobalProperties === 'function') {
+                window.filterGlobalProperties();
+            } else {
+                console.warn('Función filterGlobalProperties no cargada aún');
+            }
+        }
+
+        // Función para resetear filtros
+        function resetFilters() {
+            document.getElementById('operacion-select-styled').value = '';
+            document.getElementById('barrio-select-styled').value = '';
+            document.getElementById('tipo-select-styled').value = '';
+
+            console.log('🏠 Filtros reseteados - Mostrando todas las propiedades');
+
+            // Usar la nueva función de filtrado para mostrar todo sin recargar y perder eventos
+            if (typeof window.filterGlobalProperties === 'function') {
+                window.filterGlobalProperties();
+            } else if (typeof window.loadProperties === 'function') {
+                window.loadProperties();
+            }
+        }
+
+        // Verificación de carga de recursos
+        window.addEventListener('load', function () {
+            console.log('✅ Todos los recursos cargados correctamente');
+            console.log('🎯 Sistema completamente funcional');
+        });
+    </script>
+
+    <!-- Modal para el visor 360 -->
+    <div id="pannellum-modal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); z-index: 10001;">
+        <button onclick="closePannellumModal()"
+            style="position: absolute; top: 15px; right: 15px; z-index: 10002; background: white; border: none; font-size: 24px; cursor: pointer; width: 40px; height: 40px; border-radius: 50%;">&times;</button>
+        <div id="pannellum-container" style="width: 100%; height: 100%;"></div>
+        <div id="pannellum-thumbnails"
+            style="position: absolute; z-index: 10002; bottom: 60px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; padding: 10px; background-color: rgba(0,0,0,0.5); border-radius: 10px;">
+            <!-- Las miniaturas se generarán aquí -->
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pannellum/2.5.6/pannellum.js"
+        integrity="sha512-EmZuy6vd0ns9wP+3l1hETKq/vNGELFRuLfazPnKKBbDpgZL0sZ7qyao5KgVbGJKOWlAFPNn6G9naB/8WnKN43Q=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        // ========================================
+        // CONFIGURACIÓN DEL BACKEND
+        // ========================================
+        const API_BASE_URL = "https://pagina-web-g82d.onrender.com";
+        const CHAT_URL = `${API_BASE_URL}/api/chat`;
+        const STATUS_URL = `${API_BASE_URL}/api/status`;
+        //const FILTERS_URL = `${API_BASE_URL}/properties/filter-options`;
+        const FILTERS_URL = `${API_BASE_URL}/api/properties/filter-options`;
+
+        // Variables Globales
+        let chatBox, input, button, typingIndicator, statusText;
+        let conversacionActual = [];
+        let filtrosDinamicos = { operaciones: [], tipos: [], barrios: [] };
+        let contextoActual = { tipo: null, resultados: [], propiedad_focus: null, filtros_usados: {}, timestamp: null };
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function () {
+            chatBox = document.querySelector('#ai-chat-window .chat-box');
+            input = document.querySelector('#ai-chat-window #userInput');
+            button = document.querySelector('#ai-chat-window #sendBtn');
+            typingIndicator = document.querySelector('#ai-chat-window #typingIndicator');
+            statusText = document.querySelector('#ai-chat-window #statusText');
+
+            if (button) {
+                button.addEventListener('click', send);
+                console.log('✅ Event Listener asignado al botón Enviar');
+            } else {
+                console.error('❌ Botón Enviar no encontrado');
+            }
+
+            if (input) {
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') send();
+                });
+            }
+
+            checkServerStatus();
+            cargarFiltrosDinamicos();
+        });
+
+        function mostrarImagenesByIndex(index) {
+            const fotos = contextoActual.resultados[index]?.fotos;
+
+            console.log(`[Diagnóstico] Intentando cargar imágenes para propiedad índice ${index}. URLs:`, fotos);
+
+            const modal = document.getElementById('imageModal');
+            const modalImages = document.getElementById('modalImagesContainer');
+
+            // Mostrar loading mientras cargan
+            modalImages.innerHTML = `
+    <div style="text-align: center; color: white; padding: 40px;">
+        <div style="font-size: 24px; margin-bottom: 20px;">🔄</div>
+        <p>Cargando imágenes...</p>
+    </div>
+    `;
+
+            modal.style.display = 'block';
+
+            const counter = document.createElement('div');
+            counter.style.cssText = `
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    z-index: 1000;
+    font-weight: bold;
+    `;
+            counter.textContent = `📸 ${fotos ? fotos.length : 0} fotos`;
+            modal.appendChild(counter);
+
+            // Limpiar y cargar imágenes después de un breve delay
+            setTimeout(() => {
+                modalImages.innerHTML = '';
+
+                if (fotos && fotos.length > 0) {
+                    let imagenesCargadas = 0;
+                    const totalImagenes = fotos.length;
+
+                    fotos.forEach((fotoUrl, i) => {
+                        const imgContainer = document.createElement('div');
+                        imgContainer.style.cssText = `
+    position: relative;
+    width: 100%;
+    margin-bottom: 25px;
+    `;
+
+                        const imgNumber = document.createElement('div');
+                        imgNumber.style.cssText = `
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    z-index: 10;
+    font-weight: bold;
+    `;
+                        imgNumber.textContent = `${i + 1} / ${totalImagenes}`;
+                        imgContainer.appendChild(imgNumber);
+
+                        const img = document.createElement('img');
+
+                        // Construir URL correcta
+                        let imagenSrc = fotoUrl;
+                        if (fotoUrl.startsWith('imgs/')) {
+                            imagenSrc = `${API_BASE_URL}/${fotoUrl}`;
+                        } else if (!fotoUrl.includes('/') && fotoUrl.includes('.')) {
+                            imagenSrc = `${API_BASE_URL}/imgs/${fotoUrl}`;
+                        }
+
+                        img.src = imagenSrc;
+                        img.alt = `Imagen ${i + 1} de ${totalImagenes}`;
+                        img.style.maxWidth = '100%';
+                        img.style.height = 'auto';
+                        img.style.borderRadius = '8px';
+                        img.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+                        img.style.display = 'block';
+
+                        img.onload = () => {
+                            imagenesCargadas++;
+                            console.log(`✅ Imagen ${imagenesCargadas}/${totalImagenes} cargada: ${imagenSrc}`);
+
+                            if (imagenesCargadas === totalImagenes) {
+                                counter.textContent = `📸 ${totalImagenes} fotos - Todas cargadas ✅`;
+                                modalImages.scrollTop = 0;
+                            }
+                        };
+
+                        img.onerror = () => {
+                            imagenesCargadas++;
+                            console.log(`⚠️ Imagen no disponible: ${imagenSrc}`);
+
+                            img.src =
+                                'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMzMzIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGRvbWluYW50LWJhc2VsaW5lPSJjZW50cmFsIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjODg4IiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCI+SW1hZ2VuIG5vIGRpc3BvbmlibGU8L3RleHQ+PC9zdmc+';
+                            img.alt = 'Imagen no disponible';
+
+                            imgNumber.innerHTML = `${i + 1} / ${totalImagenes} <span style="color: #ff6b6b;">⚠️</span>`;
+                        };
+
+                        imgContainer.appendChild(img);
+                        modalImages.appendChild(imgContainer);
+                    });
+                } else {
+                    modalImages.innerHTML = `
+    <div style="text-align: center; color: white; padding: 40px;">
+        <div style="font-size: 48px; margin-bottom: 20px;">📷</div>
+        <h3>No hay imágenes disponibles</h3>
+        <p>Esta propiedad no cuenta con fotos en este momento.</p>
+    </div>
+    `;
+                }
+            }, 100);
+
+            const cleanUp = () => {
+                if (modal.contains(counter)) {
+                    modal.removeChild(counter);
+                }
+            };
+
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const originalOnClick = closeModalBtn.onclick;
+            closeModalBtn.onclick = () => {
+                cleanUp();
+                cerrarModal();
+                if (originalOnClick) originalOnClick();
+            };
+
+            const originalWindowOnClick = window.onclick;
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    cleanUp();
+                    cerrarModal();
+                }
+                if (originalWindowOnClick) originalWindowOnClick(event);
+            };
+        }
+
+
+        function cerrarModal() {
+            const modal = document.getElementById('imageModal');
+
+            const counters = modal.querySelectorAll('[style*="position: fixed"][style*="top: 20px"]');
+            counters.forEach(counter => {
+                if (modal.contains(counter)) {
+                    modal.removeChild(counter);
+                }
+            });
+
+            modal.style.display = 'none';
+        }
+
+        
+        // 1. Primero coloca la función verificarPropiedadesCargadas
+        // 1. Primero las funciones auxiliares (arriba en el archivo, antes de DOMContentLoaded)
+        function verificarPropiedadesCargadas() {
+            return new Promise((resolve) => {
+                if (typeof window.allProperties !== 'undefined' && 
+                    Array.isArray(window.allProperties) && 
+                    window.allProperties.length > 0) {
+                    console.log('✅ Propiedades ya cargadas en app.js');
+                    return resolve(true);
+                }
+                
+                const maxAttempts = 30;
+                let attempts = 0;
+                
+                const checkInterval = setInterval(() => {
+                    attempts++;
+                    
+                    if (typeof window.allProperties !== 'undefined' && 
+                        Array.isArray(window.allProperties) && 
+                        window.allProperties.length > 0) {
+                        clearInterval(checkInterval);
+                        console.log(`✅ Propiedades cargadas después de ${attempts * 100}ms`);
+                        resolve(true);
+                    } 
+                    else if (attempts >= maxAttempts) {
+                        clearInterval(checkInterval);
+                        console.log('❌ Timeout: Propiedades no cargadas después de 3 segundos');
+                        resolve(false);
+                    }
+                }, 100);
+            });
+        }
+
+        // 2. La función cargarFiltrosDinamicos (completa)
+        async function cargarFiltrosDinamicos() {
+            const loadingElement = document.getElementById('filtersLoading');
+            
+            try {
+                loadingElement.innerHTML = '<small>🔄 Cargando filtros dinámicos...</small>';
+                
+                console.log('🔗 Intentando obtener filtros dinámicos...');
+                
+                // INTENTO 1: Extraer de propiedades cargadas en app.js
+                console.log('🔄 Extrayendo de propiedades globales...');
+                
+                // Verificar si app.js ya cargó las propiedades
+                if (typeof globalData !== 'undefined' && 
+                    globalData.properties && 
+                    globalData.properties.length > 0) {
+                    
+                    const propiedades = globalData.properties;
+                    console.log('✅ Usando', propiedades.length, 'propiedades de globalData');
+                    
+                    const operacionesSet = new Set();
+                    const tiposSet = new Set();
+                    const barriosSet = new Set();
+                    
+                    propiedades.forEach(prop => {
+                        if (prop.operacion) operacionesSet.add(prop.operacion);
+                        if (prop.tipo) tiposSet.add(prop.tipo);
+                        if (prop.barrio) barriosSet.add(prop.barrio);
+                    });
+                    
+                    filtrosDinamicos = {
+                        operaciones: Array.from(operacionesSet).filter(op => op && String(op).trim()),
+                        tipos: Array.from(tiposSet).filter(tipo => tipo && String(tipo).trim()),
+                        barrios: Array.from(barriosSet).filter(barrio => barrio && String(barrio).trim())
+                    };
+                    
+                    console.log('✅ Filtros dinámicos extraídos:', filtrosDinamicos);
+                    loadingElement.innerHTML = '<small>✅ Filtros dinámicos cargados</small>';
+                    
+                } 
+                // INTENTO 2: Usar window.globalProperties si existe
+                else if (typeof window.globalProperties !== 'undefined' && 
+                        window.globalProperties.length > 0) {
+                    
+                    console.log('✅ Usando window.globalProperties');
+                    const propiedades = window.globalProperties;
+                    
+                    const operacionesSet = new Set();
+                    const tiposSet = new Set();
+                    const barriosSet = new Set();
+                    
+                    propiedades.forEach(prop => {
+                        if (prop.operacion) operacionesSet.add(prop.operacion);
+                        if (prop.tipo) tiposSet.add(prop.tipo);
+                        if (prop.barrio) barriosSet.add(prop.barrio);
+                    });
+                    
+                    filtrosDinamicos = {
+                        operaciones: Array.from(operacionesSet).filter(op => op && String(op).trim()),
+                        tipos: Array.from(tiposSet).filter(tipo => tipo && String(tipo).trim()),
+                        barrios: Array.from(barriosSet).filter(barrio => barrio && String(barrio).trim())
+                    };
+                    
+                    console.log('✅ Filtros de window.globalProperties:', filtrosDinamicos);
+                    loadingElement.innerHTML = '<small>✅ Filtros dinámicos cargados</small>';
+                    
+                } 
+                // INTENTO 3: Si no hay datos disponibles, esperar y reintentar
+                else {
+                    console.log('⏳ Esperando datos de propiedades...');
+                    loadingElement.innerHTML = '<small>⏳ Esperando datos...</small>';
+                    
+                    // Reintentar después de 2 segundos
+                    setTimeout(cargarFiltrosDinamicos, 2000);
+                    return;
+                }
+                
+            } catch (error) {
+                console.log('❌ Error cargando filtros dinámicos:', error);
+                
+                // Datos predeterminados SOLO como último recurso
+                filtrosDinamicos = {
+                    operaciones: ["alquiler", "venta"],
+                    tipos: ["casa", "departamento", "ph", "terreno", "oficina", "casaquinta"],
+                    barrios: ["Parque Avellaneda", "Boedo", "Microcentro", "Pilar"]
+                };
+                
+                loadingElement.innerHTML = '<small>⚠️ Usando filtros predeterminados</small>';
+                console.log('🔄 Filtros predeterminados cargados como fallback');
+            } finally {
+                actualizarSelectoresFiltros();
+                
+                setTimeout(() => { 
+                    if (loadingElement) loadingElement.innerHTML = ''; 
+                }, 2000);
+            }
+        }
+        // 3. Función para actualizar selectores
+        function actualizarSelectoresFiltros() {
+            console.log('🔄 Actualizando selectores con filtros dinámicos:', filtrosDinamicos);
+            
+            const poblarSelect = (id, options, defaultText) => {
+                const select = document.getElementById(id);
+                if (select) {
+                    const currentValue = select.value;
+                    select.innerHTML = `<option value="">${defaultText}</option>`;
+                    
+                    const optionsArray = Array.isArray(options) ? options : [];
+                    
+                    optionsArray.forEach(optionText => {
+                        if (optionText) {
+                            const option = document.createElement('option');
+                            // VALOR en minúsculas para consistencia
+                            option.value = String(optionText).toLowerCase().trim();
+                            // TEXTO con formato original
+                            option.textContent = String(optionText).charAt(0).toUpperCase() + String(optionText).slice(1);
+                            select.appendChild(option);
+                        }
+                    });
+                    
+                    // Restaurar valor seleccionado si existe
+                    if (currentValue && optionsArray.some(opt => 
+                        String(opt).toLowerCase().trim() === currentValue.toLowerCase().trim())) {
+                        select.value = currentValue;
+                    }
+                }
+            };
+            
+            // Actualizar selectores del chat de IA
+            if (document.getElementById('operacion')) {
+                poblarSelect('operacion', filtrosDinamicos.operaciones || [], 'Todas las operaciones');
+            }
+            
+            if (document.getElementById('barrio')) {
+                poblarSelect('barrio', filtrosDinamicos.barrios || [], 'Todos los barrios');
+            }
+            
+            if (document.getElementById('tipo')) {
+                poblarSelect('tipo', filtrosDinamicos.tipos || [], 'Todos los tipos');
+            }
+            
+            // Los selectores principales (styled) se actualizan por populateFilters() en app.js
+            // NO los actualices aquí para evitar conflictos
+        }
+        // 4. En DOMContentLoaded (al final del archivo, donde ya tienes ese código)
+        
+        
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('🎬 Sistema de multimedia inicializado');
+            console.log('📄 Soporte para PDFs activado');
+            console.log('🎥 Soporte para videos activado');
+
+            // Inicializar el asistente de IA
+            chatBox = document.querySelector('#ai-chat-window .chat-box');
+            input = document.querySelector('#ai-chat-window #userInput');
+            button = document.querySelector('#ai-chat-window #sendBtn');
+            typingIndicator = document.querySelector('#ai-chat-window #typingIndicator');
+            statusText = document.querySelector('#ai-chat-window #statusText');
+
+            if (button) {
+                button.addEventListener('click', send);
+                console.log('✅ Event Listener asignado al botón Enviar');
+            }
+
+            if (input) {
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') send();
+                });
+            }
+
+            checkServerStatus();
+            
+            // Cargar filtros después de 500ms (da tiempo a que app.js cargue)
+            setTimeout(() => {
+                cargarFiltrosDinamicos();
+            }, 500);
+        });
+        
+        
+
+
+        function actualizarContexto(resultados, filtros = {}, tipo = 'busqueda') {
+            contextoActual = {
+                tipo: tipo,
+                resultados: resultados || [],
+                propiedad_focus: resultados && resultados.length === 1 ? resultados[0] : null,
+                filtros_usados: filtros,
+                timestamp: new Date().toISOString()
+            };
+        }
+
+        function addMessage(text, from = "bot") {
+            if (!chatBox) return;
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${from === 'user' ? 'msg-user' : 'msg-bot'}`;
+            messageDiv.innerHTML = from === 'bot' ? `<b>ASISTENTE VIRTUAL</b><br>${text.replace(/\n/g, '<br>')}` : text;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function formatPrecio(precio, moneda) {
+            if (!precio || isNaN(precio) || precio === 0) return 'Consultar';
+            const currency = moneda === 'ARS' ? 'ARS' : 'USD';
+            const formatter = new Intl.NumberFormat('es-AR', {
+                style: 'currency',
+                currency: currency,
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+
+            let precioFormateado = formatter.format(precio);
+            if (currency === 'USD') {
+                precioFormateado = precioFormateado.replace('USD', '').trim();
+            } else {
+                precioFormateado = precioFormateado.replace('ARS', '').replace('$', '').trim();
+            }
+
+            return precioFormateado;
+        }
+        function mostrarPropiedadesEnInterfaz(propiedades) {
+            const mainContainer = document.getElementById('properties-container');
+            const resultsCounter = document.getElementById('results-counter-styled');
+
+            // Lógica para mostrar en el contenedor principal de la página
+            if (mainContainer) {
+                mainContainer.innerHTML = ''; // Limpiar resultados anteriores
+
+                // Actualizar contador usando función de app.js si existe, sino manual
+                if (typeof window.updateResultsCount === 'function') {
+                    window.updateResultsCount(propiedades.length);
+                } else if (resultsCounter) {
+                    resultsCounter.innerHTML = `
+                        <div style="background: #e8f5e9; color: #2e7d32; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid #c8e6c9;">
+                            <strong>📊 Resultados de la búsqueda:</strong> Se encontraron ${propiedades.length} propiedades
+                        </div>
+                    `;
+                }
+
+                if (propiedades.length === 0) {
+                    mainContainer.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 50px; background: #f8f9fa; border-radius: 10px;">
+                            <div style="font-size: 40px; margin-bottom: 10px;">🔍</div>
+                            <h3>No se encontraron propiedades</h3>
+                            <p style="color: #666;">Intentá con otros filtros o términos de búsqueda.</p>
+                        </div>
+                     `;
+                    return;
+                }
+
+                // Intentar usar createPropertyCard global de app.js
+                const useGlobalFunction = typeof window.createPropertyCard === 'function';
+                console.log('Using global createPropertyCard:', useGlobalFunction);
+
+                propiedades.forEach((prop, index) => {
+                    if (useGlobalFunction) {
+                        try {
+                            const card = window.createPropertyCard(prop);
+                            mainContainer.appendChild(card);
+                        } catch (e) {
+                            console.error('Error usando createPropertyCard:', e);
+                            renderFallbackCard(mainContainer, prop, index);
+                        }
+                    } else {
+                        renderFallbackCard(mainContainer, prop, index);
+                    }
+                });
+
+                // Scroll suave hacia los resultados
+                setTimeout(() => {
+                    const scrollTarget = document.querySelector('.container') || mainContainer;
+                    scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+
+                // Avisar en el chat
+                addMessage(`✅ He actualizado la lista de propiedades principal con los ${propiedades.length} resultados encontrados. Mirá abajo 👇`, 'bot');
+
+                // AUTO-OCULTAR CHAT (Mejor experiencia de usuario solicitada)
+                setTimeout(() => {
+                    const chatWindow = document.getElementById('ai-chat-window');
+                    if (chatWindow && chatWindow.classList.contains('open')) {
+                        console.log('🔽 Auto-minimizando chat para mostrar resultados');
+                        chatWindow.classList.remove('open');
+                    }
+                }, 1500); // 1.5 segundos de delay para leer el mensaje de confirmación
+
+            } else {
+                console.error("❌ Contenedor 'properties-container' no encontrado. Mostrando en chat como fallback.");
+                // Fallback: mostrar en chat si falla el contenedor principal
+                const container = document.createElement('div');
+                container.className = 'propiedades-container-chat';
+                // ... (lógica simplificada para fallback) ...
+                chatBox.appendChild(container);
+            }
+        }
+
+        // Función auxiliar de fallback por si app.js no carga
+        function renderFallbackCard(container, prop, index) {
+            const propertyEmojis = {
+                'casa': '🏠', 'departamento': '🏢', 'ph': '🏡',
+                'terreno': '📐', 'oficina': '💼', 'casaquinta': '🏘️',
+                'local': '🏪', 'galpon': '🏭'
+            };
+            const emoji = propertyEmojis[prop.tipo?.toLowerCase()] || '🏠';
+            const card = document.createElement('div');
+            card.className = 'property-card';
+
+            card.innerHTML = `
+                <div class="property-image-container">
+                    ${prop.fotos && prop.fotos.length > 0 ?
+                    `<img src="${prop.fotos[0]}" alt="${prop.titulo}" class="property-image" onerror="this.src='https://via.placeholder.com/400x300?text=Sin+Imagen'">` :
+                    `<div class="no-image-placeholder">📷 Sin foto</div>`
+                }
+                    <div class="property-price-tag">
+                        ${formatPrecio(prop.precio, prop.moneda_precio)}
+                    </div>
+                </div>
+                <div class="property-content">
+                    <h3 class="property-title">${emoji} ${prop.titulo}</h3>
+                    <div class="property-location">📍 ${prop.barrio}</div>
+                    <div class="property-features">
+                        <span>🏠 ${prop.ambientes} amb</span>
+                        <span>📏 ${prop.metros_cuadrados} m²</span>
+                    </div>
+
+                    <!-- Botón 360 en fallback -->
+                    ${(prop.imagenes_360 && Array.isArray(prop.imagenes_360) && prop.imagenes_360.length > 0) ? `
+                    <div style="margin-top: 10px; margin-bottom: 10px;">
+                        <button class="btn-360" data-images='${JSON.stringify(prop.imagenes_360)}' data-title="${prop.titulo}"
+                                onclick='if(typeof openPannellumModal==="function") openPannellumModal(${JSON.stringify(prop.imagenes_360)}, "${prop.titulo}")'>
+                            🔄 Ver recorrido 360
+                        </button>
+                    </div>
+                    ` : ''}
+
+                    <div class="property-actions">
+                         <button class="btn-details" onclick='if(typeof mostrarImagenesByIndex==="function") mostrarImagenesByIndex(${index})'>Ver Fotos</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        }
+
+
+        function showTypingIndicator(show) {
+            typingIndicator.style.display = show ? 'flex' : 'none';
+            if (show) chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function resetearChat() {
+            if (confirm('¿Estás seguro de que querés empezar una nueva conversación?')) {
+                chatBox.innerHTML = '';
+                conversacionActual = [];
+                actualizarContexto([], {}, null);
+                limpiarFiltros();
+                addMessage('¡Perfecto! Empecemos de nuevo. ¿Qué propiedad estás buscando?', 'bot');
+            }
+        }
+
+        function obtenerFiltrosSeleccionados() {
+            const filtros = {};
+            ['operacion', 'barrio', 'tipo', 'ambientes', 'precioMin', 'precioMax', 'metrosMin', 'metrosMax'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el && el.value) {
+                    const keyMap = {
+                        'barrio': 'neighborhood', 'ambientes': 'min_rooms', 'precioMin': 'min_price', 'precioMax':
+                            'max_price', 'metrosMin': 'min_sqm', 'metrosMax': 'max_sqm'
+                    };
+                    filtros[keyMap[id] || id] = ['min_price', 'max_price', 'min_sqm', 'max_sqm'].includes(id) ? parseFloat(el.value) :
+                        el.value;
+                }
+            });
+            return filtros;
+        }
+
+        function aplicarFiltros() {
+            const filtros = obtenerFiltrosSeleccionados();
+            if (Object.keys(filtros).length === 0) return alert('Seleccioná al menos un filtro para buscar.');
+
+            let mensajeNatural = "Buscar con filtros: " + Object.entries(filtros).map(([k, v]) => `${k}: ${v}`).join(', ');
+            input.value = mensajeNatural;
+            send();
+        }
+
+        function limpiarFiltros() {
+            ['operacion', 'barrio', 'tipo', 'ambientes', 'precioMin', 'precioMax', 'metrosMin', 'metrosMax'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+        }
+
+        function actualizarContexto(nuevosResultados, filtros, tipo) {
+            contextoActual = {
+                tipo: tipo,
+                resultados: nuevosResultados || [],
+                filtros_usados: filtros || {},
+                timestamp: new Date().toISOString(),
+                propiedad_focus: null
+            };
+            console.log('Contexto actualizado:', contextoActual);
+        }
+
+        async function send() {
+            let msg = input.value.trim();
+            const filtrosSeleccionados = obtenerFiltrosSeleccionados();
+            if (!msg && Object.keys(filtrosSeleccionados).length > 0) {
+                msg = "Busqueda desde filtros"; // Mensaje genérico cuando se usan filtros
+            }
+            if (!msg) return;
+
+            addMessage(msg, 'user');
+            input.value = '';
+            button.disabled = true;
+            showTypingIndicator(true);
+
+
+            // ========================================
+
+            try {
+                const payload = { message: msg, channel: 'web', filters: filtrosSeleccionados, contexto_anterior: contextoActual };
+                const response = await fetch(CHAT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+
+                const data = await response.json();
+
+                if (data.response) {
+                    addMessage(data.response);
+                    if (data.propiedades && data.propiedades.length > 0) {
+                        actualizarContexto(data.propiedades, filtrosSeleccionados, 'busqueda');
+                        mostrarPropiedadesEnInterfaz(data.propiedades);
+                    } else {
+                        actualizarContexto([], filtrosSeleccionados, 'busqueda_sin_resultados');
+                    }
+                } else if (data.error) {
+                    addMessage(`⚠️ Error: ${data.error}`);
+                } else {
+                    addMessage('❌ Respuesta inesperada del servidor');
+                }
+                statusText.textContent = 'Conectado';
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('⚠️ No se pudo conectar con el servidor. Por favor, intentá nuevamente más tarde.');
+                statusText.textContent = 'Error de conexión';
+            } finally {
+                showTypingIndicator(false);
+                button.disabled = false;
+                input.focus();
+            }
+        }
+
+        async function checkServerStatus() {
+            try {
+                const response = await fetch(STATUS_URL);
+                if (statusText) statusText.textContent = response.ok ? 'Conectado' : 'Servidor inactivo';
+            } catch (error) {
+                if (statusText) statusText.textContent = 'Sin conexión';
+            }
+        }
+    </script>
+</body>
+
+</html>
