@@ -2209,76 +2209,309 @@ function initializeDetailsTabs() {
 // En showPropertyMap (alrededor de línea 580), cambia:
 
 
-
+// ========================================
+// FUNCIÓN SIMPLIFICADA PARA MOSTRAR OVERLAY
+// ========================================
+function mostrarOverlaySimple(propertyId, titulo, direccion) {
+    console.log('🎨 Mostrando overlay simple...');
+    
+    // 1. Eliminar overlay anterior si existe
+    const overlayAnterior = document.getElementById('overlay-directions');
+    if (overlayAnterior) {
+        overlayAnterior.remove();
+    }
+    
+    // 2. Crear overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'overlay-directions';
+    
+    // 3. ESTILOS DIRECTOS E INLINE (sin CSS externo)
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 99999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        box-sizing: border-box;
+    `;
+    
+    // 4. Contenido del overlay
+    overlay.innerHTML = `
+        <div style="
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            animation: fadeIn 0.4s ease-out;
+        ">
+            <!-- Icono grande -->
+            <div style="font-size: 60px; margin-bottom: 15px; color: #28a745;">🚗</div>
+            
+            <!-- Título -->
+            <h2 style="margin: 0 0 10px 0; color: #232deb; font-size: 22px;">
+                Abriendo Google Maps...
+            </h2>
+            
+            <!-- Información de la propiedad -->
+            <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+                <p style="margin: 0 0 8px 0; color: #495057; font-weight: 600; font-size: 16px;">
+                    ${titulo}
+                </p>
+                <p style="margin: 0; color: #6c757d; font-size: 14px;">
+                    📍 ${direccion}
+                </p>
+            </div>
+            
+            <!-- Mensaje informativo -->
+            <div style="margin: 25px 0;">
+                <p style="color: #495057; font-size: 15px; line-height: 1.5; margin-bottom: 15px;">
+                    <strong>Google Maps</strong> se abrirá en una nueva pestaña con las indicaciones.
+                </p>
+                <p style="color: #6c757d; font-size: 14px;">
+                    Puedes consultar la ruta y luego volver aquí usando el botón de abajo.
+                </p>
+            </div>
+            
+            <!-- CONTENEDOR DE BOTONES -->
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 25px;">
+                <!-- Botón PRINCIPAL: Volver a Detalles -->
+                <button onclick="volverDesdeOverlay('${propertyId}')" 
+                        style="
+                            background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
+                            color: white;
+                            border: none;
+                            padding: 16px 24px;
+                            border-radius: 10px;
+                            font-size: 16px;
+                            font-weight: 700;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 10px;
+                            box-shadow: 0 6px 20px rgba(35, 45, 235, 0.3);
+                        "
+                        onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 10px 25px rgba(35, 45, 235, 0.4)'"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 20px rgba(35, 45, 235, 0.3)'">
+                    <span style="font-size: 22px; font-weight: bold;">←</span>
+                    <span>Volver a los Detalles</span>
+                </button>
+                
+                <!-- Botón SECUNDARIO: Cerrar -->
+                <button onclick="cerrarOverlayActual()" 
+                        style="
+                            background: #6c757d;
+                            color: white;
+                            border: none;
+                            padding: 12px 20px;
+                            border-radius: 8px;
+                            font-size: 14px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                        "
+                        onmouseover="this.style.background='#5a6268'"
+                        onmouseout="this.style.background='#6c757d'">
+                    Cerrar este mensaje
+                </button>
+            </div>
+            
+            <!-- Pie informativo -->
+            <div style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #e9ecef;">
+                <p style="color: #adb5bd; font-size: 12px; margin: 0; line-height: 1.4;">
+                    💡 <strong>Tip:</strong> Mantén presionada Ctrl (o Cmd en Mac) al hacer clic en enlaces 
+                    para abrirlos en pestañas sin salir de esta página.
+                </p>
+            </div>
+        </div>
+    `;
+    
+    // 5. Agregar al DOM
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+    
+    console.log('✅ Overlay MOSTRADO correctamente');
+    
+    // 6. Agregar animación de entrada
+    setTimeout(() => {
+        const content = overlay.querySelector('div');
+        if (content) {
+            content.style.animation = 'fadeIn 0.4s ease-out';
+        }
+    }, 10);
+}
 
 // ========================================
-// FUNCIÓN openDirectionsFromDetails - VERSIÓN COMPLETA
+// FUNCIÓN PARA CERRAR OVERLAY ACTUAL
 // ========================================
+function cerrarOverlayActual() {
+    const overlay = document.getElementById('overlay-directions');
+    if (overlay) {
+        // Animación de salida
+        overlay.style.opacity = '0';
+        overlay.style.transition = 'opacity 0.3s ease';
+        
+        setTimeout(() => {
+            overlay.remove();
+            document.body.style.overflow = 'auto';
+            console.log('✅ Overlay cerrado');
+        }, 300);
+    }
+}
+
+// ========================================
+// FUNCIÓN PARA VOLVER DESDE OVERLAY
+// ========================================
+function volverDesdeOverlay(propertyId) {
+    console.log('↩️ Volviendo desde overlay para propiedad:', propertyId);
+    
+    // 1. Cerrar overlay
+    cerrarOverlayActual();
+    
+    // 2. Buscar propiedad
+    const property = globalData.properties.find(p => p.id_temporal === propertyId);
+    if (property) {
+        // 3. Pequeño delay para transición suave
+        setTimeout(() => {
+            // 4. Volver a abrir los detalles
+            showPropertyDetails(propertyId);
+            console.log('✅ Volviendo a detalles de:', property.titulo);
+        }, 300);
+    } else {
+        console.error('❌ Propiedad no encontrada:', propertyId);
+        // Fallback: volver a la lista
+        backToProperties();
+    }
+}
+
+/ ========================================
+// FUNCIÓN PARA CERRAR MODAL DE DETALLES
+// ========================================
+function cerrarModalDetalles() {
+    const detallesModal = document.getElementById('property-details-modal');
+    if (detallesModal) {
+        detallesModal.remove();
+        document.body.style.overflow = 'auto';
+        console.log('✅ Modal de detalles cerrado');
+    }
+}
+
+
 // ========================================
 // FUNCIÓN openDirectionsFromDetails - CON BOTÓN VOLVER
 // ========================================
 function openDirectionsFromDetails(propertyId, encodedAddress, title) {
-    console.log('🚗 openDirectionsFromDetails invocada para:', { propertyId, encodedAddress, title });
+    console.log('🚗 openDirectionsFromDetails - INICIANDO');
     
     try {
         // 1. Decodificar la dirección
         const direccion = decodeURIComponent(encodedAddress);
+        console.log('📍 Dirección decodificada:', direccion);
         
         // 2. Buscar la propiedad
         const property = globalData.properties.find(p => p.id_temporal === propertyId);
         if (!property) {
-            console.error('❌ Propiedad no encontrada:', propertyId);
+            console.error('❌ Propiedad no encontrada');
             alert('No se pudo encontrar la propiedad');
             return;
         }
         
-        // 3. Usar dirección de la propiedad como respaldo
+        // 3. Usar dirección de la propiedad
         const direccionFinal = direccion || property.direccion_completa || property.direccion || property.barrio;
         const tituloFinal = title || property.titulo;
         
-        // 4. Cerrar modal de detalles
-        const detallesModal = document.getElementById('property-details-modal');
-        if (detallesModal) {
-            detallesModal.remove();
-            document.body.style.overflow = 'auto';
-            console.log('✅ Modal de detalles cerrado');
-        }
+        console.log('✅ Datos preparados:', { tituloFinal, direccionFinal });
         
-        // 5. CREAR OVERLAY CON BOTÓN VOLVER
-        crearOverlayConVolver(propertyId, tituloFinal, direccionFinal);
+        // 4. Cerrar modal de detalles si existe
+        cerrarModalDetalles();
         
-        // 6. Crear URL para Google Maps Directions
+        // 5. MOSTRAR OVERLAY INMEDIATAMENTE (antes de abrir Google Maps)
+        mostrarOverlaySimple(propertyId, tituloFinal, direccionFinal);
+        
+        // 6. Crear URL para Google Maps
         const direccionCodificada = encodeURIComponent(direccionFinal);
-        const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${direccionCodificada}&travelmode=driving`;
+        const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${direccionCodificada}`;
         
         console.log('🔗 URL de Google Maps:', directionsUrl);
         
-        // 7. Abrir en nueva pestaña
-        const nuevaPestaña = window.open(directionsUrl, '_blank');
-        
-        if (nuevaPestaña) {
-            console.log('✅ Google Maps abierto en nueva pestaña');
+        // 7. Abrir Google Maps en nueva pestaña (con retardo para que se vea el overlay)
+        setTimeout(() => {
+            const nuevaPestaña = window.open(directionsUrl, '_blank');
             
-            // 8. Escuchar cuando se cierre la pestaña (opcional)
-            const verificarCierre = setInterval(() => {
-                if (nuevaPestaña.closed) {
-                    clearInterval(verificarCierre);
-                    cerrarOverlayVolver();
-                    console.log('✅ Pestaña de Google Maps cerrada');
-                }
-            }, 1000);
-            
-        } else {
-            // Si el bloqueador de ventanas emergentes bloqueó la apertura
-            console.warn('⚠️ Bloqueador de ventanas emergentes detectado');
-            mostrarFallbackManual(propertyId, tituloFinal, direccionFinal, directionsUrl);
-        }
+            if (nuevaPestaña) {
+                console.log('✅ Google Maps abierto en nueva pestaña');
+            } else {
+                console.warn('⚠️ Bloqueador detectado - Mostrar alternativa');
+                mostrarAlternativaManual(propertyId, tituloFinal, direccionFinal, directionsUrl);
+            }
+        }, 500); // Pequeño retardo para que se vea el overlay
         
     } catch (error) {
-        console.error('❌ Error en openDirectionsFromDetails:', error);
-        mostrarErrorFallback(propertyId, title);
+        console.error('❌ Error crítico:', error);
+        mostrarErrorSimple(propertyId, title);
     }
 }
+
+
+// ========================================
+// FUNCIÓN PARA MOSTRAR ERROR SIMPLE
+// ========================================
+function mostrarErrorSimple(propertyId, title) {
+    alert(`Error al abrir Google Maps para: ${title}\n\nPuedes buscar manualmente la dirección en maps.google.com`);
+    
+    // Intentar volver a los detalles
+    setTimeout(() => {
+        const property = globalData.properties.find(p => p.id_temporal === propertyId);
+        if (property) {
+            showPropertyDetails(propertyId);
+        }
+    }, 1000);
+}
+
+// ========================================
+// AGREGAR ANIMACIÓN CSS (crítica para que funcione)
+// ========================================
+function agregarAnimacionesCSS() {
+    if (!document.querySelector('#animaciones-css')) {
+        const style = document.createElement('style');
+        style.id = 'animaciones-css';
+        style.textContent = `
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-30px) scale(0.95);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+            }
+            
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+            
+            .pulse-animation {
+                animation: pulse 2s infinite;
+            }
+        `;
+        document.head.appendChild(style);
+        console.log('✅ Animaciones CSS agregadas');
+    }
+}
+
 
 // ========================================
 // FUNCIÓN AUXILIAR: CREAR OVERLAY CON BOTÓN VOLVER
@@ -2383,6 +2616,84 @@ function crearOverlayConVolver(propertyId, titulo, direccion) {
     document.body.style.overflow = 'hidden';
     console.log('✅ Overlay con botón Volver creado');
 }
+
+
+// ========================================
+// FUNCIÓN PARA MOSTRAR ALTERNATIVA MANUAL
+// ========================================
+function mostrarAlternativaManual(propertyId, titulo, direccion, url) {
+    console.log('🔄 Mostrando alternativa manual');
+    
+    // Primero cerrar overlay anterior si existe
+    cerrarOverlayActual();
+    
+    const overlay = document.createElement('div');
+    overlay.id = 'overlay-alternativa';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 99999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    `;
+    
+    overlay.innerHTML = `
+        <div style="
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        ">
+            <div style="font-size: 60px; margin-bottom: 15px; color: #dc3545;">⚠️</div>
+            <h2 style="margin: 0 0 10px 0; color: #dc3545;">Bloqueador detectado</h2>
+            <p style="color: #666; margin-bottom: 20px;">Tu navegador bloqueó la ventana emergente.</p>
+            
+            <div style="margin: 20px 0; padding: 15px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <p style="margin: 0; color: #856404; font-weight: 600;">${titulo}</p>
+                <p style="margin: 5px 0 0 0; color: #856404; font-size: 14px;">${direccion}</p>
+            </div>
+            
+            <a href="${url}" target="_blank" 
+               style="display: block; background: #28a745; color: white; 
+                      padding: 16px; border-radius: 8px; text-decoration: none;
+                      font-weight: 700; font-size: 16px; margin-bottom: 15px;
+                      transition: all 0.3s;"
+               onmouseover="this.style.background='#218838'; this.style.transform='translateY(-2px)'"
+               onmouseout="this.style.background='#28a745'; this.style.transform='translateY(0)'">
+                🔗 HAZ CLIC AQUÍ para abrir Google Maps
+            </a>
+            
+            <p style="color: #666; font-size: 13px; margin-bottom: 20px;">
+                Después de hacer clic, usa el botón de abajo para volver
+            </p>
+            
+            <div style="display: flex; gap: 10px;">
+                <button onclick="volverDesdeOverlay('${propertyId}')" 
+                        style="flex: 1; background: #232deb; color: white; border: none; 
+                               padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                    ← Volver a Detalles
+                </button>
+                
+                <button onclick="cerrarOverlayActual()" 
+                        style="flex: 1; background: #6c757d; color: white; border: none; 
+                               padding: 12px; border-radius: 6px; cursor: pointer;">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(overlay);
+}
+
 
 // ========================================
 // FUNCIÓN AUXILIAR: VOLVER A DETALLES
@@ -2953,6 +3264,7 @@ document.addEventListener('DOMContentLoaded', function() {
     addBackButtonStyles();
     addMapButtonStyles(); 
     agregarEstilosDirections();
+    agregarAnimacionesCSS();
     
     // Inicializar variables DOM
     initializeVariables();
