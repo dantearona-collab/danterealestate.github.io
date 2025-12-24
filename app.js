@@ -846,15 +846,12 @@ function createPropertyCard(property) {
                 </div>
             </div>
             
-            onclick="testPanelFunction('${property.id_temporal}')"
-                    style="width: 100% !important; background: #232deb !important; color: white !important; 
-                           border: none !important; padding: 12px !important; border-radius: 6px !important; 
-                           font-size: 14px !important; font-weight: 600 !important; cursor: pointer !important; 
-                           transition: all 0.3s ease !important; margin-top: 15px !important;"
-                    onmouseover="this.style.background='#1a1db4' !important" 
-                    onmouseout="this.style.background='#232deb' !important">
-                Ver Detalles
-            </button>
+            <button onclick="createPropertyPanel('${property.id_temporal}', '${property.titulo.replace(/'/g, "\\'")}', '${property.precio}', '${property.moneda_precio}', '${property.direccion}', '${property.barrio}', ${property.ambientes}, ${property.metros_cuadrados}, '${property.estado}', '${property.tipo}')" 
+                style="width: 100% !important; background: #232deb !important; color: white !important; border: none !important; padding: 12px !important; border-radius: 6px !important; font-size: 14px !important; font-weight: 600 !important; cursor: pointer !important; transition: all 0.3s ease !important; margin-top: 15px !important;"
+                onmouseover="this.style.background='#1a1db4' !important" 
+                onmouseout="this.style.background='#232deb' !important">
+            🔍 Ver Detalles
+             </button>
         </div>
     `;
     
@@ -3640,3 +3637,304 @@ window.closeDocumentsModal = closeDocumentsModal;
 window.getUpdatedDetailsButton = getUpdatedDetailsButton;
 
 console.log('✅ Sistema de Panel Deslizable - JavaScript cargado completamente');
+
+
+
+// ========================================
+// PANEL DESLIZABLE - VERSIÓN ROBUSTA
+// ========================================
+
+function createPropertyPanel(id, titulo, precio, moneda, direccion, barrio, ambientes, metros, estado, tipo) {
+console.log('🏠 Creando panel para:', titulo);
+
+// Crear overlay
+const overlay = document.createElement('div');
+overlay.id = 'property-panel-overlay';
+overlay.style.cssText = `
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0,0,0,0.5);
+z-index: 999;
+opacity: 0;
+visibility: hidden;
+transition: all 0.3s ease;
+`;
+
+// Crear panel
+const panel = document.createElement('div');
+panel.id = 'property-panel';
+panel.style.cssText = `
+position: fixed;
+top: 0;
+right: -450px;
+width: 450px;
+height: 100%;
+background: white;
+box-shadow: -8px 0 25px rgba(0,0,0,0.15);
+transition: right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+z-index: 1000;
+overflow-y: auto;
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+`;
+
+// Contenido del panel
+panel.innerHTML = `
+<!-- Header -->
+<div style="
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 25px;
+background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
+color: white;
+position: sticky;
+top: 0;
+z-index: 10;
+">
+<h3 style="margin: 0; font-size: 18px; font-weight: 600; line-height: 1.2; flex: 1; padding-right: 15px;">
+${titulo}
+</h3>
+<button onclick="closePropertyPanel()" 
+style="
+background: rgba(255,255,255,0.2);
+border: none;
+color: white;
+font-size: 28px;
+cursor: pointer;
+padding: 8px;
+border-radius: 50%;
+width: 40px;
+height: 40px;
+display: flex;
+align-items: center;
+justify-content: center;
+"
+onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+×
+</button>
+</div>
+
+<!-- Contenido -->
+<div style="padding: 25px;">
+<!-- Precio -->
+<div style="
+background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+padding: 20px;
+border-radius: 12px;
+margin-bottom: 25px;
+text-align: center;
+border: 1px solid #e9ecef;
+">
+<div style="font-size: 32px; font-weight: 700; color: #232deb; margin-bottom: 8px;">
+${moneda} ${precio ? parseInt(precio).toLocaleString() : 'Consultar'}
+</div>
+</div>
+
+<!-- Ubicación -->
+<div style="margin-bottom: 25px;">
+<div style="font-weight: 600; color: #495057; margin-bottom: 8px; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+📍 ${direccion}
+</div>
+<div style="color: #6c757d; font-size: 14px; line-height: 1.4;">
+${barrio}, Argentina
+</div>
+</div>
+
+<!-- Características -->
+<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px;">
+<div style="text-align: center; padding: 15px; background: white; border-radius: 8px; border: 1px solid #e9ecef;">
+<div style="font-size: 24px; font-weight: 700; color: #232deb; margin-bottom: 4px;">${ambientes}</div>
+<div style="font-size: 12px; color: #6c757d; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Ambientes</div>
+</div>
+<div style="text-align: center; padding: 15px; background: white; border-radius: 8px; border: 1px solid #e9ecef;">
+<div style="font-size: 24px; font-weight: 700; color: #232deb; margin-bottom: 4px;">${metros}</div>
+<div style="font-size: 12px; color: #6c757d; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">m²</div>
+</div>
+<div style="text-align: center; padding: 15px; background: white; border-radius: 8px; border: 1px solid #e9ecef;">
+<div style="font-size: 24px; font-weight: 700; color: #232deb; margin-bottom: 4px;">${estado}</div>
+<div style="font-size: 12px; color: #6c757d; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Estado</div>
+</div>
+<div style="text-align: center; padding: 15px; background: white; border-radius: 8px; border: 1px solid #e9ecef;">
+<div style="font-size: 24px; font-weight: 700; color: #232deb; margin-bottom: 4px;">${tipo}</div>
+<div style="font-size: 12px; color: #6c757d; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Tipo</div>
+</div>
+</div>
+
+<!-- Acciones -->
+<div style="margin-bottom: 25px;">
+<h4 style="margin: 0 0 12px 0; font-size: 16px; color: #495057; font-weight: 600;">
+⚡ Acciones Rápidas
+</h4>
+<div style="display: flex; flex-direction: column; gap: 10px;">
+<button onclick="openWhatsApp('${titulo}', '${barrio}', '${moneda}', '${precio}')" 
+style="
+background: white;
+border: 1px solid #e9ecef;
+padding: 12px 16px;
+border-radius: 8px;
+text-align: left;
+cursor: pointer;
+display: flex;
+align-items: center;
+gap: 10px;
+transition: all 0.3s ease;
+font-size: 14px;
+color: #495057;
+"
+onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#232deb'; this.style.color='#232deb'" 
+onmouseout="this.style.background='white'; this.style.borderColor='#e9ecef'; this.style.color='#495057'">
+<span style="font-size: 18px;">💬</span>
+Contactar por WhatsApp
+</button>
+
+<button onclick="alert('Función en desarrollo: Ver fotos de la propiedad')" 
+style="
+background: white;
+border: 1px solid #e9ecef;
+padding: 12px 16px;
+border-radius: 8px;
+text-align: left;
+cursor: pointer;
+display: flex;
+align-items: center;
+gap: 10px;
+transition: all 0.3s ease;
+font-size: 14px;
+color: #495057;
+"
+onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#232deb'; this.style.color='#232deb'" 
+onmouseout="this.style.background='white'; this.style.borderColor='#e9ecef'; this.style.color='#495057'">
+<span style="font-size: 18px;">📷</span>
+Ver Fotos
+</button>
+
+<button onclick="openGoogleMaps('${direccion}, ${barrio}, Argentina')" 
+style="
+background: white;
+border: 1px solid #e9ecef;
+padding: 12px 16px;
+border-radius: 8px;
+text-align: left;
+cursor: pointer;
+display: flex;
+align-items: center;
+gap: 10px;
+transition: all 0.3s ease;
+font-size: 14px;
+color: #495057;
+"
+onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#232deb'; this.style.color='#232deb'" 
+onmouseout="this.style.background='white'; this.style.borderColor='#e9ecef'; this.style.color='#495057'">
+<span style="font-size: 18px;">🗺️</span>
+Ver en Mapa
+</button>
+</div>
+</div>
+</div>
+
+<!-- Footer -->
+<div style="
+position: sticky;
+bottom: 0;
+padding: 25px;
+background: white;
+border-top: 1px solid #e9ecef;
+box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+">
+<button onclick="alert('Función en desarrollo: Vista completa con todos los detalles')" 
+style="
+width: 100%;
+background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
+color: white;
+border: none;
+padding: 14px 20px;
+border-radius: 8px;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.3s ease;
+box-shadow: 0 4px 12px rgba(35, 45, 235, 0.3);
+font-size: 14px;
+"
+onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(35, 45, 235, 0.4)'" 
+onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(35, 45, 235, 0.3)'">
+📋 Ver Detalles Completos
+</button>
+</div>
+`;
+
+// Agregar al DOM
+document.body.appendChild(overlay);
+document.body.appendChild(panel);
+
+// Mostrar con animación
+setTimeout(() => {
+overlay.style.opacity = '1';
+overlay.style.visibility = 'visible';
+panel.style.right = '0';
+document.body.style.overflow = 'hidden';
+}, 10);
+
+// Event listeners
+overlay.addEventListener('click', closePropertyPanel);
+
+// Cerrar con ESC
+document.addEventListener('keydown', function escHandler(e) {
+if (e.key === 'Escape') {
+closePropertyPanel();
+document.removeEventListener('keydown', escHandler);
+}
+});
+
+console.log('✅ Panel creado para:', titulo);
+}
+
+function closePropertyPanel() {
+const overlay = document.getElementById('property-panel-overlay');
+const panel = document.getElementById('property-panel');
+
+if (overlay && panel) {
+overlay.style.opacity = '0';
+overlay.style.visibility = 'hidden';
+panel.style.right = '-450px';
+
+setTimeout(() => {
+if (overlay.parentNode) overlay.remove();
+if (panel.parentNode) panel.remove();
+document.body.style.overflow = '';
+}, 400);
+}
+
+console.log('🔒 Panel cerrado');
+}
+
+function openWhatsApp(titulo, barrio, moneda, precio) {
+const phoneNumber = '5491125368595';
+const message = encodeURIComponent(`¡Hola! Me interesa la propiedad: ${titulo}
+
+📍 ${barrio}
+
+💰 ${moneda} ${precio}
+
+¿Podrías brindarme más información?`);
+const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+window.open(whatsappUrl, '_blank');
+console.log('💬 Abriendo WhatsApp');
+}
+
+function openGoogleMaps(address) {
+const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+window.open(mapsUrl, '_blank');
+console.log('🗺️ Abriendo Google Maps');
+}
+
+// Hacer funciones disponibles globalmente
+window.createPropertyPanel = createPropertyPanel;
+window.closePropertyPanel = closePropertyPanel;
+window.openWhatsApp = openWhatsApp;
+window.openGoogleMaps = openGoogleMaps;
+
+console.log('✅ Panel deslizable robusto cargado');
