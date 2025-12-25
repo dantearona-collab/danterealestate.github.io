@@ -3822,7 +3822,7 @@ function decodeBase64(encoded) {
 
 // Modificar loadEnvironmentInfo para decodificar la descripción
 const originalLoadEnvironmentInfo = loadEnvironmentInfo;
-loadEnvironmentInfo = function(direccion, barrio) {
+loadEnvironmentInfo = async function(direccion, barrio) {
     // Decodificar la descripción si está codificada en Base64
     if (window.currentProperty && window.currentProperty.descripcionEncoded) {
         window.currentProperty.descripcion = decodeBase64(window.currentProperty.descripcionEncoded);
@@ -3959,7 +3959,7 @@ function createPropertyPanel(id, titulo, precio, moneda, direccion, barrio, ambi
                         "
                         onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(40, 167, 69, 0.3)'" 
                         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                    🌍 Analizar Entorno con IA
+                    🌍 Descripcion del Entorno con IA
                 </button>
             </div>
             
@@ -4015,7 +4015,7 @@ function createPropertyPanel(id, titulo, precio, moneda, direccion, barrio, ambi
                             "
                             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(40, 167, 69, 0.3)'" 
                             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(40, 167, 69, 0.2)'">
-                        🌍 Analizar Entorno con IA
+                        🌍 Descripcion del Entorno con IA
                     </button>
                 </div>
             </div>
@@ -4152,7 +4152,7 @@ function createPropertyPanel(id, titulo, precio, moneda, direccion, barrio, ambi
     });
     
     // Guardar referencia de la propiedad actual
-    window.currentProperty = { direccion, barrio, titulo };
+    window.currentProperty = { direccion, barrio, titulo, descripcionEncoded: encodeBase64(descripcion) };
     
     console.log('✅ Panel con entorno IA creado para:', titulo);
 }
@@ -4278,7 +4278,7 @@ function createPropertyPanelSimple(id, titulo, precio, moneda, direccion, barrio
                 <h4 style="margin: 0 0 10px 0; font-size: 16px; color: #495057;">¿Qué hay cerca?</h4>
                 <p style="margin: 0; font-size: 13px; color: #6c757d; margin-bottom: 10px;">Descubre servicios, transporte y más en el entorno.</p>
                 <button onclick="window.currentProperty = {direccion: '${direccion}', barrio: '${barrio}', descripcionEncoded: '${encodeBase64(descripcion)}'}; loadEnvironmentInfo('${direccion}', '${barrio}')" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none; padding: 10px 15px; border-radius: 6px; font-size: 13px; cursor: pointer;">
-                    🌍 Analizar Entorno con IA
+                    🌍 Descripcion del Entorno con IA
                 </button>
             </div>
         </div>
