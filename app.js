@@ -3922,7 +3922,7 @@ function identificarVirtudes(property, promedio) {
             virtudes.push({
                 tipo: 'ambientes',
                 icono: '🚪',
-               titulo: 'Distribución superior',
+                titulo: 'Distribución superior',
                 dato: `${property.ambientes} ambientes vs. ${avgAmbientes.toFixed(1)} en promedio`,
                 emocion: `Más ambientes para que cada miembro de la familia tenga su propio espacio.`
             });
@@ -3942,6 +3942,460 @@ function identificarVirtudes(property, promedio) {
     
     return virtudes;
 }
+
+// ========================================
+// BÚSQUEDAS WEB PARA DATOS DEL MERCADO REAL
+// ========================================
+
+// Consultas para obtener datos del mercado inmobiliario
+const CONSULTAS_MERCADO = {
+    precios: (barrio) => `${barrio} Buenos Aires precio metro cuadrado promedio 2024 2025`,
+    propiedades: (barrio, tipo) => `${barrio} Buenos Aires ${tipo} en venta precio características`,
+    tendencia: (barrio) => `${barrio} Buenos Aires tendencia precios inmobiliarios 2024`,
+    zona: (barrio) => `${barrio} Buenos Aires zona características servicios transporte`
+};
+
+// Buscar datos del mercado en la web
+async function buscarDatosMercado(barrio, tipo) {
+    const queries = [
+        CONSULTAS_MERCADO.precios(barrio),
+        CONSULTAS_MERCADO.propiedades(barrio, tipo),
+        CONSULTAS_MERCADO.tendencia(barrio),
+        CONSULTAS_MERCADO.zona(barrio)
+    ];
+    
+    try {
+        // Usar batch_web_search para obtener datos reales
+        const results = await batch_web_search({
+            queries: queries.map(q => ({
+                query: q,
+                num_results: 5,
+                cursor: 1,
+                data_range: 'y'
+            }))
+        });
+        
+        return results;
+    } catch (error) {
+        console.warn('Error buscando datos del mercado:', error);
+        return null;
+    }
+}
+
+// Extraer datos de precios de los resultados web
+function extraerDatosMercado(searchResults, barrio) {
+    const datos = {
+        barrio: barrio,
+        precioM2Rango: null,
+        caracteristicasZona: [],
+        tendencia: null,
+        fuentes: []
+    };
+    
+    if (!searchResults || !searchResults.results) return datos;
+    
+    searchResults.results.forEach((result, idx) => {
+        if (!result || !result.content) return;
+        
+        datos.fuentes.push(result.url);
+        
+        // Buscar patrones de precios en el texto
+        const contenido = result.content.toLowerCase();
+        
+        // Extraer rangos de precio por m2
+        const precioMatch = contenido.match(/(\$[\d.]+)\s*(?:a|-)\s*(\$[\d.]+)\s*(?:por|m2|m²)/);
+        if (precioMatch) {
+            datos.precioM2Rango = {
+                min: parseFloat(precioMatch[1].replace('$', '').replace('.', '')),
+                max: parseFloat(precioMatch[2].replace('$', '').replace('.', '')),
+                fuente: result.url
+            };
+        }
+        
+        // Buscar precio promedio
+        const promedioMatch = contenido.match(/promedio[:\s]+(\$[\d.]+)\s*(?:por|m2|m²)?/);
+        if (promedioMatch && !datos.precioM2Rango) {
+            datos.precioM2Rango = {
+                promedio: parseFloat(promedioMatch[1].replace('$', '').replace('.', '')),
+                fuente: result.url
+            };
+        }
+        
+        // Extraer características de la zona
+        const caracteristicas = [];
+        if (contenido.includes('transporte') || contenido.includes('subte') || contenido.includes('colectivo')) {
+            caracteristicas.push('Buena conectividad');
+        }
+        if (contenido.includes('comercio') || contenido.includes('tienda') || contenido.includes('shopping')) {
+            caracteristicas.push('Comercio disponible');
+        }
+        if (contenido.includes('seguridad') || contenido.includes('seguro')) {
+            caracteristicas.push('Zona segura');
+        }
+        if (contenido.includes('verde') || contenido.includes('parque') || contenido.includes('plaza')) {
+            caracteristicas.push('Areas verdes');
+        }
+        if (contenido.includes('escuela') || contenido.includes('colegio') || contenido.includes('universidad')) {
+            caracteristicas.push('Educacion cercana');
+        }
+        
+        datos.caracteristicasZona = [...new Set([...datos.caracteristicasZona, ...caracteristicas])];
+        
+        // Determinar tendencia
+        if (contenido.includes('subiendo') || contenido.includes('alza') || contenido.includes('aumentando')) {
+            datos.tendencia = 'subiendo';
+        } else if (contenido.includes('bajando') || contenido.includes('baja') || contenido.includes('reducc')) {
+            datos.tendencia = 'bajando';
+        } else {
+            datos.tendencia = 'estable';
+        }
+    });
+    
+    return datos;
+}
+
+// Generar virtudes basadas en datos web reales
+function identificarVirtudesWeb(property, datosWeb, precioM2) {
+    const virtudes = [];
+    
+    if (!datosWeb || !datosWeb.precioM2Rango) return virtudes;
+    
+    const precioM2Web = datosWeb.precioM2Rango.promedio || datosWeb.precioM2Rango.min;
+    
+    if (!precioM2Web) return virtudes;
+    
+    const diff = ((precioM2Web - precioM2) / precioM2Web) * 100;
+    
+    if (diff > 15) {
+        virtudes.push({
+            tipo: 'precio',
+            icono: '💰',
+            titulo: 'Precio inferior al mercado',
+            dato: `$${precioM2.toFixed(0)}/m² vs. promedio en ${property.barrio}: $${precioM2Web.toFixed(0)}/m²`,
+            emocion: `¡Excelente oportunidad! Estás pagando menos que el promedio del mercado. Ahorras un ${diff.toFixed(0)}% comparado con propiedades similares en la zona.`
+        });
+    } else if (diff > 5) {
+        virtudes.push({
+            tipo: 'precio',
+            icono: '💵',
+            titulo: 'Buen precio de mercado',
+            dato: `$${precioM2.toFixed(0)}/m² (${diff.toFixed(0)}% por debajo del promedio)`,
+            emocion: `Estás haciendo una compra inteligente. El precio está por debajo del promedio de mercado sin sacrificar ubicación.`
+        });
+    } else if (diff < -15) {
+        virtudes.push({
+            tipo: 'precio',
+            icono: '📈',
+            titulo: 'Inversión de valor',
+            dato: `$${precioM2.toFixed(0)}/m² (${Math.abs(diff).toFixed(0)}% por encima del promedio)`,
+            emocion: `Aunque el precio está por encima del promedio, las características únicas de esta propiedad justifican la inversión.`
+        });
+    }
+    
+    // Virtudes por características de la zona
+    if (datosWeb.caracteristicasZona && datosWeb.caracteristicasZona.length > 0) {
+        virtudes.push({
+            tipo: 'zona',
+            icono: '📍',
+            titulo: 'Zona con excelentes servicios',
+            dato: datosWeb.caracteristicasZona.slice(0, 3).join(' • '),
+            emocion: `La zona ofrece todo lo que necesitas cerca: ${datosWeb.caracteristicasZona.slice(0, 2).join(' y ')}. Conveniencia premium.`
+        });
+    }
+    
+    // Virtud por tendencia
+    if (datosWeb.tendencia === 'subiendo') {
+        virtudes.push({
+            tipo: 'tendencia',
+            icono: '📊',
+            titulo: 'Mercado en ascenso',
+            dato: 'Precios tendiendo al alza en la zona',
+            emocion: `Los precios en ${property.barrio} están aumentando. Esta es una inversión que probablemente se valore más con el tiempo.`
+        });
+    }
+    
+    return virtudes;
+}
+
+// Generar texto persuasivo con datos web
+function generarTextoPersuasivoWeb(property, virtudes, datosWeb) {
+    const partes = [];
+    
+    // Introducción basada en virtud principal
+    if (virtudes.length > 0) {
+        const virtudPrincipal = virtudes[0];
+        partes.push(`${virtudPrincipal.icono} ${virtudPrincipal.titulo}`);
+        partes.push(virtudPrincipal.dato);
+        partes.push(virtudPrincipal.emocion);
+    }
+    
+    // Segunda virtud
+    if (virtudes.length > 1) {
+        partes.push(`✨ ${virtudes[1].titulo}: ${virtudes[1].dato}`);
+    }
+    
+    // Contexto del mercado
+    if (datosWeb && datosWeb.caracteristicasZona && datosWeb.caracteristicasZona.length > 0) {
+        partes.push(`📍 ${property.barrio} se caracteriza por: ${datosWeb.caracteristicasZona.join(', ')}.`);
+    }
+    
+    // Llamado a la acción
+    partes.push(`🎯 Esta propiedad representa una oportunidad sólida en un mercado donde la oferta es limitada y la demanda creciente.`);
+    
+    return partes.join('\n\n');
+}
+
+// Mostrar análisis comparativo con datos web reales
+async function mostrarAnalisisComparativo() {
+    if (!window.currentProperty) {
+        alert('Selecciona una propiedad primero');
+        return;
+    }
+    
+    const property = globalData.properties.find(p => 
+        p.direccion === window.currentProperty.direccion && 
+        p.barrio === window.currentProperty.barrio
+    );
+    
+    if (!property) {
+        alert('No se encontró la propiedad');
+        return;
+    }
+    
+    const precioM2 = property.precio / property.metros_cuadrados;
+    
+    // Mostrar loading
+    const loadingModal = document.createElement('div');
+    loadingModal.id = 'analisis-loading-modal';
+    loadingModal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        z-index: 1001;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    `;
+    loadingModal.innerHTML = `
+        <div style="
+            background: white;
+            padding: 30px 50px;
+            border-radius: 16px;
+            text-align: center;
+        ">
+            <div style="
+                width: 50px;
+                height: 50px;
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid #10b981;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 15px;
+            "></div>
+            <p style="margin: 0; color: #495057; font-size: 14px;">
+                🔍 Buscando datos del mercado en tiempo real...
+            </p>
+            <p style="margin: 8px 0 0 0; color: #6c757d; font-size: 12px;">
+                Comparando con propiedades reales en ${property.barrio}
+            </p>
+        </div>
+    `;
+    document.body.appendChild(loadingModal);
+    document.body.style.overflow = 'hidden';
+    
+    // Buscar datos del mercado
+    const searchResults = await buscarDatosMercado(property.barrio, property.tipo);
+    const datosWeb = extraerDatosMercado(searchResults, property.barrio);
+    
+    // Eliminar loading
+    loadingModal.remove();
+    
+    // Calcular análisis
+    const virtudes = identificarVirtudesWeb(property, datosWeb, precioM2);
+    const textoPersuasivo = generarTextoPersuasivoWeb(property, virtudes, datosWeb);
+    const score = Math.min(5 + (virtudes.length * 1.5), 10);
+    
+    // Crear modal de resultados
+    const modal = document.createElement('div');
+    modal.id = 'analisis-comparativo-modal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        z-index: 1001;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    `;
+    
+    const virtudesHTML = virtudes.length > 0 ? virtudes.map(v => `
+        <div style="
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid #10b981;
+        ">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <span style="font-size: 24px;">${v.icono}</span>
+                <span style="font-weight: 600; color: #495057; font-size: 15px;">${v.titulo}</span>
+            </div>
+            <div style="font-size: 13px; color: #6c757d; margin-bottom: 6px;">${v.dato}</div>
+            <div style="font-size: 13px; color: #10b981; font-style: italic;">${v.emocion}</div>
+        </div>
+    `).join('') : `
+        <div style="
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        ">
+            <span style="font-size: 40px;">🏠</span>
+            <p style="margin: 10px 0 0 0; color: #6c757d;">
+                Propiedades con características sólidas en ubicación privilegiada.
+            </p>
+        </div>
+    `;
+    
+    // Fuentes consultadas
+    const fuentesHTML = datosWeb.fuentes && datosWeb.fuentes.length > 0 ? `
+        <div style="
+            margin-top: 16px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            font-size: 11px;
+            color: #64748b;
+        ">
+            <div style="font-weight: 600; margin-bottom: 6px;">📡 Datos actualizados de:</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                ${datosWeb.fuentes.slice(0, 3).map(f => `
+                    <span style="
+                        background: #e2e8f0;
+                        padding: 2px 8px;
+                        border-radius: 4px;
+                    ">${new URL(f).hostname.replace('www.', '')}</span>
+                `).join('')}
+            </div>
+        </div>
+    ` : '';
+    
+    modal.innerHTML = `
+        <div style="
+            background: white;
+            border-radius: 16px;
+            max-width: 550px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        ">
+            <!-- Header -->
+            <div style="
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                padding: 20px;
+                color: white;
+                position: sticky;
+                top: 0;
+            ">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <h3 style="margin: 0 0 8px 0; font-size: 18px;">
+                            📊 Análisis de Mercado Real
+                        </h3>
+                        <p style="margin: 0; font-size: 13px; opacity: 0.9;">
+                            ${property.barrio} • ${property.tipo}
+                        </p>
+                    </div>
+                    <button onclick="cerrarAnalisisComparativo()" style="
+                        background: rgba(255,255,255,0.2);
+                        border: none;
+                        color: white;
+                        font-size: 24px;
+                        cursor: pointer;
+                        padding: 4px 10px;
+                        border-radius: 6px;
+                    ">×</button>
+                </div>
+            </div>
+            
+            <!-- Score -->
+            <div style="
+                background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+                padding: 16px;
+                text-align: center;
+                border-bottom: 1px solid #86efac;
+            ">
+                <div style="font-size: 12px; color: #166534; margin-bottom: 4px;">PUNTUACIÓN DE OPORTUNIDAD</div>
+                <div style="font-size: 32px; font-weight: 700; color: #10b981;">${score.toFixed(1)}<span style="font-size: 16px; color: #6c757d;">/10</span></div>
+            </div>
+            
+            <!-- Contenido -->
+            <div style="padding: 20px;">
+                <!-- Virtudes -->
+                ${virtudesHTML}
+                
+                <!-- Texto persuasivo -->
+                <div style="
+                    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+                    border-radius: 12px;
+                    padding: 16px;
+                    margin-top: 16px;
+                    border: 1px solid #fcd34d;
+                ">
+                    <p style="
+                        margin: 0;
+                        font-size: 14px;
+                        line-height: 1.6;
+                        color: #92400e;
+                        font-family: Georgia, serif;
+                    ">${textoPersuasivo.replace(/\n\n/g, '</p><p style="margin: 12px 0 0 0;">')}</p>
+                </div>
+                
+                <!-- Fuentes -->
+                ${fuentesHTML}
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Cerrar al hacer clic fuera
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            cerrarAnalisisComparativo();
+        }
+    });
+    
+    // Cerrar con ESC
+    document.addEventListener('keydown', function escHandler(e) {
+        if (e.key === 'Escape') {
+            cerrarAnalisisComparativo();
+            document.removeEventListener('keydown', escHandler);
+        }
+    });
+}
+
+function cerrarAnalisisComparativo() {
+    const modal = document.getElementById('analisis-comparativo-modal');
+    const loading = document.getElementById('analisis-loading-modal');
+    if (modal) modal.remove();
+    if (loading) loading.remove();
+    document.body.style.overflow = '';
+}
+
+// Exportar funciones
+window.mostrarAnalisisComparativo = mostrarAnalisisComparativo;
+window.cerrarAnalisisComparativo = cerrarAnalisisComparativo;
+
+console.log('✅ Sistema de análisis comparativo con datos web cargado');
 
 function diffPremio(diff) {
     return diff.toFixed(0);
