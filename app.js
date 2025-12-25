@@ -3499,13 +3499,23 @@ function showEnvironmentLoading() {
     const panel = document.getElementById('property-panel');
     if (!panel) return;
     
-    const content = panel.querySelector('.environment-section') || 
-                   createEnvironmentSection(panel);
-    
     // Obtener descripción del propiedad actual
     const descripcion = window.currentProperty?.descripcion || '';
     
-    content.innerHTML = `
+    // Buscar o crear la sección de entorno
+    let section = panel.querySelector('#environment-section') || 
+                  panel.querySelector('.environment-section');
+    
+    if (!section) {
+        const content = panel.querySelector('div[style*="padding: 25px;"]');
+        section = document.createElement('div');
+        section.id = 'environment-section';
+        section.className = 'environment-section';
+        section.style.marginBottom = '25px';
+        content.appendChild(section);
+    }
+    
+    section.innerHTML = `
         <!-- Header con botón cerrar y descripción -->
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #e9ecef;">
             <div style="flex: 1;">
@@ -3557,6 +3567,7 @@ function createEnvironmentSection(panel) {
     const content = panel.querySelector('div[style*="padding: 25px;"]');
     
     const section = document.createElement('div');
+    section.id = 'environment-section';
     section.className = 'environment-section';
     section.style.marginBottom = '25px';
     
@@ -3569,10 +3580,13 @@ function displayEnvironmentInfo(data) {
     const panel = document.getElementById('property-panel');
     if (!panel) return;
     
-    const section = panel.querySelector('.environment-section') || 
-                   createEnvironmentSection(panel);
+    // Buscar por ID primero, luego por clase, si no existe crear nueva
+    const existingSection = panel.querySelector('#environment-section') || 
+                           panel.querySelector('.environment-section') || 
+                           createEnvironmentSection(panel);
     
-    section.innerHTML = `
+    // Actualizar el contenido de la sección existente
+    existingSection.innerHTML = `
         <!-- Header con botón cerrar y descripción -->
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #e9ecef;">
             <div style="flex: 1;">
@@ -3647,11 +3661,21 @@ function showEnvironmentError(message) {
     const panel = document.getElementById('property-panel');
     if (!panel) return;
     
-    const section = panel.querySelector('.environment-section') || 
-                   createEnvironmentSection(panel);
-    
     // Obtener descripción del propiedad actual
     const descripcion = window.currentProperty?.descripcion || '';
+    
+    // Buscar o crear la sección de entorno
+    let section = panel.querySelector('#environment-section') || 
+                  panel.querySelector('.environment-section');
+    
+    if (!section) {
+        const content = panel.querySelector('div[style*="padding: 25px;"]');
+        section = document.createElement('div');
+        section.id = 'environment-section';
+        section.className = 'environment-section';
+        section.style.marginBottom = '25px';
+        content.appendChild(section);
+    }
     
     section.innerHTML = `
         <!-- Header con botón cerrar y descripción -->
