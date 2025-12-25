@@ -3955,6 +3955,12 @@ const CONSULTAS_MERCADO = {
     zona: (barrio) => `${barrio} Buenos Aires zona características servicios transporte`
 };
 
+// Configuración del servidor de análisis
+const ANALISIS_SERVER = {
+    url: 'http://localhost:8080',
+    enabled: true
+};
+
 // Buscar datos del mercado en la web
 async function buscarDatosMercado(barrio, tipo) {
     const queries = [
@@ -3982,73 +3988,205 @@ async function buscarDatosMercado(barrio, tipo) {
     }
 }
 
-// Extraer datos de precios de los resultados web
+// Analizar mercado usando el servidor Python con Gemini AI
+async function analizarMercadoConIA(barrio, searchResults) {
+    if (!ANALISIS_SERVER.enabled) {
+        console.log('🔧 Servidor de análisis deshabilitado, usando extracción local');
+        return null;
+    }
+    
+    try {
+        console.log('🤖 Enviando datos a Gemini AI para análisis avanzado...');
+        
+        const response = await fetch(`${ANALISIS_SERVER.url}/analizar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action: 'analizar_mercado',
+                barrio: barrio,
+                search_results: searchResults?.results || []
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+        
+        const resultado = await response.json();
+        
+        if (resultado.success) {
+            console.log('✅ Análisis con IA completado');
+            return resultado.data;
+        } else {
+            console.warn('⚠️ Análisis con IA falló:', resultado.error);
+            return null;
+        }
+        
+    } catch (error) {
+        console.warn('🔧 Servidor de IA no disponible, usando extracción local:', error.message);
+        return null;
+    }
+}
+
+// Extraer datos de precios de los resultados web (MEJORADO)
 function extraerDatosMercado(searchResults, barrio) {
     const datos = {
         barrio: barrio,
         precioM2Rango: null,
+        precioM2Promedio: null,
         caracteristicasZona: [],
         tendencia: null,
+        conectividad: null,
+        amenities: [],
+        analisisIA: null,
         fuentes: []
     };
     
     if (!searchResults || !searchResults.results) return datos;
     
+    // Patrones mejorados para extraer precios
+    const patronesPrecio = [
+        // "$1.500 a $2.500 por m2" o "$1.500-$2.500 m2"
+        /(\$[\d.]+)\s*(?:a|-)\s*(\$[\d.]+)\s*(?:por|m2|m²)?/gi,
+        // "entre $1.500 y $2.500"
+        /entre\s*\$([\d.]+)\s*y\s*\$([\d.]+)/gi,
+        // "promedio de $2.000"
+        /promedio[:\s]+\$([\d.]+)/gi,
+        // "alcanza los $3.000"
+        /alcanza[n]?\s*(?:los?)?\s*\$([\d.]+)/gi,
+        // "desde $1.500"
+        /desde\s*\$([\d.]+)/gi,
+        // "$2000 por metro cuadrado" - detecta solo el número
+        /\$([\d]{3,5})\s*(?:por|m2|m²)?/gi
+    ];
+    
+    // Buscar el mejor precio (mayor y menor)
+    let preciosEncontrados = [];
+    
     searchResults.results.forEach((result, idx) => {
         if (!result || !result.content) return;
         
         datos.fuentes.push(result.url);
+        const contenido = result.content;
         
-        // Buscar patrones de precios en el texto
-        const contenido = result.content.toLowerCase();
+        // Buscar precios con todos los patrones
+        patronesPrecio.forEach((patron, pIdx) => {
+            const matches = contenido.matchAll(patron);
+            matches.forEach(match => {
+                if (match.length >= 2 && match[1] && match[2]) {
+                    // Es un rango
+                    preciosEncontrados.push({
+                        min: parseFloat(match[1].replace(/\./g, '')),
+                        max: parseFloat(match[2].replace(/\./g, ''))
+                    });
+                } else if (match[1]) {
+                    // Es un solo precio
+                    preciosEncontrados.push({
+                        precio: parseFloat(match[1].replace(/\./g, ''))
+                    });
+                }
+            });
+        });
+    });
+    
+    // Calcular promedio de los precios encontrados
+    if (preciosEncontrados.length > 0) {
+        const todosPrecios = [];
+        preciosEncontrados.forEach(p => {
+            if (p.min) todosPrecios.push(p.min);
+            if (p.max) todosPrecios.push(p.max);
+            if (p.precio) todosPrecios.push(p.precio);
+        });
         
-        // Extraer rangos de precio por m2
-        const precioMatch = contenido.match(/(\$[\d.]+)\s*(?:a|-)\s*(\$[\d.]+)\s*(?:por|m2|m²)/);
-        if (precioMatch) {
+        if (todosPrecios.length > 0) {
+            const suma = todosPrecios.reduce((a, b) => a + b, 0);
+            datos.precioM2Promedio = Math.round(suma / todosPrecios.length);
+            
+            // Determinar rango
+            const minReal = Math.min(...todosPrecios);
+            const maxReal = Math.max(...todosPrecios);
+            
             datos.precioM2Rango = {
-                min: parseFloat(precioMatch[1].replace('$', '').replace('.', '')),
-                max: parseFloat(precioMatch[2].replace('$', '').replace('.', '')),
-                fuente: result.url
+                min: minReal,
+                max: maxReal,
+                promedio: datos.precioM2Promedio,
+                count: preciosEncontrados.length
             };
         }
-        
-        // Buscar precio promedio
-        const promedioMatch = contenido.match(/promedio[:\s]+(\$[\d.]+)\s*(?:por|m2|m²)?/);
-        if (promedioMatch && !datos.precioM2Rango) {
-            datos.precioM2Rango = {
-                promedio: parseFloat(promedioMatch[1].replace('$', '').replace('.', '')),
-                fuente: result.url
-            };
-        }
-        
-        // Extraer características de la zona
-        const caracteristicas = [];
-        if (contenido.includes('transporte') || contenido.includes('subte') || contenido.includes('colectivo')) {
-            caracteristicas.push('Buena conectividad');
-        }
-        if (contenido.includes('comercio') || contenido.includes('tienda') || contenido.includes('shopping')) {
-            caracteristicas.push('Comercio disponible');
-        }
-        if (contenido.includes('seguridad') || contenido.includes('seguro')) {
-            caracteristicas.push('Zona segura');
-        }
-        if (contenido.includes('verde') || contenido.includes('parque') || contenido.includes('plaza')) {
-            caracteristicas.push('Areas verdes');
-        }
-        if (contenido.includes('escuela') || contenido.includes('colegio') || contenido.includes('universidad')) {
-            caracteristicas.push('Educacion cercana');
-        }
-        
-        datos.caracteristicasZona = [...new Set([...datos.caracteristicasZona, ...caracteristicas])];
-        
-        // Determinar tendencia
-        if (contenido.includes('subiendo') || contenido.includes('alza') || contenido.includes('aumentando')) {
-            datos.tendencia = 'subiendo';
-        } else if (contenido.includes('bajando') || contenido.includes('baja') || contenido.includes('reducc')) {
-            datos.tendencia = 'bajando';
-        } else {
-            datos.tendencia = 'estable';
-        }
+    }
+    
+    // Extraer características de la zona del contenido
+    const contenidoCompleto = searchResults.results
+        .map(r => r.content || '')
+        .join(' ')
+        .toLowerCase();
+    
+    // Características de infraestructura
+    const caracteristicasDetectadas = [];
+    
+    if (contenidoCompleto.match(/transporte|subte|colectivo|metro|tren|estacion/)) {
+        caracteristicasDetectadas.push('Buena conectividad');
+    }
+    if (contenidoCompleto.match(/comercio|shopping|centro comercial|tiendas|locales/)) {
+        caracteristicasDetectadas.push('Comercio disponible');
+    }
+    if (contenidoCompleto.match(/segurid|safe|vigilanc|policia/)) {
+        caracteristicasDetectadas.push('Zona segura');
+    }
+    if (contenidoCompleto.match(/verde|parque|plaza|jardin|areas verdes/)) {
+        caracteristicasDetectadas.push('Areas verdes');
+    }
+    if (contenidoCompleto.match(/escuela|colegio|universidad|educacion|insti/)) {
+        caracteristicasDetectadas.push('Educacion cercana');
+    }
+    if (contenidoCompleto.match(/hospital|clinica|salud|medico|centro medico/)) {
+        caracteristicasDetectadas.push('Salud accesible');
+    }
+    if (contenidoCompleto.match(/restaurante|cafeteria|gastronomia|comida/)) {
+        caracteristicasDetectadas.push('Gastronomia variada');
+    }
+    
+    datos.caracteristicasZona = caracteristicasDetectadas;
+    
+    // Determinar tendencia del mercado
+    if (contenidoCompleto.match(/subiendo|aumentando|alza|creciendo/)) {
+        datos.tendencia = 'subiendo';
+    } else if (contenidoCompleto.match(/bajando|disminuyendo|baja|caida/)) {
+        datos.tendencia = 'bajando';
+    } else {
+        datos.tendencia = 'estable';
+    }
+    
+    // Extraer información de conectividad
+    if (contenidoCompleto.match(/subte|metro/)) {
+        datos.conectividad = {
+            transporte: 'Subte/Metro disponible',
+            accesibilidad: 'Alta'
+        };
+    } else if (contenidoCompleto.match(/colectivo|bus/)) {
+        datos.conectividad = {
+            transporte: 'Líneas de colectivo',
+            accesibilidad: 'Media'
+        };
+    }
+    
+    // Extraer amenities mencionados
+    const amenitiesDetectados = [];
+    if (contenidoCompleto.match(/pileta|pool|natacion/)) amenitiesDetectados.push('Pileta');
+    if (contenidoCompleto.match(/gimnasio|gym|fitness/)) amenitiesDetectados.push('Gimnasio');
+    if (contenidoCompleto.match(/estacionamiento|garage|cochera/)) amenitiesDetectados.push('Estacionamiento');
+    if (contenidoCompleto.match(/seguridad|vigilancia/)) amenitiesDetectados.push('Seguridad 24h');
+    if (contenidoCompleto.match(/balcon|terraza/)) amenitiesDetectados.push('Terraza/Balcon');
+    
+    datos.amenities = amenitiesDetectados;
+    
+    console.log('📊 Datos extraídos:', {
+        precioM2: datos.precioM2Promedio,
+        caracteristicas: datos.caracteristicasZona.length,
+        tendencia: datos.tendencia,
+        fuentes: datos.fuentes.length
     });
     
     return datos;
