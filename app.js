@@ -3838,7 +3838,342 @@ window.loadRealEnvironmentInfo = loadRealEnvironmentInfo;
 window.encodeBase64 = encodeBase64;
 window.decodeBase64 = decodeBase64;
 
-console.log('✅ Sistema de información del entorno con IA cargado');// ========================================
+console.log('✅ Sistema de información del entorno con IA cargado');
+
+// ========================================
+// ANÁLISIS COMPARATIVO DE PROPIEDADES
+// ========================================
+
+// Calcular promedio del barrio
+function calcularPromedioBarrio(propiedades, barrio, tipo) {
+    const delBarrio = propiedades.filter(p => 
+        p.barrio === barrio && 
+        p.tipo === tipo &&
+        p.precio > 0 &&
+        p.metros_cuadrados > 0
+    );
+    
+    if (delBarrio.length === 0) return null;
+    
+    const precioTotal = delBarrio.reduce((sum, p) => sum + (p.precio / p.metros_cuadrados), 0);
+    const metrosTotal = delBarrio.reduce((sum, p) => sum + p.metros_cuadrados, 0);
+    
+    return {
+        count: delBarrio.length,
+        precioM2Promedio: precioTotal / delBarrio.length,
+        metrosPromedio: metrosTotal / delBarrio.length,
+        propiedades: delBarrio
+    };
+}
+
+// Identificar virtudes vs promedio
+function identificarVirtudes(property, promedio) {
+    const virtudes = [];
+    
+    if (!promedio) return virtudes;
+    
+    // Precio por m2
+    const precioM2 = property.precio / property.metros_cuadrados;
+    const diffPrecio = ((promedio.precioM2Promedio - precioM2) / promedio.precioM2Promedio) * 100;
+    
+    if (diffPrecio > 10) {
+        virtudes.push({
+            tipo: 'precio',
+            icono: '💰',
+            titulo: 'Mejor precio del área',
+            dato: `$${precioM2.toFixed(0)}/m² vs. promedio $${promedio.precioM2Promedio.toFixed(0)}/m²`,
+            emocion: `Ahorrás un ${diffPremio(diffPrecio)}% comparado con propiedades similares. Más valor por tu inversión.`
+        });
+    } else if (diffPrecio < -10) {
+        virtudes.push({
+            tipo: 'precio',
+            icono: '📈',
+            titulo: 'Inversión premium',
+            dato: `$${precioM2.toFixed(0)}/m² (${Math.abs(diffPrecio).toFixed(0)}% por encima del promedio)`,
+            emocion: `Estás pagando un poco más, pero la ubicación y características lo justifican completamente.`
+        });
+    }
+    
+    // Metros cuadrados
+    const diffMetros = ((property.metros_cuadrados - promedio.metrosPromedio) / promedio.metrosPromedio) * 100;
+    
+    if (diffMetros > 15) {
+        virtudes.push({
+            tipo: 'espacio',
+            icono: '📐',
+            titulo: 'Más espacio que el promedio',
+            dato: `${property.metros_cuadrados}m² vs. ${promedio.metrosPromedio.toFixed(0)}m² promedio`,
+            emocion: `Imaginate la libertad de tener espacio de más. Ideal para familias que buscan comodidad sin sacrificios.`
+        });
+    } else if (diffMetros < -15) {
+        virtudes.push({
+            tipo: 'espacio',
+            icono: '🏠',
+            titulo: 'Eficiencia inteligente',
+            dato: `${property.metros_cuadrados}m² (compacto pero bien distribuidos)`,
+            emocion: `Menos metros, más versatilidad. Perfecto para quienes buscan un espacio fácil de mantener y cuidar.`
+        });
+    }
+    
+    // Ambientes
+    if (property.ambientes >= 3 && promedio.count > 0) {
+        const avgAmbientes = promedio.propiedades.reduce((sum, p) => sum + (p.ambientes || 1), 0) / promedio.count;
+        if (property.ambientes > avgAmbientes) {
+            virtudes.push({
+                tipo: 'ambientes',
+                icono: '🚪',
+               titulo: 'Distribución superior',
+                dato: `${property.ambientes} ambientes vs. ${avgAmbientes.toFixed(1)} en promedio`,
+                emocion: `Más ambientes para que cada miembro de la familia tenga su propio espacio.`
+            });
+        }
+    }
+    
+    // Estado
+    if (property.estado === 'A Estrenar' || property.estado === 'Excelente') {
+        virtudes.push({
+            tipo: 'estado',
+            icono: '✨',
+            titulo: 'Estado impecable',
+            dato: property.estado,
+            emocion: `Listo para mudarte sin invertir un peso más. Olvidate de refacciones y sorpresas.`
+        });
+    }
+    
+    return virtudes;
+}
+
+function diffPremio(diff) {
+    return diff.toFixed(0);
+}
+
+// Generar texto persuasivo mixto
+function generarTextoPersuasivo(property, virtudes, promedio) {
+    const partes = [];
+    
+    // Introducción basada en virtudes principales
+    if (virtudes.length > 0) {
+        const virtudPrincipal = virtudes[0];
+        partes.push(`${virtudPrincipal.icono} ${virtudPrincipal.titulo}: ${virtudPrincipal.dato}.`);
+        partes.push(virtudPrincipal.emocion);
+    }
+    
+    // Segunda virtud si existe
+    if (virtudes.length > 1) {
+        const virtud2 = virtudes[1];
+        partes.push(`Además, ${virtud2.titulo.toLowerCase()}: ${virtud2.dato}.`);
+    }
+    
+    // Comparación con el mercado
+    if (promedio && promedio.count > 1) {
+        partes.push(`📊 De ${promedio.count} propiedades similares en ${property.barrio}, esta opción destaca por su relación precio-calidad.`);
+    }
+    
+    return partes.join(' ');
+}
+
+// Calcular puntuación de ajuste
+function calcularPuntuacion(property, virtudes) {
+    let score = 5; // Base
+    
+    // Bonificaciones
+    if (virtudes.some(v => v.tipo === 'precio')) score += 1.5;
+    if (virtudes.some(v => v.tipo === 'espacio')) score += 1.5;
+    if (virtudes.some(v => v.tipo === 'estado')) score += 1;
+    if (virtudes.some(v => v.tipo === 'ambientes')) score += 1;
+    
+    // Cap a 10
+    return Math.min(score, 10);
+}
+
+// Mostrar análisis comparativo en modal
+function mostrarAnalisisComparativo() {
+    if (!window.currentProperty) {
+        alert('Selecciona una propiedad primero');
+        return;
+    }
+    
+    const property = globalData.properties.find(p => 
+        p.direccion === window.currentProperty.direccion && 
+        p.barrio === window.currentProperty.barrio
+    );
+    
+    if (!property) {
+        alert('No se encontró la propiedad');
+        return;
+    }
+    
+    // Calcular análisis
+    const promedio = calcularPromedioBarrio(globalData.properties, property.barrio, property.tipo);
+    const virtudes = identificarVirtudes(property, promedio);
+    const textoPersuasivo = generarTextoPersuasivo(property, virtudes, promedio);
+    const score = calcularPuntuacion(property, virtudes);
+    
+    // Crear modal
+    const modal = document.createElement('div');
+    modal.id = 'analisis-comparativo-modal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        z-index: 1001;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    `;
+    
+    const virtudesHTML = virtudes.length > 0 ? virtudes.map(v => `
+        <div style="
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid #10b981;
+        ">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <span style="font-size: 24px;">${v.icono}</span>
+                <span style="font-weight: 600; color: #495057; font-size: 15px;">${v.titulo}</span>
+            </div>
+            <div style="font-size: 13px; color: #6c757d; margin-bottom: 6px;">${v.dato}</div>
+            <div style="font-size: 13px; color: #10b981; font-style: italic;">${v.emocion}</div>
+        </div>
+    `).join('') : `
+        <div style="
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        ">
+            <span style="font-size: 40px;">🏠</span>
+            <p style="margin: 10px 0 0 0; color: #6c757d;">
+                Esta propiedad tiene características sólidas en una ubicación privilegiada.
+            </p>
+        </div>
+    `;
+    
+    modal.innerHTML = `
+        <div style="
+            background: white;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        ">
+            <!-- Header -->
+            <div style="
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                padding: 20px;
+                color: white;
+                position: sticky;
+                top: 0;
+            ">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <h3 style="margin: 0 0 8px 0; font-size: 18px;">
+                            ⭐ Por qué esta propiedad destaca
+                        </h3>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="
+                                background: rgba(255,255,255,0.2);
+                                padding: 4px 12px;
+                                border-radius: 20px;
+                                font-size: 14px;
+                                font-weight: 600;
+                            ">
+                                Score: ${score.toFixed(1)}/10
+                            </span>
+                        </div>
+                    </div>
+                    <button onclick="cerrarAnalisisComparativo()" style="
+                        background: rgba(255,255,255,0.2);
+                        border: none;
+                        color: white;
+                        font-size: 24px;
+                        cursor: pointer;
+                        padding: 4px 10px;
+                        border-radius: 6px;
+                    ">×</button>
+                </div>
+            </div>
+            
+            <!-- Contenido -->
+            <div style="padding: 20px;">
+                <!-- Virtudes -->
+                ${virtudesHTML}
+                
+                <!-- Texto persuasivo -->
+                <div style="
+                    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+                    border-radius: 12px;
+                    padding: 16px;
+                    margin-top: 16px;
+                    border: 1px solid #86efac;
+                ">
+                    <p style="
+                        margin: 0;
+                        font-size: 14px;
+                        line-height: 1.6;
+                        color: #166534;
+                        font-family: Georgia, serif;
+                    ">${textoPersuasivo}</p>
+                </div>
+                
+                <!-- Footer con comparacion -->
+                ${promedio ? `
+                <div style="
+                    margin-top: 16px;
+                    padding: 12px;
+                    background: #f8fafc;
+                    border-radius: 8px;
+                    font-size: 12px;
+                    color: #64748b;
+                    text-align: center;
+                ">
+                    📊 Comparado con ${promedio.count} propiedades similares en ${property.barrio}
+                </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+    
+    // Cerrar al hacer clic fuera
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            cerrarAnalisisComparativo();
+        }
+    });
+    
+    // Cerrar con ESC
+    document.addEventListener('keydown', function escHandler(e) {
+        if (e.key === 'Escape') {
+            cerrarAnalisisComparativo();
+            document.removeEventListener('keydown', escHandler);
+        }
+    });
+}
+
+function cerrarAnalisisComparativo() {
+    const modal = document.getElementById('analisis-comparativo-modal');
+    if (modal) {
+        modal.remove();
+        document.body.style.overflow = '';
+    }
+}
+
+// Exportar funciones
+window.mostrarAnalisisComparativo = mostrarAnalisisComparativo;
+window.cerrarAnalisisComparativo = cerrarAnalisisComparativo;
+
+console.log('✅ Sistema de análisis comparativo cargado');// ========================================
 // PANEL DESLIZABLE - VERSIÓN CON ENTORNO IA
 // ========================================
 
@@ -4093,6 +4428,30 @@ function createPropertyPanel(id, titulo, precio, moneda, direccion, barrio, ambi
                             onmouseout="this.style.background='white'; this.style.borderColor='#e9ecef'">
                         <span style="font-size: 18px;">🗺️</span>
                         Ver en Mapa (Disponible en sección principal)
+                    </button>
+                    
+                    <!-- Analisis Comparativo - NUEVO -->
+                    <button onclick="mostrarAnalisisComparativo()" 
+                            style="
+                                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                                border: none;
+                                padding: 12px 16px;
+                                border-radius: 8px;
+                                text-align: left;
+                                cursor: pointer;
+                                display: flex;
+                                align-items: center;
+                                gap: 10px;
+                                transition: all 0.3s ease;
+                                font-size: 14px;
+                                color: white;
+                                font-weight: 500;
+                                box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+                            "
+                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)'" 
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(16, 185, 129, 0.3)'">
+                        <span style="font-size: 18px;">📊</span>
+                        Análisis Comparativo con IA
                     </button>
                 </div>
             </div>
