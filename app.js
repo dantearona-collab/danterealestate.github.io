@@ -1417,7 +1417,8 @@ function showPropertyDetails(propertyId) {
                 property.ambientes, 
                 property.metros_cuadrados, 
                 property.estado, 
-                property.tipo
+                property.tipo,
+                property.descripcion
             );
         } catch (error) {
             console.warn('⚠️ Panel completo falló, usando panel simple:', error);
@@ -1432,7 +1433,8 @@ function showPropertyDetails(propertyId) {
                 property.ambientes, 
                 property.metros_cuadrados, 
                 property.estado, 
-                property.tipo
+                property.tipo,
+                property.descripcion
             );
         }
     }
@@ -2915,9 +2917,15 @@ async function loadEnvironmentInfo(direccion, barrio) {
     
     // USAR UBICACIÓN EXACTA DE GOOGLE MAPS SI ESTÁ DISPONIBLE
     let ubicacionExacta = null;
+    let descripcion = '';
     if (window.currentProperty && window.currentProperty.googleLocation) {
         ubicacionExacta = window.currentProperty.googleLocation;
         console.log('🗺️ Ubicación exacta de Google Maps:', ubicacionExacta);
+    }
+    // Obtener descripción de la propiedad
+    if (window.currentProperty && window.currentProperty.descripcion) {
+        descripcion = window.currentProperty.descripcion;
+        console.log('📝 Descripción de la propiedad:', descripcion);
     }
     
     try {
@@ -2948,7 +2956,7 @@ async function loadEnvironmentInfo(direccion, barrio) {
         console.log('✅ Resultados de IA recibidos:', Object.keys(searchResults));
         
         // Procesar y estructurar la información
-        const environmentData = processEnvironmentData(searchResults, direccion, barrio, ubicacionParaBusqueda);
+        const environmentData = processEnvironmentData(searchResults, direccion, barrio, ubicacionParaBusqueda, descripcion);
         
         console.log('🎯 Datos procesados con IA:', environmentData.aiGenerated);
         console.log('📊 Categorías generadas:', Object.keys(environmentData.categories));
@@ -3311,7 +3319,7 @@ function testAIEnvironment() {
 }
 
 // Procesar y estructurar datos del entorno (USANDO UBICACIÓN REAL)
-function processEnvironmentData(searchResults, direccion, barrio, ubicacionReal = null) {
+function processEnvironmentData(searchResults, direccion, barrio, ubicacionReal = null, descripcion = '') {
     console.log('🔧 PROCESANDO DATOS REALES DE IA:', searchResults);
     console.log('📍 Ubicación real:', ubicacionReal);
     console.log('🏢 Barrio del JSON:', barrio);
@@ -3478,6 +3486,7 @@ function processEnvironmentData(searchResults, direccion, barrio, ubicacionReal 
         barrio: barrio,
         direccion: direccion,
         ubicacionReal: ubicacionReal,
+        descripcion: descripcion,
         categories: categories,
         lastUpdated: new Date().toLocaleDateString('es-AR'),
         aiGenerated: true, // Flag para indicar que se usó IA real
@@ -3493,7 +3502,39 @@ function showEnvironmentLoading() {
     const content = panel.querySelector('.environment-section') || 
                    createEnvironmentSection(panel);
     
+    // Obtener descripción del propiedad actual
+    const descripcion = window.currentProperty?.descripcion || '';
+    
     content.innerHTML = `
+        <!-- Header con botón cerrar y descripción -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #e9ecef;">
+            <div style="flex: 1;">
+                <h4 style="margin: 0 0 8px 0; font-size: 16px; color: #495057; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                    🌍 Entorno del Barrio
+                </h4>
+                ${descripcion ? `
+                <div style="font-size: 13px; color: #6c757d; line-height: 1.5; font-style: italic; background: #f8f9fa; padding: 10px; border-radius: 6px; border-left: 3px solid #232deb;">
+                    "${descripcion}"
+                </div>
+                ` : ''}
+            </div>
+            <button onclick="closePropertyPanel()" 
+                    style="
+                        background: rgba(255,255,255,0.9);
+                        border: 1px solid #e9ecef;
+                        color: #495057;
+                        font-size: 20px;
+                        cursor: pointer;
+                        padding: 6px 10px;
+                        border-radius: 6px;
+                        margin-left: 10px;
+                        transition: all 0.2s ease;
+                    "
+                    onmouseover="this.style.background='#232deb'; this.style.color='white'; this.style.borderColor='#232deb'" 
+                    onmouseout="this.style.background='rgba(255,255,255,0.9)'; this.style.color='#495057'; this.style.borderColor='#e9ecef'">
+                ×
+            </button>
+        </div>
         <div style="padding: 20px; text-align: center;">
             <div style="margin-bottom: 15px;">
                 <div style="display: inline-block; width: 40px; height: 40px; border: 3px solid #f3f3f3; border-top: 3px solid #232deb; border-radius: 50%; animation: spin 1s linear infinite;"></div>
@@ -3532,10 +3573,36 @@ function displayEnvironmentInfo(data) {
                    createEnvironmentSection(panel);
     
     section.innerHTML = `
-        <h4 style="margin: 0 0 12px 0; font-size: 16px; color: #495057; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-            🌍 Entorno del Barrio
-            <small style="font-size: 12px; color: #6c757d; font-weight: normal;">(${data.lastUpdated})</small>
-        </h4>
+        <!-- Header con botón cerrar y descripción -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #e9ecef;">
+            <div style="flex: 1;">
+                <h4 style="margin: 0 0 8px 0; font-size: 16px; color: #495057; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                    🌍 Entorno del Barrio
+                    <small style="font-size: 12px; color: #6c757d; font-weight: normal;">(${data.lastUpdated})</small>
+                </h4>
+                ${data.descripcion ? `
+                <div style="font-size: 13px; color: #6c757d; line-height: 1.5; font-style: italic; background: #f8f9fa; padding: 10px; border-radius: 6px; border-left: 3px solid #232deb;">
+                    "${data.descripcion}"
+                </div>
+                ` : ''}
+            </div>
+            <button onclick="closePropertyPanel()" 
+                    style="
+                        background: rgba(255,255,255,0.9);
+                        border: 1px solid #e9ecef;
+                        color: #495057;
+                        font-size: 20px;
+                        cursor: pointer;
+                        padding: 6px 10px;
+                        border-radius: 6px;
+                        margin-left: 10px;
+                        transition: all 0.2s ease;
+                    "
+                    onmouseover="this.style.background='#232deb'; this.style.color='white'; this.style.borderColor='#232deb'" 
+                    onmouseout="this.style.background='rgba(255,255,255,0.9)'; this.style.color='#495057'; this.style.borderColor='#e9ecef'">
+                ×
+            </button>
+        </div>
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
             ${Object.values(data.categories).map(category => `
                 <div style="
@@ -3583,7 +3650,39 @@ function showEnvironmentError(message) {
     const section = panel.querySelector('.environment-section') || 
                    createEnvironmentSection(panel);
     
+    // Obtener descripción del propiedad actual
+    const descripcion = window.currentProperty?.descripcion || '';
+    
     section.innerHTML = `
+        <!-- Header con botón cerrar y descripción -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #e9ecef;">
+            <div style="flex: 1;">
+                <h4 style="margin: 0 0 8px 0; font-size: 16px; color: #495057; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                    🌍 Entorno del Barrio
+                </h4>
+                ${descripcion ? `
+                <div style="font-size: 13px; color: #6c757d; line-height: 1.5; font-style: italic; background: #f8f9fa; padding: 10px; border-radius: 6px; border-left: 3px solid #232deb;">
+                    "${descripcion}"
+                </div>
+                ` : ''}
+            </div>
+            <button onclick="closePropertyPanel()" 
+                    style="
+                        background: rgba(255,255,255,0.9);
+                        border: 1px solid #e9ecef;
+                        color: #495057;
+                        font-size: 20px;
+                        cursor: pointer;
+                        padding: 6px 10px;
+                        border-radius: 6px;
+                        margin-left: 10px;
+                        transition: all 0.2s ease;
+                    "
+                    onmouseover="this.style.background='#232deb'; this.style.color='white'; this.style.borderColor='#232deb'" 
+                    onmouseout="this.style.background='rgba(255,255,255,0.9)'; this.style.color='#495057'; this.style.borderColor='#e9ecef'">
+                ×
+            </button>
+        </div>
         <div style="padding: 20px; text-align: center; color: #dc3545;">
             <div style="font-size: 32px; margin-bottom: 10px;">⚠️</div>
             <p style="margin: 0; font-size: 14px;">${message}</p>
@@ -3672,7 +3771,7 @@ console.log('✅ Sistema de información del entorno con IA cargado');// =======
 // PANEL DESLIZABLE - VERSIÓN CON ENTORNO IA
 // ========================================
 
-function createPropertyPanel(id, titulo, precio, moneda, direccion, barrio, ambientes, metros, estado, tipo) {
+function createPropertyPanel(id, titulo, precio, moneda, direccion, barrio, ambientes, metros, estado, tipo, descripcion = '') {
     console.log('🏠 Creando panel con entorno IA para:', titulo);
     
     // Crear overlay
@@ -4018,7 +4117,7 @@ console.log('✅ Panel deslizable con entorno IA cargado');// ==================
 // ========================================
 
 // Versión simplificada por si la principal falla
-function createPropertyPanelSimple(id, titulo, precio, moneda, direccion, barrio, ambientes, metros, estado, tipo) {
+function createPropertyPanelSimple(id, titulo, precio, moneda, direccion, barrio, ambientes, metros, estado, tipo, descripcion = '') {
     console.log('🏠 Creando panel simple para:', titulo);
     
     // Cerrar panel anterior si existe
