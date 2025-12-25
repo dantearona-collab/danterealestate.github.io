@@ -3786,10 +3786,57 @@ async function loadRealEnvironmentInfo(direccion, barrio) {
     };
 }
 
+// ========================================
+// UTILIDADES DE CODIFICACIÓN BASE64 PARA DESCRIPCIONES
+// ========================================
+
+// Codificar texto a Base64 (maneja Unicode correctamente)
+function encodeBase64(text) {
+    if (!text) return '';
+    try {
+        return btoa(encodeURIComponent(text).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+            return String.fromCharCode('0x' + p1);
+        }));
+    } catch (e) {
+        console.warn('Error codificando Base64:', e);
+        return '';
+    }
+}
+
+// Decodificar Base64 a texto (maneja Unicode correctamente)
+function decodeBase64(encoded) {
+    if (!encoded) return '';
+    try {
+        return decodeURIComponent(Array.prototype.map.call(atob(encoded), function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+    } catch (e) {
+        console.warn('Error decodificando Base64:', e);
+        return '';
+    }
+}
+
+// ========================================
+// ACTUALIZAR currentProperty CON DESCRIPCIÓN CODIFICADA
+// ========================================
+
+// Modificar loadEnvironmentInfo para decodificar la descripción
+const originalLoadEnvironmentInfo = loadEnvironmentInfo;
+loadEnvironmentInfo = function(direccion, barrio) {
+    // Decodificar la descripción si está codificada en Base64
+    if (window.currentProperty && window.currentProperty.descripcionEncoded) {
+        window.currentProperty.descripcion = decodeBase64(window.currentProperty.descripcionEncoded);
+    }
+    // Continuar con la función original
+    return originalLoadEnvironmentInfo ? originalLoadEnvironmentInfo(direccion, barrio) : undefined;
+};
+
 // Exportar funciones para uso global
 window.loadEnvironmentInfo = loadEnvironmentInfo;
 window.loadNearbyPlaces = loadNearbyPlaces;
 window.loadRealEnvironmentInfo = loadRealEnvironmentInfo;
+window.encodeBase64 = encodeBase64;
+window.decodeBase64 = decodeBase64;
 
 console.log('✅ Sistema de información del entorno con IA cargado');// ========================================
 // PANEL DESLIZABLE - VERSIÓN CON ENTORNO IA
@@ -3894,7 +3941,7 @@ function createPropertyPanel(id, titulo, precio, moneda, direccion, barrio, ambi
                     ${barrio}, Argentina
                 </div>
                 <!-- Botón para cargar entorno -->
-                <button onclick="window.currentProperty = {direccion: '${direccion}', barrio: '${barrio}'}; loadEnvironmentInfo('${direccion}', '${barrio}')"
+                <button onclick="window.currentProperty = {direccion: '${direccion}', barrio: '${barrio}', descripcionEncoded: '${encodeBase64(descripcion)}'}; loadEnvironmentInfo('${direccion}', '${barrio}')"
                         style="
                             margin-top: 10px;
                             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
@@ -3952,7 +3999,7 @@ function createPropertyPanel(id, titulo, precio, moneda, direccion, barrio, ambi
                     <p style="margin: 0; font-size: 13px; color: #6c757d; line-height: 1.4;">
                         Descubre servicios, transporte, educación y más en el entorno de esta propiedad usando información actualizada.
                     </p>
-                    <button onclick="window.currentProperty = {direccion: '${direccion}', barrio: '${barrio}'}; loadEnvironmentInfo('${direccion}', '${barrio}')"
+                    <button onclick="window.currentProperty = {direccion: '${direccion}', barrio: '${barrio}', descripcionEncoded: '${encodeBase64(descripcion)}'}; loadEnvironmentInfo('${direccion}', '${barrio}')"
                             style="
                                 margin-top: 12px;
                                 background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
@@ -4230,7 +4277,7 @@ function createPropertyPanelSimple(id, titulo, precio, moneda, direccion, barrio
                 <div style="font-size: 32px; margin-bottom: 10px;">🌍</div>
                 <h4 style="margin: 0 0 10px 0; font-size: 16px; color: #495057;">¿Qué hay cerca?</h4>
                 <p style="margin: 0; font-size: 13px; color: #6c757d; margin-bottom: 10px;">Descubre servicios, transporte y más en el entorno.</p>
-                <button onclick="loadEnvironmentInfo('${direccion}', '${barrio}')" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none; padding: 10px 15px; border-radius: 6px; font-size: 13px; cursor: pointer;">
+                <button onclick="window.currentProperty = {direccion: '${direccion}', barrio: '${barrio}', descripcionEncoded: '${encodeBase64(descripcion)}'}; loadEnvironmentInfo('${direccion}', '${barrio}')" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none; padding: 10px 15px; border-radius: 6px; font-size: 13px; cursor: pointer;">
                     🌍 Analizar Entorno con IA
                 </button>
             </div>
