@@ -857,6 +857,76 @@
         let contextoActual = { tipo: null, resultados: [], propiedad_focus: null, filtros_usados: {}, timestamp: null };
 
         // ========================================
+        // DATOS ESPECÍFICOS POR UBICACIÓN (NUEVA FUNCIONALIDAD)
+        // ========================================
+        const datosEspecificosPorBarrio = {
+            'Pilar': {
+                descripcion_entorno: "Zona en desarrollo con excelente conectividad por Autopista Acceso Norte. Próximo a centros comerciales como Las Palmas del Pilar y Hospital Universitario Austral.",
+                ventajas_transporte: "Acceso directo a Autopista Acceso Norte Ramal Pilar, líneas de colectivo 57 y 510",
+                servicios_cercanos: "Las Palmas del Pilar (con Jumbo), Hospital Austral, colegios privados San Patricio",
+                perfil_residente: "Ideal para familias que buscan tranquilidad con acceso a servicios urbanos completos"
+            },
+            'Microcentro': {
+                descripcion_entorno: "Corazón financiero y comercial de Buenos Aires. Máxima conectividad con subte, shops y servicios urbanos.",
+                ventajas_transporte: "Conexión directa con líneas de subte A, B, C, D, E. Colectivos 105, 39, 59",
+                servicios_cercanos: "Galerías Pacífico, Florida Street, Hospital Italiano, Banco Nación",
+                perfil_residente: "Perfecto para profesionales que valoran la proximidad al centro de negocios"
+            },
+            'Boedo': {
+                descripcion_entorno: "Barrio residencial consolidado con excelente conectividad y comercio de barrio desarrollado.",
+                ventajas_transporte: "31 líneas de colectivos, conexión con subte A, B, D, E, H",
+                servicios_cercanos: "Hospital Durand, supermercados Disco y Vea, centros comerciales cercanos",
+                perfil_residente: "Ideal para familias que buscan la comodidad del barrio tradicional porteño"
+            },
+            'Parque Avellaneda': {
+                descripcion_entorno: "Zona en crecimiento con acceso al Parque Avellaneda y buena conectividad hacia el centro.",
+                ventajas_transporte: "Colectivos 114, 126, 180, 4, 55, 86, 50, 7. Tren SARMIENTO cercano",
+                servicios_cercanos: "CeSAC Nº 13, nuevos centros de salud, parques y espacios verdes",
+                perfil_residente: "Excelente para quienes valoran espacios verdes y tranquilidad familiar"
+            },
+            'default': {
+                descripcion_entorno: "Zona con servicios urbanos y conectividad desarrollada.",
+                ventajas_transporte: "Líneas de transporte público desarrolladas y acceso a autopistas principales",
+                servicios_cercanos: "Comercio local, servicios de salud, centros comerciales cercanos",
+                perfil_residente: "Zona consolidada ideal para familias y profesionales"
+            }
+        };
+
+        function generarContextoEntorno(barrio, direccion) {
+            // Buscar datos específicos del barrio o usar default
+            const barrioKey = Object.keys(datosEspecificosPorBarrio).find(key => 
+                barrio.toLowerCase().includes(key.toLowerCase()) || 
+                (direccion && direccion.toLowerCase().includes(key.toLowerCase()))
+            );
+            
+            return datosEspecificosPorBarrio[barrioKey || 'default'];
+        }
+
+        function enriquecerRespuestaConUbicacion(respuesta, propiedades) {
+            if (!propiedades || propiedades.length === 0) return respuesta;
+            
+            // Analizar barrios únicos en los resultados
+            const barriosUnicos = [...new Set(propiedades.map(p => p.barrio))];
+            
+            let enriquecimiento = "";
+            if (barriosUnicos.length === 1) {
+                const contexto = generarContextoEntorno(barriosUnicos[0]);
+                enriquecimiento = `\n\n🌟 **Sobre ${barriosUnicos[0]}:**\n`;
+                enriquecimiento += `• ${contexto.descripcion_entorno}\n`;
+                enriquecimiento += `• ${contexto.ventajas_transporte}\n`;
+                enriquecimiento += `• ${contexto.servicios_cercanos}`;
+            } else if (barriosUnicos.length > 1) {
+                enriquecimiento = `\n\n📍 **Ubicaciones encontradas:**`;
+                barriosUnicos.forEach(barrio => {
+                    const contexto = generarContextoEntorno(barrio);
+                    enriquecimiento += `\n• **${barrio}:** ${contexto.descripcion_entorno}`;
+                });
+            }
+            
+            return respuesta + enriquecimiento;
+        }
+
+        // ========================================
         // LÓGICA DEL MODAL DE IMÁGENES (CORREGIDA)
         // ========================================
         function mostrarImagenesByIndex(index) {
@@ -1093,11 +1163,18 @@
             };
         }
 
-        function addMessage(text, from = "bot") {
+        function addMessage(text, from = "bot", propiedades = []) {
             if (!chatBox) return;
+            
+            // Enriquecer respuesta con datos específicos de ubicación si hay propiedades
+            let enrichedText = text;
+            if (from === 'bot' && propiedades && propiedades.length > 0) {
+                enrichedText = enriquecerRespuestaConUbicacion(text, propiedades);
+            }
+            
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${from === 'user' ? 'msg-user' : 'msg-bot'}`;
-            messageDiv.innerHTML = from === 'bot' ? `<b>ASISTENTE VIRTUAL</b><br>${text.replace(/\n/g, '<br>')}` : text;
+            messageDiv.innerHTML = from === 'bot' ? `<b>ASISTENTE VIRTUAL</b><br>${enrichedText.replace(/\n/g, '<br>')}` : text;
             chatBox.appendChild(messageDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
@@ -1141,6 +1218,7 @@
 
             propiedades.forEach((prop, index) => {
                 const emoji = propertyEmojis[prop.tipo?.toLowerCase()] || '🏠';
+                const contextoEspecifico = generarContextoEntorno(prop.barrio, prop.direccion);
                 const card = document.createElement('div');
                 card.className = 'propiedad-card';
 
@@ -1155,6 +1233,17 @@
                 <span>📏 ${prop.metros_cuadrados} m²</span>
                 <span>📋 ${prop.operacion}</span>
             </div>
+            
+            <!-- NUEVO: Contexto específico del entorno -->
+            <div class="contexto-entorno" style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #232deb;">
+                <h5 style="margin: 0 0 8px 0; color: #232deb; font-size: 14px;">🌟 Ventajas de la ubicación:</h5>
+                <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #555;">
+                    ${contextoEspecifico.ventajas_transporte ? `<li style="margin-bottom: 4px;">🚇 ${contextoEspecifico.ventajas_transporte}</li>` : ''}
+                    ${contextoEspecifico.servicios_cercanos ? `<li style="margin-bottom: 4px;">🏪 ${contextoEspecifico.servicios_cercanos}</li>` : ''}
+                    ${contextoEspecifico.perfil_residente ? `<li style="margin-bottom: 4px;">👥 ${contextoEspecifico.perfil_residente}</li>` : ''}
+                </ul>
+            </div>
+            
             ${prop.descripcion ? `
                 <div class="descripcion">
                     💬 ${prop.descripcion.substring(0, 120)}...
@@ -1248,7 +1337,7 @@
                 const data = await response.json();
 
                 if (data.response) {
-                    addMessage(data.response);
+                    addMessage(data.response, 'bot', data.propiedades);
                     if (data.propiedades && data.propiedades.length > 0) {
                         // Primero se actualiza el contexto
                         actualizarContexto(data.propiedades, filtrosSeleccionados, 'busqueda');
