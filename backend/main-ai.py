@@ -69,11 +69,16 @@ app = FastAPI(
 
 # Definir los orígenes permitidos para CORS
 origins = [
-    "https://artarona.github.io",
+    # Orígenes de desarrollo
     "http://localhost",
     "http://localhost:8000",
     "http://127.0.0.1",
     "http://127.0.0.1:8000",
+    # Orígenes de producción
+    "https://artarona.github.io",
+    "https://dantepropiedades.com.ar",
+    "https://www.dantepropiedades.com.ar",
+    "https://pagina-web-g82d.onrender.com",
 ]
 
 app.add_middleware(
@@ -299,6 +304,18 @@ def get_all_filters():
         "operaciones": OPERACIONES,
         "tipos": TIPOS,
         "barrios": BARRIOS
+    }
+
+@app.get("/properties/filter-options")
+def get_filter_options():
+    """Endpoint para obtener opciones de filtros (alias de /filters para compatibilidad)."""
+    return {
+        "operaciones": OPERACIONES,
+        "tipos": TIPOS,
+        "barrios": BARRIOS,
+        "estado": ["A Estrenar", "Excelente", "Muy Bueno", "Bueno", "Regular"],
+        "orientacion": ["Norte", "Sur", "Este", "Oeste", "Noreste", "Noroeste", "Sureste", "Suroeste"],
+        "moneda": ["USD", "ARS"]
     }
 
 @app.get("/properties", response_model=List[PropertyResponse])
