@@ -30,6 +30,15 @@ from logic.filters import detect_filters
 from logic.gemini_client import call_gemini_with_rotation, build_prompt
 from logic.filter_data import BARRIOS, OPERACIONES, TIPOS
 
+# Importar módulo de scraping de mercado
+try:
+    from logic.scraper import ScrapingManager, MarketAnalyzer
+    SCRAPER_AVAILABLE = True
+    print("✅ Módulo de scraping disponible")
+except ImportError as e:
+    SCRAPER_AVAILABLE = False
+    print(f"⚠️ Módulo de scraping no disponible: {e}")
+
 # ✅ INICIALIZACIÓN Y CONFIGURACIÓN
 verificar_y_reparar_bd()
 CACHE_DURATION = 300  # 5 minutos para cache
@@ -744,6 +753,170 @@ def property_comparison(request: PropertyComparisonRequest):
         }
     else:
         raise HTTPException(status_code=500, detail=resultado.get('error', 'Error en comparación'))
+
+
+# ========================================
+# ENDPOINTS DE SCRAPING DE MERCADO
+# ========================================
+
+@app.get("/market/scraping")
+def scrape_market_data(
+    zone: str = Query(..., description="Barrio o zona a analizar (ej: palermo, microcentro)"),
+    operation: str = Query("venta", description="Tipo de operación: venta o alquiler"),
+    property_type: str = Query("departamento", description="Tipo de propiedad")
+):
+    """
+    Obtiene datos del mercado inmobiliario mediante scraping de portales (Zonaprop, Argenprop)
+    
+    Uso:
+    - GET /market/scraping?zone=palermo
+    - GET /market/scraping?zone=belgrano&operation=venta&property_type=casa
+    
+    Este endpoint extrae propiedades reales de portales inmobiliarios argentinos
+    y calcula estadísticas del mercado.
+    """
+    if not SCRAPER_AVAILABLE:
+        raise HTTPException(
+            status_code=503, 
+            detail="Módulo de scraping no disponible. Verificar instalación de dependencias."
+        )
+    
+    print(f"📊 Solicitud de scraping: zone={zone}, op={operation}, type={property_type}")
+    
+    try:
+        scraping_manager = ScrapingManager()
+        result = scraping_manager.scrape_market(zone, operation, property_type)
+        
+        if result.get('sample_size', 0) == 0:
+            return {
+                "success": False,
+                "message": "No se pudieron obtener datos del mercado",
+                "zone": zone,
+                "errors": result.get('errors', [])
+            }
+        
+        return {
+            "success": True,
+            "message": f"Analizadas {result['sample_size']} propiedades de {result.get('source_breakdown', {})}",
+            "zone": zone,
+            "data": result
+        }
+        
+    except Exception as e:
+        print(f"❌ Error en scraping: {e}")
+        raise HTTPException(status_code=500, detail=f"Error en scraping: {str(e)}")
+
+
+@app.get("/market/stats/{zone}")
+def get_market_stats(
+    zone: str,
+    operation: str = "venta",
+    property_type: str = "departamento"
+):
+    """
+    Obtiene estadísticas resumidas del mercado para una zona
+    
+    Uso:
+    - GET /market/stats/palermo
+    - GET /market/stats/belgrano?operation=alquiler&property_type=casa
+    """
+    if not SCRAPER_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Módulo de scraping no disponible")
+    
+    try:
+        scraping_manager = ScrapingManager()
+        result = scraping_manager.scrape_market(zone, operation, property_type)
+        
+        # Resumen condensado
+        return {
+            "zone": zone,
+            "sample_size": result['sample_size'],
+            "statistics": {
+                "average_price_m2": result['statistics']['average_price_per_m2'],
+                "median_price_m2": result['statistics']['median_price_per_m2'],
+                "min_price_m2": result['statistics']['min_price_per_m2'],
+                "max_price_m2": result['statistics']['max_price_per_m2'],
+                "price_range_total": result['statistics']['price_range_total']
+            },
+            "sources": result['source_breakdown'],
+            "currencies": result['currency_distribution'],
+            "analysis_timestamp": result.get('analysis_timestamp', '')
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/market/comparative/{zone}")
+def get_comparative_analysis(zone: str):
+    """
+    Obtiene análisis comparativo completo del mercado para una zona
+    
+    Combina scraping de portales con análisis de IA
+    """
+    if not SCRAPER_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Módulo de scraping no disponible")
+    
+    try:
+        scraping_manager = ScrapingManager()
+        result = scraping_manager.scrape_market(zone, "venta", "departamento")
+        
+        if result.get('sample_size', 0) == 0:
+            return {
+                "success": False,
+                "message": "No hay datos disponibles para esta zona"
+            }
+        
+        # Generar análisis con IA si hay suficientes datos
+        analysis = {}
+        if result['sample_size'] >= 5:
+            try:
+                # Preparar datos para IA
+                market_summary = f\"\"\"
+                Zona: {zone}
+                Muestra: {result['sample_size']} propiedades
+                Precio m² promedio: {result['statistics']['average_price_per_m2']}
+                Precio m² mediana: {result['statistics']['median_price_per_m2']}
+                Rango de precios: {result['statistics']['price_range_total']}
+                Fuentes: {result['source_breakdown']}
+                \"\"\"
+                
+                prompt = f\"\"\"
+                Eres un analista inmobiliario argentino. Genera un breve análisis del mercado basado en estos datos:
+
+                {market_summary}
+
+                Tu análisis debe incluir:
+                1. Breve resumen de la situación del mercado
+                2. Una observación sobre el precio por m²
+                3. Recomendación general para compradores
+
+                Responde en formato JSON con keys: summary, price_obs, recommendation
+                \"\"\"
+                
+                ai_response = call_gemini_with_rotation(prompt)
+                
+                # Intentar parsear respuesta
+                try:
+                    import re
+                    json_match = re.search(r'\{.*\}', ai_response, re.DOTALL)
+                    if json_match:
+                        analysis = json.loads(json_match.group())
+                except:
+                    analysis = {"raw_analysis": ai_response[:500]}
+                    
+            except Exception as ai_error:
+                print(f\"⚠️ Error generando análisis IA: {ai_error}\")
+        
+        return {
+            "success": True,
+            "zone": zone,
+            "market_data": result,
+            "ai_analysis": analysis
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ✅ INICIO
