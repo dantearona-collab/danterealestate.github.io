@@ -89,8 +89,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Servir archivos estáticos de la carpeta 'imgs'
-app.mount("/imgs", StaticFiles(directory="imgs"), name="images")
+# Servir archivos estáticos de la carpeta 'imgs' (solo si existe)
+import os as _os
+if _os.path.exists("imgs"):
+    app.mount("/imgs", StaticFiles(directory="imgs"), name="images")
 
 # ✅ CACHE
 query_cache = {}
