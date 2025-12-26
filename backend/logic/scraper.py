@@ -114,51 +114,88 @@ class BaseScraper(ABC):
         if "USD" in price_text or "U$S" in price_text or "DÓLARES" in price_text:
             currency = "USD"
         
-        # Extraer todos los números del texto
+        # Extraer todos los grupos de dígitos
         all_numbers = re.findall(r'\d+', price_text)
         
         if not all_numbers:
             return 0.0, currency
         
-        # Para precios inmobiliarios, los valores típicos son:
-        # USD: 10,000 - 10,000,000 (10 mil a 10 millones)
-        # ARS: 1,000,000 - 5,000,000,000 (1 millón a 5 mil millones)
+        # Unir todos los grupos para buscar dentro del número completo
+        full_number_str = ''.join(all_numbers)
         
-        # Encontrar el número más razonable
-        valid_prices = []
-        for num_str in all_numbers:
+        # Rango de precios inmobiliarios realistas
+        if currency == "USD":
+            # USD: 30,000 - 1,000,000 (5-7 dígitos)
+            min_price = 30_000
+            max_price = 1_000_000
+        else:
+            # ARS: 1,000,000 - 10,000,000,000 (7-11 dígitos)
+            min_price = 1_000_000
+            max_price = 10_000_000_000
+        
+        # Estrategia de búsqueda por ventana deslizante
+        # Buscar un substring de 5-7 dígitos (USD) o 7-11 dígitos (ARS) que sea precio válido
+        
+        best_candidate = None
+        
+        if currency == "USD":
+            # Para USD, buscar en ventanas de 6 dígitos
+            window_size = 6
+            for i in range(len(full_number_str) - window_size + 1):
+                window = full_number_str[i:i+window_size]
+                try:
+                    value = int(window)
+                    if min_price <= value <= max_price:
+                        # Encontramos un precio válido, verificar que sea razonable
+                        # Los precios no deben empezar con 0
+                        if not window.startswith('0'):
+                            best_candidate = value
+                            break
+                except ValueError:
+                    continue
+            
+            # Si no encontramos con ventana de 6, probar con 5 o 7
+            if not best_candidate:
+                for size in [5, 7]:
+                    for i in range(len(full_number_str) - size + 1):
+                        window = full_number_str[i:i+size]
+                        try:
+                            value = int(window)
+                            if min_price <= value <= max_price:
+                                if not window.startswith('0'):
+                                    best_candidate = value
+                                    break
+                        except ValueError:
+                            continue
+                    if best_candidate:
+                        break
+        else:
+            # Para ARS, usar ventana de 8 dígitos
+            window_size = 8
+            for i in range(len(full_number_str) - window_size + 1):
+                window = full_number_str[i:i+window_size]
+                try:
+                    value = int(window)
+                    if min_price <= value <= max_price:
+                        if not window.startswith('0'):
+                            best_candidate = value
+                            break
+                except ValueError:
+                    continue
+        
+        if best_candidate:
+            return float(best_candidate), currency
+        
+        # Si nada funcionó, intentar con grupos individuales
+        for num_str in reversed(all_numbers):  # Empezar por los más largos
             try:
                 num = int(num_str)
-                if currency == "USD":
-                    # Para USD, filtrar entre 5,000 y 15,000,000
-                    if 5000 <= num <= 15_000_000:
-                        valid_prices.append(num)
-                else:
-                    # Para ARS, filtrar entre 100,000 y 10,000,000,000
-                    if 100_000 <= num <= 10_000_000_000:
-                        valid_prices.append(num)
+                if min_price <= num <= max_price:
+                    return float(num), currency
             except ValueError:
                 continue
         
-        # Si hay precios válidos, usar el más grande (precio total, no precio m2)
-        if valid_prices:
-            amount = max(valid_prices)
-        else:
-            # Si no hay precios válidos, intentar con el primer número
-            # pero con límites más permisivos
-            try:
-                num = int(all_numbers[0])
-                if currency == "USD":
-                    if num > 15_000_000:
-                        amount = 0.0  # Descartar precios ridículos
-                    else:
-                        amount = float(num)
-                else:
-                    amount = float(num)
-            except ValueError:
-                amount = 0.0
-        
-        return amount, currency
+        return 0.0, currency
     
     def _clean_surface(self, surface_text: str) -> float:
         """
