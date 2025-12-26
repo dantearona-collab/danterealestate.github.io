@@ -7,4 +7,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD ["gunicorn", "-b", "0.0.0.0:8080", "main-ai:app"]
+CMD ["uvicorn", "main-ai:app", "--host", "0.0.0.0", "--port", "8080"]
