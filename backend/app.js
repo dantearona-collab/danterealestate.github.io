@@ -4172,8 +4172,300 @@ function cerrarAnalisisComparativo() {
 // Exportar funciones
 window.mostrarAnalisisComparativo = mostrarAnalisisComparativo;
 window.cerrarAnalisisComparativo = cerrarAnalisisComparativo;
+window.mostrarAnalisisComparativoIA = mostrarAnalisisComparativoIA;
 
-console.log('✅ Sistema de análisis comparativo cargado');// ========================================
+console.log('✅ Sistema de análisis comparativo cargado');
+
+// ========================================
+// ANÁLISIS COMPARATIVO CON IA (NUEVO)
+// ========================================
+
+async function mostrarAnalisisComparativoIA() {
+    if (!window.currentProperty) {
+        alert('Selecciona una propiedad primero');
+        return;
+    }
+    
+    const property = window.currentProperty;
+    console.log('🤖 Iniciando análisis comparativo con IA para:', property.titulo);
+    
+    // Mostrar indicador de carga
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.id = 'analisis-ia-loading';
+    loadingOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.7);
+        z-index: 2000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    `;
+    loadingOverlay.innerHTML = `
+        <div style="text-align: center; color: white;">
+            <div style="font-size: 48px; margin-bottom: 20px;">🤖</div>
+            <h3 style="margin: 0 0 10px 0;">Analizando con Inteligencia Artificial</h3>
+            <p style="margin: 0; opacity: 0.8;">Comparando propiedad con el mercado...</p>
+            <div style="margin-top: 20px; width: 200px; height: 4px; background: rgba(255,255,255,0.3); border-radius: 2px; overflow: hidden;">
+                <div style="width: 100%; height: 100%; background: #10b981; animation: loading 1.5s infinite ease-in-out;"></div>
+            </div>
+        </div>
+        <style>
+            @keyframes loading {
+                0% { width: 0%; margin-left: 0%; }
+                50% { width: 100%; margin-left: 0%; }
+                100% { width: 0%; margin-left: 100%; }
+            }
+        </style>
+    `;
+    document.body.appendChild(loadingOverlay);
+    
+    try {
+        // Llamar al endpoint de comparación con IA
+        const response = await fetch(`${API_BASE_URL}/market/comparison`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                propiedad: {
+                    id_temporal: property.id_temporal,
+                    titulo: property.titulo,
+                    direccion: property.direccion,
+                    barrio: property.barrio,
+                    tipo: property.tipo,
+                    precio: property.precio,
+                    metros_cuadrados: property.metros,
+                    ambientes: property.ambientes,
+                    estado: property.estado,
+                    moneda_precio: property.moneda,
+                    descripcion: property.descripcion
+                }
+            })
+        });
+        
+        const data = await response.json();
+        
+        // Remover indicador de carga
+        loadingOverlay.remove();
+        
+        if (data.success) {
+            // Mostrar resultado del análisis con IA
+            mostrarModalAnalisisIA(data.comparacion, data.propiedad);
+        } else {
+            alert('Error al generar análisis: ' + (data.error || 'Error desconocido'));
+        }
+        
+    } catch (error) {
+        console.error('❌ Error en análisis comparativo IA:', error);
+        loadingOverlay.remove();
+        alert('Error de conexión. Usando análisis local...');
+        // Fallback al análisis local
+        mostrarAnalisisComparativo();
+    }
+}
+
+function mostrarModalAnalisisIA(comparacion, propiedadData) {
+    const propiedades = globalData.properties || [];
+    const promedio = calcularPromedioBarrio(propiedades, propiedadData.barrio, propiedadData.tipo);
+    
+    // Procesar virtudes del análisis IA
+    const virtudes = (comparacion.virtudes || []).map(v => ({
+        tipo: v.tipo || 'general',
+        icono: v.icono || '⭐',
+        titulo: v.titulo || 'Características',
+        dato: v.dato_objetivo || '',
+        emocion: v.beneficio_emocional || '',
+        persuasion_score: v.persuasion_score || 5
+    }));
+    
+    const score = comparacion.score_oportunidad || 5;
+    const textoPersuasivo = comparacion.texto_persuasivo || '';
+    const llamadaAccion = comparacion.llamada_accion || '';
+    
+    // Crear modal
+    const modal = document.createElement('div');
+    modal.id = 'analisis-comparativo-modal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        z-index: 1001;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    `;
+    
+    const virtudesHTML = virtudes.length > 0 ? virtudes.map(v => `
+        <div style="
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid #8b5cf6;
+        ">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <span style="font-size: 24px;">${v.icono}</span>
+                <span style="font-weight: 600; color: #495057; font-size: 15px;">${v.titulo}</span>
+            </div>
+            <div style="font-size: 13px; color: #6c757d; margin-bottom: 6px;">${v.dato}</div>
+            <div style="font-size: 13px; color: #8b5cf6; font-style: italic;">${v.emocion}</div>
+        </div>
+    `).join('') : `
+        <div style="
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        ">
+            <span style="font-size: 40px;">🏠</span>
+            <p style="margin: 10px 0 0 0; color: #6c757d;">
+                Esta propiedad tiene características sólidas en una ubicación privilegiada.
+            </p>
+        </div>
+    `;
+    
+    modal.innerHTML = `
+        <div style="
+            background: white;
+            border-radius: 16px;
+            max-width: 550px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        ">
+            <!-- Header -->
+            <div style="
+                background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+                padding: 20px;
+                color: white;
+                position: sticky;
+                top: 0;
+            ">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                            <span style="font-size: 20px;">🤖</span>
+                            <h3 style="margin: 0; font-size: 18px;">
+                                Análisis IA
+                            </h3>
+                        </div>
+                        <p style="margin: 0; font-size: 12px; opacity: 0.9;">
+                            Comparación inteligente con el mercado
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+                            <span style="
+                                background: rgba(255,255,255,0.2);
+                                padding: 4px 12px;
+                                border-radius: 20px;
+                                font-size: 14px;
+                                font-weight: 600;
+                            ">
+                                Score: ${score.toFixed(1)}/10
+                            </span>
+                        </div>
+                    </div>
+                    <button onclick="cerrarAnalisisComparativo()" style="
+                        background: rgba(255,255,255,0.2);
+                        border: none;
+                        color: white;
+                        font-size: 24px;
+                        cursor: pointer;
+                        padding: 4px 10px;
+                        border-radius: 6px;
+                    ">×</button>
+                </div>
+            </div>
+                
+            <!-- Contenido -->
+            <div style="padding: 20px;">
+                <!-- Virtudes -->
+                ${virtudesHTML}
+                
+                <!-- Texto persuasivo -->
+                <div style="
+                    background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+                    border-radius: 12px;
+                    padding: 16px;
+                    margin-top: 16px;
+                    border: 1px solid #c4b5fd;
+                ">
+                    <p style="
+                        margin: 0 0 12px 0;
+                        font-size: 14px;
+                        line-height: 1.6;
+                        color: #5b21b6;
+                        font-family: Georgia, serif;
+                    ">${textoPersuasivo}</p>
+                </div>
+                
+                <!-- Llamada a la acción -->
+                ${llamadaAccion ? `
+                <div style="
+                    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+                    border-radius: 12px;
+                    padding: 16px;
+                    margin-top: 16px;
+                    text-align: center;
+                ">
+                    <p style="
+                        margin: 0;
+                        font-size: 15px;
+                        font-weight: 600;
+                        color: white;
+                    ">${llamadaAccion}</p>
+                </div>
+                ` : ''}
+                
+                <!-- Footer con comparación -->
+                ${promedio ? `
+                <div style="
+                    margin-top: 16px;
+                    padding: 12px;
+                    background: #f8fafc;
+                    border-radius: 8px;
+                    font-size: 12px;
+                    color: #64748b;
+                    text-align: center;
+                ">
+                    📊 Comparado con ${promedio.count} propiedades similares en ${propiedadData.barrio}
+                </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+    
+    // Cerrar al hacer clic fuera
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            cerrarAnalisisComparativo();
+        }
+    });
+    
+    // Cerrar con ESC
+    document.addEventListener('keydown', function escHandler(e) {
+        if (e.key === 'Escape') {
+            cerrarAnalisisComparativo();
+            document.removeEventListener('keydown', escHandler);
+        }
+    });
+}
+
+console.log('✅ Sistema de análisis comparativo con IA cargado');
+
+// ========================================
 // PANEL DESLIZABLE - VERSIÓN CON ENTORNO IA
 // ========================================
 

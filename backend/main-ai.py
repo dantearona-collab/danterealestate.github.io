@@ -159,10 +159,265 @@ class ChatResponse(BaseModel):
     search_performed: bool
     propiedades: Optional[List[PropertyResponse]] = None
 
+# ========================================
+# MODELOS PARA ANÁLISIS DE MERCADO
+# ========================================
+
+class MarketAnalysisRequest(BaseModel):
+    barrio: str = Field(..., min_length=1, max_length=100)
+    search_results: Optional[List[Dict[str, Any]]] = None
+
+class PropertyComparisonRequest(BaseModel):
+    propiedad_id: Optional[str] = None
+    propiedad: Optional[Dict[str, Any]] = None
+
+class MarketAnalysisResponse(BaseModel):
+    precio_m2_promedio: Optional[float] = None
+    precio_m2_min: Optional[float] = None
+    precio_m2_max: Optional[float] = None
+    rango_precios_propiedades: Optional[str] = None
+    caracteristicas_zona: List[str] = []
+    tendencias: Dict[str, Any] = {}
+    conectividad: Dict[str, Any] = {}
+    amenities_proximos: List[str] = []
+    analisis_oportunidad: Dict[str, Any] = {}
+    nota_analista: str = ""
+    fuentes_procesadas: int = 0
+    barrio: str = ""
+
+class PropertyComparisonResponse(BaseModel):
+    virtudes: List[Dict[str, Any]] = []
+    score_oportunidad: int = 0
+    texto_persuasivo: str = ""
+    llamada_accion: str = ""
+
+# ========================================
+# PROMPTS ESPECIALIZADOS PARA ANÁLISIS
+# ========================================
+
+MARKET_ANALYSIS_PROMPT = """
+Eres un experto analista inmobiliario argentino. Vas a analizar datos del mercado inmobiliario de una zona específica.
+
+## TAREA
+Procesa los siguientes resultados de búsqueda sobre propiedades en {barrio} y extrae información estructurada y precisa.
+
+## RESULTADOS DE BÚSQUEDA
+{search_results}
+
+## INSTRUCCIONES
+1. Extrae SOLO información que aparezca explícitamente en los textos
+2. Si no encuentras un dato, usa null
+3. Todos los precios deben ser en PESOS ARGENTINOS por metro cuadrado (ARS/m²)
+4. Convierte cualquier precio expresado en USD a ARS usando tasa aproximada de 1000 ARS = 1 USD
+
+## FORMATO DE RESPUESTA (JSON EXACTO, SIN TEXTO EXTRA)
+
+{{
+    "precio_m2_promedio": NUMERO_O_NULL,
+    "precio_m2_min": NUMERO_O_NULL,
+    "precio_m2_max": NUMERO_O_NULL,
+    "rango_precios_propiedades": "string descriptivo o null",
+    "caracteristicas_zona": ["caracteristica1", "caracteristica2"],
+    "tendencias": {{
+        "direccion": "subiendo|bajando|estable|null",
+        "descripcion": "texto explicativo o null"
+    }},
+    "conectividad": {{
+        "transporte": "string o null",
+        "accesibilidad": "string o null"
+    }},
+    "amenities_proximos": ["amenity1", "amenity2"],
+    "analisis_oportunidad": {{
+        "es_oportunidad": true/false,
+        "factores": ["factor1", "factor2"],
+        "recomendacion": "texto breve"
+    }},
+    "nota_analista": "texto explicando cómo se obtuvo cada dato",
+    "fuentes_procesadas": NUMERO
+}}
+
+## REGLAS ESTRICTAS
+- No inventes datos que no estén en los textos
+- Si un precio es "aproximado", usa el valor dado
+- Las características deben ser verificables en los textos
+- La recomendación debe ser objetiva basada en los datos
+"""
+
+PROPERTY_COMPARISON_PROMPT = """
+Eres un experto en ventas inmobiliarias. Genera un análisis persuasivo comparando una propiedad específica con el mercado.
+
+## DATOS DE LA PROPIEDAD
+{datos_propiedad}
+
+## DATOS DEL MERCADO
+{datos_mercado}
+
+## TAREA
+Genera un análisis que destaque las virtudes de la propiedad comparado con el mercado real.
+
+## FORMATO DE RESPUESTA (JSON EXACTO)
+
+{{
+    "virtudes": [
+        {{
+            "tipo": "precio|espacio|ubicacion|estado|zona",
+            "icono": "emoji_representativo",
+            "titulo": "título corto y atractivo",
+            "dato_objetivo": "dato numérico o porcentual",
+            "beneficio_emocional": "texto que conecte el dato con la vida del comprador",
+            "persuasion_score": NUMERO_1_A_10
+        }}
+    ],
+    "score_oportunidad": NUMERO_1_A_10,
+    "texto_persuasivo": "párrafo de 2-3 oraciones que resuma por qué esta propiedad es una buena oportunidad",
+    "llamada_accion": "oración que motive al comprador a actuar"
+}}
+
+## REGLAS
+- Las virtudes deben estar respaldadas por datos objetivos
+- El beneficio emocional debe ser realista y alcanzable
+- El score debe reflejar genuinamente la oportunidad
+- No exagerar ni hacer promesas falsas
+"""
+
+# ========================================
+# FUNCIONES DE ANÁLISIS DE MERCADO
+# ========================================
+
+def analizar_mercado_inmobiliario(barrio: str, search_results: List[Dict]) -> Dict[str, Any]:
+    """
+    Analiza datos del mercado inmobiliario usando Gemini AI
+    """
+    print(f"📊 Analizando mercado para: {barrio}")
+    print(f"📄 Procesando {len(search_results)} resultados de búsqueda...")
+    
+    # Combinar todos los textos de resultados
+    combined_text = ""
+    for i, result in enumerate(search_results, 1):
+        combined_text += f"\n--- RESULTADO {i} ---\n"
+        combined_text += f"URL: {result.get('url', 'N/A')}\n"
+        combined_text += f"TITULO: {result.get('title', 'N/A')}\n"
+        if result.get('content'):
+            contenido = result['content'][:2000] if len(result.get('content', '')) > 2000 else result['content']
+            combined_text += f"CONTENIDO: {contenido}\n"
+    
+    # Construir prompt
+    prompt = MARKET_ANALYSIS_PROMPT.format(
+        barrio=barrio,
+        search_results=combined_text
+    )
+    
+    print("🤖 Enviando a Gemini para análisis de mercado...")
+    
+    # Llamar a Gemini
+    response = call_gemini_with_rotation(prompt)
+    
+    # Parsear respuesta JSON
+    try:
+        clean_response = response.strip()
+        if clean_response.startswith('```json'):
+            clean_response = clean_response[7:]
+        if clean_response.startswith('```'):
+            clean_response = clean_response[3:]
+        if clean_response.endswith('```'):
+            clean_response = clean_response[:-3]
+        
+        analisis = json.loads(clean_response)
+        analisis['fuentes_procesadas'] = len(search_results)
+        analisis['barrio'] = barrio
+        
+        print(f"✅ Análisis de mercado completado")
+        
+        return {
+            'success': True,
+            'data': analisis,
+            'raw_response': response
+        }
+        
+    except json.JSONDecodeError as e:
+        print(f"❌ Error parseando JSON: {e}")
+        return {
+            'success': False,
+            'error': 'Error al procesar respuesta de IA',
+            'details': str(e)
+        }
+
+
+def generar_comparacion_propiedad(propiedad: Dict, mercado: Dict) -> Dict[str, Any]:
+    """
+    Genera análisis comparativo persuasivo de una propiedad vs el mercado
+    """
+    print(f"📈 Generando comparación para: {propiedad.get('direccion', 'Unknown')}")
+    
+    # Preparar datos de la propiedad
+    precio = propiedad.get('precio', 0)
+    metros = propiedad.get('metros_cuadrados', 1)
+    precio_m2 = precio / max(metros, 1)
+    
+    datos_propiedad = {
+        'direccion': propiedad.get('direccion', ''),
+        'barrio': propiedad.get('barrio', ''),
+        'tipo': propiedad.get('tipo', ''),
+        'precio': precio,
+        'metros_cuadrados': metros,
+        'precio_m2': round(precio_m2, 2),
+        'ambientes': propiedad.get('ambientes', 0),
+        'estado': propiedad.get('estado', ''),
+        'moneda': propiedad.get('moneda_precio', 'ARS')
+    }
+    
+    datos_mercado = {
+        'precio_m2_promedio': mercado.get('precio_m2_promedio'),
+        'precio_m2_min': mercado.get('precio_m2_min'),
+        'precio_m2_max': mercado.get('precio_m2_max'),
+        'caracteristicas_zona': mercado.get('caracteristicas_zona', []),
+        'tendencias': mercado.get('tendencias', {}),
+        'amenities_proximos': mercado.get('amenities_proximos', [])
+    }
+    
+    # Construir prompt
+    prompt = PROPERTY_COMPARISON_PROMPT.format(
+        datos_propiedad=json.dumps(datos_propiedad, indent=2, ensure_ascii=False),
+        datos_mercado=json.dumps(datos_mercado, indent=2, ensure_ascii=False)
+    )
+    
+    print("🤖 Generando comparación con Gemini...")
+    
+    # Llamar a Gemini
+    response = call_gemini_with_rotation(prompt)
+    
+    # Parsear respuesta
+    try:
+        clean_response = response.strip()
+        if clean_response.startswith('```json'):
+            clean_response = clean_response[7:]
+        if clean_response.startswith('```'):
+            clean_response = clean_response[3:]
+        if clean_response.endswith('```'):
+            clean_response = clean_response[:-3]
+        
+        comparacion = json.loads(clean_response)
+        
+        print(f"✅ Comparación generada: {len(comparacion.get('virtudes', []))} virtudes identificadas")
+        
+        return {
+            'success': True,
+            'data': comparacion,
+            'raw_response': response
+        }
+        
+    except json.JSONDecodeError as e:
+        print(f"❌ Error parseando comparación: {e}")
+        return {
+            'success': False,
+            'error': 'Error al generar comparacion',
+            'details': str(e)
+        }
+
 # ✅ ENDPOINTS
 @app.get("/")
 def root():
-    return FileResponse("index.html")
+    return FileResponse("backend/index.html")
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
@@ -359,6 +614,136 @@ def debug_images():
             return {"error": "Carpeta 'imgs' no encontrada en el servidor"}
     except Exception as e:
         return {"error": f"Error al leer carpeta: {str(e)}"}
+
+
+# ========================================
+# ENDPOINTS DE ANÁLISIS DE MERCADO
+# ========================================
+
+@app.post("/market/analysis")
+def market_analysis(request: MarketAnalysisRequest):
+    """
+    Analiza el mercado inmobiliario de un barrio específico.
+    
+    Uso:
+    - Envía el nombre del barrio
+    - Opcionalmente envía resultados de búsqueda web para contexto
+    """
+    print(f"📊 Endpoint: Análisis de mercado para {request.barrio}")
+    
+    # Si no hay resultados de búsqueda, usar datos de la base de datos local
+    if not request.search_results:
+        # Obtener propiedades del barrio para análisis básico
+        propiedades = query_properties({"barrio": request.barrio})
+        
+        # Generar contexto básico desde propiedades locales
+        search_results = []
+        for prop in propiedades[:10]:  # Usar hasta 10 propiedades
+            search_results.append({
+                "url": f"propiedad/{prop.get('id_temporal', '')}",
+                "title": f"{prop.get('tipo', '')} en {prop.get('direccion', '')}",
+                "content": f"""
+                Precio: {prop.get('precio', 0)} {prop.get('moneda_precio', 'ARS')}
+                Metros cuadrados: {prop.get('metros_cuadrados', 0)} m²
+                Tipo: {prop.get('tipo', '')}
+                Operación: {prop.get('operacion', '')}
+                Barrio: {prop.get('barrio', '')}
+                Ambientes: {prop.get('ambientes', 0)}
+                Estado: {prop.get('estado', '')}
+                Descripción: {prop.get('descripcion', '')}
+                """
+            })
+        
+        print(f"📊 Usando {len(search_results)} propiedades locales para análisis")
+    
+    # Si hay search_results del frontend, usarlos directamente
+    elif isinstance(request.search_results, list):
+        search_results = request.search_results
+        print(f"📊 Usando {len(search_results)} resultados de búsqueda del frontend")
+    
+    else:
+        search_results = []
+    
+    # Realizar análisis
+    resultado = analizar_mercado_inmobiliario(request.barrio, search_results)
+    
+    if resultado['success']:
+        return {
+            "success": True,
+            "barrio": request.barrio,
+            "analysis": resultado['data']
+        }
+    else:
+        raise HTTPException(status_code=500, detail=resultado.get('error', 'Error en análisis'))
+
+
+@app.post("/market/comparison")
+def property_comparison(request: PropertyComparisonRequest):
+    """
+    Genera análisis comparativo de una propiedad vs el mercado.
+    
+    Uso:
+    - Envía el ID de una propiedad O los datos directamente
+    - El sistema analiza la propiedad vs el mercado de su barrio
+    """
+    # Obtener datos de la propiedad
+    if request.propiedad_id:
+        # Buscar en la base de datos
+        propiedades = query_properties({"id_temporal": request.propiedad_id})
+        if not propiedades:
+            raise HTTPException(status_code=404, detail="Propiedad no encontrada")
+        propiedad = propiedades[0]
+    elif request.propiedad:
+        propiedad = request.propiedad
+    else:
+        raise HTTPException(status_code=400, detail="Se requiere propiedad_id o propiedad")
+    
+    barrio = propiedad.get('barrio', '')
+    
+    # Primero obtener análisis del mercado del barrio
+    propiedades_barrio = query_properties({"barrio": barrio})
+    
+    # Generar contexto del mercado desde propiedades locales
+    mercado_data = {
+        "precio_m2_promedio": None,
+        "precio_m2_min": None,
+        "precio_m2_max": None,
+        "caracteristicas_zona": [barrio],
+        "tendencias": {"direccion": "estable", "descripcion": "Datos del mercado local"},
+        "amenities_proximos": []
+    }
+    
+    if propiedades_barrio:
+        precios_m2 = []
+        for prop in propiedades_barrio:
+            precio = prop.get('precio', 0)
+            metros = prop.get('metros_cuadrados', 1)
+            if metros > 0:
+                precio_m2 = precio / metros
+                precios_m2.append(precio_m2)
+        
+        if precios_m2:
+            mercado_data["precio_m2_promedio"] = sum(precios_m2) / len(precios_m2)
+            mercado_data["precio_m2_min"] = min(precios_m2)
+            mercado_data["precio_m2_max"] = max(precios_m2)
+    
+    # Generar comparación
+    resultado = generar_comparacion_propiedad(propiedad, mercado_data)
+    
+    if resultado['success']:
+        return {
+            "success": True,
+            "propiedad": {
+                "id": propiedad.get('id_temporal'),
+                "direccion": propiedad.get('direccion'),
+                "barrio": propiedad.get('barrio'),
+                "precio": propiedad.get('precio'),
+                "metros": propiedad.get('metros_cuadrados')
+            },
+            "comparacion": resultado['data']
+        }
+    else:
+        raise HTTPException(status_code=500, detail=resultado.get('error', 'Error en comparación'))
 
 
 # ✅ INICIO
