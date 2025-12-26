@@ -4685,10 +4685,4 @@ window.createPropertyPanelSimple = createPropertyPanelSimple;
 window.closePropertyPanelSimple = closePropertyPanelSimple;
 
 console.log('✅ Panel simple de respaldo cargado');
-
-// Inicialización automática para testing de IA
-console.log('🚀 Sistema de IA iniciado. Ejecutando test automático...');
-setTimeout(() => {
-    console.log('🧪 Ejecutando test de IA automáticamente...');
-    testAIEnvironment();
-}, 2000);
+console.log('✅ Sistema Dante Propiedades completamente cargado');
