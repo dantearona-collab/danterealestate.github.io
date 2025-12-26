@@ -16,7 +16,19 @@ import time
 
 app = Flask(__name__)
 # Add the new Render URL to CORS
-CORS(app, resources={r"/api/*": {"origins": ["null", "http://dantepropiedades.com.ar", "http://www.dantepropiedades.com.ar", "https://dantepropiedades.com.ar", "https://www.dantepropiedades.com.ar", "http://dantepropiedades.com", "https://danterealestate-github-io.onrender.com", "https://danterealestate.github.io", "https://pagina-web-g82d.onrender.com", "https://artar1.github.io"]}})
+CORS(app, resources={r"/api/*": {"origins": [
+    "null", 
+    "http://dantepropiedades.com.ar", 
+    "http://www.dantepropiedades.com.ar", 
+    "https://dantepropiedades.com.ar", 
+    "https://www.dantepropiedades.com.ar", 
+    "http://dantepropiedades.com", 
+    "https://danterealestate-github-io.onrender.com", 
+    "https://danterealestate.github.io", 
+    "https://danterealestate-github-io-ewlg.onrender.com",  # NUEVO: Servicio principal
+    "https://pagina-web-g82d.onrender.com", 
+    "https://artar1.github.io"
+]}})
 
 EXCEL_FILE = 'contactos_dante_propiedades.xlsx'
 
