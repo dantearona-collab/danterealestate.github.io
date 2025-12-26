@@ -87,7 +87,12 @@ origins = [
     "https://artarona.github.io",
     "https://dantepropiedades.com.ar",
     "https://www.dantepropiedades.com.ar",
+    "http://dantepropiedades.com.ar",
+    "http://www.dantepropiedades.com.ar",
     "https://pagina-web-g82d.onrender.com",
+    "https://*.onrender.com",
+    # Permitir cualquier origen para desarrollo (temporal)
+    "*"
 ]
 
 app.add_middleware(
