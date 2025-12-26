@@ -9,6 +9,7 @@ import time
 import random
 import logging
 import re
+import requests
 from typing import Optional, Dict, Any, List
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -113,17 +114,67 @@ class BaseScraper(ABC):
         if "USD" in price_text or "U$S" in price_text or "DÓLARES" in price_text:
             currency = "USD"
         
-        # Remover moneda y símbolos
+        # Remover caracteres no numéricos excepto puntos y comas
         clean = re.sub(r'[^\d.,]', '', price_text)
         
-        # Normalizar separadores de miles
-        clean = clean.replace('.', '').replace(',', '.')
+        # Si hay múltiples puntos (separadores de miles), tomar el último como decimal
+        # y remover los anteriores
+        parts = clean.split('.')
+        if len(parts) > 1:
+            # Último segmento puede tener decimales
+            last_part = parts[-1]
+            # Los segmentos anteriores son miles - solo tomar el primero si es un solo dígito
+            # Esto evita el error de precios como "130.000.160.000" -> tomar "160000" o "130000"
+            
+            # Estrategia: buscar el patrón de precio más razonable (1-3 dígitos seguidos de miles)
+            # Para precios inmobiliarios argentinos típicos: 100.000 a 10.000.000
+            # Para USD: 50.000 a 5.000.000
+            
+            # Tomar solo los últimos 2 grupos de miles como máximo
+            if len(parts) >= 2:
+                # Construir desde el final: últimos 2 grupos
+                if len(parts[-1]) <= 3:
+                    # El último grupo es pequeño, podría ser decimal
+                    candidate = parts[-2] + '.' + parts[-1]
+                else:
+                    # El último grupo es grande, tomar los últimos 2
+                    candidate = parts[-2] + parts[-1]
+            else:
+                candidate = parts[0]
+            
+            try:
+                amount = float(candidate)
+            except ValueError:
+                amount = 0.0
+        else:
+            # No hay puntos, solo comas o nada
+            clean_comma = clean.replace(',', '.')
+            try:
+                amount = float(clean_comma)
+            except ValueError:
+                amount = 0.0
         
-        try:
-            amount = float(clean)
-            return amount, currency
-        except ValueError:
-            return 0.0, "ARS"
+        # VALIDACIÓN: Filtrar precios irrealistas
+        # Precios inmobiliarios máximos razonables:
+        # - USD: hasta 50,000,000 (50 millones)
+        # - ARS: hasta 10,000,000,000 (10 mil millones)
+        
+        max_reasonable_usd = 50_000_000
+        max_reasonable_ars = 10_000_000_000
+        
+        if currency == "USD" and amount > max_reasonable_usd:
+            # Si el precio es muy alto en USD, dividir por 1000 o descartar
+            if amount > max_reasonable_usd * 100:
+                # Probablemente tiene demasiados dígitos, descartar
+                return 0.0, currency
+            # Si está solo un poco alto, reducir proporcionalmente
+            amount = amount / 1000
+        
+        if currency == "ARS" and amount > max_reasonable_ars:
+            if amount > max_reasonable_ars * 100:
+                return 0.0, currency
+        
+        return amount, currency
     
     def _clean_surface(self, surface_text: str) -> float:
         """
