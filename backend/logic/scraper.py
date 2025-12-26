@@ -114,65 +114,49 @@ class BaseScraper(ABC):
         if "USD" in price_text or "U$S" in price_text or "DÓLARES" in price_text:
             currency = "USD"
         
-        # Remover caracteres no numéricos excepto puntos y comas
-        clean = re.sub(r'[^\d.,]', '', price_text)
+        # Extraer todos los números del texto
+        all_numbers = re.findall(r'\d+', price_text)
         
-        # Si hay múltiples puntos (separadores de miles), tomar el último como decimal
-        # y remover los anteriores
-        parts = clean.split('.')
-        if len(parts) > 1:
-            # Último segmento puede tener decimales
-            last_part = parts[-1]
-            # Los segmentos anteriores son miles - solo tomar el primero si es un solo dígito
-            # Esto evita el error de precios como "130.000.160.000" -> tomar "160000" o "130000"
-            
-            # Estrategia: buscar el patrón de precio más razonable (1-3 dígitos seguidos de miles)
-            # Para precios inmobiliarios argentinos típicos: 100.000 a 10.000.000
-            # Para USD: 50.000 a 5.000.000
-            
-            # Tomar solo los últimos 2 grupos de miles como máximo
-            if len(parts) >= 2:
-                # Construir desde el final: últimos 2 grupos
-                if len(parts[-1]) <= 3:
-                    # El último grupo es pequeño, podría ser decimal
-                    candidate = parts[-2] + '.' + parts[-1]
+        if not all_numbers:
+            return 0.0, currency
+        
+        # Para precios inmobiliarios, los valores típicos son:
+        # USD: 10,000 - 10,000,000 (10 mil a 10 millones)
+        # ARS: 1,000,000 - 5,000,000,000 (1 millón a 5 mil millones)
+        
+        # Encontrar el número más razonable
+        valid_prices = []
+        for num_str in all_numbers:
+            try:
+                num = int(num_str)
+                if currency == "USD":
+                    # Para USD, filtrar entre 5,000 y 15,000,000
+                    if 5000 <= num <= 15_000_000:
+                        valid_prices.append(num)
                 else:
-                    # El último grupo es grande, tomar los últimos 2
-                    candidate = parts[-2] + parts[-1]
-            else:
-                candidate = parts[0]
-            
-            try:
-                amount = float(candidate)
+                    # Para ARS, filtrar entre 100,000 y 10,000,000,000
+                    if 100_000 <= num <= 10_000_000_000:
+                        valid_prices.append(num)
             except ValueError:
-                amount = 0.0
+                continue
+        
+        # Si hay precios válidos, usar el más grande (precio total, no precio m2)
+        if valid_prices:
+            amount = max(valid_prices)
         else:
-            # No hay puntos, solo comas o nada
-            clean_comma = clean.replace(',', '.')
+            # Si no hay precios válidos, intentar con el primer número
+            # pero con límites más permisivos
             try:
-                amount = float(clean_comma)
+                num = int(all_numbers[0])
+                if currency == "USD":
+                    if num > 15_000_000:
+                        amount = 0.0  # Descartar precios ridículos
+                    else:
+                        amount = float(num)
+                else:
+                    amount = float(num)
             except ValueError:
                 amount = 0.0
-        
-        # VALIDACIÓN: Filtrar precios irrealistas
-        # Precios inmobiliarios máximos razonables:
-        # - USD: hasta 50,000,000 (50 millones)
-        # - ARS: hasta 10,000,000,000 (10 mil millones)
-        
-        max_reasonable_usd = 50_000_000
-        max_reasonable_ars = 10_000_000_000
-        
-        if currency == "USD" and amount > max_reasonable_usd:
-            # Si el precio es muy alto en USD, dividir por 1000 o descartar
-            if amount > max_reasonable_usd * 100:
-                # Probablemente tiene demasiados dígitos, descartar
-                return 0.0, currency
-            # Si está solo un poco alto, reducir proporcionalmente
-            amount = amount / 1000
-        
-        if currency == "ARS" and amount > max_reasonable_ars:
-            if amount > max_reasonable_ars * 100:
-                return 0.0, currency
         
         return amount, currency
     
