@@ -872,16 +872,16 @@ def get_comparative_analysis(zone: str):
         if result['sample_size'] >= 5:
             try:
                 # Preparar datos para IA
-                market_summary = f\"\"\"
+                market_summary = f"""
                 Zona: {zone}
                 Muestra: {result['sample_size']} propiedades
                 Precio m² promedio: {result['statistics']['average_price_per_m2']}
                 Precio m² mediana: {result['statistics']['median_price_per_m2']}
                 Rango de precios: {result['statistics']['price_range_total']}
                 Fuentes: {result['source_breakdown']}
-                \"\"\"
+                """
                 
-                prompt = f\"\"\"
+                prompt = f"""
                 Eres un analista inmobiliario argentino. Genera un breve análisis del mercado basado en estos datos:
 
                 {market_summary}
@@ -892,7 +892,7 @@ def get_comparative_analysis(zone: str):
                 3. Recomendación general para compradores
 
                 Responde en formato JSON con keys: summary, price_obs, recommendation
-                \"\"\"
+                """
                 
                 ai_response = call_gemini_with_rotation(prompt)
                 
@@ -906,7 +906,7 @@ def get_comparative_analysis(zone: str):
                     analysis = {"raw_analysis": ai_response[:500]}
                     
             except Exception as ai_error:
-                print(f\"⚠️ Error generando análisis IA: {ai_error}\")
+                print(f"⚠️ Error generando análisis IA: {ai_error}")
         
         return {
             "success": True,
