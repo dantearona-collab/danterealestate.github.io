@@ -1056,3 +1056,432 @@ window.ApiClient = ApiClient;
 window.UIRenderer = UIRenderer;
 window.EventHandlers = EventHandlers;
 window.Utils = Utils;
+
+// ============================================
+// FUNCIONES GLOBALES PARA HTML ONCLICK
+// ============================================
+
+/**
+ * Alternar el modo administrador
+ */
+function toggleAdminMode() {
+    AppState.isEditing = !AppState.isEditing;
+    const badge = document.getElementById('edit-badge');
+    const toolbar = document.getElementById('admin-toolbar');
+    const inputs = document.querySelectorAll('#editor-form input, #editor-form textarea, #editor-form select');
+    
+    if (AppState.isEditing) {
+        if (badge) badge.textContent = 'Editando';
+        if (badge) badge.classList.add('editing');
+        if (toolbar) toolbar.classList.remove('hidden');
+        inputs.forEach(input => input.disabled = false);
+    } else {
+        if (badge) badge.textContent = 'Solo lectura';
+        if (badge) badge.classList.remove('editing');
+        if (toolbar) toolbar.classList.add('hidden');
+        inputs.forEach(input => input.disabled = true);
+    }
+    
+    console.log('🔄 Modo admin toggled:', AppState.isEditing);
+}
+
+/**
+ * Alternar acordeón de categoría
+ */
+function toggleAccordion(category) {
+    const header = document.querySelector(`.accordion-header[onclick*="${category}"]`);
+    const content = document.getElementById(`content-${category}`);
+    const arrow = header ? header.querySelector('.accordion-arrow') : null;
+    
+    if (header) {
+        header.classList.toggle('active');
+    }
+    
+    if (content) {
+        content.classList.toggle('active');
+    }
+    
+    if (arrow) {
+        arrow.style.transform = header.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
+    }
+}
+
+/**
+ * Marcar formulario como modificado
+ */
+function markAsChanged() {
+    AppState.isChanged = true;
+    const saveBtn = document.getElementById('save-btn');
+    if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.style.opacity = '1';
+    }
+    console.log('📝 Formulario modificado');
+}
+
+/**
+ * Actualizar puntuación visual en acordeón
+ */
+function updateScore(category) {
+    const scoreEl = document.getElementById(`score-${category}`);
+    const inputEl = document.getElementById(`${category}-puntuacion`);
+    
+    if (scoreEl && inputEl) {
+        const score = parseInt(inputEl.value) || 0;
+        scoreEl.textContent = score;
+        
+        // Actualizar color según puntuación
+        scoreEl.removeAttribute('data-score');
+        if (score >= 70) {
+            scoreEl.setAttribute('data-score', 'high');
+        } else if (score >= 40) {
+            scoreEl.setAttribute('data-score', 'medium');
+        } else {
+            scoreEl.setAttribute('data-score', 'low');
+        }
+    }
+}
+
+/**
+ * Crear nuevo barrio
+ */
+function createNewBarrio() {
+    const input = document.getElementById('neighborhood-input');
+    const nombre = input ? input.value.trim() : '';
+    
+    if (!nombre) {
+        alert('Por favor ingresa un nombre de barrio');
+        return;
+    }
+    
+    console.log('✨ Creando nuevo barrio:', nombre);
+    
+    // Limpiar formulario
+    clearEditorForm();
+    
+    // Mostrar toolbar
+    const toolbar = document.getElementById('admin-toolbar');
+    const currentBarrio = document.getElementById('current-barrio-name');
+    const badge = document.getElementById('edit-badge');
+    
+    if (toolbar) toolbar.classList.remove('hidden');
+    if (currentBarrio) currentBarrio.textContent = nombre;
+    if (badge) {
+        badge.textContent = 'Nuevo';
+        badge.classList.add('editing');
+    }
+    
+    // Habilitar edición
+    AppState.isEditing = true;
+    AppState.currentBarrio = { nombre: nombre };
+    const inputs = document.querySelectorAll('#editor-form input, #editor-form textarea, #editor-form select');
+    inputs.forEach(input => input.disabled = false);
+    
+    // Scroll al editor
+    document.getElementById('editor-column').scrollIntoView({ behavior: 'smooth' });
+}
+
+/**
+ * Guardar barrio actual
+ */
+async function saveBarrio() {
+    if (!AppState.currentBarrio) {
+        alert('No hay barrio para guardar');
+        return;
+    }
+    
+    const saveBtn = document.getElementById('save-btn');
+    const statusEl = document.getElementById('save-status');
+    
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+    }
+    
+    try {
+        // Recopilar datos del formulario
+        const data = collectFormData();
+        
+        // Actualizar o crear barrio
+        if (AppState.currentBarrio.existe) {
+            await ApiClient.updateBarrio(AppState.currentBarrio.nombre, data);
+        } else {
+            await ApiClient.createBarrio(data);
+        }
+        
+        if (statusEl) {
+            statusEl.textContent = '✓ Guardado correctamente';
+            statusEl.classList.add('success');
+        }
+        
+        AppState.isChanged = false;
+        console.log('💾 Barrio guardado correctamente');
+        
+        // Recargar datos
+        loadBarrio(AppState.currentBarrio.nombre);
+        
+    } catch (error) {
+        console.error('Error guardando:', error);
+        if (statusEl) {
+            statusEl.textContent = '✗ Error al guardar';
+            statusEl.classList.add('error');
+        }
+        alert('Error al guardar: ' + error.message);
+    } finally {
+        if (saveBtn) {
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> Guardar';
+            saveBtn.disabled = !AppState.isChanged;
+        }
+    }
+}
+
+/**
+ * Regenerar datos con IA
+ */
+async function regenerateWithAI() {
+    if (!AppState.currentBarrio) {
+        alert('No hay barrio para regenerar');
+        return;
+    }
+    
+    const nombre = AppState.currentBarrio.nombre;
+    const confirmRegen = confirm(`¿Estás seguro de regenerar los datos de "${nombre}" con IA?\n\nEsto sobrescribirá los datos actuales.`);
+    
+    if (!confirmRegen) return;
+    
+    const regenerateBtn = document.getElementById('regenerate-btn');
+    if (regenerateBtn) {
+        regenerateBtn.disabled = true;
+        regenerateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
+    }
+    
+    try {
+        // Mostrar overlay de carga
+        showLoadingOverlay('Generando análisis con IA', `Actualizando datos de ${nombre}...`);
+        
+        const newData = await ApiClient.createBarrioWithAI(nombre);
+        
+        console.log('✨ Datos regenerados con IA:', newData);
+        
+        // Cargar datos nuevos
+        loadBarrioData(newData);
+        
+        alert('Datos regenerados correctamente');
+        
+    } catch (error) {
+        console.error('Error regenerando:', error);
+        alert('Error al regenerar: ' + error.message);
+    } finally {
+        hideLoadingOverlay();
+        if (regenerateBtn) {
+            regenerateBtn.innerHTML = '<i class="fas fa-magic"></i> Regenerar con IA';
+            regenerateBtn.disabled = false;
+        }
+    }
+}
+
+/**
+ * Eliminar barrio actual
+ */
+async function deleteBarrio() {
+    if (!AppState.currentBarrio) {
+        alert('No hay barrio para eliminar');
+        return;
+    }
+    
+    const nombre = AppState.currentBarrio.nombre;
+    const confirmDelete = confirm(`¿Estás seguro de eliminar "${nombre}"?\n\nEsta acción no se puede deshacer.`);
+    
+    if (!confirmDelete) return;
+    
+    try {
+        await ApiClient.deleteBarrio(nombre);
+        
+        console.log('🗑️ Barrio eliminado:', nombre);
+        
+        // Limpiar formulario
+        clearEditorForm();
+        
+        // Actualizar lista de barrios
+        await initApp();
+        
+        alert('Barrio eliminado correctamente');
+        
+    } catch (error) {
+        console.error('Error eliminando:', error);
+        alert('Error al eliminar: ' + error.message);
+    }
+}
+
+/**
+ * Limpiar formulario del editor
+ */
+function clearEditorForm() {
+    const inputs = document.querySelectorAll('#editor-form input, #editor-form textarea, #editor-form select');
+    inputs.forEach(input => {
+        input.value = '';
+        input.disabled = true;
+    });
+    
+    // Limpiar puntuaciones
+    const scores = document.querySelectorAll('[id^="score-"]');
+    scores.forEach(score => score.textContent = '--');
+    
+    // Reset estado
+    AppState.currentBarrio = null;
+    AppState.isEditing = false;
+    AppState.isChanged = false;
+    
+    // Reset badge
+    const badge = document.getElementById('edit-badge');
+    if (badge) {
+        badge.textContent = 'Sin datos';
+        badge.classList.remove('editing');
+    }
+}
+
+/**
+ * Recopilar datos del formulario
+ */
+function collectFormData() {
+    const nombre = AppState.currentBarrio?.nombre || document.getElementById('neighborhood-input')?.value || '';
+    
+    return {
+        nombre: nombre,
+        resumen: document.getElementById('edit-resumen')?.value || '',
+        conclusion: document.getElementById('edit-conclusion')?.value || '',
+        categorias: {
+            transporte: {
+                puntuacion: parseInt(document.getElementById('transporte-puntuacion')?.value) || 0,
+                descripcion: document.getElementById('transporte-descripcion')?.value || '',
+                estaciones: document.getElementById('transporte-estaciones')?.value || '',
+                colectivos: document.getElementById('transporte-colectivos')?.value || ''
+            },
+            comercio: {
+                puntuacion: parseInt(document.getElementById('comercio-puntuacion')?.value) || 0,
+                descripcion: document.getElementById('comercio-descripcion')?.value || '',
+                supermercados: document.getElementById('comercio-supermercados')?.value || '',
+                centros_comerciales: document.getElementById('comercio-centros')?.value || ''
+            },
+            seguridad: {
+                puntuacion: parseInt(document.getElementById('seguridad-puntuacion')?.value) || 0,
+                descripcion: document.getElementById('seguridad-descripcion')?.value || '',
+                comisaria: document.getElementById('seguridad-comisaria')?.value || ''
+            },
+            educacion: {
+                puntuacion: parseInt(document.getElementById('educacion-puntuacion')?.value) || 0,
+                descripcion: document.getElementById('educacion-descripcion')?.value || '',
+                escuelas: document.getElementById('educacion-escuelas')?.value || '',
+                universidades: document.getElementById('educacion-universidades')?.value || ''
+            },
+            salud: {
+                puntuacion: parseInt(document.getElementById('salud-puntuacion')?.value) || 0,
+                descripcion: document.getElementById('salud-descripcion')?.value || '',
+                hospitales: document.getElementById('salud-hospitales')?.value || '',
+                centros_salud: document.getElementById('salud-centros')?.value || ''
+            },
+            espacios_verdes: {
+                puntuacion: parseInt(document.getElementById('espacios_verdes-puntuacion')?.value) || 0,
+                descripcion: document.getElementById('espacios_verdes-descripcion')?.value || '',
+                parques: document.getElementById('espacios_verdes-parques')?.value || ''
+            },
+            contaminacion: {
+                puntuacion: parseInt(document.getElementById('contaminacion-puntuacion')?.value) || 0,
+                descripcion: document.getElementById('contaminacion-descripcion')?.value || '',
+                nivel_ruido: document.getElementById('contaminacion-ruido')?.value || '',
+                fuente: document.getElementById('contaminacion-fuente')?.value || ''
+            },
+            vida_barrio: {
+                puntuacion: parseInt(document.getElementById('vida_barrio-puntuacion')?.value) || 0,
+                descripcion: document.getElementById('vida_barrio-descripcion')?.value || '',
+                bares: document.getElementById('vida_barrio-bares')?.value || '',
+                cultura: document.getElementById('vida_barrio-cultura')?.value || ''
+            },
+            servicios_financieros: {
+                puntuacion: parseInt(document.getElementById('servicios_financieros-puntuacion')?.value) || 0,
+                descripcion: document.getElementById('servicios_financieros-descripcion')?.value || '',
+                bancos: document.getElementById('servicios_financieros-bancos')?.value || '',
+                cajeros: document.getElementById('servicios_financieros-cajeros')?.value || ''
+            }
+        }
+    };
+}
+
+/**
+ * Cargar datos de barrio en el formulario
+ */
+function loadBarrioData(data) {
+    if (!data || !data.nombre) return;
+    
+    AppState.currentBarrio = {
+        nombre: data.nombre,
+        existe: true
+    };
+    
+    // Actualizar toolbar
+    const currentBarrio = document.getElementById('current-barrio-name');
+    if (currentBarrio) currentBarrio.textContent = data.nombre;
+    
+    // Cargar resumen
+    const resumenEl = document.getElementById('edit-resumen');
+    if (resumenEl) resumenEl.value = data.resumen || '';
+    
+    // Cargar conclusión
+    const conclusionEl = document.getElementById('edit-conclusion');
+    if (conclusionEl) conclusionEl.value = data.conclusion || '';
+    
+    // Cargar categorías
+    const categorias = data.categorias || {};
+    const categoryNames = ['transporte', 'comercio', 'seguridad', 'educacion', 'salud', 'espacios_verdes', 'contaminacion', 'vida_barrio', 'servicios_financieros'];
+    
+    categoryNames.forEach(cat => {
+        const catData = categorias[cat] || {};
+        
+        const puntuacionEl = document.getElementById(`${cat}-puntuacion`);
+        const descripcionEl = document.getElementById(`${cat}-descripcion`);
+        const scoreEl = document.getElementById(`score-${cat}`);
+        
+        if (puntuacionEl) puntuacionEl.value = catData.puntuacion || '';
+        if (descripcionEl) descripcionEl.value = catData.descripcion || '';
+        
+        if (scoreEl) {
+            scoreEl.textContent = catData.puntuacion || '--';
+            scoreEl.removeAttribute('data-score');
+            if (catData.puntuacion >= 70) {
+                scoreEl.setAttribute('data-score', 'high');
+            } else if (catData.puntuacion >= 40) {
+                scoreEl.setAttribute('data-score', 'medium');
+            } else if (catData.puntuacion > 0) {
+                scoreEl.setAttribute('data-score', 'low');
+            }
+        }
+        
+        // Cargar campos específicos
+        const fieldMappings = {
+            'transporte': ['estaciones', 'colectivos'],
+            'comercio': ['supermercados', 'centros'],
+            'seguridad': ['comisaria'],
+            'educacion': ['escuelas', 'universidades'],
+            'salud': ['hospitales', 'centros'],
+            'espacios_verdes': ['parques'],
+            'contaminacion': ['ruido', 'fuente'],
+            'vida_barrio': ['bares', 'cultura'],
+            'servicios_financieros': ['bancos', 'cajeros']
+        };
+        
+        const fields = fieldMappings[cat] || [];
+        fields.forEach(field => {
+            const inputEl = document.getElementById(`${cat}-${field}`);
+            const catKey = field === 'centros' ? 'centros_salud' : 
+                          field === 'centros' ? 'centros_comerciales' : 
+                          field === 'colectivos' ? 'colectivos' : field;
+            if (inputEl) inputEl.value = catData[catKey] || '';
+        });
+    });
+    
+    // Deshabilitar campos por defecto
+    const inputs = document.querySelectorAll('#editor-form input, #editor-form textarea, #editor-form select');
+    inputs.forEach(input => input.disabled = true);
+    
+    console.log('📋 Datos cargados para:', data.nombre);
+}
