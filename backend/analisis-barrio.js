@@ -193,6 +193,16 @@ const Utils = {
             month: 'long',
             day: 'numeric'
         });
+    },
+
+    /**
+     * Escapa caracteres HTML para prevenir XSS
+     */
+    escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 };
 
@@ -240,29 +250,217 @@ const UIRenderer = {
      * Llena el formulario con los datos de un barrio
      */
     populateForm(barrio) {
-        // Campos de texto
-        this.setFieldValue('barrio-nombre', barrio.nombre);
-        this.setFieldValue('barrio-puntuacion', barrio.puntuacion_general);
-        this.setFieldValue('barrio-descripcion', barrio.perfil_barrio);
+        if (!barrio) return;
         
-        // Puntuaciones individuales
-        this.setScoreField('transporte', barrio.transporte_publico);
-        this.setScoreField('educacion', barrio.educacion);
-        this.setScoreField('salud', barrio.salud);
-        this.setScoreField('comercio', barrio.comercio_servicios);
-        this.setScoreField('gastronomia', barrio.gastronomia);
-        this.setScoreField('recreacion', barrio.recreacion_cultura);
-        this.setScoreField('seguridad', barrio.seguridad);
-        this.setScoreField('servicios-financieros', barrio.servicios_financieros);
+        console.log('📝 populateForm llamado con:', barrio);
         
-        // Mostrar estado de IA
-        this.updateAIStatus(barrio);
+        // Actualizar toolbar con el nombre del barrio
+        const currentBarrio = document.getElementById('current-barrio-name');
+        if (currentBarrio) currentBarrio.textContent = barrio.nombre || 'Unknown';
         
-        // Mostrar fecha de última actualización
-        this.updateLastUpdated(barrio);
+        // Campo de resumen
+        this.setFieldValue('edit-resumen', barrio.resumen);
         
-        // Actualizar el badge de estado
-        this.updateStatusBadge(barrio);
+        // Campo de conclusión
+        this.setFieldValue('edit-conclusion', barrio.conclusion);
+        
+        // Cargar categorías
+        const categorias = barrio.categorias || {};
+        
+        // Transporte
+        this.setScoreField('transporte', categorias.transporte);
+        this.setFieldValue('transporte-puntuacion', categorias.transporte?.puntuacion);
+        this.setFieldValue('transporte-descripcion', categorias.transporte?.descripcion);
+        this.setFieldValue('transporte-estaciones', categorias.transporte?.estaciones);
+        this.setFieldValue('transporte-colectivos', categorias.transporte?.colectivos);
+        
+        // Comercio
+        this.setScoreField('comercio', categorias.comercio);
+        this.setFieldValue('comercio-puntuacion', categorias.comercio?.puntuacion);
+        this.setFieldValue('comercio-descripcion', categorias.comercio?.descripcion);
+        this.setFieldValue('comercio-supermercados', categorias.comercio?.supermercados);
+        this.setFieldValue('comercio-centros', categorias.comercio?.centros_comerciales);
+        
+        // Seguridad
+        this.setScoreField('seguridad', categorias.seguridad);
+        this.setFieldValue('seguridad-puntuacion', categorias.seguridad?.puntuacion);
+        this.setFieldValue('seguridad-descripcion', categorias.seguridad?.descripcion);
+        this.setFieldValue('seguridad-comisaria', categorias.seguridad?.comisaria);
+        
+        // Educación
+        this.setScoreField('educacion', categorias.educacion);
+        this.setFieldValue('educacion-puntuacion', categorias.educacion?.puntuacion);
+        this.setFieldValue('educacion-descripcion', categorias.educacion?.descripcion);
+        this.setFieldValue('educacion-escuelas', categorias.educacion?.escuelas);
+        this.setFieldValue('educacion-universidades', categorias.educacion?.universidades);
+        
+        // Salud
+        this.setScoreField('salud', categorias.salud);
+        this.setFieldValue('salud-puntuacion', categorias.salud?.puntuacion);
+        this.setFieldValue('salud-descripcion', categorias.salud?.descripcion);
+        this.setFieldValue('salud-hospitales', categorias.salud?.hospitales);
+        this.setFieldValue('salud-centros', categorias.salud?.centros_salud);
+        
+        // Espacios Verdes
+        this.setScoreField('espacios_verdes', categorias.espacios_verdes);
+        this.setFieldValue('espacios_verdes-puntuacion', categorias.espacios_verdes?.puntuacion);
+        this.setFieldValue('espacios_verdes-descripcion', categorias.espacios_verdes?.descripcion);
+        this.setFieldValue('espacios_verdes-parques', categorias.espacios_verdes?.parques);
+        
+        // Contaminación
+        this.setScoreField('contaminacion', categorias.contaminacion);
+        this.setFieldValue('contaminacion-puntuacion', categorias.contaminacion?.puntuacion);
+        this.setFieldValue('contaminacion-descripcion', categorias.contaminacion?.descripcion);
+        this.setFieldValue('contaminacion-ruido', categorias.contaminacion?.nivel_ruido);
+        this.setFieldValue('contaminacion-fuente', categorias.contaminacion?.fuente);
+        
+        // Vida del Barrio
+        this.setScoreField('vida_barrio', categorias.vida_barrio);
+        this.setFieldValue('vida_barrio-puntuacion', categorias.vida_barrio?.puntuacion);
+        this.setFieldValue('vida_barrio-descripcion', categorias.vida_barrio?.descripcion);
+        this.setFieldValue('vida_barrio-bares', categorias.vida_barrio?.bares);
+        this.setFieldValue('vida_barrio-cultura', categorias.vida_barrio?.cultura);
+        
+        // Servicios Financieros
+        this.setScoreField('servicios_financieros', categorias.servicios_financieros);
+        this.setFieldValue('servicios_financieros-puntuacion', categorias.servicios_financieros?.puntuacion);
+        this.setFieldValue('servicios_financieros-descripcion', categorias.servicios_financieros?.descripcion);
+        this.setFieldValue('servicios_financieros-bancos', categorias.servicios_financieros?.bancos);
+        this.setFieldValue('servicios_financieros-cajeros', categorias.servicios_financieros?.cajeros);
+        
+        // Actualizar vista previa
+        this.updatePreview(barrio);
+        
+        console.log('✅ Formulario populado correctamente');
+    },
+
+    /**
+     * Actualiza la columna de vista previa con los datos del barrio
+     */
+    updatePreview(barrio) {
+        if (!barrio) {
+            console.log('⚠️ updatePreview: barrio es null');
+            return;
+        }
+        
+        console.log('🎨 updatePreview llamado con:', barrio);
+        
+        // Actualizar resumen/perfil
+        const previewResumen = document.getElementById('preview-resumen');
+        if (previewResumen) {
+            if (barrio.resumen) {
+                previewResumen.innerHTML = `<p>${Utils.escapeHtml(barrio.resumen)}</p>`;
+            } else {
+                previewResumen.innerHTML = '<p class="empty-text">Sin resumen disponible</p>';
+            }
+        }
+        
+        // Actualizar conclusión
+        const previewConclusion = document.getElementById('preview-conclusion');
+        if (previewConclusion) {
+            if (barrio.conclusion) {
+                previewConclusion.innerHTML = `<p>${Utils.escapeHtml(barrio.conclusion)}</p>`;
+            } else {
+                previewConclusion.innerHTML = '<p class="empty-text">Sin conclusión disponible</p>';
+            }
+        }
+        
+        // Obtener categorías
+        const categorias = barrio.categorias || {};
+        
+        // Mapeo de categorías del editor a la vista previa
+        const categoryMap = {
+            'transporte': 'preview-transporte',
+            'comercio': 'preview-comercio',
+            'seguridad': 'preview-seguridad',
+            'educacion': 'preview-educacion',
+            'salud': 'preview-salud',
+            'espacios_verdes': 'preview-recreacion',
+            'contaminacion': 'preview-contaminacion',
+            'vida_barrio': 'preview-gastronomia',
+            'servicios_financieros': 'preview-finanzas'
+        };
+        
+        // Actualizar cada categoría en la vista previa
+        Object.keys(categoryMap).forEach(catKey => {
+            const previewId = categoryMap[catKey];
+            const catData = categorias[catKey];
+            const previewElement = document.getElementById(previewId);
+            
+            if (previewElement && catData) {
+                const puntuacion = catData.puntuacion || 0;
+                const descripcion = catData.descripcion || '';
+                
+                // Generar contenido de la tarjeta
+                let contentHtml = `
+                    <div class="category-score" style="margin-bottom: 8px;">
+                        <strong>Puntuación:</strong> 
+                        <span style="
+                            background: ${puntuacion >= 70 ? 'var(--success-color)' : puntuacion >= 40 ? 'var(--warning-color)' : 'var(--danger-color)'};
+                            color: white;
+                            padding: 2px 8px;
+                            border-radius: 12px;
+                            font-size: 12px;
+                        ">${puntuacion}/100</span>
+                    </div>
+                    <p style="margin-bottom: 8px;">${Utils.escapeHtml(descripcion)}</p>
+                `;
+                
+                // Agregar detalles específicos
+                const details = this.getPreviewDetails(catKey, catData);
+                if (details) {
+                    contentHtml += `<p style="font-size: 12px; color: var(--text-secondary);"><strong>Destacado:</strong> ${details}</p>`;
+                }
+                
+                previewElement.innerHTML = contentHtml;
+            } else if (previewElement) {
+                previewElement.innerHTML = '<p class="empty-text">Sin datos disponibles</p>';
+            }
+        });
+        
+        console.log('✅ Vista previa actualizada');
+    },
+
+    /**
+     * Obtiene los detalles destacados para la vista previa
+     */
+    getPreviewDetails(category, data) {
+        if (!data) return '';
+        
+        switch (category) {
+            case 'transporte':
+                if (data.estaciones) return `Estaciones: ${data.estaciones}`;
+                if (data.colectivos) return `Líneas: ${data.colectivos}`;
+                break;
+            case 'comercio':
+                if (data.supermercados) return data.supermercados.split(',')[0];
+                if (data.centros_comerciales) return data.centros_comerciales.split(',')[0];
+                break;
+            case 'seguridad':
+                if (data.comisaria) return `Comisaría: ${data.comisaria}`;
+                break;
+            case 'educacion':
+                if (data.escuelas) return data.escuelas.split(',')[0];
+                if (data.universidades) return data.universidades.split(',')[0];
+                break;
+            case 'salud':
+                if (data.hospitales) return data.hospitales.split(',')[0];
+                if (data.centros_salud) return data.centros_salud.split(',')[0];
+                break;
+            case 'espacios_verdes':
+                if (data.parques) return data.parques.split(',')[0];
+                break;
+            case 'vida_barrio':
+                if (data.bares) return data.bares.split(',')[0];
+                if (data.cultura) return data.cultura.split(',')[0];
+                break;
+            case 'servicios_financieros':
+                if (data.bancos) return data.bancos.split(',')[0];
+                if (data.cajeros) return `Cajeros: ${data.cajeros.split(',')[0]}`;
+                break;
+        }
+        
+        return '';
     },
 
     /**
@@ -278,16 +476,31 @@ const UIRenderer = {
     /**
      * Establece el valor de un campo de puntuación
      */
-    setScoreField(category, score) {
+    setScoreField(category, scoreData) {
         const scoreElement = document.getElementById(`score-${category}`);
-        const inputElement = document.getElementById(`barrio-${category}`);
         
-        if (scoreElement) {
-            scoreElement.textContent = score !== null && score !== undefined ? `${score} /100` : '--';
+        // Obtener la puntuación del objeto o del valor directo
+        let score = 0;
+        if (scoreData !== null && scoreData !== undefined) {
+            if (typeof scoreData === 'object') {
+                score = scoreData.puntuacion || 0;
+            } else {
+                score = scoreData;
+            }
         }
         
-        if (inputElement) {
-            inputElement.value = score !== null && score !== undefined ? score : '';
+        if (scoreElement) {
+            scoreElement.textContent = score > 0 ? score : '--';
+            
+            // Actualizar color según puntuación
+            scoreElement.removeAttribute('data-score');
+            if (score >= 70) {
+                scoreElement.setAttribute('data-score', 'high');
+            } else if (score >= 40) {
+                scoreElement.setAttribute('data-score', 'medium');
+            } else if (score > 0) {
+                scoreElement.setAttribute('data-score', 'low');
+            }
         }
     },
 
