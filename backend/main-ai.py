@@ -1052,60 +1052,70 @@ Eres un analista inmobiliario experto en Buenos Aires, Argentina. Genera un aná
     
     try:
         # Llamar a Gemini
+        print(f"📤 Enviando prompt a Gemini para zona: {zone_clean}")
         ai_response = call_gemini_with_rotation(prompt)
         
-        # Parsear respuesta
-        json_match = re.search(r'\{[\s\S]*\}', ai_response)
+        print(f"📥 Respuesta de Gemini recibida ({len(ai_response)} caracteres)")
+        print(f"📄 Primeros 300 caracteres: {ai_response[:300]}...")
         
-        if json_match:
-            try:
-                analysis_data = json.loads(json_match.group())
-                
-                # Validar que tenga la estructura esperada
-                if not isinstance(analysis_data, dict):
-                    raise ValueError("La respuesta no es un objeto JSON válido")
-                
-                # Guardar en base de datos (7 días de caché)
-                save_environ_analysis(zone_clean, analysis_data, cache_days=7)
-                
-                # Log exitoso
-                log_environ_analysis_request(zone_clean, True, analysis_json=json.dumps(analysis_data))
-                
-                print(f"✅ Análisis generado y guardado para: {zone_clean}")
-                
-                return {
-                    "success": True,
-                    "source": "ai",
-                    "zone": zone_clean,
-                    "entorno": analysis_data,
-                    "message": "Análisis generado exitosamente con IA"
-                }
-                
-            except json.JSONDecodeError as e:
-                error_msg = f"Error parseando JSON: {str(e)}"
-                print(f"❌ {error_msg}")
-                log_environ_analysis_request(zone_clean, False, error=error_msg)
-                
-                return {
-                    "success": False,
-                    "error": error_msg,
-                    "message": "Error al procesar la respuesta de la IA"
-                }
-        else:
-            error_msg = "No se encontró JSON válido en la respuesta de la IA"
-            print(f"❌ {error_msg}")
-            print(f"📄 Respuesta recibida: {ai_response[:200]}...")
-            log_environ_analysis_request(zone_clean, False, error=error_msg)
+        # Limpiar markdown y extraer JSON de forma más robusta
+        clean_response = ai_response.strip()
+        
+        # Remover bloques de markdown ```json ... ```
+        if clean_response.startswith('```json'):
+            clean_response = clean_response[7:]
+        elif clean_response.startswith('```'):
+            clean_response = clean_response[3:]
+        
+        if clean_response.endswith('```'):
+            clean_response = clean_response[:-3]
+        
+        clean_response = clean_response.strip()
+        
+        print(f"🧹 Respuesta limpia: {clean_response[:200]}...")
+        
+        # Intentar parsear directamente primero
+        try:
+            analysis_data = json.loads(clean_response)
+            print(f"✅ JSON parseado directamente")
+        except json.JSONDecodeError:
+            # Si falla, buscar el primer objeto JSON en la respuesta
+            print(f"🔍 Buscando JSON en la respuesta...")
+            json_match = re.search(r'\{[\s\S]*\}', clean_response)
             
-            return {
-                "success": False,
-                "error": error_msg,
-                "message": "No se pudo generar el análisis"
-            }
+            if json_match:
+                try:
+                    analysis_data = json.loads(json_match.group())
+                    print(f"✅ JSON extraído con regex")
+                except json.JSONDecodeError as e:
+                    raise ValueError(f"JSON inválido encontrado: {str(e)}")
+            else:
+                raise ValueError("No se encontró ningún objeto JSON en la respuesta")
+        
+        # Validar que tenga la estructura esperada
+        if not isinstance(analysis_data, dict):
+            raise ValueError("La respuesta no es un objeto JSON válido")
+        
+        # Guardar en base de datos (7 días de caché)
+        save_environ_analysis(zone_clean, analysis_data, cache_days=7)
+        
+        # Log exitoso
+        log_environ_analysis_request(zone_clean, True, analysis_json=json.dumps(analysis_data))
+        
+        print(f"✅ Análisis generado y guardado para: {zone_clean}")
+        
+        return {
+            "success": True,
+            "source": "ai",
+            "zone": zone_clean,
+            "entorno": analysis_data,
+            "message": "Análisis generado exitosamente con IA"
+        }
             
     except Exception as e:
         error_msg = str(e)
         print(f"❌ Error generando análisis: {error_msg}")
+        print(f"📄 Respuesta completa de Gemini: {ai_response[:500]}...")
         
         # Log de error
         log_environ_analysis_request(zone_clean, False, error=error_msg)
