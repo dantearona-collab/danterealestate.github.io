@@ -1304,6 +1304,13 @@ def generar_datos_barrio_ai(nombre_barrio: str) -> Dict[str, Any]:
     def clean_and_parse_json(response: str) -> Dict:
         """Limpia y parsea la respuesta JSON con manejo de errores avanzado"""
         
+        # Guardar respuesta cruda para debug
+        try:
+            with open('debug_json_error.json', 'w', encoding='utf-8') as f:
+                f.write(response)
+        except:
+            pass
+        
         # EXTRAER EL JSON entre el primer { y el último }
         first_brace = response.find('{')
         last_brace = response.rfind('}')
@@ -1312,66 +1319,75 @@ def generar_datos_barrio_ai(nombre_barrio: str) -> Dict[str, Any]:
             json_str = response[first_brace:last_brace + 1]
             print(f"   📋 JSON extraído ({len(json_str)} caracteres)")
             
+            # Intentar parsear directamente primero
             try:
                 return json.loads(json_str)
             except json.JSONDecodeError as e:
-                print(f"   ⚠️ Error en JSON extraído: {e}")
-                # Guardar para debug
-                try:
-                    with open('debug_json_error.json', 'w', encoding='utf-8') as f:
-                        f.write(json_str)
-                    print(f"   💾 JSON guardado en debug_json_error.json")
-                except:
-                    pass
-        
-        # Si falló, limpiar y reintentar
-        clean = response.strip()
-        
-        # Remover bloques markdown
-        clean = re.sub(r'```json\s*', '', clean)
-        clean = re.sub(r'\s*```', '', clean)
-        clean = re.sub(r'^```\s*', '', clean, flags=re.MULTILINE)
-        clean = re.sub(r'\s*```$', '', clean, flags=re.MULTILINE)
-        
-        # Extraer JSON
-        first_brace = clean.find('{')
-        last_brace = clean.rfind('}')
-        
-        if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
-            clean = clean[first_brace:last_brace + 1]
-        
-        print(f"   📋 JSON limpiado ({len(clean)} caracteres)")
-        
-        # Correcciones agresivas iterativas
-        for _ in range(5):  # Múltiples pasadas
-            # Trailing commas
-            clean = re.sub(r',\s*([}\]])', r'\1', clean)
-            # Comillas simples en keys
-            clean = re.sub(r"'([^']+)':", r'"\1":', clean)
-            # Comillas simples en strings
-            clean = re.sub(r"'([^']*)'", r'"\1"', clean)
+                print(f"   ⚠️ Error en JSON directo: {e}")
             
+            # Si falla, limpiar y reintentar
+            clean = json_str.strip()
+            
+            # Remover bloques markdown
+            clean = re.sub(r'```json\s*', '', clean)
+            clean = re.sub(r'\s*```', '', clean)
+            clean = re.sub(r'^```\s*', '', clean, flags=re.MULTILINE)
+            clean = re.sub(r'\s*```$', '', clean, flags=re.MULTILINE)
+            
+            # Correcciones agresivas iterativas (más iteraciones)
+            for _ in range(10):
+                # Trailing commas en objetos
+                clean = re.sub(r',\s*([}\]])', r'\1', clean)
+                # Trailing commas en arrays
+                clean = re.sub(r',\s*(\])', r'\1', clean)
+                # Comillas simples en keys
+                clean = re.sub(r"'([^']+)':", r'"\1":', clean)
+                # Comillas simples en strings (excepto ya escapadas)
+                clean = re.sub(r"(?<!\\)'([^'\\]*(?:\\.[^'\\]*)*)'", r'"\1"', clean)
+                # Nueva línea en strings sin escapar
+                clean = re.sub(r'"([^"\\]*(?:\\.[^"\\]*)*)\n([^"\\]*(?:\\.[^"\\]*)*)"', r'"\1 \\n \2"', clean)
+                # Caracteres especiales problemáticos
+                clean = clean.replace('\n', '\\n')
+                clean = clean.replace('\r', '\\r')
+                clean = clean.replace('\t', '\\t')
+                
+                try:
+                    result = json.loads(clean)
+                    print(f"   ✅ JSON reparado en iteración {_ + 1}")
+                    return result
+                except json.JSONDecodeError:
+                    pass
+            
+            # Último intento: eliminar todo después del último } completo
+            # Encontrar el último } que cierra un objeto válido
             try:
-                return json.loads(clean)
-            except json.JSONDecodeError:
+                # Intentar desde el final
+                for i in range(len(clean) - 1, -1, -1):
+                    if clean[i] == '}':
+                        try_test = clean[:i + 1]
+                        try:
+                            return json.loads(try_test)
+                        except json.JSONDecodeError:
+                            continue
+            except:
                 pass
         
-        # Último intento: usar regex para encontrar y corregir el JSON problema
-        try:
-            # Dividir en líneas y verificar cada una
-            lines = clean.split('\n')
-            fixed_lines = []
-            for i, line in enumerate(lines):
-                # Eliminar trailing commas en objetos/arrays
-                line = re.sub(r',\s*([}\]])', r'\1', line)
-                fixed_lines.append(line)
-            
-            fixed_json = '\n'.join(fixed_lines)
-            return json.loads(fixed_json)
-        except json.JSONDecodeError:
-            pass
-        
-        raise ValueError(f"No se pudo parsear el JSON")
+        # Si todo falla, devolver estructura vacía
+        print(f"   ❌ No se pudo parsear el JSON, devolviendo estructura vacía")
+        return {
+            "resumen_general": "Error al generar datos",
+            "puntuacion_general": 50,
+            "transporte": {"puntuacion": 50, "descripcion": "Datos no disponibles"},
+            "comercio": {"puntuacion": 50, "descripcion": "Datos no disponibles"},
+            "seguridad": {"puntuacion": 50, "descripcion": "Datos no disponibles"},
+            "educacion": {"puntuacion": 50, "descripcion": "Datos no disponibles"},
+            "salud": {"puntuacion": 50, "descripcion": "Datos no disponibles"},
+            "espacios_verdes": {"puntuacion": 50, "descripcion": "Datos no disponibles"},
+            "contaminacion": {"puntuacion": 50, "descripcion": "Datos no disponibles"},
+            "vida_barrio": {"puntuacion": 50, "descripcion": "Datos no disponibles"},
+            "servicios_financieros": {"puntuacion": 50, "descripcion": "Datos no disponibles"},
+            "conclusion": "Error al generar datos con IA"
+        }
     
     try:
         ai_response = call_gemini_with_rotation(prompt)
@@ -1498,15 +1514,132 @@ def obtener_barrio(nombre: str):
         raise HTTPException(status_code=404, detail=f"Barrio '{nombre}' no encontrado")
     
     data = json.loads(row['data'])
+    nombre_display = row['nombre']
+    
+    # Transformar datos al formato esperado por el frontend
+    frontend_data = transformar_a_formatofrontend(data, nombre_display)
     
     return {
         "success": True,
-        "nombre": row['nombre'],
-        "data": data,
+        "nombre": nombre_display,
+        "data": frontend_data,
         "generado_por_ia": row['actualizado_por'] == 'ai',
         "actualizado_por": row['actualizado_por'],
         "fecha_actualizacion": row['fecha_actualizacion']
     }
+
+def transformar_a_formatofrontend(data: dict, nombre: str) -> dict:
+    """
+    Transforma los datos del formato interno al formato esperado por el frontend.
+    El frontend espera: resumen, conclusion, categorias.transporte.puntuacion, etc.
+    El backend almacena: resumen_general, conclusion, transporte.puntuacion, etc.
+    """
+    if not data:
+        return {
+            'nombre': nombre,
+            'resumen': '',
+            'conclusion': '',
+            'categorias': {}
+        }
+    
+    # Mapear los campos del formato backend al formato frontend
+    categorias = {}
+    
+    # Transporte
+    if 'transporte' in data:
+        t = data['transporte']
+        categorias['transporte'] = {
+            'puntuacion': t.get('puntuacion', 0),
+            'descripcion': t.get('descripcion', ''),
+            'estaciones': ', '.join(t.get('estaciones_cercanas', [])) if t.get('estaciones_cercanas') else t.get('estaciones', ''),
+            'colectivos': ', '.join(t.get('lineas_colectivo', [])) if t.get('lineas_colectivo') else t.get('colectivos', '')
+        }
+    
+    # Comercio
+    if 'comercio' in data:
+        c = data['comercio']
+        categorias['comercio'] = {
+            'puntuacion': c.get('puntuacion', 0),
+            'descripcion': c.get('descripcion', ''),
+            'supermercados': ', '.join(c.get('supermercados', [])) if c.get('supermercados') else c.get('supermercados', ''),
+            'centros_comerciales': ', '.join(c.get('centros_comerciales', [])) if c.get('centros_comerciales') else c.get('centros', '')
+        }
+    
+    # Seguridad
+    if 'seguridad' in data:
+        s = data['seguridad']
+        categorias['seguridad'] = {
+            'puntuacion': s.get('puntuacion', 0),
+            'descripcion': s.get('descripcion', ''),
+            'comisaria': s.get('comisaria_cercana', '') or s.get('comisaria', '')
+        }
+    
+    # Educación
+    if 'educacion' in data:
+        e = data['educacion']
+        categorias['educacion'] = {
+            'puntuacion': e.get('puntuacion', 0),
+            'descripcion': e.get('descripcion', ''),
+            'escuelas': ', '.join(e.get('escuelas', [])) if e.get('escuelas') else e.get('escuelas', ''),
+            'universidades': ', '.join(e.get('universidades', [])) if e.get('universidades') else e.get('universidades', '')
+        }
+    
+    # Salud
+    if 'salud' in data:
+        s = data['salud']
+        categorias['salud'] = {
+            'puntuacion': s.get('puntuacion', 0),
+            'descripcion': s.get('descripcion', ''),
+            'hospitales': ', '.join(s.get('hospitales', [])) if s.get('hospitales') else s.get('hospitales', ''),
+            'centros_salud': ', '.join(s.get('centros_salud', [])) if s.get('centros_salud') else s.get('centros', '')
+        }
+    
+    # Espacios Verdes
+    if 'espacios_verdes' in data:
+        e = data['espacios_verdes']
+        categorias['espacios_verdes'] = {
+            'puntuacion': e.get('puntuacion', 0),
+            'descripcion': e.get('descripcion', ''),
+            'parques': ', '.join(e.get('parques', [])) if e.get('parques') else e.get('parques', '')
+        }
+    
+    # Contaminación
+    if 'contaminacion' in data:
+        c = data['contaminacion']
+        categorias['contaminacion'] = {
+            'puntuacion': c.get('puntuacion', 0),
+            'descripcion': c.get('descripcion', ''),
+            'nivel_ruido': c.get('nivel_ruido', '') or c.get('ruido', ''),
+            'fuente': c.get('principal_fuente', '') or c.get('fuente', '')
+        }
+    
+    # Vida del Barrio
+    if 'vida_barrio' in data:
+        v = data['vida_barrio']
+        categorias['vida_barrio'] = {
+            'puntuacion': v.get('puntuacion', 0),
+            'descripcion': v.get('descripcion', ''),
+            'bares': ', '.join(v.get('bares_restaurantes', [])) if v.get('bares_restaurantes') else v.get('bares', ''),
+            'cultura': ', '.join(v.get('cultura', [])) if v.get('cultura') else v.get('cultura', '')
+        }
+    
+    # Servicios Financieros
+    if 'servicios_financieros' in data:
+        s = data['servicios_financieros']
+        categorias['servicios_financieros'] = {
+            'puntuacion': s.get('puntuacion', 0),
+            'descripcion': s.get('descripcion', ''),
+            'bancos': ', '.join(s.get('bancos', [])) if s.get('bancos') else s.get('bancos', ''),
+            'cajeros': ', '.join(s.get('cajeros_automaticos', [])) if s.get('cajeros_automaticos') else s.get('cajeros', '')
+        }
+    
+    return {
+        'nombre': nombre,
+        'resumen': data.get('resumen_general', '') or data.get('resumen', ''),
+        'conclusion': data.get('conclusion', ''),
+        'categorias': categorias
+    }
+
 
 @app.post("/api/barrios")
 def crear_barrio(request: BarrioCreateRequest):
@@ -1556,11 +1689,14 @@ def crear_barrio(request: BarrioCreateRequest):
         conn.commit()
         conn.close()
         
+        # Transformar datos al formato esperado por el frontend
+        frontend_data = transformar_a_formatofrontend(data, nombre_display)
+        
         return {
             "success": True,
             "message": f"Barrio '{nombre_display}' creado exitosamente",
             "source": "ai" if request.generar_ia else "manual",
-            "data": data,
+            "data": frontend_data,
             "generado_por_ia": request.generar_ia,
             "fecha_actualizacion": datetime.now().isoformat()
         }
@@ -1638,10 +1774,13 @@ def regenerar_barrio_ai(nombre: str):
         conn.commit()
         conn.close()
         
+        # Transformar datos al formato esperado por el frontend
+        frontend_data = transformar_a_formatofrontend(data, nombre_display)
+        
         return {
             "success": True,
             "message": f"Barrio '{nombre_display}' regenerado con IA",
-            "data": data,
+            "data": frontend_data,
             "generado_por_ia": True,
             "fecha_actualizacion": datetime.now().isoformat()
         }
