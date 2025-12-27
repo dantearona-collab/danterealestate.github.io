@@ -620,6 +620,8 @@ const EventHandlers = {
      * Maneja la acción de buscar/analizar un barrio
      */
     async handleAnalyze() {
+        console.log('🔍🚀 handleAnalyze EJECUTANDO NUEVO CÓDIGO');
+        
         const searchInput = document.getElementById('neighborhood-input');
         const query = searchInput ? searchInput.value.trim() : '';
         
@@ -658,19 +660,33 @@ const EventHandlers = {
         } catch (error) {
             console.log('❌ Error capturado:', error.message);
             
-            // Si el barrio no existe (404), preguntar si quiere crearlo
-            if (error.message.includes('404')) {
-                console.log('📋 Barrio no encontrado, mostrando confirmación...');
-                const confirmCreate = confirm(
-                    `El barrio "${query}" no existe en la base de datos.\n\n` +
-                    '¿Desea crear un nuevo análisis usando IA?'
-                );
-                
-                console.log('📋 Usuario eligió:', confirmCreate);
-                
-                if (confirmCreate) {
-                    await this.handleCreateWithAI(query);
-                }
+            // Si el barrio no existe, preguntar si quiere crearlo
+            const errorMsg = error.message.toLowerCase();
+            console.log('📋 errorMsg:', errorMsg);
+            console.log('📋 incluye 404:', errorMsg.includes('404'));
+            console.log('📋 incluye no encontrado:', errorMsg.includes('no encontrado'));
+            console.log('📋 incluye not found:', errorMsg.includes('not found'));
+            
+            // Verificar si el error indica que el barrio no existe
+            const barrioNoEncontrado = 
+                errorMsg.includes('404') || 
+                errorMsg.includes('no encontrado') || 
+                errorMsg.includes('not found');
+            
+            if (barrioNoEncontrado) {
+                console.log('📋 Mostrando diálogo de confirmación...');
+                setTimeout(() => {
+                    const confirmCreate = confirm(
+                        `El barrio "${query}" no existe en la base de datos.\n\n` +
+                        '¿Desea crear un nuevo análisis usando IA?'
+                    );
+                    
+                    console.log('📋 Usuario eligió:', confirmCreate);
+                    
+                    if (confirmCreate) {
+                        this.handleCreateWithAI(query);
+                    }
+                }, 100);
             } else {
                 console.error('Error al buscar barrio:', error);
                 Utils.showToast(`Error: ${error.message}`, 'error');
