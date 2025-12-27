@@ -1056,7 +1056,9 @@ Eres un analista inmobiliario experto en Buenos Aires, Argentina. Genera un aná
         ai_response = call_gemini_with_rotation(prompt)
         
         print(f"📥 Respuesta de Gemini recibida ({len(ai_response)} caracteres)")
-        print(f"📄 Primeros 300 caracteres: {ai_response[:300]}...")
+        print("=" * 80)
+        print(ai_response)
+        print("=" * 80)
         
         # Limpiar markdown y extraer JSON de forma más robusta
         clean_response = ai_response.strip()
@@ -1072,25 +1074,40 @@ Eres un analista inmobiliario experto en Buenos Aires, Argentina. Genera un aná
         
         clean_response = clean_response.strip()
         
-        print(f"🧹 Respuesta limpia: {clean_response[:200]}...")
+        print(f"🧹 Respuesta limpia ({len(clean_response)} caracteres):")
+        print("=" * 80)
+        print(clean_response)
+        print("=" * 80)
         
         # Intentar parsear directamente primero
         try:
             analysis_data = json.loads(clean_response)
             print(f"✅ JSON parseado directamente")
-        except json.JSONDecodeError:
-            # Si falla, buscar el primer objeto JSON en la respuesta
-            print(f"🔍 Buscando JSON en la respuesta...")
-            json_match = re.search(r'\{[\s\S]*\}', clean_response)
+        except json.JSONDecodeError as e:
+            # Si falla, intentar corregir errores comunes
+            print(f"🔧 Error de parsing: {e}")
+            print(f"🔍 Intentando corregir...")
             
-            if json_match:
-                try:
-                    analysis_data = json.loads(json_match.group())
-                    print(f"✅ JSON extraído con regex")
-                except json.JSONDecodeError as e:
-                    raise ValueError(f"JSON inválido encontrado: {str(e)}")
-            else:
-                raise ValueError("No se encontró ningún objeto JSON en la respuesta")
+            # Corregir errores comunes
+            corrected = clean_response
+            
+            # Corregir comillas simples a dobles (pero preservar contenido)
+            # Reemplazar ' por " solo en claves JSON
+            corrected = re.sub(r"'([^']+)':", r'"\1":', corrected)
+            
+            # Corregir trailing commas
+            corrected = re.sub(r',\s*([}\]])', r'\1', corrected)
+            
+            print(f"🧹 Respuesta corregida:")
+            print("=" * 80)
+            print(corrected)
+            print("=" * 80)
+            
+            try:
+                analysis_data = json.loads(corrected)
+                print(f"✅ JSON corregido y parseado")
+            except json.JSONDecodeError as e2:
+                raise ValueError(f"JSON inválido incluso después de corrección: {str(e2)}\n\nRespuesta original:\n{ai_response[:1000]}...")
         
         # Validar que tenga la estructura esperada
         if not isinstance(analysis_data, dict):
