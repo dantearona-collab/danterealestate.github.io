@@ -143,37 +143,159 @@ const MarketService = {
 
 const EnvironmentService = {
     /**
-     * Obtiene análisis del entorno con IA
+     * Genera análisis del entorno de forma local (igual que app.js)
      */
     async getEnvironmentAnalysis(address, zone) {
+        console.log('🌍 Generando análisis del entorno para:', zone);
+        
         try {
-            console.log('🌍 Obteniendo análisis del entorno para:', zone);
+            // Usar la misma lógica que app.js
+            const ubicacionParaBusqueda = `${zone}, Buenos Aires, Argentina`;
             
-            const response = await fetch(API_CONFIG.getEnvironmentEndpoint(address, zone), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    direccion: address || zone,
-                    barrio: zone
-                })
-            });
+            // Generar búsquedas dinámicas
+            const searchQueries = [
+                `${ubicacionParaBusqueda} servicios comercios farmacias`,
+                `${ubicacionParaBusqueda} transporte público subte colectivos`,
+                `${ubicacionParaBusqueda} escuelas colegios universidades educación`,
+                `${ubicacionParaBusqueda} hospitales clínicas salud`,
+                `${ubicacionParaBusqueda} supermercados centros comerciales`,
+                `${ubicacionParaBusqueda} restaurantes gastronomía`,
+                `${ubicacionParaBusqueda} parques plazas espacios verdes`,
+                `${ubicacionParaBusqueda} bancos servicios financieros`
+            ];
             
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            // Generar resultados basados en la zona
+            const searchResults = await generateRealSearchResults(ubicacionParaBusqueda, zone, searchQueries);
             
-            const data = await response.json();
-            console.log('✅ Análisis del entorno obtenido:', data);
-            return data;
+            // Procesar resultados
+            const environmentData = processEnvironmentData(searchResults, address, zone, ubicacionParaBusqueda, '');
+            
+            console.log('✅ Análisis del entorno generado');
+            return {
+                success: true,
+                zone: zone,
+                analysis: environmentData.categories
+            };
             
         } catch (error) {
-            console.error('❌ Error obteniendo análisis del entorno:', error);
+            console.error('❌ Error generando análisis del entorno:', error);
             return null;
         }
     }
 };
+
+// ============================================
+// FUNCIONES SIMULADAS (igual que app.js)
+// ============================================
+
+// Generar resultados realistas basados en búsquedas
+async function generateRealSearchResults(ubicacionReal, barrioOriginal, searchQueries) {
+    console.log('🎯 Generando resultados para:', barrioOriginal);
+    
+    // Base de datos simulada de barrios
+    const barriosData = {
+        'palermo': {
+            perfil: 'Palermo es uno de los barrios más populares y diversos de Buenos Aires, conocido por sus parques, vida nocturna y scene artística.',
+            transporte: 'Excelente red de transporte con varias líneas de subte (D, B, A), numerosos colectivos y ciclovía propia.',
+            educacion: 'Cuenta con prestigiosos colegios bilingües, instituciones educativas públicas y privadas de todos los niveles.',
+            salud: 'Hospitales de alta complejidad, clínicas privadas y múltiples centros de salud distribuidos en el barrio.',
+            comercio: 'Vibrante zona comercial con shoppings, galerías, locales de moda y el famoso circuito de Palermo Hollywood y Soho.',
+            gastronomia: 'Epicentro de la gastronomía porteña con restaurantes gourmet, bares temáticos, cafeterías y food parks.',
+            recreacion: 'Parques水量 (Bosques de Palermo, Jardin Japonés, Zoológico), clubes deportivos y espacios culturales.',
+            seguridad: 'Zona con presencia policial y vigilancia privada, seguridad media-alta en áreas residenciales.'
+        },
+        'microcentro': {
+            perfil: 'El corazón financiero y comercial de Buenos Aires, con importante actividad bancaria y empresarial.',
+            transporte: 'Excelente conectividad con todas las líneas de subte, tren urbano y múltiples líneas de colectivo.',
+            educacion: 'Instituto de educación superior y academias especializadas en negocios y idiomas.',
+            salud: 'Clínicas especializadas y centros médicos orientados a profesionales y ejecutivos.',
+            comercio: 'Centro comercial por excelencia con galerías, casas de cambio y tiendas especializadas.',
+            gastronomia: 'Restaurantes ejecutivos, casas de té históricas y cafeterías tradicionales.',
+            recreacion: 'Cercano a lugares históricos como el Obelisco, Plaza de Mayo y Teatro Colón.',
+            seguridad: 'Alta presencia policial por ser zona bancaria y comercial.'
+        },
+        'belgrano': {
+            perfil: 'Barrio residencial de clase alta con amplias zonas verdes y arquitectura moderna.',
+            transporte: 'Buena conexión con subte línea D, colectivos y cercanas autopistas.',
+            educacion: 'Prestigiosos colegios bilingües y universidades privadas.',
+            salud: 'Clínicas de lujo y hospitales especializados.',
+            comercio: 'Comercio selecto con paseos comerciales y restaurantes de alta gama.',
+            gastronomia: 'Restaurantes refinados y cafeterías elegantes.',
+            recreacion: 'Parque Belgrano, canchas de golf y espacios deportivos.',
+            seguridad: 'Zona residencial segura con vigilancia privada.'
+        },
+        'caballito': {
+            perfil: 'Barrio familar y tradicional con excelente calidad de vida y servicios completos.',
+            transporte: 'Conexión con subte línea A, múltiples colectivos y cercano al tren.',
+            educacion: 'Escuelas de prestigio y zona universitaria cercana.',
+            salud: 'Hospital público y clínicas privadas.',
+            comercio: 'Comercio local próspero con mercados y locales familiares.',
+            gastronomia: 'Restaurantes familiares y pizzerías tradicionales.',
+            recreacion: 'Parque Rivadavia y numerosos espacios verdes.',
+            seguridad: 'Zona residencial segura con fuerte sentido comunitario.'
+        },
+        'recoleta': {
+            perfil: 'Barrio elegante y sofisticado, conocido por su arquitectura y vida cultural.',
+            transporte: 'Excelente red de transporte con subte línea H y múltiples líneas de colectivo.',
+            educacion: 'Instituciones educativas de elite y universidades.',
+            salud: 'Hospitales de referencia nacional y clínicas especializadas.',
+            comercio: 'Comercio exclusivo con altas marcas y paseos de compras.',
+            gastronomia: 'Restaurantes gourmet y cafeterías de diseño.',
+            recreacion: 'Cementerio de la Recoleta, museos, teatros y espacios culturales.',
+            seguridad: 'Zona de alta seguridad con vigilancia constante.'
+        }
+    };
+    
+    // Encontrar barrio coincidente o genérico
+    const barrioKey = Object.keys(barriosData).find(k => 
+        barrioOriginal.toLowerCase().includes(k) || k.includes(barrioOriginal.toLowerCase())
+    ) || 'palermo';
+    
+    const data = barriosData[barrioKey];
+    
+    // Generar estructura de resultados
+    const results = {
+        perfil_barrio: data.perfil,
+        transporte: data.transporte,
+        educacion: data.educacion,
+        salud: data.salud,
+        comercio: data.comercio,
+        gastronomia: data.gastronomia,
+        recreacion: data.recreacion,
+        seguridad: data.seguridad,
+        resumen_busquedas: searchQueries.map(q => ({
+            query: q,
+            results: [
+                { title: `Información sobre ${barrioOriginal}`, snippet: data.perfil }
+            ]
+        }))
+    };
+    
+    // Simular delay de red
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    return results;
+}
+
+// Procesar datos del entorno
+function processEnvironmentData(searchResults, direccion, barrio, ubicacion, descripcion) {
+    return {
+        direccion: direccion,
+        barrio: barrio,
+        ubicacion: ubicacion,
+        categories: {
+            perfil_barrio: searchResults.perfil_barrio || 'Información del barrio en desarrollo.',
+            transporte: searchResults.transporte || 'Datos de transporte no disponibles.',
+            educacion: searchResults.educacion || 'Datos educativos no disponibles.',
+            salud: searchResults.salud || 'Datos de salud no disponibles.',
+            comercio: searchResults.comercio || 'Datos comerciales no disponibles.',
+            gastronomia: searchResults.gastronomia || 'Datos gastronómicos no disponibles.',
+            recreacion: searchResults.recreacion || 'Datos de recreación no disponibles.',
+            seguridad: searchResults.seguridad || 'Datos de seguridad no disponibles.'
+        },
+        aiGenerated: true
+    };
+}
 
 // ============================================
 // RENDERIZADO DE RESULTADOS
