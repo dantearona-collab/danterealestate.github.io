@@ -2,19 +2,30 @@ import os
 import google.generativeai as genai
 from typing import Optional, Dict, Any, List
 
+# ✅ API KEY DE GEMINI - CONFIGURADA
+GEMINI_API_KEY = "AIzaSyDaedj3zFKwfW814v0OvEWmN4II6wlJZ0s"
+
 # ✅ CONFIGURACIÓN GLOBAL
 print("=" * 50)
 print("🔍 INICIALIZANDO GEMINI CLIENT")
 print("=" * 50)
 
-# Cargar API keys
+# Cargar API keys desde entorno o usar la key hardcodeada
 API_KEYS = []
+
+# Primero intentar cargar desde variables de entorno
 for i in range(1, 4):
     key_name = f"GEMINI_API_KEY_{i}"
     key_value = os.environ.get(key_name)
     if key_value and key_value.strip():
         API_KEYS.append(key_value.strip())
-        print(f"✅ {key_name}: Cargada correctamente")
+        print(f"✅ {key_name}: Cargada desde entorno")
+
+# Si no hay keys en entorno, usar la key hardcodeada
+if not API_KEYS:
+    if GEMINI_API_KEY and GEMINI_API_KEY.strip():
+        API_KEYS.append(GEMINI_API_KEY.strip())
+        print(f"✅ API Key: Cargada desde configuración")
 
 MODEL = os.environ.get("WORKING_MODEL", "gemini-2.0-flash-001")
 

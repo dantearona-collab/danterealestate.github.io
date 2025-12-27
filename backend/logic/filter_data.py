@@ -1,38 +1,73 @@
-
-# -*- coding: utf-8 -*-
 """
-Archivo central para almacenar las listas de filtros estáticos.
+Datos de filtros estáticos para Dante Propiedades
 """
-
-# Lista de barrios disponibles.
-# Extraída de properties.json para asegurar consistencia.
+# Barrios disponibles
 BARRIOS = [
-    "Parque Avellaneda",
-    "Boedo",
-    "Microcentro",
-    "Pilar",
-    "Colegiales",
-    "Palermo",
-    "Belgrano",
-    "Recoleta",
+    "Agronomía",
     "Almagro",
+    "Balvanera",
+    "Barracas",
+    "Belgrano",
+    "Boedo",
+    "Caballito",
+    "Chacarita",
+    "Coghlan",
+    "Colegiales",
+    "Constitución",
+    "Flores",
+    "Floresta",
+    "La Boca",
+    "La Paternal",
+    "Liniers",
+    "Mataderos",
+    "Monte Castro",
+    "Montserrat",
+    "Nueva Pompeya",
+    "Núñez",
+    "Palermo",
+    "Parque Avellaneda",
+    "Parque Chacabuco",
+    "Parque Chas",
+    "Parque Patricios",
+    "Puerto Madero",
+    "Recoleta",
+    "Retiro",
+    "Saavedra",
+    "San Cristóbal",
+    "San Nicolás",
+    "San Telmo",
+    "Versailles",
     "Villa Crespo",
-    "San Isidro",
-    "Vicente Lopez"
+    "Villa del Parque",
+    "Villa Devoto",
+    "Villa General Mitre",
+    "Villa Lugano",
+    "Villa Luro",
+    "Villa Ortúzar",
+    "Villa Pueyrredón",
+    "Villa Real",
+    "Villa Santa Rita",
+    "Villa Soldati",
+    "Villa Urquiza"
 ]
 
-# Lista de operaciones de propiedad disponibles.
-OPERACIONES = [
-    "venta",
-    "alquiler"
-]
-
-# Lista de tipos de propiedad disponibles.
+# Tipos de propiedad
 TIPOS = [
-    "casa",
-    "terreno",
-    "departamento",
-    "oficina",
-    "ph",
-    "casaquinta"
+    "Casa",
+    "Departamento",
+    "PH",
+    "Terreno",
+    "Oficina",
+    "Local",
+    "Galpón",
+    "Casaquinta",
+    "Duplex",
+    "Triplex"
+]
+
+# Tipos de operación
+OPERACIONES = [
+    "Venta",
+    "Alquiler",
+    "Alquiler Temporal"
 ]
