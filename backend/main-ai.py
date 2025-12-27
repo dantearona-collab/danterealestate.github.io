@@ -1304,90 +1304,120 @@ def generar_datos_barrio_ai(nombre_barrio: str) -> Dict[str, Any]:
     def clean_and_parse_json(response: str) -> Dict:
         """Limpia y parsea la respuesta JSON con manejo de errores avanzado"""
         
-        # Guardar respuesta cruda para debug
-        try:
-            with open('debug_json_error.json', 'w', encoding='utf-8') as f:
-                f.write(response)
-        except:
-            pass
+        print(f"   📄 Recibiendo respuesta de {len(response)} caracteres")
         
-        # EXTRAER EL JSON entre el primer { y el último }
+        # Guardar respuesta cruda para debug en la carpeta backend
+        import os
+        debug_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'debug_json_error.json')
+        try:
+            with open(debug_path, 'w', encoding='utf-8') as f:
+                f.write(response)
+            print(f"   💾 Debug guardado en: {debug_path}")
+        except Exception as e:
+            print(f"   ⚠️ No se pudo guardar debug: {e}")
+        
+        # Extraer el JSON entre el primer { y el último }
         first_brace = response.find('{')
         last_brace = response.rfind('}')
         
-        if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
-            json_str = response[first_brace:last_brace + 1]
-            print(f"   📋 JSON extraído ({len(json_str)} caracteres)")
-            
-            # Intentar parsear directamente primero
-            try:
-                return json.loads(json_str)
-            except json.JSONDecodeError as e:
-                print(f"   ⚠️ Error en JSON directo: {e}")
-            
-            # Si falla, limpiar y reintentar
-            clean = json_str.strip()
-            
-            # Remover bloques markdown
-            clean = re.sub(r'```json\s*', '', clean)
-            clean = re.sub(r'\s*```', '', clean)
-            clean = re.sub(r'^```\s*', '', clean, flags=re.MULTILINE)
-            clean = re.sub(r'\s*```$', '', clean, flags=re.MULTILINE)
-            
-            # Correcciones agresivas iterativas (más iteraciones)
-            for _ in range(10):
-                # Trailing commas en objetos
-                clean = re.sub(r',\s*([}\]])', r'\1', clean)
-                # Trailing commas en arrays
-                clean = re.sub(r',\s*(\])', r'\1', clean)
-                # Comillas simples en keys
-                clean = re.sub(r"'([^']+)':", r'"\1":', clean)
-                # Comillas simples en strings (excepto ya escapadas)
-                clean = re.sub(r"(?<!\\)'([^'\\]*(?:\\.[^'\\]*)*)'", r'"\1"', clean)
-                # Nueva línea en strings sin escapar
-                clean = re.sub(r'"([^"\\]*(?:\\.[^"\\]*)*)\n([^"\\]*(?:\\.[^"\\]*)*)"', r'"\1 \\n \2"', clean)
-                # Caracteres especiales problemáticos
-                clean = clean.replace('\n', '\\n')
-                clean = clean.replace('\r', '\\r')
-                clean = clean.replace('\t', '\\t')
-                
-                try:
-                    result = json.loads(clean)
-                    print(f"   ✅ JSON reparado en iteración {_ + 1}")
-                    return result
-                except json.JSONDecodeError:
-                    pass
-            
-            # Último intento: eliminar todo después del último } completo
-            # Encontrar el último } que cierra un objeto válido
-            try:
-                # Intentar desde el final
-                for i in range(len(clean) - 1, -1, -1):
-                    if clean[i] == '}':
-                        try_test = clean[:i + 1]
-                        try:
-                            return json.loads(try_test)
-                        except json.JSONDecodeError:
-                            continue
-            except:
-                pass
+        if first_brace == -1 or last_brace == -1 or last_brace <= first_brace:
+            print(f"   ❌ No se encontró estructura JSON válida")
+            return None
         
-        # Si todo falla, devolver estructura vacía
-        print(f"   ❌ No se pudo parsear el JSON, devolviendo estructura vacía")
-        return {
-            "resumen_general": "Error al generar datos",
-            "puntuacion_general": 50,
-            "transporte": {"puntuacion": 50, "descripcion": "Datos no disponibles"},
-            "comercio": {"puntuacion": 50, "descripcion": "Datos no disponibles"},
-            "seguridad": {"puntuacion": 50, "descripcion": "Datos no disponibles"},
-            "educacion": {"puntuacion": 50, "descripcion": "Datos no disponibles"},
-            "salud": {"puntuacion": 50, "descripcion": "Datos no disponibles"},
-            "espacios_verdes": {"puntuacion": 50, "descripcion": "Datos no disponibles"},
-            "contaminacion": {"puntuacion": 50, "descripcion": "Datos no disponibles"},
-            "vida_barrio": {"puntuacion": 50, "descripcion": "Datos no disponibles"},
-            "servicios_financieros": {"puntuacion": 50, "descripcion": "Datos no disponibles"},
-            "conclusion": "Error al generar datos con IA"
-        }
+        json_str = response[first_brace:last_brace + 1]
+        print(f"   📋 JSON extraído ({len(json_str)} caracteres)")
+        
+        # Intentar parsear directamente primero
+        try:
+            result = json.loads(json_str)
+            print(f"   ✅ JSON parseado directamente")
+            return result
+        except json.JSONDecodeError as e:
+            print(f"   ⚠️ Error en JSON directo: {e}")
+        
+        # Si falla, limpiar progresivamente
+        clean = json_str.strip()
+        
+        # Remover bloques markdown ```json ... ```
+        clean = re.sub(r'```json\s*', '', clean)
+        clean = re.sub(r'\s*```', '', clean)
+        
+        # Corrección paso a paso
+        problems_found = []
+        
+        for iteration in range(20):
+            original_clean = clean
+            
+            # 1. Eliminar trailing commas antes de } o ]
+            clean = re.sub(r',\s*([}\]])', r'\1', clean)
+            
+            # 2. Eliminar trailing commas antes de , en arrays
+            clean = re.sub(r',(\s*[\]\}])', r'\1', clean)
+            
+            # 3. Convertir comillas simples en keys
+            clean = re.sub(r"'([^'\"жа]+)':", r'"\1":', clean)
+            
+            # 4. Convertir comillas simples en strings (cuidadosamente)
+            clean = re.sub(r"'([^'\\]*)'", r'"\1"', clean)
+            
+            # 5. Eliminar caracteres de control problemáticos
+            clean = clean.replace('\n', ' ')
+            clean = clean.replace('\r', ' ')
+            clean = clean.replace('\t', ' ')
+            
+            # 6. Eliminar múltiples espacios
+            clean = re.sub(r'\s+', ' ', clean)
+            
+            # 7. Corregir patrones comunes problemáticos
+            clean = re.sub(r'"\s*:\s*"', '": "', clean)
+            clean = re.sub(r'{\s*"', '{"', clean)
+            clean = re.sub(r'"\s*{', '" {', clean)
+            clean = re.sub(r'}\s*"', '}"', clean)
+            clean = re.sub(r'"\s*}', '" }', clean)
+            clean = re.sub(r'\[\s*"', '["', clean)
+            clean = re.sub(r'"\s*\]', '"]', clean)
+            
+            # Verificar si hubo cambios
+            if clean == original_clean:
+                break
+                
+            # Intentar parsear
+            try:
+                result = json.loads(clean)
+                print(f"   ✅ JSON reparado en iteración {iteration + 1}")
+                return result
+            except json.JSONDecodeError as e:
+                problems_found.append(f"Iteración {iteration + 1}: {e}")
+                continue
+        
+        # Último recurso: buscar el objeto JSON más interno y usarlo
+        print(f"   🔧 Intentando recuperación avanzada...")
+        
+        # Encontrar todos los objetos JSON completos
+        try:
+            # Buscar objetos que parezcan válidos desde el final
+            for end_pos in range(len(clean), 0, -100):  # Reducir de 100 en 100
+                start_estimate = max(0, end_pos - 5000)  # Máximo 5000 caracteres
+                test_json = clean[start_estimate:end_pos]
+                
+                # Encontrar el primer { en el rango
+                first = test_json.find('{')
+                if first != -1:
+                    test_json = test_json[first:]
+                    try:
+                        result = json.loads(test_json)
+                        print(f"   ✅ Recuperado JSON truncando a {len(test_json)} caracteres")
+                        return result
+                    except:
+                        continue
+        except Exception as e:
+            print(f"   ⚠️ Error en recuperación: {e}")
+        
+        # Si todo falla, informar el error
+        print(f"   ❌ No se pudo parsear después de {len(problems_found)} intentos")
+        print(f"   Últimos errores: {problems_found[-3:] if problems_found else 'Ninguno'}")
+        
+        return None
     
     try:
         ai_response = call_gemini_with_rotation(prompt)
@@ -1399,6 +1429,44 @@ def generar_datos_barrio_ai(nombre_barrio: str) -> Dict[str, Any]:
         
         # Parsear con la nueva función
         data = clean_and_parse_json(ai_response)
+        
+        # Si el parser falló, intentar una vez más con un prompt más simple
+        if data is None:
+            print(f"⚠️ Parser falló, intentando con formato más simple...")
+            simple_prompt = f"""
+Genera un análisis de barrio en JSON válido y bien formado para "{nombre_barrio}" en Buenos Aires.
+
+Requisitos estrictos:
+- Usa SOLO comillas dobles
+- NO uses comillas simples en ningún valor
+- NO uses comas finales antes de } o ]
+- NO uses saltos de línea dentro de strings
+- Usa español correcto sin errores de tipeo
+
+Estructura EXACTA (sin variaciones):
+{{
+    "resumen_general": "Una oración describing el barrio",
+    "puntuacion_general": 75,
+    "transporte": {{"puntuacion": 80, "descripcion": "Descripción"}},
+    "comercio": {{"puntuacion": 70, "descripcion": "Descripción"}},
+    "seguridad": {{"puntuacion": 65, "descripcion": "Descripción"}},
+    "educacion": {{"puntuacion": 75, "descripcion": "Descripción"}},
+    "salud": {{"puntuacion": 70, "descripcion": "Descripción"}},
+    "espacios_verdes": {{"puntuacion": 85, "descripcion": "Descripción"}},
+    "contaminacion": {{"puntuacion": 60, "descripcion": "Descripción"}},
+    "vida_barrio": {{"puntuacion": 80, "descripcion": "Descripción"}},
+    "servicios_financieros": {{"puntuacion": 70, "descripcion": "Descripción"}},
+    "conclusion": "Conclusión para inversores"
+}}
+
+Solo responde con el JSON, sin markdown, sin explicaciones.
+"""
+            retry_response = call_gemini_with_rotation(simple_prompt)
+            data = clean_and_parse_json(retry_response)
+        
+        if data is None:
+            print(f"❌ No se pudo parsear ni siquiera con el retry")
+            raise ValueError("No se pudo generar datos válidos para el barrio")
         
         print(f"✅ Datos generados para: {nombre_barrio}")
         return data
