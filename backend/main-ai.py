@@ -26,7 +26,7 @@ from logic.database import (
     DB_PATH,
     LOG_PATH
 )
-from logic.environ_database import init_environ_analysis_db
+from logic.environ_database import init_environ_analysis_db, get_environ_analysis, save_environ_analysis, is_environ_analysis_expired, log_environ_analysis_request
 from logic.filters import detect_filters
 from logic.gemini_client import call_gemini_with_rotation, build_prompt
 from logic.filter_data import BARRIOS, OPERACIONES, TIPOS
@@ -489,12 +489,12 @@ async def chat(request: ChatRequest):
             print("🎯 DETECTADO: Saludo inicial - enviando bienvenida mejorada")
             answer = """¡Hola! 👋 Soy tu asistente de Dante Propiedades. 
 
-        Te ayudo a encontrar la propiedad ideal. Podés:
-        • Usar los filtros a la izquierda para búsquedas específicas
-        • Contarme directamente qué estás buscando
-        • Preguntarme sobre propiedades que veas
+Te ayudo a encontrar la propiedad ideal. Podés:
+• Usar los filtros a la izquierda para búsquedas específicas
+• Contarme directamente qué estás buscando
+• Preguntarme sobre propiedades que veas
 
-        ¿En qué tipo de propiedad estás interesado hoy?"""
+¿En qué tipo de propiedad estás interesado hoy?"""
         else:
             # Procesamiento normal con IA
             prompt = build_prompt(user_text, results, filters, channel, f"{style_hint}\n{contexto_dinamico}\n{contexto_historial}")
@@ -945,7 +945,7 @@ def analisis_barrio_js():
     return FileResponse("analisis-barrio.js")
 
 
-# ✅ ENDPOINT DE ANÁLISIS DE ENTORNO CON IA (NUEVO - USANDO DATOS REALES DE LA API)
+# ✅ ENDPOINT DE ANÁLISIS DE ENTORNO CON IA
 @app.post("/ai/environment-analysis")
 async def generate_environment_analysis(
     zone: str = Query(..., description="Nombre del barrio o zona a analizar"),
@@ -960,43 +960,36 @@ async def generate_environment_analysis(
     3. Guarda resultados en base de datos para reutilizar
     4. Retorna el análisis completo con estructura detallada
     """
-    from logic.environ_database import (
-        get_environ_analysis,
-        save_environ_analysis,
-        is_environ_analysis_expired,
-        log_environ_analysis_request
-    )
-    
     zone_clean = zone.strip()
     
     print(f"🌍 Solicitud de análisis de entorno para: {zone_clean} (force_refresh: {force_refresh})")
     
     # Verificar caché primero si no se fuerza actualización
     if not force_refresh:
-        cached = get_environ_analysis(zone_clean)
-        if cached:
-            return {
-                "success": True,
-                "source": "cache",
-                "zone": zone_clean,
-                "entorno": cached,
-                "message": "Análisis obtenido desde caché"
-            }
-    
-    # Verificar si está expirado o se fuerza actualización
-    if force_refresh or is_environ_analysis_expired(zone_clean):
-        # Generar nuevo análisis con Gemini
         try:
-            print(f"🔄 Generando nuevo análisis con IA para: {zone_clean}")
-            
-            # Prompt detallado para Gemini - Estructura mejorada
-            prompt = f"""
+            cached = get_environ_analysis(zone_clean)
+            if cached:
+                print(f"✅ Análisis encontrado en caché para: {zone_clean}")
+                return {
+                    "success": True,
+                    "source": "cache",
+                    "zone": zone_clean,
+                    "entorno": cached,
+                    "message": "Análisis obtenido desde caché"
+                }
+        except Exception as e:
+            print(f"⚠️ Error consultando caché: {e}")
+    
+    # Generar nuevo análisis con Gemini
+    print(f"🔄 Generando nuevo análisis con IA para: {zone_clean}")
+    
+    # Prompt detallado para Gemini - Estructura mejorada
+    prompt = f"""
 Eres un analista inmobiliario experto en Buenos Aires, Argentina. Genera un análisis exhaustivo y profesional del barrio '{zone_clean}' con la siguiente estructura detallada:
 
 ## ESTRUCTURA REQUERIDA (JSON)
 
 {{
-    "puntuacion_general": PUNTUACIÓN_0_100,
     "transporte": {{
         "puntuacion": PUNTUACIÓN_0_100,
         "descripcion": "Descripción detallada del transporte público",
@@ -1023,7 +1016,7 @@ Eres un analista inmobiliario experto en Buenos Aires, Argentina. Genera un aná
     }},
     "salud": {{
         "puntuacion": PUNTUACIÓN_0_100,
-        "descripción": "Centros de salud y hospitales",
+        "descripcion": "Centros de salud y hospitales",
         "hospitales": ["Hospital 1"],
         "centros_salud": ["Centro 1", "Centro 2"]
     }},
@@ -1038,7 +1031,7 @@ Eres un analista inmobiliario experto en Buenos Aires, Argentina. Genera un aná
         "nivel_ruido": "Nivel (Bajo/Medio/Alto)",
         "principal_fuente": "Fuente principal de contaminación"
     }},
-    "vibrabarrio": {{
+    "vida_barrio": {{
         "puntuacion": PUNTUACIÓN_0_100,
         "descripcion": "Vida nocturna, cultura y entretenimiento",
         "bares_restaurantes": ["Lugar 1", "Lugar 2"],
@@ -1056,71 +1049,72 @@ Eres un analista inmobiliario experto en Buenos Aires, Argentina. Genera un aná
 - La conclusión debe ser profesional y orientada a inversores
 - Todos los arrays deben tener al menos 2-3 elementos si es posible
 """
-            
-            # Llamar a Gemini
-            ai_response = call_gemini_with_rotation(prompt)
-            
-            # Parsear respuesta
-            import re
-            json_match = re.search(r'\{[\s\S]*\}', ai_response)
-            
-            if json_match:
-                try:
-                    analysis_data = json.loads(json_match.group())
-                    
-                    # Validar que tenga la estructura esperada
-                    if not isinstance(analysis_data, dict):
-                        raise ValueError("La respuesta no es un objeto JSON válido")
-                    
-                    # Guardar en base de datos (7 días de caché)
-                    save_environ_analysis(zone_clean, analysis_data, cache_days=7)
-                    
-                    # Log exitoso
-                    log_environ_analysis_request(zone_clean, True, analysis_json=json.dumps(analysis_data))
-                    
-                    return {
-                        "success": True,
-                        "source": "ai",
-                        "zone": zone_clean,
-                        "entorno": analysis_data,
-                        "message": "Análisis generado exitosamente con IA"
-                    }
-                    
-                except json.JSONDecodeError as e:
-                    raise ValueError(f"Error parseando JSON: {str(e)}")
-            else:
-                raise ValueError("No se encontró JSON válido en la respuesta")
+    
+    try:
+        # Llamar a Gemini
+        ai_response = call_gemini_with_rotation(prompt)
+        
+        # Parsear respuesta
+        json_match = re.search(r'\{[\s\S]*\}', ai_response)
+        
+        if json_match:
+            try:
+                analysis_data = json.loads(json_match.group())
                 
-        except Exception as e:
-            error_msg = str(e)
-            print(f"❌ Error generando análisis: {error_msg}")
-            
-            # Log de error
+                # Validar que tenga la estructura esperada
+                if not isinstance(analysis_data, dict):
+                    raise ValueError("La respuesta no es un objeto JSON válido")
+                
+                # Guardar en base de datos (7 días de caché)
+                save_environ_analysis(zone_clean, analysis_data, cache_days=7)
+                
+                # Log exitoso
+                log_environ_analysis_request(zone_clean, True, analysis_json=json.dumps(analysis_data))
+                
+                print(f"✅ Análisis generado y guardado para: {zone_clean}")
+                
+                return {
+                    "success": True,
+                    "source": "ai",
+                    "zone": zone_clean,
+                    "entorno": analysis_data,
+                    "message": "Análisis generado exitosamente con IA"
+                }
+                
+            except json.JSONDecodeError as e:
+                error_msg = f"Error parseando JSON: {str(e)}"
+                print(f"❌ {error_msg}")
+                log_environ_analysis_request(zone_clean, False, error=error_msg)
+                
+                return {
+                    "success": False,
+                    "error": error_msg,
+                    "message": "Error al procesar la respuesta de la IA"
+                }
+        else:
+            error_msg = "No se encontró JSON válido en la respuesta de la IA"
+            print(f"❌ {error_msg}")
+            print(f"📄 Respuesta recibida: {ai_response[:200]}...")
             log_environ_analysis_request(zone_clean, False, error=error_msg)
             
             return {
                 "success": False,
-                "error": f"Error generando análisis: {error_msg}",
+                "error": error_msg,
                 "message": "No se pudo generar el análisis"
             }
-    
-    return {
-        "success": False,
-        "message": "No hay análisis disponible para esta zona"
-    }
-
-
-# ✅ ENDPOINT LEGACY (MANTENER PARA COMPATIBILIDAD)
-@app.get("/ai/environment-analysis")
-async def get_environment_analysis_legacy(
-    zone: str = Query(..., description="Nombre del barrio o zona a analizar"),
-    force_refresh: bool = Query(False, description="Forzar regeneración del análisis")
-):
-    """
-    Endpoint legacy GET para compatibilidad - Redirige al endpoint POST
-    """
-    # Convertir GET a POST para mantener consistencia
-    return await generate_environment_analysis(zone=zone, force_refresh=force_refresh)
+            
+    except Exception as e:
+        error_msg = str(e)
+        print(f"❌ Error generando análisis: {error_msg}")
+        
+        # Log de error
+        log_environ_analysis_request(zone_clean, False, error=error_msg)
+        
+        return {
+            "success": False,
+            "error": f"Error generando análisis: {error_msg}",
+            "message": "No se pudo generar el análisis"
+        }
 
 
 # ✅ INICIO
