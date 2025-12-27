@@ -189,7 +189,7 @@ const EnvironmentService = {
                     success: true,
                     zone: zone,
                     entorno: data.entorno,
-                    source: data.source,  // 'cache' o 'ai'
+                    source: data.source,
                     message: data.message
                 };
             } else {
@@ -214,27 +214,54 @@ const Renderer = {
     updateKPIs(data) {
         if (!data) return;
         
-        // El endpoint /market/stats/{zone} devuelve datos directos
-        const stats = data.statistics || data;
+        const stats = data.statistics || {};
         const zone = data.zone || AppState.currentZone;
         
         if (!zone) return;
         
         // Actualizar badges de zona
-        document.getElementById('market-zone-badge').textContent = capitalizeWords(zone);
+        const zoneBadge = document.getElementById('market-zone-badge');
+        if (zoneBadge) {
+            zoneBadge.textContent = capitalizeWords(zone);
+        }
         
         // Actualizar KPIs
-        document.getElementById('kpi-properties').textContent = formatNumber(data.sample_size || 0);
-        document.getElementById('kpi-avg-price').textContent = `USD ${formatPrice(stats.average_price_m2)}/m²`;
-        document.getElementById('kpi-price-m2').textContent = `USD ${formatPrice(stats.median_price_m2)}/m²`;
-        document.getElementById('kpi-median-price').textContent = `USD ${formatPrice(stats.min_price_m2)} - ${formatPrice(stats.max_price_m2)}`;
+        const kpiProperties = document.getElementById('kpi-properties');
+        if (kpiProperties) {
+            kpiProperties.textContent = formatNumber(data.sample_size || 0);
+        }
+        
+        const kpiAvgPrice = document.getElementById('kpi-avg-price');
+        if (kpiAvgPrice) {
+            kpiAvgPrice.textContent = `USD ${formatPrice(stats.average_price_m2)}/m²`;
+        }
+        
+        const kpiPriceM2 = document.getElementById('kpi-price-m2');
+        if (kpiPriceM2) {
+            kpiPriceM2.textContent = `USD ${formatPrice(stats.median_price_m2)}/m²`;
+        }
+        
+        const kpiMedianPrice = document.getElementById('kpi-median-price');
+        if (kpiMedianPrice) {
+            kpiMedianPrice.textContent = `USD ${formatPrice(stats.min_price_m2)} - ${formatPrice(stats.max_price_m2)}`;
+        }
         
         // Actualizar rango de precios
-        document.getElementById('price-min').textContent = `USD ${formatPrice(stats.min_price_m2)}`;
-        document.getElementById('price-max').textContent = `USD ${formatPrice(stats.max_price_m2)}`;
+        const priceMin = document.getElementById('price-min');
+        if (priceMin) {
+            priceMin.textContent = `USD ${formatPrice(stats.min_price_m2)}`;
+        }
+        
+        const priceMax = document.getElementById('price-max');
+        if (priceMax) {
+            priceMax.textContent = `USD ${formatPrice(stats.max_price_m2)}`;
+        }
         
         // Actualizar tendencia
-        document.getElementById('kpi-trend').innerHTML = '<span class="up">📈 Mercado activo</span>';
+        const kpiTrend = document.getElementById('kpi-trend');
+        if (kpiTrend) {
+            kpiTrend.innerHTML = '<span class="up">📈 Mercado activo</span>';
+        }
     },
     
     /**
@@ -244,7 +271,9 @@ const Renderer = {
         const container = document.getElementById('distribution-chart');
         
         if (!data || !data.sample_size) {
-            container.innerHTML = '<p class="loading-text">No hay datos suficientes para mostrar distribución</p>';
+            if (container) {
+                container.innerHTML = '<p class="loading-text">No hay datos suficientes para mostrar distribución</p>';
+            }
             return;
         }
         
@@ -257,9 +286,11 @@ const Renderer = {
             { height: 40, label: 'Alto Lujo' }
         ];
         
-        container.innerHTML = distribution.map(d => 
-            `<div class="distribution-bar" style="height: ${d.height}%" title="${d.label}"></div>`
-        ).join('');
+        if (container) {
+            container.innerHTML = distribution.map(d => 
+                `<div class="distribution-bar" style="height: ${d.height}%" title="${d.label}"></div>`
+            ).join('');
+        }
     },
     
     /**
@@ -268,12 +299,14 @@ const Renderer = {
     renderPropertiesTable(data) {
         const container = document.getElementById('properties-table-container');
         
+        if (!container) return;
+        
         if (!data || !data.data || !data.data.properties || data.data.properties.length === 0) {
             container.innerHTML = '<p class="loading-text">No se encontraron propiedades en el mercado</p>';
             return;
         }
         
-        const propiedades = data.data.properties.slice(0, 10); // Mostrar máximo 10
+        const propiedades = data.data.properties.slice(0, 10);
         
         const tableHTML = `
             <table class="properties-table">
@@ -302,164 +335,140 @@ const Renderer = {
     },
     
     /**
-     * Actualiza el análisis del entorno con IA (nueva estructura)
+     * Actualiza el análisis del entorno con IA (estructura del HTML existente)
      */
     updateEnvironmentAnalysis(data) {
-        const container = document.getElementById('neighborhood-profile');
+        const profileContainer = document.getElementById('neighborhood-profile');
         
         if (!data || !data.success || !data.entorno) {
-            container.innerHTML = '<p class="loading-text">No se pudo obtener el análisis del entorno</p>';
+            if (profileContainer) {
+                profileContainer.innerHTML = '<p class="loading-text">No se pudo obtener el análisis del entorno</p>';
+            }
             this.clearEnvironmentCategories();
             return;
         }
         
         const entorno = data.entorno;
         
-        // Actualizar puntuación general
-        const overallScore = entorno.puntuacion_general || 0;
-        const overallClass = getScoreClass(overallScore);
-        const overallElement = document.getElementById('neighborhood-profile');
-        if (overallElement) {
-            overallElement.innerHTML = `
+        // Actualizar puntuación general si existe el elemento
+        if (profileContainer) {
+            const overallScore = entorno.puntuacion_general || 0;
+            const overallClass = getScoreClass(overallScore);
+            
+            profileContainer.innerHTML = `
                 <div class="overall-score-container">
                     <div class="overall-score ${overallClass}">
                         <span class="score-value">${overallScore}</span>
                         <span class="score-label">Puntuación General</span>
                     </div>
+                    <div class="data-source-info">
+                        <span class="data-source-badge">${data.source === 'cache' ? '📦 Datos desde caché' : '🤖 Datos generados por IA'}</span>
+                    </div>
                 </div>
+                ${entorno.conclusion ? `<p class="ai-conclusion">${sanitizeHTML(entorno.conclusion)}</p>` : ''}
             `;
         }
         
-        // Categorías del entorno con la nueva estructura
-        const categories = [
-            { key: 'transporte', icon: '🚌', title: 'Transporte' },
-            { key: 'comercio', icon: '🛒', title: 'Comercio' },
-            { key: 'seguridad', icon: '🚔', title: 'Seguridad' },
-            { key: 'educacion', icon: '🏫', title: 'Educación' },
-            { key: 'salud', icon: '🏥', title: 'Salud' },
-            { key: 'espacios_verdes', icon: '🌳', title: 'Espacios Verdes' },
-            { key: 'contaminacion', icon: '🌬️', title: 'Contaminación' },
-            { key: 'vibrabarrio', icon: '🎭', title: 'VibraBarrio' }
-        ];
+        // Mapeo de categorías del endpoint a los IDs del HTML
+        const categoryMapping = {
+            'transporte': 'cat-transporte',
+            'educacion': 'cat-educacion',
+            'salud': 'cat-salud',
+            'comercio': 'cat-comercio',
+            'gastronomia': 'cat-gastronomia',
+            'recreacion': 'cat-recreacion',
+            'seguridad': 'cat-seguridad',
+            'espacios_verdes': 'cat-recreacion',
+            'vibrabarrio': 'cat-gastronomia',
+            'contaminacion': 'cat-seguridad'
+        };
         
-        let categoriesHtml = '';
-        
-        categories.forEach(cat => {
-            const catData = entorno[cat.key];
+        // Actualizar cada categoría en el HTML
+        Object.entries(categoryMapping).forEach(([sourceKey, targetId]) => {
+            const catData = entorno[sourceKey];
             if (catData) {
-                const scoreClass = getScoreClass(catData.puntuacion);
-                
-                // Construir detalles adicionales
-                let detailsHtml = '';
-                if (catData.estaciones_cercanas?.length) {
-                    detailsHtml += `<div class="detail-item"><strong>🚉 Estaciones:</strong> ${catData.estaciones_cercanas.join(', ')}</div>`;
-                }
-                if (catData.lineas_colectivo?.length) {
-                    detailsHtml += `<div class="detail-item"><strong>🚌 Colectivos:</strong> ${catData.lineas_colectivo.join(', ')}</div>`;
-                }
-                if (catData.supermercados?.length) {
-                    detailsHtml += `<div class="detail-item"><strong>🛒 Supermercados:</strong> ${catData.supermercados.join(', ')}</div>`;
-                }
-                if (catData.hospitales?.length) {
-                    detailsHtml += `<div class="detail-item"><strong>🏥 Hospitales:</strong> ${catData.hospitales.join(', ')}</div>`;
-                }
-                if (catData.centros_salud?.length) {
-                    detailsHtml += `<div class="detail-item"><strong>🏥 Centros:</strong> ${catData.centros_salud.join(', ')}</div>`;
-                }
-                if (catData.escuelas?.length) {
-                    detailsHtml += `<div class="detail-item"><strong>🏫 Escuelas:</strong> ${catData.escuelas.join(', ')}</div>`;
-                }
-                if (catData.universidades?.length) {
-                    detailsHtml += `<div class="detail-item"><strong>🎓 Universidades:</strong> ${catData.universidades.join(', ')}</div>`;
-                }
-                if (catData.parques?.length) {
-                    detailsHtml += `<div class="detail-item"><strong>🌳 Parques:</strong> ${catData.parques.join(', ')}</div>`;
-                }
-                if (catData.bares_restaurantes?.length) {
-                    detailsHtml += `<div class="detail-item"><strong>🍽️ Bares/Restaurantes:</strong> ${catData.bares_restaurantes.join(', ')}</div>`;
-                }
-                if (catData.cultura?.length) {
-                    detailsHtml += `<div class="detail-item"><strong>🎭 Cultura:</strong> ${catData.cultura.join(', ')}</div>`;
-                }
-                if (catData.nivel_ruido) {
-                    detailsHtml += `<div class="detail-item"><strong>🔊 Ruido:</strong> ${catData.nivel_ruido}</div>`;
-                }
-                if (catData.principal_fuente) {
-                    detailsHtml += `<div class="detail-item"><strong>⚠️ Fuente:</strong> ${catData.principal_fuente}</div>`;
-                }
-                if (catData.rating_seguridad) {
-                    detailsHtml += `<div class="detail-item"><strong>⭐ Rating:</strong> ${catData.rating_seguridad}</div>`;
-                }
-                if (catData.comisaria_cercana) {
-                    detailsHtml += `<div class="detail-item"><strong>🚔 Comisaría:</strong> ${catData.comisaria_cercana}</div>`;
-                }
-                
-                categoriesHtml += `
-                    <div class="category-card" style="border-left-color: ${this.getCategoryColor(cat.key)}">
-                        <div class="category-header">
-                            <span class="category-icon">${cat.icon}</span>
-                            <span class="category-title">${cat.title}</span>
-                            <div class="category-score ${scoreClass}">${catData.puntuacion}</div>
+                const container = document.getElementById(targetId);
+                if (container) {
+                    const scoreClass = getScoreClass(catData.puntuacion);
+                    
+                    // Construir detalles adicionales
+                    let detailsHtml = '';
+                    
+                    // Lista de lugares/elementos específicos
+                    const itemsToShow = [];
+                    
+                    if (catData.estaciones_cercanas?.length) {
+                        itemsToShow.push(`🚉 <strong>Estaciones:</strong> ${catData.estaciones_cercanas.join(', ')}`);
+                    }
+                    if (catData.lineas_colectivo?.length) {
+                        itemsToShow.push(`🚌 <strong>Colectivos:</strong> ${catData.lineas_colectivo.join(', ')}`);
+                    }
+                    if (catData.supermercados?.length) {
+                        itemsToShow.push(`🛒 <strong>Supermercados:</strong> ${catData.supermercados.join(', ')}`);
+                    }
+                    if (catData.hospitales?.length) {
+                        itemsToShow.push(`🏥 <strong>Hospitales:</strong> ${catData.hospitales.join(', ')}`);
+                    }
+                    if (catData.centros_salud?.length) {
+                        itemsToShow.push(`🏥 <strong>Centros de salud:</strong> ${catData.centros_salud.join(', ')}`);
+                    }
+                    if (catData.escuelas?.length) {
+                        itemsToShow.push(`🏫 <strong>Escuelas:</strong> ${catData.escuelas.join(', ')}`);
+                    }
+                    if (catData.universidades?.length) {
+                        itemsToShow.push(`🎓 <strong>Universidades:</strong> ${catData.universidades.join(', ')}`);
+                    }
+                    if (catData.parques?.length) {
+                        itemsToShow.push(`🌳 <strong>Parques:</strong> ${catData.parques.join(', ')}`);
+                    }
+                    if (catData.bares_restaurantes?.length) {
+                        itemsToShow.push(`🍽️ <strong>Bares/Restaurantes:</strong> ${catData.bares_restaurantes.join(', ')}`);
+                    }
+                    if (catData.cultura?.length) {
+                        itemsToShow.push(`🎭 <strong>Cultura:</strong> ${catData.cultura.join(', ')}`);
+                    }
+                    if (catData.nivel_ruido) {
+                        itemsToShow.push(`🔊 <strong>Ruido:</strong> ${catData.nivel_ruido}`);
+                    }
+                    if (catData.principal_fuente) {
+                        itemsToShow.push(`⚠️ <strong>Fuente contaminación:</strong> ${catData.principal_fuente}`);
+                    }
+                    if (catData.rating_seguridad) {
+                        itemsToShow.push(`⭐ <strong>Rating:</strong> ${catData.rating_seguridad}`);
+                    }
+                    if (catData.comisaria_cercana) {
+                        itemsToShow.push(`🚔 <strong>Comisaría:</strong> ${catData.comisaria_cercana}`);
+                    }
+                    
+                    if (itemsToShow.length > 0) {
+                        detailsHtml = itemsToShow.map(item => `<p class="detail-item">${item}</p>`).join('');
+                    }
+                    
+                    container.innerHTML = `
+                        <div class="category-score ${scoreClass}">
+                            <span class="score-number">${catData.puntuacion}</span>
+                            <span class="score-label">/100</span>
                         </div>
                         <p class="category-description">${sanitizeHTML(catData.descripcion || '')}</p>
                         ${detailsHtml ? `<div class="category-details">${detailsHtml}</div>` : ''}
-                    </div>
-                `;
+                    `;
+                }
             }
         });
-        
-        // Actualizar contenedor de categorías
-        const categoriesContainer = document.getElementById('environment-categories');
-        if (categoriesContainer) {
-            categoriesContainer.innerHTML = categoriesHtml;
-        }
-        
-        // Mostrar conclusión si existe
-        if (entorno.conclusion) {
-            const conclusionContainer = document.getElementById('ai-conclusion');
-            if (conclusionContainer) {
-                conclusionContainer.innerHTML = `
-                    <div class="ai-conclusion-section">
-                        <h4>📋 Conclusión del Análisis</h4>
-                        <p>${sanitizeHTML(entorno.conclusion)}</p>
-                    </div>
-                `;
-            }
-        }
-        
-        // Mostrar fuente de datos
-        const sourceBadge = document.getElementById('data-source-badge');
-        if (sourceBadge) {
-            sourceBadge.textContent = data.source === 'cache' ? '📦 Datos desde caché' : '🤖 Datos generados por IA';
-            sourceBadge.className = `badge ${data.source === 'cache' ? 'badge-cache' : 'badge-ai'}`;
-        }
-    },
-    
-    /**
-     * Obtiene el color para una categoría
-     */
-    getCategoryColor(category) {
-        const colors = {
-            'transporte': '#3498db',
-            'comercio': '#2ecc71',
-            'seguridad': '#e74c3c',
-            'educacion': '#9b59b6',
-            'salud': '#e67e22',
-            'espacios_verdes': '#27ae60',
-            'contaminacion': '#95a5a6',
-            'vibrabarrio': '#f39c12'
-        };
-        return colors[category] || '#95a5a6';
     },
     
     /**
      * Limpia las categorías del entorno
      */
     clearEnvironmentCategories() {
-        const categoriesContainer = document.getElementById('environment-categories');
-        if (categoriesContainer) {
-            categoriesContainer.innerHTML = '';
-        }
+        const categories = ['transporte', 'educacion', 'salud', 'comercio', 'gastronomia', 'recreacion', 'seguridad', 'finanzas'];
+        
+        categories.forEach(cat => {
+            const el = document.getElementById(`cat-${cat}`);
+            if (el) {
+                el.innerHTML = '<p class="loading-text">--</p>';
+            }
+        });
     },
     
     /**
@@ -467,6 +476,7 @@ const Renderer = {
      */
     renderExecutiveSummary(marketData, envData) {
         const container = document.getElementById('executive-summary');
+        if (!container) return;
         
         let summaryHTML = '';
         
@@ -492,8 +502,8 @@ const Renderer = {
                 <div class="summary-section">
                     <h4>🏙️ Análisis del Entorno</h4>
                     <p>El barrio obtiene una puntuación general de 
-                    <strong class="${scoreClass}">${score}/100</strong> basada en 8 categorías evaluadas:
-                    transporte, comercio, seguridad, educación, salud, espacios verdes, contaminación y vida nocturna.</p>
+                    <strong class="${scoreClass}">${score}/100</strong> basada en evaluación de transporte, 
+                    educación, salud, comercio, gastronomía, recreación y seguridad.</p>
                 </div>
             `;
         }
@@ -532,17 +542,19 @@ const AppController = {
         const input = document.getElementById('neighborhood-input');
         const btn = document.getElementById('analyze-btn');
         
-        // Enter key triggers search
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                this.analyzeZone();
-            }
-        });
+        if (input) {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.analyzeZone();
+                }
+            });
+        }
         
-        // Button click triggers search
-        btn.addEventListener('click', () => {
-            this.analyzeZone();
-        });
+        if (btn) {
+            btn.addEventListener('click', () => {
+                this.analyzeZone();
+            });
+        }
         
         console.log('✅ Event listeners configurados');
     },
@@ -555,8 +567,11 @@ const AppController = {
         const zone = urlParams.get('zone') || urlParams.get('barrio');
         
         if (zone) {
-            document.getElementById('neighborhood-input').value = zone;
-            this.analyzeZone(zone);
+            const input = document.getElementById('neighborhood-input');
+            if (input) {
+                input.value = zone;
+                this.analyzeZone(zone);
+            }
         }
     },
     
@@ -564,7 +579,8 @@ const AppController = {
      * Analiza una zona
      */
     async analyzeZone(zoneOverride = null) {
-        const zone = zoneOverride || document.getElementById('neighborhood-input').value.trim();
+        const input = document.getElementById('neighborhood-input');
+        const zone = zoneOverride || (input ? input.value.trim() : '');
         
         if (!zone) {
             alert('Por favor, ingresá un barrio o zona para analizar');
@@ -617,10 +633,10 @@ const AppController = {
             if (envData && envData.success) {
                 Renderer.updateEnvironmentAnalysis(envData);
             } else {
-                // Si falla la IA, mostrar error
-                const envContainer = document.getElementById('neighborhood-profile');
-                if (envContainer) {
-                    envContainer.innerHTML = `
+                // Si falla la IA, mostrar error en el perfil
+                const profileContainer = document.getElementById('neighborhood-profile');
+                if (profileContainer) {
+                    profileContainer.innerHTML = `
                         <div class="error-container">
                             <p class="error-text">No se pudo obtener el análisis del entorno</p>
                             <button class="retry-btn" onclick="AppController.retryEnvironmentAnalysis()">
@@ -635,7 +651,7 @@ const AppController = {
             this.updateLoadingStep('summary', 'loading');
             
             // Generar resumen ejecutivo
-            await new Promise(resolve => setTimeout(resolve, 500)); // Pequeña pausa para UX
+            await new Promise(resolve => setTimeout(resolve, 500));
             Renderer.renderExecutiveSummary(marketData, envData);
             
             // Actualizar paso 3: Completado
@@ -663,9 +679,9 @@ const AppController = {
         const zone = AppState.currentZone;
         
         // Mostrar indicador de carga
-        const envContainer = document.getElementById('neighborhood-profile');
-        if (envContainer) {
-            envContainer.innerHTML = `
+        const profileContainer = document.getElementById('neighborhood-profile');
+        if (profileContainer) {
+            profileContainer.innerHTML = `
                 <div class="retry-loading">
                     <div class="spinner"></div>
                     <p>Regenerando análisis con IA...</p>
@@ -680,8 +696,8 @@ const AppController = {
         if (envData && envData.success) {
             Renderer.updateEnvironmentAnalysis(envData);
         } else {
-            if (envContainer) {
-                envContainer.innerHTML = `
+            if (profileContainer) {
+                profileContainer.innerHTML = `
                     <div class="error-container">
                         <p class="error-text">No se pudo generar el análisis. Por favor, intentá más tarde.</p>
                     </div>
@@ -694,8 +710,15 @@ const AppController = {
      * Muestra el estado de carga
      */
     showLoading(zone) {
-        document.getElementById('loading-zone').textContent = capitalizeWords(zone);
-        document.getElementById('loading-overlay').classList.remove('hidden');
+        const loadingZone = document.getElementById('loading-zone');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        
+        if (loadingZone) {
+            loadingZone.textContent = capitalizeWords(zone);
+        }
+        if (loadingOverlay) {
+            loadingOverlay.classList.remove('hidden');
+        }
         
         // Resetear pasos
         ['market', 'environment', 'summary'].forEach(step => {
@@ -707,7 +730,10 @@ const AppController = {
      * Oculta el estado de carga
      */
     hideLoading() {
-        document.getElementById('loading-overlay').classList.add('hidden');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        if (loadingOverlay) {
+            loadingOverlay.classList.add('hidden');
+        }
     },
     
     /**
@@ -718,6 +744,7 @@ const AppController = {
         if (!stepEl) return;
         
         const statusEl = stepEl.querySelector('.step-status');
+        if (!statusEl) return;
         
         switch (status) {
             case 'pending':
@@ -740,48 +767,82 @@ const AppController = {
      */
     resetResults() {
         // Resetear KPIs
-        document.getElementById('kpi-properties').textContent = '--';
-        document.getElementById('kpi-avg-price').textContent = 'USD --/m²';
-        document.getElementById('kpi-price-m2').textContent = 'USD --/m²';
-        document.getElementById('kpi-median-price').textContent = 'USD --';
-        document.getElementById('market-zone-badge').textContent = '--';
-        document.getElementById('price-min').textContent = 'USD --';
-        document.getElementById('price-max').textContent = 'USD --';
+        const kpiProperties = document.getElementById('kpi-properties');
+        if (kpiProperties) kpiProperties.textContent = '--';
+        
+        const kpiAvgPrice = document.getElementById('kpi-avg-price');
+        if (kpiAvgPrice) kpiAvgPrice.textContent = 'USD --/m²';
+        
+        const kpiPriceM2 = document.getElementById('kpi-price-m2');
+        if (kpiPriceM2) kpiPriceM2.textContent = 'USD --/m²';
+        
+        const kpiMedianPrice = document.getElementById('kpi-median-price');
+        if (kpiMedianPrice) kpiMedianPrice.textContent = 'USD --';
+        
+        const zoneBadge = document.getElementById('market-zone-badge');
+        if (zoneBadge) zoneBadge.textContent = '--';
+        
+        const priceMin = document.getElementById('price-min');
+        if (priceMin) priceMin.textContent = 'USD --';
+        
+        const priceMax = document.getElementById('price-max');
+        if (priceMax) priceMax.textContent = 'USD --';
         
         // Resetear gráficos
-        document.getElementById('distribution-chart').innerHTML = '';
-        document.getElementById('properties-table-container').innerHTML = '';
+        const distributionChart = document.getElementById('distribution-chart');
+        if (distributionChart) distributionChart.innerHTML = '';
         
-        // Resetear entorno
-        document.getElementById('neighborhood-profile').innerHTML = '<p class="loading-text">Cargando análisis del entorno...</p>';
-        document.getElementById('environment-categories').innerHTML = '';
-        document.getElementById('ai-conclusion').innerHTML = '';
-        document.getElementById('data-source-badge').textContent = '--';
+        const propertiesContainer = document.getElementById('properties-table-container');
+        if (propertiesContainer) propertiesContainer.innerHTML = '';
+        
+        // Resetear perfil del barrio
+        const profileContainer = document.getElementById('neighborhood-profile');
+        if (profileContainer) {
+            profileContainer.innerHTML = '<p class="loading-text">Cargando análisis del entorno...</p>';
+        }
+        
+        // Resetear categorías del entorno
+        Renderer.clearEnvironmentCategories();
         
         // Resetear resumen
-        document.getElementById('executive-summary').innerHTML = '<p class="loading-text">Generando resumen ejecutivo...</p>';
+        const summaryContainer = document.getElementById('executive-summary');
+        if (summaryContainer) {
+            summaryContainer.innerHTML = '<p class="loading-text">Generando resumen ejecutivo...</p>';
+        }
     },
     
     /**
      * Muestra la sección de resultados
      */
     showResults() {
-        document.getElementById('initial-section').classList.add('hidden');
-        document.getElementById('error-section').classList.add('hidden');
-        document.getElementById('results-section').classList.remove('hidden');
+        const initialSection = document.getElementById('initial-section');
+        const errorSection = document.getElementById('error-section');
+        const resultsSection = document.getElementById('results-section');
+        
+        if (initialSection) initialSection.classList.add('hidden');
+        if (errorSection) errorSection.classList.add('hidden');
+        if (resultsSection) resultsSection.classList.remove('hidden');
         
         // Scroll suave al inicio de resultados
-        document.querySelector('.kpi-panel').scrollIntoView({ behavior: 'smooth' });
+        const kpiPanel = document.querySelector('.kpi-panel');
+        if (kpiPanel) {
+            kpiPanel.scrollIntoView({ behavior: 'smooth' });
+        }
     },
     
     /**
      * Muestra el error
      */
     showError(message) {
-        document.getElementById('initial-section').classList.add('hidden');
-        document.getElementById('results-section').classList.add('hidden');
-        document.getElementById('error-section').classList.remove('hidden');
-        document.getElementById('error-message').textContent = message;
+        const initialSection = document.getElementById('initial-section');
+        const resultsSection = document.getElementById('results-section');
+        const errorSection = document.getElementById('error-section');
+        const errorMessage = document.getElementById('error-message');
+        
+        if (initialSection) initialSection.classList.add('hidden');
+        if (resultsSection) resultsSection.classList.add('hidden');
+        if (errorSection) errorSection.classList.remove('hidden');
+        if (errorMessage) errorMessage.textContent = message;
     }
 };
 
@@ -823,10 +884,15 @@ function printReport() {
  * Analiza una nueva zona
  */
 function analyzeNewZone() {
-    document.getElementById('neighborhood-input').value = '';
-    document.getElementById('results-section').classList.add('hidden');
-    document.getElementById('error-section').classList.add('hidden');
-    document.getElementById('initial-section').classList.remove('hidden');
+    const input = document.getElementById('neighborhood-input');
+    const resultsSection = document.getElementById('results-section');
+    const errorSection = document.getElementById('error-section');
+    const initialSection = document.getElementById('initial-section');
+    
+    if (input) input.value = '';
+    if (resultsSection) resultsSection.classList.add('hidden');
+    if (errorSection) errorSection.classList.add('hidden');
+    if (initialSection) initialSection.classList.remove('hidden');
     
     AppState.currentZone = null;
     AppState.marketData = null;
@@ -858,6 +924,6 @@ window.exportData = exportData;
 window.printReport = printReport;
 window.analyzeNewZone = analyzeNewZone;
 window.resetSearch = resetSearch;
-window.AppController = AppController; // Exponer el controlador para retry
+window.AppController = AppController;
 
 console.log('✅ Analytics Dashboard JavaScript cargado correctamente');
