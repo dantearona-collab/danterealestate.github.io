@@ -1,929 +1,892 @@
 /**
- * Dante Propiedades - Analytics Dashboard
- * Dashboard de Análisis de Barrios - JavaScript
- * 
- * Este módulo maneja toda la lógica de la aplicación:
- * - Configuración de API (local vs producción)
- * - Obtención de datos del mercado
- * - Obtención de análisis del entorno con IA real
- * - Renderizado de resultados
+ * Analisis-Barrio.js - Lógica del CMS para Gestión de Barrios
+ * Maneja toda la funcionalidad del frontend para buscar, editar y guardar datos de barrios
  */
 
 // ============================================
-// CONFIGURACIÓN DE API
+// CONFIGURACIÓN Y CONSTANTES
 // ============================================
 
-const API_CONFIG = {
-    // Detectar si está en localhost o producción
-    isLocal: window.location.hostname === 'localhost' || 
-             window.location.hostname === '127.0.0.1' ||
-             window.location.hostname.includes('192.168.') ||
-             window.location.hostname.includes('10.0.0.'),
-    
-    // URLs de la API
-    getBaseUrl() {
-        return this.isLocal ? 'http://localhost:8000' : '';
-    },
-    
-    getMarketStatsEndpoint(zone) {
-        return `${this.getBaseUrl()}/market/stats/${encodeURIComponent(zone)}`;
-    },
-    
-    getScrapingEndpoint() {
-        return `${this.getBaseUrl()}/market/scraping?zone=`;
-    },
-    
-    // Endpoint real de IA para análisis de entorno
-    getEnvironmentAnalysisEndpoint(zone, forceRefresh = false) {
-        const params = new URLSearchParams({
-            zone: zone,
-            force_refresh: forceRefresh.toString()
-        });
-        return `${this.getBaseUrl()}/ai/environment-analysis?${params.toString()}`;
-    }
-};
+const API_BASE_URL = 'http://localhost:8000';
+const API_TIMEOUT = 30000;
 
 // ============================================
 // ESTADO DE LA APLICACIÓN
 // ============================================
 
 const AppState = {
-    currentZone: null,
-    marketData: null,
-    environmentData: null,
+    currentBarrio: null,
+    isEditing: false,
     isLoading: false,
-    analysisComplete: false
+    searchResults: [],
+    formData: {},
+    originalData: null,
+    apiError: null
+};
+
+// ============================================
+// CLIENTE API - Funciones de Comunicación con el Backend
+// ============================================
+
+const ApiClient = {
+    /**
+     * Realiza una petición al API con manejo de errores
+     */
+    async request(endpoint, options = {}) {
+        const url = `${API_BASE_URL}${endpoint}`;
+        
+        const defaultOptions = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            timeout: API_TIMEOUT
+        };
+
+        const config = { ...defaultOptions, ...options };
+        
+        try {
+            const controller = new AbortController();
+            config.signal = controller.signal;
+            
+            const timeoutId = setTimeout(() => controller.abort(), config.timeout);
+            
+            const response = await fetch(url, config);
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.detail || `Error HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            return await response.json();
+            
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                throw new Error('La solicitud excedió el tiempo máximo de espera');
+            }
+            throw error;
+        }
+    },
+
+    /**
+     * Obtiene todos los barrios
+     */
+    async getAllBarrios() {
+        return this.request('/api/barrios');
+    },
+
+    /**
+     * Busca barrios por nombre
+     */
+    async searchBarrios(query) {
+        return this.request(`/api/barrios?q=${encodeURIComponent(query)}`);
+    },
+
+    /**
+     * Obtiene un barrio específico por nombre
+     */
+    async getBarrio(nombre) {
+        return this.request(`/api/barrios/${encodeURIComponent(nombre)}`);
+    },
+
+    /**
+     * Crea un nuevo barrio
+     */
+    async createBarrio(data) {
+        return this.request('/api/barrios', {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+    },
+
+    /**
+     * Actualiza un barrio existente
+     */
+    async updateBarrio(nombre, data) {
+        return this.request(`/api/barrios/${encodeURIComponent(nombre)}`, {
+            method: 'PUT',
+            body: JSON.stringify(data)
+        });
+    },
+
+    /**
+     * Elimina un barrio
+     */
+    async deleteBarrio(nombre) {
+        return this.request(`/api/barrios/${encodeURIComponent(nombre)}`, {
+            method: 'DELETE'
+        });
+    },
+
+    /**
+     * Genera análisis de entorno usando IA
+     */
+    async generateAIContanalysis(zone, forceRefresh = false) {
+        const params = new URLSearchParams({
+            zone: zone,
+            force_refresh: forceRefresh
+        });
+        return this.request(`/ai/environment-analysis?${params.toString()}`);
+    }
 };
 
 // ============================================
 // UTILIDADES
 // ============================================
 
-/**
- * Formatea un número como precio en USD
- */
-function formatPrice(price) {
-    if (!price || isNaN(price) || price === 0) return 'N/A';
-    return Math.round(price).toLocaleString('es-AR');
-}
-
-/**
- * Formatea un número con separadores de miles
- */
-function formatNumber(num) {
-    if (!num || isNaN(num)) return '--';
-    return num.toLocaleString('es-AR');
-}
-
-/**
- * Sanitiza HTML para prevenir XSS
- */
-function sanitizeHTML(str) {
-    if (!str) return '';
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-}
-
-/**
- * Capitaliza la primera letra de cada palabra
- */
-function capitalizeWords(str) {
-    if (!str) return '';
-    return str.split(' ').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    ).join(' ');
-}
-
-/**
- * Determina la clase CSS según la puntuación
- */
-function getScoreClass(score) {
-    if (!score) return 'score-low';
-    if (score >= 80) return 'score-high';
-    if (score >= 60) return 'score-medium';
-    return 'score-low';
-}
-
-// ============================================
-// SERVICIOS DE API
-// ============================================
-
-const MarketService = {
+const Utils = {
     /**
-     * Obtiene estadísticas del mercado para una zona
+     * Capitaliza la primera letra de cada palabra
      */
-    async getMarketStats(zone) {
-        try {
-            console.log('📊 Obteniendo estadísticas de mercado para:', zone);
-            
-            const response = await fetch(API_CONFIG.getMarketStatsEndpoint(zone));
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            console.log('✅ Datos de mercado obtenidos:', data);
-            return data;
-            
-        } catch (error) {
-            console.error('❌ Error obteniendo estadísticas de mercado:', error);
-            return null;
-        }
+    capitalize(str) {
+        if (!str) return '';
+        return str.toLowerCase().split(' ').map(word => 
+            word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
     },
-    
-    /**
-     * Obtiene propiedades scraped del mercado
-     */
-    async getScrapedProperties(zone) {
-        try {
-            console.log('🏠 Obteniendo propiedades del mercado para:', zone);
-            
-            const response = await fetch(API_CONFIG.getScrapingEndpoint() + encodeURIComponent(zone));
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            console.log('✅ Propiedades obtenidas:', data);
-            return data;
-            
-        } catch (error) {
-            console.error('❌ Error obteniendo propiedades:', error);
-            return null;
-        }
-    }
-};
 
-const EnvironmentService = {
     /**
-     * Obtiene análisis del entorno usando Gemini AI (endpoint real)
+     * Formatea un valor para mostrar en la UI
      */
-    async getEnvironmentAnalysis(zone, forceRefresh = false) {
-        console.log('🌍 Obteniendo análisis del entorno para:', zone, '(force:', forceRefresh, ')');
-        
-        try {
-            const endpoint = API_CONFIG.getEnvironmentAnalysisEndpoint(zone, forceRefresh);
-            console.log('🌐 Llamando endpoint de IA:', endpoint);
-            
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }
-            });
-            
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            console.log('✅ Análisis del entorno obtenido:', data);
-            
-            if (data.success) {
-                return {
-                    success: true,
-                    zone: zone,
-                    entorno: data.entorno,
-                    source: data.source,
-                    message: data.message
-                };
-            } else {
-                throw new Error(data.error || 'Error en el análisis');
-            }
-            
-        } catch (error) {
-            console.error('❌ Error obteniendo análisis del entorno:', error);
-            return null;
+    formatValue(value) {
+        if (value === null || value === undefined || value === '--') {
+            return '';
         }
+        return String(value);
+    },
+
+    /**
+     * Valida que un campo no esté vacío
+     */
+    validateRequired(value) {
+        return value !== null && value !== undefined && String(value).trim() !== '';
+    },
+
+    /**
+     * Muestra un toast de notificación
+     */
+    showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('fade-out');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    },
+
+    /**
+     * Formatea la fecha para mostrar
+     */
+    formatDate(dateString) {
+        if (!dateString) return 'Sin fecha';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('es-AR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
     }
 };
 
 // ============================================
-// RENDERIZADO DE RESULTADOS
+// RENDERIZADO DE UI
 // ============================================
 
-const Renderer = {
+const UIRenderer = {
     /**
-     * Actualiza los KPIs con los datos del mercado
+     * Limpia todos los campos del formulario
      */
-    updateKPIs(data) {
-        if (!data) return;
-        
-        const stats = data.statistics || {};
-        const zone = data.zone || AppState.currentZone;
-        
-        if (!zone) return;
-        
-        // Actualizar badges de zona
-        const zoneBadge = document.getElementById('market-zone-badge');
-        if (zoneBadge) {
-            zoneBadge.textContent = capitalizeWords(zone);
-        }
-        
-        // Actualizar KPIs
-        const kpiProperties = document.getElementById('kpi-properties');
-        if (kpiProperties) {
-            kpiProperties.textContent = formatNumber(data.sample_size || 0);
-        }
-        
-        const kpiAvgPrice = document.getElementById('kpi-avg-price');
-        if (kpiAvgPrice) {
-            kpiAvgPrice.textContent = `USD ${formatPrice(stats.average_price_m2)}/m²`;
-        }
-        
-        const kpiPriceM2 = document.getElementById('kpi-price-m2');
-        if (kpiPriceM2) {
-            kpiPriceM2.textContent = `USD ${formatPrice(stats.median_price_m2)}/m²`;
-        }
-        
-        const kpiMedianPrice = document.getElementById('kpi-median-price');
-        if (kpiMedianPrice) {
-            kpiMedianPrice.textContent = `USD ${formatPrice(stats.min_price_m2)} - ${formatPrice(stats.max_price_m2)}`;
-        }
-        
-        // Actualizar rango de precios
-        const priceMin = document.getElementById('price-min');
-        if (priceMin) {
-            priceMin.textContent = `USD ${formatPrice(stats.min_price_m2)}`;
-        }
-        
-        const priceMax = document.getElementById('price-max');
-        if (priceMax) {
-            priceMax.textContent = `USD ${formatPrice(stats.max_price_m2)}`;
-        }
-        
-        // Actualizar tendencia
-        const kpiTrend = document.getElementById('kpi-trend');
-        if (kpiTrend) {
-            kpiTrend.innerHTML = '<span class="up">📈 Mercado activo</span>';
-        }
-    },
-    
-    /**
-     * Genera el gráfico de distribución de precios
-     */
-    renderDistributionChart(data) {
-        const container = document.getElementById('distribution-chart');
-        
-        if (!data || !data.sample_size) {
-            if (container) {
-                container.innerHTML = '<p class="loading-text">No hay datos suficientes para mostrar distribución</p>';
-            }
-            return;
-        }
-        
-        // Generar distribución basada en los datos del mercado
-        const distribution = [
-            { height: 30, label: 'Económico' },
-            { height: 50, label: 'Accesible' },
-            { height: 80, label: 'Medio' },
-            { height: 60, label: 'Premium' },
-            { height: 40, label: 'Alto Lujo' }
+    clearForm() {
+        const formFields = [
+            'barrio-nombre', 'barrio-puntuacion', 'barrio-descripcion',
+            'barrio-transporte', 'barrio-educacion', 'barrio-salud',
+            'barrio-comercio', 'barrio-gastronomia', 'barrio-recreacion',
+            'barrio-seguridad', 'barrio-servicios-financieros'
         ];
-        
-        if (container) {
-            container.innerHTML = distribution.map(d => 
-                `<div class="distribution-bar" style="height: ${d.height}%" title="${d.label}"></div>`
-            ).join('');
-        }
-    },
-    
-    /**
-     * Renderiza la tabla de propiedades
-     */
-    renderPropertiesTable(data) {
-        const container = document.getElementById('properties-table-container');
-        
-        if (!container) return;
-        
-        if (!data || !data.data || !data.data.properties || data.data.properties.length === 0) {
-            container.innerHTML = '<p class="loading-text">No se encontraron propiedades en el mercado</p>';
-            return;
-        }
-        
-        const propiedades = data.data.properties.slice(0, 10);
-        
-        const tableHTML = `
-            <table class="properties-table">
-                <thead>
-                    <tr>
-                        <th>Propiedad</th>
-                        <th>Precio</th>
-                        <th>m²</th>
-                        <th>Amb.</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${propiedades.map(prop => `
-                        <tr>
-                            <td>${sanitizeHTML(prop.title || 'Propiedad')}</td>
-                            <td class="price-cell">USD ${formatPrice(prop.price)}</td>
-                            <td>${formatNumber(prop.area || 0)}</td>
-                            <td>${prop.rooms || '-'}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
-        
-        container.innerHTML = tableHTML;
-    },
-    
-    /**
-     * Actualiza el análisis del entorno con IA (estructura del HTML existente)
-     */
-    updateEnvironmentAnalysis(data) {
-        const profileContainer = document.getElementById('neighborhood-profile');
-        
-        if (!data || !data.success || !data.entorno) {
-            if (profileContainer) {
-                profileContainer.innerHTML = '<p class="loading-text">No se pudo obtener el análisis del entorno</p>';
-            }
-            this.clearEnvironmentCategories();
-            return;
-        }
-        
-        const entorno = data.entorno;
-        
-        // Actualizar puntuación general si existe el elemento
-        if (profileContainer) {
-            const overallScore = entorno.puntuacion_general || 0;
-            const overallClass = getScoreClass(overallScore);
-            
-            profileContainer.innerHTML = `
-                <div class="overall-score-container">
-                    <div class="overall-score ${overallClass}">
-                        <span class="score-value">${overallScore}</span>
-                        <span class="score-label">Puntuación General</span>
-                    </div>
-                    <div class="data-source-info">
-                        <span class="data-source-badge">${data.source === 'cache' ? '📦 Datos desde caché' : '🤖 Datos generados por IA'}</span>
-                    </div>
-                </div>
-                ${entorno.conclusion ? `<p class="ai-conclusion">${sanitizeHTML(entorno.conclusion)}</p>` : ''}
-            `;
-        }
-        
-        // Mapeo de categorías del endpoint a los IDs del HTML
-        const categoryMapping = {
-            'transporte': 'cat-transporte',
-            'educacion': 'cat-educacion',
-            'salud': 'cat-salud',
-            'comercio': 'cat-comercio',
-            'gastronomia': 'cat-gastronomia',
-            'recreacion': 'cat-recreacion',
-            'seguridad': 'cat-seguridad',
-            'espacios_verdes': 'cat-recreacion',
-            'vibrabarrio': 'cat-gastronomia',
-            'contaminacion': 'cat-seguridad'
-        };
-        
-        // Actualizar cada categoría en el HTML
-        Object.entries(categoryMapping).forEach(([sourceKey, targetId]) => {
-            const catData = entorno[sourceKey];
-            if (catData) {
-                const container = document.getElementById(targetId);
-                if (container) {
-                    const scoreClass = getScoreClass(catData.puntuacion);
-                    
-                    // Construir detalles adicionales
-                    let detailsHtml = '';
-                    
-                    // Lista de lugares/elementos específicos
-                    const itemsToShow = [];
-                    
-                    if (catData.estaciones_cercanas?.length) {
-                        itemsToShow.push(`🚉 <strong>Estaciones:</strong> ${catData.estaciones_cercanas.join(', ')}`);
-                    }
-                    if (catData.lineas_colectivo?.length) {
-                        itemsToShow.push(`🚌 <strong>Colectivos:</strong> ${catData.lineas_colectivo.join(', ')}`);
-                    }
-                    if (catData.supermercados?.length) {
-                        itemsToShow.push(`🛒 <strong>Supermercados:</strong> ${catData.supermercados.join(', ')}`);
-                    }
-                    if (catData.hospitales?.length) {
-                        itemsToShow.push(`🏥 <strong>Hospitales:</strong> ${catData.hospitales.join(', ')}`);
-                    }
-                    if (catData.centros_salud?.length) {
-                        itemsToShow.push(`🏥 <strong>Centros de salud:</strong> ${catData.centros_salud.join(', ')}`);
-                    }
-                    if (catData.escuelas?.length) {
-                        itemsToShow.push(`🏫 <strong>Escuelas:</strong> ${catData.escuelas.join(', ')}`);
-                    }
-                    if (catData.universidades?.length) {
-                        itemsToShow.push(`🎓 <strong>Universidades:</strong> ${catData.universidades.join(', ')}`);
-                    }
-                    if (catData.parques?.length) {
-                        itemsToShow.push(`🌳 <strong>Parques:</strong> ${catData.parques.join(', ')}`);
-                    }
-                    if (catData.bares_restaurantes?.length) {
-                        itemsToShow.push(`🍽️ <strong>Bares/Restaurantes:</strong> ${catData.bares_restaurantes.join(', ')}`);
-                    }
-                    if (catData.cultura?.length) {
-                        itemsToShow.push(`🎭 <strong>Cultura:</strong> ${catData.cultura.join(', ')}`);
-                    }
-                    if (catData.nivel_ruido) {
-                        itemsToShow.push(`🔊 <strong>Ruido:</strong> ${catData.nivel_ruido}`);
-                    }
-                    if (catData.principal_fuente) {
-                        itemsToShow.push(`⚠️ <strong>Fuente contaminación:</strong> ${catData.principal_fuente}`);
-                    }
-                    if (catData.rating_seguridad) {
-                        itemsToShow.push(`⭐ <strong>Rating:</strong> ${catData.rating_seguridad}`);
-                    }
-                    if (catData.comisaria_cercana) {
-                        itemsToShow.push(`🚔 <strong>Comisaría:</strong> ${catData.comisaria_cercana}`);
-                    }
-                    
-                    if (itemsToShow.length > 0) {
-                        detailsHtml = itemsToShow.map(item => `<p class="detail-item">${item}</p>`).join('');
-                    }
-                    
-                    container.innerHTML = `
-                        <div class="category-score ${scoreClass}">
-                            <span class="score-number">${catData.puntuacion}</span>
-                            <span class="score-label">/100</span>
-                        </div>
-                        <p class="category-description">${sanitizeHTML(catData.descripcion || '')}</p>
-                        ${detailsHtml ? `<div class="category-details">${detailsHtml}</div>` : ''}
-                    `;
+
+        formFields.forEach(fieldId => {
+            const element = document.getElementById(fieldId);
+            if (element) {
+                if (element.tagName === 'TEXTAREA') {
+                    element.value = '';
+                } else if (element.type === 'number') {
+                    element.value = '';
+                } else {
+                    element.value = '';
                 }
             }
         });
-    },
-    
-    /**
-     * Limpia las categorías del entorno
-     */
-    clearEnvironmentCategories() {
-        const categories = ['transporte', 'educacion', 'salud', 'comercio', 'gastronomia', 'recreacion', 'seguridad', 'finanzas'];
-        
-        categories.forEach(cat => {
-            const el = document.getElementById(`cat-${cat}`);
-            if (el) {
-                el.innerHTML = '<p class="loading-text">--</p>';
-            }
-        });
-    },
-    
-    /**
-     * Genera el resumen ejecutivo
-     */
-    renderExecutiveSummary(marketData, envData) {
-        const container = document.getElementById('executive-summary');
-        if (!container) return;
-        
-        let summaryHTML = '';
-        
-        if (marketData && marketData.sample_size) {
-            const stats = marketData.statistics || {};
-            summaryHTML += `
-                <div class="summary-section">
-                    <h4>💰 Resumen del Mercado</h4>
-                    <p>El barrio presenta un precio promedio de 
-                    <strong>USD ${formatPrice(stats.average_price_m2)}/m²</strong> con un rango de 
-                    USD ${formatPrice(stats.min_price_m2)} a USD ${formatPrice(stats.max_price_m2)}/m². 
-                    Se analizaron <strong>${marketData.sample_size} propiedades</strong> en el mercado actual.</p>
-                </div>
-            `;
-        }
-        
-        if (envData && envData.success && envData.entorno) {
-            const entorno = envData.entorno;
-            const score = entorno.puntuacion_general || 0;
-            const scoreClass = getScoreClass(score);
-            
-            summaryHTML += `
-                <div class="summary-section">
-                    <h4>🏙️ Análisis del Entorno</h4>
-                    <p>El barrio obtiene una puntuación general de 
-                    <strong class="${scoreClass}">${score}/100</strong> basada en evaluación de transporte, 
-                    educación, salud, comercio, gastronomía, recreación y seguridad.</p>
-                </div>
-            `;
-        }
-        
-        if (!summaryHTML) {
-            summaryHTML = '<p class="loading-text">No hay suficientes datos para generar un resumen</p>';
-        }
-        
-        container.innerHTML = summaryHTML;
-    }
-};
 
-// ============================================
-// CONTROLADOR PRINCIPAL
-// ============================================
+        // Limpiar elementos específicos
+        const descripcionGenerada = document.getElementById('descripcion-generada');
+        if (descripcionGenerada) descripcionGenerada.innerHTML = '';
+        
+        const aiStatus = document.getElementById('ai-status');
+        if (aiStatus) aiStatus.innerHTML = '';
+        
+        const lastUpdated = document.getElementById('last-updated');
+        if (lastUpdated) lastUpdated.textContent = '';
+    },
 
-const AppController = {
     /**
-     * Inicializa la aplicación
+     * Llena el formulario con los datos de un barrio
      */
-    init() {
-        console.log('🚀 Inicializando Analytics Dashboard...');
-        console.log('🌐 Modo:', API_CONFIG.isLocal ? 'LOCAL' : 'PRODUCCIÓN');
+    populateForm(barrio) {
+        // Campos de texto
+        this.setFieldValue('barrio-nombre', barrio.nombre);
+        this.setFieldValue('barrio-puntuacion', barrio.puntuacion_general);
+        this.setFieldValue('barrio-descripcion', barrio.perfil_barrio);
         
-        // Configurar event listeners
-        this.setupEventListeners();
+        // Puntuaciones individuales
+        this.setScoreField('transporte', barrio.transporte_publico);
+        this.setScoreField('educacion', barrio.educacion);
+        this.setScoreField('salud', barrio.salud);
+        this.setScoreField('comercio', barrio.comercio_servicios);
+        this.setScoreField('gastronomia', barrio.gastronomia);
+        this.setScoreField('recreacion', barrio.recreacion_cultura);
+        this.setScoreField('seguridad', barrio.seguridad);
+        this.setScoreField('servicios-financieros', barrio.servicios_financieros);
         
-        // Verificar si hay parámetros en la URL
-        this.checkUrlParams();
+        // Mostrar estado de IA
+        this.updateAIStatus(barrio);
+        
+        // Mostrar fecha de última actualización
+        this.updateLastUpdated(barrio);
+        
+        // Actualizar el badge de estado
+        this.updateStatusBadge(barrio);
     },
-    
+
     /**
-     * Configura los event listeners
+     * Establece el valor de un campo
      */
-    setupEventListeners() {
-        const input = document.getElementById('neighborhood-input');
-        const btn = document.getElementById('analyze-btn');
-        
-        if (input) {
-            input.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    this.analyzeZone();
-                }
-            });
-        }
-        
-        if (btn) {
-            btn.addEventListener('click', () => {
-                this.analyzeZone();
-            });
-        }
-        
-        console.log('✅ Event listeners configurados');
-    },
-    
-    /**
-     * Verifica parámetros en la URL
-     */
-    checkUrlParams() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const zone = urlParams.get('zone') || urlParams.get('barrio');
-        
-        if (zone) {
-            const input = document.getElementById('neighborhood-input');
-            if (input) {
-                input.value = zone;
-                this.analyzeZone(zone);
-            }
+    setFieldValue(elementId, value) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.value = Utils.formatValue(value);
         }
     },
-    
+
     /**
-     * Analiza una zona
+     * Establece el valor de un campo de puntuación
      */
-    async analyzeZone(zoneOverride = null) {
-        const input = document.getElementById('neighborhood-input');
-        const zone = zoneOverride || (input ? input.value.trim() : '');
+    setScoreField(category, score) {
+        const scoreElement = document.getElementById(`score-${category}`);
+        const inputElement = document.getElementById(`barrio-${category}`);
         
-        if (!zone) {
-            alert('Por favor, ingresá un barrio o zona para analizar');
-            return;
+        if (scoreElement) {
+            scoreElement.textContent = score !== null && score !== undefined ? `${score} /100` : '--';
         }
         
-        // Guardar zona actual
-        AppState.currentZone = zone;
-        AppState.isLoading = true;
-        AppState.analysisComplete = false;
-        
-        // Mostrar loading
-        this.showLoading(zone);
-        
-        // Resetear UI
-        this.resetResults();
-        
-        try {
-            // Actualizar paso 1: Mercado
-            this.updateLoadingStep('market', 'loading');
-            
-            // Obtener datos del mercado en paralelo
-            const [marketData, scrapedData] = await Promise.all([
-                MarketService.getMarketStats(zone),
-                MarketService.getScrapedProperties(zone)
-            ]);
-            
-            AppState.marketData = marketData;
-            
-            // Actualizar paso 1: Completado
-            this.updateLoadingStep('market', 'complete');
-            
-            if (marketData && marketData.success !== false) {
-                // Renderizar datos del mercado
-                Renderer.updateKPIs(marketData);
-                Renderer.renderDistributionChart(marketData);
-                Renderer.renderPropertiesTable(scrapedData);
-            }
-            
-            // Actualizar paso 2: Entorno
-            this.updateLoadingStep('environment', 'loading');
-            
-            // Obtener análisis del entorno con IA real
-            const envData = await EnvironmentService.getEnvironmentAnalysis(zone, false);
-            AppState.environmentData = envData;
-            
-            // Actualizar paso 2: Completado
-            this.updateLoadingStep('environment', 'complete');
-            
-            if (envData && envData.success) {
-                Renderer.updateEnvironmentAnalysis(envData);
-            } else {
-                // Si falla la IA, mostrar error en el perfil
-                const profileContainer = document.getElementById('neighborhood-profile');
-                if (profileContainer) {
-                    profileContainer.innerHTML = `
-                        <div class="error-container">
-                            <p class="error-text">No se pudo obtener el análisis del entorno</p>
-                            <button class="retry-btn" onclick="AppController.retryEnvironmentAnalysis()">
-                                🔄 Reintentar con IA
-                            </button>
-                        </div>
-                    `;
-                }
-            }
-            
-            // Actualizar paso 3: Resumen
-            this.updateLoadingStep('summary', 'loading');
-            
-            // Generar resumen ejecutivo
-            await new Promise(resolve => setTimeout(resolve, 500));
-            Renderer.renderExecutiveSummary(marketData, envData);
-            
-            // Actualizar paso 3: Completado
-            this.updateLoadingStep('summary', 'complete');
-            
-            // Mostrar resultados
-            AppState.analysisComplete = true;
-            this.showResults();
-            
-        } catch (error) {
-            console.error('❌ Error en el análisis:', error);
-            this.showError('Ocurrió un error al analizar la zona. Por favor, intentá nuevamente.');
-        } finally {
-            AppState.isLoading = false;
-            this.hideLoading();
+        if (inputElement) {
+            inputElement.value = score !== null && score !== undefined ? score : '';
         }
     },
-    
+
     /**
-     * Reintenta el análisis del entorno
+     * Actualiza el indicador de estado de IA
      */
-    async retryEnvironmentAnalysis() {
-        if (!AppState.currentZone) return;
+    updateAIStatus(barrio) {
+        const aiStatus = document.getElementById('ai-status');
+        if (!aiStatus) return;
         
-        const zone = AppState.currentZone;
-        
-        // Mostrar indicador de carga
-        const profileContainer = document.getElementById('neighborhood-profile');
-        if (profileContainer) {
-            profileContainer.innerHTML = `
-                <div class="retry-loading">
-                    <div class="spinner"></div>
-                    <p>Regenerando análisis con IA...</p>
-                </div>
-            `;
-        }
-        
-        // Llamar con force_refresh = true
-        const envData = await EnvironmentService.getEnvironmentAnalysis(zone, true);
-        AppState.environmentData = envData;
-        
-        if (envData && envData.success) {
-            Renderer.updateEnvironmentAnalysis(envData);
+        if (barrio.generado_por_ia) {
+            aiStatus.innerHTML = '<span class="badge badge-ai">🤖 Datos generados por IA</span>';
         } else {
-            if (profileContainer) {
-                profileContainer.innerHTML = `
-                    <div class="error-container">
-                        <p class="error-text">No se pudo generar el análisis. Por favor, intentá más tarde.</p>
-                    </div>
-                `;
+            aiStatus.innerHTML = '<span class="badge badge-manual">✏️ Datos ingresados manualmente</span>';
+        }
+    },
+
+    /**
+     * Actualiza la fecha de última actualización
+     */
+    updateLastUpdated(barrio) {
+        const lastUpdated = document.getElementById('last-updated');
+        if (lastUpdated && barrio.fecha_actualizacion) {
+            lastUpdated.textContent = `Última actualización: ${Utils.formatDate(barrio.fecha_actualizacion)}`;
+        }
+    },
+
+    /**
+     * Actualiza el badge de estado
+     */
+    updateStatusBadge(barrio) {
+        const statusBadge = document.getElementById('status-badge');
+        if (statusBadge) {
+            if (barrio.generado_por_ia) {
+                statusBadge.innerHTML = '<span class="badge badge-ai">🤖 Generado por IA</span>';
+            } else {
+                statusBadge.innerHTML = '<span class="badge badge-manual">✏️ Manual</span>';
             }
         }
     },
-    
+
     /**
-     * Muestra el estado de carga
+     * Muestra los resultados de búsqueda
      */
-    showLoading(zone) {
-        const loadingZone = document.getElementById('loading-zone');
-        const loadingOverlay = document.getElementById('loading-overlay');
+    showSearchResults(barrios) {
+        const resultsContainer = document.getElementById('search-results');
+        if (!resultsContainer) return;
         
-        if (loadingZone) {
-            loadingZone.textContent = capitalizeWords(zone);
-        }
-        if (loadingOverlay) {
-            loadingOverlay.classList.remove('hidden');
+        resultsContainer.innerHTML = '';
+        
+        if (!barrios || barrios.length === 0) {
+            resultsContainer.innerHTML = '<div class="search-no-results">No se encontraron barrios</div>';
+            return;
         }
         
-        // Resetear pasos
-        ['market', 'environment', 'summary'].forEach(step => {
-            this.updateLoadingStep(step, 'pending');
+        barrios.forEach(barrio => {
+            const resultItem = document.createElement('div');
+            resultItem.className = 'search-result-item';
+            resultItem.innerHTML = `
+                <div class="result-name">${Utils.capitalize(barrio.nombre)}</div>
+                <div class="result-score">Puntuación: ${barrio.puntuacion_general || '--'} /100</div>
+            `;
+            resultItem.addEventListener('click', () => {
+                AppState.currentBarrio = barrio;
+                this.populateForm(barrio);
+                AppState.isEditing = false;
+                EventHandlers.updateEditMode();
+                this.hideSearchResults();
+            });
+            resultsContainer.appendChild(resultItem);
         });
     },
-    
+
     /**
-     * Oculta el estado de carga
+     * Oculta los resultados de búsqueda
+     */
+    hideSearchResults() {
+        const resultsContainer = document.getElementById('search-results');
+        if (resultsContainer) {
+            resultsContainer.innerHTML = '';
+        }
+    },
+
+    /**
+     * Muestra el indicador de carga
+     */
+    showLoading(message = 'Cargando...') {
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const loadingText = document.getElementById('loading-text');
+        
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'flex';
+            if (loadingText) loadingText.textContent = message;
+        }
+    },
+
+    /**
+     * Oculta el indicador de carga
      */
     hideLoading() {
         const loadingOverlay = document.getElementById('loading-overlay');
         if (loadingOverlay) {
-            loadingOverlay.classList.add('hidden');
+            loadingOverlay.style.display = 'none';
         }
     },
-    
+
     /**
-     * Actualiza el estado de un paso
+     * Actualiza el estado visual del formulario
      */
-    updateLoadingStep(step, status) {
-        const stepEl = document.getElementById(`step-${step}`);
-        if (!stepEl) return;
-        
-        const statusEl = stepEl.querySelector('.step-status');
-        if (!statusEl) return;
-        
-        switch (status) {
-            case 'pending':
-                statusEl.textContent = '⏳';
-                stepEl.classList.remove('completed');
-                break;
-            case 'loading':
-                statusEl.textContent = '🔄';
-                stepEl.classList.remove('completed');
-                break;
-            case 'complete':
-                statusEl.textContent = '✅';
-                stepEl.classList.add('completed');
-                break;
-        }
-    },
-    
-    /**
-     * Resetea los resultados
-     */
-    resetResults() {
-        // Resetear KPIs
-        const kpiProperties = document.getElementById('kpi-properties');
-        if (kpiProperties) kpiProperties.textContent = '--';
-        
-        const kpiAvgPrice = document.getElementById('kpi-avg-price');
-        if (kpiAvgPrice) kpiAvgPrice.textContent = 'USD --/m²';
-        
-        const kpiPriceM2 = document.getElementById('kpi-price-m2');
-        if (kpiPriceM2) kpiPriceM2.textContent = 'USD --/m²';
-        
-        const kpiMedianPrice = document.getElementById('kpi-median-price');
-        if (kpiMedianPrice) kpiMedianPrice.textContent = 'USD --';
-        
-        const zoneBadge = document.getElementById('market-zone-badge');
-        if (zoneBadge) zoneBadge.textContent = '--';
-        
-        const priceMin = document.getElementById('price-min');
-        if (priceMin) priceMin.textContent = 'USD --';
-        
-        const priceMax = document.getElementById('price-max');
-        if (priceMax) priceMax.textContent = 'USD --';
-        
-        // Resetear gráficos
-        const distributionChart = document.getElementById('distribution-chart');
-        if (distributionChart) distributionChart.innerHTML = '';
-        
-        const propertiesContainer = document.getElementById('properties-table-container');
-        if (propertiesContainer) propertiesContainer.innerHTML = '';
-        
-        // Resetear perfil del barrio
-        const profileContainer = document.getElementById('neighborhood-profile');
-        if (profileContainer) {
-            profileContainer.innerHTML = '<p class="loading-text">Cargando análisis del entorno...</p>';
-        }
-        
-        // Resetear categorías del entorno
-        Renderer.clearEnvironmentCategories();
-        
-        // Resetear resumen
-        const summaryContainer = document.getElementById('executive-summary');
-        if (summaryContainer) {
-            summaryContainer.innerHTML = '<p class="loading-text">Generando resumen ejecutivo...</p>';
-        }
-    },
-    
-    /**
-     * Muestra la sección de resultados
-     */
-    showResults() {
-        const initialSection = document.getElementById('initial-section');
-        const errorSection = document.getElementById('error-section');
-        const resultsSection = document.getElementById('results-section');
-        
-        if (initialSection) initialSection.classList.add('hidden');
-        if (errorSection) errorSection.classList.add('hidden');
-        if (resultsSection) resultsSection.classList.remove('hidden');
-        
-        // Scroll suave al inicio de resultados
-        const kpiPanel = document.querySelector('.kpi-panel');
-        if (kpiPanel) {
-            kpiPanel.scrollIntoView({ behavior: 'smooth' });
-        }
-    },
-    
-    /**
-     * Muestra el error
-     */
-    showError(message) {
-        const initialSection = document.getElementById('initial-section');
-        const resultsSection = document.getElementById('results-section');
-        const errorSection = document.getElementById('error-section');
-        const errorMessage = document.getElementById('error-message');
-        
-        if (initialSection) initialSection.classList.add('hidden');
-        if (resultsSection) resultsSection.classList.add('hidden');
-        if (errorSection) errorSection.classList.remove('hidden');
-        if (errorMessage) errorMessage.textContent = message;
+    updateFormState(isEditing) {
+        const formFields = [
+            'barrio-nombre', 'barrio-puntuacion', 'barrio-descripcion',
+            'barrio-transporte', 'barrio-educacion', 'barrio-salud',
+            'barrio-comercio', 'barrio-gastronomia', 'barrio-recreacion',
+            'barrio-seguridad', 'barrio-servicios-financieros'
+        ];
+
+        formFields.forEach(fieldId => {
+            const element = document.getElementById(fieldId);
+            if (element) {
+                element.disabled = !isEditing;
+                if (isEditing) {
+                    element.classList.add('editing');
+                } else {
+                    element.classList.remove('editing');
+                }
+            }
+        });
+
+        // Actualizar botones
+        const editBtn = document.getElementById('btn-edit');
+        const saveBtn = document.getElementById('btn-save');
+        const cancelBtn = document.getElementById('btn-cancel');
+        const regenerateBtn = document.getElementById('btn-regenerate-ai');
+
+        if (editBtn) editBtn.style.display = isEditing ? 'none' : 'inline-flex';
+        if (saveBtn) saveBtn.style.display = isEditing ? 'inline-flex' : 'none';
+        if (cancelBtn) cancelBtn.style.display = isEditing ? 'inline-flex' : 'none';
+        if (regenerateBtn) regenerateBtn.style.display = isEditing ? 'inline-flex' : 'none';
     }
 };
 
 // ============================================
-// FUNCIONES GLOBALES (accesibles desde HTML)
+// MANEJO DE EVENTOS
 // ============================================
 
-/**
- * Exporta los datos a JSON
- */
-function exportData() {
-    const data = {
-        zona: AppState.currentZone,
-        fechaAnalisis: new Date().toISOString(),
-        mercado: AppState.marketData,
-        entorno: AppState.environmentData
-    };
-    
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `analisis-${AppState.currentZone || 'barrio'}-${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    
-    URL.revokeObjectURL(url);
-    console.log('✅ Datos exportados');
-}
+const EventHandlers = {
+    /**
+     * Inicializa todos los event listeners
+     */
+    init() {
+        this.setupSearchHandlers();
+        this.setupFormHandlers();
+        this.setupButtonHandlers();
+        this.setupNavigationHandlers();
+    },
 
-/**
- * Imprime el reporte
- */
-function printReport() {
-    window.print();
-}
+    /**
+     * Configura los manejadores de búsqueda
+     */
+    setupSearchHandlers() {
+        const searchInput = document.getElementById('barrio-search');
+        if (searchInput) {
+            let debounceTimer;
+            
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(async () => {
+                    const query = e.target.value.trim();
+                    
+                    if (query.length < 2) {
+                        UIRenderer.hideSearchResults();
+                        return;
+                    }
+                    
+                    try {
+                        const resultados = await ApiClient.searchBarrios(query);
+                        AppState.searchResults = resultados;
+                        UIRenderer.showSearchResults(resultados);
+                    } catch (error) {
+                        console.error('Error en búsqueda:', error);
+                        Utils.showToast('Error al buscar barrios', 'error');
+                    }
+                }, 300);
+            });
+        }
+    },
 
-/**
- * Analiza una nueva zona
- */
-function analyzeNewZone() {
-    const input = document.getElementById('neighborhood-input');
-    const resultsSection = document.getElementById('results-section');
-    const errorSection = document.getElementById('error-section');
-    const initialSection = document.getElementById('initial-section');
-    
-    if (input) input.value = '';
-    if (resultsSection) resultsSection.classList.add('hidden');
-    if (errorSection) errorSection.classList.add('hidden');
-    if (initialSection) initialSection.classList.remove('hidden');
-    
-    AppState.currentZone = null;
-    AppState.marketData = null;
-    AppState.environmentData = null;
-    AppState.analysisComplete = false;
-    
-    // Scroll al inicio
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
+    /**
+     * Configura los manejadores del formulario
+     */
+    setupFormHandlers() {
+        // Los campos de puntuación se actualizan en tiempo real
+        const scoreInputs = [
+            'barrio-transporte', 'barrio-educacion', 'barrio-salud',
+            'barrio-comercio', 'barrio-gastronomia', 'barrio-recreacion',
+            'barrio-seguridad', 'barrio-servicios-financieros'
+        ];
 
-/**
- * Resetea la búsqueda (desde pantalla de error)
- */
-function resetSearch() {
-    analyzeNewZone();
-}
+        scoreInputs.forEach(inputId => {
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.addEventListener('input', (e) => {
+                    const category = inputId.replace('barrio-', '');
+                    const scoreElement = document.getElementById(`score-${category}`);
+                    const value = parseInt(e.target.value);
+                    
+                    if (scoreElement) {
+                        if (!isNaN(value) && value >= 0 && value <= 100) {
+                            scoreElement.textContent = `${value} /100`;
+                        } else {
+                            scoreElement.textContent = '--';
+                        }
+                    }
+                });
+            }
+        });
+    },
+
+    /**
+     * Configura los manejadores de botones principales
+     */
+    setupButtonHandlers() {
+        // Botón Nuevo Barrio
+        const newBtn = document.getElementById('btn-new');
+        if (newBtn) {
+            newBtn.addEventListener('click', () => this.handleNewBarrio());
+        }
+
+        // Botón Editar
+        const editBtn = document.getElementById('btn-edit');
+        if (editBtn) {
+            editBtn.addEventListener('click', () => this.handleEdit());
+        }
+
+        // Botón Guardar
+        const saveBtn = document.getElementById('btn-save');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', () => this.handleSave());
+        }
+
+        // Botón Cancelar
+        const cancelBtn = document.getElementById('btn-cancel');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => this.handleCancel());
+        }
+
+        // Botón Regenerar con IA
+        const regenerateBtn = document.getElementById('btn-regenerate-ai');
+        if (regenerateBtn) {
+            regenerateBtn.addEventListener('click', () => this.handleRegenerateAI());
+        }
+
+        // Botón Eliminar
+        const deleteBtn = document.getElementById('btn-delete');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', () => this.handleDelete());
+        }
+
+        // Cerrar resultados de búsqueda al hacer click fuera
+        document.addEventListener('click', (e) => {
+            const searchInput = document.getElementById('barrio-search');
+            const resultsContainer = document.getElementById('search-results');
+            
+            if (searchInput && resultsContainer && 
+                !searchInput.contains(e.target) && 
+                !resultsContainer.contains(e.target)) {
+                UIRenderer.hideSearchResults();
+            }
+        });
+    },
+
+    /**
+     * Configura los manejadores de navegación entre secciones
+     */
+    setupNavigationHandlers() {
+        // Navegación entre tabs del dashboard
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = item.dataset.section;
+                this.switchSection(section);
+            });
+        });
+    },
+
+    /**
+     * Cambia de sección en el dashboard
+     */
+    switchSection(sectionId) {
+        // Actualizar navegación
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+            if (item.dataset.section === sectionId) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+
+        // Actualizar secciones
+        const sections = document.querySelectorAll('.dashboard-section');
+        sections.forEach(section => {
+            if (section.id === sectionId) {
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+            }
+        });
+    },
+
+    /**
+     * Maneja la creación de un nuevo barrio
+     */
+    async handleNewBarrio() {
+        AppState.currentBarrio = null;
+        AppState.isEditing = true;
+        AppState.originalData = null;
+        
+        UIRenderer.clearForm();
+        UIRenderer.updateFormState(true);
+        
+        // Enfocar el campo de nombre
+        const nombreInput = document.getElementById('barrio-nombre');
+        if (nombreInput) {
+            nombreInput.focus();
+        }
+        
+        Utils.showToast('Modo de creación activado. Ingrese los datos del nuevo barrio.');
+    },
+
+    /**
+     * Maneja la edición del barrio actual
+     */
+    handleEdit() {
+        if (!AppState.currentBarrio) {
+            Utils.showToast('Seleccione un barrio para editar', 'warning');
+            return;
+        }
+        
+        AppState.isEditing = true;
+        AppState.originalData = this.collectFormData();
+        UIRenderer.updateFormState(true);
+        Utils.showToast('Modo de edición activado. Modifique los campos necesarios.');
+    },
+
+    /**
+     * Maneja el guardado del barrio
+     */
+    async handleSave() {
+        const formData = this.collectFormData();
+        
+        // Validación básica
+        if (!formData.nombre || formData.nombre.trim() === '') {
+            Utils.showToast('El nombre del barrio es obligatorio', 'error');
+            return;
+        }
+
+        UIRenderer.showLoading('Guardando barrio...');
+
+        try {
+            let response;
+            
+            if (AppState.currentBarrio) {
+                // Actualizar barrio existente
+                response = await ApiClient.updateBarrio(AppState.currentBarrio.nombre, formData);
+                Utils.showToast('Barrio actualizado correctamente', 'success');
+            } else {
+                // Crear nuevo barrio
+                response = await ApiClient.createBarrio(formData);
+                AppState.currentBarrio = response;
+                Utils.showToast('Barrio creado correctamente', 'success');
+            }
+            
+            // Actualizar la UI con los datos guardados
+            AppState.currentBarrio = response;
+            AppState.isEditing = false;
+            AppState.originalData = null;
+            UIRenderer.populateForm(response);
+            UIRenderer.updateFormState(false);
+            
+        } catch (error) {
+            console.error('Error al guardar:', error);
+            Utils.showToast(`Error al guardar: ${error.message}`, 'error');
+        } finally {
+            UIRenderer.hideLoading();
+        }
+    },
+
+    /**
+     * Maneja la cancelación de edición
+     */
+    handleCancel() {
+        if (AppState.originalData) {
+            // Restaurar datos originales
+            UIRenderer.populateForm(AppState.originalData);
+            AppState.currentBarrio = AppState.originalData;
+        } else if (AppState.currentBarrio) {
+            // Si era un nuevo barrio, limpiar el formulario
+            UIRenderer.clearForm();
+        }
+        
+        AppState.isEditing = false;
+        AppState.originalData = null;
+        UIRenderer.updateFormState(false);
+        Utils.showToast('Edición cancelada', 'info');
+    },
+
+    /**
+     * Maneja la regeneración de análisis con IA
+     */
+    async handleRegenerateAI() {
+        const nombreInput = document.getElementById('barrio-nombre');
+        const zoneName = nombreInput ? nombreInput.value.trim() : '';
+        
+        if (!zoneName) {
+            Utils.showToast('Ingrese el nombre del barrio para generar el análisis', 'warning');
+            return;
+        }
+
+        const confirmRegenerate = confirm(
+            '¿Está seguro que desea regenerar el análisis con IA?\n\n' +
+            'Se perderán los cambios no guardados y se generará un nuevo análisis.'
+        );
+
+        if (!confirmRegenerate) return;
+
+        UIRenderer.showLoading('Generando análisis con IA...');
+
+        try {
+            const analysis = await ApiClient.generateAIContanalysis(zoneName, true);
+            
+            // Convertir el análisis de formato legacy al nuevo formato
+            const convertedData = this.convertLegacyAnalysis(analysis, zoneName);
+            
+            // Mostrar en el formulario
+            UIRenderer.populateForm(convertedData);
+            
+            // Actualizar el estado
+            AppState.currentBarrio = {
+                ...convertedData,
+                generado_por_ia: true,
+                fecha_actualizacion: new Date().toISOString()
+            };
+            
+            Utils.showToast('Análisis generado correctamente', 'success');
+            
+        } catch (error) {
+            console.error('Error al regenerar con IA:', error);
+            Utils.showToast(`Error al generar análisis: ${error.message}`, 'error');
+        } finally {
+            UIRenderer.hideLoading();
+        }
+    },
+
+    /**
+     * Maneja la eliminación del barrio actual
+     */
+    async handleDelete() {
+        if (!AppState.currentBarrio) {
+            Utils.showToast('Seleccione un barrio para eliminar', 'warning');
+            return;
+        }
+
+        const confirmDelete = confirm(
+            `¿Está seguro que desea eliminar el barrio "${AppState.currentBarrio.nombre}"?\n\n` +
+            'Esta acción no se puede deshacer.'
+        );
+
+        if (!confirmDelete) return;
+
+        UIRenderer.showLoading('Eliminando barrio...');
+
+        try {
+            await ApiClient.deleteBarrio(AppState.currentBarrio.nombre);
+            
+            Utils.showToast('Barrio eliminado correctamente', 'success');
+            
+            // Limpiar la UI
+            AppState.currentBarrio = null;
+            UIRenderer.clearForm();
+            
+        } catch (error) {
+            console.error('Error al eliminar:', error);
+            Utils.showToast(`Error al eliminar: ${error.message}`, 'error');
+        } finally {
+            UIRenderer.hideLoading();
+        }
+    },
+
+    /**
+     * Recoge los datos del formulario
+     */
+    collectFormData() {
+        return {
+            nombre: document.getElementById('barrio-nombre')?.value?.trim() || '',
+            puntuacion_general: this.parseScore(document.getElementById('barrio-puntuacion')?.value),
+            perfil_barrio: document.getElementById('barrio-descripcion')?.value?.trim() || '',
+            transporte_publico: this.parseScore(document.getElementById('barrio-transporte')?.value),
+            educacion: this.parseScore(document.getElementById('barrio-educacion')?.value),
+            salud: this.parseScore(document.getElementById('barrio-salud')?.value),
+            comercio_servicios: this.parseScore(document.getElementById('barrio-comercio')?.value),
+            gastronomia: this.parseScore(document.getElementById('barrio-gastronomia')?.value),
+            recreacion_cultura: this.parseScore(document.getElementById('barrio-recreacion')?.value),
+            seguridad: this.parseScore(document.getElementById('barrio-seguridad')?.value),
+            servicios_financieros: this.parseScore(document.getElementById('barrio-servicios-financieros')?.value)
+        };
+    },
+
+    /**
+     * Convierte una puntuación de string a número
+     */
+    parseScore(value) {
+        if (!value || value.trim() === '') return null;
+        const parsed = parseInt(value);
+        return isNaN(parsed) ? null : parsed;
+    },
+
+    /**
+     * Convierte el formato legacy del análisis de IA al nuevo formato
+     */
+    convertLegacyAnalysis(analysis, nombre) {
+        return {
+            nombre: Utils.capitalize(nombre),
+            puntuacion_general: this.parseScore(analysis.puntuacion_general) || 
+                               this.parseScore(analysis.puntuacion) || 50,
+            perfil_barrio: analysis.perfil_barrio || analysis.descripcion_general || '',
+            transporte_publico: this.extractScore(analysis, 'transporte') || 
+                               this.extractScore(analysis, 'transporte_publico'),
+            educacion: this.extractScore(analysis, 'educacion'),
+            salud: this.extractScore(analysis, 'salud'),
+            comercio_servicios: this.extractScore(analysis, 'comercio') || 
+                               this.extractScore(analysis, 'comercio_servicios'),
+            gastronomia: this.extractScore(analysis, 'gastronomia'),
+            recreacion_cultura: this.extractScore(analysis, 'recreacion') || 
+                               this.extractScore(analysis, 'recreacion_cultura'),
+            seguridad: this.extractScore(analysis, 'seguridad'),
+            servicios_financieros: this.extractScore(analysis, 'servicios_financieros') || 
+                                  this.extractScore(analysis, 'financieros')
+        };
+    },
+
+    /**
+     * Extrae una puntuación del análisis
+     */
+    extractScore(analysis, key) {
+        if (analysis[key]) {
+            if (typeof analysis[key] === 'object') {
+                return this.parseScore(analysis[key].puntuacion) || 
+                       this.parseScore(analysis[key].score);
+            }
+            return this.parseScore(analysis[key]);
+        }
+        return null;
+    },
+
+    /**
+     * Actualiza el estado del modo de edición
+     */
+    updateEditMode() {
+        UIRenderer.updateFormState(AppState.isEditing);
+    }
+};
 
 // ============================================
-// INICIALIZACIÓN
+// INICIALIZACIÓN DE LA APLICACIÓN
 // ============================================
 
-// Inicializar cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', () => {
-    AppController.init();
-});
+async function initApp() {
+    console.log('🚀 Inicializando CMS de Barrios...');
+    
+    // Configurar modo
+    const mode = 'LOCAL';
+    console.log(`🌐 Modo: ${mode}`);
+    
+    // Inicializar manejadores de eventos
+    EventHandlers.init();
+    
+    // Deshabilitar campos inicialmente
+    UIRenderer.updateFormState(false);
+    
+    // Cargar lista de barrios si existe el endpoint
+    try {
+        const barrios = await ApiClient.getAllBarrios();
+        console.log(`✅ Barrios cargados: ${barrios.length} registros`);
+    } catch (error) {
+        console.warn('No se pudieron cargar los barrios:', error.message);
+    }
+    
+    console.log('✅ CMS de Barrios inicializado correctamente');
+}
 
-// Hacer funciones disponibles globalmente
-window.exportData = exportData;
-window.printReport = printReport;
-window.analyzeNewZone = analyzeNewZone;
-window.resetSearch = resetSearch;
-window.AppController = AppController;
+// Iniciar la aplicación cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', initApp);
 
-console.log('✅ Analytics Dashboard JavaScript cargado correctamente');
+// Exportar funciones necesarias para uso global
+window.AppState = AppState;
+window.ApiClient = ApiClient;
+window.UIRenderer = UIRenderer;
+window.EventHandlers = EventHandlers;
+window.Utils = Utils;

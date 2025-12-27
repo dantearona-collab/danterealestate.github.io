@@ -30,6 +30,7 @@ from logic.environ_database import init_environ_analysis_db, get_environ_analysi
 from logic.filters import detect_filters
 from logic.gemini_client import call_gemini_with_rotation, build_prompt
 from logic.filter_data import BARRIOS, OPERACIONES, TIPOS
+from logic.barrio_data import get_gastronomy_info, get_financial_info
 
 # Importar módulo de scraping de mercado
 try:
@@ -1112,6 +1113,33 @@ Eres un analista inmobiliario experto en Buenos Aires, Argentina. Genera un aná
         # Validar que tenga la estructura esperada
         if not isinstance(analysis_data, dict):
             raise ValueError("La respuesta no es un objeto JSON válido")
+        
+        # ✅ COMPLETAR CAMPOS VACÍOS CON DATOS DE RESPALDO
+        print(f"🔍 Verificando campos vacíos para completar...")
+        
+        # Obtener datos de gastronomía
+        gastro_info = get_gastronomy_info(zone_clean)
+        if 'gastronomia' not in analysis_data or not analysis_data.get('gastronomia') or analysis_data['gastronomia'].get('puntuacion') in [None, 0, '--', '']:
+            analysis_data['gastronomia'] = {
+                'puntuacion': gastro_info.get('puntuacion', 50),
+                'descripcion': gastro_info.get('descripcion', 'Información gastronómica no disponible'),
+                'restaurantes_destacados': gastro_info.get('restaurantes_destacados', []),
+                'zonas_gastronomicas': gastro_info.get('zonas_gastronomicas', []),
+                'tipo_comida': gastro_info.get('tipo_comida', [])
+            }
+            print(f"✅ Campo 'gastronomia' completado con datos de respaldo")
+        
+        # Obtener datos de servicios financieros
+        financial_info = get_financial_info(zone_clean)
+        if 'servicios_financieros' not in analysis_data or not analysis_data.get('servicios_financieros') or analysis_data['servicios_financieros'].get('puntuacion') in [None, 0, '--', '']:
+            analysis_data['servicios_financieros'] = {
+                'puntuacion': financial_info.get('puntuacion', 50),
+                'descripcion': financial_info.get('descripcion', 'Información de servicios financieros no disponible'),
+                'bancos': financial_info.get('bancos', []),
+                'cajeros_automaticos': financial_info.get('cajeros_automaticos', []),
+                'sucursales': financial_info.get('sucursales_bancarias', [])
+            }
+            print(f"✅ Campo 'servicios_financieros' completado con datos de respaldo")
         
         # Guardar en base de datos (7 días de caché)
         save_environ_analysis(zone_clean, analysis_data, cache_days=7)
