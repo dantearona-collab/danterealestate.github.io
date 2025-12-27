@@ -1349,7 +1349,6 @@ def generar_datos_barrio_ai(nombre_barrio: str) -> Dict[str, Any]:
             (r"'([^']+)':", r'"\1":'),  # Keys con comillas simples
             (r',\s*([}\]])', r'\1'),    # Trailing commas
             (r"'([^']*)'", r'"\1"'),    # Strings con comillas simples
-            (r'\n\s*//[^\n]*', '', re.MULTILINE),  // Comments
         ]
         
         for pattern, replacement in corrections:
