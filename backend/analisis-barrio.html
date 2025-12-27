@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard - Dante Propiedades</title>
+    <link rel="stylesheet" href="analisis-barrio.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header con búsqueda -->
+    <header class="dashboard-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <h1 class="logo">🏠 Dante Propiedades</h1>
+                <span class="subtitle">Analytics Dashboard</span>
+            </div>
+            <div class="search-section">
+                <div class="search-container">
+                    <input 
+                        type="text" 
+                        id="neighborhood-input" 
+                        placeholder="Ingrese un barrio o zona (ej: Palermo, Belgrano, Microcentro...)"
+                        autocomplete="off"
+                    >
+                    <button id="analyze-btn" class="analyze-btn">
+                        <span class="btn-icon">🔍</span>
+                        Analizar Zona
+                    </button>
+                </div>
+                <p class="search-hint">Los datos se obtendrán en tiempo real del mercado inmobiliario argentino</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido principal -->
+    <main class="dashboard-main">
+        <!-- Sección de resultados (oculta inicialmente) -->
+        <section id="results-section" class="results-section hidden">
+            
+            <!-- Panel de KPIs -->
+            <div class="kpi-panel">
+                <div class="kpi-card" data-kpi="properties">
+                    <div class="kpi-icon">🏘️</div>
+                    <div class="kpi-value" id="kpi-properties">--</div>
+                    <div class="kpi-label">Propiedades Analizadas</div>
+                    <div class="kpi-trend" id="kpi-trend"></div>
+                </div>
+                <div class="kpi-card" data-kpi="avg-price">
+                    <div class="kpi-icon">💰</div>
+                    <div class="kpi-value" id="kpi-avg-price">USD --</div>
+                    <div class="kpi-label">Precio Promedio</div>
+                    <div class="kpi-trend" id="kpi-avg-price-trend"></div>
+                </div>
+                <div class="kpi-card" data-kpi="price-m2">
+                    <div class="kpi-icon">📐</div>
+                    <div class="kpi-value" id="kpi-price-m2">USD --/m²</div>
+                    <div class="kpi-label">Precio por m²</div>
+                    <div class="kpi-trend" id="kpi-m2-trend"></div>
+                </div>
+                <div class="kpi-card" data-kpi="median-price">
+                    <div class="kpi-icon">📊</div>
+                    <div class="kpi-value" id="kpi-median-price">USD --</div>
+                    <div class="kpi-label">Precio Mediano</div>
+                    <div class="kpi-trend" id="kpi-median-trend"></div>
+                </div>
+            </div>
+
+            <!-- Grid de dos columnas -->
+            <div class="results-grid">
+                <!-- Columna Izquierda: Datos de Mercado -->
+                <div class="market-column">
+                    <div class="card market-card">
+                        <div class="card-header">
+                            <h2>📈 Estadísticas del Mercado</h2>
+                            <span class="zone-badge" id="market-zone-badge">--</span>
+                        </div>
+                        <div class="card-body">
+                            <!-- Rango de precios -->
+                            <div class="price-range-section">
+                                <h3>Rango de Precios</h3>
+                                <div class="price-range-visual">
+                                    <div class="range-bar">
+                                        <div class="range-min">
+                                            <span class="range-label">Mínimo</span>
+                                            <span class="range-value" id="price-min">--</span>
+                                        </div>
+                                        <div class="range-track">
+                                            <div class="range-fill"></div>
+                                            <div class="range-marker" id="range-marker"></div>
+                                        </div>
+                                        <div class="range-max">
+                                            <span class="range-label">Máximo</span>
+                                            <span class="range-value" id="price-max">--</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Distribución de precios (gráfico simple) -->
+                            <div class="price-distribution">
+                                <h3>Distribución de Precios</h3>
+                                <div class="distribution-chart" id="distribution-chart">
+                                    <!-- Barras generadas dinámicamente -->
+                                </div>
+                                <div class="distribution-labels">
+                                    <span>Muy Accesible</span>
+                                    <span>Accesible</span>
+                                    <span>Medio</span>
+                                    <span>Premium</span>
+                                    <span>Alto Lujo</span>
+                                </div>
+                            </div>
+
+                            <!-- Tabla de propiedades scrapeadas -->
+                            <div class="properties-table-section">
+                                <h3>Propiedades Encontradas en el Mercado</h3>
+                                <div class="table-container" id="properties-table-container">
+                                    <!-- Tabla generada dinámicamente -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: Datos del Entorno (IA) -->
+                <div class="environment-column">
+                    <div class="card environment-card">
+                        <div class="card-header">
+                            <h2>🌍 Análisis del Entorno con IA</h2>
+                            <span class="ai-badge">🤖 Inteligencia Artificial</span>
+                        </div>
+                        <div class="card-body">
+                            <!-- Perfil del barrio -->
+                            <div class="neighborhood-profile">
+                                <h3>Perfil del Barrio</h3>
+                                <div class="profile-content" id="neighborhood-profile">
+                                    <p class="loading-text">Cargando análisis del entorno...</p>
+                                </div>
+                            </div>
+
+                            <!-- Categorías del entorno -->
+                            <div class="environment-categories">
+                                <h3>Características del Entorno</h3>
+                                
+                                <!-- Transporte -->
+                                <div class="category-card" data-category="transporte">
+                                    <div class="category-header">
+                                        <span class="category-icon">🚇</span>
+                                        <h4>Transporte Público</h4>
+                                    </div>
+                                    <div class="category-content" id="cat-transporte">
+                                        <p class="loading-text">--</p>
+                                    </div>
+                                </div>
+
+                                <!-- Educación -->
+                                <div class="category-card" data-category="educacion">
+                                    <div class="category-header">
+                                        <span class="category-icon">🎓</span>
+                                        <h4>Educación</h4>
+                                    </div>
+                                    <div class="category-content" id="cat-educacion">
+                                        <p class="loading-text">--</p>
+                                    </div>
+                                </div>
+
+                                <!-- Salud -->
+                                <div class="category-card" data-category="salud">
+                                    <div class="category-header">
+                                        <span class="category-icon">🏥</span>
+                                        <h4>Salud</h4>
+                                    </div>
+                                    <div class="category-content" id="cat-salud">
+                                        <p class="loading-text">--</p>
+                                    </div>
+                                </div>
+
+                                <!-- Comercio -->
+                                <div class="category-card" data-category="comercio">
+                                    <div class="category-header">
+                                        <span class="category-icon">🛒</span>
+                                        <h4>Comercio y Servicios</h4>
+                                    </div>
+                                    <div class="category-content" id="cat-comercio">
+                                        <p class="loading-text">--</p>
+                                    </div>
+                                </div>
+
+                                <!-- Gastronomía -->
+                                <div class="category-card" data-category="gastronomia">
+                                    <div class="category-header">
+                                        <span class="category-icon">🍽️</span>
+                                        <h4>Gastronomía</h4>
+                                    </div>
+                                    <div class="category-content" id="cat-gastronomia">
+                                        <p class="loading-text">--</p>
+                                    </div>
+                                </div>
+
+                                <!-- Recreación -->
+                                <div class="category-card" data-category="recreacion">
+                                    <div class="category-header">
+                                        <span class="category-icon">🌳</span>
+                                        <h4>Recreación y Cultura</h4>
+                                    </div>
+                                    <div class="category-content" id="cat-recreacion">
+                                        <p class="loading-text">--</p>
+                                    </div>
+                                </div>
+
+                                <!-- Seguridad -->
+                                <div class="category-card" data-category="seguridad">
+                                    <div class="category-header">
+                                        <span class="category-icon">🛡️</span>
+                                        <h4>Seguridad</h4>
+                                    </div>
+                                    <div class="category-content" id="cat-seguridad">
+                                        <p class="loading-text">--</p>
+                                    </div>
+                                </div>
+
+                                <!-- Servicios Financieros -->
+                                <div class="category-card" data-category="finanzas">
+                                    <div class="category-header">
+                                        <span class="category-icon">🏦</span>
+                                        <h4>Servicios Financieros</h4>
+                                    </div>
+                                    <div class="category-content" id="cat-finanzas">
+                                        <p class="loading-text">--</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer con resumen -->
+            <div class="summary-footer">
+                <div class="summary-card">
+                    <h3>📋 Resumen Ejecutivo</h3>
+                    <div class="summary-content" id="executive-summary">
+                        <p class="loading-text">Generando resumen ejecutivo...</p>
+                    </div>
+                </div>
+                <div class="summary-actions">
+                    <button class="action-btn" onclick="exportData()">
+                        <span>📥</span> Exportar Datos
+                    </button>
+                    <button class="action-btn" onclick="printReport()">
+                        <span>🖨️</span> Imprimir Reporte
+                    </button>
+                    <button class="action-btn" onclick="analyzeNewZone()">
+                        <span>🔄</span> Analizar Nueva Zona
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pantalla inicial (cuando no hay búsqueda) -->
+        <section id="initial-section" class="initial-section">
+            <div class="initial-content">
+                <div class="initial-icon">🏙️</div>
+                <h2>Analizá cualquier barrio de Argentina</h2>
+                <p>Descubrí el potencial de inversión en cualquier zona del país con análisis en tiempo real del mercado inmobiliario y del entorno.</p>
+                <div class="features-list">
+                    <div class="feature-item">
+                        <span class="feature-icon">📊</span>
+                        <div>
+                            <h4>Estadísticas de Mercado</h4>
+                            <p>Precios promedio, por m² y tendencias actualizadas</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🤖</span>
+                        <div>
+                            <h4>Análisis con Inteligencia Artificial</h4>
+                            <p>Descripción completa del entorno: transporte, educación, comercio y más</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">📈</span>
+                        <div>
+                            <h4>Comparativas Inteligentes</h4>
+                            <p>Compará características y precios entre diferentes zonas</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pantalla de error -->
+        <section id="error-section" class="error-section hidden">
+            <div class="error-content">
+                <div class="error-icon">⚠️</div>
+                <h2>No pudimos encontrar datos para esta zona</h2>
+                <p id="error-message">Verificá el nombre del barrio e intentá nuevamente.</p>
+                <button class="retry-btn" onclick="resetSearch()">🔄 Intentar de Nuevo</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Loading overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h3>Analizando <span id="loading-zone">--</span></h3>
+            <p>Obteniendo datos del mercado y generando análisis del entorno...</p>
+            <div class="loading-steps">
+                <div class="step" id="step-market">
+                    <span class="step-icon">📊</span>
+                    <span class="step-text">Datos de mercado</span>
+                    <span class="step-status">⏳</span>
+                </div>
+                <div class="step" id="step-environment">
+                    <span class="step-icon">🌍</span>
+                    <span class="step-text">Análisis del entorno</span>
+                    <span class="step-status">⏳</span>
+                </div>
+                <div class="step" id="step-summary">
+                    <span class="step-icon">📋</span>
+                    <span class="step-text">Generando resumen</span>
+                    <span class="step-status">⏳</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="dashboard-footer">
+        <p>© 2025 Dante Propiedades | Analytics Dashboard</p>
+        <p class="footer-note">Datos actualizados en tiempo real mediante web scraping e inteligencia artificial</p>
+    </footer>
+
+    <script src="analisis-barrio.js"></script>
+</body>
+</html>

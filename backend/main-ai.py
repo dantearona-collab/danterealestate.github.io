@@ -924,8 +924,45 @@ def get_comparative_analysis(zone: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ✅ RUTAS PARA ANALISIS DE BARRIOS
+@app.get("/analisis-barrio")
+def analisis_barrio_page():
+    """Sirve la página principal del Analytics Dashboard"""
+    return FileResponse("analisis-barrio.html")
+
+
+@app.get("/analisis-barrio.css")
+def analisis_barrio_css():
+    """Sirve los estilos del Analytics Dashboard"""
+    return FileResponse("analisis-barrio.css")
+
+
+@app.get("/analisis-barrio.js")
+def analisis_barrio_js():
+    """Sirve el JavaScript del Analytics Dashboard"""
+    return FileResponse("analisis-barrio.js")
+
+
 # ✅ INICIO
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run("main-ai:app", host="0.0.0.0", port=port, reload=False)  # reload=False en producción
+    # ✅ RUTAS PARA ANALISIS DE BARRIOS
+
+@app.get("/analisis-barrio")
+def analisis_barrio_page():
+    """Sirve la página principal del Analytics Dashboard"""
+    return FileResponse("analisis-barrio.html")
+
+
+@app.get("/analisis-barrio.css")
+def analisis_barrio_css():
+    """Sirve los estilos del Analytics Dashboard"""
+    return FileResponse("analisis-barrio.css")
+
+
+@app.get("/analisis-barrio.js")
+def analisis_barrio_js():
+    """Sirve el JavaScript del Analytics Dashboard"""
+    return FileResponse("analisis-barrio.js")
