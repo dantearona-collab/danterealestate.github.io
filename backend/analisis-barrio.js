@@ -5,7 +5,7 @@
  * Este módulo maneja toda la lógica de la aplicación:
  * - Configuración de API (local vs producción)
  * - Obtención de datos del mercado
- * - Obtención de análisis del entorno con IA
+ * - Obtención de análisis del entorno con IA real
  * - Renderizado de resultados
  */
 
@@ -33,8 +33,13 @@ const API_CONFIG = {
         return `${this.getBaseUrl()}/market/scraping?zone=`;
     },
     
-    getEnvironmentEndpoint(address, zone) {
-        return `${this.getBaseUrl()}/ai/environment`;
+    // Endpoint real de IA para análisis de entorno
+    getEnvironmentAnalysisEndpoint(zone, forceRefresh = false) {
+        const params = new URLSearchParams({
+            zone: zone,
+            force_refresh: forceRefresh.toString()
+        });
+        return `${this.getBaseUrl()}/ai/environment-analysis?${params.toString()}`;
     }
 };
 
@@ -74,6 +79,7 @@ function formatNumber(num) {
  * Sanitiza HTML para prevenir XSS
  */
 function sanitizeHTML(str) {
+    if (!str) return '';
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
@@ -87,6 +93,16 @@ function capitalizeWords(str) {
     return str.split(' ').map(word => 
         word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
     ).join(' ');
+}
+
+/**
+ * Determina la clase CSS según la puntuación
+ */
+function getScoreClass(score) {
+    if (!score) return 'score-low';
+    if (score >= 80) return 'score-high';
+    if (score >= 60) return 'score-medium';
+    return 'score-low';
 }
 
 // ============================================
@@ -145,17 +161,24 @@ const EnvironmentService = {
     /**
      * Obtiene análisis del entorno usando Gemini AI (endpoint real)
      */
-    async getEnvironmentAnalysis(address, zone) {
-        console.log('🌍 Obteniendo análisis del entorno para:', zone);
+    async getEnvironmentAnalysis(zone, forceRefresh = false) {
+        console.log('🌍 Obteniendo análisis del entorno para:', zone, '(force:', forceRefresh, ')');
         
         try {
-            const endpoint = `${API_CONFIG.getBaseUrl()}/ai/environment-analysis?zone=${encodeURIComponent(zone)}`;
-            console.log('🌐 Llamando endpoint:', endpoint);
+            const endpoint = API_CONFIG.getEnvironmentAnalysisEndpoint(zone, forceRefresh);
+            console.log('🌐 Llamando endpoint de IA:', endpoint);
             
-            const response = await fetch(endpoint);
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
             
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
             }
             
             const data = await response.json();
@@ -165,8 +188,9 @@ const EnvironmentService = {
                 return {
                     success: true,
                     zone: zone,
-                    analysis: data.analysis,
-                    source: data.source  // 'cache' o 'ai'
+                    entorno: data.entorno,
+                    source: data.source,  // 'cache' o 'ai'
+                    message: data.message
                 };
             } else {
                 throw new Error(data.error || 'Error en el análisis');
@@ -180,119 +204,6 @@ const EnvironmentService = {
 };
 
 // ============================================
-// FUNCIONES SIMULADAS (igual que app.js)
-// ============================================
-
-// Generar resultados realistas basados en búsquedas
-async function generateRealSearchResults(ubicacionReal, barrioOriginal, searchQueries) {
-    console.log('🎯 Generando resultados para:', barrioOriginal);
-    
-    // Base de datos simulada de barrios
-    const barriosData = {
-        'palermo': {
-            perfil: 'Palermo es uno de los barrios más populares y diversos de Buenos Aires, conocido por sus parques, vida nocturna y scene artística.',
-            transporte: 'Excelente red de transporte con varias líneas de subte (D, B, A), numerosos colectivos y ciclovía propia.',
-            educacion: 'Cuenta con prestigiosos colegios bilingües, instituciones educativas públicas y privadas de todos los niveles.',
-            salud: 'Hospitales de alta complejidad, clínicas privadas y múltiples centros de salud distribuidos en el barrio.',
-            comercio: 'Vibrante zona comercial con shoppings, galerías, locales de moda y el famoso circuito de Palermo Hollywood y Soho.',
-            gastronomia: 'Epicentro de la gastronomía porteña con restaurantes gourmet, bares temáticos, cafeterías y food parks.',
-            recreacion: 'Parques水量 (Bosques de Palermo, Jardin Japonés, Zoológico), clubes deportivos y espacios culturales.',
-            seguridad: 'Zona con presencia policial y vigilancia privada, seguridad media-alta en áreas residenciales.'
-        },
-        'microcentro': {
-            perfil: 'El corazón financiero y comercial de Buenos Aires, con importante actividad bancaria y empresarial.',
-            transporte: 'Excelente conectividad con todas las líneas de subte, tren urbano y múltiples líneas de colectivo.',
-            educacion: 'Instituto de educación superior y academias especializadas en negocios y idiomas.',
-            salud: 'Clínicas especializadas y centros médicos orientados a profesionales y ejecutivos.',
-            comercio: 'Centro comercial por excelencia con galerías, casas de cambio y tiendas especializadas.',
-            gastronomia: 'Restaurantes ejecutivos, casas de té históricas y cafeterías tradicionales.',
-            recreacion: 'Cercano a lugares históricos como el Obelisco, Plaza de Mayo y Teatro Colón.',
-            seguridad: 'Alta presencia policial por ser zona bancaria y comercial.'
-        },
-        'belgrano': {
-            perfil: 'Barrio residencial de clase alta con amplias zonas verdes y arquitectura moderna.',
-            transporte: 'Buena conexión con subte línea D, colectivos y cercanas autopistas.',
-            educacion: 'Prestigiosos colegios bilingües y universidades privadas.',
-            salud: 'Clínicas de lujo y hospitales especializados.',
-            comercio: 'Comercio selecto con paseos comerciales y restaurantes de alta gama.',
-            gastronomia: 'Restaurantes refinados y cafeterías elegantes.',
-            recreacion: 'Parque Belgrano, canchas de golf y espacios deportivos.',
-            seguridad: 'Zona residencial segura con vigilancia privada.'
-        },
-        'caballito': {
-            perfil: 'Barrio familar y tradicional con excelente calidad de vida y servicios completos.',
-            transporte: 'Conexión con subte línea A, múltiples colectivos y cercano al tren.',
-            educacion: 'Escuelas de prestigio y zona universitaria cercana.',
-            salud: 'Hospital público y clínicas privadas.',
-            comercio: 'Comercio local próspero con mercados y locales familiares.',
-            gastronomia: 'Restaurantes familiares y pizzerías tradicionales.',
-            recreacion: 'Parque Rivadavia y numerosos espacios verdes.',
-            seguridad: 'Zona residencial segura con fuerte sentido comunitario.'
-        },
-        'recoleta': {
-            perfil: 'Barrio elegante y sofisticado, conocido por su arquitectura y vida cultural.',
-            transporte: 'Excelente red de transporte con subte línea H y múltiples líneas de colectivo.',
-            educacion: 'Instituciones educativas de elite y universidades.',
-            salud: 'Hospitales de referencia nacional y clínicas especializadas.',
-            comercio: 'Comercio exclusivo con altas marcas y paseos de compras.',
-            gastronomia: 'Restaurantes gourmet y cafeterías de diseño.',
-            recreacion: 'Cementerio de la Recoleta, museos, teatros y espacios culturales.',
-            seguridad: 'Zona de alta seguridad con vigilancia constante.'
-        }
-    };
-    
-    // Encontrar barrio coincidente o genérico
-    const barrioKey = Object.keys(barriosData).find(k => 
-        barrioOriginal.toLowerCase().includes(k) || k.includes(barrioOriginal.toLowerCase())
-    ) || 'palermo';
-    
-    const data = barriosData[barrioKey];
-    
-    // Generar estructura de resultados
-    const results = {
-        perfil_barrio: data.perfil,
-        transporte: data.transporte,
-        educacion: data.educacion,
-        salud: data.salud,
-        comercio: data.comercio,
-        gastronomia: data.gastronomia,
-        recreacion: data.recreacion,
-        seguridad: data.seguridad,
-        resumen_busquedas: searchQueries.map(q => ({
-            query: q,
-            results: [
-                { title: `Información sobre ${barrioOriginal}`, snippet: data.perfil }
-            ]
-        }))
-    };
-    
-    // Simular delay de red
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    return results;
-}
-
-// Procesar datos del entorno
-function processEnvironmentData(searchResults, direccion, barrio, ubicacion, descripcion) {
-    return {
-        direccion: direccion,
-        barrio: barrio,
-        ubicacion: ubicacion,
-        categories: {
-            perfil_barrio: searchResults.perfil_barrio || 'Información del barrio en desarrollo.',
-            transporte: searchResults.transporte || 'Datos de transporte no disponibles.',
-            educacion: searchResults.educacion || 'Datos educativos no disponibles.',
-            salud: searchResults.salud || 'Datos de salud no disponibles.',
-            comercio: searchResults.comercio || 'Datos comerciales no disponibles.',
-            gastronomia: searchResults.gastronomia || 'Datos gastronómicos no disponibles.',
-            recreacion: searchResults.recreacion || 'Datos de recreación no disponibles.',
-            seguridad: searchResults.seguridad || 'Datos de seguridad no disponibles.'
-        },
-        aiGenerated: true
-    };
-}
-
-// ============================================
 // RENDERIZADO DE RESULTADOS
 // ============================================
 
@@ -301,23 +212,26 @@ const Renderer = {
      * Actualiza los KPIs con los datos del mercado
      */
     updateKPIs(data) {
-        if (!data || !data.success) return;
+        if (!data) return;
         
-        const stats = data.stats;
-        const zone = data.zone;
+        // El endpoint /market/stats/{zone} devuelve datos directos
+        const stats = data.statistics || data;
+        const zone = data.zone || AppState.currentZone;
+        
+        if (!zone) return;
         
         // Actualizar badges de zona
         document.getElementById('market-zone-badge').textContent = capitalizeWords(zone);
         
         // Actualizar KPIs
-        document.getElementById('kpi-properties').textContent = formatNumber(stats.total_propiedades || 0);
-        document.getElementById('kpi-avg-price').textContent = `USD ${formatPrice(stats.precio_promedio)}`;
-        document.getElementById('kpi-price-m2').textContent = `USD ${formatPrice(stats.precio_m2_promedio)}/m²`;
-        document.getElementById('kpi-median-price').textContent = `USD ${formatPrice(stats.precio_mediana)}`;
+        document.getElementById('kpi-properties').textContent = formatNumber(data.sample_size || 0);
+        document.getElementById('kpi-avg-price').textContent = `USD ${formatPrice(stats.average_price_m2)}/m²`;
+        document.getElementById('kpi-price-m2').textContent = `USD ${formatPrice(stats.median_price_m2)}/m²`;
+        document.getElementById('kpi-median-price').textContent = `USD ${formatPrice(stats.min_price_m2)} - ${formatPrice(stats.max_price_m2)}`;
         
         // Actualizar rango de precios
-        document.getElementById('price-min').textContent = `USD ${formatPrice(stats.precio_min)}`;
-        document.getElementById('price-max').textContent = `USD ${formatPrice(stats.precio_max)}`;
+        document.getElementById('price-min').textContent = `USD ${formatPrice(stats.min_price_m2)}`;
+        document.getElementById('price-max').textContent = `USD ${formatPrice(stats.max_price_m2)}`;
         
         // Actualizar tendencia
         document.getElementById('kpi-trend').innerHTML = '<span class="up">📈 Mercado activo</span>';
@@ -329,12 +243,12 @@ const Renderer = {
     renderDistributionChart(data) {
         const container = document.getElementById('distribution-chart');
         
-        if (!data || !data.stats) {
+        if (!data || !data.sample_size) {
             container.innerHTML = '<p class="loading-text">No hay datos suficientes para mostrar distribución</p>';
             return;
         }
         
-        // Generar distribución simulada basada en los datos
+        // Generar distribución basada en los datos del mercado
         const distribution = [
             { height: 30, label: 'Económico' },
             { height: 50, label: 'Accesible' },
@@ -354,12 +268,12 @@ const Renderer = {
     renderPropertiesTable(data) {
         const container = document.getElementById('properties-table-container');
         
-        if (!data || !data.propiedades || data.propiedades.length === 0) {
+        if (!data || !data.data || !data.data.properties || data.data.properties.length === 0) {
             container.innerHTML = '<p class="loading-text">No se encontraron propiedades en el mercado</p>';
             return;
         }
         
-        const propiedades = data.propiedades.slice(0, 10); // Mostrar máximo 10
+        const propiedades = data.data.properties.slice(0, 10); // Mostrar máximo 10
         
         const tableHTML = `
             <table class="properties-table">
@@ -374,10 +288,10 @@ const Renderer = {
                 <tbody>
                     ${propiedades.map(prop => `
                         <tr>
-                            <td>${sanitizeHTML(prop.titulo || 'Propiedad')}</td>
-                            <td class="price-cell">USD ${formatPrice(prop.precio)}</td>
-                            <td>${formatNumber(prop.metros)}</td>
-                            <td>${prop.ambientes || '-'}</td>
+                            <td>${sanitizeHTML(prop.title || 'Propiedad')}</td>
+                            <td class="price-cell">USD ${formatPrice(prop.price)}</td>
+                            <td>${formatNumber(prop.area || 0)}</td>
+                            <td>${prop.rooms || '-'}</td>
                         </tr>
                     `).join('')}
                 </tbody>
@@ -388,43 +302,164 @@ const Renderer = {
     },
     
     /**
-     * Actualiza el análisis del entorno con IA
+     * Actualiza el análisis del entorno con IA (nueva estructura)
      */
     updateEnvironmentAnalysis(data) {
-        if (!data || !data.success) {
-            document.getElementById('neighborhood-profile').innerHTML = 
-                '<p class="loading-text">No se pudo obtener el análisis del entorno</p>';
+        const container = document.getElementById('neighborhood-profile');
+        
+        if (!data || !data.success || !data.entorno) {
+            container.innerHTML = '<p class="loading-text">No se pudo obtener el análisis del entorno</p>';
+            this.clearEnvironmentCategories();
             return;
         }
         
-        const analysis = data.analysis || {};
+        const entorno = data.entorno;
         
-        // Perfil del barrio
-        const profileEl = document.getElementById('neighborhood-profile');
-        profileEl.innerHTML = `<p>${sanitizeHTML(analysis.perfil_barrio || 'Análisis del barrio en desarrollo...')}</p>`;
+        // Actualizar puntuación general
+        const overallScore = entorno.puntuacion_general || 0;
+        const overallClass = getScoreClass(overallScore);
+        const overallElement = document.getElementById('neighborhood-profile');
+        if (overallElement) {
+            overallElement.innerHTML = `
+                <div class="overall-score-container">
+                    <div class="overall-score ${overallClass}">
+                        <span class="score-value">${overallScore}</span>
+                        <span class="score-label">Puntuación General</span>
+                    </div>
+                </div>
+            `;
+        }
         
-        // Categorías del entorno
-        const categories = {
-            'transporte': analysis.transporte || '',
-            'educacion': analysis.educacion || '',
-            'salud': analysis.salud || '',
-            'comercio': analysis.comercio || '',
-            'gastronomia': analysis.gastronomia || '',
-            'recreacion': analysis.recreacion || '',
-            'seguridad': analysis.seguridad || '',
-            'finanzas': analysis.finanzas || ''
-        };
+        // Categorías del entorno con la nueva estructura
+        const categories = [
+            { key: 'transporte', icon: '🚌', title: 'Transporte' },
+            { key: 'comercio', icon: '🛒', title: 'Comercio' },
+            { key: 'seguridad', icon: '🚔', title: 'Seguridad' },
+            { key: 'educacion', icon: '🏫', title: 'Educación' },
+            { key: 'salud', icon: '🏥', title: 'Salud' },
+            { key: 'espacios_verdes', icon: '🌳', title: 'Espacios Verdes' },
+            { key: 'contaminacion', icon: '🌬️', title: 'Contaminación' },
+            { key: 'vibrabarrio', icon: '🎭', title: 'VibraBarrio' }
+        ];
         
-        Object.entries(categories).forEach(([key, value]) => {
-            const el = document.getElementById(`cat-${key}`);
-            if (el) {
-                if (value) {
-                    el.innerHTML = `<p>${sanitizeHTML(value)}</p>`;
-                } else {
-                    el.innerHTML = '<p class="loading-text">Información no disponible</p>';
+        let categoriesHtml = '';
+        
+        categories.forEach(cat => {
+            const catData = entorno[cat.key];
+            if (catData) {
+                const scoreClass = getScoreClass(catData.puntuacion);
+                
+                // Construir detalles adicionales
+                let detailsHtml = '';
+                if (catData.estaciones_cercanas?.length) {
+                    detailsHtml += `<div class="detail-item"><strong>🚉 Estaciones:</strong> ${catData.estaciones_cercanas.join(', ')}</div>`;
                 }
+                if (catData.lineas_colectivo?.length) {
+                    detailsHtml += `<div class="detail-item"><strong>🚌 Colectivos:</strong> ${catData.lineas_colectivo.join(', ')}</div>`;
+                }
+                if (catData.supermercados?.length) {
+                    detailsHtml += `<div class="detail-item"><strong>🛒 Supermercados:</strong> ${catData.supermercados.join(', ')}</div>`;
+                }
+                if (catData.hospitales?.length) {
+                    detailsHtml += `<div class="detail-item"><strong>🏥 Hospitales:</strong> ${catData.hospitales.join(', ')}</div>`;
+                }
+                if (catData.centros_salud?.length) {
+                    detailsHtml += `<div class="detail-item"><strong>🏥 Centros:</strong> ${catData.centros_salud.join(', ')}</div>`;
+                }
+                if (catData.escuelas?.length) {
+                    detailsHtml += `<div class="detail-item"><strong>🏫 Escuelas:</strong> ${catData.escuelas.join(', ')}</div>`;
+                }
+                if (catData.universidades?.length) {
+                    detailsHtml += `<div class="detail-item"><strong>🎓 Universidades:</strong> ${catData.universidades.join(', ')}</div>`;
+                }
+                if (catData.parques?.length) {
+                    detailsHtml += `<div class="detail-item"><strong>🌳 Parques:</strong> ${catData.parques.join(', ')}</div>`;
+                }
+                if (catData.bares_restaurantes?.length) {
+                    detailsHtml += `<div class="detail-item"><strong>🍽️ Bares/Restaurantes:</strong> ${catData.bares_restaurantes.join(', ')}</div>`;
+                }
+                if (catData.cultura?.length) {
+                    detailsHtml += `<div class="detail-item"><strong>🎭 Cultura:</strong> ${catData.cultura.join(', ')}</div>`;
+                }
+                if (catData.nivel_ruido) {
+                    detailsHtml += `<div class="detail-item"><strong>🔊 Ruido:</strong> ${catData.nivel_ruido}</div>`;
+                }
+                if (catData.principal_fuente) {
+                    detailsHtml += `<div class="detail-item"><strong>⚠️ Fuente:</strong> ${catData.principal_fuente}</div>`;
+                }
+                if (catData.rating_seguridad) {
+                    detailsHtml += `<div class="detail-item"><strong>⭐ Rating:</strong> ${catData.rating_seguridad}</div>`;
+                }
+                if (catData.comisaria_cercana) {
+                    detailsHtml += `<div class="detail-item"><strong>🚔 Comisaría:</strong> ${catData.comisaria_cercana}</div>`;
+                }
+                
+                categoriesHtml += `
+                    <div class="category-card" style="border-left-color: ${this.getCategoryColor(cat.key)}">
+                        <div class="category-header">
+                            <span class="category-icon">${cat.icon}</span>
+                            <span class="category-title">${cat.title}</span>
+                            <div class="category-score ${scoreClass}">${catData.puntuacion}</div>
+                        </div>
+                        <p class="category-description">${sanitizeHTML(catData.descripcion || '')}</p>
+                        ${detailsHtml ? `<div class="category-details">${detailsHtml}</div>` : ''}
+                    </div>
+                `;
             }
         });
+        
+        // Actualizar contenedor de categorías
+        const categoriesContainer = document.getElementById('environment-categories');
+        if (categoriesContainer) {
+            categoriesContainer.innerHTML = categoriesHtml;
+        }
+        
+        // Mostrar conclusión si existe
+        if (entorno.conclusion) {
+            const conclusionContainer = document.getElementById('ai-conclusion');
+            if (conclusionContainer) {
+                conclusionContainer.innerHTML = `
+                    <div class="ai-conclusion-section">
+                        <h4>📋 Conclusión del Análisis</h4>
+                        <p>${sanitizeHTML(entorno.conclusion)}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Mostrar fuente de datos
+        const sourceBadge = document.getElementById('data-source-badge');
+        if (sourceBadge) {
+            sourceBadge.textContent = data.source === 'cache' ? '📦 Datos desde caché' : '🤖 Datos generados por IA';
+            sourceBadge.className = `badge ${data.source === 'cache' ? 'badge-cache' : 'badge-ai'}`;
+        }
+    },
+    
+    /**
+     * Obtiene el color para una categoría
+     */
+    getCategoryColor(category) {
+        const colors = {
+            'transporte': '#3498db',
+            'comercio': '#2ecc71',
+            'seguridad': '#e74c3c',
+            'educacion': '#9b59b6',
+            'salud': '#e67e22',
+            'espacios_verdes': '#27ae60',
+            'contaminacion': '#95a5a6',
+            'vibrabarrio': '#f39c12'
+        };
+        return colors[category] || '#95a5a6';
+    },
+    
+    /**
+     * Limpia las categorías del entorno
+     */
+    clearEnvironmentCategories() {
+        const categoriesContainer = document.getElementById('environment-categories');
+        if (categoriesContainer) {
+            categoriesContainer.innerHTML = '';
+        }
     },
     
     /**
@@ -435,23 +470,32 @@ const Renderer = {
         
         let summaryHTML = '';
         
-        if (marketData && marketData.success) {
-            const stats = marketData.stats;
+        if (marketData && marketData.sample_size) {
+            const stats = marketData.statistics || {};
             summaryHTML += `
-                <p><strong>💰 Mercado:</strong> El barrio presenta un precio promedio de 
-                <strong>USD ${formatPrice(stats.precio_promedio)}</strong> con un rango de 
-                USD ${formatPrice(stats.precio_min)} a USD ${formatPrice(stats.precio_max)}. 
-                Se analizaron ${stats.total_propiedades || 0} propiedades en el mercado actual.</p>
+                <div class="summary-section">
+                    <h4>💰 Resumen del Mercado</h4>
+                    <p>El barrio presenta un precio promedio de 
+                    <strong>USD ${formatPrice(stats.average_price_m2)}/m²</strong> con un rango de 
+                    USD ${formatPrice(stats.min_price_m2)} a USD ${formatPrice(stats.max_price_m2)}/m². 
+                    Se analizaron <strong>${marketData.sample_size} propiedades</strong> en el mercado actual.</p>
+                </div>
             `;
         }
         
-        if (envData && envData.success) {
-            const analysis = envData.analysis || {};
-            const profile = analysis.perfil_barrio || '';
+        if (envData && envData.success && envData.entorno) {
+            const entorno = envData.entorno;
+            const score = entorno.puntuacion_general || 0;
+            const scoreClass = getScoreClass(score);
             
-            if (profile.length > 50) {
-                summaryHTML += `<p><strong>🏙️ Entorno:</strong> ${sanitizeHTML(profile.substring(0, 300))}...</p>`;
-            }
+            summaryHTML += `
+                <div class="summary-section">
+                    <h4>🏙️ Análisis del Entorno</h4>
+                    <p>El barrio obtiene una puntuación general de 
+                    <strong class="${scoreClass}">${score}/100</strong> basada en 8 categorías evaluadas:
+                    transporte, comercio, seguridad, educación, salud, espacios verdes, contaminación y vida nocturna.</p>
+                </div>
+            `;
         }
         
         if (!summaryHTML) {
@@ -553,7 +597,7 @@ const AppController = {
             // Actualizar paso 1: Completado
             this.updateLoadingStep('market', 'complete');
             
-            if (marketData && marketData.success) {
+            if (marketData && marketData.success !== false) {
                 // Renderizar datos del mercado
                 Renderer.updateKPIs(marketData);
                 Renderer.renderDistributionChart(marketData);
@@ -563,8 +607,8 @@ const AppController = {
             // Actualizar paso 2: Entorno
             this.updateLoadingStep('environment', 'loading');
             
-            // Obtener análisis del entorno
-            const envData = await EnvironmentService.getEnvironmentAnalysis(zone, zone);
+            // Obtener análisis del entorno con IA real
+            const envData = await EnvironmentService.getEnvironmentAnalysis(zone, false);
             AppState.environmentData = envData;
             
             // Actualizar paso 2: Completado
@@ -572,6 +616,19 @@ const AppController = {
             
             if (envData && envData.success) {
                 Renderer.updateEnvironmentAnalysis(envData);
+            } else {
+                // Si falla la IA, mostrar error
+                const envContainer = document.getElementById('neighborhood-profile');
+                if (envContainer) {
+                    envContainer.innerHTML = `
+                        <div class="error-container">
+                            <p class="error-text">No se pudo obtener el análisis del entorno</p>
+                            <button class="retry-btn" onclick="AppController.retryEnvironmentAnalysis()">
+                                🔄 Reintentar con IA
+                            </button>
+                        </div>
+                    `;
+                }
             }
             
             // Actualizar paso 3: Resumen
@@ -594,6 +651,42 @@ const AppController = {
         } finally {
             AppState.isLoading = false;
             this.hideLoading();
+        }
+    },
+    
+    /**
+     * Reintenta el análisis del entorno
+     */
+    async retryEnvironmentAnalysis() {
+        if (!AppState.currentZone) return;
+        
+        const zone = AppState.currentZone;
+        
+        // Mostrar indicador de carga
+        const envContainer = document.getElementById('neighborhood-profile');
+        if (envContainer) {
+            envContainer.innerHTML = `
+                <div class="retry-loading">
+                    <div class="spinner"></div>
+                    <p>Regenerando análisis con IA...</p>
+                </div>
+            `;
+        }
+        
+        // Llamar con force_refresh = true
+        const envData = await EnvironmentService.getEnvironmentAnalysis(zone, true);
+        AppState.environmentData = envData;
+        
+        if (envData && envData.success) {
+            Renderer.updateEnvironmentAnalysis(envData);
+        } else {
+            if (envContainer) {
+                envContainer.innerHTML = `
+                    <div class="error-container">
+                        <p class="error-text">No se pudo generar el análisis. Por favor, intentá más tarde.</p>
+                    </div>
+                `;
+            }
         }
     },
     
@@ -648,7 +741,7 @@ const AppController = {
     resetResults() {
         // Resetear KPIs
         document.getElementById('kpi-properties').textContent = '--';
-        document.getElementById('kpi-avg-price').textContent = 'USD --';
+        document.getElementById('kpi-avg-price').textContent = 'USD --/m²';
         document.getElementById('kpi-price-m2').textContent = 'USD --/m²';
         document.getElementById('kpi-median-price').textContent = 'USD --';
         document.getElementById('market-zone-badge').textContent = '--';
@@ -661,14 +754,9 @@ const AppController = {
         
         // Resetear entorno
         document.getElementById('neighborhood-profile').innerHTML = '<p class="loading-text">Cargando análisis del entorno...</p>';
-        
-        const categories = ['transporte', 'educacion', 'salud', 'comercio', 'gastronomia', 'recreacion', 'seguridad', 'finanzas'];
-        categories.forEach(cat => {
-            const el = document.getElementById(`cat-${cat}`);
-            if (el) {
-                el.innerHTML = '<p class="loading-text">--</p>';
-            }
-        });
+        document.getElementById('environment-categories').innerHTML = '';
+        document.getElementById('ai-conclusion').innerHTML = '';
+        document.getElementById('data-source-badge').textContent = '--';
         
         // Resetear resumen
         document.getElementById('executive-summary').innerHTML = '<p class="loading-text">Generando resumen ejecutivo...</p>';
@@ -770,5 +858,6 @@ window.exportData = exportData;
 window.printReport = printReport;
 window.analyzeNewZone = analyzeNewZone;
 window.resetSearch = resetSearch;
+window.AppController = AppController; // Exponer el controlador para retry
 
 console.log('✅ Analytics Dashboard JavaScript cargado correctamente');
