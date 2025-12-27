@@ -1304,30 +1304,52 @@ def generar_datos_barrio_ai(nombre_barrio: str) -> Dict[str, Any]:
     def clean_and_parse_json(response: str) -> Dict:
         """Limpia y parsea la respuesta JSON con manejo de errores avanzado"""
         
-        # Paso 1: Eliminar bloques markdown
-        clean = response.strip()
-        if clean.startswith('```json'):
-            clean = clean[7:]
-        elif clean.startswith('```'):
-            clean = clean[3:]
-        if clean.endswith('```'):
-            clean = clean[:-3]
-        clean = clean.strip()
+        # EXTRAER SOLO EL JSON - buscar desde el primer { hasta el último }
+        json_match = re.search(r'\{[\s\S]*\}', response)
         
-        # Paso 2: Intentar parsear directamente
+        if json_match:
+            json_str = json_match.group()
+            print(f"   📋 JSON extraído ({len(json_str)} caracteres)")
+            
+            try:
+                return json.loads(json_str)
+            except json.JSONDecodeError as e:
+                print(f"   ⚠️ Error en JSON extraído: {e}")
+                # Continuar con correcciones
+        
+        # Si no se encontró JSON o falló, limpiar todo y reintentar
+        clean = response.strip()
+        
+        # Remover TODOS los bloques markdown ```json ... ```
+        clean = re.sub(r'```json\s*', '', clean)
+        clean = re.sub(r'\s*```', '', clean)
+        
+        # Remover bloques ``` simples
+        clean = re.sub(r'^```\s*', '', clean, flags=re.MULTILINE)
+        clean = re.sub(r'\s*```$', '', clean, flags=re.MULTILINE)
+        
+        # Remover cualquier texto que no sea JSON (letras antes/después)
+        # Buscar el primer { y el último }
+        first_brace = clean.find('{')
+        last_brace = clean.rfind('}')
+        
+        if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
+            clean = clean[first_brace:last_brace + 1]
+        
+        print(f"   📋 JSON limpio ({len(clean)} caracteres)")
+        
+        # Intentar parsear
         try:
             return json.loads(clean)
         except json.JSONDecodeError:
             pass
         
-        # Paso 3: Corregir errores comunes
+        # Correcciones adicionales
         corrections = [
-            # Corregir comillas simples en keys
-            (r"'([^']+)':", r'"\1":'),
-            # Corregir trailing commas
-            (r',\s*([}\]])', r'\1'),
-            # Corregir comillas simples en strings por dobles (solo fuera de contenido)
-            # Esta es más peligrosa, la aplicamos con cuidado
+            (r"'([^']+)':", r'"\1":'),  # Keys con comillas simples
+            (r',\s*([}\]])', r'\1'),    # Trailing commas
+            (r"'([^']*)'", r'"\1"'),    # Strings con comillas simples
+            (r'\n\s*//[^\n]*', '', re.MULTILINE),  // Comments
         ]
         
         for pattern, replacement in corrections:
@@ -1337,7 +1359,15 @@ def generar_datos_barrio_ai(nombre_barrio: str) -> Dict[str, Any]:
             except json.JSONDecodeError:
                 continue
         
-        # Paso 4: Buscar el JSON dentro del texto
+        # Último intento: buscar cualquier JSON en el texto
+        all_json = re.findall(r'\{[\s\S]*\}', response)
+        for json_str in all_json:
+            try:
+                return json.loads(json_str)
+            except json.JSONDecodeError:
+                continue
+        
+        raise ValueError(f"No se pudo parsear el JSON")
         json_match = re.search(r'\{[\s\S]*\}', clean)
         if json_match:
             try:
@@ -1345,8 +1375,8 @@ def generar_datos_barrio_ai(nombre_barrio: str) -> Dict[str, Any]:
             except json.JSONDecodeError:
                 pass
         
-        # Si todo falla, lanzar error
-        raise ValueError(f"No se pudo parsear el JSON: {response[:200]}...")
+        # Si todo falla, lanzar error con más contexto
+        raise ValueError(f"No se pudo parsear el JSON: {response[:300]}...")
     
     try:
         ai_response = call_gemini_with_rotation(prompt)
