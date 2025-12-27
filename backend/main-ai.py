@@ -1296,26 +1296,68 @@ def generar_datos_barrio_ai(nombre_barrio: str) -> Dict[str, Any]:
     - Usa nombres de lugares REALES de {nombre_barrio} y zonas cercanas
     - Los arrays deben tener al menos 2-3 elementos si es posible
     - La conclusión debe ser profesional e informativa
+    - NO uses comillas simples dentro de las descripciones, usa comillas dobles correctamente
     """
     
     print(f"🤖 Generando datos con IA para: {nombre_barrio}")
     
+    def clean_and_parse_json(response: str) -> Dict:
+        """Limpia y parsea la respuesta JSON con manejo de errores avanzado"""
+        
+        # Paso 1: Eliminar bloques markdown
+        clean = response.strip()
+        if clean.startswith('```json'):
+            clean = clean[7:]
+        elif clean.startswith('```'):
+            clean = clean[3:]
+        if clean.endswith('```'):
+            clean = clean[:-3]
+        clean = clean.strip()
+        
+        # Paso 2: Intentar parsear directamente
+        try:
+            return json.loads(clean)
+        except json.JSONDecodeError:
+            pass
+        
+        # Paso 3: Corregir errores comunes
+        corrections = [
+            # Corregir comillas simples en keys
+            (r"'([^']+)':", r'"\1":'),
+            # Corregir trailing commas
+            (r',\s*([}\]])', r'\1'),
+            # Corregir comillas simples en strings por dobles (solo fuera de contenido)
+            # Esta es más peligrosa, la aplicamos con cuidado
+        ]
+        
+        for pattern, replacement in corrections:
+            try:
+                fixed = re.sub(pattern, replacement, clean)
+                return json.loads(fixed)
+            except json.JSONDecodeError:
+                continue
+        
+        # Paso 4: Buscar el JSON dentro del texto
+        json_match = re.search(r'\{[\s\S]*\}', clean)
+        if json_match:
+            try:
+                return json.loads(json_match.group())
+            except json.JSONDecodeError:
+                pass
+        
+        # Si todo falla, lanzar error
+        raise ValueError(f"No se pudo parsear el JSON: {response[:200]}...")
+    
     try:
         ai_response = call_gemini_with_rotation(prompt)
         
-        # Limpiar respuesta
-        clean_response = ai_response.strip()
-        if clean_response.startswith('```json'):
-            clean_response = clean_response[7:]
-        elif clean_response.startswith('```'):
-            clean_response = clean_response[3:]
-        if clean_response.endswith('```'):
-            clean_response = clean_response[:-3]
+        print(f"📄 Respuesta cruda ({len(ai_response)} caracteres):")
+        print("=" * 80)
+        print(ai_response[:500] + "..." if len(ai_response) > 500 else ai_response)
+        print("=" * 80)
         
-        clean_response = clean_response.strip()
-        
-        # Parsear JSON
-        data = json.loads(clean_response)
+        # Parsear con la nueva función
+        data = clean_and_parse_json(ai_response)
         
         print(f"✅ Datos generados para: {nombre_barrio}")
         return data

@@ -623,6 +623,8 @@ const EventHandlers = {
         const searchInput = document.getElementById('neighborhood-input');
         const query = searchInput ? searchInput.value.trim() : '';
         
+        console.log('🔍 handleAnalyze llamado con query:', query);
+        
         if (!query) {
             Utils.showToast('Ingrese el nombre de un barrio', 'warning');
             return;
@@ -631,44 +633,48 @@ const EventHandlers = {
         UIRenderer.showLoading('Buscando barrio...');
 
         try {
-            // Primero verificar si existe en la base de datos
-            const existencia = await ApiClient.request(`/api/barrios/${encodeURIComponent(query)}/exists`);
+            console.log('📡 Intentando obtener barrio del API...');
             
-            if (existencia.exists) {
-                // Si existe, obtener los datos completos
-                const response = await ApiClient.getBarrio(query);
+            // Intentar obtener el barrio directamente
+            const response = await ApiClient.getBarrio(query);
+            
+            console.log('✅ Respuesta del API:', response);
+            
+            if (response.success) {
+                AppState.currentBarrio = {
+                    nombre: response.nombre,
+                    ...response.data,
+                    generado_por_ia: response.generado_por_ia,
+                    fecha_actualizacion: response.fecha_actualizacion
+                };
                 
-                if (response.success) {
-                    AppState.currentBarrio = {
-                        nombre: response.nombre,
-                        ...response.data,
-                        generado_por_ia: response.generado_por_ia,
-                        fecha_actualizacion: response.fecha_actualizacion
-                    };
-                    
-                    UIRenderer.populateForm(AppState.currentBarrio);
-                    AppState.isEditing = false;
-                    this.updateEditMode();
-                    UIRenderer.hideSearchResults();
-                    
-                    Utils.showToast(`Barrio "${Utils.capitalize(query)}" cargado correctamente`, 'success');
-                } else {
-                    throw new Error('No se pudieron obtener los datos del barrio');
-                }
-            } else {
-                // Si no existe, preguntar si quiere crearlo con IA
+                UIRenderer.populateForm(AppState.currentBarrio);
+                AppState.isEditing = false;
+                this.updateEditMode();
+                UIRenderer.hideSearchResults();
+                
+                Utils.showToast(`Barrio "${Utils.capitalize(query)}" cargado correctamente`, 'success');
+            }
+        } catch (error) {
+            console.log('❌ Error capturado:', error.message);
+            
+            // Si el barrio no existe (404), preguntar si quiere crearlo
+            if (error.message.includes('404')) {
+                console.log('📋 Barrio no encontrado, mostrando confirmación...');
                 const confirmCreate = confirm(
                     `El barrio "${query}" no existe en la base de datos.\n\n` +
                     '¿Desea crear un nuevo análisis usando IA?'
                 );
                 
+                console.log('📋 Usuario eligió:', confirmCreate);
+                
                 if (confirmCreate) {
                     await this.handleCreateWithAI(query);
                 }
+            } else {
+                console.error('Error al buscar barrio:', error);
+                Utils.showToast(`Error: ${error.message}`, 'error');
             }
-        } catch (error) {
-            console.error('Error al buscar barrio:', error);
-            Utils.showToast(`Error: ${error.message}`, 'error');
         } finally {
             UIRenderer.hideLoading();
         }
@@ -703,11 +709,45 @@ const EventHandlers = {
                 throw new Error(response.detail || 'Error al crear el barrio');
             }
         } catch (error) {
-            console.error('Error al crear barrio:', error);
-            Utils.showToast(`Error al crear barrio: ${error.message}`, 'error');
+            console.error('Error al crear barrio con IA:', error);
+            
+            // Si falla la IA, ofrecer crear manualmente
+            if (error.message.includes('500') || error.message.includes('leaked') || error.message.includes('Forbidden')) {
+                const tryManual = confirm(
+                    `La generación con IA falló (API key bloqueada o error del servidor).\n\n` +
+                    `¿Desea crear el barrio "${nombre}" manualmente?`
+                );
+                
+                if (tryManual) {
+                    this.handleNewBarrioManual(nombre);
+                }
+            } else {
+                Utils.showToast(`Error al crear barrio: ${error.message}`, 'error');
+            }
         } finally {
             UIRenderer.hideLoading();
         }
+    },
+
+    /**
+     * Crea un nuevo barrio manualmente
+     */
+    handleNewBarrioManual(nombre) {
+        AppState.currentBarrio = null;
+        AppState.isEditing = true;
+        AppState.originalData = null;
+        
+        UIRenderer.clearForm();
+        
+        // Llenar el nombre
+        const nombreInput = document.getElementById('barrio-nombre');
+        if (nombreInput) {
+            nombreInput.value = nombre;
+        }
+        
+        UIRenderer.updateFormState(true);
+        
+        Utils.showToast(`Modo de creación manual activado para "${nombre}". Complete los campos.`, 'info');
     },
 
     /**
