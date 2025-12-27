@@ -449,7 +449,7 @@ const EventHandlers = {
      * Configura los manejadores de búsqueda
      */
     setupSearchHandlers() {
-        const searchInput = document.getElementById('barrio-search');
+        const searchInput = document.getElementById('neighborhood-input');
         if (searchInput) {
             let debounceTimer;
             
@@ -518,7 +518,7 @@ const EventHandlers = {
         }
 
         // Permitir búsqueda con Enter en el campo de búsqueda
-        const searchInput = document.getElementById('barrio-search');
+        const searchInput = document.getElementById('neighborhood-input');
         if (searchInput) {
             searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
@@ -565,7 +565,7 @@ const EventHandlers = {
 
         // Cerrar resultados de búsqueda al hacer click fuera
         document.addEventListener('click', (e) => {
-            const searchInput = document.getElementById('barrio-search');
+            const searchInput = document.getElementById('neighborhood-input');
             const resultsContainer = document.getElementById('search-results');
             
             if (searchInput && resultsContainer && 
@@ -620,7 +620,7 @@ const EventHandlers = {
      * Maneja la acción de buscar/analizar un barrio
      */
     async handleAnalyze() {
-        const searchInput = document.getElementById('barrio-search');
+        const searchInput = document.getElementById('neighborhood-input');
         const query = searchInput ? searchInput.value.trim() : '';
         
         if (!query) {
