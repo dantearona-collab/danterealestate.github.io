@@ -14,6 +14,7 @@ from fastapi.responses import FileResponse
 from fastapi.openapi.utils import get_openapi
 from typing import Optional, Dict, Any, List
 from pydantic import BaseModel, Field
+from logic.environ_database import init_environ_analysis_db
 
 # Importar lógica de negocio
 from logic.database import (
@@ -941,6 +942,14 @@ def analisis_barrio_css():
 def analisis_barrio_js():
     """Sirve el JavaScript del Analytics Dashboard"""
     return FileResponse("analisis-barrio.js")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("🔄 Iniciando ciclo de vida de la aplicación...")
+    initialize_databases()
+    init_environ_analysis_db()  # AGREGAR ESTA LÍNEA
+    yield
+    print("✅ Finalizando ciclo de vida de la aplicación.")
 
 
 # ✅ INICIO

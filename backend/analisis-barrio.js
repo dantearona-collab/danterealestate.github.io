@@ -143,42 +143,37 @@ const MarketService = {
 
 const EnvironmentService = {
     /**
-     * Genera análisis del entorno de forma local (igual que app.js)
+     * Obtiene análisis del entorno usando Gemini AI (endpoint real)
      */
     async getEnvironmentAnalysis(address, zone) {
-        console.log('🌍 Generando análisis del entorno para:', zone);
+        console.log('🌍 Obteniendo análisis del entorno para:', zone);
         
         try {
-            // Usar la misma lógica que app.js
-            const ubicacionParaBusqueda = `${zone}, Buenos Aires, Argentina`;
+            const endpoint = `${API_CONFIG.getBaseUrl()}/ai/environment-analysis?zone=${encodeURIComponent(zone)}`;
+            console.log('🌐 Llamando endpoint:', endpoint);
             
-            // Generar búsquedas dinámicas
-            const searchQueries = [
-                `${ubicacionParaBusqueda} servicios comercios farmacias`,
-                `${ubicacionParaBusqueda} transporte público subte colectivos`,
-                `${ubicacionParaBusqueda} escuelas colegios universidades educación`,
-                `${ubicacionParaBusqueda} hospitales clínicas salud`,
-                `${ubicacionParaBusqueda} supermercados centros comerciales`,
-                `${ubicacionParaBusqueda} restaurantes gastronomía`,
-                `${ubicacionParaBusqueda} parques plazas espacios verdes`,
-                `${ubicacionParaBusqueda} bancos servicios financieros`
-            ];
+            const response = await fetch(endpoint);
             
-            // Generar resultados basados en la zona
-            const searchResults = await generateRealSearchResults(ubicacionParaBusqueda, zone, searchQueries);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             
-            // Procesar resultados
-            const environmentData = processEnvironmentData(searchResults, address, zone, ubicacionParaBusqueda, '');
+            const data = await response.json();
+            console.log('✅ Análisis del entorno obtenido:', data);
             
-            console.log('✅ Análisis del entorno generado');
-            return {
-                success: true,
-                zone: zone,
-                analysis: environmentData.categories
-            };
+            if (data.success) {
+                return {
+                    success: true,
+                    zone: zone,
+                    analysis: data.analysis,
+                    source: data.source  // 'cache' o 'ai'
+                };
+            } else {
+                throw new Error(data.error || 'Error en el análisis');
+            }
             
         } catch (error) {
-            console.error('❌ Error generando análisis del entorno:', error);
+            console.error('❌ Error obteniendo análisis del entorno:', error);
             return null;
         }
     }
