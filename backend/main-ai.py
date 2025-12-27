@@ -1433,7 +1433,7 @@ def generar_datos_barrio_ai(nombre_barrio: str) -> Dict[str, Any]:
         # Si el parser falló, intentar una vez más con un prompt más simple
         if data is None:
             print(f"⚠️ Parser falló, intentando con formato más simple...")
-            simple_prompt = f"""
+            simple_prompt = """
 Genera un análisis de barrio en JSON válido y bien formado para "{nombre_barrio}" en Buenos Aires.
 
 Requisitos estrictos:
@@ -1444,23 +1444,23 @@ Requisitos estrictos:
 - Usa español correcto sin errores de tipeo
 
 Estructura EXACTA (sin variaciones):
-{{
+{
     "resumen_general": "Una oración describing el barrio",
     "puntuacion_general": 75,
-    "transporte": {{"puntuacion": 80, "descripcion": "Descripción"}},
-    "comercio": {{"puntuacion": 70, "descripcion": "Descripción"}},
-    "seguridad": {{"puntuacion": 65, "descripcion": "Descripción"}},
-    "educacion": {{"puntuacion": 75, "descripcion": "Descripción"}},
-    "salud": {{"puntuacion": 70, "descripcion": "Descripción"}},
-    "espacios_verdes": {{"puntuacion": 85, "descripcion": "Descripción"}},
-    "contaminacion": {{"puntuacion": 60, "descripcion": "Descripción"}},
-    "vida_barrio": {{"puntuacion": 80, "descripcion": "Descripción"}},
-    "servicios_financieros": {{"puntuacion": 70, "descripcion": "Descripción"}},
+    "transporte": {"puntuacion": 80, "descripcion": "Descripción"},
+    "comercio": {"puntuacion": 70, "descripcion": "Descripción"},
+    "seguridad": {"puntuacion": 65, "descripcion": "Descripción"},
+    "educacion": {"puntuacion": 75, "descripcion": "Descripción"},
+    "salud": {"puntuacion": 70, "descripcion": "Descripción"},
+    "espacios_verdes": {"puntuacion": 85, "descripcion": "Descripción"},
+    "contaminacion": {"puntuacion": 60, "descripcion": "Descripción"},
+    "vida_barrio": {"puntuacion": 80, "descripcion": "Descripción"},
+    "servicios_financieros": {"puntuacion": 70, "descripcion": "Descripción"},
     "conclusion": "Conclusión para inversores"
-}}
+}
 
 Solo responde con el JSON, sin markdown, sin explicaciones.
-"""
+""".format(nombre_barrio=nombre_barrio)
             retry_response = call_gemini_with_rotation(simple_prompt)
             data = clean_and_parse_json(retry_response)
         
