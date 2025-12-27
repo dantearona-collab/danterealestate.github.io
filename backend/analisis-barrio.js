@@ -511,6 +511,22 @@ const EventHandlers = {
      * Configura los manejadores de botones principales
      */
     setupButtonHandlers() {
+        // Botón Buscar/Analizar
+        const analyzeBtn = document.getElementById('analyze-btn');
+        if (analyzeBtn) {
+            analyzeBtn.addEventListener('click', () => this.handleAnalyze());
+        }
+
+        // Permitir búsqueda con Enter en el campo de búsqueda
+        const searchInput = document.getElementById('barrio-search');
+        if (searchInput) {
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.handleAnalyze();
+                }
+            });
+        }
+
         // Botón Nuevo Barrio
         const newBtn = document.getElementById('btn-new');
         if (newBtn) {
@@ -598,6 +614,100 @@ const EventHandlers = {
                 section.style.display = 'none';
             }
         });
+    },
+
+    /**
+     * Maneja la acción de buscar/analizar un barrio
+     */
+    async handleAnalyze() {
+        const searchInput = document.getElementById('barrio-search');
+        const query = searchInput ? searchInput.value.trim() : '';
+        
+        if (!query) {
+            Utils.showToast('Ingrese el nombre de un barrio', 'warning');
+            return;
+        }
+
+        UIRenderer.showLoading('Buscando barrio...');
+
+        try {
+            // Primero verificar si existe en la base de datos
+            const existencia = await ApiClient.request(`/api/barrios/${encodeURIComponent(query)}/exists`);
+            
+            if (existencia.exists) {
+                // Si existe, obtener los datos completos
+                const response = await ApiClient.getBarrio(query);
+                
+                if (response.success) {
+                    AppState.currentBarrio = {
+                        nombre: response.nombre,
+                        ...response.data,
+                        generado_por_ia: response.generado_por_ia,
+                        fecha_actualizacion: response.fecha_actualizacion
+                    };
+                    
+                    UIRenderer.populateForm(AppState.currentBarrio);
+                    AppState.isEditing = false;
+                    this.updateEditMode();
+                    UIRenderer.hideSearchResults();
+                    
+                    Utils.showToast(`Barrio "${Utils.capitalize(query)}" cargado correctamente`, 'success');
+                } else {
+                    throw new Error('No se pudieron obtener los datos del barrio');
+                }
+            } else {
+                // Si no existe, preguntar si quiere crearlo con IA
+                const confirmCreate = confirm(
+                    `El barrio "${query}" no existe en la base de datos.\n\n` +
+                    '¿Desea crear un nuevo análisis usando IA?'
+                );
+                
+                if (confirmCreate) {
+                    await this.handleCreateWithAI(query);
+                }
+            }
+        } catch (error) {
+            console.error('Error al buscar barrio:', error);
+            Utils.showToast(`Error: ${error.message}`, 'error');
+        } finally {
+            UIRenderer.hideLoading();
+        }
+    },
+
+    /**
+     * Crea un nuevo barrio usando IA
+     */
+    async handleCreateWithAI(nombre) {
+        UIRenderer.showLoading('Generando análisis con IA...');
+        
+        try {
+            const response = await ApiClient.createBarrio({
+                nombre: nombre,
+                generar_ia: true
+            });
+            
+            if (response.success) {
+                AppState.currentBarrio = {
+                    nombre: response.data.nombre || nombre,
+                    ...response.data,
+                    generado_por_ia: response.generado_por_ia,
+                    fecha_actualizacion: response.fecha_actualizacion
+                };
+                
+                UIRenderer.populateForm(AppState.currentBarrio);
+                AppState.isEditing = true;
+                this.updateEditMode();
+                
+                Utils.showToast(`Barrio "${nombre}" creado exitosamente con IA`, 'success');
+            } else {
+                throw new Error(response.detail || 'Error al crear el barrio');
+            }
+        } catch (error) {
+            console.error('Error al crear barrio:', error);
+            Utils.showToast(`Error al crear barrio: ${error.message}`, 'error');
+        } finally {
+            UIRenderer.hideLoading();
+        }
     },
 
     /**
