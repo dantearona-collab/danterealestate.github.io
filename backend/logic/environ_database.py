@@ -1,6 +1,6 @@
 """
 Módulo de base de datos para Dante Propiedades
-Maneja SQLite para propiedades y análisis de entorno
+Maneja SQLite para análisis de entorno con IA
 """
 import sqlite3
 import json
