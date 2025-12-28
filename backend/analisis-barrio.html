@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Barrios - Dante Propiedades</title>
+    <link rel="stylesheet" href="analisis-barrio.css?v=20241228-0745">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header con búsqueda -->
+    <header class="dashboard-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <h1 class="logo">🏠 Dante Propiedades</h1>
+                <span class="subtitle">Gestor de Barrios CMS</span>
+            </div>
+            <div class="header-actions">
+                <button id="toggle-admin-mode" class="toggle-admin-btn" onclick="toggleAdminMode()">
+                    <i class="fas fa-cog"></i> Modo Admin
+                </button>
+            </div>
+        </div>
+        <div class="search-container-wrapper">
+            <div class="search-container">
+                <input 
+                    type="text" 
+                    id="neighborhood-input" 
+                    placeholder="Buscar barrio (ej: Palermo, Belgrano, Microcentro...)"
+                    autocomplete="off"
+                    list="barrios-list"
+                >
+                <datalist id="barrios-list"></datalist>
+                <button id="analyze-btn" class="analyze-btn">
+                    <span class="btn-icon">🔍</span>
+                    <span id="btn-text">Buscar</span>
+                </button>
+                <button id="create-new-btn" class="create-btn hidden" onclick="createNewBarrio()">
+                    <span class="btn-icon">✨</span>
+                    Crear Nuevo
+                </button>
+            </div>
+            <p class="search-hint" id="search-hint">Ingresa el nombre de un barrio para ver o editar sus datos</p>
+        </div>
+    </header>
+
+    <!-- Barra de herramientas Admin -->
+    <div id="admin-toolbar" class="admin-toolbar hidden">
+        <div class="toolbar-left">
+            <span class="toolbar-title">Panel de Administración</span>
+            <span id="current-barrio-name" class="current-barrio">--</span>
+        </div>
+        <div class="toolbar-right">
+            <button class="toolbar-btn save-btn" onclick="saveBarrio()" id="save-btn" disabled>
+                <i class="fas fa-save"></i> Guardar
+            </button>
+            <button class="toolbar-btn regenerate-btn" onclick="regenerateWithAI()" id="regenerate-btn" disabled>
+                <i class="fas fa-magic"></i> Regenerar con IA
+            </button>
+            <button class="toolbar-btn delete-btn" onclick="deleteBarrio()" id="delete-btn" disabled>
+                <i class="fas fa-trash"></i> Eliminar
+            </button>
+            <span id="save-status" class="save-status"></span>
+        </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <main class="dashboard-main">
+        <!-- Vista Normal: Resultados -->
+        <section id="results-section" class="results-section">
+            
+            <!-- Grid de dos columnas -->
+            <div class="results-grid">
+                <!-- Columna Izquierda: Editor de Datos -->
+                <div class="editor-column" id="editor-column">
+                    <div class="card editor-card">
+                        <div class="card-header">
+                            <h2>📝 Datos del Barrio</h2>
+                            <span class="edit-badge" id="edit-badge">Solo lectura</span>
+                        </div>
+                        <div class="card-body">
+                            <!-- Sección de edición -->
+                            <div id="editor-form" class="editor-form">
+                                <!-- Resumen General -->
+                                <div class="editor-section">
+                                    <h3>Resumen General</h3>
+                                    <div class="form-group">
+                                        <label>Perfil del Barrio</label>
+                                        <textarea id="edit-resumen" rows="3" placeholder="Breve descripción del barrio..." onchange="markAsChanged()"></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Acordeón de Categorías -->
+                                <div class="accordion" id="categories-accordion">
+                                    
+                                    <!-- Transporte -->
+                                    <div class="accordion-item">
+                                        <div class="accordion-header" onclick="toggleAccordion('transporte')">
+                                            <span class="accordion-icon">🚇</span>
+                                            <span>Transporte Público</span>
+                                            <span class="accordion-score" id="score-transporte">--</span>
+                                            <i class="fas fa-chevron-down accordion-arrow"></i>
+                                        </div>
+                                        <div class="accordion-content" id="content-transporte">
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label>Puntuación (0-100)</label>
+                                                    <input type="number" id="transporte-puntuacion" min="0" max="100" onchange="updateScore('transporte'); markAsChanged()">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Descripción</label>
+                                                <textarea id="transporte-descripcion" rows="2" onchange="markAsChanged()"></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Estaciones Cercanas (separadas por coma)</label>
+                                                <input type="text" id="transporte-estaciones" onchange="markAsChanged()">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Líneas de Colectivo (separadas por coma)</label>
+                                                <input type="text" id="transporte-colectivos" onchange="markAsChanged()">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Comercio -->
+                                    <div class="accordion-item">
+                                        <div class="accordion-header" onclick="toggleAccordion('comercio')">
+                                            <span class="accordion-icon">🛒</span>
+                                            <span>Comercio y Servicios</span>
+                                            <span class="accordion-score" id="score-comercio">--</span>
+                                            <i class="fas fa-chevron-down accordion-arrow"></i>
+                                        </div>
+                                        <div class="accordion-content" id="content-comercio">
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label>Puntuación (0-100)</label>
+                                                    <input type="number" id="comercio-puntuacion" min="0" max="100" onchange="updateScore('comercio'); markAsChanged()">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Descripción</label>
+                                                <textarea id="comercio-descripcion" rows="2" onchange="markAsChanged()"></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Supermercados (separados por coma)</label>
+                                                <input type="text" id="comercio-supermercados" onchange="markAsChanged()">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Centros Comerciales (separados por coma)</label>
+                                                <input type="text" id="comercio-centros" onchange="markAsChanged()">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Seguridad -->
+                                    <div class="accordion-item">
+                                        <div class="accordion-header" onclick="toggleAccordion('seguridad')">
+                                            <span class="accordion-icon">🛡️</span>
+                                            <span>Seguridad</span>
+                                            <span class="accordion-score" id="score-seguridad">--</span>
+                                            <i class="fas fa-chevron-down accordion-arrow"></i>
+                                        </div>
+                                        <div class="accordion-content" id="content-seguridad">
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label>Puntuación (0-100)</label>
+                                                    <input type="number" id="seguridad-puntuacion" min="0" max="100" onchange="updateScore('seguridad'); markAsChanged()">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Descripción</label>
+                                                <textarea id="seguridad-descripcion" rows="2" onchange="markAsChanged()"></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Comisaría Cercana</label>
+                                                <input type="text" id="seguridad-comisaria" onchange="markAsChanged()">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Educación -->
+                                    <div class="accordion-item">
+                                        <div class="accordion-header" onclick="toggleAccordion('educacion')">
+                                            <span class="accordion-icon">🎓</span>
+                                            <span>Educación</span>
+                                            <span class="accordion-score" id="score-educacion">--</span>
+                                            <i class="fas fa-chevron-down accordion-arrow"></i>
+                                        </div>
+                                        <div class="accordion-content" id="content-educacion">
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label>Puntuación (0-100)</label>
+                                                    <input type="number" id="educacion-puntuacion" min="0" max="100" onchange="updateScore('educacion'); markAsChanged()">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Descripción</label>
+                                                <textarea id="educacion-descripcion" rows="2" onchange="markAsChanged()"></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Escuelas (separadas por coma)</label>
+                                                <input type="text" id="educacion-escuelas" onchange="markAsChanged()">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Universidades (separadas por coma)</label>
+                                                <input type="text" id="educacion-universidades" onchange="markAsChanged()">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Salud -->
+                                    <div class="accordion-item">
+                                        <div class="accordion-header" onclick="toggleAccordion('salud')">
+                                            <span class="accordion-icon">🏥</span>
+                                            <span>Salud</span>
+                                            <span class="accordion-score" id="score-salud">--</span>
+                                            <i class="fas fa-chevron-down accordion-arrow"></i>
+                                        </div>
+                                        <div class="accordion-content" id="content-salud">
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label>Puntuación (0-100)</label>
+                                                    <input type="number" id="salud-puntuacion" min="0" max="100" onchange="updateScore('salud'); markAsChanged()">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Descripción</label>
+                                                <textarea id="salud-descripcion" rows="2" onchange="markAsChanged()"></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Hospitales (separados por coma)</label>
+                                                <input type="text" id="salud-hospitales" onchange="markAsChanged()">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Centros de Salud (separados por coma)</label>
+                                                <input type="text" id="salud-centros" onchange="markAsChanged()">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Espacios Verdes -->
+                                    <div class="accordion-item">
+                                        <div class="accordion-header" onclick="toggleAccordion('espacios_verdes')">
+                                            <span class="accordion-icon">🌳</span>
+                                            <span>Espacios Verdes</span>
+                                            <span class="accordion-score" id="score-espacios_verdes">--</span>
+                                            <i class="fas fa-chevron-down accordion-arrow"></i>
+                                        </div>
+                                        <div class="accordion-content" id="content-espacios_verdes">
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label>Puntuación (0-100)</label>
+                                                    <input type="number" id="espacios_verdes-puntuacion" min="0" max="100" onchange="updateScore('espacios_verdes'); markAsChanged()">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Descripción</label>
+                                                <textarea id="espacios_verdes-descripcion" rows="2" onchange="markAsChanged()"></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Parques y Plazas (separados por coma)</label>
+                                                <input type="text" id="espacios_verdes-parques" onchange="markAsChanged()">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Contaminación -->
+                                    <div class="accordion-item">
+                                        <div class="accordion-header" onclick="toggleAccordion('contaminacion')">
+                                            <span class="accordion-icon">🌫️</span>
+                                            <span>Contaminación y Ruido</span>
+                                            <span class="accordion-score" id="score-contaminacion">--</span>
+                                            <i class="fas fa-chevron-down accordion-arrow"></i>
+                                        </div>
+                                        <div class="accordion-content" id="content-contaminacion">
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label>Puntuación (0-100)</label>
+                                                    <input type="number" id="contaminacion-puntuacion" min="0" max="100" onchange="updateScore('contaminacion'); markAsChanged()">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Descripción</label>
+                                                <textarea id="contaminacion-descripcion" rows="2" onchange="markAsChanged()"></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Nivel de Ruido</label>
+                                                <select id="contaminacion-ruido" onchange="markAsChanged()">
+                                                    <option value="">Seleccionar...</option>
+                                                    <option value="Bajo">Bajo</option>
+                                                    <option value="Medio">Medio</option>
+                                                    <option value="Alto">Alto</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Principal Fuente de Contaminación</label>
+                                                <input type="text" id="contaminacion-fuente" onchange="markAsChanged()">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Vida del Barrio -->
+                                    <div class="accordion-item">
+                                        <div class="accordion-header" onclick="toggleAccordion('vida_barrio')">
+                                            <span class="accordion-icon">🎭</span>
+                                            <span>Vida del Barrio</span>
+                                            <span class="accordion-score" id="score-vida_barrio">--</span>
+                                            <i class="fas fa-chevron-down accordion-arrow"></i>
+                                        </div>
+                                        <div class="accordion-content" id="content-vida_barrio">
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label>Puntuación (0-100)</label>
+                                                    <input type="number" id="vida_barrio-puntuacion" min="0" max="100" onchange="updateScore('vida_barrio'); markAsChanged()">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Descripción</label>
+                                                <textarea id="vida_barrio-descripcion" rows="2" onchange="markAsChanged()"></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Bares y Restaurantes (separados por coma)</label>
+                                                <input type="text" id="vida_barrio-bares" onchange="markAsChanged()">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Cultura y Entretenimiento (separados por coma)</label>
+                                                <input type="text" id="vida_barrio-cultura" onchange="markAsChanged()">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Servicios Financieros -->
+                                    <div class="accordion-item">
+                                        <div class="accordion-header" onclick="toggleAccordion('servicios_financieros')">
+                                            <span class="accordion-icon">🏦</span>
+                                            <span>Servicios Financieros</span>
+                                            <span class="accordion-score" id="score-servicios_financieros">--</span>
+                                            <i class="fas fa-chevron-down accordion-arrow"></i>
+                                        </div>
+                                        <div class="accordion-content" id="content-servicios_financieros">
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label>Puntuación (0-100)</label>
+                                                    <input type="number" id="servicios_financieros-puntuacion" min="0" max="100" onchange="updateScore('servicios_financieros'); markAsChanged()">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Descripción</label>
+                                                <textarea id="servicios_financieros-descripcion" rows="2" onchange="markAsChanged()"></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Bancos (separados por coma)</label>
+                                                <input type="text" id="servicios_financieros-bancos" onchange="markAsChanged()">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Cajeros Automáticos (separados por coma)</label>
+                                                <input type="text" id="servicios_financieros-cajeros" onchange="markAsChanged()">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Conclusión -->
+                                    <div class="accordion-item">
+                                        <div class="accordion-header" onclick="toggleAccordion('conclusion')">
+                                            <span class="accordion-icon">📊</span>
+                                            <span>Conclusión</span>
+                                            <i class="fas fa-chevron-down accordion-arrow"></i>
+                                        </div>
+                                        <div class="accordion-content" id="content-conclusion">
+                                            <div class="form-group">
+                                                <label>Resumen para Inversores</label>
+                                                <textarea id="edit-conclusion" rows="4" placeholder="Conclusión orientada a inversores inmobiliarios..." onchange="markAsChanged()"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: Vista Previa -->
+                <div class="preview-column">
+                    <div class="card preview-card">
+                        <div class="card-header">
+                            <h2>👁️ Vista Previa</h2>
+                            <span class="preview-badge">Tarjeta "Ver Detalles"</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="preview-content" id="preview-content">
+                                <!-- Perfil del barrio -->
+                                <div class="neighborhood-profile">
+                                    <h3>Perfil del Barrio</h3>
+                                    <div class="profile-content" id="preview-resumen">
+                                        <p class="empty-text">Buscá un barrio para ver el resumen...</p>
+                                    </div>
+                                </div>
+
+                                <!-- Categorías del entorno -->
+                                <div class="environment-categories">
+                                    <h3>Características del Entorno</h3>
+                                    
+                                    <!-- Transporte -->
+                                    <div class="category-card">
+                                        <div class="category-header">
+                                            <span class="category-icon">🚇</span>
+                                            <h4>Transporte Público</h4>
+                                        </div>
+                                        <div class="category-content" id="preview-transporte">
+                                            <p class="empty-text">--</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Educación -->
+                                    <div class="category-card">
+                                        <div class="category-header">
+                                            <span class="category-icon">🎓</span>
+                                            <h4>Educación</h4>
+                                        </div>
+                                        <div class="category-content" id="preview-educacion">
+                                            <p class="empty-text">--</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Salud -->
+                                    <div class="category-card">
+                                        <div class="category-header">
+                                            <span class="category-icon">🏥</span>
+                                            <h4>Salud</h4>
+                                        </div>
+                                        <div class="category-content" id="preview-salud">
+                                            <p class="empty-text">--</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Comercio -->
+                                    <div class="category-card">
+                                        <div class="category-header">
+                                            <span class="category-icon">🛒</span>
+                                            <h4>Comercio y Servicios</h4>
+                                        </div>
+                                        <div class="category-content" id="preview-comercio">
+                                            <p class="empty-text">--</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Gastronomía -->
+                                    <div class="category-card">
+                                        <div class="category-header">
+                                            <span class="category-icon">🍽️</span>
+                                            <h4>Gastronomía</h4>
+                                        </div>
+                                        <div class="category-content" id="preview-gastronomia">
+                                            <p class="empty-text">--</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Recreación -->
+                                    <div class="category-card">
+                                        <div class="category-header">
+                                            <span class="category-icon">🌳</span>
+                                            <h4>Recreación y Cultura</h4>
+                                        </div>
+                                        <div class="category-content" id="preview-recreacion">
+                                            <p class="empty-text">--</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Seguridad -->
+                                    <div class="category-card">
+                                        <div class="category-header">
+                                            <span class="category-icon">🛡️</span>
+                                            <h4>Seguridad</h4>
+                                        </div>
+                                        <div class="category-content" id="preview-seguridad">
+                                            <p class="empty-text">--</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Servicios Financieros -->
+                                    <div class="category-card">
+                                        <div class="category-header">
+                                            <span class="category-icon">🏦</span>
+                                            <h4>Servicios Financieros</h4>
+                                        </div>
+                                        <div class="category-content" id="preview-finanzas">
+                                            <p class="empty-text">--</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Resumen Ejecutivo -->
+                                <div class="summary-footer-preview">
+                                    <h3>📋 Conclusión</h3>
+                                    <div class="summary-content" id="preview-conclusion">
+                                        <p class="empty-text">--</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pantalla inicial -->
+        <section id="initial-section" class="initial-section">
+            <div class="initial-content">
+                <div class="initial-icon">🏙️</div>
+                <h2>Gestor de Barrios Dante Propiedades</h2>
+                <p>Administrá los datos de todos los barrios de CABA. Creá, editá y actualizá información con asistencia de IA.</p>
+                <div class="features-list">
+                    <div class="feature-item">
+                        <span class="feature-icon">✨</span>
+                        <div>
+                            <h4>Crear Nuevos Barrios</h4>
+                            <p>Escribí el nombre de un barrio nuevo y generá sus datos automáticamente con IA</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✏️</span>
+                        <div>
+                            <h4>Editar Datos</h4>
+                            <p>Modificá cualquier campo manualmente para mantener la información actualizada</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🔄</span>
+                        <div>
+                            <h4>Regenerar con IA</h4>
+                            <p>Actualizá los datos usando inteligencia artificial cuando lo necesites</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">💾</span>
+                        <div>
+                            <h4>Persistencia Automática</h4>
+                            <p>Todos los cambios se guardan en la base de datos SQLite</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Loading overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h3 id="loading-title">Procesando...</h3>
+            <p id="loading-text">Por favor esperá</p>
+            <div class="loading-steps">
+                <div class="step" id="step-loading">
+                    <span class="step-icon">⏳</span>
+                    <span class="step-text" id="step-text">Procesando</span>
+                    <span class="step-status" id="step-status">⏳</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="dashboard-footer">
+        <p>© 2025 Dante Propiedades | CMS de Barrios</p>
+        <p class="footer-note">Los datos se almacenan en SQLite y pueden regenerarse con IA</p>
+    </footer>
+
+    <script src="analisis-barrio.js?v=20241228-0745"></script>
+</body>
+</html>
