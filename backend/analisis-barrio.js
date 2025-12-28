@@ -868,6 +868,12 @@ const EventHandlers = {
                 this.updateEditMode();
                 UIRenderer.hideSearchResults();
                 
+                // ✅ HABILITAR BOTÓN REGENERAR CON IA
+                const regenerateBtn = document.getElementById('regenerate-btn');
+                if (regenerateBtn) {
+                    regenerateBtn.disabled = false;
+                }
+                
                 Utils.showToast(`Barrio "${Utils.capitalize(query)}" cargado correctamente`, 'success');
             }
         } catch (error) {
