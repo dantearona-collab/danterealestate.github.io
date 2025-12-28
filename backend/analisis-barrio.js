@@ -1098,13 +1098,19 @@ const EventHandlers = {
             
             if (AppState.currentBarrio) {
                 // Actualizar barrio existente
-                // El backend espera: { categorias: { transporte: {...}, comercio: {...}, etc. } }
+                // El backend espera: { data: { categorias: {...}, resumen_general: ... }, actualizado_por: "admin" }
                 const updateData = this.convertToBackendFormat(formData);
                 
-                console.log('📤 Enviando datos de actualización:', JSON.stringify(updateData, null, 2));
+                // Envolver en el formato que espera el backend
+                const backendPayload = {
+                    data: updateData,
+                    actualizado_por: 'admin'
+                };
+                
+                console.log('📤 Enviando datos de actualización:', JSON.stringify(backendPayload, null, 2));
                 
                 // Usar PUT para actualizar
-                response = await ApiClient.updateBarrio(AppState.currentBarrio.nombre, updateData);
+                response = await ApiClient.updateBarrio(AppState.currentBarrio.nombre, backendPayload);
                 Utils.showToast('Barrio actualizado correctamente', 'success');
             } else {
                 // Crear nuevo barrio
@@ -1646,9 +1652,17 @@ async function saveBarrio() {
         if (AppState.currentBarrio && AppState.currentBarrio.existe) {
             // Actualizar barrio existente - usar el EventHandlers para convertir al formato correcto
             const updateData = EventHandlers.convertToBackendFormat(formData);
+            
+            // El backend espera: { data: {...}, actualizado_por: "admin" }
+            const backendPayload = {
+                data: updateData,
+                actualizado_por: 'admin'
+            };
+            
             console.log('📤 Actualizando barrio:', AppState.currentBarrio.nombre);
-            console.log('📤 Datos:', JSON.stringify(updateData, null, 2));
-            await ApiClient.updateBarrio(AppState.currentBarrio.nombre, updateData);
+            console.log('📤 Datos:', JSON.stringify(backendPayload, null, 2));
+            
+            await ApiClient.updateBarrio(AppState.currentBarrio.nombre, backendPayload);
         } else {
             // Crear nuevo barrio
             console.log('📤 Creando nuevo barrio:', formData.nombre);
