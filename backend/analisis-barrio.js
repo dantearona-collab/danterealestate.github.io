@@ -1679,7 +1679,11 @@ async function saveBarrio() {
         
         // Recargar datos
         if (AppState.currentBarrio && AppState.currentBarrio.nombre) {
-            loadBarrioData(await ApiClient.getBarrio(AppState.currentBarrio.nombre));
+            console.log('🔄 Recargando datos del barrio desde el servidor...');
+            const reloadResponse = await ApiClient.getBarrio(AppState.currentBarrio.nombre);
+            console.log('📥 Respuesta de recarga:', reloadResponse);
+            loadBarrioData(reloadResponse);
+            console.log('✅ Datos recargados correctamente');
         }
         
     } catch (error) {
@@ -1885,25 +1889,47 @@ function collectFormData() {
 /**
  * Cargar datos de barrio en el formulario
  */
-function loadBarrioData(data) {
-    if (!data || !data.nombre) return;
+function loadBarrioData(response) {
+    console.log('📥 loadBarrioData recibe:', response);
+    
+    if (!response) {
+        console.log('⚠️ loadBarrioData: response es null');
+        return;
+    }
+    
+    // Extraer los datos del formato de respuesta del API
+    // El API puede responder: {success: true, data: {...}, nombre: '...'}
+    // O directamente: {nombre: '...', categorias: {...}}
+    const data = response.data || response;
+    const nombre = response.nombre || data?.nombre || data?.nombre;
+    
+    if (!nombre) {
+        console.log('⚠️ loadBarrioData: no se encontró nombre en:', response);
+        return;
+    }
     
     AppState.currentBarrio = {
-        nombre: data.nombre,
+        nombre: nombre,
         existe: true
     };
     
+    console.log('🔄 Cargando barrio:', nombre);
+    console.log('📋 Datos a cargar:', data);
+    
     // Actualizar toolbar
     const currentBarrio = document.getElementById('current-barrio-name');
-    if (currentBarrio) currentBarrio.textContent = data.nombre;
+    if (currentBarrio) currentBarrio.textContent = nombre;
     
-    // Cargar resumen
+    // Cargar resumen y conclusión
     const resumenEl = document.getElementById('edit-resumen');
-    if (resumenEl) resumenEl.value = data.resumen || '';
+    if (resumenEl) resumenEl.value = data.resumen_general || data.resumen || '';
     
-    // Cargar conclusión
     const conclusionEl = document.getElementById('edit-conclusion');
     if (conclusionEl) conclusionEl.value = data.conclusion || '';
+    
+    // Cargar puntuación general
+    const puntuacionGeneral = document.getElementById('barrio-puntuacion');
+    if (puntuacionGeneral) puntuacionGeneral.value = data.puntuacion_general || 50;
     
     // Cargar categorías
     const categorias = data.categorias || {};
@@ -1954,9 +1980,9 @@ function loadBarrioData(data) {
         });
     });
     
-    // Deshabilitar campos por defecto
+    // Deshabilitar campos
     const inputs = document.querySelectorAll('#editor-form input, #editor-form textarea, #editor-form select');
     inputs.forEach(input => input.disabled = true);
     
-    console.log('📋 Datos cargados para:', data.nombre);
+    console.log('✅ loadBarrioData completado para:', nombre);
 }
