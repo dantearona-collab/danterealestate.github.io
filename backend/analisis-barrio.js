@@ -500,12 +500,16 @@ const UIRenderer = {
     },
 
     /**
-     * Establece el valor de un campo
+     * Establece el valor de un campo (funciona incluso si está deshabilitado)
      */
     setFieldValue(elementId, value) {
         const element = document.getElementById(elementId);
         if (element) {
+            // Remover disabled temporalmente para poder establecer el valor
+            const wasDisabled = element.disabled;
+            element.disabled = false;
             element.value = Utils.formatValue(value);
+            element.disabled = wasDisabled;
         }
     },
 
