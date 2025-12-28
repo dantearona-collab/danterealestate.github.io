@@ -918,7 +918,8 @@ const EventHandlers = {
                     categorias: data?.categorias || {},
                     puntuacion_general: data?.puntuacion_general || 50,
                     generado_por_ia: response.generado_por_ia,
-                    fecha_actualizacion: response.fecha_actualizacion
+                    fecha_actualizacion: response.fecha_actualizacion,
+                    existe: true  // ✅ MARCAR COMO EXISTENTE EN LA BASE DE DATOS
                 };
                 
                 UIRenderer.populateForm(AppState.currentBarrio);
@@ -1639,13 +1640,19 @@ async function saveBarrio() {
     
     try {
         // Recopilar datos del formulario
-        const data = collectFormData();
+        const formData = collectFormData();
         
-        // Actualizar o crear barrio
-        if (AppState.currentBarrio.existe) {
-            await ApiClient.updateBarrio(AppState.currentBarrio.nombre, data);
+        // Determinar si es update o create
+        if (AppState.currentBarrio && AppState.currentBarrio.existe) {
+            // Actualizar barrio existente - usar el EventHandlers para convertir al formato correcto
+            const updateData = EventHandlers.convertToBackendFormat(formData);
+            console.log('📤 Actualizando barrio:', AppState.currentBarrio.nombre);
+            console.log('📤 Datos:', JSON.stringify(updateData, null, 2));
+            await ApiClient.updateBarrio(AppState.currentBarrio.nombre, updateData);
         } else {
-            await ApiClient.createBarrio(data);
+            // Crear nuevo barrio
+            console.log('📤 Creando nuevo barrio:', formData.nombre);
+            await ApiClient.createBarrio(formData);
         }
         
         if (statusEl) {
@@ -1657,7 +1664,9 @@ async function saveBarrio() {
         console.log('💾 Barrio guardado correctamente');
         
         // Recargar datos
-        loadBarrio(AppState.currentBarrio.nombre);
+        if (AppState.currentBarrio && AppState.currentBarrio.nombre) {
+            loadBarrioData(await ApiClient.getBarrio(AppState.currentBarrio.nombre));
+        }
         
     } catch (error) {
         console.error('Error guardando:', error);
