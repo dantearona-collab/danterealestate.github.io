@@ -2,34 +2,41 @@ import os
 import google.generativeai as genai
 from typing import Optional, Dict, Any, List
 
-# ✅ API KEY DE GEMINI - CONFIGURADA
-GEMINI_API_KEY = "AIzaSyAoC9RD4HPE7l5wY8RcnMHS7F1BeXj7ea8"
+# ✅ API KEYS DE GEMINI - CONFIGURACIÓN MÚLTIPLE CON ROTACIÓN
+# Si una clave se agota (error 429), el sistema automáticamente prueba con la siguiente
 
-# ✅ CONFIGURACIÓN GLOBAL
-print("=" * 50)
-print("🔍 INICIALIZANDO GEMINI CLIENT")
-print("=" * 50)
-
-# Cargar API keys desde entorno o usar la key hardcodeada
+# Buscar claves en variables de entorno (formato: GEMINI_KEYS_1, GEMINI_KEYS_2, GEMINI_KEYS_3)
 API_KEYS = []
 
-# Primero intentar cargar desde variables de entorno
-for i in range(1, 4):
-    key_name = f"GEMINI_API_KEY_{i}"
+# Intentar cargar claves desde variables de entorno
+for i in range(1, 10):  # Buscar hasta 10 claves posibles
+    key_name = f"GEMINI_KEYS_{i}"
     key_value = os.environ.get(key_name)
     if key_value and key_value.strip():
-        API_KEYS.append(key_value.strip())
-        print(f"✅ {key_name}: Cargada desde entorno")
+        # Validar que parece una API key de Google (empieza con AIza)
+        if key_value.strip().startswith('AIza'):
+            API_KEYS.append(key_value.strip())
+            print(f"✅ {key_name}: Clave cargada exitosamente")
 
-# Si no hay keys en entorno, usar la key hardcodeada
+# Si no hay claves en entorno, buscar en una variable compuesta separada por comas
 if not API_KEYS:
-    if GEMINI_API_KEY and GEMINI_API_KEY.strip():
-        API_KEYS.append(GEMINI_API_KEY.strip())
-        print(f"✅ API Key: Cargada desde configuración")
+    compound_keys = os.environ.get('GEMINI_ALL_KEYS', '')
+    if compound_keys:
+        for key in compound_keys.split(','):
+            key = key.strip()
+            if key.startswith('AIza'):
+                API_KEYS.append(key)
+                print(f"✅ Clave encontrada en GEMINI_ALL_KEYS")
+
+# Si aún no hay claves, no hay configuración válida
+if not API_KEYS:
+    print("⚠️ No se encontraron API keys válidas de Gemini")
+    print("   El sistema funcionará sin capacidad de generación con IA")
 
 MODEL = os.environ.get("WORKING_MODEL", "gemini-2.0-flash-001")
 
-print(f"🎯 CONFIGURACIÓN FINAL: Modelo={MODEL}, Claves={len(API_KEYS)}")
+print(f"🎯 CONFIGURACIÓN FINAL: Modelo={MODEL}")
+print(f"🔑 Claves API disponibles: {len(API_KEYS)}")
 print("=" * 50)
 
 def call_gemini_with_rotation(prompt: str) -> str:
