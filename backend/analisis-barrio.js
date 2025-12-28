@@ -259,103 +259,108 @@ const UIRenderer = {
      * Llena el formulario con los datos de un barrio
      */
     populateForm(barrio) {
-        if (!barrio) return;
+        if (!barrio) {
+            console.log('⚠️ populateForm: barrio es null o undefined');
+            return;
+        }
         
-        console.log('📝 populateForm llamado con:', barrio);
+        console.log('📝 populateForm llamado con:', JSON.stringify(barrio, null, 2));
+        
+        // Normalizar la estructura de datos - el barrio puede venir con datos anidados en 'data'
+        const barrioData = barrio.data ? barrio.data : barrio;
         
         // Actualizar toolbar con el nombre del barrio
         const currentBarrio = document.getElementById('current-barrio-name');
-        if (currentBarrio) currentBarrio.textContent = barrio.nombre || 'Unknown';
+        if (currentBarrio) currentBarrio.textContent = barrioData.nombre || barrio.nombre || 'Unknown';
         
-        // Campo de resumen y conclusión
-        this.setFieldValue('edit-resumen', barrio.resumen);
-        this.setFieldValue('edit-conclusion', barrio.conclusion);
-        
-        // Campo de puntuación general (usar setFieldValue para manejar disabled)
-        const puntuacionGeneral = barrio.puntuacion_general || 
-                                  (barrio.data && barrio.data.puntuacion_general) || 50;
+        // Campo de puntuación general
+        const puntuacionGeneral = barrioData.puntuacion_general || barrio.puntuacion_general || 50;
         this.setFieldValue('barrio-puntuacion', puntuacionGeneral);
         
-        // Cargar categorías
-        const categorias = barrio.categorias || barrio.data?.categorias || {};
+        // Campo de resumen y conclusión
+        this.setFieldValue('edit-resumen', barrioData.resumen_general || barrioData.resumen || '');
+        this.setFieldValue('edit-conclusion', barrioData.conclusion || '');
+        
+        // Cargar categorías - puede estar en 'categorias' o directamente en el objeto
+        const categorias = barrioData.categorias || {};
         
         // Transporte
-        const transporte = categorias.transporte || {};
+        const transporte = categorias.transporte || barrioData.transporte || {};
         this.setScoreField('transporte', transporte.puntuacion);
         this.setFieldValue('transporte-puntuacion', transporte.puntuacion);
         this.setFieldValue('transporte-descripcion', transporte.descripcion);
-        this.setFieldValue('transporte-estaciones', transporte.estaciones);
-        this.setFieldValue('transporte-colectivos', transporte.colectivos);
+        this.setFieldValue('transporte-estaciones', this.arrayToString(transporte.estaciones || transporte.estaciones_cercanas || []));
+        this.setFieldValue('transporte-colectivos', this.arrayToString(transporte.colectivos || transporte.lineas_colectivo || []));
         
         // Comercio
-        const comercio = categorias.comercio || {};
+        const comercio = categorias.comercio || barrioData.comercio || {};
         this.setScoreField('comercio', comercio.puntuacion);
         this.setFieldValue('comercio-puntuacion', comercio.puntuacion);
         this.setFieldValue('comercio-descripcion', comercio.descripcion);
-        this.setFieldValue('comercio-supermercados', comercio.supermercados);
-        this.setFieldValue('comercio-centros', comercio.centros_comerciales);
+        this.setFieldValue('comercio-supermercados', this.arrayToString(comercio.supermercados || []));
+        this.setFieldValue('comercio-centros', this.arrayToString(comercio.centros_comerciales || comercio.centros || []));
         
         // Seguridad
-        const seguridad = categorias.seguridad || {};
+        const seguridad = categorias.seguridad || barrioData.seguridad || {};
         this.setScoreField('seguridad', seguridad.puntuacion);
         this.setFieldValue('seguridad-puntuacion', seguridad.puntuacion);
         this.setFieldValue('seguridad-descripcion', seguridad.descripcion);
-        this.setFieldValue('seguridad-comisaria', seguridad.comisaria);
+        this.setFieldValue('seguridad-comisaria', seguridad.comisaria || seguridad.comisaria_cercana || '');
         
         // Educación
-        const educacion = categorias.educacion || {};
+        const educacion = categorias.educacion || barrioData.educacion || {};
         this.setScoreField('educacion', educacion.puntuacion);
         this.setFieldValue('educacion-puntuacion', educacion.puntuacion);
         this.setFieldValue('educacion-descripcion', educacion.descripcion);
-        this.setFieldValue('educacion-escuelas', educacion.escuelas);
-        this.setFieldValue('educacion-universidades', educacion.universidades);
+        this.setFieldValue('educacion-escuelas', this.arrayToString(educacion.escuelas || []));
+        this.setFieldValue('educacion-universidades', this.arrayToString(educacion.universidades || []));
         
         // Salud
-        const salud = categorias.salud || {};
+        const salud = categorias.salud || barrioData.salud || {};
         this.setScoreField('salud', salud.puntuacion);
         this.setFieldValue('salud-puntuacion', salud.puntuacion);
         this.setFieldValue('salud-descripcion', salud.descripcion);
-        this.setFieldValue('salud-hospitales', salud.hospitales);
-        this.setFieldValue('salud-centros', salud.centros_salud);
+        this.setFieldValue('salud-hospitales', this.arrayToString(salud.hospitales || []));
+        this.setFieldValue('salud-centros', this.arrayToString(salud.centros_salud || salud.centros || []));
         
         // Espacios Verdes
-        const espaciosVerdes = categorias.espacios_verdes || {};
+        const espaciosVerdes = categorias.espacios_verdes || barrioData.espacios_verdes || {};
         this.setScoreField('espacios_verdes', espaciosVerdes.puntuacion);
         this.setFieldValue('espacios_verdes-puntuacion', espaciosVerdes.puntuacion);
         this.setFieldValue('espacios_verdes-descripcion', espaciosVerdes.descripcion);
-        this.setFieldValue('espacios_verdes-parques', espaciosVerdes.parques);
+        this.setFieldValue('espacios_verdes-parques', this.arrayToString(espaciosVerdes.parques || []));
         
         // Contaminación
-        const contaminacion = categorias.contaminacion || {};
+        const contaminacion = categorias.contaminacion || barrioData.contaminacion || {};
         this.setScoreField('contaminacion', contaminacion.puntuacion);
         this.setFieldValue('contaminacion-puntuacion', contaminacion.puntuacion);
         this.setFieldValue('contaminacion-descripcion', contaminacion.descripcion);
-        this.setFieldValue('contaminacion-ruido', contaminacion.nivel_ruido);
-        this.setFieldValue('contaminacion-fuente', contaminacion.fuente);
+        this.setFieldValue('contaminacion-ruido', contaminacion.nivel_ruido || '');
+        this.setFieldValue('contaminacion-fuente', contaminacion.fuente || contaminacion.principal_fuente || '');
         
         // Vida del Barrio
-        const vidaBarrio = categorias.vida_barrio || {};
+        const vidaBarrio = categorias.vida_barrio || barrioData.vida_barrio || {};
         this.setScoreField('vida_barrio', vidaBarrio.puntuacion);
         this.setFieldValue('vida_barrio-puntuacion', vidaBarrio.puntuacion);
         this.setFieldValue('vida_barrio-descripcion', vidaBarrio.descripcion);
-        this.setFieldValue('vida_barrio-bares', vidaBarrio.bares);
-        this.setFieldValue('vida_barrio-cultura', vidaBarrio.cultura);
+        this.setFieldValue('vida_barrio-bares', this.arrayToString(vidaBarrio.bares || vidaBarrio.bares_restaurantes || []));
+        this.setFieldValue('vida_barrio-cultura', this.arrayToString(vidaBarrio.cultura || []));
         
         // Gastronomía
-        const gastronomia = categorias.gastronomia || {};
+        const gastronomia = categorias.gastronomia || barrioData.gastronomia || {};
         this.setScoreField('gastronomia', gastronomia.puntuacion);
         this.setFieldValue('gastronomia-puntuacion', gastronomia.puntuacion);
         this.setFieldValue('gastronomia-descripcion', gastronomia.descripcion);
-        this.setFieldValue('gastronomia-restaurantes', gastronomia.restaurantes_destacados);
-        this.setFieldValue('gastronomia-zonas', gastronomia.zonas_gastronomicas);
+        this.setFieldValue('gastronomia-restaurantes', this.arrayToString(gastronomia.restaurantes || gastronomia.restaurantes_destacados || []));
+        this.setFieldValue('gastronomia-zonas', this.arrayToString(gastronomia.zonas || gastronomia.zonas_gastronomicas || []));
         
         // Servicios Financieros
-        const serviciosFinancieros = categorias.servicios_financieros || {};
+        const serviciosFinancieros = categorias.servicios_financieros || barrioData.servicios_financieros || {};
         this.setScoreField('servicios_financieros', serviciosFinancieros.puntuacion);
         this.setFieldValue('servicios_financieros-puntuacion', serviciosFinancieros.puntuacion);
         this.setFieldValue('servicios_financieros-descripcion', serviciosFinancieros.descripcion);
-        this.setFieldValue('servicios_financieros-bancos', serviciosFinancieros.bancos);
-        this.setFieldValue('servicios_financieros-cajeros', serviciosFinancieros.cajeros);
+        this.setFieldValue('servicios_financieros-bancos', this.arrayToString(serviciosFinancieros.bancos || []));
+        this.setFieldValue('servicios_financieros-cajeros', this.arrayToString(serviciosFinancieros.cajeros || serviciosFinancieros.cajeros_automaticos || []));
         
         // Actualizar estado de IA y fecha
         this.updateAIStatus(barrio);
@@ -365,6 +370,17 @@ const UIRenderer = {
         this.updatePreview(barrio);
         
         console.log('✅ Formulario populado correctamente');
+    }
+    
+    /**
+     * Convierte un array a string separado por comas
+     */
+    arrayToString(arr) {
+        if (!arr) return '';
+        if (Array.isArray(arr)) {
+            return arr.join(', ');
+        }
+        return String(arr);
     },
 
     /**
@@ -1080,9 +1096,13 @@ const EventHandlers = {
             let response;
             
             if (AppState.currentBarrio) {
-                // Actualizar barrio existente - convertir al formato del backend
+                // Actualizar barrio existente
+                // El backend espera: { categorias: { transporte: {...}, comercio: {...}, etc. } }
                 const updateData = this.convertToBackendFormat(formData);
-                console.log('📤 Enviando datos de actualización:', updateData);
+                
+                console.log('📤 Enviando datos de actualización:', JSON.stringify(updateData, null, 2));
+                
+                // Usar PUT para actualizar
                 response = await ApiClient.updateBarrio(AppState.currentBarrio.nombre, updateData);
                 Utils.showToast('Barrio actualizado correctamente', 'success');
             } else {
@@ -1093,14 +1113,18 @@ const EventHandlers = {
             }
             
             // Actualizar la UI con los datos guardados
-            AppState.currentBarrio = response;
+            if (response && response.data) {
+                AppState.currentBarrio = response.data;
+            } else {
+                AppState.currentBarrio = response;
+            }
             AppState.isEditing = false;
             AppState.originalData = null;
-            UIRenderer.populateForm(response);
+            UIRenderer.populateForm(AppState.currentBarrio);
             UIRenderer.updateFormState(false);
             
         } catch (error) {
-            console.error('Error al guardar:', error);
+            console.error('❌ Error al guardar:', error);
             Utils.showToast(`Error al guardar: ${error.message}`, 'error');
         } finally {
             UIRenderer.hideLoading();
@@ -1109,18 +1133,16 @@ const EventHandlers = {
 
     /**
      * Convierte los datos del formulario al formato esperado por el backend
-     * El backend espera: {resumen, conclusion, categorias: {transporte: {...}, comercio: {...}, etc.}}
+     * El backend espera: { categorias: { transporte: {...}, comercio: {...}, etc. }, resumen_general, conclusion }
      */
     convertToBackendFormat(formData) {
-        return {
-            resumen_general: formData.perfil_barrio || '',
-            conclusion: formData.conclusion || '',
-            puntuacion_general: formData.puntuacion_general || 50,
+        // Construir el objeto categorias
+        const categorias = {
             transporte: {
                 puntuacion: formData.transporte_publico || 50,
                 descripcion: formData.transporte_descripcion || '',
-                estaciones_cercanas: formData.transporte_estaciones ? formData.transporte_estaciones.split(',').map(s => s.trim()) : [],
-                lineas_colectivo: formData.transporte_colectivos ? formData.transporte_colectivos.split(',').map(s => s.trim()) : []
+                estaciones: formData.transporte_estaciones ? formData.transporte_estaciones.split(',').map(s => s.trim()) : [],
+                colectivos: formData.transporte_colectivos ? formData.transporte_colectivos.split(',').map(s => s.trim()) : []
             },
             comercio: {
                 puntuacion: formData.comercio_servicios || 50,
@@ -1131,7 +1153,7 @@ const EventHandlers = {
             seguridad: {
                 puntuacion: formData.seguridad || 50,
                 descripcion: formData.seguridad_descripcion || '',
-                comisaria_cercana: formData.seguridad_comisaria || '',
+                comisaria: formData.seguridad_comisaria || '',
                 rating_seguridad: String(formData.seguridad_rating || '5')
             },
             educacion: {
@@ -1155,26 +1177,34 @@ const EventHandlers = {
                 puntuacion: formData.contaminacion || 50,
                 descripcion: formData.contaminacion_descripcion || '',
                 nivel_ruido: formData.contaminacion_ruido || 'Medio',
-                principal_fuente: formData.contaminacion_fuente || ''
+                fuente: formData.contaminacion_fuente || ''
             },
             vida_barrio: {
                 puntuacion: formData.vida_barrio || 50,
                 descripcion: formData.vida_barrio_descripcion || '',
-                bares_restaurantes: formData.vida_barrio_bares ? formData.vida_barrio_bares.split(',').map(s => s.trim()) : [],
+                bares: formData.vida_barrio_bares ? formData.vida_barrio_bares.split(',').map(s => s.trim()) : [],
                 cultura: formData.vida_barrio_cultura ? formData.vida_barrio_cultura.split(',').map(s => s.trim()) : []
             },
             gastronomia: {
                 puntuacion: formData.gastronomia || 50,
                 descripcion: formData.gastronomia_descripcion || '',
-                restaurantes_destacados: formData.gastronomia_restaurantes ? formData.gastronomia_restaurantes.split(',').map(s => s.trim()) : [],
-                zonas_gastronomicas: formData.gastronomia_zonas ? formData.gastronomia_zonas.split(',').map(s => s.trim()) : []
+                restaurantes: formData.gastronomia_restaurantes ? formData.gastronomia_restaurantes.split(',').map(s => s.trim()) : [],
+                zonas: formData.gastronomia_zonas ? formData.gastronomia_zonas.split(',').map(s => s.trim()) : []
             },
             servicios_financieros: {
                 puntuacion: formData.servicios_financieros || 50,
                 descripcion: formData.servicios_financieros_descripcion || '',
                 bancos: formData.servicios_financieros_bancos ? formData.servicios_financieros_bancos.split(',').map(s => s.trim()) : [],
-                cajeros_automaticos: formData.servicios_financieros_cajeros ? formData.servicios_financieros_cajeros.split(',').map(s => s.trim()) : []
+                cajeros: formData.servicios_financieros_cajeros ? formData.servicios_financieros_cajeros.split(',').map(s => s.trim()) : []
             }
+        };
+        
+        // Retornar en el formato esperado: categorias + campos base
+        return {
+            categorias: categorias,
+            resumen_general: formData.perfil_barrio || '',
+            conclusion: formData.conclusion || '',
+            puntuacion_general: formData.puntuacion_general || 50
         };
     },
 
