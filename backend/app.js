@@ -2935,39 +2935,203 @@ async function loadEnvironmentInfo(direccion, barrio) {
         // USAR BARRIO REAL DEL JSON + UBICACIÓN EXACTA SI ESTÁ DISPONIBLE
         const ubicacionParaBusqueda = ubicacionExacta || `${barrio}, Buenos Aires, Argentina`;
         
-        // Preparar búsquedas dinámicas con ubicación real
-        const searchQueries = [
-            `${ubicacionParaBusqueda} servicios comercios farmacias heladerías`,
-            `${ubicacionParaBusqueda} transporte público subte colectivo líneas`,
-            `${ubicacionParaBusqueda} escuelas colegios universidades educación`,
-            `${ubicacionParaBusqueda} hospitales clínicas centros médicos salud`,
-            `${ubicacionParaBusqueda} supermercados centros comerciales shopping`,
-            `${ubicacionParaBusqueda} restaurantes cafeterías gastronomía`,
-            `${ubicacionParaBusqueda} parques plazas espacios verdes`,
-            `${ubicacionParaBusqueda} bancos cajeros servicios financieros`
-        ];
+        // ========================================
+        // CONECTAR CON ENDPOINT DEL BACKEND
+        // ========================================
+        const API_BASE_URL = "https://danterealestate-github-io-ewlg.onrender.com";
         
-        console.log('🔍 Consultas dinámicas preparadas:', searchQueries);
-        console.log('📍 Usando ubicación:', ubicacionParaBusqueda);
+        console.log('🌐 Consultando endpoint del backend para:', barrio);
         
-        // Realizar búsquedas con ubicación real
-        const searchResults = await performParallelSearchesReal(searchQueries, ubicacionParaBusqueda, barrio);
+        // Hacer llamada al endpoint del backend
+        const response = await fetch(`${API_BASE_URL}/api/barrios/${encodeURIComponent(barrio)}`);
         
-        console.log('✅ Resultados de IA recibidos:', Object.keys(searchResults));
+        let environmentData;
         
-        // Procesar y estructurar la información
-        const environmentData = processEnvironmentData(searchResults, direccion, barrio, ubicacionParaBusqueda, descripcion);
-        
-        console.log('🎯 Datos procesados con IA:', environmentData.aiGenerated);
-        console.log('📊 Categorías generadas:', Object.keys(environmentData.categories));
+        if (response.ok) {
+            const result = await response.json();
+            console.log('✅ Datos recibidos del backend:', result);
+            
+            if (result.success && result.data) {
+                // Transformar datos del formato backend al formato frontend
+                environmentData = transformBackendDataToFrontend(result.data, barrio, direccion, descripcion);
+                console.log('✅ Datos transformados correctamente desde el backend');
+            } else {
+                throw new Error(result.detail || 'Datos del barrio no disponibles');
+            }
+        } else {
+            console.log('⚠️ Endpoint del backend no disponible, usando datos simulados');
+            
+            // Si el endpoint falla, usar los datos simulados existentes
+            const searchResults = await performParallelSearchesReal(
+                [
+                    `${ubicacionParaBusqueda} servicios comercios farmacias heladerías`,
+                    `${ubicacionParaBusqueda} transporte público subte colectivo líneas`,
+                    `${ubicacionParaBusqueda} escuelas colegios universidades educación`,
+                    `${ubicacionParaBusqueda} hospitales clínicas centros médicos salud`,
+                    `${ubicacionParaBusqueda} supermercados centros comerciales shopping`,
+                    `${ubicacionParaBusqueda} restaurantes cafeterías gastronomía`,
+                    `${ubicacionParaBusqueda} parques plazas espacios verdes`,
+                    `${ubicacionParaBusqueda} bancos cajeros servicios financieros`
+                ],
+                ubicacionParaBusqueda,
+                barrio
+            );
+            
+            environmentData = processEnvironmentData(searchResults, direccion, barrio, ubicacionParaBusqueda, descripcion);
+            console.log('✅ Datos simulados generados correctamente');
+        }
         
         // Mostrar resultados
         displayEnvironmentInfo(environmentData);
         
     } catch (error) {
         console.error('Error cargando entorno:', error);
-        showEnvironmentError('Error cargando información del entorno');
+        // Fallback: usar datos simulados si algo falla
+        console.log('⚠️ Usando datos de respaldo por error:', error.message);
+        
+        try {
+            const ubicacionParaBusqueda = ubicacionExacta || `${barrio}, Buenos Aires, Argentina`;
+            const searchResults = await performParallelSearchesReal(
+                [
+                    `${ubicacionParaBusqueda} servicios comercios farmacias heladerías`,
+                    `${ubicacionParaBusqueda} transporte público subte colectivo líneas`,
+                    `${ubicacionParaBusqueda} escuelas colegios universidades educación`,
+                    `${ubicacionParaBusqueda} hospitales clínicas centros médicos salud`,
+                    `${ubicacionParaBusqueda} supermercados centros comerciales shopping`,
+                    `${ubicacionParaBusqueda} restaurantes cafeterías gastronomía`,
+                    `${ubicacionParaBusqueda} parques plazas espacios verdes`,
+                    `${ubicacionParaBusqueda} bancos cajeros servicios financieros`
+                ],
+                ubicacionParaBusqueda,
+                barrio
+            );
+            
+            const fallbackData = processEnvironmentData(searchResults, direccion, barrio, ubicacionParaBusqueda, descripcion);
+            displayEnvironmentInfo(fallbackData);
+        } catch (fallbackError) {
+            console.error('Error en fallback:', fallbackError);
+            showEnvironmentError('Error cargando información del entorno');
+        }
     }
+}
+
+// Transformar datos del backend al formato esperado por displayEnvironmentInfo
+function transformBackendDataToFrontend(data, barrio, direccion, descripcion = '') {
+    const categories = {};
+    
+    // Mapear cada categoría del backend al formato frontend
+    if (data.transporte) {
+        categories.transporte = {
+            icon: '🚇',
+            title: 'Transporte Público',
+            items: parseBackendItems(data.transporte, ['estaciones', 'estaciones_cercanas', 'colectivos', 'lineas_colectivo'])
+        };
+    }
+    
+    if (data.educacion) {
+        categories.educacion = {
+            icon: '🎓',
+            title: 'Educación',
+            items: parseBackendItems(data.educacion, ['escuelas', 'universidades', 'colegios'])
+        };
+    }
+    
+    if (data.salud) {
+        categories.salud = {
+            icon: '🏥',
+            title: 'Salud',
+            items: parseBackendItems(data.salud, ['hospitales', 'centros_salud', 'centros', 'clinicas'])
+        };
+    }
+    
+    if (data.comercio) {
+        categories.comercio = {
+            icon: '🛒',
+            title: 'Comercio',
+            items: parseBackendItems(data.comercio, ['supermercados', 'centros_comerciales', 'centros', 'tiendas'])
+        };
+    }
+    
+    if (data.vida_barrio) {
+        categories.gastronomia = {
+            icon: '🍽️',
+            title: 'Gastronomía',
+            items: parseBackendItems(data.vida_barrio, ['bares_restaurantes', 'bares', 'cultura', 'restaurantes'])
+        };
+        
+        categories.recreacion = {
+            icon: '🌳',
+            title: 'Recreación',
+            items: parseBackendItems(data.vida_barrio, ['actividades', 'espacios', 'parques'])
+        };
+    }
+    
+    if (data.servicios_financieros) {
+        categories.servicios_financieros = {
+            icon: '🏦',
+            title: 'Servicios Financieros',
+            items: parseBackendItems(data.servicios_financieros, ['bancos', 'cajeros', 'servicios'])
+        };
+    }
+    
+    if (data.seguridad) {
+        categories.seguridad = {
+            icon: '🛡️',
+            title: 'Seguridad',
+            items: parseBackendItems(data.seguridad, ['comisaria', 'comisaria_cercana', 'seguridad'])
+        };
+    }
+    
+    // Si no hay datos del backend, crear estructura vacía con placeholder
+    if (Object.keys(categories).length === 0) {
+        categories.transporte = { icon: '🚇', title: 'Transporte Público', items: ['Información del barrio'] };
+        categories.educacion = { icon: '🎓', title: 'Educación', items: ['Información del barrio'] };
+        categories.salud = { icon: '🏥', title: 'Salud', items: ['Información del barrio'] };
+        categories.comercio = { icon: '🛒', title: 'Comercio', items: ['Información del barrio'] };
+    }
+    
+    return {
+        barrio: barrio,
+        direccion: direccion,
+        categories: categories,
+        lastUpdated: new Date().toLocaleDateString('es-AR'),
+        descripcion: descripcion || data.resumen_general || data.resumen || ''
+    };
+}
+
+// Helper para parsear items desde los datos del backend
+function parseBackendItems(data, fieldNames) {
+    const items = [];
+    
+    // Buscar campos en orden de prioridad
+    for (const fieldName of fieldNames) {
+        if (data[fieldName]) {
+            const value = data[fieldName];
+            if (Array.isArray(value)) {
+                value.forEach(item => {
+                    if (item && typeof item === 'string' && item.trim()) {
+                        items.push(item.trim());
+                    }
+                });
+            } else if (typeof value === 'string' && value.trim()) {
+                items.push(value.trim());
+            }
+        }
+    }
+    
+    // Si no hay campos específicos, usar la descripción
+    if (items.length === 0 && data.descripcion) {
+        // Dividir por puntos y tomar las oraciones principales
+        const frases = data.descripcion.split('.').filter(f => f.trim().length > 10);
+        items.push(...frases.slice(0, 4).map(f => f.trim() + '.'));
+    }
+    
+    // Asegurar al menos un item
+    if (items.length === 0) {
+        items.push('Información disponible del barrio');
+    }
+    
+    return items.slice(0, 6); // Máximo 6 items por categoría
 }
 
 // Función para realizar búsquedas REALES con datos dinámicos del JSON
