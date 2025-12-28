@@ -1645,8 +1645,14 @@ async function saveBarrio() {
     }
     
     try {
+        // Habilitar todos los campos temporalmente para poder leer sus valores
+        const allInputs = document.querySelectorAll('#editor-form input, #editor-form textarea, #editor-form select');
+        allInputs.forEach(input => input.disabled = false);
+        
         // Recopilar datos del formulario
         const formData = collectFormData();
+        
+        console.log('📋 Datos recopilados del formulario:', formData);
         
         // Determinar si es update o create
         if (AppState.currentBarrio && AppState.currentBarrio.existe) {
@@ -1660,7 +1666,7 @@ async function saveBarrio() {
             };
             
             console.log('📤 Actualizando barrio:', AppState.currentBarrio.nombre);
-            console.log('📤 Datos:', JSON.stringify(backendPayload, null, 2));
+            console.log('📤 Datos a enviar:', JSON.stringify(backendPayload, null, 2));
             
             await ApiClient.updateBarrio(AppState.currentBarrio.nombre, backendPayload);
         } else {
@@ -1825,65 +1831,119 @@ function clearEditorForm() {
 function collectFormData() {
     const nombre = AppState.currentBarrio?.nombre || document.getElementById('neighborhood-input')?.value || '';
     
-    return {
+    console.log('🔍 collectFormData - nombre:', nombre);
+    
+    // Leer cada campo
+    const resumen = document.getElementById('edit-resumen')?.value || '';
+    const conclusion = document.getElementById('edit-conclusion')?.value || '';
+    const puntuacion_general = parseInt(document.getElementById('barrio-puntuacion')?.value) || 50;
+    
+    // Transporte
+    const transporte_puntuacion = parseInt(document.getElementById('transporte-puntuacion')?.value) || 50;
+    const transporte_descripcion = document.getElementById('transporte-descripcion')?.value || '';
+    const transporte_estaciones = document.getElementById('transporte-estaciones')?.value || '';
+    const transporte_colectivos = document.getElementById('transporte-colectivos')?.value || '';
+    
+    // Comercio
+    const comercio_puntuacion = parseInt(document.getElementById('comercio-puntuacion')?.value) || 50;
+    const comercio_descripcion = document.getElementById('comercio-descripcion')?.value || '';
+    const comercio_supermercados = document.getElementById('comercio-supermercados')?.value || '';
+    const comercio_centros = document.getElementById('comercio-centros')?.value || '';
+    
+    // Seguridad
+    const seguridad_puntuacion = parseInt(document.getElementById('seguridad-puntuacion')?.value) || 50;
+    const seguridad_descripcion = document.getElementById('seguridad-descripcion')?.value || '';
+    const seguridad_comisaria = document.getElementById('seguridad-comisaria')?.value || '';
+    
+    // Educación
+    const educacion_puntuacion = parseInt(document.getElementById('educacion-puntuacion')?.value) || 50;
+    const educacion_descripcion = document.getElementById('educacion-descripcion')?.value || '';
+    const educacion_escuelas = document.getElementById('educacion-escuelas')?.value || '';
+    const educacion_universidades = document.getElementById('educacion-universidades')?.value || '';
+    
+    // Salud
+    const salud_puntuacion = parseInt(document.getElementById('salud-puntuacion')?.value) || 50;
+    const salud_descripcion = document.getElementById('salud-descripcion')?.value || '';
+    const salud_hospitales = document.getElementById('salud-hospitales')?.value || '';
+    const salud_centros = document.getElementById('salud-centros')?.value || '';
+    
+    // Espacios Verdes
+    const espacios_verdes_puntuacion = parseInt(document.getElementById('espacios_verdes-puntuacion')?.value) || 50;
+    const espacios_verdes_descripcion = document.getElementById('espacios_verdes-descripcion')?.value || '';
+    const espacios_verdes_parques = document.getElementById('espacios_verdes-parques')?.value || '';
+    
+    // Contaminación
+    const contaminacion_puntuacion = parseInt(document.getElementById('contaminacion-puntuacion')?.value) || 50;
+    const contaminacion_descripcion = document.getElementById('contaminacion-descripcion')?.value || '';
+    const contaminacion_ruido = document.getElementById('contaminacion-ruido')?.value || '';
+    const contaminacion_fuente = document.getElementById('contaminacion-fuente')?.value || '';
+    
+    // Vida del Barrio
+    const vida_barrio_puntuacion = parseInt(document.getElementById('vida_barrio-puntuacion')?.value) || 50;
+    const vida_barrio_descripcion = document.getElementById('vida_barrio-descripcion')?.value || '';
+    const vida_barrio_bares = document.getElementById('vida_barrio-bares')?.value || '';
+    const vida_barrio_cultura = document.getElementById('vida_barrio-cultura')?.value || '';
+    
+    // Gastronomía
+    const gastronomia_puntuacion = parseInt(document.getElementById('gastronomia-puntuacion')?.value) || 50;
+    const gastronomia_descripcion = document.getElementById('gastronomia-descripcion')?.value || '';
+    const gastronomia_restaurantes = document.getElementById('gastronomia-restaurantes')?.value || '';
+    const gastronomia_zonas = document.getElementById('gastronomia-zonas')?.value || '';
+    
+    // Servicios Financieros
+    const servicios_financieros_puntuacion = parseInt(document.getElementById('servicios_financieros-puntuacion')?.value) || 50;
+    const servicios_financieros_descripcion = document.getElementById('servicios_financieros-descripcion')?.value || '';
+    const servicios_financieros_bancos = document.getElementById('servicios_financieros-bancos')?.value || '';
+    const servicios_financieros_cajeros = document.getElementById('servicios_financieros-cajeros')?.value || '';
+    
+    // Retornar objeto con la estructura correcta
+    const data = {
         nombre: nombre,
-        resumen: document.getElementById('edit-resumen')?.value || '',
-        conclusion: document.getElementById('edit-conclusion')?.value || '',
-        categorias: {
-            transporte: {
-                puntuacion: parseInt(document.getElementById('transporte-puntuacion')?.value) || 0,
-                descripcion: document.getElementById('transporte-descripcion')?.value || '',
-                estaciones: document.getElementById('transporte-estaciones')?.value || '',
-                colectivos: document.getElementById('transporte-colectivos')?.value || ''
-            },
-            comercio: {
-                puntuacion: parseInt(document.getElementById('comercio-puntuacion')?.value) || 0,
-                descripcion: document.getElementById('comercio-descripcion')?.value || '',
-                supermercados: document.getElementById('comercio-supermercados')?.value || '',
-                centros_comerciales: document.getElementById('comercio-centros')?.value || ''
-            },
-            seguridad: {
-                puntuacion: parseInt(document.getElementById('seguridad-puntuacion')?.value) || 0,
-                descripcion: document.getElementById('seguridad-descripcion')?.value || '',
-                comisaria: document.getElementById('seguridad-comisaria')?.value || ''
-            },
-            educacion: {
-                puntuacion: parseInt(document.getElementById('educacion-puntuacion')?.value) || 0,
-                descripcion: document.getElementById('educacion-descripcion')?.value || '',
-                escuelas: document.getElementById('educacion-escuelas')?.value || '',
-                universidades: document.getElementById('educacion-universidades')?.value || ''
-            },
-            salud: {
-                puntuacion: parseInt(document.getElementById('salud-puntuacion')?.value) || 0,
-                descripcion: document.getElementById('salud-descripcion')?.value || '',
-                hospitales: document.getElementById('salud-hospitales')?.value || '',
-                centros_salud: document.getElementById('salud-centros')?.value || ''
-            },
-            espacios_verdes: {
-                puntuacion: parseInt(document.getElementById('espacios_verdes-puntuacion')?.value) || 0,
-                descripcion: document.getElementById('espacios_verdes-descripcion')?.value || '',
-                parques: document.getElementById('espacios_verdes-parques')?.value || ''
-            },
-            contaminacion: {
-                puntuacion: parseInt(document.getElementById('contaminacion-puntuacion')?.value) || 0,
-                descripcion: document.getElementById('contaminacion-descripcion')?.value || '',
-                nivel_ruido: document.getElementById('contaminacion-ruido')?.value || '',
-                fuente: document.getElementById('contaminacion-fuente')?.value || ''
-            },
-            vida_barrio: {
-                puntuacion: parseInt(document.getElementById('vida_barrio-puntuacion')?.value) || 0,
-                descripcion: document.getElementById('vida_barrio-descripcion')?.value || '',
-                bares: document.getElementById('vida_barrio-bares')?.value || '',
-                cultura: document.getElementById('vida_barrio-cultura')?.value || ''
-            },
-            servicios_financieros: {
-                puntuacion: parseInt(document.getElementById('servicios_financieros-puntuacion')?.value) || 0,
-                descripcion: document.getElementById('servicios_financieros-descripcion')?.value || '',
-                bancos: document.getElementById('servicios_financieros-bancos')?.value || '',
-                cajeros: document.getElementById('servicios_financieros-cajeros')?.value || ''
-            }
-        }
+        perfil_barrio: resumen,
+        conclusion: conclusion,
+        puntuacion_general: puntuacion_general,
+        transporte_publico: transporte_puntuacion,
+        transporte_descripcion: transporte_descripcion,
+        transporte_estaciones: transporte_estaciones,
+        transporte_colectivos: transporte_colectivos,
+        comercio_servicios: comercio_puntuacion,
+        comercio_descripcion: comercio_descripcion,
+        comercio_supermercados: comercio_supermercados,
+        comercio_centros: comercio_centros,
+        seguridad: seguridad_puntuacion,
+        seguridad_descripcion: seguridad_descripcion,
+        seguridad_comisaria: seguridad_comisaria,
+        educacion: educacion_puntuacion,
+        educacion_descripcion: educacion_descripcion,
+        educacion_escuelas: educacion_escuelas,
+        educacion_universidades: educacion_universidades,
+        salud: salud_puntuacion,
+        salud_descripcion: salud_descripcion,
+        salud_hospitales: salud_hospitales,
+        salud_centros: salud_centros,
+        espacios_verdes: espacios_verdes_puntuacion,
+        espacios_verdes_descripcion: espacios_verdes_descripcion,
+        espacios_verdes_parques: espacios_verdes_parques,
+        contaminacion: contaminacion_puntuacion,
+        contaminacion_descripcion: contaminacion_descripcion,
+        contaminacion_ruido: contaminacion_ruido,
+        contaminacion_fuente: contaminacion_fuente,
+        vida_barrio: vida_barrio_puntuacion,
+        vida_barrio_descripcion: vida_barrio_descripcion,
+        vida_barrio_bares: vida_barrio_bares,
+        vida_barrio_cultura: vida_barrio_cultura,
+        gastronomia: gastronomia_puntuacion,
+        gastronomia_descripcion: gastronomia_descripcion,
+        gastronomia_restaurantes: gastronomia_restaurantes,
+        gastronomia_zonas: gastronomia_zonas,
+        servicios_financieros: servicios_financieros_puntuacion,
+        servicios_financieros_descripcion: servicios_financieros_descripcion,
+        servicios_financieros_bancos: servicios_financieros_bancos,
+        servicios_financieros_cajeros: servicios_financieros_cajeros
     };
+    
+    console.log('📋 collectFormData retornando:', data);
+    return data;
 }
 
 /**
