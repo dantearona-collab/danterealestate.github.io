@@ -3,7 +3,7 @@ import google.generativeai as genai
 from typing import Optional, Dict, Any, List
 
 # ✅ API KEY DE GEMINI - CONFIGURADA
-GEMINI_API_KEY = "AIzaSyC5Q_zOkU3fEWPL4lCvTNXL4Em18nJ9Zkk"
+GEMINI_API_KEY = "AIzaSyAoC9RD4HPE7l5wY8RcnMHS7F1BeXj7ea8"
 
 # ✅ CONFIGURACIÓN GLOBAL
 print("=" * 50)
