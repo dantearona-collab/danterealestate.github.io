@@ -1498,17 +1498,26 @@ function toggleAdminMode() {
     AppState.isEditing = !AppState.isEditing;
     const badge = document.getElementById('edit-badge');
     const toolbar = document.getElementById('admin-toolbar');
+    const editBtn = document.getElementById('btn-edit-toggle');
     const inputs = document.querySelectorAll('#editor-form input, #editor-form textarea, #editor-form select');
     
     if (AppState.isEditing) {
         if (badge) badge.textContent = 'Editando';
         if (badge) badge.classList.add('editing');
         if (toolbar) toolbar.classList.remove('hidden');
+        if (editBtn) {
+            editBtn.innerHTML = '<i class="fas fa-times"></i> ❌ Cancelar';
+            editBtn.classList.add('cancel-btn');
+        }
         inputs.forEach(input => input.disabled = false);
     } else {
         if (badge) badge.textContent = 'Solo lectura';
         if (badge) badge.classList.remove('editing');
         if (toolbar) toolbar.classList.add('hidden');
+        if (editBtn) {
+            editBtn.innerHTML = '<i class="fas fa-edit"></i> ✏️ Editar';
+            editBtn.classList.remove('cancel-btn');
+        }
         inputs.forEach(input => input.disabled = true);
     }
     

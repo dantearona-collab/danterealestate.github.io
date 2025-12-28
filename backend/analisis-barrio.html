@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestor de Barrios - Dante Propiedades</title>
-    <link rel="stylesheet" href="analisis-barrio.css?v=20241228-0745">
+    <link rel="stylesheet" href="analisis-barrio.css?v=20241229-0420">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -78,6 +78,9 @@
                         <div class="card-header">
                             <h2>📝 Datos del Barrio</h2>
                             <span class="edit-badge" id="edit-badge">Solo lectura</span>
+                            <button class="edit-btn" onclick="toggleAdminMode()" id="btn-edit-toggle">
+                                <i class="fas fa-edit"></i> ✏️ Editar
+                            </button>
                         </div>
                         <div class="card-body">
                             <!-- Sección de edición -->
