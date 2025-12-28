@@ -120,6 +120,15 @@ const ApiClient = {
     },
 
     /**
+     * Regenera los datos de un barrio usando IA
+     */
+    async regenerateBarrio(nombre) {
+        return this.request(`/api/barrios/${encodeURIComponent(nombre)}/regenerate`, {
+            method: 'POST'
+        });
+    },
+
+    /**
      * Genera análisis de entorno usando IA
      */
     async generateAIContanalysis(zone, forceRefresh = false) {
@@ -1483,22 +1492,35 @@ async function regenerateWithAI() {
     
     try {
         // Mostrar overlay de carga
-        showLoadingOverlay('Generando análisis con IA', `Actualizando datos de ${nombre}...`);
+        UIRenderer.showLoading('Generando análisis con IA...');
         
-        const newData = await ApiClient.createBarrioWithAI(nombre);
+        // Usar el endpoint de regeneración
+        const response = await ApiClient.regenerateBarrio(nombre);
         
-        console.log('✨ Datos regenerados con IA:', newData);
+        console.log('✨ Datos regenerados con IA:', response);
         
-        // Cargar datos nuevos
-        loadBarrioData(newData);
-        
-        alert('Datos regenerados correctamente');
+        if (response.success) {
+            // Actualizar el estado con los nuevos datos
+            AppState.currentBarrio = {
+                nombre: response.data.nombre || nombre,
+                ...response.data,
+                generado_por_ia: true,
+                fecha_actualizacion: response.fecha_actualizacion
+            };
+            
+            // Recargar el formulario con los nuevos datos
+            UIRenderer.populateForm(AppState.currentBarrio);
+            
+            alert('Datos regenerados correctamente');
+        } else {
+            throw new Error(response.message || 'Error al regenerar');
+        }
         
     } catch (error) {
         console.error('Error regenerando:', error);
         alert('Error al regenerar: ' + error.message);
     } finally {
-        hideLoadingOverlay();
+        UIRenderer.hideLoading();
         if (regenerateBtn) {
             regenerateBtn.innerHTML = '<i class="fas fa-magic"></i> Regenerar con IA';
             regenerateBtn.disabled = false;
