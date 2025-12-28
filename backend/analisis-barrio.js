@@ -1255,6 +1255,13 @@ async function initApp() {
     // Deshabilitar campos inicialmente
     UIRenderer.updateFormState(false);
     
+    // ✅ HABILITAR BOTÓN REGENERAR CON IA AL INICIO
+    const regenerateBtn = document.getElementById('regenerate-btn');
+    if (regenerateBtn) {
+        regenerateBtn.disabled = false;
+        console.log('✅ Botón Regenerar con IA habilitado');
+    }
+    
     // Cargar lista de barrios si existe el endpoint
     try {
         const barrios = await ApiClient.getAllBarrios();
