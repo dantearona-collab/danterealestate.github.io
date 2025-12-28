@@ -892,9 +892,14 @@ const EventHandlers = {
             console.log('✅ Respuesta del API:', response);
             
             if (response.success) {
+                // Extraer las propiedades de response.data al nivel superior
+                const data = response.data;
                 AppState.currentBarrio = {
-                    nombre: response.nombre,
-                    ...response.data,
+                    nombre: response.nombre || data?.nombre || '',
+                    resumen: data?.resumen || '',
+                    conclusion: data?.conclusion || '',
+                    categorias: data?.categorias || {},
+                    puntuacion_general: data?.puntuacion_general || 50,
                     generado_por_ia: response.generado_por_ia,
                     fecha_actualizacion: response.fecha_actualizacion
                 };
@@ -1427,8 +1432,13 @@ async function initApp() {
     
     // Cargar lista de barrios si existe el endpoint
     try {
-        const barrios = await ApiClient.getAllBarrios();
-        console.log(`✅ Barrios cargados: ${barrios.length} registros`);
+        const response = await ApiClient.getAllBarrios();
+        if (response && response.barrios) {
+            AppState.searchResults = response.barrios;
+            console.log(`✅ Barrios cargados: ${response.barrios.length} registros`);
+        } else {
+            console.log('✅ Barrios cargados (formato diferente)');
+        }
     } catch (error) {
         console.warn('No se pudieron cargar los barrios:', error.message);
     }
