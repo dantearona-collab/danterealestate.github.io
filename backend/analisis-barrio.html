@@ -85,6 +85,12 @@
                                 <!-- Resumen General -->
                                 <div class="editor-section">
                                     <h3>Resumen General</h3>
+                                    <div class="form-row">
+                                        <div class="form-group" style="flex: 0 0 150px;">
+                                            <label>Puntuación General (0-100)</label>
+                                            <input type="number" id="barrio-puntuacion" min="0" max="100" onchange="markAsChanged()">
+                                        </div>
+                                    </div>
                                     <div class="form-group">
                                         <label>Perfil del Barrio</label>
                                         <textarea id="edit-resumen" rows="3" placeholder="Breve descripción del barrio..." onchange="markAsChanged()"></textarea>
@@ -568,6 +574,6 @@
         <p class="footer-note">Los datos se almacenan en SQLite y pueden regenerarse con IA</p>
     </footer>
 
-    <script src="analisis-barrio.js?v=20241228-0815"></script>
+    <script src="analisis-barrio.js?v=20241228-0830"></script>
 </body>
 </html>

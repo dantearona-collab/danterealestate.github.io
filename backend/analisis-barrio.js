@@ -267,75 +267,102 @@ const UIRenderer = {
         const currentBarrio = document.getElementById('current-barrio-name');
         if (currentBarrio) currentBarrio.textContent = barrio.nombre || 'Unknown';
         
-        // Campo de resumen
+        // Campo de resumen y conclusión
         this.setFieldValue('edit-resumen', barrio.resumen);
-        
-        // Campo de conclusión
         this.setFieldValue('edit-conclusion', barrio.conclusion);
         
+        // Campo de puntuación general (si existe el campo)
+        const puntuacionGeneral = barrio.puntuacion_general || 
+                                  (barrio.data && barrio.data.puntuacion_general) || 50;
+        const barrioPuntuacion = document.getElementById('barrio-puntuacion');
+        if (barrioPuntuacion) {
+            barrioPuntuacion.value = puntuacionGeneral;
+        }
+        
         // Cargar categorías
-        const categorias = barrio.categorias || {};
+        const categorias = barrio.categorias || barrio.data?.categorias || {};
         
         // Transporte
-        this.setScoreField('transporte', categorias.transporte);
-        this.setFieldValue('transporte-puntuacion', categorias.transporte?.puntuacion);
-        this.setFieldValue('transporte-descripcion', categorias.transporte?.descripcion);
-        this.setFieldValue('transporte-estaciones', categorias.transporte?.estaciones);
-        this.setFieldValue('transporte-colectivos', categorias.transporte?.colectivos);
+        const transporte = categorias.transporte || {};
+        this.setScoreField('transporte', transporte.puntuacion);
+        this.setFieldValue('transporte-puntuacion', transporte.puntuacion);
+        this.setFieldValue('transporte-descripcion', transporte.descripcion);
+        this.setFieldValue('transporte-estaciones', transporte.estaciones);
+        this.setFieldValue('transporte-colectivos', transporte.colectivos);
         
         // Comercio
-        this.setScoreField('comercio', categorias.comercio);
-        this.setFieldValue('comercio-puntuacion', categorias.comercio?.puntuacion);
-        this.setFieldValue('comercio-descripcion', categorias.comercio?.descripcion);
-        this.setFieldValue('comercio-supermercados', categorias.comercio?.supermercados);
-        this.setFieldValue('comercio-centros', categorias.comercio?.centros_comerciales);
+        const comercio = categorias.comercio || {};
+        this.setScoreField('comercio', comercio.puntuacion);
+        this.setFieldValue('comercio-puntuacion', comercio.puntuacion);
+        this.setFieldValue('comercio-descripcion', comercio.descripcion);
+        this.setFieldValue('comercio-supermercados', comercio.supermercados);
+        this.setFieldValue('comercio-centros', comercio.centros_comerciales);
         
         // Seguridad
-        this.setScoreField('seguridad', categorias.seguridad);
-        this.setFieldValue('seguridad-puntuacion', categorias.seguridad?.puntuacion);
-        this.setFieldValue('seguridad-descripcion', categorias.seguridad?.descripcion);
-        this.setFieldValue('seguridad-comisaria', categorias.seguridad?.comisaria);
+        const seguridad = categorias.seguridad || {};
+        this.setScoreField('seguridad', seguridad.puntuacion);
+        this.setFieldValue('seguridad-puntuacion', seguridad.puntuacion);
+        this.setFieldValue('seguridad-descripcion', seguridad.descripcion);
+        this.setFieldValue('seguridad-comisaria', seguridad.comisaria);
         
         // Educación
-        this.setScoreField('educacion', categorias.educacion);
-        this.setFieldValue('educacion-puntuacion', categorias.educacion?.puntuacion);
-        this.setFieldValue('educacion-descripcion', categorias.educacion?.descripcion);
-        this.setFieldValue('educacion-escuelas', categorias.educacion?.escuelas);
-        this.setFieldValue('educacion-universidades', categorias.educacion?.universidades);
+        const educacion = categorias.educacion || {};
+        this.setScoreField('educacion', educacion.puntuacion);
+        this.setFieldValue('educacion-puntuacion', educacion.puntuacion);
+        this.setFieldValue('educacion-descripcion', educacion.descripcion);
+        this.setFieldValue('educacion-escuelas', educacion.escuelas);
+        this.setFieldValue('educacion-universidades', educacion.universidades);
         
         // Salud
-        this.setScoreField('salud', categorias.salud);
-        this.setFieldValue('salud-puntuacion', categorias.salud?.puntuacion);
-        this.setFieldValue('salud-descripcion', categorias.salud?.descripcion);
-        this.setFieldValue('salud-hospitales', categorias.salud?.hospitales);
-        this.setFieldValue('salud-centros', categorias.salud?.centros_salud);
+        const salud = categorias.salud || {};
+        this.setScoreField('salud', salud.puntuacion);
+        this.setFieldValue('salud-puntuacion', salud.puntuacion);
+        this.setFieldValue('salud-descripcion', salud.descripcion);
+        this.setFieldValue('salud-hospitales', salud.hospitales);
+        this.setFieldValue('salud-centros', salud.centros_salud);
         
         // Espacios Verdes
-        this.setScoreField('espacios_verdes', categorias.espacios_verdes);
-        this.setFieldValue('espacios_verdes-puntuacion', categorias.espacios_verdes?.puntuacion);
-        this.setFieldValue('espacios_verdes-descripcion', categorias.espacios_verdes?.descripcion);
-        this.setFieldValue('espacios_verdes-parques', categorias.espacios_verdes?.parques);
+        const espaciosVerdes = categorias.espacios_verdes || {};
+        this.setScoreField('espacios_verdes', espaciosVerdes.puntuacion);
+        this.setFieldValue('espacios_verdes-puntuacion', espaciosVerdes.puntuacion);
+        this.setFieldValue('espacios_verdes-descripcion', espaciosVerdes.descripcion);
+        this.setFieldValue('espacios_verdes-parques', espaciosVerdes.parques);
         
         // Contaminación
-        this.setScoreField('contaminacion', categorias.contaminacion);
-        this.setFieldValue('contaminacion-puntuacion', categorias.contaminacion?.puntuacion);
-        this.setFieldValue('contaminacion-descripcion', categorias.contaminacion?.descripcion);
-        this.setFieldValue('contaminacion-ruido', categorias.contaminacion?.nivel_ruido);
-        this.setFieldValue('contaminacion-fuente', categorias.contaminacion?.fuente);
+        const contaminacion = categorias.contaminacion || {};
+        this.setScoreField('contaminacion', contaminacion.puntuacion);
+        this.setFieldValue('contaminacion-puntuacion', contaminacion.puntuacion);
+        this.setFieldValue('contaminacion-descripcion', contaminacion.descripcion);
+        this.setFieldValue('contaminacion-ruido', contaminacion.nivel_ruido);
+        this.setFieldValue('contaminacion-fuente', contaminacion.fuente);
         
         // Vida del Barrio
-        this.setScoreField('vida_barrio', categorias.vida_barrio);
-        this.setFieldValue('vida_barrio-puntuacion', categorias.vida_barrio?.puntuacion);
-        this.setFieldValue('vida_barrio-descripcion', categorias.vida_barrio?.descripcion);
-        this.setFieldValue('vida_barrio-bares', categorias.vida_barrio?.bares);
-        this.setFieldValue('vida_barrio-cultura', categorias.vida_barrio?.cultura);
+        const vidaBarrio = categorias.vida_barrio || {};
+        this.setScoreField('vida_barrio', vidaBarrio.puntuacion);
+        this.setFieldValue('vida_barrio-puntuacion', vidaBarrio.puntuacion);
+        this.setFieldValue('vida_barrio-descripcion', vidaBarrio.descripcion);
+        this.setFieldValue('vida_barrio-bares', vidaBarrio.bares);
+        this.setFieldValue('vida_barrio-cultura', vidaBarrio.cultura);
+        
+        // Gastronomía
+        const gastronomia = categorias.gastronomia || {};
+        this.setScoreField('gastronomia', gastronomia.puntuacion);
+        this.setFieldValue('gastronomia-puntuacion', gastronomia.puntuacion);
+        this.setFieldValue('gastronomia-descripcion', gastronomia.descripcion);
+        this.setFieldValue('gastronomia-restaurantes', gastronomia.restaurantes_destacados);
+        this.setFieldValue('gastronomia-zonas', gastronomia.zonas_gastronomicas);
         
         // Servicios Financieros
-        this.setScoreField('servicios_financieros', categorias.servicios_financieros);
-        this.setFieldValue('servicios_financieros-puntuacion', categorias.servicios_financieros?.puntuacion);
-        this.setFieldValue('servicios_financieros-descripcion', categorias.servicios_financieros?.descripcion);
-        this.setFieldValue('servicios_financieros-bancos', categorias.servicios_financieros?.bancos);
-        this.setFieldValue('servicios_financieros-cajeros', categorias.servicios_financieros?.cajeros);
+        const serviciosFinancieros = categorias.servicios_financieros || {};
+        this.setScoreField('servicios_financieros', serviciosFinancieros.puntuacion);
+        this.setFieldValue('servicios_financieros-puntuacion', serviciosFinancieros.puntuacion);
+        this.setFieldValue('servicios_financieros-descripcion', serviciosFinancieros.descripcion);
+        this.setFieldValue('servicios_financieros-bancos', serviciosFinancieros.bancos);
+        this.setFieldValue('servicios_financieros-cajeros', serviciosFinancieros.cajeros);
+        
+        // Actualizar estado de IA y fecha
+        this.updateAIStatus(barrio);
+        this.updateLastUpdated(barrio);
         
         // Actualizar vista previa
         this.updatePreview(barrio);
@@ -1047,8 +1074,10 @@ const EventHandlers = {
             let response;
             
             if (AppState.currentBarrio) {
-                // Actualizar barrio existente
-                response = await ApiClient.updateBarrio(AppState.currentBarrio.nombre, formData);
+                // Actualizar barrio existente - convertir al formato del backend
+                const updateData = this.convertToBackendFormat(formData);
+                console.log('📤 Enviando datos de actualización:', updateData);
+                response = await ApiClient.updateBarrio(AppState.currentBarrio.nombre, updateData);
                 Utils.showToast('Barrio actualizado correctamente', 'success');
             } else {
                 // Crear nuevo barrio
@@ -1070,6 +1099,77 @@ const EventHandlers = {
         } finally {
             UIRenderer.hideLoading();
         }
+    },
+
+    /**
+     * Convierte los datos del formulario al formato esperado por el backend
+     * El backend espera: {resumen, conclusion, categorias: {transporte: {...}, comercio: {...}, etc.}}
+     */
+    convertToBackendFormat(formData) {
+        return {
+            resumen_general: formData.perfil_barrio || '',
+            conclusion: formData.conclusion || '',
+            puntuacion_general: formData.puntuacion_general || 50,
+            transporte: {
+                puntuacion: formData.transporte_publico || 50,
+                descripcion: formData.transporte_descripcion || '',
+                estaciones_cercanas: formData.transporte_estaciones ? formData.transporte_estaciones.split(',').map(s => s.trim()) : [],
+                lineas_colectivo: formData.transporte_colectivos ? formData.transporte_colectivos.split(',').map(s => s.trim()) : []
+            },
+            comercio: {
+                puntuacion: formData.comercio_servicios || 50,
+                descripcion: formData.comercio_descripcion || '',
+                supermercados: formData.comercio_supermercados ? formData.comercio_supermercados.split(',').map(s => s.trim()) : [],
+                centros_comerciales: formData.comercio_centros ? formData.comercio_centros.split(',').map(s => s.trim()) : []
+            },
+            seguridad: {
+                puntuacion: formData.seguridad || 50,
+                descripcion: formData.seguridad_descripcion || '',
+                comisaria_cercana: formData.seguridad_comisaria || '',
+                rating_seguridad: String(formData.seguridad_rating || '5')
+            },
+            educacion: {
+                puntuacion: formData.educacion || 50,
+                descripcion: formData.educacion_descripcion || '',
+                escuelas: formData.educacion_escuelas ? formData.educacion_escuelas.split(',').map(s => s.trim()) : [],
+                universidades: formData.educacion_universidades ? formData.educacion_universidades.split(',').map(s => s.trim()) : []
+            },
+            salud: {
+                puntuacion: formData.salud || 50,
+                descripcion: formData.salud_descripcion || '',
+                hospitales: formData.salud_hospitales ? formData.salud_hospitales.split(',').map(s => s.trim()) : [],
+                centros_salud: formData.salud_centros ? formData.salud_centros.split(',').map(s => s.trim()) : []
+            },
+            espacios_verdes: {
+                puntuacion: formData.espacios_verdes || 50,
+                descripcion: formData.espacios_verdes_descripcion || '',
+                parques: formData.espacios_verdes_parques ? formData.espacios_verdes_parques.split(',').map(s => s.trim()) : []
+            },
+            contaminacion: {
+                puntuacion: formData.contaminacion || 50,
+                descripcion: formData.contaminacion_descripcion || '',
+                nivel_ruido: formData.contaminacion_ruido || 'Medio',
+                principal_fuente: formData.contaminacion_fuente || ''
+            },
+            vida_barrio: {
+                puntuacion: formData.vida_barrio || 50,
+                descripcion: formData.vida_barrio_descripcion || '',
+                bares_restaurantes: formData.vida_barrio_bares ? formData.vida_barrio_bares.split(',').map(s => s.trim()) : [],
+                cultura: formData.vida_barrio_cultura ? formData.vida_barrio_cultura.split(',').map(s => s.trim()) : []
+            },
+            gastronomia: {
+                puntuacion: formData.gastronomia || 50,
+                descripcion: formData.gastronomia_descripcion || '',
+                restaurantes_destacados: formData.gastronomia_restaurantes ? formData.gastronomia_restaurantes.split(',').map(s => s.trim()) : [],
+                zonas_gastronomicas: formData.gastronomia_zonas ? formData.gastronomia_zonas.split(',').map(s => s.trim()) : []
+            },
+            servicios_financieros: {
+                puntuacion: formData.servicios_financieros || 50,
+                descripcion: formData.servicios_financieros_descripcion || '',
+                bancos: formData.servicios_financieros_bancos ? formData.servicios_financieros_bancos.split(',').map(s => s.trim()) : [],
+                cajeros_automaticos: formData.servicios_financieros_cajeros ? formData.servicios_financieros_cajeros.split(',').map(s => s.trim()) : []
+            }
+        };
     },
 
     /**
@@ -1175,20 +1275,74 @@ const EventHandlers = {
 
     /**
      * Recoge los datos del formulario
+     * Mapea los IDs del HTML al formato interno
      */
     collectFormData() {
         return {
+            // Datos básicos
             nombre: document.getElementById('barrio-nombre')?.value?.trim() || '',
+            conclusion: document.getElementById('edit-conclusion')?.value?.trim() || '',
             puntuacion_general: this.parseScore(document.getElementById('barrio-puntuacion')?.value),
-            perfil_barrio: document.getElementById('barrio-descripcion')?.value?.trim() || '',
-            transporte_publico: this.parseScore(document.getElementById('barrio-transporte')?.value),
-            educacion: this.parseScore(document.getElementById('barrio-educacion')?.value),
-            salud: this.parseScore(document.getElementById('barrio-salud')?.value),
-            comercio_servicios: this.parseScore(document.getElementById('barrio-comercio')?.value),
-            gastronomia: this.parseScore(document.getElementById('barrio-gastronomia')?.value),
-            recreacion_cultura: this.parseScore(document.getElementById('barrio-recreacion')?.value),
-            seguridad: this.parseScore(document.getElementById('barrio-seguridad')?.value),
-            servicios_financieros: this.parseScore(document.getElementById('barrio-servicios-financieros')?.value)
+            perfil_barrio: document.getElementById('edit-resumen')?.value?.trim() || '',
+            
+            // Transporte
+            transporte_publico: this.parseScore(document.getElementById('transporte-puntuacion')?.value),
+            transporte_descripcion: document.getElementById('transporte-descripcion')?.value?.trim() || '',
+            transporte_estaciones: document.getElementById('transporte-estaciones')?.value?.trim() || '',
+            transporte_colectivos: document.getElementById('transporte-colectivos')?.value?.trim() || '',
+            
+            // Comercio
+            comercio_servicios: this.parseScore(document.getElementById('comercio-puntuacion')?.value),
+            comercio_descripcion: document.getElementById('comercio-descripcion')?.value?.trim() || '',
+            comercio_supermercados: document.getElementById('comercio-supermercados')?.value?.trim() || '',
+            comercio_centros: document.getElementById('comercio-centros')?.value?.trim() || '',
+            
+            // Seguridad
+            seguridad: this.parseScore(document.getElementById('seguridad-puntuacion')?.value),
+            seguridad_descripcion: document.getElementById('seguridad-descripcion')?.value?.trim() || '',
+            seguridad_comisaria: document.getElementById('seguridad-comisaria')?.value?.trim() || '',
+            seguridad_rating: this.parseScore(document.getElementById('seguridad-rating')?.value),
+            
+            // Educación
+            educacion: this.parseScore(document.getElementById('educacion-puntuacion')?.value),
+            educacion_descripcion: document.getElementById('educacion-descripcion')?.value?.trim() || '',
+            educacion_escuelas: document.getElementById('educacion-escuelas')?.value?.trim() || '',
+            educacion_universidades: document.getElementById('educacion-universidades')?.value?.trim() || '',
+            
+            // Salud
+            salud: this.parseScore(document.getElementById('salud-puntuacion')?.value),
+            salud_descripcion: document.getElementById('salud-descripcion')?.value?.trim() || '',
+            salud_hospitales: document.getElementById('salud-hospitales')?.value?.trim() || '',
+            salud_centros: document.getElementById('salud-centros')?.value?.trim() || '',
+            
+            // Espacios Verdes
+            espacios_verdes: this.parseScore(document.getElementById('espacios_verdes-puntuacion')?.value),
+            espacios_verdes_descripcion: document.getElementById('espacios_verdes-descripcion')?.value?.trim() || '',
+            espacios_verdes_parques: document.getElementById('espacios_verdes-parques')?.value?.trim() || '',
+            
+            // Contaminación
+            contaminacion: this.parseScore(document.getElementById('contaminacion-puntuacion')?.value),
+            contaminacion_descripcion: document.getElementById('contaminacion-descripcion')?.value?.trim() || '',
+            contaminacion_ruido: document.getElementById('contaminacion-ruido')?.value?.trim() || '',
+            contaminacion_fuente: document.getElementById('contaminacion-fuente')?.value?.trim() || '',
+            
+            // Vida del Barrio
+            vida_barrio: this.parseScore(document.getElementById('vida_barrio-puntuacion')?.value),
+            vida_barrio_descripcion: document.getElementById('vida_barrio-descripcion')?.value?.trim() || '',
+            vida_barrio_bares: document.getElementById('vida_barrio-bares')?.value?.trim() || '',
+            vida_barrio_cultura: document.getElementById('vida_barrio-cultura')?.value?.trim() || '',
+            
+            // Gastronomía
+            gastronomia: this.parseScore(document.getElementById('gastronomia-puntuacion')?.value),
+            gastronomia_descripcion: document.getElementById('gastronomia-descripcion')?.value?.trim() || '',
+            gastronomia_restaurantes: document.getElementById('gastronomia-restaurantes')?.value?.trim() || '',
+            gastronomia_zonas: document.getElementById('gastronomia-zonas')?.value?.trim() || '',
+            
+            // Servicios Financieros
+            servicios_financieros: this.parseScore(document.getElementById('servicios_financieros-puntuacion')?.value),
+            servicios_financieros_descripcion: document.getElementById('servicios_financieros-descripcion')?.value?.trim() || '',
+            servicios_financieros_bancos: document.getElementById('servicios_financieros-bancos')?.value?.trim() || '',
+            servicios_financieros_cajeros: document.getElementById('servicios_financieros-cajeros')?.value?.trim() || ''
         };
     },
 
