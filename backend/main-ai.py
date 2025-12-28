@@ -18,6 +18,19 @@ from pathlib import Path
 import sqlite3
 from datetime import datetime
 
+# ✅ CARGAR VARIABLES DE ENTORNO DESDE .env
+try:
+    from dotenv import load_dotenv
+    # Buscar archivo .env en la misma carpeta que main-ai.py
+    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
+    if os.path.exists(env_path):
+        load_dotenv(env_path)
+        print("✅ Variables de entorno cargadas desde .env")
+    else:
+        print("⚠️ Archivo .env no encontrado, usando variables del sistema")
+except ImportError:
+    print("⚠️ python-dotenv no instalado, usando variables del sistema")
+
 # Importar lógica de negocio
 from logic.database import (
     initialize_databases,
