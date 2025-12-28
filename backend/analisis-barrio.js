@@ -271,13 +271,10 @@ const UIRenderer = {
         this.setFieldValue('edit-resumen', barrio.resumen);
         this.setFieldValue('edit-conclusion', barrio.conclusion);
         
-        // Campo de puntuación general (si existe el campo)
+        // Campo de puntuación general (usar setFieldValue para manejar disabled)
         const puntuacionGeneral = barrio.puntuacion_general || 
                                   (barrio.data && barrio.data.puntuacion_general) || 50;
-        const barrioPuntuacion = document.getElementById('barrio-puntuacion');
-        if (barrioPuntuacion) {
-            barrioPuntuacion.value = puntuacionGeneral;
-        }
+        this.setFieldValue('barrio-puntuacion', puntuacionGeneral);
         
         // Cargar categorías
         const categorias = barrio.categorias || barrio.data?.categorias || {};
