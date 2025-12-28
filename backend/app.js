@@ -2946,6 +2946,7 @@ async function loadEnvironmentInfo(direccion, barrio) {
         const response = await fetch(`${API_BASE_URL}/api/barrios/${encodeURIComponent(barrio)}`);
         
         let environmentData;
+        let dataSource = 'unknown';
         
         if (response.ok) {
             const result = await response.json();
@@ -2954,12 +2955,14 @@ async function loadEnvironmentInfo(direccion, barrio) {
             if (result.success && result.data) {
                 // Transformar datos del formato backend al formato frontend
                 environmentData = transformBackendDataToFrontend(result.data, barrio, direccion, descripcion);
-                console.log('✅ Datos transformados correctamente desde el backend');
+                dataSource = 'backend';
+                console.log('✅✅ DATOS DESDE API REAL (backend) - Barrio:', barrio);
             } else {
                 throw new Error(result.detail || 'Datos del barrio no disponibles');
             }
         } else {
-            console.log('⚠️ Endpoint del backend no disponible, usando datos simulados');
+            console.log(`⚠️ Endpoint del backend no disponible (HTTP ${response.status}), usando datos simulados`);
+            console.log('⚠️⚠️ DATOS SIMULADOS (fallback) - Barrio:', barrio);
             
             // Si el endpoint falla, usar los datos simulados existentes
             const searchResults = await performParallelSearchesReal(
@@ -2978,8 +2981,16 @@ async function loadEnvironmentInfo(direccion, barrio) {
             );
             
             environmentData = processEnvironmentData(searchResults, direccion, barrio, ubicacionParaBusqueda, descripcion);
+            dataSource = 'simulated';
             console.log('✅ Datos simulados generados correctamente');
         }
+        
+        // Mostrar en consola la fuente de datos
+        console.log('═══════════════════════════════════════════════');
+        console.log(`📊 FUENTE DE DATOS: ${dataSource.toUpperCase()}`);
+        console.log(`🏢 Barrio: ${barrio}`);
+        console.log(`📅 Fecha: ${new Date().toLocaleString()}`);
+        console.log('═══════════════════════════════════════════════');
         
         // Mostrar resultados
         displayEnvironmentInfo(environmentData);
