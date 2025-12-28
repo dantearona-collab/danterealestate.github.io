@@ -212,6 +212,17 @@ const Utils = {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    },
+
+    /**
+     * Convierte un array a string separado por comas
+     */
+    arrayToString(arr) {
+        if (!arr) return '';
+        if (Array.isArray(arr)) {
+            return arr.join(', ');
+        }
+        return String(arr);
     }
 };
 
@@ -289,16 +300,16 @@ const UIRenderer = {
         this.setScoreField('transporte', transporte.puntuacion);
         this.setFieldValue('transporte-puntuacion', transporte.puntuacion);
         this.setFieldValue('transporte-descripcion', transporte.descripcion);
-        this.setFieldValue('transporte-estaciones', this.arrayToString(transporte.estaciones || transporte.estaciones_cercanas || []));
-        this.setFieldValue('transporte-colectivos', this.arrayToString(transporte.colectivos || transporte.lineas_colectivo || []));
+        this.setFieldValue('transporte-estaciones', Utils.arrayToString(transporte.estaciones || transporte.estaciones_cercanas || []));
+        this.setFieldValue('transporte-colectivos', Utils.arrayToString(transporte.colectivos || transporte.lineas_colectivo || []));
         
         // Comercio
         const comercio = categorias.comercio || barrioData.comercio || {};
         this.setScoreField('comercio', comercio.puntuacion);
         this.setFieldValue('comercio-puntuacion', comercio.puntuacion);
         this.setFieldValue('comercio-descripcion', comercio.descripcion);
-        this.setFieldValue('comercio-supermercados', this.arrayToString(comercio.supermercados || []));
-        this.setFieldValue('comercio-centros', this.arrayToString(comercio.centros_comerciales || comercio.centros || []));
+        this.setFieldValue('comercio-supermercados', Utils.arrayToString(comercio.supermercados || []));
+        this.setFieldValue('comercio-centros', Utils.arrayToString(comercio.centros_comerciales || comercio.centros || []));
         
         // Seguridad
         const seguridad = categorias.seguridad || barrioData.seguridad || {};
@@ -312,23 +323,23 @@ const UIRenderer = {
         this.setScoreField('educacion', educacion.puntuacion);
         this.setFieldValue('educacion-puntuacion', educacion.puntuacion);
         this.setFieldValue('educacion-descripcion', educacion.descripcion);
-        this.setFieldValue('educacion-escuelas', this.arrayToString(educacion.escuelas || []));
-        this.setFieldValue('educacion-universidades', this.arrayToString(educacion.universidades || []));
+        this.setFieldValue('educacion-escuelas', Utils.arrayToString(educacion.escuelas || []));
+        this.setFieldValue('educacion-universidades', Utils.arrayToString(educacion.universidades || []));
         
         // Salud
         const salud = categorias.salud || barrioData.salud || {};
         this.setScoreField('salud', salud.puntuacion);
         this.setFieldValue('salud-puntuacion', salud.puntuacion);
         this.setFieldValue('salud-descripcion', salud.descripcion);
-        this.setFieldValue('salud-hospitales', this.arrayToString(salud.hospitales || []));
-        this.setFieldValue('salud-centros', this.arrayToString(salud.centros_salud || salud.centros || []));
+        this.setFieldValue('salud-hospitales', Utils.arrayToString(salud.hospitales || []));
+        this.setFieldValue('salud-centros', Utils.arrayToString(salud.centros_salud || salud.centros || []));
         
         // Espacios Verdes
         const espaciosVerdes = categorias.espacios_verdes || barrioData.espacios_verdes || {};
         this.setScoreField('espacios_verdes', espaciosVerdes.puntuacion);
         this.setFieldValue('espacios_verdes-puntuacion', espaciosVerdes.puntuacion);
         this.setFieldValue('espacios_verdes-descripcion', espaciosVerdes.descripcion);
-        this.setFieldValue('espacios_verdes-parques', this.arrayToString(espaciosVerdes.parques || []));
+        this.setFieldValue('espacios_verdes-parques', Utils.arrayToString(espaciosVerdes.parques || []));
         
         // Contaminación
         const contaminacion = categorias.contaminacion || barrioData.contaminacion || {};
@@ -343,24 +354,24 @@ const UIRenderer = {
         this.setScoreField('vida_barrio', vidaBarrio.puntuacion);
         this.setFieldValue('vida_barrio-puntuacion', vidaBarrio.puntuacion);
         this.setFieldValue('vida_barrio-descripcion', vidaBarrio.descripcion);
-        this.setFieldValue('vida_barrio-bares', this.arrayToString(vidaBarrio.bares || vidaBarrio.bares_restaurantes || []));
-        this.setFieldValue('vida_barrio-cultura', this.arrayToString(vidaBarrio.cultura || []));
+        this.setFieldValue('vida_barrio-bares', Utils.arrayToString(vidaBarrio.bares || vidaBarrio.bares_restaurantes || []));
+        this.setFieldValue('vida_barrio-cultura', Utils.arrayToString(vidaBarrio.cultura || []));
         
         // Gastronomía
         const gastronomia = categorias.gastronomia || barrioData.gastronomia || {};
         this.setScoreField('gastronomia', gastronomia.puntuacion);
         this.setFieldValue('gastronomia-puntuacion', gastronomia.puntuacion);
         this.setFieldValue('gastronomia-descripcion', gastronomia.descripcion);
-        this.setFieldValue('gastronomia-restaurantes', this.arrayToString(gastronomia.restaurantes || gastronomia.restaurantes_destacados || []));
-        this.setFieldValue('gastronomia-zonas', this.arrayToString(gastronomia.zonas || gastronomia.zonas_gastronomicas || []));
+        this.setFieldValue('gastronomia-restaurantes', Utils.arrayToString(gastronomia.restaurantes || gastronomia.restaurantes_destacados || []));
+        this.setFieldValue('gastronomia-zonas', Utils.arrayToString(gastronomia.zonas || gastronomia.zonas_gastronomicas || []));
         
         // Servicios Financieros
         const serviciosFinancieros = categorias.servicios_financieros || barrioData.servicios_financieros || {};
         this.setScoreField('servicios_financieros', serviciosFinancieros.puntuacion);
         this.setFieldValue('servicios_financieros-puntuacion', serviciosFinancieros.puntuacion);
         this.setFieldValue('servicios_financieros-descripcion', serviciosFinancieros.descripcion);
-        this.setFieldValue('servicios_financieros-bancos', this.arrayToString(serviciosFinancieros.bancos || []));
-        this.setFieldValue('servicios_financieros-cajeros', this.arrayToString(serviciosFinancieros.cajeros || serviciosFinancieros.cajeros_automaticos || []));
+        this.setFieldValue('servicios_financieros-bancos', Utils.arrayToString(serviciosFinancieros.bancos || []));
+        this.setFieldValue('servicios_financieros-cajeros', Utils.arrayToString(serviciosFinancieros.cajeros || serviciosFinancieros.cajeros_automaticos || []));
         
         // Actualizar estado de IA y fecha
         this.updateAIStatus(barrio);
@@ -370,17 +381,6 @@ const UIRenderer = {
         this.updatePreview(barrio);
         
         console.log('✅ Formulario populado correctamente');
-    }
-    
-    /**
-     * Convierte un array a string separado por comas
-     */
-    arrayToString(arr) {
-        if (!arr) return '';
-        if (Array.isArray(arr)) {
-            return arr.join(', ');
-        }
-        return String(arr);
     },
 
     /**
