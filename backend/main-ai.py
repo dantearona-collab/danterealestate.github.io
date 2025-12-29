@@ -1742,6 +1742,7 @@ def transformar_a_formatofrontend(data: dict, nombre: str) -> dict:
         'nombre': nombre,
         'resumen': data.get('resumen_general', '') or data.get('resumen', ''),
         'conclusion': data.get('conclusion', ''),
+        'puntuacion_general': data.get('puntuacion_general', 50),
         'categorias': categorias
     }
 
