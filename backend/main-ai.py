@@ -1626,7 +1626,10 @@ def transformar_a_formatofrontend(data: dict, nombre: str) -> dict:
     """
     Transforma los datos del formato interno al formato esperado por el frontend.
     El frontend espera: resumen, conclusion, categorias.transporte.puntuacion, etc.
-    El backend almacena: resumen_general, conclusion, transporte.puntuacion, etc.
+
+    El backend puede almacenar dos formatos:
+    1. Formato flat (antiguo): transporte.puntuacion, comercio.puntuacion, etc. a nivel raíz
+    2. Formato nested (nuevo): categorias.transporte.puntuacion, categorias.comercio.puntuacion, etc.
     """
     if not data:
         return {
@@ -1635,98 +1638,106 @@ def transformar_a_formatofrontend(data: dict, nombre: str) -> dict:
             'conclusion': '',
             'categorias': {}
         }
-    
-    # Mapear los campos del formato backend al formato frontend
+
+    # Detectar si los datos están anidados bajo 'categorias'
+    # El frontend envía datos con estructura: { categorias: { transporte: {...}, comercio: {...} } }
+    if 'categorias' in data and isinstance(data['categorias'], dict):
+        # Nuevo formato nested: extraer las categorías de data.categorias
+        categorias_data = data['categorias']
+    else:
+        # Formato antiguo flat: las categorías están directamente en data
+        categorias_data = data
+
     categorias = {}
-    
+
     # Transporte
-    if 'transporte' in data:
-        t = data['transporte']
+    if 'transporte' in categorias_data:
+        t = categorias_data['transporte']
         categorias['transporte'] = {
             'puntuacion': t.get('puntuacion', 0),
             'descripcion': t.get('descripcion', ''),
             'estaciones': ', '.join(t.get('estaciones_cercanas', [])) if t.get('estaciones_cercanas') else t.get('estaciones', ''),
             'colectivos': ', '.join(t.get('lineas_colectivo', [])) if t.get('lineas_colectivo') else t.get('colectivos', '')
         }
-    
+
     # Comercio
-    if 'comercio' in data:
-        c = data['comercio']
+    if 'comercio' in categorias_data:
+        c = categorias_data['comercio']
         categorias['comercio'] = {
             'puntuacion': c.get('puntuacion', 0),
             'descripcion': c.get('descripcion', ''),
             'supermercados': ', '.join(c.get('supermercados', [])) if c.get('supermercados') else c.get('supermercados', ''),
             'centros_comerciales': ', '.join(c.get('centros_comerciales', [])) if c.get('centros_comerciales') else c.get('centros', '')
         }
-    
+
     # Seguridad
-    if 'seguridad' in data:
-        s = data['seguridad']
+    if 'seguridad' in categorias_data:
+        s = categorias_data['seguridad']
         categorias['seguridad'] = {
             'puntuacion': s.get('puntuacion', 0),
             'descripcion': s.get('descripcion', ''),
             'comisaria': s.get('comisaria_cercana', '') or s.get('comisaria', '')
         }
-    
+
     # Educación
-    if 'educacion' in data:
-        e = data['educacion']
+    if 'educacion' in categorias_data:
+        e = categorias_data['educacion']
         categorias['educacion'] = {
             'puntuacion': e.get('puntuacion', 0),
             'descripcion': e.get('descripcion', ''),
             'escuelas': ', '.join(e.get('escuelas', [])) if e.get('escuelas') else e.get('escuelas', ''),
             'universidades': ', '.join(e.get('universidades', [])) if e.get('universidades') else e.get('universidades', '')
         }
-    
+
     # Salud
-    if 'salud' in data:
-        s = data['salud']
+    if 'salud' in categorias_data:
+        s = categorias_data['salud']
         categorias['salud'] = {
             'puntuacion': s.get('puntuacion', 0),
             'descripcion': s.get('descripcion', ''),
             'hospitales': ', '.join(s.get('hospitales', [])) if s.get('hospitales') else s.get('hospitales', ''),
             'centros_salud': ', '.join(s.get('centros_salud', [])) if s.get('centros_salud') else s.get('centros', '')
         }
-    
+
     # Espacios Verdes
-    if 'espacios_verdes' in data:
-        e = data['espacios_verdes']
+    if 'espacios_verdes' in categorias_data:
+        e = categorias_data['espacios_verdes']
         categorias['espacios_verdes'] = {
             'puntuacion': e.get('puntuacion', 0),
             'descripcion': e.get('descripcion', ''),
             'parques': ', '.join(e.get('parques', [])) if e.get('parques') else e.get('parques', '')
         }
-    
+
     # Contaminación
-    if 'contaminacion' in data:
-        c = data['contaminacion']
+    if 'contaminacion' in categorias_data:
+        c = categorias_data['contaminacion']
         categorias['contaminacion'] = {
             'puntuacion': c.get('puntuacion', 0),
             'descripcion': c.get('descripcion', ''),
             'nivel_ruido': c.get('nivel_ruido', '') or c.get('ruido', ''),
             'fuente': c.get('principal_fuente', '') or c.get('fuente', '')
         }
-    
+
     # Vida del Barrio
-    if 'vida_barrio' in data:
-        v = data['vida_barrio']
+    if 'vida_barrio' in categorias_data:
+        v = categorias_data['vida_barrio']
         categorias['vida_barrio'] = {
             'puntuacion': v.get('puntuacion', 0),
             'descripcion': v.get('descripcion', ''),
             'bares': ', '.join(v.get('bares_restaurantes', [])) if v.get('bares_restaurantes') else v.get('bares', ''),
             'cultura': ', '.join(v.get('cultura', [])) if v.get('cultura') else v.get('cultura', '')
         }
-    
+
     # Servicios Financieros
-    if 'servicios_financieros' in data:
-        s = data['servicios_financieros']
+    if 'servicios_financieros' in categorias_data:
+        s = categorias_data['servicios_financieros']
         categorias['servicios_financieros'] = {
             'puntuacion': s.get('puntuacion', 0),
             'descripcion': s.get('descripcion', ''),
             'bancos': ', '.join(s.get('bancos', [])) if s.get('bancos') else s.get('bancos', ''),
             'cajeros': ', '.join(s.get('cajeros_automaticos', [])) if s.get('cajeros_automaticos') else s.get('cajeros', '')
         }
-    
+
     return {
         'nombre': nombre,
         'resumen': data.get('resumen_general', '') or data.get('resumen', ''),
