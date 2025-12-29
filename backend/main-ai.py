@@ -304,6 +304,59 @@ def _construir_data_cms(nombre: str, gastro_data: dict, financial_data: dict, lo
         '_fecha_migracion': datetime.now().isoformat()
     }
 
+# Inicializar base de datos de barrios
+init_barrios_db()
+
+# Importar módulo de scraping de mercado
+try:
+    from logic.scraper import ScrapingManager, MarketAnalyzer
+    SCRAPER_AVAILABLE = True
+    print("✅ Módulo de scraping disponible")
+except ImportError as e:
+    SCRAPER_AVAILABLE = False
+    print(f"⚠️ Módulo de scraping no disponible: {e}")
+
+# ✅ INICIALIZACIÓN Y CONFIGURACIÓN
+verificar_y_reparar_bd()
+CACHE_DURATION = 300  # 5 minutos para cache
+
+class Metrics:
+    def __init__(self):
+        self.requests_count = 0
+        self.successful_requests = 0
+        self.failed_requests = 0
+        self.gemini_calls = 0
+        self.search_queries = 0
+        self.start_time = time.time()
+    
+    def increment_requests(self): self.requests_count += 1
+    def increment_success(self): self.successful_requests += 1
+    def increment_failures(self): self.failed_requests += 1
+    def increment_gemini_calls(self): self.gemini_calls += 1
+    def increment_searches(self): self.search_queries += 1
+    def get_uptime(self): return time.time() - self.start_time
+
+metrics = Metrics()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("🔄 Iniciando ciclo de vida de la aplicación...")
+    initialize_databases()
+    init_environ_analysis_db()  # Inicializar BD de análisis de entorno
+    yield
+    print("✅ Finalizando ciclo de vida de la aplicación.")
+
+# ✅ APP PRINCIPAL
+app = FastAPI(
+    lifespan=lifespan,
+    title="Dante Propiedades API",
+    description="Backend para procesamiento de consultas y filtros de propiedades con IA.",
+    version="1.1.0"
+)
+
+# ============================================
+# ENDPOINTS DE ADMINISTRACIÓN Y MIGRACIÓN
+# ============================================
 
 @app.post("/api/admin/migrate-static-data")
 def ejecutar_migracion(request: dict = None):
@@ -354,105 +407,46 @@ def estado_migracion():
 # ENDPOINTS DE DATOS ESPECÍFICOS POR UBICACIÓN
 # ========================================
 
-@app.get("/api/location-specific/{nombre}")
-def obtener_datos_especificos(nombre: str):
+@app.get("/api/data/location-specific/{location_key}")
+def obtener_datos_ubicacion(location_key: str):
     """
-    Obtiene datos específicos detallados para una ubicación.
-    Estos datos incluyen direcciones reales, servicios específicos y características particulares.
+    Obtiene datos específicos para una ubicación desde la base de datos.
     
     Uso:
-    - GET /api/location-specific/pilar
-    - GET /api/location-specific/microcentro
+    - GET /api/data/location-specific/pilar
+    - GET /api/data/location-specific/nordelta
     """
-    nombre_lower = nombre.lower().strip()
-    
-    # Buscar coincidencia exacta o parcial
-    data = get_location_specific_info(nombre_lower)
-    
-    # Si es el default, verificar coincidencias parciales
-    if data == get_location_specific_info("default"):
-        for key in LOCATION_SPECIFIC_DATA:
-            if key in nombre_lower or nombre_lower in key:
-                data = LOCATION_SPECIFIC_DATA[key]
-                break
-    
-    return {
-        "success": True,
-        "location": nombre,
-        "data": data
-    }
+    try:
+        conn = get_barrios_db_connection()
+        cursor = conn.cursor()
+        
+        # Buscar coincidencia exacta
+        cursor.execute("SELECT data FROM barrios_data WHERE LOWER(nombre) = LOWER(?)", (location_key.lower(),))
+        result = cursor.fetchone()
+        
+        conn.close()
+        
+        if result:
+            data = json.loads(result['data'])
+            return {
+                "success": True,
+                "location": location_key,
+                "data": data
+            }
+        else:
+            # Retornar estructura vacía con las categorías
+            return {
+                "success": False,
+                "location": location_key,
+                "data": {},
+                "message": "No hay datos disponibles para esta ubicación"
+            }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
 
-
-@app.get("/api/location-specific")
-def listar_ubicaciones_disponibles():
-    """
-    Lista todas las ubicaciones que tienen datos específicos disponibles.
-    """
-    ubicaciones = []
-    
-    for key, value in LOCATION_SPECIFIC_DATA.items():
-        ubicaciones.append({
-            "key": key,
-            "name": key.replace("_", " ").title(),
-            "has_detailed_data": True
-        })
-    
-    return {
-        "success": True,
-        "total": len(ubicaciones),
-        "ubicaciones": ubicaciones
-    }
-
-
-# Inicializar base de datos de barrios
-init_barrios_db()
-
-# Importar módulo de scraping de mercado
-try:
-    from logic.scraper import ScrapingManager, MarketAnalyzer
-    SCRAPER_AVAILABLE = True
-    print("✅ Módulo de scraping disponible")
-except ImportError as e:
-    SCRAPER_AVAILABLE = False
-    print(f"⚠️ Módulo de scraping no disponible: {e}")
-
-# ✅ INICIALIZACIÓN Y CONFIGURACIÓN
-verificar_y_reparar_bd()
-CACHE_DURATION = 300  # 5 minutos para cache
-
-class Metrics:
-    def __init__(self):
-        self.requests_count = 0
-        self.successful_requests = 0
-        self.failed_requests = 0
-        self.gemini_calls = 0
-        self.search_queries = 0
-        self.start_time = time.time()
-    
-    def increment_requests(self): self.requests_count += 1
-    def increment_success(self): self.successful_requests += 1
-    def increment_failures(self): self.failed_requests += 1
-    def increment_gemini_calls(self): self.gemini_calls += 1
-    def increment_searches(self): self.search_queries += 1
-    def get_uptime(self): return time.time() - self.start_time
-
-metrics = Metrics()
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    print("🔄 Iniciando ciclo de vida de la aplicación...")
-    initialize_databases()
-    init_environ_analysis_db()  # Inicializar BD de análisis de entorno
-    yield
-    print("✅ Finalizando ciclo de vida de la aplicación.")
-
-# ✅ APP PRINCIPAL
-app = FastAPI(
-    lifespan=lifespan,
-    title="Dante Propiedades API",
-    description="Backend para procesamiento de consultas y filtros de propiedades con IA.",
-    version="1.1.0"
-)
 
 # Definir los orígenes permitidos para CORS
 origins = [
