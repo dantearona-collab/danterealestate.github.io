@@ -1940,3 +1940,82 @@ def get_financial_info(zone: str) -> Dict[str, Any]:
         "sucursales_bancarias": [],
         "otros_servicios": []
     }
+
+# ========================================
+# DATOS ESPECÍFICOS POR UBICACIÓN (desde app.js)
+# ========================================
+# Estos datos incluyen información detallada con direcciones reales,
+# servicios específicos y características particulares de cada barrio
+
+LOCATION_SPECIFIC_DATA = {
+    "pilar": {
+        "transporte": "En {location} tienes acceso a la Autopista Acceso Norte Ramal Pilar y Ruta 8. Líneas de colectivo específicas: Línea 57, Línea 510 (Pilar Bus S.A.), Línea 176. Conexiones con Ruta Bus S.A. hacia Moreno, Areco, y Cardales.",
+        "salud": "{location} cuenta con Hospital Universitario Austral (Juan Domingo Perón 1500, Derqui), Sanatorio del Pilar, Hospital Central de Emergencia y Alta Complejidad de Pilar, Centro Medico Pilares, y MAS Centro Médico (Moreno 565).",
+        "comercio": "{location} tiene Las Palmas del Pilar (con Jumbo), Tortugas Open Mall (Panamericana Ramal Pilar Km 36,5), Paseo Pilar (Ruta Panamericana Km 44), Cardinal Shopping, y el supermercado Jumbo en Palmas del Pilar.",
+        "servicios": "{location} cuenta con Farmacity, farmacias locales, centros de estética, servicios de lavandería, peluquerías, sucursales de bancos como Banco Santander y BBVA, y servicios profesionales completos.",
+        "gastronomia": "{location} ofrece restaurantes variados, cafeterías especializadas, bares tradicionales, pizzerías locales, heladerías artesanales, y una plaza gastronómica en Cardinal Shopping.",
+        "recreacion": "{location} tiene Las Palmas del Pilar, parques y plazas, canchas deportivas, centro cultural, bibliotecas, espacios familiares, y actividades al aire libre en la zona.",
+        "servicios_financieros": "{location} cuenta con sucursales de Banco Santander, BBVA, Macro, cajeros automáticos en Las Palmas del Pilar y centros comerciales, casas de cambio, y servicios de seguros.",
+        "educacion": "{location} tiene colegios privados como San Patricio, colegios públicos de calidad, cercanía a universidades (UBA), institutos técnicos, centros de idiomas, y academias especializadas."
+    },
+    "microcentro": {
+        "transporte": "En {location} tienes acceso a las líneas de subte Línea D (conecta Palermo con el centro porteño) y Línea C (conecta Retiro y Constitución). Colectivos específicos: 105, 39, 59, 7, 8. Paradas estratégicas en el microcentro con acceso directo a todas las zonas de CABA.",
+        "salud": "{location} cuenta con Hospital Italiano, Hospital Británico, centros de salud del Gobierno de la Ciudad, consultorios médicos especializados, Farmacity, y servicios de emergencia médica 24hs.",
+        "comercio": "{location} tiene Galerías Pacífico, Florida Street (compras), Mercado San Telmo, centros comerciales, bancos principales, casas de cambio, y todas las cadenas comerciales importantes concentradas.",
+        "servicios": "{location} cuenta con servicios completos: Farmacity, bancos principales (Banco Nación, Santander, BBVA), casas de cambio, servicios profesionales, centros de estética, lavanderías, y toda la infraestructura comercial del centro.",
+        "gastronomia": "{location} ofrece la mayor concentración gastronómica de Buenos Aires: restaurantes premium, bares tradicionales, cafeterías históricas, pizzerías emblemáticas, y opciones desde comida rápida hasta fine dining.",
+        "recreacion": "{location} tiene Plaza San Martín, Plaza de Mayo, Teatro Colón, Obelisco, museos (MAMBA, Fortabat), bibliotecas, y acceso directo a todos los espacios culturales de la ciudad.",
+        "servicios_financieros": "{location} cuenta con la mayor concentración de servicios financieros: Banco Nación, Santander, BBVA, HSBC, casas de cambio (Cambios Alem, Miguel), seguros, y fintech.",
+        "educacion": "{location} tiene acceso a universidades (UBA, UCA), colegios privados prestigiosos, institutos técnicos, centros de idiomas, academias, y toda la oferta educativa de CABA."
+    },
+    "boedo": {
+        "transporte": "En {location} tienes conectividad con 31 líneas de colectivos de CABA (modernizadas en 2025 con color azul). Conexión directa con líneas de subte A, B, D, E, H. Paradas estratégicas y acceso rápido a todas las zonas de la ciudad.",
+        "salud": "{location} cuenta con Hospital Durand, centros de salud comunitarios, consultorios médicos, Farmacity, centros de diagnóstico, y servicios de salud públicos y privados.",
+        "comercio": "{location} tiene supermercados (Disco, Vea), centros comerciales, tiendas de barrio, librerías, jugueterías, y comercio local completo con acceso a centros comerciales mayores.",
+        "servicios": "{location} cuenta con Farmacity, bancos locales, centros de estética, lavanderías, tintorerías, peluquerías, servicios profesionales, y toda la infraestructura de servicios.",
+        "gastronomia": "{location} ofrece restaurantes variados, bares tradicionales, pizzerías familiares, cafeterías de barrio, heladerías artesanales, y opciones gastronómicas diversas.",
+        "recreacion": "{location} tiene plazas del barrio, canchas deportivas, bibliotecas, centro cultural, espacios familiares, y acceso a parques y espacios verdes cercanos.",
+        "servicios_financieros": "{location} cuenta con sucursales de bancos principales, cajeros automáticos en ubicaciones estratégicas, casas de cambio, servicios de seguros, y fintech.",
+        "educacion": "{location} tiene colegios públicos y privados, institutos técnicos, cercanía a universidades, centros de idiomas, academias, y acceso a la oferta educativa de CABA."
+    },
+    "parque avellaneda": {
+        "transporte": "En {location} tienes acceso a colectivos específicos: 114, 126, 180, 4, 55, 86, 50, 7. Tren SARMIENTO con estaciones cercanas. Conexión con líneas de subte A y E. Excelente conectividad con el resto de la ciudad.",
+        "salud": "{location} cuenta con Centro de Salud Nivel 1 - CeSAC Nº 13 (Dirección 4210), nuevo CeSAC 15 (desde setiembre 2025), centros de salud comunitarios, consultorios médicos, y Farmacity.",
+        "comercio": "{location} tiene supermercados locales, centros comerciales cercanos, tiendas de barrio, librerías, jugueterías, y acceso a centros comerciales mayores en zonas adyacentes.",
+        "servicios": "{location} cuenta con Farmacity, bancos locales, centros de estética, lavanderías, tintorerías, peluquerías, servicios profesionales, y toda la infraestructura de servicios del barrio.",
+        "gastronomia": "{location} ofrece restaurantes familiares, bares tradicionales, pizzerías locales, cafeterías de barrio, heladerías artesanales, y opciones gastronómicas de la zona.",
+        "recreacion": "{location} tiene el propio Parque Avellaneda, canchas deportivas, espacios verdes, centro cultural, bibliotecas, actividades familiares, y espacios para recreación al aire libre.",
+        "servicios_financieros": "{location} cuenta con sucursales de bancos locales, cajeros automáticos en el barrio, casas de cambio cercanas, servicios de seguros, y fintech.",
+        "educacion": "{location} tiene colegios públicos y privados del barrio, institutos técnicos, centros de idiomas, academias, y acceso a la oferta educativa de CABA."
+    }
+}
+
+
+def get_location_specific_info(zone: str) -> Dict[str, Any]:
+    """
+    Obtiene información específica detallada para una zona.
+    Esta función retorna datos con direcciones reales, servicios específicos,
+    y características particulares del barrio.
+    """
+    zone_lower = zone.lower().strip()
+    
+    # Buscar coincidencia exacta
+    if zone_lower in LOCATION_SPECIFIC_DATA:
+        return LOCATION_SPECIFIC_DATA[zone_lower]
+    
+    # Buscar coincidencia parcial
+    for key, value in LOCATION_SPECIFIC_DATA.items():
+        if key in zone_lower or zone_lower in key:
+            return value
+    
+    # Retornar datos genéricos usando el template default
+    return {
+        "transporte": "En {location} tienes conectividad con líneas de colectivo locales, acceso a subte según la línea disponible, paradas de taxi estratégicas, y acceso a autopistas principales.",
+        "salud": "{location} cuenta con hospitales públicos y privados, consultorios médicos especializados, centros de diagnóstico, farmacias 24hs, y servicios de emergencia.",
+        "comercio": "{location} tiene supermercados de cadenas reconocidas, centros comerciales, tiendas especializadas, librerías, jugueterías, y servicios básicos.",
+        "servicios": "{location} cuenta con farmacias, centros de estética, lavanderías, tintorerías, peluquerías, sucursales bancarias, y servicios profesionales.",
+        "gastronomia": "{location} ofrece restaurantes variados, cafeterías especializadas, bares tradicionales, pizzerías, heladerías artesanales, y opciones gastronómicas diversas.",
+        "recreacion": "{location} tiene plazas y parques, canchas deportivas, centros culturales, bibliotecas, teatros, museos, y espacios familiares.",
+        "servicios_financieros": "{location} cuenta con sucursales de bancos principales, cajeros automáticos, casas de cambio, servicios de seguros, y fintech.",
+        "educacion": "{location} tiene colegios primarios y secundarios, universidades cercanas, institutos técnicos, centros de idiomas, y academias."
+    }
