@@ -95,17 +95,50 @@ def construir_data_cms(nombre: str, gastro_data: dict, financial_data: dict, loc
             'otros_servicios': financial_data.get('otros_servicios', [])
         }
     
-    # Datos específicos de ubicación (desde app.js)
+    # Datos específicos de ubicación (desde app.js) - Desplegados directamente en categorias
     if location_specific_data:
-        categorias['datos_especificos'] = {
-            'transporte': location_specific_data.get('transporte', ''),
-            'salud': location_specific_data.get('salud', ''),
-            'comercio': location_specific_data.get('comercio', ''),
-            'servicios': location_specific_data.get('servicios', ''),
-            'gastronomia': location_specific_data.get('gastronomia', ''),
-            'recreacion': location_specific_data.get('recreacion', ''),
-            'servicios_financieros': location_specific_data.get('servicios_financieros', ''),
-            'educacion': location_specific_data.get('educacion', '')
+        location_display = nombre.title()
+        # Desplegar cada dato específico directamente como categoría principal
+        categorias['transporte'] = {
+            'puntuacion': 75,
+            'descripcion': location_specific_data.get('transporte', '').replace('{location}', location_display),
+            'estaciones': [],
+            'colectivos': []
+        }
+        
+        categorias['comercio'] = {
+            'puntuacion': 75,
+            'descripcion': location_specific_data.get('comercio', '').replace('{location}', location_display),
+            'supermercados': [],
+            'centros_comerciales': ''
+        }
+        
+        categorias['salud'] = {
+            'puntuacion': 75,
+            'descripcion': location_specific_data.get('salud', '').replace('{location}', location_display),
+            'hospitales': [],
+            'centros_salud': ''
+        }
+        
+        categorias['servicios'] = {
+            'puntuacion': 75,
+            'descripcion': location_specific_data.get('servicios', '').replace('{location}', location_display),
+            'bancos': [],
+            'cajeros': []
+        }
+        
+        categorias['recreacion'] = {
+            'puntuacion': 75,
+            'descripcion': location_specific_data.get('recreacion', '').replace('{location}', location_display),
+            'parques': [],
+            'centros_culturales': []
+        }
+        
+        categorias['educacion'] = {
+            'puntuacion': 75,
+            'descripcion': location_specific_data.get('educacion', '').replace('{location}', location_display),
+            'escuelas': [],
+            'universidades': []
         }
     
     # Construir conclusión basada en los datos
