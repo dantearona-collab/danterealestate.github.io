@@ -2910,6 +2910,146 @@ function closePannellumModal() {
 // ========================================
 
 // Función principal para obtener información del entorno (USANDO DATOS REALES DINÁMICOS)
+// ========================================
+// FUNCIÓN ENTORNO CON IA - DATOS DESDE JSON ESTÁTICO (CMS)
+// ========================================
+
+// Cache para datos del entorno
+let entornoCache = null;
+
+// Función principal para obtener información del entorno (DESDE JSON ESTÁTICO)
+async function loadEnvironmentInfo(direccion, barrio) {
+    console.log('🌍 Cargando información del entorno para:', barrio);
+    console.log('📍 Dirección recibida:', direccion);
+    console.log('🏢 Barrio recibido (del JSON):', barrio);
+    
+    try {
+        // Mostrar loading
+        showEnvironmentLoading();
+        
+        // Cargar datos del archivo JSON estático
+        const environmentData = await loadEnvironmentFromJSON(barrio, direccion);
+        
+        // Mostrar en consola la fuente de datos
+        console.log('═══════════════════════════════════════════════');
+        console.log('📊 FUENTE DE DATOS: JSON ESTÁTICO (CMS)');
+        console.log(`🏢 Barrio: ${barrio}`);
+        console.log(`📅 Fecha: ${new Date().toLocaleString()}`);
+        console.log('═══════════════════════════════════════════════');
+        
+        // Mostrar resultados
+        displayEnvironmentInfo(environmentData);
+        
+    } catch (error) {
+        console.error('Error cargando entorno:', error);
+        showEnvironmentError('Error cargando información del entorno');
+    }
+}
+
+// Cargar datos del entorno desde archivo JSON estático
+async function loadEnvironmentFromJSON(barrio, direccion) {
+    // Normalizar nombre del barrio para buscar en el JSON
+    const barrioNormalizado = normalizeBarrioName(barrio);
+    
+    // Cargar JSON si no está en cache
+    if (!entornoCache) {
+        try {
+            const response = await fetch('/entorno.json');
+            if (!response.ok) {
+                throw new Error('No se pudo cargar entorno.json');
+            }
+            entornoCache = await response.json();
+            console.log('✅ Archivo entorno.json cargado correctamente');
+        } catch (error) {
+            console.warn('⚠️ No se pudo cargar entorno.json, usando datos por defecto');
+            return createDefaultEnvironmentData(barrio, direccion);
+        }
+    }
+    
+    // Buscar datos del barrio específico
+    const barrioData = entornoCache[barrioNormalizado] || 
+                       entornoCache[barrioNormalizado.toLowerCase()] ||
+                       entornoCache[barrioNormalizado.toUpperCase()];
+    
+    if (!barrioData) {
+        console.warn(`⚠️ No se encontraron datos para el barrio: ${barrio}`);
+        return createDefaultEnvironmentData(barrio, direccion);
+    }
+    
+    // Transformar datos al formato esperado
+    return transformJSONToEnvironmentData(barrioData, barrio, direccion);
+}
+
+// Normalizar nombre del barrio para búsqueda
+function normalizeBarrioName(barrio) {
+    if (!barrio) return 'microcentro';
+    const mapping = {
+        'microcentro': 'microcentro',
+        'micro centro': 'microcentro',
+        'centro': 'microcentro'
+    };
+    const lower = barrio.toLowerCase().trim();
+    return mapping[lower] || lower;
+}
+
+// Transformar datos del JSON al formato esperado por displayEnvironmentInfo
+function transformJSONToEnvironmentData(data, barrio, direccion) {
+    const categories = {};
+    
+    const categoryMapping = {
+        'transporte': { icon: '🚇', title: 'Transporte Público', key: 'transporte' },
+        'educacion': { icon: '🎓', title: 'Educación', key: 'educacion' },
+        'salud': { icon: '🏥', title: 'Salud', key: 'salud' },
+        'comercio': { icon: '🛒', title: 'Comercio', key: 'comercio' },
+        'gastronomia': { icon: '🍽️', title: 'Gastronomía', key: 'gastronomia' },
+        'recreacion': { icon: '🌳', title: 'Recreación', key: 'recreacion' },
+        'servicios_financieros': { icon: '🏦', title: 'Servicios Financieros', key: 'servicios_financieros' },
+        'seguridad': { icon: '🛡️', title: 'Seguridad', key: 'seguridad' },
+        'servicios': { icon: '🏪', title: 'Servicios Urbanos', key: 'servicios' }
+    };
+    
+    Object.keys(categoryMapping).forEach(catKey => {
+        const mapping = categoryMapping[catKey];
+        const items = data[mapping.key] || [];
+        
+        if (items && items.length > 0) {
+            categories[catKey] = {
+                icon: mapping.icon,
+                title: mapping.title,
+                items: Array.isArray(items) ? items : [items]
+            };
+        }
+    });
+    
+    if (Object.keys(categories).length === 0) {
+        return createDefaultEnvironmentData(barrio, direccion);
+    }
+    
+    return {
+        barrio: barrio,
+        direccion: direccion,
+        categories: categories,
+        lastUpdated: data.fecha_actualizacion || new Date().toLocaleDateString('es-AR'),
+        descripcion: data.descripcion_general || ''
+    };
+}
+
+// Crear datos por defecto cuando no hay información del barrio
+function createDefaultEnvironmentData(barrio, direccion) {
+    return {
+        barrio: barrio,
+        direccion: direccion,
+        categories: {
+            transporte: { icon: '🚇', title: 'Transporte Público', items: ['Información del barrio'] },
+            educacion: { icon: '🎓', title: 'Educación', items: ['Información del barrio'] },
+            salud: { icon: '🏥', title: 'Salud', items: ['Información del barrio'] },
+            comercio: { icon: '🛒', title: 'Comercio', items: ['Información del barrio'] }
+        },
+        lastUpdated: new Date().toLocaleDateString('es-AR'),
+        descripcion: ''
+    };
+}
+
 async function loadEnvironmentInfo(direccion, barrio) {
     console.log('🌍 Cargando información del entorno para:', barrio);
     console.log('📍 Dirección recibida:', direccion);
