@@ -7,8 +7,8 @@
 // CONFIGURACIÓN Y CONSTANTES
 // ============================================
 
-const API_BASE_URL = 'http://localhost:8000';
-const API_TIMEOUT = 30000;
+// const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = "https://danterealestate-github-io-ewlg.onrender.com";const API_TIMEOUT = 30000;
 
 // ============================================
 // ESTADO DE LA APLICACIÓN
@@ -1761,6 +1761,57 @@ async function regenerateWithAI() {
         if (regenerateBtn) {
             regenerateBtn.innerHTML = '<i class="fas fa-magic"></i> Regenerar con IA';
             regenerateBtn.disabled = false;
+        }
+    }
+}
+
+/**
+ * Generar archivo entorno.json para el frontend
+ */
+async function generateEntornoJSON() {
+    const exportBtn = document.querySelector('.toolbar-btn.export-btn');
+    if (exportBtn) {
+        exportBtn.disabled = true;
+        exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
+    }
+    
+    try {
+        console.log('📦 Generando archivo entorno.json...');
+        
+        // Llamar al endpoint del backend
+        const response = await fetch(`${API_BASE_URL}/api/barrios/generate-json`);
+        
+        if (!response.ok) {
+            throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        // Convertir a JSON pretty
+        const jsonString = JSON.stringify(data, null, 2);
+        
+        // Crear blob y descargar
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'entorno.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        console.log('✅ archivo entorno.json descargado correctamente');
+        alert('✅ archivo entorno.json descargado correctamente\n\nGuarda este archivo en la raíz de tu sitio web (danterealestate.github.io)');
+        
+    } catch (error) {
+        console.error('Error generando entorno.json:', error);
+        alert('Error al generar entorno.json: ' + error.message);
+    } finally {
+        if (exportBtn) {
+            exportBtn.innerHTML = '<i class="fas fa-file-code"></i> Exportar JSON';
+            exportBtn.disabled = false;
         }
     }
 }
