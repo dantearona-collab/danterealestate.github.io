@@ -21,7 +21,9 @@ const AppState = {
     searchResults: [],
     formData: {},
     originalData: null,
-    apiError: null
+    apiError: null,
+    metadata: null,  // Metadatos de rubros y campos
+    categoriesOrder: []  // Orden de categorías definido por el backend
 };
 
 // ============================================
@@ -40,7 +42,7 @@ const ApiClient = {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            timeout: API_TIMEOUT
+            timeout: 30000  // 30 segundos - valor directo para evitar problemas de caché
         };
 
         const config = { ...defaultOptions, ...options };
@@ -137,6 +139,30 @@ const ApiClient = {
             force_refresh: forceRefresh
         });
         return this.request(`/ai/environment-analysis?${params.toString()}`);
+    },
+
+    /**
+     * Obtiene los metadatos de campos por rubro desde el backend
+     * Este método es usado por el CMS para generar formularios dinámicos
+     * 
+     * Returns:
+     * - rubros: definición completa de cada rubro con sus campos
+     * - categorias_ordenadas: lista de rubros ordenados por importancia
+     */
+    async getEntornoMetadata() {
+        return this.request('/api/entorno/metadata');
+    },
+
+    /**
+     * Genera el archivo completo entorno.json con metadatos y datos
+     * Este endpoint es usado para integración con dantepropiedades.com.ar
+     * 
+     * Returns objeto con:
+     * - metadata: versión, rubros definidos, configuración
+     * - data: datos de cada barrio
+     */
+    async generateEntornoJSON() {
+        return this.request('/api/entorno/generate-json');
     }
 };
 
@@ -1445,6 +1471,208 @@ const EventHandlers = {
 };
 
 // ============================================
+// GENERACIÓN DINÁMICA DE FORMULARIOS BASADA EN METADATA
+// ============================================
+
+/**
+ * Carga los metadatos de campos desde el backend
+ * Esta función es llamada durante la inicialización de la aplicación
+ */
+async function loadMetadata() {
+    console.log('📋 Cargando metadatos de campos desde el backend...');
+    
+    try {
+        const response = await ApiClient.getEntornoMetadata();
+        
+        if (response.success) {
+            AppState.metadata = response.rubros;
+            AppState.categoriesOrder = response.categorias_ordenadas || [];
+            
+            console.log(`✅ Metadatos cargados: ${Object.keys(AppState.metadata).length} rubros`);
+            console.log('📋 Orden de categorías:', AppState.categoriesOrder);
+            
+            // Opcional: generar formularios dinámicamente si es necesario
+            // generateDynamicForms();
+        } else {
+            console.warn('⚠️ No se pudieron cargar los metadatos:', response.message);
+        }
+    } catch (error) {
+        console.warn('⚠️ Error cargando metadatos:', error.message);
+        console.log('ℹ️ La aplicación continuará con formularios hardcodeados');
+    }
+}
+
+/**
+ * Genera campos de formulario dinámicamente basados en los metadatos
+ * Esta función puede ser usada para regenerar formularios si el HTML cambia
+ * 
+ * @param {string} categoryKey - Clave del rubro (ej: 'transporte', 'comercio')
+ * @param {HTMLElement} container - Contenedor donde insertar los campos
+ */
+function generateFormFieldsForCategory(categoryKey, container) {
+    if (!AppState.metadata || !AppState.metadata[categoryKey]) {
+        console.warn(`⚠️ No hay metadatos para la categoría: ${categoryKey}`);
+        return;
+    }
+    
+    const metadata = AppState.metadata[categoryKey];
+    const fields = metadata.campos || {};
+    
+    // Ordenar campos por su propiedad 'orden'
+    const sortedFields = Object.entries(fields).sort((a, b) => {
+        return (a[1].orden || 99) - (b[1].orden || 99);
+    });
+    
+    sortedFields.forEach(([fieldKey, fieldConfig]) => {
+        const fieldHtml = createFormField(categoryKey, fieldKey, fieldConfig);
+        container.insertAdjacentHTML('beforeend', fieldHtml);
+    });
+}
+
+/**
+ * Crea el HTML para un campo de formulario individual
+ * 
+ * @param {string} categoryKey - Clave del rubro (ej: 'transporte')
+ * @param {string} fieldKey - Clave del campo (ej: 'estaciones')
+ * @param {object} fieldConfig - Configuración del campo desde los metadatos
+ * @returns {string} HTML del campo
+ */
+function createFormField(categoryKey, fieldKey, fieldConfig) {
+    const fieldId = `${categoryKey}-${fieldKey}`;
+    const label = fieldConfig.label || fieldKey;
+    const placeholder = fieldConfig.placeholder || '';
+    const type = fieldConfig.tipo || 'input';
+    
+    let fieldHtml = '';
+    
+    switch (type) {
+        case 'textarea':
+            fieldHtml = `
+                <div class="form-field">
+                    <label for="${fieldId}">${label}:</label>
+                    <textarea 
+                        id="${fieldId}" 
+                        class="editor-input" 
+                        placeholder="${placeholder}"
+                        disabled
+                        rows="3"
+                    ></textarea>
+                </div>
+            `;
+            break;
+            
+        case 'select':
+            const options = fieldConfig.options || [];
+            const optionsHtml = options.map(opt => 
+                `<option value="${opt}">${opt}</option>`
+            ).join('');
+            fieldHtml = `
+                <div class="form-field">
+                    <label for="${fieldId}">${label}:</label>
+                    <select 
+                        id="${fieldId}" 
+                        class="editor-input" 
+                        disabled
+                    >
+                        <option value="">Seleccionar...</option>
+                        ${optionsHtml}
+                    </select>
+                </div>
+            `;
+            break;
+            
+        case 'input':
+        default:
+            fieldHtml = `
+                <div class="form-field">
+                    <label for="${fieldId}">${label}:</label>
+                    <input 
+                        type="text" 
+                        id="${fieldId}" 
+                        class="editor-input" 
+                        placeholder="${placeholder}"
+                        disabled
+                    />
+                </div>
+            `;
+            break;
+    }
+    
+    return fieldHtml;
+}
+
+/**
+ * Obtiene el valor de un campo del formulario basado en su ID
+ * Soporta los tres tipos de campos: input, textarea, select
+ * 
+ * @param {string} fieldId - ID del campo (ej: 'transporte-estaciones')
+ * @returns {string} Valor del campo
+ */
+function getFieldValue(fieldId) {
+    const element = document.getElementById(fieldId);
+    if (!element) return '';
+    
+    return element.value?.trim() || '';
+}
+
+/**
+ * Establece el valor de un campo del formulario
+ * 
+ * @param {string} fieldId - ID del campo
+ * @param {string} value - Valor a establecer
+ */
+function setFieldValue(fieldId, value) {
+    const element = document.getElementById(fieldId);
+    if (!element) return;
+    
+    // Habilitar temporalmente para poder establecer el valor
+    const wasDisabled = element.disabled;
+    element.disabled = false;
+    element.value = value || '';
+    element.disabled = wasDisabled;
+}
+
+/**
+ * Recoge los datos de todos los campos de una categoría usando metadatos
+ * 
+ * @param {string} categoryKey - Clave del rubro (ej: 'transporte')
+ * @returns {object} Objeto con los datos de la categoría
+ */
+function collectCategoryData(categoryKey) {
+    if (!AppState.metadata || !AppState.metadata[categoryKey]) {
+        return {};
+    }
+    
+    const metadata = AppState.metadata[categoryKey];
+    const fields = metadata.campos || {};
+    const categoryData = {};
+    
+    Object.keys(fields).forEach(fieldKey => {
+        const fieldId = `${categoryKey}-${fieldKey}`;
+        categoryData[fieldKey] = getFieldValue(fieldId);
+    });
+    
+    return categoryData;
+}
+
+/**
+ * Rellena los campos de una categoría con datos usando metadatos
+ * 
+ * @param {string} categoryKey - Clave del rubro
+ * @param {object} categoryData - Datos de la categoría
+ */
+function populateCategoryFields(categoryKey, categoryData) {
+    if (!categoryData || typeof categoryData !== 'object') {
+        return;
+    }
+    
+    Object.entries(categoryData).forEach(([fieldKey, value]) => {
+        const fieldId = `${categoryKey}-${fieldKey}`;
+        setFieldValue(fieldId, value);
+    });
+}
+
+// ============================================
 // INICIALIZACIÓN DE LA APLICACIÓN
 // ============================================
 
@@ -1480,6 +1708,9 @@ async function initApp() {
     } catch (error) {
         console.warn('No se pudieron cargar los barrios:', error.message);
     }
+    
+    // Cargar metadatos de campos para formularios dinámicos
+    await loadMetadata();
     
     console.log('✅ CMS de Barrios inicializado correctamente');
 }
@@ -1645,8 +1876,14 @@ async function saveBarrio() {
     }
     
     try {
+        // Habilitar todos los campos temporalmente para poder leer sus valores
+        const allInputs = document.querySelectorAll('#editor-form input, #editor-form textarea, #editor-form select');
+        allInputs.forEach(input => input.disabled = false);
+        
         // Recopilar datos del formulario
         const formData = collectFormData();
+        
+        console.log('📋 Datos recopilados del formulario:', formData);
         
         // Determinar si es update o create
         if (AppState.currentBarrio && AppState.currentBarrio.existe) {
@@ -1660,7 +1897,7 @@ async function saveBarrio() {
             };
             
             console.log('📤 Actualizando barrio:', AppState.currentBarrio.nombre);
-            console.log('📤 Datos:', JSON.stringify(backendPayload, null, 2));
+            console.log('📤 Datos a enviar:', JSON.stringify(backendPayload, null, 2));
             
             await ApiClient.updateBarrio(AppState.currentBarrio.nombre, backendPayload);
         } else {
@@ -1679,7 +1916,11 @@ async function saveBarrio() {
         
         // Recargar datos
         if (AppState.currentBarrio && AppState.currentBarrio.nombre) {
-            loadBarrioData(await ApiClient.getBarrio(AppState.currentBarrio.nombre));
+            console.log('🔄 Recargando datos del barrio desde el servidor...');
+            const reloadResponse = await ApiClient.getBarrio(AppState.currentBarrio.nombre);
+            console.log('📥 Respuesta de recarga:', reloadResponse);
+            loadBarrioData(reloadResponse);
+            console.log('✅ Datos recargados correctamente');
         }
         
     } catch (error) {
@@ -1756,6 +1997,57 @@ async function regenerateWithAI() {
 }
 
 /**
+ * Generar archivo entorno.json para el frontend
+ */
+async function generateEntornoJSON() {
+    const exportBtn = document.querySelector('.toolbar-btn.export-btn');
+    if (exportBtn) {
+        exportBtn.disabled = true;
+        exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
+    }
+    
+    try {
+        console.log('📦 Generando archivo entorno.json...');
+        
+        // Llamar al endpoint del backend
+        const response = await fetch(`${API_BASE_URL}/api/barrios/generate-json`);
+        
+        if (!response.ok) {
+            throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        // Convertir a JSON pretty
+        const jsonString = JSON.stringify(data, null, 2);
+        
+        // Crear blob y descargar
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'entorno.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        console.log('✅ archivo entorno.json descargado correctamente');
+        alert('✅ archivo entorno.json descargado correctamente\n\nGuarda este archivo en la raíz de tu sitio web (danterealestate.github.io)');
+        
+    } catch (error) {
+        console.error('Error generando entorno.json:', error);
+        alert('Error al generar entorno.json: ' + error.message);
+    } finally {
+        if (exportBtn) {
+            exportBtn.innerHTML = '<i class="fas fa-file-code"></i> Exportar JSON';
+            exportBtn.disabled = false;
+        }
+    }
+}
+
+/**
  * Eliminar barrio actual
  */
 async function deleteBarrio() {
@@ -1821,89 +2113,165 @@ function clearEditorForm() {
 function collectFormData() {
     const nombre = AppState.currentBarrio?.nombre || document.getElementById('neighborhood-input')?.value || '';
     
-    return {
+    console.log('🔍 collectFormData - nombre:', nombre);
+    
+    // Leer cada campo
+    const resumen = document.getElementById('edit-resumen')?.value || '';
+    const conclusion = document.getElementById('edit-conclusion')?.value || '';
+    const puntuacion_general = parseInt(document.getElementById('barrio-puntuacion')?.value) || 50;
+    
+    // Transporte
+    const transporte_puntuacion = parseInt(document.getElementById('transporte-puntuacion')?.value) || 50;
+    const transporte_descripcion = document.getElementById('transporte-descripcion')?.value || '';
+    const transporte_estaciones = document.getElementById('transporte-estaciones')?.value || '';
+    const transporte_colectivos = document.getElementById('transporte-colectivos')?.value || '';
+    
+    // Comercio
+    const comercio_puntuacion = parseInt(document.getElementById('comercio-puntuacion')?.value) || 50;
+    const comercio_descripcion = document.getElementById('comercio-descripcion')?.value || '';
+    const comercio_supermercados = document.getElementById('comercio-supermercados')?.value || '';
+    const comercio_centros = document.getElementById('comercio-centros')?.value || '';
+    
+    // Seguridad
+    const seguridad_puntuacion = parseInt(document.getElementById('seguridad-puntuacion')?.value) || 50;
+    const seguridad_descripcion = document.getElementById('seguridad-descripcion')?.value || '';
+    const seguridad_comisaria = document.getElementById('seguridad-comisaria')?.value || '';
+    
+    // Educación
+    const educacion_puntuacion = parseInt(document.getElementById('educacion-puntuacion')?.value) || 50;
+    const educacion_descripcion = document.getElementById('educacion-descripcion')?.value || '';
+    const educacion_escuelas = document.getElementById('educacion-escuelas')?.value || '';
+    const educacion_universidades = document.getElementById('educacion-universidades')?.value || '';
+    
+    // Salud
+    const salud_puntuacion = parseInt(document.getElementById('salud-puntuacion')?.value) || 50;
+    const salud_descripcion = document.getElementById('salud-descripcion')?.value || '';
+    const salud_hospitales = document.getElementById('salud-hospitales')?.value || '';
+    const salud_centros = document.getElementById('salud-centros')?.value || '';
+    
+    // Espacios Verdes
+    const espacios_verdes_puntuacion = parseInt(document.getElementById('espacios_verdes-puntuacion')?.value) || 50;
+    const espacios_verdes_descripcion = document.getElementById('espacios_verdes-descripcion')?.value || '';
+    const espacios_verdes_parques = document.getElementById('espacios_verdes-parques')?.value || '';
+    
+    // Contaminación
+    const contaminacion_puntuacion = parseInt(document.getElementById('contaminacion-puntuacion')?.value) || 50;
+    const contaminacion_descripcion = document.getElementById('contaminacion-descripcion')?.value || '';
+    const contaminacion_ruido = document.getElementById('contaminacion-ruido')?.value || '';
+    const contaminacion_fuente = document.getElementById('contaminacion-fuente')?.value || '';
+    
+    // Vida del Barrio
+    const vida_barrio_puntuacion = parseInt(document.getElementById('vida_barrio-puntuacion')?.value) || 50;
+    const vida_barrio_descripcion = document.getElementById('vida_barrio-descripcion')?.value || '';
+    const vida_barrio_bares = document.getElementById('vida_barrio-bares')?.value || '';
+    const vida_barrio_cultura = document.getElementById('vida_barrio-cultura')?.value || '';
+    
+    // Gastronomía
+    const gastronomia_puntuacion = parseInt(document.getElementById('gastronomia-puntuacion')?.value) || 50;
+    const gastronomia_descripcion = document.getElementById('gastronomia-descripcion')?.value || '';
+    const gastronomia_restaurantes = document.getElementById('gastronomia-restaurantes')?.value || '';
+    const gastronomia_zonas = document.getElementById('gastronomia-zonas')?.value || '';
+    
+    // Servicios Financieros
+    const servicios_financieros_puntuacion = parseInt(document.getElementById('servicios_financieros-puntuacion')?.value) || 50;
+    const servicios_financieros_descripcion = document.getElementById('servicios_financieros-descripcion')?.value || '';
+    const servicios_financieros_bancos = document.getElementById('servicios_financieros-bancos')?.value || '';
+    const servicios_financieros_cajeros = document.getElementById('servicios_financieros-cajeros')?.value || '';
+    
+    // Retornar objeto con la estructura correcta
+    const data = {
         nombre: nombre,
-        resumen: document.getElementById('edit-resumen')?.value || '',
-        conclusion: document.getElementById('edit-conclusion')?.value || '',
-        categorias: {
-            transporte: {
-                puntuacion: parseInt(document.getElementById('transporte-puntuacion')?.value) || 0,
-                descripcion: document.getElementById('transporte-descripcion')?.value || '',
-                estaciones: document.getElementById('transporte-estaciones')?.value || '',
-                colectivos: document.getElementById('transporte-colectivos')?.value || ''
-            },
-            comercio: {
-                puntuacion: parseInt(document.getElementById('comercio-puntuacion')?.value) || 0,
-                descripcion: document.getElementById('comercio-descripcion')?.value || '',
-                supermercados: document.getElementById('comercio-supermercados')?.value || '',
-                centros_comerciales: document.getElementById('comercio-centros')?.value || ''
-            },
-            seguridad: {
-                puntuacion: parseInt(document.getElementById('seguridad-puntuacion')?.value) || 0,
-                descripcion: document.getElementById('seguridad-descripcion')?.value || '',
-                comisaria: document.getElementById('seguridad-comisaria')?.value || ''
-            },
-            educacion: {
-                puntuacion: parseInt(document.getElementById('educacion-puntuacion')?.value) || 0,
-                descripcion: document.getElementById('educacion-descripcion')?.value || '',
-                escuelas: document.getElementById('educacion-escuelas')?.value || '',
-                universidades: document.getElementById('educacion-universidades')?.value || ''
-            },
-            salud: {
-                puntuacion: parseInt(document.getElementById('salud-puntuacion')?.value) || 0,
-                descripcion: document.getElementById('salud-descripcion')?.value || '',
-                hospitales: document.getElementById('salud-hospitales')?.value || '',
-                centros_salud: document.getElementById('salud-centros')?.value || ''
-            },
-            espacios_verdes: {
-                puntuacion: parseInt(document.getElementById('espacios_verdes-puntuacion')?.value) || 0,
-                descripcion: document.getElementById('espacios_verdes-descripcion')?.value || '',
-                parques: document.getElementById('espacios_verdes-parques')?.value || ''
-            },
-            contaminacion: {
-                puntuacion: parseInt(document.getElementById('contaminacion-puntuacion')?.value) || 0,
-                descripcion: document.getElementById('contaminacion-descripcion')?.value || '',
-                nivel_ruido: document.getElementById('contaminacion-ruido')?.value || '',
-                fuente: document.getElementById('contaminacion-fuente')?.value || ''
-            },
-            vida_barrio: {
-                puntuacion: parseInt(document.getElementById('vida_barrio-puntuacion')?.value) || 0,
-                descripcion: document.getElementById('vida_barrio-descripcion')?.value || '',
-                bares: document.getElementById('vida_barrio-bares')?.value || '',
-                cultura: document.getElementById('vida_barrio-cultura')?.value || ''
-            },
-            servicios_financieros: {
-                puntuacion: parseInt(document.getElementById('servicios_financieros-puntuacion')?.value) || 0,
-                descripcion: document.getElementById('servicios_financieros-descripcion')?.value || '',
-                bancos: document.getElementById('servicios_financieros-bancos')?.value || '',
-                cajeros: document.getElementById('servicios_financieros-cajeros')?.value || ''
-            }
-        }
+        perfil_barrio: resumen,
+        conclusion: conclusion,
+        puntuacion_general: puntuacion_general,
+        transporte_publico: transporte_puntuacion,
+        transporte_descripcion: transporte_descripcion,
+        transporte_estaciones: transporte_estaciones,
+        transporte_colectivos: transporte_colectivos,
+        comercio_servicios: comercio_puntuacion,
+        comercio_descripcion: comercio_descripcion,
+        comercio_supermercados: comercio_supermercados,
+        comercio_centros: comercio_centros,
+        seguridad: seguridad_puntuacion,
+        seguridad_descripcion: seguridad_descripcion,
+        seguridad_comisaria: seguridad_comisaria,
+        educacion: educacion_puntuacion,
+        educacion_descripcion: educacion_descripcion,
+        educacion_escuelas: educacion_escuelas,
+        educacion_universidades: educacion_universidades,
+        salud: salud_puntuacion,
+        salud_descripcion: salud_descripcion,
+        salud_hospitales: salud_hospitales,
+        salud_centros: salud_centros,
+        espacios_verdes: espacios_verdes_puntuacion,
+        espacios_verdes_descripcion: espacios_verdes_descripcion,
+        espacios_verdes_parques: espacios_verdes_parques,
+        contaminacion: contaminacion_puntuacion,
+        contaminacion_descripcion: contaminacion_descripcion,
+        contaminacion_ruido: contaminacion_ruido,
+        contaminacion_fuente: contaminacion_fuente,
+        vida_barrio: vida_barrio_puntuacion,
+        vida_barrio_descripcion: vida_barrio_descripcion,
+        vida_barrio_bares: vida_barrio_bares,
+        vida_barrio_cultura: vida_barrio_cultura,
+        gastronomia: gastronomia_puntuacion,
+        gastronomia_descripcion: gastronomia_descripcion,
+        gastronomia_restaurantes: gastronomia_restaurantes,
+        gastronomia_zonas: gastronomia_zonas,
+        servicios_financieros: servicios_financieros_puntuacion,
+        servicios_financieros_descripcion: servicios_financieros_descripcion,
+        servicios_financieros_bancos: servicios_financieros_bancos,
+        servicios_financieros_cajeros: servicios_financieros_cajeros
     };
+    
+    console.log('📋 collectFormData retornando:', data);
+    return data;
 }
 
 /**
  * Cargar datos de barrio en el formulario
  */
-function loadBarrioData(data) {
-    if (!data || !data.nombre) return;
+function loadBarrioData(response) {
+    console.log('📥 loadBarrioData recibe:', response);
+    
+    if (!response) {
+        console.log('⚠️ loadBarrioData: response es null');
+        return;
+    }
+    
+    // Extraer los datos del formato de respuesta del API
+    // El API puede responder: {success: true, data: {...}, nombre: '...'}
+    // O directamente: {nombre: '...', categorias: {...}}
+    const data = response.data || response;
+    const nombre = response.nombre || data?.nombre || data?.nombre;
+    
+    if (!nombre) {
+        console.log('⚠️ loadBarrioData: no se encontró nombre en:', response);
+        return;
+    }
     
     AppState.currentBarrio = {
-        nombre: data.nombre,
+        nombre: nombre,
         existe: true
     };
     
+    console.log('🔄 Cargando barrio:', nombre);
+    console.log('📋 Datos a cargar:', data);
+    
     // Actualizar toolbar
     const currentBarrio = document.getElementById('current-barrio-name');
-    if (currentBarrio) currentBarrio.textContent = data.nombre;
+    if (currentBarrio) currentBarrio.textContent = nombre;
     
-    // Cargar resumen
+    // Cargar resumen y conclusión
     const resumenEl = document.getElementById('edit-resumen');
-    if (resumenEl) resumenEl.value = data.resumen || '';
+    if (resumenEl) resumenEl.value = data.resumen_general || data.resumen || '';
     
-    // Cargar conclusión
     const conclusionEl = document.getElementById('edit-conclusion');
     if (conclusionEl) conclusionEl.value = data.conclusion || '';
+    
+    // Cargar puntuación general
+    const puntuacionGeneral = document.getElementById('barrio-puntuacion');
+    if (puntuacionGeneral) puntuacionGeneral.value = data.puntuacion_general || 50;
     
     // Cargar categorías
     const categorias = data.categorias || {};
@@ -1954,9 +2322,9 @@ function loadBarrioData(data) {
         });
     });
     
-    // Deshabilitar campos por defecto
+    // Deshabilitar campos
     const inputs = document.querySelectorAll('#editor-form input, #editor-form textarea, #editor-form select');
     inputs.forEach(input => input.disabled = true);
     
-    console.log('📋 Datos cargados para:', data.nombre);
+    console.log('✅ loadBarrioData completado para:', nombre);
 }
