@@ -8,7 +8,7 @@
 // ============================================
 
 const API_BASE_URL = 'http://localhost:8000';
-//const API_BASE_URL = "https://danterealestate-github-io-ewlg.onrender.com";const API_TIMEOUT = 30000;
+const API_TIMEOUT = 30000;
 
 // ============================================
 // ESTADO DE LA APLICACIÓN
@@ -40,7 +40,7 @@ const ApiClient = {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            timeout: API_TIMEOUT
+            timeout: 30000  // 30 segundos - valor directo para evitar problemas de caché
         };
 
         const config = { ...defaultOptions, ...options };
