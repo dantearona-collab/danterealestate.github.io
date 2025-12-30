@@ -581,6 +581,32 @@ import os as _os
 if _os.path.exists("imgs"):
     app.mount("/imgs", StaticFiles(directory="imgs"), name="images")
 
+# Servir archivos de la raíz (logo.png, llave.png, etc.)
+# Solo para desarrollo local, no sirve archivos sensibles
+@app.get("/{file_path:path}")
+async def serve_root_files(file_path: str):
+    """Serve static files from root directory like logo.png, llave.png, etc."""
+    # Lista de archivos permitidos en la raíz
+    allowed_files = ['logo.png', 'llave.png', 'favicon.ico', 'robots.txt', 'sitemap.xml']
+    
+    # Extraer solo el nombre del archivo
+    import os
+    filename = os.path.basename(file_path)
+    
+    # Verificar si es un archivo permitido
+    if filename in allowed_files:
+        root_dir = os.path.dirname(os.path.abspath(__file__))
+        file_path_abs = os.path.join(root_dir, filename)
+        
+        if os.path.exists(file_path_abs):
+            from fastapi.responses import FileResponse
+            return FileResponse(file_path_abs)
+        else:
+            raise HTTPException(status_code=404, detail=f"Archivo {filename} no encontrado")
+    
+    # Si no es un archivo permitido, retornar 404
+    raise HTTPException(status_code=404, detail="Archivo no encontrado")
+
 # ✅ CACHE
 query_cache = {}
 
@@ -2521,3 +2547,492 @@ if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run("main-ai:app", host="0.0.0.0", port=port, reload=False)  # reload=False en producción
+
+
+# ========================================
+# METADATOS DE CAMPOS POR RUBRO (PARA CMS Y FRONTEND)
+# ========================================
+
+# Definición de los campos específicos que existen en el CMS para cada rubro.
+# Esta estructura es usada por:
+# 1. El CMS (analisis-barrio.js) para generar formularios dinámicos
+# 2. El frontend principal (dantepropiedades.com.ar) para mostrar datos estructurados
+# 3. El endpoint /api/entorno/metadata para integración externa
+
+RUBRO_METADATA = {
+    "transporte": {
+        "titulo": "Transporte",
+        "icono": "🚌",
+        "descripcion": "Acceso a transporte público y conectividad",
+        "orden": 1,
+        "campos": {
+            "descripcion": {
+                "tipo": "textarea",
+                "label": "Descripción del transporte",
+                "placeholder": "Describe la cobertura de transporte público en la zona...",
+                "orden": 1
+            },
+            "estaciones": {
+                "tipo": "input",
+                "label": "Estaciones de tren/subte",
+                "placeholder": "Ej: Estación Tigre, Estación Bartolomé Mitre",
+                "orden": 2
+            },
+            "colectivos": {
+                "tipo": "input",
+                "label": "Líneas de colectivo",
+                "placeholder": "Ej: 15, 28, 57, 71, 130",
+                "orden": 3
+            }
+        }
+    },
+    "comercio": {
+        "titulo": "Comercio",
+        "icono": "🛒",
+        "descripcion": "Comercios locales, supermercados y centros comerciales",
+        "orden": 2,
+        "campos": {
+            "descripcion": {
+                "tipo": "textarea",
+                "label": "Descripción del comercio",
+                "placeholder": "Describe la oferta comercial de la zona...",
+                "orden": 1
+            },
+            "supermercados": {
+                "tipo": "input",
+                "label": "Supermercados",
+                "placeholder": "Ej: Coto, Jumbo, Día, ChangoMas",
+                "orden": 2
+            },
+            "centros": {
+                "tipo": "input",
+                "label": "Centros comerciales",
+                "placeholder": "Ej: Nordelta Shopping, Paseo de la Costa",
+                "orden": 3
+            }
+        }
+    },
+    "salud": {
+        "titulo": "Salud",
+        "icono": "🏥",
+        "descripcion": "Hospitales, centros de salud y farmacias",
+        "orden": 3,
+        "campos": {
+            "descripcion": {
+                "tipo": "textarea",
+                "label": "Descripción de servicios de salud",
+                "placeholder": "Describe la infraestructura de salud de la zona...",
+                "orden": 1
+            },
+            "hospitales": {
+                "tipo": "input",
+                "label": "Hospitales",
+                "placeholder": "Ej: Hospital Municipal de Tigre",
+                "orden": 2
+            },
+            "centros_salud": {
+                "tipo": "input",
+                "label": "Centros de salud/CAPS",
+                "placeholder": "Ej: CAPS N° 1, Centro Médico del Norte",
+                "orden": 3
+            },
+            "farmacias": {
+                "tipo": "input",
+                "label": "Farmacias",
+                "placeholder": "Ej: Farmacia del Puerto, Farmacia 24hs",
+                "orden": 4
+            }
+        }
+    },
+    "educacion": {
+        "titulo": "Educación",
+        "icono": "📚",
+        "descripcion": "Instituciones educativas de todos los niveles",
+        "orden": 4,
+        "campos": {
+            "descripcion": {
+                "tipo": "textarea",
+                "label": "Descripción educativa",
+                "placeholder": "Describe la oferta educativa de la zona...",
+                "orden": 1
+            },
+            "nivel_inicial": {
+                "tipo": "input",
+                "label": "Nivel Inicial/Jardín",
+                "placeholder": "Ej: Jardín Nr. 1, Jardín del Puerto",
+                "orden": 2
+            },
+            "primario": {
+                "tipo": "input",
+                "label": "Escuela Primaria",
+                "placeholder": "Ej: Escuela Nr. 4, Escuela del Litoral",
+                "orden": 3
+            },
+            "secundario": {
+                "tipo": "input",
+                "label": "Escuela Secundaria",
+                "placeholder": "Ej: Secundarias de Tigre, Instituto técnico",
+                "orden": 4
+            },
+            "universitario": {
+                "tipo": "input",
+                "label": "Universidad/Terciario",
+                "placeholder": "Ej: UADE, UTN, Instituto de formación docente",
+                "orden": 5
+            }
+        }
+    },
+    "recreacion": {
+        "titulo": "Recreación",
+        "icono": "🌳",
+        "descripcion": "Parques, plazas y áreas deportivas",
+        "orden": 5,
+        "campos": {
+            "descripcion": {
+                "tipo": "textarea",
+                "label": "Descripción recreativa",
+                "placeholder": "Describe las opciones de recreación y espacios verdes...",
+                "orden": 1
+            },
+            "parques": {
+                "tipo": "input",
+                "label": "Parques",
+                "placeholder": "Ej: Parque de la Costa, Parque Natural",
+                "orden": 2
+            },
+            "plazas": {
+                "tipo": "input",
+                "label": "Plazas",
+                "placeholder": "Ej: Plaza Mitre, Plaza San Martín",
+                "orden": 3
+            },
+            "areas_deportivas": {
+                "tipo": "input",
+                "label": "Áreas deportivas",
+                "placeholder": "Ej: Canchas de fútbol, Club náutico, Gimnasios",
+                "orden": 4
+            }
+        }
+    },
+    "seguridad": {
+        "titulo": "Seguridad",
+        "icono": "🚔",
+        "descripcion": "Comisarías y nivel de seguridad de la zona",
+        "orden": 6,
+        "campos": {
+            "descripcion": {
+                "tipo": "textarea",
+                "label": "Descripción de seguridad",
+                "placeholder": "Describe el nivel de seguridad de la zona...",
+                "orden": 1
+            },
+            "comisaria": {
+                "tipo": "input",
+                "label": "Comisaría cercana",
+                "placeholder": "Ej: Comisaría de Tigre 1ra",
+                "orden": 2
+            }
+        }
+    },
+    "espacios_verdes": {
+        "titulo": "Espacios Verdes",
+        "icono": "🌲",
+        "descripcion": "Áreas verdes y parques",
+        "orden": 7,
+        "campos": {
+            "descripcion": {
+                "tipo": "textarea",
+                "label": "Descripción de espacios verdes",
+                "placeholder": "Describe las áreas verdes disponibles...",
+                "orden": 1
+            },
+            "parques": {
+                "tipo": "input",
+                "label": "Parques",
+                "placeholder": "Ej: Parque Vías, Reserva natural",
+                "orden": 2
+            }
+        }
+    },
+    "contaminacion": {
+        "titulo": "Contaminación",
+        "icono": "🌫️",
+        "descripcion": "Nivel de contaminación y ruido ambiental",
+        "orden": 8,
+        "campos": {
+            "descripcion": {
+                "tipo": "textarea",
+                "label": "Descripción de contaminación",
+                "placeholder": "Describe el nivel de contaminación de la zona...",
+                "orden": 1
+            },
+            "nivel_ruido": {
+                "tipo": "select",
+                "label": "Nivel de ruido",
+                "options": ["Bajo", "Medio", "Alto"],
+                "orden": 2
+            },
+            "fuente": {
+                "tipo": "input",
+                "label": "Fuente de contaminación",
+                "placeholder": "Ej: Tráfico vehicular, Industria",
+                "orden": 3
+            }
+        }
+    },
+    "vida_barrio": {
+        "titulo": "Vida del Barrio",
+        "icono": "🎭",
+        "descripcion": "Bares, restaurantes, cultura y entretenimiento",
+        "orden": 9,
+        "campos": {
+            "descripcion": {
+                "tipo": "textarea",
+                "label": "Descripción de vida nocturna/cultural",
+                "placeholder": "Describe la vida social y cultural del barrio...",
+                "orden": 1
+            },
+            "bares": {
+                "tipo": "input",
+                "label": "Bares y restaurantes",
+                "placeholder": "Ej: Bar del Puerto, Restaurant Delicias",
+                "orden": 2
+            },
+            "cultura": {
+                "tipo": "input",
+                "label": "Cultura (teatros, museos)",
+                "placeholder": "Ej: Teatro Municipal, Museo de la ciudad",
+                "orden": 3
+            }
+        }
+    },
+    "servicios_financieros": {
+        "titulo": "Servicios Financieros",
+        "icono": "🏦",
+        "descripcion": "Bancos, cajeros y servicios bancarios",
+        "orden": 10,
+        "campos": {
+            "descripcion": {
+                "tipo": "textarea",
+                "label": "Descripción de servicios financieros",
+                "placeholder": "Describe los servicios bancarios disponibles...",
+                "orden": 1
+            },
+            "bancos": {
+                "tipo": "input",
+                "label": "Bancos",
+                "placeholder": "Ej: Banco Nación, Banco Provincia",
+                "orden": 2
+            },
+            "cajeros": {
+                "tipo": "input",
+                "label": "Cajeros automáticos",
+                "placeholder": "Ej: Red Link, Banelco",
+                "orden": 3
+            }
+        }
+    }
+}
+
+
+@app.get("/api/entorno/metadata")
+def obtener_metadata_entorno():
+    """
+    Endpoint para obtener los metadatos de campos por rubro.
+    Este endpoint es usado por:
+    - El CMS (analisis-barrio.js) para generar formularios dinámicos
+    - Sitios externos (dantepropiedades.com.ar) para integración
+    
+    Returns:
+        dict con la estructura metadata incluyendo:
+        - rubros: definición completa de cada rubro con sus campos
+        - categorias_ordenadas: lista de rubros ordenados por importancia
+    """
+    # Crear lista ordenada de rubros
+    rubros_ordenados = sorted(
+        [{"key": k, **v} for k, v in RUBRO_METADATA.items()],
+        key=lambda x: x.get("orden", 99)
+    )
+    
+    return {
+        "success": True,
+        "version": "1.0.0",
+        "descripcion": "Metadatos de campos para análisis de entorno por rubro",
+        "rubros": RUBRO_METADATA,
+        "categorias_ordenadas": [r["key"] for r in rubros_ordenados],
+        "total_rubros": len(RUBRO_METADATA)
+    }
+
+
+@app.get("/api/entorno/generate-json")
+def generar_entorno_json_con_metadata():
+    """
+    Genera el archivo entorno.json con metadatos incluidos.
+    Este endpoint combina:
+    1. Los datos de barrios almacenados en la base de datos
+    2. Los metadatos de campos (RUBRO_METADATA)
+    
+    El resultado es un JSON completo con la estructura:
+    {
+        "metadata": {...},  // Definición de campos por rubro
+        "data": {...}       // Datos reales de cada barrio
+    }
+    
+    Este formato es ideal para:
+    - Integración con dantepropiedades.com.ar
+    - Exportación completa del sistema de análisis de entorno
+    """
+    conn = get_barrios_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT nombre, data, fecha_actualizacion FROM barrios_data ORDER BY nombre')
+    rows = cursor.fetchall()
+    conn.close()
+    
+    if not rows:
+        raise HTTPException(status_code=404, detail="No hay barrios registrados")
+    
+    # Datos de respaldo mejorados por categoría
+    FALLBACK_DATA = {
+        'transporte': [
+            "Estación de tren cercana con conexiones a toda la ciudad",
+            "Líneas de colectivo con parada principal en la zona",
+            "Acceso fácil a centro de la ciudad",
+            "Parada de taxi y remise a pocas cuadras"
+        ],
+        'educacion': [
+            "Escuela primaria pública en el barrio",
+            "Instituto secundario cercano",
+            "Centro de educación inicial disponible",
+            "Universidad o terciario a distancia accesible"
+        ],
+        'salud': [
+            "Centro de atención primaria a pocas cuadras",
+            "Farmacia de turno disponible",
+            "Consultorios médicos privados en la zona",
+            "Hospital público de referencia en zona cercana"
+        ],
+        'comercio': [
+            "Comercio local de barrio con productos frescos",
+            "Supermercado mayorista y minorista en zona",
+            "Locales comerciales con variedad de rubros",
+            "Mercado de frutos del país cercano"
+        ],
+        'gastronomia': [
+            "Restaurante local con comida tradicional",
+            "Café y panadería de barrio",
+            "Rotisería y local de comidas para llevar",
+            "Bar pub con ambiente familiar"
+        ],
+        'recreacion': [
+            "Plaza principal del barrio con juegos",
+            "Area verde con jardín y bancos",
+            "Club social y deportivo del barrio",
+            "Ciclovía y sendero para caminar"
+        ],
+        'servicios_financieros': [
+            "Banco con sucursal en zona",
+            "Cajero automático disponible 24hs",
+            "Casa de cambios y transferencia",
+            "Cooperativa de ahorro y crédito"
+        ],
+        'seguridad': [
+            "Comisaría de barrio con atención",
+            "Vigilancia privada en zonas residenciales",
+            "Alumbrado público en todas las calles",
+            "Vecinos organizados con ronda nocturna"
+        ],
+        'servicios': [
+            "Correo y oficina postal cercana",
+            "Centro de atención municipal",
+            "Gomería y servicio mecánico",
+            "Lavadero y tintorería en zona"
+        ]
+    }
+    
+    # Mensajes de respaldo por categoría cuando no hay datos específicos
+    FALLBACK_MESSAGES = {
+        'transporte': "Transporte público disponible con fácil acceso a distintas zonas de la ciudad",
+        'educacion': "Cuenta con instituciones educativas para todos los niveles en el barrio o zonas cercanas",
+        'salud': "Servicios de salud accesibles con centros de atención primaria y farmacias en la zona",
+        'comercio': "Variedad de comercios locales que satisfacen las necesidades cotidianas",
+        'gastronomia': "Opciones gastronómicas variadas con locales de comida tradicional y modernos",
+        'recreacion': "Espacios de recreación y áreas verdes para actividades al aire libre",
+        'servicios_financieros': "Servicios bancarios y financieros disponibles en la zona",
+        'seguridad': "Nivel de seguridad estándar con presencia policial y vigilancia comunitaria",
+        'servicios': "Servicios generales y utilitarios disponibles en el barrio"
+    }
+    
+    # Transformar datos al formato de entorno.json para el frontend
+    entorno_data = {}
+    
+    for row in rows:
+        nombre = row['nombre']
+        data = json.loads(row['data'])
+        fecha = row['fecha_actualizacion']
+        nombre_title = nombre.title()
+        
+        # Mapeo de campos del backend al formato frontend
+        field_mappings = {
+            'transporte': ['estaciones_cercanas', 'lineas_colectivo', 'descripcion'],
+            'educacion': ['escuelas', 'universidades', 'colegios'],
+            'salud': ['hospitales', 'centros_salud', 'clinicas', 'farmacias'],
+            'comercio': ['supermercados', 'centros_comerciales', 'tiendas'],
+            'gastronomia': ['bares_restaurantes', 'restaurantes', 'cafeterias'],
+            'recreacion': ['plazas', 'parques', 'espacios_verdes', 'actividades'],
+            'servicios_financieros': ['bancos', 'cajeros', 'servicios'],
+            'seguridad': ['comisarias', 'seguridad'],
+            'servicios': ['farmacias', 'centros_servicios', 'otros_servicios']
+        }
+        
+        # Convertir datos al formato requerido
+        barrio_json = {
+            'nombre': nombre_title,
+            'descripcion_general': data.get('resumen_general', data.get('perfil_barrio', f"{nombre_title} es un barrio con características propias de la zona norte del Gran Buenos Aires, ofreciendo una combinación de residentialidad y servicios locales.")),
+            'fecha_actualizacion': fecha
+        }
+        
+        for cat_key, fields in field_mappings.items():
+            cat_data = data.get('categorias', {}).get(cat_key, {}) if 'categorias' in data else data.get(cat_key, {})
+            
+            # Extraer items de los campos disponibles
+            items = []
+            for field_name in fields:
+                if field_name in cat_data and cat_data[field_name]:
+                    value = cat_data[field_name]
+                    if isinstance(value, list):
+                        items.extend([str(v).strip() for v in value if v])
+                    elif isinstance(value, str) and value.strip():
+                        parts = [p.strip() for p in value.split(',') if p.strip()]
+                        items.extend(parts)
+            
+            # Si hay items, usarlos; si no, proporcionar fallback mejorado
+            if items:
+                # Filtrar duplicados manteniendo el orden
+                seen = set()
+                unique_items = []
+                for item in items:
+                    item_lower = item.lower()
+                    if item_lower not in seen:
+                        seen.add(item_lower)
+                        unique_items.append(item)
+                barrio_json[cat_key] = unique_items
+            else:
+                # Usar datos de respaldo específicos por categoría
+                barrio_json[cat_key] = FALLBACK_DATA.get(cat_key, FALLBACK_DATA['servicios']).copy()
+        
+        entorno_data[nombre] = barrio_json
+    
+    # Crear respuesta completa con metadata
+    response = {
+        "metadata": {
+            "version": "1.0.0",
+            "generado_el": datetime.now().isoformat(),
+            "descripcion": "Archivo completo de análisis de entorno con metadatos de campos",
+            "total_barrios": len(entorno_data),
+            "rubros": RUBRO_METADATA
+        },
+        "data": entorno_data
+    }
+    
+    return response
