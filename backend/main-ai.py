@@ -2364,6 +2364,78 @@ def verificar_barrio_existe(nombre: str):
         }
 
 
+# ✅ ENDPOINT PARA GENERAR entorno.json
+@app.get("/api/barrios/generate-json")
+def generar_entorno_json():
+    """
+    Genera el archivo entorno.json con todos los barrios para el frontend del sitio principal.
+    Este endpoint es usado por el CMS para exportar los datos.
+    """
+    conn = get_barrios_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT nombre, data, fecha_actualizacion FROM barrios_data ORDER BY nombre')
+    rows = cursor.fetchall()
+    conn.close()
+    
+    if not rows:
+        raise HTTPException(status_code=404, detail="No hay barrios registrados")
+    
+    # Transformar datos al formato de entorno.json para el frontend
+    entorno_data = {}
+    
+    for row in rows:
+        nombre = row['nombre']
+        data = json.loads(row['data'])
+        fecha = row['fecha_actualizacion']
+        
+        # Transformar cada categoría a arrays de strings
+        def extract_items(category_data, field_names):
+            """Extrae items de una categoría, convirtiendo todo a arrays de strings"""
+            items = []
+            for field_name in field_names:
+                if field_name in category_data and category_data[field_name]:
+                    value = category_data[field_name]
+                    if isinstance(value, list):
+                        items.extend([str(v).strip() for v in value if v])
+                    elif isinstance(value, str) and value.strip():
+                        # Dividir por comas si es un string
+                        parts = [p.strip() for p in value.split(',') if p.strip()]
+                        items.extend(parts)
+            return items if items else ["Información del barrio"]
+        
+        # Mapeo de campos del backend al formato frontend
+        field_mappings = {
+            'transporte': ['estaciones_cercanas', 'lineas_colectivo', 'descripcion'],
+            'educacion': ['escuelas', 'universidades', 'colegios'],
+            'salud': ['hospitales', 'centros_salud', 'clinicas', 'farmacias'],
+            'comercio': ['supermercados', 'centros_comerciales', 'tiendas'],
+            'gastronomia': ['bares_restaurantes', 'restaurantes', 'cafeterias'],
+            'recreacion': ['plazas', 'parques', 'espacios_verdes', 'actividades'],
+            'servicios_financieros': ['bancos', 'cajeros', 'servicios'],
+            'seguridad': ['comisarias', 'seguridad'],
+            'servicios': ['farmacias', 'centros_servicios', 'otros_servicios']
+        }
+        
+        # Convertir datos al formato requerido
+        barrio_json = {
+            'nombre': nombre.title(),
+            'descripcion_general': data.get('resumen_general', data.get('perfil_barrio', '')),
+            'fecha_actualizacion': fecha
+        }
+        
+        for cat_key, fields in field_mappings.items():
+            # Determinar la categoría correcta (puede estar en 'categorias' o directamente)
+            cat_data = data.get('categorias', {}).get(cat_key, {}) if 'categorias' in data else data.get(cat_key, {})
+            items = extract_items(cat_data, fields)
+            if items:
+                barrio_json[cat_key] = items
+        
+        entorno_data[nombre] = barrio_json
+    
+    return entorno_data
+
+
 # ✅ INICIO
 if __name__ == "__main__":
     import uvicorn
