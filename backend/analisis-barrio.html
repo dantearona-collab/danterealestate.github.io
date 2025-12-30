@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestor de Barrios - Dante Propiedades</title>
-    <link rel="stylesheet" href="analisis-barrio.css?v=20241229-1000">
+    <link rel="stylesheet" href="analisis-barrio.css?v=20241229-1100">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -60,6 +60,9 @@
             </button>
             <button class="toolbar-btn delete-btn" onclick="deleteBarrio()" id="delete-btn" disabled>
                 <i class="fas fa-trash"></i> Eliminar
+            </button>
+            <button class="toolbar-btn export-btn" onclick="generateEntornoJSON()" title="Generar archivo entorno.json para el frontend">
+                <i class="fas fa-file-code"></i> Exportar JSON
             </button>
             <span id="save-status" class="save-status"></span>
         </div>
@@ -397,37 +400,7 @@
             <div class="initial-content">
                 <div class="initial-icon">🏙️</div>
                 <h2>Gestor de Barrios Dante Propiedades</h2>
-                <p>Administrá los datos de todos los barrios de CABA. Creá, editá y actualizá información con asistencia de IA.</p>
-                <div class="features-list">
-                    <div class="feature-item">
-                        <span class="feature-icon">✨</span>
-                        <div>
-                            <h4>Crear Nuevos Barrios</h4>
-                            <p>Escribí el nombre de un barrio nuevo y generá sus datos automáticamente con IA</p>
-                        </div>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">✏️</span>
-                        <div>
-                            <h4>Editar Datos</h4>
-                            <p>Modificá cualquier campo manualmente para mantener la información actualizada</p>
-                        </div>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">🔄</span>
-                        <div>
-                            <h4>Regenerar con IA</h4>
-                            <p>Actualizá los datos usando inteligencia artificial cuando lo necesites</p>
-                        </div>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">💾</span>
-                        <div>
-                            <h4>Persistencia Automática</h4>
-                            <p>Todos los cambios se guardan en la base de datos SQLite</p>
-                        </div>
-                    </div>
-                </div>
+                <p>Escribí el nombre de un barrio para ver o editar sus datos.</p>
             </div>
         </section>
     </main>
@@ -454,6 +427,6 @@
         <p class="footer-note">Los datos se almacenan en SQLite y pueden regenerarse con IA</p>
     </footer>
 
-    <script src="analisis-barrio.js?v=20241229-1000"></script>
+    <script src="analisis-barrio.js?v=20241230-0950"></script>
 </body>
 </html>
