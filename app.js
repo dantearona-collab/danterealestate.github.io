@@ -3049,123 +3049,6 @@ function createDefaultEnvironmentData(barrio, direccion) {
         descripcion: ''
     };
 }
-
-async function loadEnvironmentInfo(direccion, barrio) {
-    console.log('🌍 Cargando información del entorno para:', barrio);
-    console.log('📍 Dirección recibida:', direccion);
-    console.log('🏢 Barrio recibido (del JSON):', barrio);
-    
-    // USAR UBICACIÓN EXACTA DE GOOGLE MAPS SI ESTÁ DISPONIBLE
-    let ubicacionExacta = null;
-    let descripcion = '';
-    if (window.currentProperty && window.currentProperty.googleLocation) {
-        ubicacionExacta = window.currentProperty.googleLocation;
-        console.log('🗺️ Ubicación exacta de Google Maps:', ubicacionExacta);
-    }
-    // Obtener descripción de la propiedad
-    if (window.currentProperty && window.currentProperty.descripcion) {
-        descripcion = window.currentProperty.descripcion;
-        console.log('📝 Descripción de la propiedad:', descripcion);
-    }
-    
-    try {
-        // Mostrar loading
-        showEnvironmentLoading();
-        
-        // USAR BARRIO REAL DEL JSON + UBICACIÓN EXACTA SI ESTÁ DISPONIBLE
-        const ubicacionParaBusqueda = ubicacionExacta || `${barrio}, Buenos Aires, Argentina`;
-        
-        // ========================================
-        // CONECTAR CON ENDPOINT DEL BACKEND
-        // ========================================
-        const API_BASE_URL = "https://danterealestate-github-io-ewlg.onrender.com";
-        
-        console.log('🌐 Consultando endpoint del backend para:', barrio);
-        
-        // Hacer llamada al endpoint del backend
-        const response = await fetch(`${API_BASE_URL}/api/barrios/${encodeURIComponent(barrio)}`);
-        
-        let environmentData;
-        let dataSource = 'unknown';
-        
-        if (response.ok) {
-            const result = await response.json();
-            console.log('✅ Datos recibidos del backend:', result);
-            
-            if (result.success && result.data) {
-                // Transformar datos del formato backend al formato frontend
-                environmentData = transformBackendDataToFrontend(result.data, barrio, direccion, descripcion);
-                dataSource = 'backend';
-                console.log('✅✅ DATOS DESDE API REAL (backend) - Barrio:', barrio);
-            } else {
-                throw new Error(result.detail || 'Datos del barrio no disponibles');
-            }
-        } else {
-            console.log(`⚠️ Endpoint del backend no disponible (HTTP ${response.status}), usando datos simulados`);
-            console.log('⚠️⚠️ DATOS SIMULADOS (fallback) - Barrio:', barrio);
-            
-            // Si el endpoint falla, usar los datos simulados existentes
-            const searchResults = await performParallelSearchesReal(
-                [
-                    `${ubicacionParaBusqueda} servicios comercios farmacias heladerías`,
-                    `${ubicacionParaBusqueda} transporte público subte colectivo líneas`,
-                    `${ubicacionParaBusqueda} escuelas colegios universidades educación`,
-                    `${ubicacionParaBusqueda} hospitales clínicas centros médicos salud`,
-                    `${ubicacionParaBusqueda} supermercados centros comerciales shopping`,
-                    `${ubicacionParaBusqueda} restaurantes cafeterías gastronomía`,
-                    `${ubicacionParaBusqueda} parques plazas espacios verdes`,
-                    `${ubicacionParaBusqueda} bancos cajeros servicios financieros`
-                ],
-                ubicacionParaBusqueda,
-                barrio
-            );
-            
-            environmentData = processEnvironmentData(searchResults, direccion, barrio, ubicacionParaBusqueda, descripcion);
-            dataSource = 'simulated';
-            console.log('✅ Datos simulados generados correctamente');
-        }
-        
-        // Mostrar en consola la fuente de datos
-        console.log('═══════════════════════════════════════════════');
-        console.log(`📊 FUENTE DE DATOS: ${dataSource.toUpperCase()}`);
-        console.log(`🏢 Barrio: ${barrio}`);
-        console.log(`📅 Fecha: ${new Date().toLocaleString()}`);
-        console.log('═══════════════════════════════════════════════');
-        
-        // Mostrar resultados
-        displayEnvironmentInfo(environmentData);
-        
-    } catch (error) {
-        console.error('Error cargando entorno:', error);
-        // Fallback: usar datos simulados si algo falla
-        console.log('⚠️ Usando datos de respaldo por error:', error.message);
-        
-        try {
-            const ubicacionParaBusqueda = ubicacionExacta || `${barrio}, Buenos Aires, Argentina`;
-            const searchResults = await performParallelSearchesReal(
-                [
-                    `${ubicacionParaBusqueda} servicios comercios farmacias heladerías`,
-                    `${ubicacionParaBusqueda} transporte público subte colectivo líneas`,
-                    `${ubicacionParaBusqueda} escuelas colegios universidades educación`,
-                    `${ubicacionParaBusqueda} hospitales clínicas centros médicos salud`,
-                    `${ubicacionParaBusqueda} supermercados centros comerciales shopping`,
-                    `${ubicacionParaBusqueda} restaurantes cafeterías gastronomía`,
-                    `${ubicacionParaBusqueda} parques plazas espacios verdes`,
-                    `${ubicacionParaBusqueda} bancos cajeros servicios financieros`
-                ],
-                ubicacionParaBusqueda,
-                barrio
-            );
-            
-            const fallbackData = processEnvironmentData(searchResults, direccion, barrio, ubicacionParaBusqueda, descripcion);
-            displayEnvironmentInfo(fallbackData);
-        } catch (fallbackError) {
-            console.error('Error en fallback:', fallbackError);
-            showEnvironmentError('Error cargando información del entorno');
-        }
-    }
-}
-
 // Transformar datos del backend al formato esperado por displayEnvironmentInfo
 function transformBackendDataToFrontend(data, barrio, direccion, descripcion = '') {
     const categories = {};
@@ -4994,6 +4877,321 @@ function closePropertyPanelSimple() {
     
     console.log('🔒 Panel simple cerrado');
 }
+
+/**
+ * GESTIÓN DE INFORMACIÓN DEL ENTORNO (USANDO JSON ESTÁTICO)
+ * Sistema simplificado basado en archivo entorno.json generado por el CMS
+ */
+
+// Cache para datos del entorno - evita cargar el mismo archivo múltiples veces
+let entornoCache = null;
+
+/**
+ * Función principal para obtener información del entorno
+ * Reemplaza la lógica anterior de llamadas al backend y regex
+ * @param {string} direccion - La dirección de la propiedad
+ * @param {string} barrio - El nombre del barrio
+ */
+async function loadEnvironmentInfo(direccion, barrio) {
+    console.log('🌍 Cargando información del entorno para:', barrio);
+    try {
+        // Mostrar indicador de carga
+        showEnvironmentLoading();
+        
+        // Cargar datos desde JSON estático
+        const environmentData = await loadEnvironmentFromJSON(barrio, direccion);
+        
+        // Verificar que tenemos datos válidos
+        if (!environmentData || Object.keys(environmentData).length === 0) {
+            console.warn('No se encontraron datos para el barrio:', barrio);
+            showEnvironmentError('No hay información disponible para este barrio');
+            return;
+        }
+        
+        console.log('📊 FUENTE DE DATOS: JSON ESTÁTICO (CMS)');
+        console.log('✅ Datos cargados correctamente:', environmentData);
+        
+        // Mostrar la información en la interfaz
+        displayEnvironmentInfo(environmentData);
+        
+    } catch (error) {
+        console.error('❌ Error cargando entorno:', error);
+        showEnvironmentError('Error cargando información del entorno. Por favor, intenta nuevamente.');
+    }
+}
+
+/**
+ * Cargar datos del entorno desde el archivo JSON estático
+ * @param {string} barrio - El nombre del barrio a buscar
+ * @param {string} direccion - La dirección de la propiedad
+ * @returns {Promise<Object>} - Datos formateados para mostrar
+ */
+async function loadEnvironmentFromJSON(barrio, direccion) {
+    // Normalizar el nombre del barrio para la búsqueda
+    const normalizedBarrio = normalizeBarrioName(barrio);
+    console.log('🔍 Buscando barrio normalizado:', normalizedBarrio);
+    
+    // Cargar el JSON estático solo una vez
+    if (!entornoCache) {
+        console.log('📄 Cargando archivo entorno.json...');
+        const response = await fetch('/entorno.json');
+        
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status} - No se pudo cargar entorno.json`);
+        }
+        
+        entornoCache = await response.json();
+        console.log('✅ Archivo entorno.json cargado:', Object.keys(entornoCache));
+    }
+    
+    // Buscar el barrio en el JSON (búsqueda flexible)
+    const barrioData = findBarrioInCache(normalizedBarrio, entornoCache);
+    
+    if (!barrioData) {
+        console.warn('⚠️ Barrio no encontrado:', normalizedBarrio);
+        return null;
+    }
+    
+    // Formatear los datos para mostrar en la interfaz
+    return formatEnvironmentData(barrioData, direccion);
+}
+
+/**
+ * Normalizar el nombre del barrio para comparación
+ * @param {string} nombre - Nombre del barrio
+ * @returns {string} - Nombre normalizado en minúsculas
+ */
+function normalizeBarrioName(nombre) {
+    if (!nombre) return '';
+    return nombre.toLowerCase()
+        .trim()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+}
+
+/**
+ * Buscar barrio en el cache con coincidencia flexible
+ * @param {string} normalizedBarrio - Nombre normalizado del barrio
+ * @param {Object} cache - Cache de datos
+ * @returns {Object|null} - Datos del barrio encontrado
+ */
+function findBarrioInCache(normalizedBarrio, cache) {
+    // Intentar coincidencia exacta primero
+    if (cache[normalizedBarrio]) {
+        return cache[normalizedBarrio];
+    }
+    
+    // Buscar coincidencias parciales (el barrio contiene el término o viceversa)
+    const cacheKeys = Object.keys(cache);
+    
+    for (const key of cacheKeys) {
+        const keyNormalized = normalizeBarrioName(key);
+        
+        // Verificar si el barrio contiene el término o viceversa
+        if (normalizedBarrio.includes(keyNormalized) || 
+            keyNormalized.includes(normalizedBarrio)) {
+            console.log(`🏘️ Coincidencia encontrada: "${key}" para "${normalizedBarrio}"`);
+            return cache[key];
+        }
+    }
+    
+    return null;
+}
+
+/**
+ * Formatear datos del entorno para mostrar en la interfaz
+ * @param {Object} barrioData - Datos crudos del barrio
+ * @param {string} direccion - Dirección de la propiedad
+ * @returns {Object} - Datos formateados
+ */
+function formatEnvironmentData(barrioData, direccion) {
+    // Crear estructura de categorías esperada por displayEnvironmentInfo
+    const formattedData = {
+        summary: {
+            title: `Información del Entorno: ${barrioData.nombre || 'Barrio'}`,
+            description: barrioData.descripcion_general || 'Información del entorno disponible.'
+        },
+        categories: []
+    };
+    
+    // Mapeo de categorías del JSON a categorías del sistema
+    const categoryMap = {
+        'transporte': 'Transporte',
+        'salud': 'Salud',
+        'educacion': 'Educación',
+        'comercio': 'Comercio',
+        'entretenimiento': 'Entretenimiento',
+        'seguridad': 'Seguridad',
+        'espacios_verdes': 'Espacios Verdes',
+        'conectividad': 'Conectividad'
+    };
+    
+    // Procesar cada categoría disponible
+    for (const [jsonKey, displayName] of Object.entries(categoryMap)) {
+        if (barrioData[jsonKey] && Array.isArray(barrioData[jsonKey]) && barrioData[jsonKey].length > 0) {
+            const items = barrioData[jsonKey].map(item => formatItem(jsonKey, item));
+            
+            formattedData.categories.push({
+                id: jsonKey,
+                name: displayName,
+                icon: getIconForCategory(jsonKey),
+                items: items
+            });
+        }
+    }
+    
+    return formattedData;
+}
+
+/**
+ * Formatear un item individual según su tipo
+ * @param {string} category - Categoría del item
+ * @param {Object} item - Item a formatear
+ * @returns {Object} - Item formateado
+ */
+function formatItem(category, item) {
+    const baseItem = {
+        id: generateItemId(),
+        title: '',
+        description: '',
+        icon: 'default'
+    };
+    
+    switch (category) {
+        case 'transporte':
+            baseItem.title = item.tipo || item.linea || 'Transporte';
+            baseItem.description = formatTransporteDescription(item);
+            baseItem.icon = 'transporte';
+            break;
+            
+        case 'salud':
+            baseItem.title = item.nombre || item.tipo || 'Establecimiento de Salud';
+            baseItem.description = item.direccion || '';
+            baseItem.icon = 'salud';
+            break;
+            
+        case 'educacion':
+            baseItem.title = item.nombre || item.tipo || 'Institución Educativa';
+            baseItem.description = item.direccion || '';
+            baseItem.icon = 'educacion';
+            break;
+            
+        case 'comercio':
+            baseItem.title = item.nombre || 'Comercio';
+            baseItem.description = item.direccion || '';
+            baseItem.icon = 'comercio';
+            break;
+            
+        case 'entretenimiento':
+            baseItem.title = item.nombre || item.tipo || 'Lugar de Entretenimiento';
+            baseItem.description = item.direccion || '';
+            baseItem.icon = 'entretenimiento';
+            break;
+            
+        case 'seguridad':
+            baseItem.title = item.nombre || item.tipo || 'Servicio de Seguridad';
+            baseItem.description = item.direccion || '';
+            baseItem.icon = 'seguridad';
+            break;
+            
+        case 'espacios_verdes':
+            baseItem.title = item.nombre || 'Espacio Verde';
+            baseItem.description = item.area || '';
+            baseItem.icon = 'parque';
+            break;
+            
+        case 'conectividad':
+            baseItem.title = item.tipo || 'Tipo de Servicio';
+            baseItem.description = formatConectividadDescription(item);
+            baseItem.icon = 'internet';
+            break;
+            
+        default:
+            baseItem.title = item.nombre || 'Información';
+            baseItem.description = item.direccion || JSON.stringify(item);
+    }
+    
+    return baseItem;
+}
+
+/**
+ * Formatear descripción para items de transporte
+ */
+function formatTransporteDescription(item) {
+    let desc = '';
+    if (item.estaciones) {
+        desc = `Estaciones: ${Array.isArray(item.estaciones) ? item.estaciones.join(', ') : item.estaciones}`;
+    } else if (item.lineas) {
+        desc = `Líneas: ${Array.isArray(item.lineas) ? item.lineas.join(', ') : item.lineas}`;
+    }
+    return desc;
+}
+
+/**
+ * Formatear descripción para items de conectividad
+ */
+function formatConectividadDescription(item) {
+    if (item.proveedores) {
+        return `Proveedores: ${Array.isArray(item.proveedores) ? item.proveedores.join(', ') : item.proveedores}`;
+    }
+    return '';
+}
+
+/**
+ * Generar ID único para items
+ */
+function generateItemId() {
+    return 'env-' + Math.random().toString(36).substr(2, 9);
+}
+
+/**
+ * Obtener icono para una categoría
+ */
+function getIconForCategory(category) {
+    const icons = {
+        'transporte': 'bus',
+        'salud': 'hospital',
+        'educacion': 'graduation-cap',
+        'comercio': 'shopping-cart',
+        'entretenimiento': 'film',
+        'seguridad': 'shield-alt',
+        'espacios_verdes': 'tree',
+        'conectividad': 'wifi'
+    };
+    return icons[category] || 'map-marker-alt';
+}
+
+/**
+ * Mostrar indicador de carga
+ */
+function showEnvironmentLoading() {
+    const container = document.getElementById('environment-cards-container');
+    if (container) {
+        container.innerHTML = `
+            <div class="environment-loading">
+                <div class="spinner"></div>
+                <p>Cargando información del entorno...</p>
+            </div>
+        `;
+    }
+}
+
+/**
+ * Mostrar error en la carga
+ * @param {string} message - Mensaje de error
+ */
+function showEnvironmentError(message) {
+    const container = document.getElementById('environment-cards-container');
+    if (container) {
+        container.innerHTML = `
+            <div class="environment-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>${message}</p>
+            </div>
+        `;
+    }
+}
+
 
 // Hacer función disponible globalmente
 window.createPropertyPanelSimple = createPropertyPanelSimple;
