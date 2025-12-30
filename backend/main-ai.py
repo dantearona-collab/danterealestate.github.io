@@ -581,41 +581,35 @@ import os as _os
 if _os.path.exists("imgs"):
     app.mount("/imgs", StaticFiles(directory="imgs"), name="images")
 
-# Servir archivos de la raíz (logo.png, llave.png, etc.)
-# Solo para desarrollo local, no sirve archivos sensibles
-# IMPORTANTE: Usar regex para que solo coincida con archivos, NO con rutas de API
-@app.get("/{file_path:path}", name="serve_static_files")
-async def serve_root_files(file_path: str):
-    """
-    Serve static files from root directory like logo.png, llave.png, etc.
-    Solo sirve archivos que tengan extensión (contengan punto).
-    Las rutas de API (/api/*) no entran aquí porque tienen su propio manejo.
-    """
-    # Solo procesar si la ruta contiene un punto (indicador de archivo)
-    # Esto evita que rutas como /status, /api/barrios sean capturadas aquí
-    if '.' not in file_path:
-        raise HTTPException(status_code=404, detail="Archivo no encontrado")
-    
-    # Lista de archivos permitidos en la raíz
-    allowed_files = ['logo.png', 'llave.png', 'favicon.ico', 'robots.txt', 'sitemap.xml']
-    
-    # Extraer solo el nombre del archivo
-    import os
-    filename = os.path.basename(file_path)
-    
-    # Verificar si es un archivo permitido
-    if filename in allowed_files:
-        root_dir = os.path.dirname(os.path.abspath(__file__))
-        file_path_abs = os.path.join(root_dir, filename)
-        
-        if os.path.exists(file_path_abs):
-            from fastapi.responses import FileResponse
-            return FileResponse(file_path_abs)
-        else:
-            raise HTTPException(status_code=404, detail=f"Archivo {filename} no encontrado")
-    
-    # Si no es un archivo permitido, retornar 404
-    raise HTTPException(status_code=404, detail="Archivo no encontrado")
+# ============================================
+# NOTA: El endpoint catch-all para archivos estáticos fue deshabilitado
+# porque estaba interfiriendo con los endpoints de la API.
+# Los archivos estáticos (logo.png, llave.png, etc.) pueden servirse
+# de otras formas si son necesarios.
+# ============================================
+# @app.get("/{file_path:path}")
+# async def serve_root_files(file_path: str):
+#     """Serve static files from root directory like logo.png, llave.png, etc."""
+#     # Lista de archivos permitidos en la raíz
+#     allowed_files = ['logo.png', 'llave.png', 'favicon.ico', 'robots.txt', 'sitemap.xml']
+#     
+#     # Extraer solo el nombre del archivo
+#     import os
+#     filename = os.path.basename(file_path)
+#     
+#     # Verificar si es un archivo permitido
+#     if filename in allowed_files:
+#         root_dir = os.path.dirname(os.path.abspath(__file__))
+#         file_path_abs = os.path.join(root_dir, filename)
+#         
+#         if os.path.exists(file_path_abs):
+#             from fastapi.responses import FileResponse
+#             return FileResponse(file_path_abs)
+#         else:
+#             raise HTTPException(status_code=404, detail=f"Archivo {filename} no encontrado")
+#     
+#     # Si no es un archivo permitido, retornar 404
+#     raise HTTPException(status_code=404, detail="Archivo no encontrado")
 
 # ✅ CACHE
 query_cache = {}
