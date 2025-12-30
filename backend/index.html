@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dante Propiedades - Galería con Múltiples Imágenes</title>
-    <link rel="icon" href="/logo.png" type="image/png">
+    <link rel="icon" href="llave.png" type="image/png">
 
     <style>
         /* RESET Y BASE */
@@ -3014,7 +3014,7 @@
                     ` : ''}
 
                     <div class="property-actions">
-                         <button class="btn-details" onclick="showPropertyDetails('${prop.id_temporal}')">🔍 Ver Detalles</button>
+                         <button class="btn-details" onclick='if(typeof mostrarImagenesByIndex==="function") mostrarImagenesByIndex(${index})'>Ver Fotos</button>
                     </div>
                 </div>
             `;
