@@ -21,7 +21,9 @@ const AppState = {
     searchResults: [],
     formData: {},
     originalData: null,
-    apiError: null
+    apiError: null,
+    metadata: null,  // Metadatos de rubros y campos
+    categoriesOrder: []  // Orden de categorías definido por el backend
 };
 
 // ============================================
@@ -137,6 +139,30 @@ const ApiClient = {
             force_refresh: forceRefresh
         });
         return this.request(`/ai/environment-analysis?${params.toString()}`);
+    },
+
+    /**
+     * Obtiene los metadatos de campos por rubro desde el backend
+     * Este método es usado por el CMS para generar formularios dinámicos
+     * 
+     * Returns:
+     * - rubros: definición completa de cada rubro con sus campos
+     * - categorias_ordenadas: lista de rubros ordenados por importancia
+     */
+    async getEntornoMetadata() {
+        return this.request('/api/entorno/metadata');
+    },
+
+    /**
+     * Genera el archivo completo entorno.json con metadatos y datos
+     * Este endpoint es usado para integración con dantepropiedades.com.ar
+     * 
+     * Returns objeto con:
+     * - metadata: versión, rubros definidos, configuración
+     * - data: datos de cada barrio
+     */
+    async generateEntornoJSON() {
+        return this.request('/api/entorno/generate-json');
     }
 };
 
@@ -1445,6 +1471,208 @@ const EventHandlers = {
 };
 
 // ============================================
+// GENERACIÓN DINÁMICA DE FORMULARIOS BASADA EN METADATA
+// ============================================
+
+/**
+ * Carga los metadatos de campos desde el backend
+ * Esta función es llamada durante la inicialización de la aplicación
+ */
+async function loadMetadata() {
+    console.log('📋 Cargando metadatos de campos desde el backend...');
+    
+    try {
+        const response = await ApiClient.getEntornoMetadata();
+        
+        if (response.success) {
+            AppState.metadata = response.rubros;
+            AppState.categoriesOrder = response.categorias_ordenadas || [];
+            
+            console.log(`✅ Metadatos cargados: ${Object.keys(AppState.metadata).length} rubros`);
+            console.log('📋 Orden de categorías:', AppState.categoriesOrder);
+            
+            // Opcional: generar formularios dinámicamente si es necesario
+            // generateDynamicForms();
+        } else {
+            console.warn('⚠️ No se pudieron cargar los metadatos:', response.message);
+        }
+    } catch (error) {
+        console.warn('⚠️ Error cargando metadatos:', error.message);
+        console.log('ℹ️ La aplicación continuará con formularios hardcodeados');
+    }
+}
+
+/**
+ * Genera campos de formulario dinámicamente basados en los metadatos
+ * Esta función puede ser usada para regenerar formularios si el HTML cambia
+ * 
+ * @param {string} categoryKey - Clave del rubro (ej: 'transporte', 'comercio')
+ * @param {HTMLElement} container - Contenedor donde insertar los campos
+ */
+function generateFormFieldsForCategory(categoryKey, container) {
+    if (!AppState.metadata || !AppState.metadata[categoryKey]) {
+        console.warn(`⚠️ No hay metadatos para la categoría: ${categoryKey}`);
+        return;
+    }
+    
+    const metadata = AppState.metadata[categoryKey];
+    const fields = metadata.campos || {};
+    
+    // Ordenar campos por su propiedad 'orden'
+    const sortedFields = Object.entries(fields).sort((a, b) => {
+        return (a[1].orden || 99) - (b[1].orden || 99);
+    });
+    
+    sortedFields.forEach(([fieldKey, fieldConfig]) => {
+        const fieldHtml = createFormField(categoryKey, fieldKey, fieldConfig);
+        container.insertAdjacentHTML('beforeend', fieldHtml);
+    });
+}
+
+/**
+ * Crea el HTML para un campo de formulario individual
+ * 
+ * @param {string} categoryKey - Clave del rubro (ej: 'transporte')
+ * @param {string} fieldKey - Clave del campo (ej: 'estaciones')
+ * @param {object} fieldConfig - Configuración del campo desde los metadatos
+ * @returns {string} HTML del campo
+ */
+function createFormField(categoryKey, fieldKey, fieldConfig) {
+    const fieldId = `${categoryKey}-${fieldKey}`;
+    const label = fieldConfig.label || fieldKey;
+    const placeholder = fieldConfig.placeholder || '';
+    const type = fieldConfig.tipo || 'input';
+    
+    let fieldHtml = '';
+    
+    switch (type) {
+        case 'textarea':
+            fieldHtml = `
+                <div class="form-field">
+                    <label for="${fieldId}">${label}:</label>
+                    <textarea 
+                        id="${fieldId}" 
+                        class="editor-input" 
+                        placeholder="${placeholder}"
+                        disabled
+                        rows="3"
+                    ></textarea>
+                </div>
+            `;
+            break;
+            
+        case 'select':
+            const options = fieldConfig.options || [];
+            const optionsHtml = options.map(opt => 
+                `<option value="${opt}">${opt}</option>`
+            ).join('');
+            fieldHtml = `
+                <div class="form-field">
+                    <label for="${fieldId}">${label}:</label>
+                    <select 
+                        id="${fieldId}" 
+                        class="editor-input" 
+                        disabled
+                    >
+                        <option value="">Seleccionar...</option>
+                        ${optionsHtml}
+                    </select>
+                </div>
+            `;
+            break;
+            
+        case 'input':
+        default:
+            fieldHtml = `
+                <div class="form-field">
+                    <label for="${fieldId}">${label}:</label>
+                    <input 
+                        type="text" 
+                        id="${fieldId}" 
+                        class="editor-input" 
+                        placeholder="${placeholder}"
+                        disabled
+                    />
+                </div>
+            `;
+            break;
+    }
+    
+    return fieldHtml;
+}
+
+/**
+ * Obtiene el valor de un campo del formulario basado en su ID
+ * Soporta los tres tipos de campos: input, textarea, select
+ * 
+ * @param {string} fieldId - ID del campo (ej: 'transporte-estaciones')
+ * @returns {string} Valor del campo
+ */
+function getFieldValue(fieldId) {
+    const element = document.getElementById(fieldId);
+    if (!element) return '';
+    
+    return element.value?.trim() || '';
+}
+
+/**
+ * Establece el valor de un campo del formulario
+ * 
+ * @param {string} fieldId - ID del campo
+ * @param {string} value - Valor a establecer
+ */
+function setFieldValue(fieldId, value) {
+    const element = document.getElementById(fieldId);
+    if (!element) return;
+    
+    // Habilitar temporalmente para poder establecer el valor
+    const wasDisabled = element.disabled;
+    element.disabled = false;
+    element.value = value || '';
+    element.disabled = wasDisabled;
+}
+
+/**
+ * Recoge los datos de todos los campos de una categoría usando metadatos
+ * 
+ * @param {string} categoryKey - Clave del rubro (ej: 'transporte')
+ * @returns {object} Objeto con los datos de la categoría
+ */
+function collectCategoryData(categoryKey) {
+    if (!AppState.metadata || !AppState.metadata[categoryKey]) {
+        return {};
+    }
+    
+    const metadata = AppState.metadata[categoryKey];
+    const fields = metadata.campos || {};
+    const categoryData = {};
+    
+    Object.keys(fields).forEach(fieldKey => {
+        const fieldId = `${categoryKey}-${fieldKey}`;
+        categoryData[fieldKey] = getFieldValue(fieldId);
+    });
+    
+    return categoryData;
+}
+
+/**
+ * Rellena los campos de una categoría con datos usando metadatos
+ * 
+ * @param {string} categoryKey - Clave del rubro
+ * @param {object} categoryData - Datos de la categoría
+ */
+function populateCategoryFields(categoryKey, categoryData) {
+    if (!categoryData || typeof categoryData !== 'object') {
+        return;
+    }
+    
+    Object.entries(categoryData).forEach(([fieldKey, value]) => {
+        const fieldId = `${categoryKey}-${fieldKey}`;
+        setFieldValue(fieldId, value);
+    });
+}
+
+// ============================================
 // INICIALIZACIÓN DE LA APLICACIÓN
 // ============================================
 
@@ -1480,6 +1708,9 @@ async function initApp() {
     } catch (error) {
         console.warn('No se pudieron cargar los barrios:', error.message);
     }
+    
+    // Cargar metadatos de campos para formularios dinámicos
+    await loadMetadata();
     
     console.log('✅ CMS de Barrios inicializado correctamente');
 }
