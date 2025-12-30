@@ -2137,15 +2137,18 @@ def generar_entorno_json():
         
         # Mapeo de campos del backend al formato frontend
         field_mappings = {
-            'transporte': ['estaciones_cercanas', 'lineas_colectivo', 'descripcion'],
-            'educacion': ['escuelas', 'universidades', 'colegios'],
+            'transporte': ['estaciones', 'colectivos', 'descripcion'],
+            'educacion': ['escuelas', 'universidades', 'colegios', 'nivel_inicial', 'primario', 'secundario', 'universitario'],
             'salud': ['hospitales', 'centros_salud', 'clinicas', 'farmacias'],
             'comercio': ['supermercados', 'centros_comerciales', 'tiendas'],
             'gastronomia': ['bares_restaurantes', 'restaurantes', 'cafeterias'],
-            'recreacion': ['plazas', 'parques', 'espacios_verdes', 'actividades'],
-            'servicios_financieros': ['bancos', 'cajeros', 'servicios'],
-            'seguridad': ['comisarias', 'seguridad'],
-            'servicios': ['farmacias', 'centros_servicios', 'otros_servicios']
+            'recreacion': ['plazas', 'parques', 'espacios_verdes', 'actividades', 'areas_deportivas'],
+            'servicios_financieros': ['bancos', 'cajeros', 'cajeros_automaticos'],
+            'seguridad': ['comisarias', 'comisaria', 'seguridad'],
+            'servicios': ['farmacias', 'centros_servicios', 'otros_servicios'],
+            'espacios_verdes': ['parques'],
+            'contaminacion': ['nivel_ruido', 'fuente', 'principal_fuente'],
+            'vida_barrio': ['bares', 'cultura']
         }
         
         # Convertir datos al formato requerido
@@ -2258,8 +2261,8 @@ def transformar_a_formatofrontend(data: dict, nombre: str) -> dict:
         categorias['transporte'] = {
             'puntuacion': t.get('puntuacion', 0),
             'descripcion': t.get('descripcion', ''),
-            'estaciones': ', '.join(t.get('estaciones_cercanas', [])) if t.get('estaciones_cercanas') else t.get('estaciones', ''),
-            'colectivos': ', '.join(t.get('lineas_colectivo', [])) if t.get('lineas_colectivo') else t.get('colectivos', '')
+            'estaciones': ', '.join(t.get('estaciones', []) or t.get('estaciones_cercanas', [])),
+            'colectivos': ', '.join(t.get('colectivos', []) or t.get('lineas_colectivo', []))
         }
 
     # Comercio
@@ -3052,15 +3055,18 @@ def generar_entorno_json_con_metadata():
         
         # Mapeo de campos del backend al formato frontend
         field_mappings = {
-            'transporte': ['estaciones_cercanas', 'lineas_colectivo', 'descripcion'],
-            'educacion': ['escuelas', 'universidades', 'colegios'],
+            'transporte': ['estaciones', 'colectivos', 'descripcion'],
+            'educacion': ['escuelas', 'universidades', 'colegios', 'nivel_inicial', 'primario', 'secundario', 'universitario'],
             'salud': ['hospitales', 'centros_salud', 'clinicas', 'farmacias'],
             'comercio': ['supermercados', 'centros_comerciales', 'tiendas'],
             'gastronomia': ['bares_restaurantes', 'restaurantes', 'cafeterias'],
-            'recreacion': ['plazas', 'parques', 'espacios_verdes', 'actividades'],
-            'servicios_financieros': ['bancos', 'cajeros', 'servicios'],
-            'seguridad': ['comisarias', 'seguridad'],
-            'servicios': ['farmacias', 'centros_servicios', 'otros_servicios']
+            'recreacion': ['plazas', 'parques', 'espacios_verdes', 'actividades', 'areas_deportivas'],
+            'servicios_financieros': ['bancos', 'cajeros', 'cajeros_automaticos'],
+            'seguridad': ['comisarias', 'comisaria', 'seguridad'],
+            'servicios': ['farmacias', 'centros_servicios', 'otros_servicios'],
+            'espacios_verdes': ['parques'],
+            'contaminacion': ['nivel_ruido', 'fuente', 'principal_fuente'],
+            'vida_barrio': ['bares', 'cultura']
         }
         
         # Convertir datos al formato requerido
