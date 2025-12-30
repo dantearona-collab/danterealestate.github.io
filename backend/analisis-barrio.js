@@ -7,8 +7,8 @@
 // CONFIGURACIÓN Y CONSTANTES
 // ============================================
 
-// const API_BASE_URL = 'http://localhost:8000';
-const API_BASE_URL = "https://danterealestate-github-io-ewlg.onrender.com";const API_TIMEOUT = 30000;
+const API_BASE_URL = 'http://localhost:8000';
+//const API_BASE_URL = "https://danterealestate-github-io-ewlg.onrender.com";const API_TIMEOUT = 30000;
 
 // ============================================
 // ESTADO DE LA APLICACIÓN
