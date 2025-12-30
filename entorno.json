@@ -1,120 +1,1606 @@
 {
-  "palermo": {
-    "nombre": "Palermo",
-    "descripcion_general": "Palermo es uno de los barrios más grandes y diversos de Buenos Aires, combinando áreas residenciales, comerciales y de entretenimiento. Conocido por sus numerosos parques, museos y una vibrante vida nocturna.",
+  "agronomia": {
+    "nombre": "Agronomia",
+    "descripcion_general": "Agronomia es un barrio de Buenos Aires con una propuesta gastronómica destacada (70/100) y excelentes servicios financieros (65/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      {"tipo": "Subte", "linea": "Línea D", "estaciones": ["Palermo", "Juramento"]},
-      {"tipo": "Tren", "linea": "Belgrano", "estaciones": ["Palermo"]},
-      {"tipo": "Colectivo", "lineas": ["15", "29", "34", "36", "41", "55", "57", "59", "60", "63", "64", "68", "93", "95", "108", "111", "118", "128", "152", "161", "168", "172", "176", "188"]},
-      {"tipo": "Bici", "estaciones": "Red de Ecobici con múltiples estaciones en todo el barrio"}
-    ],
-    "salud": [
-      {"tipo": "Hospital", "nombre": "Hospital Italiano", "direccion": "Güemes 2620"},
-      {"tipo": "Hospital", "nombre": "Hospital Fernández", "direccion": "Cránmer 3351"},
-      {"tipo": "Sanatorio", "nombre": "Sanatorio de la Trinidad Palermo", "direccion": "Mendoza 4185"},
-      {"tipo": "Clínica", "nombre": "Clínica Sagrada Familia", "direccion": "José Hernández 1742"},
-      {"tipo": "Centro Médico", "nombre": "CEMIC", "direccion": "Galván 4102"},
-      {"tipo": "Farmacia", "nombre": "Farmacity Palermo", "direccion": "Santa Fe 3250"}
+      "Información del barrio"
     ],
     "educacion": [
-      {"tipo": "Universidad", "nombre": "Universidad de Palermo", "direccion": "Mario Bravo 1050"]},
-      {"tipo": "Universidad", "nombre": "Facultad de Derecho (UBA)", "direccion": "Puerto Madryn 211"]},
-      {"tipo": "Escuela", "nombre": "Escuela Normal Mariano Moreno", "direccion": "Figueroa Alcorta 7355"]},
-      {"tipo": "Instituto", "nombre": "Instituto San José de Palermo", "direccion": "Brazuelos 2144"]},
-      {"tipo": "Instituto", "nombre": "Colegio Bayard", "direccion": "Talcahuano 1135"]}
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
     ],
     "comercio": [
-      {"tipo": "Centro Comercial", "nombre": "Alto Palermo Shopping", "direccion": "Santa Fe 3250"]},
-      {"tipo": "Mercado", "nombre": "Mercado de las Artes", "direccion": "Armenia 1640"]},
-      {"tipo": "Supermercado", "nombre": "Coto Hypermarket", "direccion": "Santa Fe 4388"]},
-      {"tipo": "Hipermercado", "nombre": "Carrefour Express", "direccion": "Berutti 3350"]}
+      "Información del barrio"
     ],
-    "entretenimiento": [
-      {"tipo": "Teatro", "nombre": "Teatro Colón", "direccion": "Cerrito 628"]},
-      {"tipo": "Teatro", "nombre": "Teatro Gran Rex", "direccion": "Av. Corrientes 857"]},
-      {"tipo": "Cine", "nombre": "Cine Hoyts Palermo", "direccion": "Santa Fe 3250"]},
-      {"tipo": "Museo", "nombre": "Museo de Arte Latinoamericano (MALBA)", "direccion": "Figueroa Alcorta 3415"]},
-      {"tipo": "Parque", "nombre": "Parque Tres de Febrero (Los Bosques)", "direccion": "Libertador y Sarmiento"]},
-      {"tipo": "Parque", "nombre": "Jardín Botánico", "direccion": "Santa Fe 3951"]},
-      {"tipo": "Bares", "nombre": "Palermo Soho", "direccion": "Honduras 4800"]}
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Macro"
     ],
     "seguridad": [
-      {"tipo": "Comisaría", "nombre": "Comisaría 15A", "direccion": "Güemes 4350"]},
-      {"tipo": "Comisaría", "nombre": "Comisaría 6A", "direccion": "Av. Córdoba 2600"]},
-      {"tipo": "Bomberos", "nombre": "Compañía 16", "direccion": "Mendoza 2100"]}
+      "Información del barrio"
     ],
-    "espacios_verdes": [
-      {"tipo": "Parque", "nombre": "Parque Palermo", "area": "34 hectáreas"]},
-      {"tipo": "Parque", "nombre": "Parque Los Andes", "area": "8 hectáreas"]},
-      {"tipo": "Jardín", "nombre": "Jardín Botánico Carlos Thays", "area": "7 hectáreas"]},
-      {"tipo": "Plaza", "nombre": "Plaza Armenia", "area": "0.5 hectáreas"]},
-      {"tipo": "Plaza", "nombre": "Plaza Cortázar", "area": "1.2 hectáreas"]}
-    ],
-    "conectividad": [
-      {"tipo": "Fibra", "proveedores": ["Movistar", "Telecom", "Directv"]},
-      {"tipo": "Cable", "proveedores": ["Movistar TV", "Telecom", "Cablevisión"]},
-      {"tipo": "Móvil", "proveedores": ["Movistar", "Personal, Claro"]}
+    "servicios": [
+      "Información del barrio"
     ]
   },
-  "recoleta": {
-    "nombre": "Recoleta",
-    "descripcion_general": "Recoleta es uno de los barrios más elegantes y tradicionales de Buenos Aires, conocido por su arquitectura french, sus numerosos museos y su histórica necrópolis donde descansan los restos de Eva Perón.",
+  "almagro": {
+    "nombre": "Almagro",
+    "descripcion_general": "Almagro es un barrio de Buenos Aires con una propuesta gastronómica destacada (80/100) y excelentes servicios financieros (78/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      {"tipo": "Subte", "linea": "Línea D", "estaciones": ["Recoleta", "Agüero"]},
-      {"tipo": "Subte", "linea": "Línea H", "estaciones": ["Facultad de Derecho"]},
-      {"tipo": "Colectivo", "lineas": ["17", "41", "61", "62", "93", "95", "102", "110", "118", "124", "130", "132", "152"]}
-    ],
-    "salud": [
-      {"tipo": "Hospital", "nombre": "Hospital Británico", "direccion": "Perdriel 74"]},
-      {"tipo": "Sanatorio", "nombre": "Sanatorio de la Trinidad Mitre", "direccion": "Electrocutores 2150"]},
-      {"tipo": "Clínica", "nombre": "Clínica Santa Isabel", "direccion": "Av. Corrientes 2037"]}
+      "Información del barrio"
     ],
     "educacion": [
-      {"tipo": "Universidad", "nombre": "Universidad Católica Argentina", "direccion": "Av. Alicia Moreau de Justo 1400"]},
-      {"tipo": "Colegio", "nombre": "Colegio Nacional de Buenos Aires", "direccion": "4 de Mayo 2470"]},
-      {"tipo": "Instituto", "nombre": "Instituto San Andrés", "direccion": "Av. del Libertador 6000"]}
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
     ],
     "comercio": [
-      {"tipo": "Centro Comercial", "nombre": "Patio Bullrich", "direccion": "Av. del Libertador 750"]},
-      {"tipo": "Calle Comercial", "nombre": "Av. Santa Fe (Shopping Street)", "direccion": "Av. Santa Fe 900-1400"]}
+      "Información del barrio"
     ],
-    "entretenimiento": [
-      {"tipo": "Museo", "nombre": "Museo Nacional de Bellas Artes", "direccion": "Av. del Libertador 1473"]},
-      {"tipo": "Museo", "nombre": "Museo de Arte Decorativo", "direccion": "Av. del Libertador 1902"]},
-      {"tipo": "Museo", "nombre": "Cementerio de la Recoleta", "direccion": "Junín 1790"]},
-      {"tipo": "Centro Cultural", "nombre": "Centro Cultural Recoleta", "direccion": "Junín 1930"]}
+    "gastronomia": [
+      "Información del barrio"
     ],
-    "espacios_verdes": [
-      {"tipo": "Plaza", "nombre": "Plaza San Martín", "area": "1.8 hectáreas"]},
-      {"tipo": "Plaza", "nombre": "Plaza Rodríguez Larreta", "area": "0.8 hectáreas"]}
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Macro",
+      "Banco Supervielle",
+      "Banco BBVA"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "balvanera": {
+    "nombre": "Balvanera",
+    "descripcion_general": "Balvanera es un barrio de Buenos Aires con una propuesta gastronómica destacada (75/100) y excelentes servicios financieros (75/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Macro",
+      "Banco BBVA",
+      "Banco Supervielle"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "barracas": {
+    "nombre": "Barracas",
+    "descripcion_general": "Barracas es un barrio de Buenos Aires con una propuesta gastronómica destacada (76/100) y excelentes servicios financieros (70/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
     ]
   },
   "belgrano": {
     "nombre": "Belgrano",
-    "descripcion_general": "Belgrano es un barrio residencial del norte de Buenos Aires, caracterizado por sus amplias calles arborizadas, construcciones de estilo inglés y una importante comunidad china en la zona de Chinatown.",
+    "descripcion_general": "Belgrano es un barrio de Buenos Aires con una propuesta gastronómica destacada (82/100) y excelentes servicios financieros (82/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      {"tipo": "Tren", "linea": "Belgrano Norte", "estaciones": ["Belgrano C", "Belgrano R"]},
-      {"tipo": "Subte", "linea": "Línea D", "estaciones": ["Belgrano", "Los Incas"]},
-      {"tipo": "Colectivo", "lineas": ["15", "28", "29", "44", "55", "56", "63", "65", "107", "114", "130", "133", "134", "152", "160", "161", "165", "168"]}
-    ],
-    "salud": [
-      {"tipo": "Hospital", "nombre": "Hospital Dr. Ignacio Pirovano", "direccion": "Monroe 3555"]},
-      {"tipo": "Sanatorio", "nombre": "Sanatorio Mater Dei", "direccion": "Moldes 1844"]},
-      {"tipo": "Centro Médico", "nombre": "Sanatorio de la Trinidad Belgrano", "direccion": "Blanco Encalada 1543"]}
+      "Información del barrio"
     ],
     "educacion": [
-      {"tipo": "Universidad", "nombre": "Universidad de Belgrano", "direccion": "Zabala 1837"]},
-      {"tipo": "Colegio", "nombre": "Colegio Ward", "direccion": "Moldes 1086"]},
-      {"tipo": "Instituto", "nombre": "Instituto San Pablo", "direccion": "11 de Septiembre 2550"]}
+      "Información del barrio"
     ],
-    "entretenimiento": [
-      {"tipo": "Parque", "nombre": "Parque Manuel Belgrano (China Town)", "area": "2.5 hectáreas"]},
-      {"tipo": "Estadio", "nombre": "Estadio Monumental (River Plate)", "direccion": "Av. Figueroa Alcorta 7597"]},
-      {"tipo": "Museo", "nombre": "Museo Casa de Yrurtia", "direccion": "José Hernández 1350"]}
+    "salud": [
+      "Información del barrio"
     ],
-    "espacios_verdes": [
-      {"tipo": "Parque", "nombre": "Parque Belgrano", "area": "12 hectáreas"]},
-      {"tipo": "Plaza", "nombre": "Plaza Barrancas de Belgrano", "area": "1.5 hectáreas"]}
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Supervielle",
+      "Banco Macro",
+      "Banco Santander"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "boedo": {
+    "nombre": "Boedo",
+    "descripcion_general": "Boedo es un barrio de Buenos Aires con una propuesta gastronómica destacada (72/100) y excelentes servicios financieros (72/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "En Boedo tienes conectividad con 31 líneas de colectivos de CABA (modernizadas en 2025 con color azul). Conexión directa con líneas de subte A",
+      "B",
+      "D",
+      "E",
+      "H. Paradas estratégicas y acceso rápido a todas las zonas de la ciudad."
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "caballito": {
+    "nombre": "Caballito",
+    "descripcion_general": "Caballito es un barrio de Buenos Aires con una propuesta gastronómica destacada (75/100) y excelentes servicios financieros (78/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Supervielle",
+      "Banco Macro",
+      "Banco Santander"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "chacarita": {
+    "nombre": "Chacarita",
+    "descripcion_general": "Chacarita es un barrio de Buenos Aires con una propuesta gastronómica destacada (92/100) y excelentes servicios financieros (80/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco BBVA (Sucursal Av. Álvarez Thomas 402)",
+      "Banco Ciudad",
+      "Banco Supervielle",
+      "Banco Macro",
+      "Banco Santander"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "coghlan": {
+    "nombre": "Coghlan",
+    "descripcion_general": "Coghlan es un barrio de Buenos Aires con una propuesta gastronómica destacada (70/100) y excelentes servicios financieros (68/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Supervielle"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "colegiales": {
+    "nombre": "Colegiales",
+    "descripcion_general": "Colegiales es un barrio de Buenos Aires con una propuesta gastronómica destacada (78/100) y excelentes servicios financieros (75/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Supervielle",
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "constitucion": {
+    "nombre": "Constitucion",
+    "descripcion_general": "Constitucion es un barrio de Buenos Aires con una propuesta gastronómica destacada (72/100) y excelentes servicios financieros (72/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Macro",
+      "Banco BBVA"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "flores": {
+    "nombre": "Flores",
+    "descripcion_general": "Flores es un barrio de Buenos Aires con una propuesta gastronómica destacada (78/100) y excelentes servicios financieros (75/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Supervielle",
+      "Banco Macro",
+      "Banco Santander"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "floresta": {
+    "nombre": "Floresta",
+    "descripcion_general": "Floresta es un barrio de Buenos Aires con una propuesta gastronómica destacada (68/100) y excelentes servicios financieros (65/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "la boca": {
+    "nombre": "La Boca",
+    "descripcion_general": "La Boca es un barrio de Buenos Aires con una propuesta gastronómica destacada (70/100) y excelentes servicios financieros (65/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "la paternal": {
+    "nombre": "La Paternal",
+    "descripcion_general": "La Paternal es un barrio de Buenos Aires con una propuesta gastronómica destacada (72/100) y excelentes servicios financieros (70/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "liniers": {
+    "nombre": "Liniers",
+    "descripcion_general": "Liniers es un barrio de Buenos Aires con una propuesta gastronómica destacada (70/100) y excelentes servicios financieros (68/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Macro",
+      "Banco Supervielle"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "mataderos": {
+    "nombre": "Mataderos",
+    "descripcion_general": "Mataderos es un barrio de Buenos Aires con una propuesta gastronómica destacada (68/100) y excelentes servicios financieros (65/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "microcentro": {
+    "nombre": "Microcentro",
+    "descripcion_general": "Microcentro es un barrio de Buenos Aires con una propuesta gastronómica destacada (80/100) y excelentes servicios financieros (100/100).",
+    "fecha_actualizacion": "2025-12-29 16:30:37",
+    "transporte": [
+      "En Microcentro tienes acceso a las líneas de subte Línea D (conecta Palermo con el centro porteño) y Línea C (conecta Retiro y Constitución). Colectivos específicos: 105",
+      "39",
+      "59",
+      "7",
+      "8. Paradas estratégicas en el microcentro con acceso directo a todas las zonas de CABA."
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco de la Nación Argentina (Casa Central)",
+      "Banco de la Provincia de Buenos Aires",
+      "Banco Ciudad",
+      "Banco Santander",
+      "Banco BBVA",
+      "Banco Macro",
+      "Banco ICBC",
+      "Banco Supervielle",
+      "Banco Comafi",
+      "Banco Hipotecario",
+      "Alta concentración en Av. Corrientes",
+      "Florida",
+      "Sarmiento",
+      "Red Banelco y Link disponibles 24/7",
+      "Cajeros con función depósito en entidades principales"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "monserrat": {
+    "nombre": "Monserrat",
+    "descripcion_general": "Monserrat es un barrio de Buenos Aires con una propuesta gastronómica destacada (78/100) y excelentes servicios financieros (85/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco de la Nación Argentina",
+      "Banco Ciudad",
+      "Banco BBVA",
+      "Banco Supervielle"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "monte castro": {
+    "nombre": "Monte Castro",
+    "descripcion_general": "Monte Castro es un barrio de Buenos Aires con una propuesta gastronómica destacada (65/100) y excelentes servicios financieros (60/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "nueva pompeya": {
+    "nombre": "Nueva Pompeya",
+    "descripcion_general": "Nueva Pompeya es un barrio de Buenos Aires con una propuesta gastronómica destacada (65/100) y excelentes servicios financieros (60/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "núñez": {
+    "nombre": "Núñez",
+    "descripcion_general": "Núñez es un barrio de Buenos Aires con una propuesta gastronómica destacada (72/100) y excelentes servicios financieros (70/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "palermo": {
+    "nombre": "Palermo",
+    "descripcion_general": "Palermo es un barrio de Buenos Aires con una propuesta gastronómica destacada (95/100) y excelentes servicios financieros (85/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Supervielle",
+      "Banco Macro",
+      "Banco Santander"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "parque avellaneda": {
+    "nombre": "Parque Avellaneda",
+    "descripcion_general": "Parque Avellaneda es un barrio de Buenos Aires con una propuesta gastronómica destacada (68/100) y excelentes servicios financieros (62/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "En Parque Avellaneda tienes acceso a colectivos específicos: 114",
+      "126",
+      "180",
+      "4",
+      "55",
+      "86",
+      "50",
+      "7. Tren SARMIENTO con estaciones cercanas. Conexión con líneas de subte A y E. Excelente conectividad con el resto de la ciudad."
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "parque chacabuco": {
+    "nombre": "Parque Chacabuco",
+    "descripcion_general": "Parque Chacabuco es un barrio de Buenos Aires con una propuesta gastronómica destacada (70/100) y excelentes servicios financieros (65/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "parque chas": {
+    "nombre": "Parque Chas",
+    "descripcion_general": "Parque Chas es un barrio de Buenos Aires con una propuesta gastronómica destacada (70/100) y excelentes servicios financieros (62/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "parque patricios": {
+    "nombre": "Parque Patricios",
+    "descripcion_general": "Parque Patricios es un barrio de Buenos Aires con una propuesta gastronómica destacada (68/100) y excelentes servicios financieros (65/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "pilar": {
+    "nombre": "Pilar",
+    "descripcion_general": "Pilar es un barrio de Buenos Aires con .",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "En Pilar tienes acceso a la Autopista Acceso Norte Ramal Pilar y Ruta 8. Líneas de colectivo específicas: Línea 57",
+      "Línea 510 (Pilar Bus S.A.)",
+      "Línea 176. Conexiones con Ruta Bus S.A. hacia Moreno",
+      "Areco",
+      "y Cardales."
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Información del barrio"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "puerto madero": {
+    "nombre": "Puerto Madero",
+    "descripcion_general": "Puerto Madero es un barrio de Buenos Aires con una propuesta gastronómica destacada (95/100) y excelentes servicios financieros (95/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco de la Nación Argentina",
+      "Banco Ciudad",
+      "Banco Santander",
+      "Banco BBVA",
+      "Banco Supervielle"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "recoleta": {
+    "nombre": "Recoleta",
+    "descripcion_general": "Recoleta es un barrio de Buenos Aires con una propuesta gastronómica destacada (85/100) y excelentes servicios financieros (90/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad (Sucursal Barrio Norte)",
+      "Banco Supervielle",
+      "Banco Santander",
+      "Banco BBVA"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "retiro": {
+    "nombre": "Retiro",
+    "descripcion_general": "Retiro es un barrio de Buenos Aires con una propuesta gastronómica destacada (85/100) y excelentes servicios financieros (88/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco de la Nación Argentina",
+      "Banco Ciudad",
+      "Banco BBVA",
+      "Banco Santander"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "saavedra": {
+    "nombre": "Saavedra",
+    "descripcion_general": "Saavedra es un barrio de Buenos Aires con una propuesta gastronómica destacada (68/100) y excelentes servicios financieros (65/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "san cristobal": {
+    "nombre": "San Cristobal",
+    "descripcion_general": "San Cristobal es un barrio de Buenos Aires con una propuesta gastronómica destacada (72/100) y excelentes servicios financieros (70/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "san nicolas": {
+    "nombre": "San Nicolas",
+    "descripcion_general": "San Nicolas es un barrio de Buenos Aires con una propuesta gastronómica destacada (80/100) y excelentes servicios financieros (82/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco de la Nación Argentina",
+      "Banco Ciudad",
+      "Banco BBVA",
+      "Banco Santander"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "san telmo": {
+    "nombre": "San Telmo",
+    "descripcion_general": "San Telmo es un barrio de Buenos Aires con una propuesta gastronómica destacada (90/100) y excelentes servicios financieros (75/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Supervielle",
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "versailles": {
+    "nombre": "Versailles",
+    "descripcion_general": "Versailles es un barrio de Buenos Aires con una propuesta gastronómica destacada (65/100) y excelentes servicios financieros (60/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "villa crespo": {
+    "nombre": "Villa Crespo",
+    "descripcion_general": "Villa Crespo es un barrio de Buenos Aires con una propuesta gastronómica destacada (88/100) y excelentes servicios financieros (72/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Macro",
+      "Banco Supervielle"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "villa del parque": {
+    "nombre": "Villa Del Parque",
+    "descripcion_general": "Villa Del Parque es un barrio de Buenos Aires con una propuesta gastronómica destacada (72/100) y excelentes servicios financieros (70/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "villa devoto": {
+    "nombre": "Villa Devoto",
+    "descripcion_general": "Villa Devoto es un barrio de Buenos Aires con una propuesta gastronómica destacada (75/100) y excelentes servicios financieros (75/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Supervielle",
+      "Banco Macro",
+      "Banco BBVA"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "villa general mitre": {
+    "nombre": "Villa General Mitre",
+    "descripcion_general": "Villa General Mitre es un barrio de Buenos Aires con una propuesta gastronómica destacada (68/100) y excelentes servicios financieros (65/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "villa lugano": {
+    "nombre": "Villa Lugano",
+    "descripcion_general": "Villa Lugano es un barrio de Buenos Aires con una propuesta gastronómica destacada (65/100) y excelentes servicios financieros (60/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "villa luro": {
+    "nombre": "Villa Luro",
+    "descripcion_general": "Villa Luro es un barrio de Buenos Aires con una propuesta gastronómica destacada (72/100) y excelentes servicios financieros (70/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "villa ortuzar": {
+    "nombre": "Villa Ortuzar",
+    "descripcion_general": "Villa Ortuzar es un barrio de Buenos Aires con una propuesta gastronómica destacada (73/100) y excelentes servicios financieros (68/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "villa pueyrredon": {
+    "nombre": "Villa Pueyrredon",
+    "descripcion_general": "Villa Pueyrredon es un barrio de Buenos Aires con una propuesta gastronómica destacada (70/100) y excelentes servicios financieros (68/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "villa real": {
+    "nombre": "Villa Real",
+    "descripcion_general": "Villa Real es un barrio de Buenos Aires con una propuesta gastronómica destacada (62/100) y excelentes servicios financieros (58/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "villa santa rita": {
+    "nombre": "Villa Santa Rita",
+    "descripcion_general": "Villa Santa Rita es un barrio de Buenos Aires con una propuesta gastronómica destacada (65/100) y excelentes servicios financieros (60/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ]
+  },
+  "villa urquiza": {
+    "nombre": "Villa Urquiza",
+    "descripcion_general": "Villa Urquiza es un barrio de Buenos Aires con una propuesta gastronómica destacada (78/100) y excelentes servicios financieros (75/100).",
+    "fecha_actualizacion": "2025-12-29 13:30:23",
+    "transporte": [
+      "Información del barrio"
+    ],
+    "educacion": [
+      "Información del barrio"
+    ],
+    "salud": [
+      "Información del barrio"
+    ],
+    "comercio": [
+      "Información del barrio"
+    ],
+    "gastronomia": [
+      "Información del barrio"
+    ],
+    "recreacion": [
+      "Información del barrio"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Supervielle",
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Información del barrio"
+    ],
+    "servicios": [
+      "Información del barrio"
     ]
   }
 }
