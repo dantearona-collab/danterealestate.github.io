@@ -4,31 +4,55 @@
     "descripcion_general": "Agronomia es un barrio de Buenos Aires con una propuesta gastronómica destacada (70/100) y excelentes servicios financieros (65/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "almagro": {
@@ -36,22 +60,40 @@
     "descripcion_general": "Almagro es un barrio de Buenos Aires con una propuesta gastronómica destacada (80/100) y excelentes servicios financieros (78/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
@@ -60,10 +102,16 @@
       "Banco BBVA"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "balvanera": {
@@ -71,22 +119,40 @@
     "descripcion_general": "Balvanera es un barrio de Buenos Aires con una propuesta gastronómica destacada (75/100) y excelentes servicios financieros (75/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
@@ -95,10 +161,16 @@
       "Banco Supervielle"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "barracas": {
@@ -106,32 +178,56 @@
     "descripcion_general": "Barracas es un barrio de Buenos Aires con una propuesta gastronómica destacada (76/100) y excelentes servicios financieros (70/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "belgrano": {
@@ -139,22 +235,40 @@
     "descripcion_general": "Belgrano es un barrio de Buenos Aires con una propuesta gastronómica destacada (82/100) y excelentes servicios financieros (82/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
@@ -163,10 +277,16 @@
       "Banco Santander"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "boedo": {
@@ -181,29 +301,50 @@
       "H. Paradas estratégicas y acceso rápido a todas las zonas de la ciudad."
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "caballito": {
@@ -211,22 +352,40 @@
     "descripcion_general": "Caballito es un barrio de Buenos Aires con una propuesta gastronómica destacada (75/100) y excelentes servicios financieros (78/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
@@ -235,10 +394,16 @@
       "Banco Santander"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "chacarita": {
@@ -246,22 +411,40 @@
     "descripcion_general": "Chacarita es un barrio de Buenos Aires con una propuesta gastronómica destacada (92/100) y excelentes servicios financieros (80/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco BBVA (Sucursal Av. Álvarez Thomas 402)",
@@ -271,10 +454,16 @@
       "Banco Santander"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "coghlan": {
@@ -282,32 +471,56 @@
     "descripcion_general": "Coghlan es un barrio de Buenos Aires con una propuesta gastronómica destacada (70/100) y excelentes servicios financieros (68/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
       "Banco Supervielle"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "colegiales": {
@@ -315,22 +528,40 @@
     "descripcion_general": "Colegiales es un barrio de Buenos Aires con una propuesta gastronómica destacada (78/100) y excelentes servicios financieros (75/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
@@ -338,10 +569,16 @@
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "constitucion": {
@@ -349,22 +586,40 @@
     "descripcion_general": "Constitucion es un barrio de Buenos Aires con una propuesta gastronómica destacada (72/100) y excelentes servicios financieros (72/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
@@ -372,10 +627,16 @@
       "Banco BBVA"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "flores": {
@@ -383,22 +644,40 @@
     "descripcion_general": "Flores es un barrio de Buenos Aires con una propuesta gastronómica destacada (78/100) y excelentes servicios financieros (75/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
@@ -407,10 +686,16 @@
       "Banco Santander"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "floresta": {
@@ -418,31 +703,55 @@
     "descripcion_general": "Floresta es un barrio de Buenos Aires con una propuesta gastronómica destacada (68/100) y excelentes servicios financieros (65/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "la boca": {
@@ -450,32 +759,56 @@
     "descripcion_general": "La Boca es un barrio de Buenos Aires con una propuesta gastronómica destacada (70/100) y excelentes servicios financieros (65/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "la paternal": {
@@ -483,32 +816,56 @@
     "descripcion_general": "La Paternal es un barrio de Buenos Aires con una propuesta gastronómica destacada (72/100) y excelentes servicios financieros (70/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "liniers": {
@@ -516,22 +873,40 @@
     "descripcion_general": "Liniers es un barrio de Buenos Aires con una propuesta gastronómica destacada (70/100) y excelentes servicios financieros (68/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
@@ -539,10 +914,16 @@
       "Banco Supervielle"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "mataderos": {
@@ -550,32 +931,56 @@
     "descripcion_general": "Mataderos es un barrio de Buenos Aires con una propuesta gastronómica destacada (68/100) y excelentes servicios financieros (65/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "microcentro": {
@@ -590,19 +995,34 @@
       "8. Paradas estratégicas en el microcentro con acceso directo a todas las zonas de CABA."
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco de la Nación Argentina (Casa Central)",
@@ -622,10 +1042,16 @@
       "Cajeros con función depósito en entidades principales"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "monserrat": {
@@ -633,22 +1059,40 @@
     "descripcion_general": "Monserrat es un barrio de Buenos Aires con una propuesta gastronómica destacada (78/100) y excelentes servicios financieros (85/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco de la Nación Argentina",
@@ -657,10 +1101,16 @@
       "Banco Supervielle"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "monte castro": {
@@ -668,31 +1118,55 @@
     "descripcion_general": "Monte Castro es un barrio de Buenos Aires con una propuesta gastronómica destacada (65/100) y excelentes servicios financieros (60/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "nueva pompeya": {
@@ -700,31 +1174,55 @@
     "descripcion_general": "Nueva Pompeya es un barrio de Buenos Aires con una propuesta gastronómica destacada (65/100) y excelentes servicios financieros (60/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "núñez": {
@@ -732,32 +1230,56 @@
     "descripcion_general": "Núñez es un barrio de Buenos Aires con una propuesta gastronómica destacada (72/100) y excelentes servicios financieros (70/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "palermo": {
@@ -765,22 +1287,40 @@
     "descripcion_general": "Palermo es un barrio de Buenos Aires con una propuesta gastronómica destacada (95/100) y excelentes servicios financieros (85/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
@@ -789,10 +1329,16 @@
       "Banco Santander"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "parque avellaneda": {
@@ -810,28 +1356,49 @@
       "7. Tren SARMIENTO con estaciones cercanas. Conexión con líneas de subte A y E. Excelente conectividad con el resto de la ciudad."
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "parque chacabuco": {
@@ -839,31 +1406,55 @@
     "descripcion_general": "Parque Chacabuco es un barrio de Buenos Aires con una propuesta gastronómica destacada (70/100) y excelentes servicios financieros (65/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "parque chas": {
@@ -871,31 +1462,55 @@
     "descripcion_general": "Parque Chas es un barrio de Buenos Aires con una propuesta gastronómica destacada (70/100) y excelentes servicios financieros (62/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "parque patricios": {
@@ -903,31 +1518,55 @@
     "descripcion_general": "Parque Patricios es un barrio de Buenos Aires con una propuesta gastronómica destacada (68/100) y excelentes servicios financieros (65/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "pilar": {
@@ -942,28 +1581,52 @@
       "y Cardales."
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
-      "Información del barrio"
+      "Banco con sucursal en zona",
+      "Cajero automático disponible 24hs",
+      "Casa de cambios y transferencia",
+      "Cooperativa de ahorro y crédito"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "puerto madero": {
@@ -971,22 +1634,40 @@
     "descripcion_general": "Puerto Madero es un barrio de Buenos Aires con una propuesta gastronómica destacada (95/100) y excelentes servicios financieros (95/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco de la Nación Argentina",
@@ -996,10 +1677,16 @@
       "Banco Supervielle"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "recoleta": {
@@ -1007,22 +1694,40 @@
     "descripcion_general": "Recoleta es un barrio de Buenos Aires con una propuesta gastronómica destacada (85/100) y excelentes servicios financieros (90/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad (Sucursal Barrio Norte)",
@@ -1031,10 +1736,16 @@
       "Banco BBVA"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "retiro": {
@@ -1042,22 +1753,40 @@
     "descripcion_general": "Retiro es un barrio de Buenos Aires con una propuesta gastronómica destacada (85/100) y excelentes servicios financieros (88/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco de la Nación Argentina",
@@ -1066,10 +1795,16 @@
       "Banco Santander"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "saavedra": {
@@ -1077,32 +1812,56 @@
     "descripcion_general": "Saavedra es un barrio de Buenos Aires con una propuesta gastronómica destacada (68/100) y excelentes servicios financieros (65/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "san cristobal": {
@@ -1110,31 +1869,55 @@
     "descripcion_general": "San Cristobal es un barrio de Buenos Aires con una propuesta gastronómica destacada (72/100) y excelentes servicios financieros (70/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "san nicolas": {
@@ -1142,22 +1925,40 @@
     "descripcion_general": "San Nicolas es un barrio de Buenos Aires con una propuesta gastronómica destacada (80/100) y excelentes servicios financieros (82/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco de la Nación Argentina",
@@ -1166,10 +1967,16 @@
       "Banco Santander"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "san telmo": {
@@ -1177,22 +1984,40 @@
     "descripcion_general": "San Telmo es un barrio de Buenos Aires con una propuesta gastronómica destacada (90/100) y excelentes servicios financieros (75/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
@@ -1200,10 +2025,16 @@
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "versailles": {
@@ -1211,31 +2042,55 @@
     "descripcion_general": "Versailles es un barrio de Buenos Aires con una propuesta gastronómica destacada (65/100) y excelentes servicios financieros (60/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "villa crespo": {
@@ -1243,22 +2098,40 @@
     "descripcion_general": "Villa Crespo es un barrio de Buenos Aires con una propuesta gastronómica destacada (88/100) y excelentes servicios financieros (72/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
@@ -1266,10 +2139,16 @@
       "Banco Supervielle"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "villa del parque": {
@@ -1277,32 +2156,56 @@
     "descripcion_general": "Villa Del Parque es un barrio de Buenos Aires con una propuesta gastronómica destacada (72/100) y excelentes servicios financieros (70/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "villa devoto": {
@@ -1310,22 +2213,40 @@
     "descripcion_general": "Villa Devoto es un barrio de Buenos Aires con una propuesta gastronómica destacada (75/100) y excelentes servicios financieros (75/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
@@ -1334,10 +2255,16 @@
       "Banco BBVA"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "villa general mitre": {
@@ -1345,32 +2272,56 @@
     "descripcion_general": "Villa General Mitre es un barrio de Buenos Aires con una propuesta gastronómica destacada (68/100) y excelentes servicios financieros (65/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "villa lugano": {
@@ -1378,32 +2329,56 @@
     "descripcion_general": "Villa Lugano es un barrio de Buenos Aires con una propuesta gastronómica destacada (65/100) y excelentes servicios financieros (60/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "villa luro": {
@@ -1411,32 +2386,56 @@
     "descripcion_general": "Villa Luro es un barrio de Buenos Aires con una propuesta gastronómica destacada (72/100) y excelentes servicios financieros (70/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "villa ortuzar": {
@@ -1444,32 +2443,56 @@
     "descripcion_general": "Villa Ortuzar es un barrio de Buenos Aires con una propuesta gastronómica destacada (73/100) y excelentes servicios financieros (68/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "villa pueyrredon": {
@@ -1477,32 +2500,56 @@
     "descripcion_general": "Villa Pueyrredon es un barrio de Buenos Aires con una propuesta gastronómica destacada (70/100) y excelentes servicios financieros (68/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "villa real": {
@@ -1510,31 +2557,55 @@
     "descripcion_general": "Villa Real es un barrio de Buenos Aires con una propuesta gastronómica destacada (62/100) y excelentes servicios financieros (58/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "villa santa rita": {
@@ -1542,31 +2613,55 @@
     "descripcion_general": "Villa Santa Rita es un barrio de Buenos Aires con una propuesta gastronómica destacada (65/100) y excelentes servicios financieros (60/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   },
   "villa urquiza": {
@@ -1574,22 +2669,40 @@
     "descripcion_general": "Villa Urquiza es un barrio de Buenos Aires con una propuesta gastronómica destacada (78/100) y excelentes servicios financieros (75/100).",
     "fecha_actualizacion": "2025-12-29 13:30:23",
     "transporte": [
-      "Información del barrio"
+      "Estación de tren cercana con conexiones a toda la ciudad",
+      "Líneas de colectivo con parada principal en la zona",
+      "Acceso fácil a centro de la ciudad",
+      "Parada de taxi y remise a pocas cuadras"
     ],
     "educacion": [
-      "Información del barrio"
+      "Escuela primaria pública en el barrio",
+      "Instituto secundario cercano",
+      "Centro de educación inicial disponible",
+      "Universidad o terciario a distancia accesible"
     ],
     "salud": [
-      "Información del barrio"
+      "Centro de atención primaria a pocas cuadras",
+      "Farmacia de turno disponible",
+      "Consultorios médicos privados en la zona",
+      "Hospital público de referencia en zona cercana"
     ],
     "comercio": [
-      "Información del barrio"
+      "Comercio local de barrio con productos frescos",
+      "Supermercado mayorista y minorista en zona",
+      "Locales comerciales con variedad de rubros",
+      "Mercado de frutos del país cercano"
     ],
     "gastronomia": [
-      "Información del barrio"
+      "Restaurante local con comida tradicional",
+      "Café y panadería de barrio",
+      "Rotisería y local de comidas para llevar",
+      "Bar pub con ambiente familiar"
     ],
     "recreacion": [
-      "Información del barrio"
+      "Plaza principal del barrio con juegos",
+      "Area verde con jardín y bancos",
+      "Club social y deportivo del barrio",
+      "Ciclovía y sendero para caminar"
     ],
     "servicios_financieros": [
       "Banco Ciudad",
@@ -1597,10 +2710,16 @@
       "Banco Macro"
     ],
     "seguridad": [
-      "Información del barrio"
+      "Comisaría de barrio con atención",
+      "Vigilancia privada en zonas residenciales",
+      "Alumbrado público en todas las calles",
+      "Vecinos organizados con ronda nocturna"
     ],
     "servicios": [
-      "Información del barrio"
+      "Correo y oficina postal cercana",
+      "Centro de atención municipal",
+      "Gomería y servicio mecánico",
+      "Lavadero y tintorería en zona"
     ]
   }
 }
