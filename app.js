@@ -3084,64 +3084,106 @@ async function loadEnvironmentInfo(direccion, barrio) {
         const ubicacionParaBusqueda = ubicacionExacta || `${barrio}, Buenos Aires, Argentina`;
         
         // ========================================
-        // CONECTAR CON ENDPOINT DEL BACKEND
+        // CONECTAR CON NUEVOS ENDPOINTS DEL BACKEND
         // ========================================
-        const API_BASE_URL = "https://danterealestate-github-io-ewlg.onrender.com";
+        const API_BASE_URL = "";
+        const barrioEncoded = encodeURIComponent(barrio);
         
-        console.log('🌐 Consultando endpoint del backend para:', barrio);
+        console.log('🌐 Consultando nuevos endpoints del backend para:', barrio);
         
-        // Hacer llamada al endpoint del backend
-        const response = await fetch(`${API_BASE_URL}/api/barrios/${encodeURIComponent(barrio)}`);
-        
-        let environmentData;
+        let rawData = null;
         let dataSource = 'unknown';
         
-        if (response.ok) {
-            const result = await response.json();
-            console.log('✅ Datos recibidos del backend:', result);
+        // ========================================
+        // ESTRATEGIA: Primero intentar metadata, luego generate-json
+        // ========================================
+        
+        // 1. Intentar obtener metadata (información sobre rubros disponibles)
+        try {
+            const metadataResponse = await fetch(`/api/entorno/metadata?barrio=${barrioEncoded}`);
             
-            if (result.success && result.data) {
-                // Transformar datos del formato backend al formato frontend
-                environmentData = transformBackendDataToFrontend(result.data, barrio, direccion, descripcion);
-                dataSource = 'backend';
-                console.log('✅✅ DATOS DESDE API REAL (backend) - Barrio:', barrio);
-            } else {
-                throw new Error(result.detail || 'Datos del barrio no disponibles');
+            if (metadataResponse.ok) {
+                const metadataResult = await metadataResponse.json();
+                console.log('✅ Metadata recibida:', metadataResult);
+                
+                if (metadataResult.metadata && metadataResult.data && metadataResult.data.rubros) {
+                    rawData = metadataResult;
+                    dataSource = 'metadata';
+                    console.log('✅✅ DATOS DESDE /api/entorno/metadata - Barrio:', barrio);
+                }
             }
-        } else {
-            console.log(`⚠️ Endpoint del backend no disponible (HTTP ${response.status}), usando datos simulados`);
-            console.log('⚠️⚠️ DATOS SIMULADOS (fallback) - Barrio:', barrio);
-            
-            // Si el endpoint falla, usar los datos simulados existentes
-            const searchResults = await performParallelSearchesReal(
-                [
-                    `${ubicacionParaBusqueda} servicios comercios farmacias heladerías`,
-                    `${ubicacionParaBusqueda} transporte público subte colectivo líneas`,
-                    `${ubicacionParaBusqueda} escuelas colegios universidades educación`,
-                    `${ubicacionParaBusqueda} hospitales clínicas centros médicos salud`,
-                    `${ubicacionParaBusqueda} supermercados centros comerciales shopping`,
-                    `${ubicacionParaBusqueda} restaurantes cafeterías gastronomía`,
-                    `${ubicacionParaBusqueda} parques plazas espacios verdes`,
-                    `${ubicacionParaBusqueda} bancos cajeros servicios financieros`
-                ],
-                ubicacionParaBusqueda,
-                barrio
-            );
-            
-            environmentData = processEnvironmentData(searchResults, direccion, barrio, ubicacionParaBusqueda, descripcion);
-            dataSource = 'simulated';
-            console.log('✅ Datos simulados generados correctamente');
+        } catch (e) {
+            console.warn('Metadata no disponible, intentando generate-json');
         }
+        
+        // 2. Si no tenemos datos, intentar con generate-json (datos completos)
+        if (!rawData) {
+            try {
+                const direccionEncoded = encodeURIComponent(ubicacionParaBusqueda);
+                const generateResponse = await fetch(`/api/entorno/generate-json?direccion=${direccionEncoded}&barrio=${barrioEncoded}`);
+                
+                if (generateResponse.ok) {
+                    const generateResult = await generateResponse.json();
+                    console.log('✅ Generate-json recibido:', generateResult);
+                    
+                    if (generateResult.metadata && generateResult.data) {
+                        rawData = generateResult;
+                        dataSource = 'generate-json';
+                        console.log('✅✅ DATOS DESDE /api/entorno/generate-json - Barrio:', barrio);
+                    }
+                } else {
+                    throw new Error(`HTTP ${generateResponse.status}`);
+                }
+            } catch (e) {
+                console.warn('Generate-json no disponible:', e.message);
+            }
+        }
+        
+        // 3. Si aún no tenemos datos, fallback al método original
+        if (!rawData) {
+            console.log(`⚠️ Nuevos endpoints no disponibles, usando endpoint original`);
+            
+            const response = await fetch(`${API_BASE_URL}/api/barrios/${encodeURIComponent(barrio)}`);
+            
+            if (response.ok) {
+                const result = await response.json();
+                console.log('✅ Datos recibidos del backend original:', result);
+                
+                if (result.success && result.data) {
+                    // Transformar datos del formato backend al formato frontend
+                    rawData = {
+                        metadata: {
+                            barrio: barrio,
+                            timestamp: new Date().toISOString(),
+                            version: '1.0'
+                        },
+                        data: {
+                            rubros: transformBackendToRubros(result.data, barrio)
+                        }
+                    };
+                    dataSource = 'backend-original';
+                    console.log('✅✅ DATOS DESDE API ORIGINAL (transformados) - Barrio:', barrio);
+                } else {
+                    throw new Error(result.detail || 'Datos del barrio no disponibles');
+                }
+            } else {
+                throw new Error(`HTTP ${response.status}`);
+            }
+        }
+        
+        // Procesar los datos con la nueva estructura (metadata + data.rubros)
+        const processedData = processNewEnvironmentData(rawData, barrio, descripcion);
         
         // Mostrar en consola la fuente de datos
         console.log('═══════════════════════════════════════════════');
         console.log(`📊 FUENTE DE DATOS: ${dataSource.toUpperCase()}`);
         console.log(`🏢 Barrio: ${barrio}`);
         console.log(`📅 Fecha: ${new Date().toLocaleString()}`);
+        console.log(`📊 Rubros encontrados: ${processedData.totalRubros || 0}`);
         console.log('═══════════════════════════════════════════════');
         
         // Mostrar resultados
-        displayEnvironmentInfo(environmentData);
+        displayEnvironmentInfo(processedData);
         
     } catch (error) {
         console.error('Error cargando entorno:', error);
@@ -3641,6 +3683,169 @@ function testAIEnvironment() {
     });
 }
 
+// Transformar datos del backend original al formato de rubros
+function transformBackendToRubros(data, barrio) {
+    const rubros = [];
+    
+    // Mapeo de categorías del backend a rubros
+    const categoryMapping = {
+        transporte: 'Transporte',
+        educacion: 'Educación',
+        salud: 'Salud',
+        comercio: 'Comercio',
+        vida_barrio: 'Gastronomía',
+        servicios_financieros: 'Financiero',
+        seguridad: 'Seguridad',
+        servicios: 'Servicios'
+    };
+    
+    Object.entries(categoryMapping).forEach(([backendField, categoria]) => {
+        if (data[backendField]) {
+            // Extraer información del campo
+            const fieldData = data[backendField];
+            if (typeof fieldData === 'string') {
+                rubros.push({
+                    categoria: categoria,
+                    nombre: fieldData,
+                    direccion: '',
+                    distancia: '',
+                    horarios: '',
+                    icon: getCategoryIcon(categoria)
+                });
+            } else if (typeof fieldData === 'object') {
+                // Si es un objeto, intentar extraer datos
+                Object.entries(fieldData).forEach(([key, value]) => {
+                    if (typeof value === 'string' && value.trim()) {
+                        rubros.push({
+                            categoria: categoria,
+                            nombre: value,
+                            direccion: '',
+                            distancia: '',
+                            horarios: '',
+                            icon: getCategoryIcon(categoria)
+                        });
+                    }
+                });
+            }
+        }
+    });
+    
+    return rubros;
+}
+
+// Procesar datos del entorno con la nueva estructura metadata + data.rubros
+function processNewEnvironmentData(rawData, barrio, descripcion = '') {
+    console.log('🔧 Procesando nueva estructura de datos del entorno:', rawData);
+    
+    // Extraer metadata y data
+    let metadata = null;
+    let data = null;
+    
+    if (rawData.metadata && rawData.data) {
+        metadata = rawData.metadata;
+        data = rawData.data;
+    } else if (rawData.data && rawData.data.rubros) {
+        // Estructura alternativa
+        metadata = rawData.metadata || { barrio: barrio, timestamp: new Date().toISOString(), version: '1.0' };
+        data = rawData.data;
+    } else {
+        console.warn('⚠️ Estructura de datos desconocida, usando datos originales');
+        return {
+            lastUpdated: new Date().toLocaleString('es-AR'),
+            descripcion: descripcion,
+            barrio: barrio,
+            categories: {},
+            totalRubros: 0
+        };
+    }
+    
+    // Extraer rubros
+    const rubros = data.rubros || [];
+    console.log('📋 Rubros encontrados:', rubros.length);
+    
+    // Organizar rubros por categoría
+    const categories = {};
+    
+    if (Array.isArray(rubros) && rubros.length > 0) {
+        rubros.forEach(rubro => {
+            const categoria = rubro.categoria || 'Otros';
+            const icono = getCategoryIcon(categoria);
+            
+            if (!categories[categoria]) {
+                categories[categoria] = {
+                    icon: icono,
+                    title: categoria.charAt(0).toUpperCase() + categoria.slice(1),
+                    items: []
+                };
+            }
+            
+            // Crear objeto item completo
+            const itemParts = [rubro.nombre];
+            if (rubro.direccion) itemParts.push(`📍 ${rubro.direccion}`);
+            if (rubro.distancia) itemParts.push(`🚶 ${rubro.distancia}`);
+            if (rubro.horarios) itemParts.push(`🕐 ${rubro.horarios}`);
+            
+            categories[categoria].items.push({
+                name: rubro.nombre || '',
+                address: rubro.direccion || '',
+                distance: rubro.distancia || '',
+                schedule: rubro.horarios || '',
+                icon: rubro.icon || getCategoryIcon(categoria),
+                description: itemParts.filter(Boolean).join(' | ')
+            });
+        });
+    }
+    
+    // Generar descripción basada en rubros
+    const generatedDescripcion = generateEnvironmentDescription(categories, barrio);
+    
+    return {
+        lastUpdated: new Date(metadata.timestamp || Date.now()).toLocaleString('es-AR'),
+        descripcion: descripcion || generatedDescripcion,
+        barrio: metadata.barrio || barrio,
+        categories: categories,
+        metadata: metadata,
+        totalRubros: Array.isArray(rubros) ? rubros.length : 0
+    };
+}
+
+// Obtener icono por categoría
+function getCategoryIcon(categoria) {
+    const icons = {
+        'Transporte': '🚇',
+        'Educación': '🎓',
+        'Salud': '🏥',
+        'Comercio': '🛒',
+        'Gastronomía': '🍽️',
+        'Recreación': '🌳',
+        'Financiero': '🏦',
+        'Servicios': '🏪',
+        'Seguridad': '🛡️',
+        'Otros': '📍'
+    };
+    
+    const categoriaLower = categoria.toLowerCase();
+    for (const [key, value] of Object.entries(icons)) {
+        if (categoriaLower.includes(key.toLowerCase())) {
+            return value;
+        }
+    }
+    return icons['Otros'];
+}
+
+// Generar descripción del entorno basada en rubros
+function generateEnvironmentDescription(categories, barrio) {
+    const totalRubros = Object.values(categories).reduce((sum, cat) => sum + cat.items.length, 0);
+    const totalCategorias = Object.keys(categories).length;
+    
+    if (totalRubros === 0) {
+        return `El barrio de ${barrio} tiene información del entorno disponible.`;
+    }
+    
+    const categoriasInfo = Object.keys(categories).join(', ');
+    return `${barrio} cuenta con ${totalRubros} lugares de interés distribuidos en ${totalCategorias} categorías: ${categoriasInfo}. Encuentra todo lo que necesitas cerca de tu próxima propiedad.`;
+}
+
 // Procesar y estructurar datos del entorno (USANDO UBICACIÓN REAL)
 function processEnvironmentData(searchResults, direccion, barrio, ubicacionReal = null, descripcion = '') {
     console.log('🔧 PROCESANDO DATOS REALES DE IA:', searchResults);
@@ -3908,75 +4113,144 @@ function displayEnvironmentInfo(data) {
                            panel.querySelector('.environment-section') || 
                            createEnvironmentSection(panel);
     
+    // Verificar si hay datos para mostrar
+    const hasCategories = data.categories && Object.keys(data.categories).length > 0;
+    const totalRubros = data.totalRubros || 0;
+    
+    // Generar HTML de categorías con detalles completos
+    const categoriesHTML = hasCategories ? Object.entries(data.categories).map(([key, category]) => {
+        return `
+            <div style="
+                background: white;
+                border: 1px solid #e9ecef;
+                border-radius: 12px;
+                padding: 18px;
+                transition: all 0.3s ease;
+                display: flex;
+                flex-direction: column;
+            "
+            onmouseover="this.style.borderColor='#232deb'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 20px rgba(35,45,235,0.1)'" 
+            onmouseout="this.style.borderColor='#e9ecef'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #f1f3f5;">
+                    <span style="font-size: 24px;">${category.icon}</span>
+                    <h5 style="margin: 0; font-size: 15px; font-weight: 600; color: #232deb;">
+                        ${category.title}
+                    </h5>
+                    <span style="margin-left: auto; background: #e9ecef; color: #6c757d; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500;">
+                        ${category.items.length} ${category.items.length === 1 ? 'lugar' : 'lugares'}
+                    </span>
+                </div>
+                <div style="flex: 1;">
+                    ${category.items.map(item => `
+                        <div style="margin-bottom: 12px; padding: 10px; background: #f8f9fa; border-radius: 8px; border-left: 3px solid #232deb;">
+                            <div style="font-size: 14px; font-weight: 600; color: #495057; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                                <span style="font-size: 12px;">${item.icon || '📍'}</span>
+                                ${item.name}
+                            </div>
+                            ${item.description ? `
+                                <div style="font-size: 12px; color: #6c757d; line-height: 1.5;">
+                                    ${item.description}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }).join('') : `
+        <div style="grid-column: 1 / -1; padding: 40px 20px; text-align: center; background: #f8f9fa; border-radius: 12px;">
+            <div style="font-size: 48px; margin-bottom: 15px;">📍</div>
+            <h4 style="margin: 0 0 10px 0; font-size: 16px; color: #495057;">Sin información disponible</h4>
+            <p style="margin: 0; font-size: 14px; color: #6c757d;">No se encontraron rubros para este barrio.</p>
+        </div>
+    `;
+    
     // Actualizar el contenido de la sección existente
     existingSection.innerHTML = `
         <!-- Header con botón cerrar y descripción -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #e9ecef;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #e9ecef;">
             <div style="flex: 1;">
-                <h4 style="margin: 0 0 8px 0; font-size: 16px; color: #495057; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                <h4 style="margin: 0 0 10px 0; font-size: 18px; color: #232deb; font-weight: 700; display: flex; align-items: center; gap: 10px;">
                     🌍 Entorno del Barrio
-                    <small style="font-size: 12px; color: #6c757d; font-weight: normal;">(${data.lastUpdated})</small>
+                    ${data.metadata?.version ? `<span style="font-size: 11px; background: #e3f2fd; color: #1971c2; padding: 3px 8px; border-radius: 4px; font-weight: 500;">v${data.metadata.version}</span>` : ''}
                 </h4>
                 ${data.descripcion ? `
-                <div style="font-size: 13px; color: #6c757d; line-height: 1.5; font-style: italic; background: #f8f9fa; padding: 10px; border-radius: 6px; border-left: 3px solid #232deb;">
-                    "${data.descripcion}"
+                <div style="font-size: 14px; color: #495057; line-height: 1.6; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 14px; border-radius: 8px; border-left: 4px solid #232deb; font-style: normal;">
+                    💡 ${data.descripcion}
+                </div>
+                ` : ''}
+                ${hasCategories ? `
+                <div style="margin-top: 10px; display: flex; gap: 12px; flex-wrap: wrap;">
+                    <span style="font-size: 12px; color: #6c757d; display: flex; align-items: center; gap: 5px;">
+                        📍 <strong>${data.barrio}</strong>
+                    </span>
+                    <span style="font-size: 12px; color: #6c757d; display: flex; align-items: center; gap: 5px;">
+                        🏢 <strong>${Object.keys(data.categories).length}</strong> categorías
+                    </span>
+                    <span style="font-size: 12px; color: #6c757d; display: flex; align-items: center; gap: 5px;">
+                        📊 <strong>${totalRubros}</strong> rubros encontrados
+                    </span>
+                    <span style="font-size: 12px; color: #6c757d; display: flex; align-items: center; gap: 5px;">
+                        🕐 ${data.lastUpdated}
+                    </span>
                 </div>
                 ` : ''}
             </div>
             <button onclick="closePropertyPanel()" 
                     style="
-                        background: rgba(255,255,255,0.9);
+                        background: rgba(255,255,255,0.95);
                         border: 1px solid #e9ecef;
                         color: #495057;
-                        font-size: 20px;
+                        font-size: 22px;
                         cursor: pointer;
-                        padding: 6px 10px;
-                        border-radius: 6px;
-                        margin-left: 10px;
+                        padding: 8px 12px;
+                        border-radius: 8px;
+                        margin-left: 15px;
                         transition: all 0.2s ease;
+                        line-height: 1;
                     "
-                    onmouseover="this.style.background='#232deb'; this.style.color='white'; this.style.borderColor='#232deb'" 
-                    onmouseout="this.style.background='rgba(255,255,255,0.9)'; this.style.color='#495057'; this.style.borderColor='#e9ecef'">
+                    onmouseover="this.style.background='#dc3545'; this.style.color='white'; this.style.borderColor='#dc3545'" 
+                    onmouseout="this.style.background='rgba(255,255,255,0.95)'; this.style.color='#495057'; this.style.borderColor='#e9ecef'">
                 ×
             </button>
         </div>
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-            ${Object.values(data.categories).map(category => `
-                <div style="
-                    background: white;
-                    border: 1px solid #e9ecef;
-                    border-radius: 8px;
-                    padding: 15px;
-                    transition: all 0.3s ease;
-                " onmouseover="this.style.borderColor='#232deb'; this.style.transform='translateY(-2px)'" 
-                   onmouseout="this.style.borderColor='#e9ecef'; this.style.transform='translateY(0)'">
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
-                        <span style="font-size: 18px;">${category.icon}</span>
-                        <h5 style="margin: 0; font-size: 14px; font-weight: 600; color: #232deb;">
-                            ${category.title}
-                        </h5>
-                    </div>
-                    <ul style="margin: 0; padding-left: 16px; font-size: 13px; color: #6c757d; line-height: 1.4;">
-                        ${category.items.map(item => `<li style="margin-bottom: 4px;">${item}</li>`).join('')}
-                    </ul>
-                </div>
-            `).join('')}
+        
+        <!-- Grid de categorías con detalles -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px;">
+            ${categoriesHTML}
         </div>
+        
+        <!-- Footer con información adicional -->
         <div style="
-            margin-top: 15px;
-            padding: 12px;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            border-radius: 10px;
+            border: 1px solid #e1bee7;
             font-size: 13px;
-            color: #6c757d;
+            color: #495057;
             text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
         ">
-            📍 Información actualizada para: <strong style="color: #495057;">${data.barrio}</strong>
+            <span>📍 Información del entorno para: <strong>${data.barrio}</strong></span>
+            <span style="color: #6c757d;">•</span>
+            <span>🏢 ${Object.keys(data.categories).length} categorías</span>
+            <span style="color: #6c757d;">•</span>
+            <span>📊 ${totalRubros} rubros encontrados</span>
+            <span style="color: #6c757d;">•</span>
+            <span>🕐 Actualizado: ${data.lastUpdated}</span>
         </div>
     `;
     
-    console.log('✅ Información del entorno cargada:', data.barrio);
+    console.log('✅ Información del entorno cargada:', {
+        barrio: data.barrio,
+        categorias: Object.keys(data.categories).length,
+        rubros: totalRubros
+    });
 }
 
 // Mostrar error si falla la carga
