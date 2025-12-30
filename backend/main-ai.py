@@ -583,9 +583,19 @@ if _os.path.exists("imgs"):
 
 # Servir archivos de la raíz (logo.png, llave.png, etc.)
 # Solo para desarrollo local, no sirve archivos sensibles
-@app.get("/{file_path:path}")
+# IMPORTANTE: Usar regex para que solo coincida con archivos, NO con rutas de API
+@app.get("/{file_path:path}", name="serve_static_files")
 async def serve_root_files(file_path: str):
-    """Serve static files from root directory like logo.png, llave.png, etc."""
+    """
+    Serve static files from root directory like logo.png, llave.png, etc.
+    Solo sirve archivos que tengan extensión (contengan punto).
+    Las rutas de API (/api/*) no entran aquí porque tienen su propio manejo.
+    """
+    # Solo procesar si la ruta contiene un punto (indicador de archivo)
+    # Esto evita que rutas como /status, /api/barrios sean capturadas aquí
+    if '.' not in file_path:
+        raise HTTPException(status_code=404, detail="Archivo no encontrado")
+    
     # Lista de archivos permitidos en la raíz
     allowed_files = ['logo.png', 'llave.png', 'favicon.ico', 'robots.txt', 'sitemap.xml']
     
