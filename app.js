@@ -3893,16 +3893,6 @@ function processEnvironmentData(searchResults, direccion, barrio, ubicacionReal 
         console.log(`✅ [EXTRACT] Categoría '${category}': ${items.length} items extraídos:`, items);
         return items.slice(0, 4); // Máximo 4 elementos por categoría
     }
-            });
-        }
-        
-        // Si absolutamente no tenemos nada, crear un item informativo
-        if (items.length === 0) {
-            items.push('Infraestructura completa disponible');
-        }
-        
-        return items.slice(0, 4); // Máximo 4 elementos por categoría
-    }
     
     // Construir categorías usando las respuestas reales de la IA
     const categories = {};
