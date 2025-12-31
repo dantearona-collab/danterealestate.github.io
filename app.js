@@ -2906,14 +2906,23 @@ function closePannellumModal() {
 }
 
 // ========================================
-// FUNCIÓN ENTORNO CON IA - INFORMACIÓN ACTUALIZADA
+// FUNCIÓN ENTORNO CON IA - INTEGRACIÓN BASE DE DATOS BARRIOS
 // ========================================
 
-// Función principal para obtener información del entorno (USANDO DATOS REALES DINÁMICOS)
+// Función principal para obtener información del entorno
+// PRIORIDAD 1: Base de datos de barrios (API local)
+// PRIORIDAD 2: Búsqueda web simulada (fallback)
 async function loadEnvironmentInfo(direccion, barrio) {
     console.log('🌍 Cargando información del entorno para:', barrio);
     console.log('📍 Dirección recibida:', direccion);
-    console.log('🏢 Barrio recibido (del JSON):', barrio);
+    
+    // Mostrar estado de carga
+    showEnvironmentLoading();
+    
+    // Guardar datos actuales
+    window.currentProperty = window.currentProperty || {};
+    window.currentProperty.direccion = direccion;
+    window.currentProperty.barrio = barrio;
     
     // USAR UBICACIÓN EXACTA DE GOOGLE MAPS SI ESTÁ DISPONIBLE
     let ubicacionExacta = null;
@@ -2922,52 +2931,447 @@ async function loadEnvironmentInfo(direccion, barrio) {
         ubicacionExacta = window.currentProperty.googleLocation;
         console.log('🗺️ Ubicación exacta de Google Maps:', ubicacionExacta);
     }
-    // Obtener descripción de la propiedad
     if (window.currentProperty && window.currentProperty.descripcion) {
         descripcion = window.currentProperty.descripcion;
-        console.log('📝 Descripción de la propiedad:', descripcion);
     }
     
     try {
-        // Mostrar loading
-        showEnvironmentLoading();
+        // ========================================
+        // PASO 1: INTENTAR CARGAR DESDE BASE DE DATOS DE BARRIOS (API LOCAL)
+        // ========================================
+        console.log('🔍 [INTEGRACIÓN DB] Intentando cargar datos desde la base de datos de barrios...');
         
-        // USAR BARRIO REAL DEL JSON + UBICACIÓN EXACTA SI ESTÁ DISPONIBLE
-        const ubicacionParaBusqueda = ubicacionExacta || `${barrio}, Buenos Aires, Argentina`;
+        // Intentar con URL relativa primero (backend local)
+        let response = null;
+        let barrioData = null;
         
-        // Preparar búsquedas dinámicas con ubicación real
-        const searchQueries = [
-            `${ubicacionParaBusqueda} servicios comercios farmacias heladerías`,
-            `${ubicacionParaBusqueda} transporte público subte colectivo líneas`,
-            `${ubicacionParaBusqueda} escuelas colegios universidades educación`,
-            `${ubicacionParaBusqueda} hospitales clínicas centros médicos salud`,
-            `${ubicacionParaBusqueda} supermercados centros comerciales shopping`,
-            `${ubicacionParaBusqueda} restaurantes cafeterías gastronomía`,
-            `${ubicacionParaBusqueda} parques plazas espacios verdes`,
-            `${ubicacionParaBusqueda} bancos cajeros servicios financieros`
-        ];
+        // Intentar API local (relative URL)
+        try {
+            const localApiUrl = `/api/barrios/${encodeURIComponent(barrio)}`;
+            console.log('🌐 [INTEGRACIÓN DB] Consultando API local:', localApiUrl);
+            
+            response = await fetch(localApiUrl);
+            
+            if (response.ok) {
+                const result = await response.json();
+                console.log('✅ [INTEGRACIÓN DB] Respuesta de API local:', result);
+                
+                if (result.success && result.data) {
+                    barrioData = result.data;
+                    console.log('✅ [INTEGRACIÓN DB] Datos válidos recibidos del backend');
+                }
+            } else {
+                console.warn(`⚠️ [INTEGRACIÓN DB] API local respondió con error: ${response.status}`);
+            }
+        } catch (localApiError) {
+            console.warn('⚠️ [INTEGRACIÓN DB] Error conectando con API local:', localApiError.message);
+        }
         
-        console.log('🔍 Consultas dinámicas preparadas:', searchQueries);
-        console.log('📍 Usando ubicación:', ubicacionParaBusqueda);
+        // Si no tenemos datos del API local, intentar con API externa como fallback
+        if (!barrioData) {
+            console.log('🔄 [FALLBACK API] Intentando con API externa...');
+            try {
+                const externalApiUrl = "https://danterealestate-github-io-ewlg.onrender.com/api/barrios/" + encodeURIComponent(barrio);
+                console.log('🌐 [FALLBACK API] Consultando API externa:', externalApiUrl);
+                
+                response = await fetch(externalApiUrl);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('✅ [FALLBACK API] Respuesta de API externa:', result);
+                    
+                    if (result.success && result.data) {
+                        barrioData = result.data;
+                        console.log('✅ [FALLBACK API] Datos válidos recibidos de API externa');
+                    }
+                } else {
+                    console.warn(`⚠️ [FALLBACK API] API externa respondió con error: ${response.status}`);
+                }
+            } catch (externalApiError) {
+                console.warn('⚠️ [FALLBACK API] Error conectando con API externa:', externalApiError.message);
+            }
+        }
         
-        // Realizar búsquedas con ubicación real
-        const searchResults = await performParallelSearchesReal(searchQueries, ubicacionParaBusqueda, barrio);
+        // ========================================
+        // PROCESAR DATOS DE LA BASE DE DATOS SI ESTÁN DISPONIBLES
+        // ========================================
+        if (barrioData && Object.keys(barrioData).length > 0) {
+            console.log('✅ [INTEGRACIÓN DB] Transformando datos del barrio para visualización...');
+            
+            // Transformar datos del barrio al formato esperado
+            const environmentData = transformBarrioDataToDisplay(barrioData, barrio, direccion, descripcion);
+            
+            // Verificar que tenga categorías válidas
+            if (environmentData.categories && Object.keys(environmentData.categories).length > 0) {
+                console.log('✅ [INTEGRACIÓN DB] Datos procesados correctamente, mostrando información');
+                console.log('📊 [INTEGRACIÓN DB] Categorías disponibles:', Object.keys(environmentData.categories));
+                
+                // Mostrar fuente de datos
+                console.log('═══════════════════════════════════════════════');
+                console.log('📊 FUENTE DE DATOS: BASE DE DATOS BARRIOS');
+                console.log(`🏢 Barrio: ${barrio}`);
+                console.log(`📅 Fecha: ${new Date().toLocaleString()}`);
+                console.log('═══════════════════════════════════════════════');
+                
+                displayEnvironmentInfo(environmentData);
+                return;
+            } else {
+                console.warn('⚠️ [INTEGRACIÓN DB] Datos recibidos pero sin categorías válidas');
+            }
+        } else {
+            console.warn('⚠️ [INTEGRACIÓN DB] No hay datos para este barrio en la base de datos');
+        }
         
-        console.log('✅ Resultados de IA recibidos:', Object.keys(searchResults));
+        // ========================================
+        // PASO 2: FALLBACK - USAR BÚSQUEDA WEB SIMULADA
+        // ========================================
+        console.log('🔄 [FALLBACK WEB] La base de datos no tiene datos, usando búsqueda web simulada...');
         
-        // Procesar y estructurar la información
-        const environmentData = processEnvironmentData(searchResults, direccion, barrio, ubicacionParaBusqueda, descripcion);
+        // Validar que barrio no sea undefined ni vacío
+        const barrioValido = barrio && barrio.trim() !== '' ? barrio : 'Buenos Aires';
+        const direccionValida = direccion && direccion.trim() !== '' ? direccion : `${barrioValido}, Buenos Aires, Argentina`;
         
-        console.log('🎯 Datos procesados con IA:', environmentData.aiGenerated);
-        console.log('📊 Categorías generadas:', Object.keys(environmentData.categories));
+        // Usar ubicación exacta si está disponible, sino usar dirección válida
+        const ubicacionParaBusqueda = ubicacionExacta || direccionValida;
         
-        // Mostrar resultados
+        console.log('📍 Ubicación para búsqueda:', ubicacionParaBusqueda);
+        console.log('🏢 Barrio válido:', barrioValido);
+        
+        // Ejecutar búsquedas simuladas (lógica existente)
+        const searchResults = await performParallelSearchesReal(
+            [
+                `${ubicacionParaBusqueda} servicios comercios farmacias heladerías`,
+                `${ubicacionParaBusqueda} transporte público subte colectivo líneas`,
+                `${ubicacionParaBusqueda} escuelas colegios universidades educación`,
+                `${ubicacionParaBusqueda} hospitales clínicas centros médicos salud`,
+                `${ubicacionParaBusqueda} supermercados centros comerciales shopping`,
+                `${ubicacionParaBusqueda} restaurantes cafeterías gastronomía`,
+                `${ubicacionParaBusqueda} parques plazas espacios verdes`,
+                `${ubicacionParaBusqueda} bancos cajeros servicios financieros`
+            ],
+            ubicacionParaBusqueda,
+            barrioValido
+        );
+        
+        const environmentData = processEnvironmentData(searchResults, direccionValida, barrioValido, ubicacionParaBusqueda, descripcion);
+        
+        console.log('✅ [FALLBACK WEB] Datos simulados generados correctamente');
+        
+        // Mostrar fuente de datos
+        console.log('═══════════════════════════════════════════════');
+        console.log('📊 FUENTE DE DATOS: BÚSQUEDA WEB SIMULADA');
+        console.log(`🏢 Barrio: ${barrio}`);
+        console.log(`📅 Fecha: ${new Date().toLocaleString()}`);
+        console.log('═══════════════════════════════════════════════');
+        
         displayEnvironmentInfo(environmentData);
         
     } catch (error) {
-        console.error('Error cargando entorno:', error);
-        showEnvironmentError('Error cargando información del entorno');
+        console.error('❌ Error al cargar información del entorno:', error);
+        
+        // Fallback final: mostrar error
+        showEnvironmentError('Error al cargar la información del entorno. Por favor, intenta de nuevo más tarde.');
     }
+}
+
+// Transformar datos del barrio (base de datos) al formato para display
+// La estructura de la DB tiene categorias.gastronomia.restaurantes_destacados[] y datos_especificos.transporte[]
+function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '') {
+    const categories = {};
+    
+    // Función auxiliar para limpiar texto (quitar {location} y placeholders)
+    const cleanText = (text) => {
+        if (!text) return '';
+        return text.replace(/\{location\}/gi, direccion || barrio)
+                   .replace(/\s+/g, ' ')
+                   .trim();
+    };
+    
+    // Función auxiliar para procesar arrays
+    const processArray = (arr) => {
+        if (!arr) return [];
+        if (Array.isArray(arr)) {
+            return arr.map(item => cleanText(item)).filter(item => item && item.length > 3);
+        }
+        return [cleanText(arr)].filter(item => item && item.length > 3);
+    };
+    
+    // 1. TRANSPORTE - puede venir de datos_especificos o transporte
+    let transporteItems = [];
+    if (data.datos_especificos?.transporte) {
+        transporteItems = processArray(data.datos_especificos.transporte);
+    } else if (data.transporte?.estaciones || data.transporte?.colectivos) {
+        if (data.transporte.estaciones) {
+            transporteItems.push(...data.transporte.estaciones.map(e => `Estación: ${e}`));
+        }
+        if (data.transporte.colectivos) {
+            transporteItems.push(...data.transporte.colectivos.map(c => `Línea ${c}`));
+        }
+    }
+    if (transporteItems.length > 0) {
+        categories.transporte = {
+            icon: '🚇',
+            title: 'Transporte Público',
+            items: transporteItems.slice(0, 6)
+        };
+    }
+    
+    // 2. SALUD - de datos_especificos
+    if (data.datos_especificos?.salud) {
+        const saludItems = processArray(data.datos_especificos.salud);
+        if (saludItems.length > 0) {
+            categories.salud = {
+                icon: '🏥',
+                title: 'Salud',
+                items: saludItems.slice(0, 6)
+            };
+        }
+    }
+    
+    // 3. COMERCIO - de datos_especificos
+    if (data.datos_especificos?.comercio) {
+        const comercioItems = processArray(data.datos_especificos.comercio);
+        if (comercioItems.length > 0) {
+            categories.comercio = {
+                icon: '🛒',
+                title: 'Comercio y Servicios',
+                items: comercioItems.slice(0, 6)
+            };
+        }
+    }
+    
+    // 4. SERVICIOS - de datos_especificos
+    if (data.datos_especificos?.servicios) {
+        const serviciosItems = processArray(data.datos_especificos.servicios);
+        if (serviciosItems.length > 0) {
+            categories.servicios = {
+                icon: '🏪',
+                title: 'Servicios Urbanos',
+                items: serviciosItems.slice(0, 6)
+            };
+        }
+    }
+    
+    // 5. GASTRONOMÍA - de categorias.gastronomia
+    let gastroItems = [];
+    if (data.categorias?.gastronomia) {
+        const gastro = data.categorias.gastronomia;
+        if (gastro.restaurantes_destacados) {
+            gastroItems.push(...gastro.restaurantes_destacados.map(r => `🍽️ ${r}`));
+        }
+        if (gastro.zonas_gastronomicas) {
+            gastroItems.push(...gastro.zonas_gastronomicas.map(z => `📍 ${z}`));
+        }
+        if (gastro.bares_notables) {
+            gastroItems.push(...gastro.bares_notables.map(b => `🍺 ${b}`));
+        }
+        if (gastro.cafes_especialidad) {
+            gastroItems.push(...gastro.cafes_especialidad.map(c => `☕ ${c}`));
+        }
+    }
+    // Si no hay datos de categorias, usar datos_especificos
+    if (gastroItems.length === 0 && data.datos_especificos?.gastronomia) {
+        gastroItems = processArray(data.datos_especificos.gastronomia);
+    }
+    if (gastroItems.length > 0) {
+        categories.gastronomia = {
+            icon: '🍽️',
+            title: 'Gastronomía',
+            items: gastroItems.slice(0, 6)
+        };
+    }
+    
+    // 6. RECREACIÓN - de datos_especificos
+    if (data.datos_especificos?.recreacion) {
+        const recreacionItems = processArray(data.datos_especificos.recreacion);
+        if (recreacionItems.length > 0) {
+            categories.recreacion = {
+                icon: '🌳',
+                title: 'Recreación',
+                items: recreacionItems.slice(0, 6)
+            };
+        }
+    }
+    
+    // 7. SERVICIOS FINANCIEROS - de categorias.servicios_financieros
+    let financieroItems = [];
+    if (data.categorias?.servicios_financieros) {
+        const sf = data.categorias.servicios_financieros;
+        if (sf.bancos) {
+            financieroItems.push(...sf.bancos.map(b => `🏦 ${b}`));
+        }
+        if (sf.cajeros_automaticos) {
+            financieroItems.push(...sf.cajeros_automaticos.map(c => `💳 ${c}`));
+        }
+        if (sf.sucursales_bancarias) {
+            financieroItems.push(...sf.sucursales_bancarias.map(s => `📍 ${s}`));
+        }
+        if (sf.otros_servicios) {
+            financieroItems.push(...sf.otros_servicios.map(o => `💼 ${o}`));
+        }
+    }
+    // Si no hay datos de categorias, usar datos_especificos
+    if (financieroItems.length === 0 && data.datos_especificos?.servicios_financieros) {
+        financieroItems = processArray(data.datos_especificos.servicios_financieros);
+    }
+    if (financieroItems.length > 0) {
+        categories.servicios_financieros = {
+            icon: '🏦',
+            title: 'Servicios Financieros',
+            items: financieroItems.slice(0, 6)
+        };
+    }
+    
+    // 8. EDUCACIÓN - de datos_especificos
+    if (data.datos_especificos?.educacion) {
+        const educacionItems = processArray(data.datos_especificos.educacion);
+        if (educacionItems.length > 0) {
+            categories.educacion = {
+                icon: '🎓',
+                title: 'Educación',
+                items: educacionItems.slice(0, 6)
+            };
+        }
+    }
+    
+    // Si no hay categorías, crear placeholder
+    if (Object.keys(categories).length === 0) {
+        categories.sin_datos = {
+            icon: '📋',
+            title: 'Información del Barrio',
+            items: ['Datos del barrio en preparación']
+        };
+    }
+    
+    console.log('✅ [DB] Categorías procesadas:', Object.keys(categories));
+    
+    return {
+        barrio: barrio,
+        direccion: direccion,
+        descripcion: descripcion || data.resumen_general || '',
+        categories: categories,
+        lastUpdated: new Date().toLocaleDateString('es-AR'),
+        dataSource: 'database'
+    };
+}
+
+// Transformar datos del backend al formato esperado por displayEnvironmentInfo
+function transformBackendDataToFrontend(data, barrio, direccion, descripcion = '') {
+    const categories = {};
+    
+    // Mapear cada categoría del backend al formato frontend
+    if (data.transporte) {
+        categories.transporte = {
+            icon: '🚇',
+            title: 'Transporte Público',
+            items: parseBackendItems(data.transporte, ['estaciones', 'estaciones_cercanas', 'colectivos', 'lineas_colectivo'])
+        };
+    }
+    
+    if (data.educacion) {
+        categories.educacion = {
+            icon: '🎓',
+            title: 'Educación',
+            items: parseBackendItems(data.educacion, ['escuelas', 'universidades', 'colegios'])
+        };
+    }
+    
+    if (data.salud) {
+        categories.salud = {
+            icon: '🏥',
+            title: 'Salud',
+            items: parseBackendItems(data.salud, ['hospitales', 'centros_salud', 'centros', 'clinicas'])
+        };
+    }
+    
+    if (data.comercio) {
+        categories.comercio = {
+            icon: '🛒',
+            title: 'Comercio',
+            items: parseBackendItems(data.comercio, ['supermercados', 'centros_comerciales', 'centros', 'tiendas'])
+        };
+    }
+    
+    if (data.vida_barrio) {
+        categories.gastronomia = {
+            icon: '🍽️',
+            title: 'Gastronomía',
+            items: parseBackendItems(data.vida_barrio, ['bares_restaurantes', 'bares', 'cultura', 'restaurantes'])
+        };
+        
+        categories.recreacion = {
+            icon: '🌳',
+            title: 'Recreación',
+            items: parseBackendItems(data.vida_barrio, ['actividades', 'espacios', 'parques'])
+        };
+    }
+    
+    if (data.servicios_financieros) {
+        categories.servicios_financieros = {
+            icon: '🏦',
+            title: 'Servicios Financieros',
+            items: parseBackendItems(data.servicios_financieros, ['bancos', 'cajeros', 'servicios'])
+        };
+    }
+    
+    if (data.seguridad) {
+        categories.seguridad = {
+            icon: '🛡️',
+            title: 'Seguridad',
+            items: parseBackendItems(data.seguridad, ['comisaria', 'comisaria_cercana', 'seguridad'])
+        };
+    }
+    
+    // Si no hay datos del backend, crear estructura vacía con placeholder
+    if (Object.keys(categories).length === 0) {
+        categories.transporte = { icon: '🚇', title: 'Transporte Público', items: ['Información del barrio'] };
+        categories.educacion = { icon: '🎓', title: 'Educación', items: ['Información del barrio'] };
+        categories.salud = { icon: '🏥', title: 'Salud', items: ['Información del barrio'] };
+        categories.comercio = { icon: '🛒', title: 'Comercio', items: ['Información del barrio'] };
+    }
+    
+    return {
+        barrio: barrio,
+        direccion: direccion,
+        categories: categories,
+        lastUpdated: new Date().toLocaleDateString('es-AR'),
+        descripcion: descripcion || data.resumen_general || data.resumen || ''
+    };
+}
+
+// Helper para parsear items desde los datos del backend
+function parseBackendItems(data, fieldNames) {
+    const items = [];
+    
+    // Buscar campos en orden de prioridad
+    for (const fieldName of fieldNames) {
+        if (data[fieldName]) {
+            const value = data[fieldName];
+            if (Array.isArray(value)) {
+                value.forEach(item => {
+                    if (item && typeof item === 'string' && item.trim()) {
+                        items.push(item.trim());
+                    }
+                });
+            } else if (typeof value === 'string' && value.trim()) {
+                items.push(value.trim());
+            }
+        }
+    }
+    
+    // Si no hay campos específicos, usar la descripción
+    if (items.length === 0 && data.descripcion) {
+        // Dividir por puntos y tomar las oraciones principales
+        const frases = data.descripcion.split('.').filter(f => f.trim().length > 10);
+        items.push(...frases.slice(0, 4).map(f => f.trim() + '.'));
+    }
+    
+    // Asegurar al menos un item
+    if (items.length === 0) {
+        items.push('Información disponible del barrio');
+    }
+    
+    return items.slice(0, 6); // Máximo 6 items por categoría
 }
 
 // Función para realizar búsquedas REALES con datos dinámicos del JSON
@@ -3023,131 +3427,98 @@ async function generateRealSearchResults(ubicacionReal, barrioOriginal, searchQu
     // Generar respuestas específicas basadas en el barrio y la ubicación real
     const searchResults = {};
     
-    // Usar Promise.all para并行izar las solicitudes
-    const responses = await Promise.all(
-        Object.keys(queryMapping).map(async (category) => {
-            const query = queryMapping[category];
-            const response = await generateSpecificResponse(category, ubicacionReal, barrioOriginal, query);
-            console.log(`✅ ${category.toUpperCase()}: Respuesta específica generada para ${ubicacionReal}`);
-            return { category, response };
-        })
-    );
-    
-    // Construir el objeto de resultados
-    responses.forEach(({ category, response }) => {
+    Object.keys(queryMapping).forEach(category => {
+        const query = queryMapping[category];
+        const response = generateSpecificResponse(category, ubicacionReal, barrioOriginal, query);
         searchResults[category] = response;
+        
+        console.log(`✅ ${category.toUpperCase()}: Respuesta específica generada para ${ubicacionReal}`);
     });
     
     return searchResults;
 }
 
-// Cache para datos de ubicación específicos
-let locationSpecificCache = {};
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
-
-// Obtener datos específicos de ubicación desde la API o fallback estático
-async function getLocationSpecificData(locationKey) {
-    // Verificar caché
-    const now = Date.now();
-    if (locationSpecificCache[locationKey] && (now - locationSpecificCache[locationKey].timestamp) < CACHE_DURATION) {
-        console.log(`📦 Usando caché para: ${locationKey}`);
-        return locationSpecificCache[locationKey].data;
-    }
-    
-    try {
-        // Intentar obtener desde la API
-        const response = await fetch(`/api/location-specific/${locationKey}`);
-        if (response.ok) {
-            const result = await response.json();
-            if (result.success && result.data) {
-                // Guardar en caché
-                locationSpecificCache[locationKey] = {
-                    data: result.data,
-                    timestamp: now
-                };
-                console.log(`✅ Datos obtenidos desde API para: ${locationKey}`);
-                return result.data;
-            }
-        }
-    } catch (error) {
-        console.log(`⚠️ Error obteniendo datos de API para ${locationKey}:`, error.message);
-    }
-    
-    // Fallback a datos estáticos hardcodeados
-    console.log(`📋 Usando datos estáticos para: ${locationKey}`);
-    return getStaticLocationData(locationKey);
-}
-
-// Datos estáticos como fallback (copia de seguridad)
-function getStaticLocationData(locationKey) {
-    const staticData = {
-        'pilar': {
-            transporte: "En {location} tienes acceso a la Autopista Acceso Norte Ramal Pilar y Ruta 8. Líneas de colectivo específicas: Línea 57, Línea 510 (Pilar Bus S.A.), Línea 176. Conexiones con Ruta Bus S.A. hacia Moreno, Areco, y Cardales.",
-            salud: "{location} cuenta con Hospital Universitario Austral (Juan Domingo Perón 1500, Derqui), Sanatorio del Pilar, Hospital Central de Emergencia y Alta Complejidad de Pilar, Centro Medico Pilares, y MAS Centro Médico (Moreno 565).",
-            comercio: "{location} tiene Las Palmas del Pilar (con Jumbo), Tortugas Open Mall (Panamericana Ramal Pilar Km 36,5), Paseo Pilar (Ruta Panamericana Km 44), Cardinal Shopping, y el supermercado Jumbo en Palmas del Pilar.",
-            servicios: "{location} cuenta con Farmacity, farmacias locales, centros de estética, servicios de lavandería, peluquerías, sucursales de bancos como Banco Santander y BBVA, y servicios profesionales completos.",
-            gastronomia: "{location} ofrece restaurantes variados, cafeterías especializadas, bares tradicionales, pizzerías locales, heladerías artesanales, y una plaza gastronómica en Cardinal Shopping.",
-            recreacion: "{location} tiene Las Palmas del Pilar, parques y plazas, canchas deportivas, centro cultural, bibliotecas, espacios familiares, y actividades al aire libre en la zona.",
-            servicios_financieros: "{location} cuenta con sucursales de Banco Santander, BBVA, Macro, cajeros automáticos en Las Palmas del Pilar y centros comerciales, casas de cambio, y servicios de seguros.",
-            educacion: "{location} tiene colegios privados como San Patricio, colegios públicos de calidad, cercanía a universidades (UBA), institutos técnicos, centros de idiomas, y academias especializadas."
-        },
-        'microcentro': {
-            transporte: "En {location} tienes acceso a las líneas de subte Línea D (conecta Palermo con el centro porteño) y Línea C (conecta Retiro y Constitución). Colectivos específicos: 105, 39, 59, 7, 8. Paradas estratégicas en el microcentro con acceso directo a todas las zonas de CABA.",
-            salud: "{location} cuenta con Hospital Italiano, Hospital Británico, centros de salud del Gobierno de la Ciudad, consultorios médicos especializados, Farmacity, y servicios de emergencia médica 24hs.",
-            comercio: "{location} tiene Galerías Pacífico, Florida Street (compras), Mercado San Telmo, centros comerciales, bancos principales, casas de cambio, y todas las cadenas comerciales importantes concentradas.",
-            servicios: "{location} cuenta con servicios completos: Farmacity, bancos principales (Banco Nación, Santander, BBVA), casas de cambio, servicios profesionales, centros de estética, lavanderías, y toda la infraestructura comercial del centro.",
-            gastronomia: "{location} ofrece la mayor concentración gastronómica de Buenos Aires: restaurantes premium, bares tradicionales, cafeterías históricas, pizzerías emblemáticas, y opciones desde comida rápida hasta fine dining.",
-            recreacion: "{location} tiene Plaza San Martín, Plaza de Mayo, Teatro Colón, Obelisco, museos (MAMBA, Fortabat), bibliotecas, y acceso directo a todos los espacios culturales de la ciudad.",
-            servicios_financieros: "{location} cuenta con la mayor concentración de servicios financieros: Banco Nación, Santander, BBVA, HSBC, casas de cambio (Cambios Alem, Miguel), seguros, y fintech.",
-            educacion: "{location} tiene acceso a universidades (UBA, UCA), colegios privados prestigiosos, institutos técnicos, centros de idiomas, academias, y toda la oferta educativa de CABA."
-        },
-        'boedo': {
-            transporte: "En {location} tienes conectividad con 31 líneas de colectivos de CABA (modernizadas en 2025 con color azul). Conexión directa con líneas de subte A, B, D, E, H. Paradas estratégicas y acceso rápido a todas las zonas de la ciudad.",
-            salud: "{location} cuenta con Hospital Durand, centros de salud comunitarios, consultorios médicos, Farmacity, centros de diagnóstico, y servicios de salud públicos y privados.",
-            comercio: "{location} tiene supermercados (Disco, Vea), centros comerciales, tiendas de barrio, librerías, jugueterías, y comercio local completo con acceso a centros comerciales mayores.",
-            servicios: "{location} cuenta con Farmacity, bancos locales, centros de estética, lavanderías, tintorerías, peluquerías, servicios profesionales, y toda la infraestructura de servicios.",
-            gastronomia: "{location} ofrece restaurantes variados, bares tradicionales, pizzerías familiares, cafeterías de barrio, heladerías artesanales, y opciones gastronómicas diversas.",
-            recreacion: "{location} tiene plazas del barrio, canchas deportivas, bibliotecas, centro cultural, espacios familiares, y acceso a parques y espacios verdes cercanos.",
-            servicios_financieros: "{location} cuenta con sucursales de bancos principales, cajeros automáticos en ubicaciones estratégicas, casas de cambio, servicios de seguros, y fintech.",
-            educacion: "{location} tiene colegios públicos y privados, institutos técnicos, cercanía a universidades, centros de idiomas, academias, y acceso a la oferta educativa de CABA."
-        },
-        'parque avellaneda': {
-            transporte: "En {location} tienes acceso a colectivos específicos: 114, 126, 180, 4, 55, 86, 50, 7. Tren SARMIENTO con estaciones cercanas. Conexión con líneas de subte A y E. Excelente conectividad con el resto de la ciudad.",
-            salud: "{location} cuenta con Centro de Salud Nivel 1 - CeSAC Nº 13 (Dirección 4210), nuevo CeSAC 15 (desde setiembre 2025), centros de salud comunitarios, consultorios médicos, y Farmacity.",
-            comercio: "{location} tiene supermercados locales, centros comerciales cercanos, tiendas de barrio, librerías, jugueterías, y acceso a centros comerciales mayores en zonas adyacentes.",
-            servicios: "{location} cuenta con Farmacity, bancos locales, centros de estética, lavanderías, tintorerías, peluquerías, servicios profesionales, y toda la infraestructura de servicios del barrio.",
-            gastronomia: "{location} ofrece restaurantes familiares, bares tradicionales, pizzerías locales, cafeterías de barrio, heladerías artesanales, y opciones gastronómicas de la zona.",
-            recreacion: "{location} tiene el propio Parque Avellaneda, canchas deportivas, espacios verdes, centro cultural, bibliotecas, actividades familiares, y espacios para recreación al aire libre.",
-            servicios_financieros: "{location} cuenta con sucursales de bancos locales, cajeros automáticos en el barrio, casas de cambio cercanas, servicios de seguros, y fintech.",
-            educacion: "{location} tiene colegios públicos y privados del barrio, institutos técnicos, centros de idiomas, academias, y acceso a la oferta educativa de CABA."
-        }
-    };
-    
-    return staticData[locationKey.toLowerCase()] || null;
-}
-
-// Generar respuestas específicas con datos de la API
-async function generateSpecificResponse(category, ubicacionReal, barrioOriginal, query) {
+// Generar respuestas específicas con datos reales
+function generateSpecificResponse(category, ubicacionReal, barrioOriginal, query) {
     const locationDisplay = ubicacionReal.includes(',') ? 
         ubicacionReal.split(',')[0].trim() : 
         ubicacionReal;
     
-    // Buscar clave de barrio
-    const locationKey = Object.keys(getStaticLocationData('default') ? {} : getStaticLocationData('')).find(key => 
+    // Respuestas específicas con datos REALES para diferentes barrios
+    const locationSpecificData = {
+        'Pilar': {
+            transporte: `En ${locationDisplay} tienes acceso a la Autopista Acceso Norte Ramal Pilar y Ruta 8. Líneas de colectivo específicas: Línea 57, Línea 510 (Pilar Bus S.A.), Línea 176. Conexiones con Ruta Bus S.A. hacia Moreno, Areco, y Cardales.`,
+            salud: `${locationDisplay} cuenta con Hospital Universitario Austral (Juan Domingo Perón 1500, Derqui), Sanatorio del Pilar, Hospital Central de Emergencia y Alta Complejidad de Pilar, Centro Medico Pilares, y MAS Centro Médico (Moreno 565).`,
+            comercio: `${locationDisplay} tiene Las Palmas del Pilar (con Jumbo), Tortugas Open Mall (Panamericana Ramal Pilar Km 36,5), Paseo Pilar (Ruta Panamericana Km 44), Cardinal Shopping, y el supermercado Jumbo en Palmas del Pilar.`,
+            servicios: `${locationDisplay} cuenta con Farmacity, farmacias locales, centros de estética, servicios de lavandería, peluquerías, sucursales de bancos como Banco Santander y BBVA, y servicios profesionales completos.`,
+            gastronomia: `${locationDisplay} ofrece restaurantes variados, cafeterías especializadas, bares tradicionales, pizzerías locales, heladerías artesanales, y una plaza gastronómica en Cardinal Shopping.`,
+            recreacion: `${locationDisplay} tiene Las Palmas del Pilar, parques y plazas, canchas deportivas, centro cultural, bibliotecas, espacios familiares, y actividades al aire libre en la zona.`,
+            servicios_financieros: `${locationDisplay} cuenta con sucursales de Banco Santander, BBVA, Macro, cajeros automáticos en Las Palmas del Pilar y centros comerciales, casas de cambio, y servicios de seguros.`,
+            educacion: `${locationDisplay} tiene colegios privados como San Patricio, colegios públicos de calidad, cercanía a universidades (UBA), institutos técnicos, centros de idiomas, y academias especializadas.`
+        },
+        'Microcentro': {
+            transporte: `En ${locationDisplay} tienes acceso a las líneas de subte Línea D (conecta Palermo con el centro porteño) y Línea C (conecta Retiro y Constitución). Colectivos específicos: 105, 39, 59, 7, 8. Paradas estratégicas en el microcentro con acceso directo a todas las zonas de CABA.`,
+            salud: `${locationDisplay} cuenta con Hospital Italiano, Hospital Británico, centros de salud del Gobierno de la Ciudad, consultorios médicos especializados, Farmacity, y servicios de emergencia médica 24hs.`,
+            comercio: `${locationDisplay} tiene Galerías Pacífico, Florida Street (compras), Mercado San Telmo, centros comerciales, bancos principales, casas de cambio, y todas las cadenas comerciales importantes concentradas.`,
+            servicios: `${locationDisplay} cuenta con servicios completos: Farmacity, bancos principales (Banco Nación, Santander, BBVA), casas de cambio, servicios profesionales, centros de estética, lavanderías, y toda la infraestructura comercial del centro.`,
+            gastronomia: `${locationDisplay} ofrece la mayor concentración gastronómica de Buenos Aires: restaurantes premium, bares tradicionales, cafeterías históricas, pizzerías emblemáticas, y opciones desde comida rápida hasta fine dining.`,
+            recreacion: `${locationDisplay} tiene Plaza San Martín, Plaza de Mayo, Teatro Colón, Obelisco, museos (MAMBA, Fortabat), bibliotecas, y acceso directo a todos los espacios culturales de la ciudad.`,
+            servicios_financieros: `${locationDisplay} cuenta con la mayor concentración de servicios financieros: Banco Nación, Santander, BBVA, HSBC, casas de cambio (Cambios Alem, Miguel), seguros, y fintech.`,
+            educacion: `${locationDisplay} tiene acceso a universidades (UBA, UCA), colegios privados prestigiosos, institutos técnicos, centros de idiomas, academias, y toda la oferta educativa de CABA.`
+        },
+        'Boedo': {
+            transporte: `En ${locationDisplay} tienes conectividad con 31 líneas de colectivos de CABA (modernizadas en 2025 con color azul). Conexión directa con líneas de subte A, B, D, E, H. Paradas estratégicas y acceso rápido a todas las zonas de la ciudad.`,
+            salud: `${locationDisplay} cuenta con Hospital Durand, centros de salud comunitarios, consultorios médicos, Farmacity, centros de diagnóstico, y servicios de salud públicos y privados.`,
+            comercio: `${locationDisplay} tiene supermercados (Disco, Vea), centros comerciales, tiendas de barrio, librerías, jugueterías, y comercio local completo con acceso a centros comerciales mayores.`,
+            servicios: `${locationDisplay} cuenta con Farmacity, bancos locales, centros de estética, lavanderías, tintorerías, peluquerías, servicios profesionales, y toda la infraestructura de servicios.`,
+            gastronomia: `${locationDisplay} ofrece restaurantes variados, bares tradicionales, pizzerías familiares, cafeterías de barrio, heladerías artesanales, y opciones gastronómicas diversas.`,
+            recreacion: `${locationDisplay} tiene plazas del barrio, canchas deportivas, bibliotecas, centro cultural, espacios familiares, y acceso a parques y espacios verdes cercanos.`,
+            servicios_financieros: `${locationDisplay} cuenta con sucursales de bancos principales, cajeros automáticos en ubicaciones estratégicas, casas de cambio, servicios de seguros, y fintech.`,
+            educacion: `${locationDisplay} tiene colegios públicos y privados, institutos técnicos, cercanía a universidades, centros de idiomas, academias, y acceso a la oferta educativa de CABA.`
+        },
+        'Parque Avellaneda': {
+            transporte: `En ${locationDisplay} tienes acceso a colectivos específicos: 114, 126, 180, 4, 55, 86, 50, 7. Tren SARMIENTO con estaciones cercanas. Conexión con líneas de subte A y E. Excelente conectividad con el resto de la ciudad.`,
+            salud: `${locationDisplay} cuenta con Centro de Salud Nivel 1 - CeSAC Nº 13 (Dirección 4210), nuevo CeSAC 15 (desde setiembre 2025), centros de salud comunitarios, consultorios médicos, y Farmacity.`,
+            comercio: `${locationDisplay} tiene supermercados locales, centros comerciales cercanos, tiendas de barrio, librerías, jugueterías, y acceso a centros comerciales mayores en zonas adyacentes.`,
+            servicios: `${locationDisplay} cuenta con Farmacity, bancos locales, centros de estética, lavanderías, tintorerías, peluquerías, servicios profesionales, y toda la infraestructura de servicios del barrio.`,
+            gastronomia: `${locationDisplay} ofrece restaurantes familiares, bares tradicionales, pizzerías locales, cafeterías de barrio, heladerías artesanales, y opciones gastronómicas de la zona.`,
+            recreacion: `${locationDisplay} tiene el propio Parque Avellaneda, canchas deportivas, espacios verdes, centro cultural, bibliotecas, actividades familiares, y espacios para recreación al aire libre.`,
+            servicios_financieros: `${locationDisplay} cuenta con sucursales de bancos locales, cajeros automáticos en el barrio, casas de cambio cercanas, servicios de seguros, y fintech.`,
+            educacion: `${locationDisplay} tiene colegios públicos y privados del barrio, institutos técnicos, centros de idiomas, academias, y acceso a la oferta educativa de CABA.`
+        },
+        'default': {
+            transporte: `En ${locationDisplay} tienes conectividad con líneas de colectivo locales, acceso a subte según la línea disponible, paradas de taxi estratégicas, y acceso a autopistas principales.`,
+            salud: `${locationDisplay} cuenta con hospitales públicos y privados, consultorios médicos especializados, centros de diagnóstico, farmacias 24hs, y servicios de emergencia.`,
+            comercio: `${locationDisplay} tiene supermercados de cadenas reconocidas, centros comerciales, tiendas especializadas, librerías, jugueterías, y servicios básicos.`,
+            servicios: `${locationDisplay} cuenta con farmacias, centros de estética, lavanderías, tintorerías, peluquerías, sucursales bancarias, y servicios profesionales.`,
+            gastronomia: `${locationDisplay} ofrece restaurantes variados, cafeterías especializadas, bares tradicionales, pizzerías, heladerías artesanales, y opciones gastronómicas diversas.`,
+            recreacion: `${locationDisplay} tiene plazas y parques, canchas deportivas, centros culturales, bibliotecas, teatros, museos, y espacios familiares.`,
+            servicios_financieros: `${locationDisplay} cuenta con sucursales de bancos principales, cajeros automáticos, casas de cambio, servicios de seguros, y fintech.`,
+            educacion: `${locationDisplay} tiene colegios primarios y secundarios, universidades cercanas, institutos técnicos, centros de idiomas, y academias.`
+        }
+    };
+    
+    // Buscar datos específicos del barrio o usar default
+    const barrioKey = Object.keys(locationSpecificData).find(key => 
         locationDisplay.toLowerCase().includes(key.toLowerCase()) || 
         barrioOriginal.toLowerCase().includes(key.toLowerCase())
-    ) || locationDisplay.toLowerCase().split(' ')[0];
+    );
     
-    // Obtener datos específicos
-    const data = await getLocationSpecificData(locationKey);
+    // Obtener datos del barrio o usar default
+    const categoryData = locationSpecificData[barrioKey || 'default'] || locationSpecificData['default'];
     
-    if (data && data[category]) {
-        // Reemplazar {location} con el nombre real
-        return data[category].replace('{location}', locationDisplay).replace('{location}', locationDisplay);
+    // Retornar datos de la categoría o datos genéricos
+    if (categoryData && categoryData[category]) {
+        return categoryData[category];
     }
     
-    // Fallback genérico si no se encuentra
-    return `En ${locationDisplay} tienes acceso a servicios de ${category} completos para la vida cotidiana.`;
+    // Si la categoría específica no existe, usar datos genéricos de default
+    if (locationSpecificData['default'] && locationSpecificData['default'][category]) {
+        return locationSpecificData['default'][category];
+    }
+    
+    // Fallback final genérico
+    return `Servicios de ${category} disponibles en ${locationDisplay}.`;
 }
 
 // Generar respuesta contextual REAL basada en la ubicación exacta
@@ -3373,103 +3744,161 @@ function processEnvironmentData(searchResults, direccion, barrio, ubicacionReal 
     function extractItemsFromAIResponse(response, category) {
         if (!response) return ['Información no disponible'];
         
-        // Dividir la respuesta en oraciones y extraer elementos clave
-        const sentences = response.split(/[.!]/);
         const items = [];
         
         // Patrones específicos por categoría para extraer información útil
+        // Mejores patrones que capturan nombres de lugares
         const extractionPatterns = {
             servicios: [
-                /farmacias? ([^,.]+)/gi,
-                /heladerías? (?:artesanales |locales |como )?([^,.]+)/gi,
-                /centros? de estética/gi,
-                /lavanderías?/gi,
-                /tintorerías?/gi,
-                /peluquerías?/gi,
-                /sucursales bancarias/gi
+                /líneas? de colectivo.*?(\d+[, \d]*)/gi,
+                /subte.*?línea ([a-h])/gi,
+                /línea[s]? (\d+[, \d]*)/gi,
+                /([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)*)/g
             ],
             transporte: [
                 /líneas? de colectivo.*?(\d+[, \d]*)/gi,
                 /subte.*?línea ([a-h])/gi,
-                /autopistas? ([^,.]+)/gi,
-                /taxis?/gi,
-                /remises/gi
+                /línea[s]? (\d+[, \d]*)/gi,
+                /([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)*)/g
             ],
             salud: [
                 /hospitales? ([^,.]+)/gi,
                 /clínicas? ([^,.]+)/gi,
-                /farmacias? 24h/gi,
-                /centros? de diagnóstico/gi,
-                /consultorios médicos/gi
+                /centro[s]? de ([^,.]+)/gi,
+                /([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)*)/g
             ],
             comercio: [
                 /supermercados? ([^,.]+)/gi,
-                /centros comerciales? ([^,.]+)/gi,
-                /tiendas de ([^,.]+)/gi,
-                /librerías? ([^,.]+)/gi,
-                /jugueterías?/gi
+                /centros? comerciales? ([^,.]+)/gi,
+                /([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)*)/g
             ],
             gastronomia: [
-                /restaurantes? (?:con |de )?([^,.]+)/gi,
-                /cafeterías? (?:especializadas |locales )?([^,.]+)/gi,
-                /pizzerías? (?:locales |como )?([^,.]+)/gi,
-                /heladerías? (?:artesanales |locales )?([^,.]+)/gi,
-                /bares? (?:tradicionales |locales)/gi
+                /restaurantes? ([^,.]+)/gi,
+                /cafeterías? ([^,.]+)/gi,
+                /pizzerías? ([^,.]+)/gi,
+                /heladerías? ([^,.]+)/gi,
+                /bares? ([^,.]+)/gi
             ],
             recreacion: [
                 /plazas? ([^,.]+)/gi,
                 /parques? ([^,.]+)/gi,
                 /teatros? ([^,.]+)/gi,
                 /museos? ([^,.]+)/gi,
-                /canchas/gi
+                /([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)*)/g
             ],
             servicios_financieros: [
-                /sucursales de ([^,.]+)/gi,
-                /cajeros automáticos/gi,
+                /bancos? ([^,.]+)/gi,
+                /cajeros automáticos?/gi,
                 /casas de cambio ([^,.]+)/gi,
-                /seguros ([^,.]+)/gi,
-                /fintech/gi
+                /sucursales de ([^,.]+)/gi
             ],
             educacion: [
-                /colegios? (?:primarios |secundarios |privados |públicos )?([^,.]+)/gi,
+                /colegios? ([^,.]+)/gi,
                 /universidades? ([^,.]+)/gi,
                 /institutos de ([^,.]+)/gi,
-                /centros de idiomas/gi,
-                /academias?/gi
+                /escuelas? ([^,.]+)/gi
             ]
         };
         
         const patterns = extractionPatterns[category] || [];
         
-        // Extraer información usando los patrones
+        // Primero intentar extraer con patrones específicos
         patterns.forEach(pattern => {
             const matches = response.match(pattern);
             if (matches) {
                 matches.forEach(match => {
                     // Limpiar y formatear la coincidencia
-                    const cleanMatch = match.replace(/^(?:con |de |locales |artesanales |como |tales como )?/gi, '').trim();
-                    if (cleanMatch.length > 3 && !items.includes(cleanMatch)) {
-                        items.push(cleanMatch);
+                    let cleanMatch = match.replace(/^(?:con |de |del |los |las |una |un |locales |artesanales |como |tales como )?/gi, '').trim();
+                    
+                    // Eliminar caracteres no deseados al final
+                    cleanMatch = cleanMatch.replace(/[,.]+$/, '').trim();
+                    
+                    // Filtrar items válidos - eliminar cualquier cosa con emojis o undefined
+                    const cleanMatchLower = cleanMatch.toLowerCase();
+                    const isInvalid = 
+                        cleanMatchLower.includes('undefined') || 
+                        cleanMatchLower.includes('nan') ||
+                        cleanMatch.includes('📍') ||
+                        cleanMatch.includes('🏢') ||
+                        cleanMatch.includes('🏪') ||
+                        cleanMatch.includes('🚇') ||
+                        cleanMatch.includes('🎓') ||
+                        cleanMatch.includes('🏥') ||
+                        cleanMatch.includes('🛒') ||
+                        cleanMatch.includes('🍽️') ||
+                        cleanMatch.includes('🌳') ||
+                        cleanMatch.includes('🏦') ||
+                        cleanMatch.length < 4 || 
+                        cleanMatch.length > 70 ||
+                        /^[0-9\s,.]+$/.test(cleanMatch); // Solo números y símbolos
+                    
+                    if (!isInvalid && !items.includes(cleanMatch)) {
+                        // Evitar frases que son solo conectores o muy genéricas
+                        const genericPhrases = ['servicios', 'zona', 'área', 'lugar', 'ubicación', 'disponibles', 'cercanos', 'área', 'información'];
+                        const isGeneric = genericPhrases.some(phrase => cleanMatch.toLowerCase().includes(phrase) && cleanMatch.length < 25);
+                        
+                        if (!isGeneric) {
+                            items.push(cleanMatch);
+                        }
                     }
                 });
             }
         });
         
-        // Si no encontramos patrones específicos, dividir la respuesta en fragmentos útiles
-        if (items.length === 0) {
-            const fragments = response.split(/, | y | además | con /);
+        // Si no encontramos suficientes items, dividir la respuesta en fragmentos útiles
+        if (items.length < 2) {
+            // Eliminar emojis de la respuesta primero
+            const cleanResponse = response.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').replace(/undefined/gi, '').trim();
+            
+            const fragments = cleanResponse.split(/[,.]+/);
             fragments.forEach(fragment => {
                 const trimmed = fragment.trim();
-                if (trimmed.length > 5 && trimmed.length < 50) {
-                    items.push(trimmed);
+                // Mejorar filtrado para capturar fragmentos más largos
+                if (trimmed.length > 10 && trimmed.length < 80) {
+                    // Tomar solo la parte más informativa del fragmento
+                    const usefulPart = trimmed.split(/ que | con | y | además /)[0];
+                    if (usefulPart.length > 5 && usefulPart.length < 60 && !items.includes(usefulPart)) {
+                        // Capitalizar primera letra
+                        const capitalized = usefulPart.charAt(0).toUpperCase() + usefulPart.slice(1);
+                        // Filtrar frases con undefined
+                        if (!capitalized.toLowerCase().includes('undefined') && !capitalized.toLowerCase().includes('nan')) {
+                            items.push(capitalized);
+                        }
+                    }
                 }
             });
         }
         
-        // Si aún no tenemos items, crear algunos basados en la respuesta
+        // Si aún no tenemos suficientes items, usar frases descriptivas
         if (items.length === 0) {
-            const shortResponse = response.substring(0, 100).trim();
-            items.push(shortResponse + '...');
+            // Tomar las oraciones completas como items
+            const cleanResponse = response.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').replace(/undefined/gi, '').trim();
+            const sentences = cleanResponse.split(/[.!]/).filter(s => s.trim().length > 10);
+            sentences.forEach(sentence => {
+                const trimmed = sentence.trim();
+                if (trimmed.length > 15 && trimmed.length < 80) {
+                    // Filtrar frases con undefined
+                    if (!trimmed.toLowerCase().includes('undefined') && !trimmed.toLowerCase().includes('nan')) {
+                        items.push(trimmed);
+                    }
+                }
+            });
+        }
+        
+        // Si absolutamente no tenemos nada, crear un item informativo
+        if (items.length === 0) {
+            items.push('Infraestructura completa disponible');
+        }
+        
+        console.log(`✅ [EXTRACT] Categoría '${category}': ${items.length} items extraídos:`, items);
+        return items.slice(0, 4); // Máximo 4 elementos por categoría
+    }
+            });
+        }
+        
+        // Si absolutamente no tenemos nada, crear un item informativo
+        if (items.length === 0) {
+            items.push('Infraestructura completa disponible');
         }
         
         return items.slice(0, 4); // Máximo 4 elementos por categoría
@@ -3663,10 +4092,7 @@ function displayEnvironmentInfo(data) {
             </button>
         </div>
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-            ${Object.values(data.categories).map(category => {
-                // Asegurar que items sea un array (no un string)
-                const items = Array.isArray(category.items) ? category.items : [category.items];
-                return `
+            ${Object.values(data.categories).map(category => `
                 <div style="
                     background: white;
                     border: 1px solid #e9ecef;
@@ -3682,11 +4108,10 @@ function displayEnvironmentInfo(data) {
                         </h5>
                     </div>
                     <ul style="margin: 0; padding-left: 16px; font-size: 13px; color: #6c757d; line-height: 1.4;">
-                        ${items.map(item => `<li style="margin-bottom: 4px;">${item}</li>`).join('')}
+                        ${category.items.map(item => `<li style="margin-bottom: 4px;">${item}</li>`).join('')}
                     </ul>
                 </div>
-                `;
-            }).join('')}
+            `).join('')}
         </div>
         <div style="
             margin-top: 15px;
@@ -3889,214 +4314,9 @@ window.decodeBase64 = decodeBase64;
 
 console.log('✅ Sistema de información del entorno con IA cargado');
 
-// ========================================// SISTEMA DE ANÁLISIS DE MERCADO (NUEVO)// ========================================
-
-// Variable global para almacenar datos del mercado
-let marketDataCache = {};
-
-// Función para obtener estadísticas del mercado por zona
-async function fetchMarketAnalysis(zone) {
-    console.log('📊 Obteniendo análisis de mercado para:', zone);
-    
-    // Verificar si ya tenemos datos en caché
-    if (marketDataCache[zone]) {
-        console.log('✅ Usando datos de mercado en caché');
-        return marketDataCache[zone];
-    }
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}/market/stats/${encodeURIComponent(zone)}`);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            // Guardar en caché
-            marketDataCache[zone] = data;
-            console.log('✅ Datos de mercado obtenidos:', data);
-            return data;
-        } else {
-            console.warn('⚠️ Error en respuesta del servidor:', data.error);
-            return null;
-        }
-        
-    } catch (error) {
-        console.error('❌ Error al obtener análisis de mercado:', error);
-        return null;
-    }
-}
-
-// Función para formatear precios
-function formatPrice(price) {
-    if (!price || isNaN(price)) return 'N/A';
-    return Math.round(price).toLocaleString();
-}
-
-// Función para crear la sección de estadísticas del mercado
-function createMarketStatsSection(marketData) {
-    if (!marketData || !marketData.success) {
-        return `
-            <div id="market-stats-section" style="margin-bottom: 25px;">
-                <div style="
-                    padding: 20px;
-                    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-                    border-radius: 12px;
-                    border: 1px solid #ffcc80;
-                    text-align: center;
-                ">
-                    <div style="font-size: 48px; margin-bottom: 12px;">📈</div>
-                    <h4 style="margin: 0 0 8px 0; font-size: 16px; color: #495057; font-weight: 600;">
-                        Estadísticas del Mercado
-                    </h4>
-                    <p style="margin: 0; font-size: 13px; color: #6c757d; line-height: 1.4;">
-                        No hay datos disponibles para esta zona en este momento.
-                    </p>
-                </div>
-            </div>
-        `;
-    }
-    
-    const stats = marketData.stats;
-    const zone = marketData.zone;
-    const propertyCount = stats.total_propiedades || 0;
-    const avgPrice = stats.precio_promedio || 0;
-    const avgPriceM2 = stats.precio_m2_promedio || 0;
-    const minPrice = stats.precio_min || 0;
-    const maxPrice = stats.precio_max || 0;
-    const medianPrice = stats.precio_mediana || 0;
-    
-    return `
-        <div id="market-stats-section" style="margin-bottom: 25px;">
-            <div style="
-                padding: 20px;
-                background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-                border-radius: 12px;
-                border: 1px solid #64b5f6;
-            ">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                    <span style="font-size: 24px;">📈</span>
-                    <h4 style="margin: 0; font-size: 16px; color: #1565c0; font-weight: 600;">
-                        Estadísticas del Mercado en ${zone}
-                    </h4>
-                </div>
-                
-                <!-- Métricas principales -->
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 15px;">
-                    <div style="
-                        background: white;
-                        padding: 12px;
-                        border-radius: 8px;
-                        text-align: center;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-                    ">
-                        <div style="font-size: 20px; font-weight: 700; color: #232deb;">
-                            ${propertyCount}
-                        </div>
-                        <div style="font-size: 11px; color: #6c757d; font-weight: 500;">
-                            Propiedades analizadas
-                        </div>
-                    </div>
-                    <div style="
-                        background: white;
-                        padding: 12px;
-                        border-radius: 8px;
-                        text-align: center;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-                    ">
-                        <div style="font-size: 20px; font-weight: 700; color: #10b981;">
-                            USD ${formatPrice(avgPrice)}
-                        </div>
-                        <div style="font-size: 11px; color: #6c757d; font-weight: 500;">
-                            Precio promedio
-                        </div>
-                    </div>
-                    <div style="
-                        background: white;
-                        padding: 12px;
-                        border-radius: 8px;
-                        text-align: center;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-                    ">
-                        <div style="font-size: 20px; font-weight: 700; color: #f59e0b;">
-                            USD ${formatPrice(avgPriceM2)}/m²
-                        </div>
-                        <div style="font-size: 11px; color: #6c757d; font-weight: 500;">
-                            Precio por m²
-                        </div>
-                    </div>
-                    <div style="
-                        background: white;
-                        padding: 12px;
-                        border-radius: 8px;
-                        text-align: center;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-                    ">
-                        <div style="font-size: 20px; font-weight: 700; color: #8b5cf6;">
-                            USD ${formatPrice(medianPrice)}
-                        </div>
-                        <div style="font-size: 11px; color: #6c757d; font-weight: 500;">
-                            Precio mediano
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Rango de precios -->
-                <div style="
-                    background: white;
-                    padding: 12px;
-                    border-radius: 8px;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-                ">
-                    <div style="font-size: 12px; color: #6c757d; margin-bottom: 8px; font-weight: 500;">
-                        Rango de precios en la zona
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <div style="flex: 1;">
-                            <div style="font-size: 14px; font-weight: 600; color: #10b981;">
-                                USD ${formatPrice(minPrice)}
-                            </div>
-                            <div style="font-size: 10px; color: #6c757d;">Mínimo</div>
-                        </div>
-                        <div style="flex: 2; height: 8px; background: linear-gradient(90deg, #10b981 0%, #f59e0b 50%, #ef4444 100%); border-radius: 4px; position: relative;">
-                            <div style="position: absolute; top: -4px; left: 50%; transform: translateX(-50%); width: 16px; height: 16px; background: #232deb; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>
-                        </div>
-                        <div style="flex: 1; text-align: right;">
-                            <div style="font-size: 14px; font-weight: 600; color: #ef4444;">
-                                USD ${formatPrice(maxPrice)}
-                            </div>
-                            <div style="font-size: 10px; color: #6c757d;">Máximo</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Indicador de última actualización -->
-                <div style="margin-top: 12px; font-size: 11px; color: #6c757d; text-align: center;">
-                    📅 Datos actualizados recientemente basados en el mercado actual
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-// Función para cargar y mostrar estadísticas del mercado en el panel
-async function loadMarketStatsForPanel(zone) {
-    const marketData = await fetchMarketAnalysis(zone);
-    const statsSection = document.getElementById('market-stats-section');
-    
-    if (statsSection && marketData) {
-        statsSection.innerHTML = createMarketStatsSection(marketData);
-    }
-}
-
-// Exportar funciones
-window.fetchMarketAnalysis = fetchMarketAnalysis;
-window.createMarketStatsSection = createMarketStatsSection;
-window.loadMarketStatsForPanel = loadMarketStatsForPanel;
-
-console.log('✅ Sistema de análisis de mercado cargado');
+// ========================================
+// ANÁLISIS COMPARATIVO DE PROPIEDADES
+// ========================================
 
 // Calcular promedio del barrio
 function calcularPromedioBarrio(propiedades, barrio, tipo) {
@@ -4426,300 +4646,8 @@ function cerrarAnalisisComparativo() {
 // Exportar funciones
 window.mostrarAnalisisComparativo = mostrarAnalisisComparativo;
 window.cerrarAnalisisComparativo = cerrarAnalisisComparativo;
-window.mostrarAnalisisComparativoIA = mostrarAnalisisComparativoIA;
 
-console.log('✅ Sistema de análisis comparativo cargado');
-
-// ========================================
-// ANÁLISIS COMPARATIVO CON IA (NUEVO)
-// ========================================
-
-async function mostrarAnalisisComparativoIA() {
-    if (!window.currentProperty) {
-        alert('Selecciona una propiedad primero');
-        return;
-    }
-    
-    const property = window.currentProperty;
-    console.log('🤖 Iniciando análisis comparativo con IA para:', property.titulo);
-    
-    // Mostrar indicador de carga
-    const loadingOverlay = document.createElement('div');
-    loadingOverlay.id = 'analisis-ia-loading';
-    loadingOverlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.7);
-        z-index: 2000;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-    `;
-    loadingOverlay.innerHTML = `
-        <div style="text-align: center; color: white;">
-            <div style="font-size: 48px; margin-bottom: 20px;">🤖</div>
-            <h3 style="margin: 0 0 10px 0;">Analizando con Inteligencia Artificial</h3>
-            <p style="margin: 0; opacity: 0.8;">Comparando propiedad con el mercado...</p>
-            <div style="margin-top: 20px; width: 200px; height: 4px; background: rgba(255,255,255,0.3); border-radius: 2px; overflow: hidden;">
-                <div style="width: 100%; height: 100%; background: #10b981; animation: loading 1.5s infinite ease-in-out;"></div>
-            </div>
-        </div>
-        <style>
-            @keyframes loading {
-                0% { width: 0%; margin-left: 0%; }
-                50% { width: 100%; margin-left: 0%; }
-                100% { width: 0%; margin-left: 100%; }
-            }
-        </style>
-    `;
-    document.body.appendChild(loadingOverlay);
-    
-    try {
-        // Llamar al endpoint de comparación con IA
-        const response = await fetch(`${API_BASE_URL}/market/comparison`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                propiedad: {
-                    id_temporal: property.id_temporal,
-                    titulo: property.titulo,
-                    direccion: property.direccion,
-                    barrio: property.barrio,
-                    tipo: property.tipo,
-                    precio: property.precio,
-                    metros_cuadrados: property.metros,
-                    ambientes: property.ambientes,
-                    estado: property.estado,
-                    moneda_precio: property.moneda,
-                    descripcion: property.descripcion
-                }
-            })
-        });
-        
-        const data = await response.json();
-        
-        // Remover indicador de carga
-        loadingOverlay.remove();
-        
-        if (data.success) {
-            // Mostrar resultado del análisis con IA
-            mostrarModalAnalisisIA(data.comparacion, data.propiedad);
-        } else {
-            alert('Error al generar análisis: ' + (data.error || 'Error desconocido'));
-        }
-        
-    } catch (error) {
-        console.error('❌ Error en análisis comparativo IA:', error);
-        loadingOverlay.remove();
-        alert('Error de conexión. Usando análisis local...');
-        // Fallback al análisis local
-        mostrarAnalisisComparativo();
-    }
-}
-
-function mostrarModalAnalisisIA(comparacion, propiedadData) {
-    const propiedades = globalData.properties || [];
-    const promedio = calcularPromedioBarrio(propiedades, propiedadData.barrio, propiedadData.tipo);
-    
-    // Procesar virtudes del análisis IA
-    const virtudes = (comparacion.virtudes || []).map(v => ({
-        tipo: v.tipo || 'general',
-        icono: v.icono || '⭐',
-        titulo: v.titulo || 'Características',
-        dato: v.dato_objetivo || '',
-        emocion: v.beneficio_emocional || '',
-        persuasion_score: v.persuasion_score || 5
-    }));
-    
-    const score = comparacion.score_oportunidad || 5;
-    const textoPersuasivo = comparacion.texto_persuasivo || '';
-    const llamadaAccion = comparacion.llamada_accion || '';
-    
-    // Crear modal
-    const modal = document.createElement('div');
-    modal.id = 'analisis-comparativo-modal';
-    modal.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.6);
-        z-index: 1001;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-    `;
-    
-    const virtudesHTML = virtudes.length > 0 ? virtudes.map(v => `
-        <div style="
-            background: white;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            border-left: 4px solid #8b5cf6;
-        ">
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                <span style="font-size: 24px;">${v.icono}</span>
-                <span style="font-weight: 600; color: #495057; font-size: 15px;">${v.titulo}</span>
-            </div>
-            <div style="font-size: 13px; color: #6c757d; margin-bottom: 6px;">${v.dato}</div>
-            <div style="font-size: 13px; color: #8b5cf6; font-style: italic;">${v.emocion}</div>
-        </div>
-    `).join('') : `
-        <div style="
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-        ">
-            <span style="font-size: 40px;">🏠</span>
-            <p style="margin: 10px 0 0 0; color: #6c757d;">
-                Esta propiedad tiene características sólidas en una ubicación privilegiada.
-            </p>
-        </div>
-    `;
-    
-    modal.innerHTML = `
-        <div style="
-            background: white;
-            border-radius: 16px;
-            max-width: 550px;
-            width: 100%;
-            max-height: 85vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        ">
-            <!-- Header -->
-            <div style="
-                background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-                padding: 20px;
-                color: white;
-                position: sticky;
-                top: 0;
-            ">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div>
-                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                            <span style="font-size: 20px;">🤖</span>
-                            <h3 style="margin: 0; font-size: 18px;">
-                                Análisis IA
-                            </h3>
-                        </div>
-                        <p style="margin: 0; font-size: 12px; opacity: 0.9;">
-                            Comparación inteligente con el mercado
-                        </p>
-                        <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
-                            <span style="
-                                background: rgba(255,255,255,0.2);
-                                padding: 4px 12px;
-                                border-radius: 20px;
-                                font-size: 14px;
-                                font-weight: 600;
-                            ">
-                                Score: ${score.toFixed(1)}/10
-                            </span>
-                        </div>
-                    </div>
-                    <button onclick="cerrarAnalisisComparativo()" style="
-                        background: rgba(255,255,255,0.2);
-                        border: none;
-                        color: white;
-                        font-size: 24px;
-                        cursor: pointer;
-                        padding: 4px 10px;
-                        border-radius: 6px;
-                    ">×</button>
-                </div>
-            </div>
-                
-            <!-- Contenido -->
-            <div style="padding: 20px;">
-                <!-- Virtudes -->
-                ${virtudesHTML}
-                
-                <!-- Texto persuasivo -->
-                <div style="
-                    background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
-                    border-radius: 12px;
-                    padding: 16px;
-                    margin-top: 16px;
-                    border: 1px solid #c4b5fd;
-                ">
-                    <p style="
-                        margin: 0 0 12px 0;
-                        font-size: 14px;
-                        line-height: 1.6;
-                        color: #5b21b6;
-                        font-family: Georgia, serif;
-                    ">${textoPersuasivo}</p>
-                </div>
-                
-                <!-- Llamada a la acción -->
-                ${llamadaAccion ? `
-                <div style="
-                    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-                    border-radius: 12px;
-                    padding: 16px;
-                    margin-top: 16px;
-                    text-align: center;
-                ">
-                    <p style="
-                        margin: 0;
-                        font-size: 15px;
-                        font-weight: 600;
-                        color: white;
-                    ">${llamadaAccion}</p>
-                </div>
-                ` : ''}
-                
-                <!-- Footer con comparación -->
-                ${promedio ? `
-                <div style="
-                    margin-top: 16px;
-                    padding: 12px;
-                    background: #f8fafc;
-                    border-radius: 8px;
-                    font-size: 12px;
-                    color: #64748b;
-                    text-align: center;
-                ">
-                    📊 Comparado con ${promedio.count} propiedades similares en ${propiedadData.barrio}
-                </div>
-                ` : ''}
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-    document.body.style.overflow = 'hidden';
-    
-    // Cerrar al hacer clic fuera
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            cerrarAnalisisComparativo();
-        }
-    });
-    
-    // Cerrar con ESC
-    document.addEventListener('keydown', function escHandler(e) {
-        if (e.key === 'Escape') {
-            cerrarAnalisisComparativo();
-            document.removeEventListener('keydown', escHandler);
-        }
-    });
-}
-
-console.log('✅ Sistema de análisis comparativo con IA cargado');
-
-// ========================================
+console.log('✅ Sistema de análisis comparativo cargado');// ========================================
 // PANEL DESLIZABLE - VERSIÓN CON ENTORNO IA
 // ========================================
 
@@ -4861,43 +4789,6 @@ function createPropertyPanel(id, titulo, precio, moneda, direccion, barrio, ambi
                 <div style="text-align: center; padding: 15px; background: white; border-radius: 8px; border: 1px solid #e9ecef;">
                     <div style="font-size: 24px; font-weight: 700; color: #232deb; margin-bottom: 4px;">${tipo}</div>
                     <div style="font-size: 12px; color: #6c757d; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Tipo</div>
-                </div>
-            </div>
-            
-            <!-- NUEVA SECCIÓN: ESTADÍSTICAS DEL MERCADO -->
-            <div id="market-stats-section">
-                <div style="
-                    padding: 20px;
-                    background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-                    border-radius: 12px;
-                    border: 1px solid #e1bee7;
-                    text-align: center;
-                ">
-                    <div style="font-size: 48px; margin-bottom: 12px;">📊</div>
-                    <h4 style="margin: 0 0 8px 0; font-size: 16px; color: #495057; font-weight: 600;">
-                        Estadísticas del Mercado
-                    </h4>
-                    <p style="margin: 0; font-size: 13px; color: #6c757d; line-height: 1.4;">
-                        Cargando datos del mercado para ${barrio}...
-                    </p>
-                    <button onclick="loadMarketStatsForPanel('${barrio}')"
-                            style="
-                                margin-top: 12px;
-                                background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
-                                color: white;
-                                border: none;
-                                padding: 12px 20px;
-                                border-radius: 6px;
-                                font-size: 13px;
-                                font-weight: 500;
-                                cursor: pointer;
-                                transition: all 0.3s ease;
-                                box-shadow: 0 2px 8px rgba(35, 45, 235, 0.2);
-                            "
-                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(35, 45, 235, 0.3)'" 
-                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(35, 45, 235, 0.2)'">
-                        📊 Ver Estadísticas del Mercado
-                    </button>
                 </div>
             </div>
             
@@ -5095,9 +4986,6 @@ function createPropertyPanel(id, titulo, precio, moneda, direccion, barrio, ambi
     
     // Guardar referencia de la propiedad actual
     window.currentProperty = { direccion, barrio, titulo, descripcionEncoded: encodeBase64(descripcion) };
-    
-    // Cargar estadísticas del mercado de forma asíncrona
-    loadMarketStatsForPanel(barrio);
     
     console.log('✅ Panel con entorno IA creado para:', titulo);
 }
