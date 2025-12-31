@@ -3101,10 +3101,11 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
     if (data.datos_especificos?.transporte) {
         transporteItems = processArray(data.datos_especificos.transporte);
     } else if (data.transporte?.estaciones || data.transporte?.colectivos) {
-        if (data.transporte.estaciones) {
+        // Verificar que sean arrays antes de usar .map()
+        if (Array.isArray(data.transporte.estaciones)) {
             transporteItems.push(...data.transporte.estaciones.map(e => `Estación: ${e}`));
         }
-        if (data.transporte.colectivos) {
+        if (Array.isArray(data.transporte.colectivos)) {
             transporteItems.push(...data.transporte.colectivos.map(c => `Línea ${c}`));
         }
     }
@@ -3156,16 +3157,17 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
     let gastroItems = [];
     if (data.categorias?.gastronomia) {
         const gastro = data.categorias.gastronomia;
-        if (gastro.restaurantes_destacados) {
+        // Verificar que sean arrays antes de usar .map()
+        if (Array.isArray(gastro.restaurantes_destacados)) {
             gastroItems.push(...gastro.restaurantes_destacados.map(r => `🍽️ ${r}`));
         }
-        if (gastro.zonas_gastronomicas) {
+        if (Array.isArray(gastro.zonas_gastronomicas)) {
             gastroItems.push(...gastro.zonas_gastronomicas.map(z => `📍 ${z}`));
         }
-        if (gastro.bares_notables) {
+        if (Array.isArray(gastro.bares_notables)) {
             gastroItems.push(...gastro.bares_notables.map(b => `🍺 ${b}`));
         }
-        if (gastro.cafes_especialidad) {
+        if (Array.isArray(gastro.cafes_especialidad)) {
             gastroItems.push(...gastro.cafes_especialidad.map(c => `☕ ${c}`));
         }
     }
@@ -3197,16 +3199,17 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
     let financieroItems = [];
     if (data.categorias?.servicios_financieros) {
         const sf = data.categorias.servicios_financieros;
-        if (sf.bancos) {
+        // Verificar que sf.bancos sea un array antes de usar .map()
+        if (Array.isArray(sf.bancos)) {
             financieroItems.push(...sf.bancos.map(b => `🏦 ${b}`));
         }
-        if (sf.cajeros_automaticos) {
+        if (Array.isArray(sf.cajeros_automaticos)) {
             financieroItems.push(...sf.cajeros_automaticos.map(c => `💳 ${c}`));
         }
-        if (sf.sucursales_bancarias) {
+        if (Array.isArray(sf.sucursales_bancarias)) {
             financieroItems.push(...sf.sucursales_bancarias.map(s => `📍 ${s}`));
         }
-        if (sf.otros_servicios) {
+        if (Array.isArray(sf.otros_servicios)) {
             financieroItems.push(...sf.otros_servicios.map(o => `💼 ${o}`));
         }
     }
