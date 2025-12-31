@@ -245,10 +245,25 @@ const Utils = {
      */
     arrayToString(arr) {
         if (!arr) return '';
+        
+        // Si ya es un string, verificar que no esté corrupto
+        if (typeof arr === 'string') {
+            // Si el string contiene el patrón "L, i, n, e, a" es porque está corrupto
+            // Esto pasa cuando se itera sobre un string como si fuera array
+            if (arr.includes(', ') && arr.length < 100 && /^[A-Za-z](, [A-Za-z])+$/.test(arr)) {
+                console.warn('⚠️ Valor corrupto detectado en arrayToString, intentando reparar:', arr);
+                // Intentar reparar: dividir por ", " y volver a unir
+                return arr.split(', ').filter((v, i, a) => a.indexOf(v) === i).join(', ');
+            }
+            return arr;
+        }
+        
+        // Si es array, convertir a string
         if (Array.isArray(arr)) {
             return arr.join(', ');
         }
-        // Si ya es un string, devolverlo directamente sin modificación
+        
+        // Cualquier otro tipo, convertir a string
         return String(arr);
     }
 };
@@ -558,7 +573,21 @@ const UIRenderer = {
             // Remover disabled temporalmente para poder establecer el valor
             const wasDisabled = element.disabled;
             element.disabled = false;
-            element.value = Utils.formatValue(value);
+            
+            // SEGURIDAD: Asegurar que el valor sea siempre un string plano
+            // Si es array, convertir a string con join
+            let stringValue = '';
+            if (Array.isArray(value)) {
+                stringValue = value.join(', ');
+            } else if (typeof value === 'string') {
+                stringValue = value;
+            } else if (value === null || value === undefined) {
+                stringValue = '';
+            } else {
+                stringValue = String(value);
+            }
+            
+            element.value = stringValue;
             element.disabled = wasDisabled;
         }
     },
@@ -2329,7 +2358,17 @@ function loadBarrioData(response) {
             const catKey = field === 'centros' ? 'centros_salud' : 
                           field === 'centros' ? 'centros_comerciales' : 
                           field === 'colectivos' ? 'colectivos' : field;
-            if (inputEl) inputEl.value = catData[catKey] || '';
+            if (inputEl) {
+                const value = catData[catKey];
+                // SEGURIDAD: Asegurar que el valor sea un string
+                if (Array.isArray(value)) {
+                    inputEl.value = value.join(', ');
+                } else if (typeof value === 'string') {
+                    inputEl.value = value;
+                } else {
+                    inputEl.value = String(value || '');
+                }
+            }
         });
     });
     
