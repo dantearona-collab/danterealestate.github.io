@@ -265,6 +265,66 @@ const Utils = {
         
         // Cualquier otro tipo, convertir a string
         return String(arr);
+    },
+
+    /**
+     * Repara un valor corrupto que viene como string separado por comas de caracteres
+     * Detecta el patrón "C, o, l, e, g, i, o, s" y lo convierte a array válido
+     */
+    repairCorruptedValue(value) {
+        if (!value) return value;
+        
+        if (typeof value === 'string') {
+            // Patrón de string corrupto: caracteres separados por ", "
+            // Ejemplo: "C, o, l, e, g, i, o, s" o "Consultorios médicos"
+            const corruptedPattern = /^([A-Za-zÀ-ÿ], )+[A-Za-zÀ-ÿ]$/;
+            if (corruptedPattern.test(value)) {
+                console.warn('🔧 Utils.repairCorruptedValue - Reparando valor corrupto:', value);
+                const repaired = value.split(', ').join('');
+                console.warn('🔧 Valor reparado:', repaired);
+                return repaired;
+            }
+            
+            // También verificar si ya viene medio reparado (con espacios extra)
+            // Ejemplo: "C, o, l, e, g, i, o, s" (caracteres sueltos con comas)
+            if (value.includes(', ')) {
+                const parts = value.split(', ');
+                // Si la mayoría de partes son letras individuales, es corrupto
+                const singleChars = parts.filter(p => p.length === 1 && /[A-Za-zÀ-ÿ]/.test(p));
+                if (singleChars.length >= 3 && parts.length <= 15) {
+                    console.warn('🔧 Utils.repairCorruptedValue - Detectado patrón de caracteres sueltos:', value);
+                    const repaired = parts.join('');
+                    console.warn('🔧 Valor reparado:', repaired);
+                    return repaired;
+                }
+            }
+        }
+        
+        return value;
+    },
+
+    /**
+     * Convierte un valor a array de strings, reparando si está corrupto
+     */
+    toStringArray(value) {
+        if (!value) return [];
+        
+        if (Array.isArray(value)) {
+            return value.map(v => this.repairCorruptedValue(v));
+        }
+        
+        if (typeof value === 'string') {
+            // Si viene corrupto como "C, o, l, e, g, i, o, s", intentar reparar
+            const repaired = this.repairCorruptedValue(value);
+            if (repaired !== value) {
+                // Si se reparó, puede ser un string largo o un array con un elemento
+                return [repaired];
+            }
+            // Si es un string normal con comas, dividirlo
+            return value.split(',').map(s => s.trim()).filter(s => s);
+        }
+        
+        return [String(value)];
     }
 };
 
@@ -350,8 +410,11 @@ const UIRenderer = {
         this.setScoreField('comercio', comercio.puntuacion);
         this.setFieldValue('comercio-puntuacion', comercio.puntuacion);
         this.setFieldValue('comercio-descripcion', comercio.descripcion);
-        this.setFieldValue('comercio-supermercados', Utils.arrayToString(comercio.supermercados || []));
-        this.setFieldValue('comercio-centros', Utils.arrayToString(comercio.centros_comerciales || comercio.centros || []));
+        // Aplicar reparación de datos corruptos
+        const comercioSupermercados = Utils.toStringArray(comercio.supermercados);
+        const comercioCentros = Utils.toStringArray(comercio.centros_comerciales || comercio.centros);
+        this.setFieldValue('comercio-supermercados', comercioSupermercados.join(', '));
+        this.setFieldValue('comercio-centros', comercioCentros.join(', '));
         
         // Seguridad
         const seguridad = categorias.seguridad || barrioData.seguridad || {};
@@ -365,23 +428,31 @@ const UIRenderer = {
         this.setScoreField('educacion', educacion.puntuacion);
         this.setFieldValue('educacion-puntuacion', educacion.puntuacion);
         this.setFieldValue('educacion-descripcion', educacion.descripcion);
-        this.setFieldValue('educacion-escuelas', Utils.arrayToString(educacion.escuelas || []));
-        this.setFieldValue('educacion-universidades', Utils.arrayToString(educacion.universidades || []));
+        // Aplicar reparación de datos corruptos
+        const educacionEscuelas = Utils.toStringArray(educacion.escuelas);
+        const educacionUniversidades = Utils.toStringArray(educacion.universidades);
+        this.setFieldValue('educacion-escuelas', educacionEscuelas.join(', '));
+        this.setFieldValue('educacion-universidades', educacionUniversidades.join(', '));
         
         // Salud
         const salud = categorias.salud || barrioData.salud || {};
         this.setScoreField('salud', salud.puntuacion);
         this.setFieldValue('salud-puntuacion', salud.puntuacion);
         this.setFieldValue('salud-descripcion', salud.descripcion);
-        this.setFieldValue('salud-hospitales', Utils.arrayToString(salud.hospitales || []));
-        this.setFieldValue('salud-centros', Utils.arrayToString(salud.centros_salud || salud.centros || []));
+        // Aplicar reparación de datos corruptos
+        const saludHospitales = Utils.toStringArray(salud.hospitales);
+        const saludCentros = Utils.toStringArray(salud.centros_salud || salud.centros);
+        this.setFieldValue('salud-hospitales', saludHospitales.join(', '));
+        this.setFieldValue('salud-centros', saludCentros.join(', '));
         
         // Espacios Verdes
         const espaciosVerdes = categorias.espacios_verdes || barrioData.espacios_verdes || {};
         this.setScoreField('espacios_verdes', espaciosVerdes.puntuacion);
         this.setFieldValue('espacios_verdes-puntuacion', espaciosVerdes.puntuacion);
         this.setFieldValue('espacios_verdes-descripcion', espaciosVerdes.descripcion);
-        this.setFieldValue('espacios_verdes-parques', Utils.arrayToString(espaciosVerdes.parques || []));
+        // Aplicar reparación de datos corruptos
+        const espaciosVerdesParques = Utils.toStringArray(espaciosVerdes.parques);
+        this.setFieldValue('espacios_verdes-parques', espaciosVerdesParques.join(', '));
         
         // Contaminación
         const contaminacion = categorias.contaminacion || barrioData.contaminacion || {};
@@ -396,24 +467,33 @@ const UIRenderer = {
         this.setScoreField('vida_barrio', vidaBarrio.puntuacion);
         this.setFieldValue('vida_barrio-puntuacion', vidaBarrio.puntuacion);
         this.setFieldValue('vida_barrio-descripcion', vidaBarrio.descripcion);
-        this.setFieldValue('vida_barrio-bares', Utils.arrayToString(vidaBarrio.bares || vidaBarrio.bares_restaurantes || []));
-        this.setFieldValue('vida_barrio-cultura', Utils.arrayToString(vidaBarrio.cultura || []));
+        // Aplicar reparación de datos corruptos
+        const vidaBarrioBares = Utils.toStringArray(vidaBarrio.bares || vidaBarrio.bares_restaurantes);
+        const vidaBarrioCultura = Utils.toStringArray(vidaBarrio.cultura);
+        this.setFieldValue('vida_barrio-bares', vidaBarrioBares.join(', '));
+        this.setFieldValue('vida_barrio-cultura', vidaBarrioCultura.join(', '));
         
         // Gastronomía
         const gastronomia = categorias.gastronomia || barrioData.gastronomia || {};
         this.setScoreField('gastronomia', gastronomia.puntuacion);
         this.setFieldValue('gastronomia-puntuacion', gastronomia.puntuacion);
         this.setFieldValue('gastronomia-descripcion', gastronomia.descripcion);
-        this.setFieldValue('gastronomia-restaurantes', Utils.arrayToString(gastronomia.restaurantes || gastronomia.restaurantes_destacados || []));
-        this.setFieldValue('gastronomia-zonas', Utils.arrayToString(gastronomia.zonas || gastronomia.zonas_gastronomicas || []));
+        // Aplicar reparación de datos corruptos
+        const gastronomiaRestaurantes = Utils.toStringArray(gastronomia.restaurantes || gastronomia.restaurantes_destacados);
+        const gastronomiaZonas = Utils.toStringArray(gastronomia.zonas || gastronomia.zonas_gastronomicas);
+        this.setFieldValue('gastronomia-restaurantes', gastronomiaRestaurantes.join(', '));
+        this.setFieldValue('gastronomia-zonas', gastronomiaZonas.join(', '));
         
         // Servicios Financieros
         const serviciosFinancieros = categorias.servicios_financieros || barrioData.servicios_financieros || {};
         this.setScoreField('servicios_financieros', serviciosFinancieros.puntuacion);
         this.setFieldValue('servicios_financieros-puntuacion', serviciosFinancieros.puntuacion);
         this.setFieldValue('servicios_financieros-descripcion', serviciosFinancieros.descripcion);
-        this.setFieldValue('servicios_financieros-bancos', Utils.arrayToString(serviciosFinancieros.bancos || []));
-        this.setFieldValue('servicios_financieros-cajeros', Utils.arrayToString(serviciosFinancieros.cajeros || serviciosFinancieros.cajeros_automaticos || []));
+        // Aplicar reparación de datos corruptos
+        const sfBancos = Utils.toStringArray(serviciosFinancieros.bancos);
+        const sfCajeros = Utils.toStringArray(serviciosFinancieros.cajeros || serviciosFinancieros.cajeros_automaticos);
+        this.setFieldValue('servicios_financieros-bancos', sfBancos.join(', '));
+        this.setFieldValue('servicios_financieros-cajeros', sfCajeros.join(', '));
         
         // Actualizar estado de IA y fecha
         this.updateAIStatus(barrio);
@@ -518,14 +598,16 @@ const UIRenderer = {
     getPreviewDetails(category, data) {
         if (!data) return '';
         
-        // Función auxiliar para obtener el primer elemento, sea array o string
+        // Función auxiliar para obtener el primer elemento, sea array o string, reparando si está corrupto
         const getFirst = (value) => {
             if (!value) return '';
             if (Array.isArray(value)) {
-                return value.length > 0 ? value[0] : '';
+                // Reparar cada elemento del array si está corrupto
+                const repaired = value.map(v => Utils.repairCorruptedValue(v));
+                return repaired.length > 0 ? repaired[0] : '';
             }
-            // Si es un string, devolverlo directamente
-            return String(value);
+            // Si es un string, reparar si está corrupto y devolverlo
+            return Utils.repairCorruptedValue(String(value));
         };
         
         switch (category) {
@@ -538,7 +620,7 @@ const UIRenderer = {
                 if (data.centros_comerciales) return getFirst(data.centros_comerciales);
                 break;
             case 'seguridad':
-                if (data.comisaria) return `Comisaría: ${data.comisaria}`;
+                if (data.comisaria) return `Comisaría: ${Utils.repairCorruptedValue(data.comisaria)}`;
                 break;
             case 'educacion':
                 if (data.escuelas) return getFirst(data.escuelas);
@@ -2359,7 +2441,13 @@ function loadBarrioData(response) {
                           field === 'centros' ? 'centros_comerciales' : 
                           field === 'colectivos' ? 'colectivos' : field;
             if (inputEl) {
-                const value = catData[catKey];
+                let value = catData[catKey];
+                // APLICAR REPARACIÓN DE DATOS CORRUPTOS
+                if (typeof value === 'string') {
+                    value = Utils.repairCorruptedValue(value);
+                } else if (Array.isArray(value)) {
+                    value = value.map(v => Utils.repairCorruptedValue(v));
+                }
                 // SEGURIDAD: Asegurar que el valor sea un string
                 if (Array.isArray(value)) {
                     inputEl.value = value.join(', ');
