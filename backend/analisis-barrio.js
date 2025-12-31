@@ -248,6 +248,7 @@ const Utils = {
         if (Array.isArray(arr)) {
             return arr.join(', ');
         }
+        // Si ya es un string, devolverlo directamente sin modificación
         return String(arr);
     }
 };
@@ -502,36 +503,46 @@ const UIRenderer = {
     getPreviewDetails(category, data) {
         if (!data) return '';
         
+        // Función auxiliar para obtener el primer elemento, sea array o string
+        const getFirst = (value) => {
+            if (!value) return '';
+            if (Array.isArray(value)) {
+                return value.length > 0 ? value[0] : '';
+            }
+            // Si es un string, devolverlo directamente
+            return String(value);
+        };
+        
         switch (category) {
             case 'transporte':
-                if (data.estaciones) return `Estaciones: ${data.estaciones}`;
-                if (data.colectivos) return `Líneas: ${data.colectivos}`;
+                if (data.estaciones) return `Estaciones: ${getFirst(data.estaciones)}`;
+                if (data.colectivos) return `Líneas: ${getFirst(data.colectivos)}`;
                 break;
             case 'comercio':
-                if (data.supermercados) return data.supermercados.split(',')[0];
-                if (data.centros_comerciales) return data.centros_comerciales.split(',')[0];
+                if (data.supermercados) return getFirst(data.supermercados);
+                if (data.centros_comerciales) return getFirst(data.centros_comerciales);
                 break;
             case 'seguridad':
                 if (data.comisaria) return `Comisaría: ${data.comisaria}`;
                 break;
             case 'educacion':
-                if (data.escuelas) return data.escuelas.split(',')[0];
-                if (data.universidades) return data.universidades.split(',')[0];
+                if (data.escuelas) return getFirst(data.escuelas);
+                if (data.universidades) return getFirst(data.universidades);
                 break;
             case 'salud':
-                if (data.hospitales) return data.hospitales.split(',')[0];
-                if (data.centros_salud) return data.centros_salud.split(',')[0];
+                if (data.hospitales) return getFirst(data.hospitales);
+                if (data.centros_salud) return getFirst(data.centros_salud);
                 break;
             case 'espacios_verdes':
-                if (data.parques) return data.parques.split(',')[0];
+                if (data.parques) return getFirst(data.parques);
                 break;
             case 'vida_barrio':
-                if (data.bares) return data.bares.split(',')[0];
-                if (data.cultura) return data.cultura.split(',')[0];
+                if (data.bares) return getFirst(data.bares);
+                if (data.cultura) return getFirst(data.cultura);
                 break;
             case 'servicios_financieros':
-                if (data.bancos) return data.bancos.split(',')[0];
-                if (data.cajeros) return `Cajeros: ${data.cajeros.split(',')[0]}`;
+                if (data.bancos) return getFirst(data.bancos);
+                if (data.cajeros) return `Cajeros: ${getFirst(data.cajeros)}`;
                 break;
         }
         
