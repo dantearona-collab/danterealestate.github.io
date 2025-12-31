@@ -3132,8 +3132,11 @@ async function generateSpecificResponse(category, ubicacionReal, barrioOriginal,
         ubicacionReal.split(',')[0].trim() : 
         ubicacionReal;
     
-    // Buscar clave de barrio
-    const locationKey = Object.keys(getStaticLocationData('default') ? {} : getStaticLocationData('')).find(key => 
+    // Buscar clave de barrio de forma segura
+    const staticData = getStaticLocationData('default');
+    const dataObj = (staticData && typeof staticData === 'object') ? staticData : {};
+    
+    const locationKey = Object.keys(dataObj).find(key => 
         locationDisplay.toLowerCase().includes(key.toLowerCase()) || 
         barrioOriginal.toLowerCase().includes(key.toLowerCase())
     ) || locationDisplay.toLowerCase().split(' ')[0];
