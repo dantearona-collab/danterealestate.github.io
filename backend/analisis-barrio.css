@@ -3,13 +3,13 @@
  * Dashboard de Análisis de Barrios
  */
 
-/* Variables CSS */
+/* Variables CSS - Colores de la empresa */
 :root {
-    --primary-color: #1E3A8A;
-    --primary-light: #3B82F6;
-    --primary-dark: #1E40AF;
-    --secondary-color: #D97706;
-    --secondary-light: #F59E0B;
+    --primary-color: #232deb;
+    --primary-light: #5359f5;
+    --primary-dark: #1a20b5;
+    --secondary-color: #ff0101;
+    --secondary-light: #ff3333;
     --success-color: #10B981;
     --warning-color: #F59E0B;
     --danger-color: #EF4444;
@@ -73,12 +73,14 @@ body {
     top: 0;
     z-index: 100;
     box-shadow: var(--shadow-lg);
+    /* Altura reducida */
+    min-height: auto;
 }
 
 .header-content {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 12px 24px;
+    padding: 8px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -87,14 +89,30 @@ body {
 .logo-section {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     margin-bottom: 0;
 }
 
 .logo {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
     letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-logo {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+}
+
+.subtitle {
+    font-size: 12px;
+    opacity: 0.85;
+    padding-left: 12px;
+    border-left: 1px solid rgba(255,255,255,0.3);
 }
 
 .subtitle {
@@ -115,18 +133,23 @@ body {
     text-align: center;
 }
 
+/* Wrapper del área de búsqueda - altura reducida */
+.search-container-wrapper {
+    padding: 6px 0 8px;
+}
+
 .search-container {
     display: flex;
     gap: 10px;
     max-width: 700px;
     margin: 0 auto;
-    padding: 0 24px 10px;
+    padding: 0 24px 4px;
 }
 
 #neighborhood-input {
     flex: 1;
-    padding: 12px 20px;
-    font-size: 15px;
+    padding: 10px 16px;
+    font-size: 14px;
     border: none;
     border-radius: var(--radius-lg);
     outline: none;
@@ -181,8 +204,8 @@ body {
 }
 
 .search-hint {
-    margin-top: 12px;
-    font-size: 13px;
+    margin-top: 6px;
+    font-size: 12px;
     opacity: 0.7;
 }
 
@@ -227,45 +250,6 @@ body {
     font-size: 18px;
     color: var(--text-secondary);
     margin-bottom: 48px;
-}
-
-.features-list {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    text-align: left;
-}
-
-.feature-item {
-    display: flex;
-    gap: 20px;
-    padding: 24px;
-    background: var(--bg-secondary);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
-    transition: var(--transition-fast);
-}
-
-.feature-item:hover {
-    transform: translateX(8px);
-    box-shadow: var(--shadow-lg);
-}
-
-.feature-icon {
-    font-size: 40px;
-    flex-shrink: 0;
-}
-
-.feature-item h4 {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 4px;
-}
-
-.feature-item p {
-    font-size: 14px;
-    color: var(--text-secondary);
 }
 
 /* KPI Panel */
@@ -1154,7 +1138,7 @@ body {
 .form-group select:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+    box-shadow: 0 0 0 3px rgba(35, 45, 235, 0.1);
 }
 
 .form-group input::placeholder,
@@ -1393,6 +1377,15 @@ body {
 
 .delete-btn:hover:not(:disabled) {
     background: #DC2626;
+}
+
+.export-btn {
+    background: var(--warning-color);
+    color: var(--text-dark);
+}
+
+.export-btn:hover:not(:disabled) {
+    background: #D97706;
 }
 
 .save-status {
