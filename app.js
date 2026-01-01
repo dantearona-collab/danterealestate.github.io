@@ -3369,6 +3369,67 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
                 };
             }
         }
+
+        // ========================================
+        // PROCESAMIENTO DINÁMICO DE CATEGORÍAS (Opción 2)
+        // ========================================
+        // Definir configuración de iconos y títulos para todas las categorías conocidas
+        const categoryConfig = {
+            transporte: { icon: '🚇', title: 'Transporte Público' },
+            comercio: { icon: '🛒', title: 'Comercio y Servicios' },
+            educacion: { icon: '🎓', title: 'Educación' },
+            salud: { icon: '🏥', title: 'Salud' },
+            servicios_financieros: { icon: '🏦', title: 'Servicios Financieros' },
+            recreacion: { icon: '🌳', title: 'Recreación' },
+            gastronomia: { icon: '🍽️', title: 'Gastronomía' },
+            servicios: { icon: '🏪', title: 'Servicios Urbanos' },
+            seguridad: { icon: '🛡️', title: 'Seguridad' },
+            espacios_verdes: { icon: '🌿', title: 'Espacios Verdes' },
+            contaminacion: { icon: '🌬️', title: 'Contaminación y Ruidos' },
+            vida_barrio: { icon: '🏘️', title: 'Vida de Barrio' }
+        };
+
+        // Procesar categorías dinámicamente desde datos_especificos
+        console.log('📊 [DEBUG] Procesando categorías dinámicamente...');
+        console.log('📊 [DEBUG] Keys en datos_especificos:', Object.keys(data.datos_especificos || {}));
+
+        Object.keys(data.datos_especificos || {}).forEach(catKey => {
+            const catData = data.datos_especificos[catKey];
+            const config = categoryConfig[catKey];
+
+            // Verificar si hay datos para esta categoría
+            let items = [];
+            if (Array.isArray(catData)) {
+                items = catData.filter(item => item && String(item).trim().length > 3);
+            } else if (typeof catData === 'string' && catData.trim().length > 3) {
+                items = catData.includes(',') ? catData.split(',').map(s => s.trim()).filter(s => s.length > 3) : [catData.trim()];
+            } else if (catData && typeof catData === 'object') {
+                // Si es un objeto, buscar campos con arrays o strings
+                Object.values(catData).forEach(value => {
+                    if (Array.isArray(value)) {
+                        items.push(...value.filter(item => item && String(item).trim().length > 3));
+                    } else if (typeof value === 'string' && value.trim().length > 3) {
+                        items.push(value.trim());
+                    }
+                });
+            }
+
+            if (items.length > 0) {
+                // Usar configuración conocida o generar título automáticamente
+                const title = config ? config.title : catKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                const icon = config ? config.icon : '📍';
+
+                categories[catKey] = {
+                    icon: icon,
+                    title: title,
+                    items: items.slice(0, 6)
+                };
+
+                console.log(`✅ [DEBUG] Categoría '${catKey}' procesada dinámicamente: ${items.length} items`);
+            }
+        });
+
+        console.log('📊 [DEBUG] Categorías procesadas dinámicamente:', Object.keys(categories).filter(k => !['transporte', 'comercio', 'educacion', 'salud', 'servicios_financieros', 'recreacion', 'gastronomia', 'servicios'].includes(k)));
     } else {
         console.log('❌ [DEBUG] NO SE DETECTÓ NINGUNA ESTRUCTURA CONOCIDA');
         console.log('📊 [DEBUG] hasCategoriasDescripcion:', hasCategoriasDescripcion);
