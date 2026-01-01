@@ -2992,6 +2992,37 @@ async function loadEnvironmentInfo(direccion, barrio) {
             }
         }
         
+        // Si aún no tenemos datos, intentar leer desde archivo local entorno.json
+        if (!barrioData) {
+            console.log('🔄 [LOCAL FILE] Intentando leer desde archivo local entorno.json...');
+            try {
+                const response = await fetch('user_input_files/entorno.json');
+                if (response.ok) {
+                    const entornoData = await response.json();
+                    console.log('✅ [LOCAL FILE] Archivo entorno.json cargado');
+                    
+                    // Buscar el barrio en el archivo (buscar coincidencias parciales)
+                    const barrioLower = barrio.toLowerCase();
+                    const barrioKey = Object.keys(entornoData).find(key => 
+                        key.toLowerCase() === barrioLower || 
+                        key.toLowerCase().includes(barrioLower) ||
+                        entornoData[key]?.nombre?.toLowerCase() === barrioLower
+                    );
+                    
+                    if (barrioKey && entornoData[barrioKey]) {
+                        barrioData = entornoData[barrioKey];
+                        console.log('✅ [LOCAL FILE] Datos encontrados para:', barrioKey);
+                    } else {
+                        console.warn('⚠️ [LOCAL FILE] No se encontró el barrio en el archivo');
+                    }
+                } else {
+                    console.warn(`⚠️ [LOCAL FILE] Error leyendo archivo: ${response.status}`);
+                }
+            } catch (fileError) {
+                console.warn('⚠️ [LOCAL FILE] Error:', fileError.message);
+            }
+        }
+        
         // ========================================
         // PROCESAR DATOS DE LA BASE DE DATOS SI ESTÁN DISPONIBLES
         // ========================================
@@ -3112,6 +3143,38 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
     
     console.log('📊 [DEBUG] Keys de categorias:', Object.keys(cats));
     console.log('📊 [DEBUG] Keys de datos_especificos:', Object.keys(datosEspecificos));
+    
+    // ========== LOGS DETALLADOS PARA SERVICIOS FINANCIEROS ==========
+    console.log('\n📊 [DEBUG] === SERVICIOS FINANCIEROS ===');
+    console.log('📌 cats.servicios_financieros:', cats.servicios_financieros ? 'EXISTE' : 'NO EXISTE');
+    if (cats.servicios_financieros) {
+        console.log('📌 bancos:', cats.servicios_financieros.bancos);
+        console.log('📌 cajeros_automaticos:', cats.servicios_financieros.cajeros_automaticos);
+        console.log('📌 sucursales_bancarias:', cats.servicios_financieros.sucursales_bancarias);
+        console.log('📌 otros_servicios:', cats.servicios_financieros.otros_servicios);
+        console.log('📌 descripcion:', cats.servicios_financieros.descripcion);
+    }
+    console.log('📌 datos_especificos.servicios_financieros:', datosEspecificos.servicios_financieros);
+    
+    console.log('\n📊 [DEBUG] === GASTRONOMÍA ===');
+    console.log('📌 cats.gastronomia:', cats.gastronomia ? 'EXISTE' : 'NO EXISTE');
+    if (cats.gastronomia) {
+        console.log('📌 restaurantes_destacados:', cats.gastronomia.restaurantes_destacados);
+        console.log('📌 zonas_gastronomicas:', cats.gastronomia.zonas_gastronomicas);
+        console.log('📌 tipo_comida:', cats.gastronomia.tipo_comida);
+        console.log('📌 bares_notables:', cats.gastronomia.bares_notables);
+        console.log('📌 cafes_especialidad:', cats.gastronomia.cafes_especialidad);
+    }
+    console.log('📌 datos_especificos.gastronomia:', datosEspecificos.gastronomia);
+    
+    console.log('\n📊 [DEBUG] === TRANSPORTE ===');
+    console.log('📌 cats.transporte:', cats.transporte ? 'EXISTE' : 'NO EXISTE');
+    if (cats.transporte) {
+        console.log('📌 estaciones:', cats.transporte.estaciones);
+        console.log('📌 colectivos:', cats.transporte.colectivos);
+        console.log('📌 descripcion:', cats.transporte.descripcion);
+    }
+    console.log('📌 datos_especificos.transporte:', datosEspecificos.transporte);
     
     // ========== PROCESAR TODAS LAS CATEGORÍAS DEL CMS ==========
     
@@ -3314,6 +3377,70 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
             icon: '🎓',
             title: 'Educación',
             items: educacionItems.slice(0, 6)
+        };
+    }
+    
+    // 9. ESPACIOS VERDES (nueva categoría)
+    let espaciosVerdesItems = [];
+    if (Array.isArray(datosEspecificos.espacios_verdes)) {
+        espaciosVerdesItems.push(...processField(datosEspecificos.espacios_verdes));
+    }
+    if (Array.isArray(data.espacios_verdes)) {
+        espaciosVerdesItems.push(...processField(data.espacios_verdes));
+    }
+    if (espaciosVerdesItems.length > 0) {
+        categories.espacios_verdes = {
+            icon: '🌳',
+            title: 'Espacios Verdes',
+            items: espaciosVerdesItems.slice(0, 6)
+        };
+    }
+    
+    // 10. CONTAMINACIÓN Y RUIDOS (nueva categoría)
+    let contaminacionItems = [];
+    if (Array.isArray(datosEspecificos.contaminacion)) {
+        contaminacionItems.push(...processField(datosEspecificos.contaminacion));
+    }
+    if (Array.isArray(data.contaminacion)) {
+        contaminacionItems.push(...processField(data.contaminacion));
+    }
+    if (contaminacionItems.length > 0) {
+        categories.contaminacion = {
+            icon: '🌬️',
+            title: 'Contaminación y Ruidos',
+            items: contaminacionItems.slice(0, 6)
+        };
+    }
+    
+    // 11. VIDA DE BARRIO (nueva categoría)
+    let vidaBarrioItems = [];
+    if (Array.isArray(datosEspecificos.vida_barrio)) {
+        vidaBarrioItems.push(...processField(datosEspecificos.vida_barrio));
+    }
+    if (Array.isArray(data.vida_barrio)) {
+        vidaBarrioItems.push(...processField(data.vida_barrio));
+    }
+    if (vidaBarrioItems.length > 0) {
+        categories.vida_barrio = {
+            icon: '🏘️',
+            title: 'Vida de Barrio',
+            items: vidaBarrioItems.slice(0, 6)
+        };
+    }
+    
+    // 12. CONCLUSIÓN (nueva categoría)
+    let conclusionItems = [];
+    if (data.conclusion) {
+        conclusionItems.push(cleanText(data.conclusion));
+    }
+    if (Array.isArray(data.conclusion)) {
+        conclusionItems.push(...processField(data.conclusion));
+    }
+    if (conclusionItems.length > 0) {
+        categories.conclusion = {
+            icon: '📝',
+            title: 'Conclusión',
+            items: conclusionItems.slice(0, 6)
         };
     }
     
