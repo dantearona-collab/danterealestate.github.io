@@ -83,6 +83,9 @@ def init_barrios_db():
 from logic.barrio_data import get_gastronomy_info, get_financial_info, GASTRONOMY_DATA, FINANCIAL_DATA, get_location_specific_info, LOCATION_SPECIFIC_DATA
 from logic.environ_database import init_environ_analysis_db, get_environ_analysis, save_environ_analysis, is_environ_analysis_expired, log_environ_analysis_request
 
+# Importar API de barrios (para montarla en el servidor principal)
+from api_barrios import barrios_app
+
 # ============================================
 # FUNCIÓN DE MIGRACIÓN DE DATOS ESTÁTICOS
 # ============================================
@@ -581,6 +584,10 @@ app.add_middleware(
 _imgs_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'imgs')
 if os.path.exists(_imgs_path):
     app.mount("/imgs", StaticFiles(directory=_imgs_path), name="images")
+
+# Montar API de barrios (sub-app desde api_barrios.py)
+app.mount("/api/barrios", barrios_app)
+print("✅ API de barrios montada en /api/barrios")
 
 # ============================================
 # NOTA: El endpoint catch-all para archivos estáticos fue deshabilitado
