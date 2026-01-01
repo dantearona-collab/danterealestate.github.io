@@ -3075,165 +3075,243 @@ async function loadEnvironmentInfo(direccion, barrio) {
 }
 
 // Transformar datos del barrio (base de datos) al formato para display
-// La estructura de la DB tiene categorias.gastronomia.restaurantes_destacados[] y datos_especificos.transporte[]
+// Maneja DOS estructuras diferentes:
+// 1. API local: data.datos_especificos.transporte[] y data.categorias.gastronomia.restaurantes_destacados[]
+// 2. API externa: categorias.transporte.descripcion y categorias.servicios_financieros.bancos (string)
 function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '') {
     const categories = {};
     
-    // Función auxiliar para limpiar texto (quitar {location} y placeholders)
+    // Función auxiliar para limpiar texto
     const cleanText = (text) => {
         if (!text) return '';
-        return text.replace(/\{location\}/gi, direccion || barrio)
+        return String(text).replace(/\{location\}/gi, direccion || barrio)
                    .replace(/\s+/g, ' ')
                    .trim();
     };
     
-    // Función auxiliar para procesar arrays
-    const processArray = (arr) => {
-        if (!arr) return [];
-        if (Array.isArray(arr)) {
-            return arr.map(item => cleanText(item)).filter(item => item && item.length > 3);
+    // Función para procesar array o string
+    const processField = (field) => {
+        if (!field) return [];
+        if (Array.isArray(field)) {
+            return field.filter(item => item && String(item).trim().length > 3);
         }
-        return [cleanText(arr)].filter(item => item && item.length > 3);
+        // Si es string, dividir por comas o usar como está
+        const str = String(field).trim();
+        if (str.length > 3) {
+            return str.includes(',') ? str.split(',').map(s => s.trim()).filter(s => s.length > 3) : [str];
+        }
+        return [];
     };
     
-    // 1. TRANSPORTE - puede venir de datos_especificos o transporte
-    let transporteItems = [];
-    if (data.datos_especificos?.transporte) {
-        transporteItems = processArray(data.datos_especificos.transporte);
-    } else if (data.transporte?.estaciones || data.transporte?.colectivos) {
-        // Verificar que sean arrays antes de usar .map()
-        if (Array.isArray(data.transporte.estaciones)) {
-            transporteItems.push(...data.transporte.estaciones.map(e => `Estación: ${e}`));
-        }
-        if (Array.isArray(data.transporte.colectivos)) {
-            transporteItems.push(...data.transporte.colectivos.map(c => `Línea ${c}`));
-        }
-    }
-    if (transporteItems.length > 0) {
-        categories.transporte = {
-            icon: '🚇',
-            title: 'Transporte Público',
-            items: transporteItems.slice(0, 6)
-        };
-    }
+    // Determinar qué estructura de datos tenemos
+    const hasCategoriasDescripcion = data.categorias && data.categorias.transporte && data.categorias.transporte.descripcion;
+    const hasDatosEspecificos = data.datos_especificos && Object.keys(data.datos_especificos).length > 0;
     
-    // 2. SALUD - de datos_especificos
-    if (data.datos_especificos?.salud) {
-        const saludItems = processArray(data.datos_especificos.salud);
-        if (saludItems.length > 0) {
-            categories.salud = {
-                icon: '🏥',
-                title: 'Salud',
-                items: saludItems.slice(0, 6)
+    console.log('🔍 [DB] Estructura detectada:', {
+        hasCategoriasDescripcion,
+        hasDatosEspecificos,
+        categoriasKeys: data.categorias ? Object.keys(data.categorias) : 'none',
+        datosKeys: data.datos_especificos ? Object.keys(data.datos_especificos) : 'none'
+    });
+    
+    if (hasCategoriasDescripcion) {
+        // === ESTRUCTURA API EXTERNA ===
+        // categorias.transporte.descripcion (string)
+        // categorias.servicios_financieros.bancos (string con comas)
+        
+        const cats = data.categorias;
+        
+        // Transporte - usar descripción
+        if (cats.transporte?.descripcion) {
+            categories.transporte = {
+                icon: '🚇',
+                title: 'Transporte Público',
+                items: [cleanText(cats.transporte.descripcion)]
             };
         }
-    }
-    
-    // 3. COMERCIO - de datos_especificos
-    if (data.datos_especificos?.comercio) {
-        const comercioItems = processArray(data.datos_especificos.comercio);
-        if (comercioItems.length > 0) {
+        
+        // Comercio - usar descripción
+        if (cats.comercio?.descripcion) {
             categories.comercio = {
                 icon: '🛒',
                 title: 'Comercio y Servicios',
-                items: comercioItems.slice(0, 6)
+                items: [cleanText(cats.comercio.descripcion)]
             };
         }
-    }
-    
-    // 4. SERVICIOS - de datos_especificos
-    if (data.datos_especificos?.servicios) {
-        const serviciosItems = processArray(data.datos_especificos.servicios);
-        if (serviciosItems.length > 0) {
-            categories.servicios = {
-                icon: '🏪',
-                title: 'Servicios Urbanos',
-                items: serviciosItems.slice(0, 6)
-            };
-        }
-    }
-    
-    // 5. GASTRONOMÍA - de categorias.gastronomia
-    let gastroItems = [];
-    if (data.categorias?.gastronomia) {
-        const gastro = data.categorias.gastronomia;
-        // Verificar que sean arrays antes de usar .map()
-        if (Array.isArray(gastro.restaurantes_destacados)) {
-            gastroItems.push(...gastro.restaurantes_destacados.map(r => `🍽️ ${r}`));
-        }
-        if (Array.isArray(gastro.zonas_gastronomicas)) {
-            gastroItems.push(...gastro.zonas_gastronomicas.map(z => `📍 ${z}`));
-        }
-        if (Array.isArray(gastro.bares_notables)) {
-            gastroItems.push(...gastro.bares_notables.map(b => `🍺 ${b}`));
-        }
-        if (Array.isArray(gastro.cafes_especialidad)) {
-            gastroItems.push(...gastro.cafes_especialidad.map(c => `☕ ${c}`));
-        }
-    }
-    // Si no hay datos de categorias, usar datos_especificos
-    if (gastroItems.length === 0 && data.datos_especificos?.gastronomia) {
-        gastroItems = processArray(data.datos_especificos.gastronomia);
-    }
-    if (gastroItems.length > 0) {
-        categories.gastronomia = {
-            icon: '🍽️',
-            title: 'Gastronomía',
-            items: gastroItems.slice(0, 6)
-        };
-    }
-    
-    // 6. RECREACIÓN - de datos_especificos
-    if (data.datos_especificos?.recreacion) {
-        const recreacionItems = processArray(data.datos_especificos.recreacion);
-        if (recreacionItems.length > 0) {
-            categories.recreacion = {
-                icon: '🌳',
-                title: 'Recreación',
-                items: recreacionItems.slice(0, 6)
-            };
-        }
-    }
-    
-    // 7. SERVICIOS FINANCIEROS - de categorias.servicios_financieros
-    let financieroItems = [];
-    if (data.categorias?.servicios_financieros) {
-        const sf = data.categorias.servicios_financieros;
-        // Verificar que sf.bancos sea un array antes de usar .map()
-        if (Array.isArray(sf.bancos)) {
-            financieroItems.push(...sf.bancos.map(b => `🏦 ${b}`));
-        }
-        if (Array.isArray(sf.cajeros_automaticos)) {
-            financieroItems.push(...sf.cajeros_automaticos.map(c => `💳 ${c}`));
-        }
-        if (Array.isArray(sf.sucursales_bancarias)) {
-            financieroItems.push(...sf.sucursales_bancarias.map(s => `📍 ${s}`));
-        }
-        if (Array.isArray(sf.otros_servicios)) {
-            financieroItems.push(...sf.otros_servicios.map(o => `💼 ${o}`));
-        }
-    }
-    // Si no hay datos de categorias, usar datos_especificos
-    if (financieroItems.length === 0 && data.datos_especificos?.servicios_financieros) {
-        financieroItems = processArray(data.datos_especificos.servicios_financieros);
-    }
-    if (financieroItems.length > 0) {
-        categories.servicios_financieros = {
-            icon: '🏦',
-            title: 'Servicios Financieros',
-            items: financieroItems.slice(0, 6)
-        };
-    }
-    
-    // 8. EDUCACIÓN - de datos_especificos
-    if (data.datos_especificos?.educacion) {
-        const educacionItems = processArray(data.datos_especificos.educacion);
-        if (educacionItems.length > 0) {
+        
+        // Educación - usar descripción
+        if (cats.educacion?.descripcion) {
             categories.educacion = {
                 icon: '🎓',
                 title: 'Educación',
-                items: educacionItems.slice(0, 6)
+                items: [cleanText(cats.educacion.descripcion)]
             };
+        }
+        
+        // Salud - usar descripción
+        if (cats.salud?.descripcion) {
+            categories.salud = {
+                icon: '🏥',
+                title: 'Salud',
+                items: [cleanText(cats.salud.descripcion)]
+            };
+        }
+        
+        // Servicios Financieros - puede tener bancos como string
+        let sfItems = [];
+        if (cats.servicios_financieros?.bancos) {
+            sfItems = processField(cats.servicios_financieros.bancos);
+        }
+        if (cats.servicios_financieros?.descripcion && sfItems.length === 0) {
+            sfItems = [cleanText(cats.servicios_financieros.descripcion)];
+        }
+        if (sfItems.length > 0) {
+            categories.servicios_financieros = {
+                icon: '🏦',
+                title: 'Servicios Financieros',
+                items: sfItems.slice(0, 6)
+            };
+        }
+        
+        // Recreación
+        if (cats.recreacion?.descripcion) {
+            categories.recreacion = {
+                icon: '🌳',
+                title: 'Recreación',
+                items: [cleanText(cats.recreacion.descripcion)]
+            };
+        }
+        
+    } else if (hasDatosEspecificos) {
+        // === ESTRUCTURA API LOCAL ===
+        // datos_especificos.transporte[] y categorias.gastronomia.restaurantes_destacados[]
+        
+        // TRANSPORTE
+        if (data.datos_especificos?.transporte) {
+            const items = processField(data.datos_especificos.transporte);
+            if (items.length > 0) {
+                categories.transporte = {
+                    icon: '🚇',
+                    title: 'Transporte Público',
+                    items: items.slice(0, 6)
+                };
+            }
+        }
+        
+        // SALUD
+        if (data.datos_especificos?.salud) {
+            const items = processField(data.datos_especificos.salud);
+            if (items.length > 0) {
+                categories.salud = {
+                    icon: '🏥',
+                    title: 'Salud',
+                    items: items.slice(0, 6)
+                };
+            }
+        }
+        
+        // COMERCIO
+        if (data.datos_especificos?.comercio) {
+            const items = processField(data.datos_especificos.comercio);
+            if (items.length > 0) {
+                categories.comercio = {
+                    icon: '🛒',
+                    title: 'Comercio y Servicios',
+                    items: items.slice(0, 6)
+                };
+            }
+        }
+        
+        // SERVICIOS
+        if (data.datos_especificos?.servicios) {
+            const items = processField(data.datos_especificos.servicios);
+            if (items.length > 0) {
+                categories.servicios = {
+                    icon: '🏪',
+                    title: 'Servicios Urbanos',
+                    items: items.slice(0, 6)
+                };
+            }
+        }
+        
+        // GASTRONOMÍA
+        let gastroItems = [];
+        if (data.categorias?.gastronomia) {
+            const gastro = data.categorias.gastronomia;
+            if (Array.isArray(gastro.restaurantes_destacados)) {
+                gastroItems.push(...gastro.restaurantes_destacados.map(r => `🍽️ ${r}`));
+            }
+            if (Array.isArray(gastro.zonas_gastronomicas)) {
+                gastroItems.push(...gastro.zonas_gastronomicas.map(z => `📍 ${z}`));
+            }
+            if (Array.isArray(gastro.bares_notables)) {
+                gastroItems.push(...gastro.bares_notables.map(b => `🍺 ${b}`));
+            }
+            if (Array.isArray(gastro.cafes_especialidad)) {
+                gastroItems.push(...gastro.cafes_especialidad.map(c => `☕ ${c}`));
+            }
+        }
+        if (gastroItems.length === 0 && data.datos_especificos?.gastronomia) {
+            gastroItems = processField(data.datos_especificos.gastronomia);
+        }
+        if (gastroItems.length > 0) {
+            categories.gastronomia = {
+                icon: '🍽️',
+                title: 'Gastronomía',
+                items: gastroItems.slice(0, 6)
+            };
+        }
+        
+        // RECREACIÓN
+        if (data.datos_especificos?.recreacion) {
+            const items = processField(data.datos_especificos.recreacion);
+            if (items.length > 0) {
+                categories.recreacion = {
+                    icon: '🌳',
+                    title: 'Recreación',
+                    items: items.slice(0, 6)
+                };
+            }
+        }
+        
+        // SERVICIOS FINANCIEROS
+        let financieroItems = [];
+        if (data.categorias?.servicios_financieros) {
+            const sf = data.categorias.servicios_financieros;
+            if (Array.isArray(sf.bancos)) {
+                financieroItems.push(...sf.bancos.map(b => `🏦 ${b}`));
+            }
+            if (Array.isArray(sf.cajeros_automaticos)) {
+                financieroItems.push(...sf.cajeros_automaticos.map(c => `💳 ${c}`));
+            }
+            if (Array.isArray(sf.sucursales_bancarias)) {
+                financieroItems.push(...sf.sucursales_bancarias.map(s => `📍 ${s}`));
+            }
+            if (Array.isArray(sf.otros_servicios)) {
+                financieroItems.push(...sf.otros_servicios.map(o => `💼 ${o}`));
+            }
+        }
+        if (financieroItems.length === 0 && data.datos_especificos?.servicios_financieros) {
+            financieroItems = processField(data.datos_especificos.servicios_financieros);
+        }
+        if (financieroItems.length > 0) {
+            categories.servicios_financieros = {
+                icon: '🏦',
+                title: 'Servicios Financieros',
+                items: financieroItems.slice(0, 6)
+            };
+        }
+        
+        // EDUCACIÓN
+        if (data.datos_especificos?.educacion) {
+            const items = processField(data.datos_especificos.educacion);
+            if (items.length > 0) {
+                categories.educacion = {
+                    icon: '🎓',
+                    title: 'Educación',
+                    items: items.slice(0, 6)
+                };
+            }
         }
     }
     
@@ -3251,7 +3329,7 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
     return {
         barrio: barrio,
         direccion: direccion,
-        descripcion: descripcion || data.resumen_general || '',
+        descripcion: descripcion || data.resumen || data.resumen_general || '',
         categories: categories,
         lastUpdated: new Date().toLocaleDateString('es-AR'),
         dataSource: 'database'
