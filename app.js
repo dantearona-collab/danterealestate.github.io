@@ -5284,3 +5284,8 @@ window.closePropertyPanelSimple = closePropertyPanelSimple;
 
 console.log('✅ Panel simple de respaldo cargado');
 console.log('✅ Sistema Dante Propiedades completamente cargado');
+}
+
+// ========================================
+// FIN DEL ARCHIVO
+// ========================================
