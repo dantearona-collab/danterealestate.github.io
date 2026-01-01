@@ -3153,11 +3153,15 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
                                       data.categorias.transporte.descripcion;
     const hasDatosEspecificos = data.datos_especificos && 
                                  Object.keys(data.datos_especificos).length > 0;
+    // Detectar estructura plana (categorías directamente en data, no en data.categorias)
+    const flatCategoryKeys = ['transporte', 'educacion', 'salud', 'comercio', 'gastronomia', 'recreacion', 'servicios_financieros', 'seguridad', 'servicios', 'espacios_verdes', 'contaminacion', 'vida_barrio'];
+    const hasFlatStructure = flatCategoryKeys.some(key => data[key] !== undefined);
     
-    console.log('\n📊 [DEBUG] RESULTADO DE DETECCIÓN DE ESTRUCTURA:');
+    console.log('\nM-pM-^_M-^SM-^J [DEBUG] RESULTADO DE DETECCIM-CM-^SN DE ESTRUCTURA:');
     console.log(`  - hasCategoriasDescripcion (API externa): ${hasCategoriasDescripcion}`);
     console.log(`  - hasDatosEspecificos (API local): ${hasDatosEspecificos}`);
-    console.log('═══════════════════════════════════════════════════════════\n');
+    console.log(`  - hasFlatStructure (DB local): ${hasFlatStructure}`);
+    console.log('M-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^P\n');
     
     if (hasCategoriasDescripcion) {
         // === ESTRUCTURA API EXTERNA ===
@@ -3236,6 +3240,59 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
                 items: [cleanText(cats.recreacion.descripcion)]
             };
         }
+        
+    } else if (hasFlatStructure) {
+        // === ESTRUCTURA PLANA (BASE DE DATOS LOCAL) ===
+        console.log('📊 [DEBUG] Entrando en rama ESTRUCTURA PLANA (DB local)');
+        
+        const categoryConfig = {
+            transporte: { icon: '🚇', title: 'Transporte Público' },
+            comercio: { icon: '🛒', title: 'Comercio y Servicios' },
+            educacion: { icon: '🎓', title: 'Educación' },
+            salud: { icon: '🏥', title: 'Salud' },
+            servicios_financieros: { icon: '🏦', title: 'Servicios Financieros' },
+            recreacion: { icon: '🌳', title: 'Recreación' },
+            gastronomia: { icon: '🍽️', title: 'Gastronomía' },
+            servicios: { icon: '🏪', title: 'Servicios Urbanos' },
+            seguridad: { icon: '🛡️', title: 'Seguridad' },
+            espacios_verdes: { icon: '🌿', title: 'Espacios Verdes' },
+            contaminacion: { icon: '🌬️', title: 'Contaminación y Ruidos' },
+            vida_barrio: { icon: '🏘️', title: 'Vida de Barrio' }
+        };
+        
+        Object.keys(categoryConfig).forEach(catKey => {
+            const catData = data[catKey];
+            const config = categoryConfig[catKey];
+            
+            if (catData) {
+                let items = [];
+                
+                if (Array.isArray(catData)) {
+                    items = catData.filter(item => item && String(item).trim().length > 3);
+                } else if (typeof catData === 'string' && catData.trim().length > 3) {
+                    items = catData.split(/[.,]+/).map(s => s.trim()).filter(s => s.length > 3);
+                } else if (catData && typeof catData === 'object') {
+                    Object.values(catData).forEach(value => {
+                        if (Array.isArray(value)) {
+                            items.push(...value.filter(item => item && String(item).trim().length > 3));
+                        } else if (typeof value === 'string' && value.trim().length > 3) {
+                            items.push(value.trim());
+                        }
+                    });
+                }
+                
+                if (items.length > 0) {
+                    categories[catKey] = {
+                        icon: config.icon,
+                        title: config.title,
+                        items: items.slice(0, 6)
+                    };
+                    console.log(`✅ [DEBUG] Categoria '${catKey}': ${items.length} items`);
+                }
+            }
+        });
+        
+        console.log('📊 [DEBUG] Categorías procesadas:', Object.keys(categories));
         
     } else if (hasDatosEspecificos) {
         // === ESTRUCTURA API LOCAL ===
@@ -3369,67 +3426,6 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
                 };
             }
         }
-
-        // ========================================
-        // PROCESAMIENTO DINÁMICO DE CATEGORÍAS (Opción 2)
-        // ========================================
-        // Definir configuración de iconos y títulos para todas las categorías conocidas
-        const categoryConfig = {
-            transporte: { icon: '🚇', title: 'Transporte Público' },
-            comercio: { icon: '🛒', title: 'Comercio y Servicios' },
-            educacion: { icon: '🎓', title: 'Educación' },
-            salud: { icon: '🏥', title: 'Salud' },
-            servicios_financieros: { icon: '🏦', title: 'Servicios Financieros' },
-            recreacion: { icon: '🌳', title: 'Recreación' },
-            gastronomia: { icon: '🍽️', title: 'Gastronomía' },
-            servicios: { icon: '🏪', title: 'Servicios Urbanos' },
-            seguridad: { icon: '🛡️', title: 'Seguridad' },
-            espacios_verdes: { icon: '🌿', title: 'Espacios Verdes' },
-            contaminacion: { icon: '🌬️', title: 'Contaminación y Ruidos' },
-            vida_barrio: { icon: '🏘️', title: 'Vida de Barrio' }
-        };
-
-        // Procesar categorías dinámicamente desde datos_especificos
-        console.log('📊 [DEBUG] Procesando categorías dinámicamente...');
-        console.log('📊 [DEBUG] Keys en datos_especificos:', Object.keys(data.datos_especificos || {}));
-
-        Object.keys(data.datos_especificos || {}).forEach(catKey => {
-            const catData = data.datos_especificos[catKey];
-            const config = categoryConfig[catKey];
-
-            // Verificar si hay datos para esta categoría
-            let items = [];
-            if (Array.isArray(catData)) {
-                items = catData.filter(item => item && String(item).trim().length > 3);
-            } else if (typeof catData === 'string' && catData.trim().length > 3) {
-                items = catData.includes(',') ? catData.split(',').map(s => s.trim()).filter(s => s.length > 3) : [catData.trim()];
-            } else if (catData && typeof catData === 'object') {
-                // Si es un objeto, buscar campos con arrays o strings
-                Object.values(catData).forEach(value => {
-                    if (Array.isArray(value)) {
-                        items.push(...value.filter(item => item && String(item).trim().length > 3));
-                    } else if (typeof value === 'string' && value.trim().length > 3) {
-                        items.push(value.trim());
-                    }
-                });
-            }
-
-            if (items.length > 0) {
-                // Usar configuración conocida o generar título automáticamente
-                const title = config ? config.title : catKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                const icon = config ? config.icon : '📍';
-
-                categories[catKey] = {
-                    icon: icon,
-                    title: title,
-                    items: items.slice(0, 6)
-                };
-
-                console.log(`✅ [DEBUG] Categoría '${catKey}' procesada dinámicamente: ${items.length} items`);
-            }
-        });
-
-        console.log('📊 [DEBUG] Categorías procesadas dinámicamente:', Object.keys(categories).filter(k => !['transporte', 'comercio', 'educacion', 'salud', 'servicios_financieros', 'recreacion', 'gastronomia', 'servicios'].includes(k)));
     } else {
         console.log('❌ [DEBUG] NO SE DETECTÓ NINGUNA ESTRUCTURA CONOCIDA');
         console.log('📊 [DEBUG] hasCategoriasDescripcion:', hasCategoriasDescripcion);
