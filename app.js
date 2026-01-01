@@ -3081,6 +3081,13 @@ async function loadEnvironmentInfo(direccion, barrio) {
 function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '') {
     const categories = {};
     
+    // ========== LOGGING DETALLADO PARA DEBUG ==========
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('🔍 [DEBUG] transformBarrioDataToDisplay - INICIO');
+    console.log('📊 [DEBUG] Tipo de data:', typeof data);
+    console.log('📊 [DEBUG] Data completa:', JSON.stringify(data, null, 2).substring(0, 2000));
+    console.log('📊 [DEBUG] Keys de data:', Object.keys(data || {}));
+    
     // Función auxiliar para limpiar texto
     const cleanText = (text) => {
         if (!text) return '';
@@ -3103,35 +3110,78 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
         return [];
     };
     
-    // Determinar qué estructura de datos tenemos
-    const hasCategoriasDescripcion = data.categorias && data.categorias.transporte && data.categorias.transporte.descripcion;
-    const hasDatosEspecificos = data.datos_especificos && Object.keys(data.datos_especificos).length > 0;
+    // ========== VERIFICACIÓN DETALLADA DE ESTRUCTURAS ==========
+    console.log('\n📊 [DEBUG] Verificando estructuras...\n');
     
-    console.log('🔍 [DB] Estructura detectada:', {
-        hasCategoriasDescripcion,
-        hasDatosEspecificos,
-        categoriasKeys: data.categorias ? Object.keys(data.categorias) : 'none',
-        datosKeys: data.datos_especificos ? Object.keys(data.datos_especificos) : 'none'
-    });
+    // Verificar data.categorias
+    if (data.categorias) {
+        console.log('✅ [DEBUG] data.categorias EXISTE');
+        console.log('📊 [DEBUG] Keys de categorias:', Object.keys(data.categorias));
+        
+        // Verificar cada sub-categoría
+        Object.keys(data.categorias || {}).forEach(catKey => {
+            const catData = data.categorias[catKey];
+            console.log(`  📌 ${catKey}:`, {
+                type: typeof catData,
+                isNull: catData === null,
+                isUndefined: catData === undefined,
+                keys: catData && typeof catData === 'object' ? Object.keys(catData) : 'N/A',
+                descripcion: catData?.descripcion ? catData.descripcion.substring(0, 100) + '...' : 'NO EXISTE'
+            });
+        });
+    } else {
+        console.log('❌ [DEBUG] data.categorias NO EXISTE');
+    }
+    
+    // Verificar data.datos_especificos
+    if (data.datos_especificos) {
+        console.log('✅ [DEBUG] data.datos_especificos EXISTE');
+        console.log('📊 [DEBUG] Keys de datos_especificos:', Object.keys(data.datos_especificos));
+    } else {
+        console.log('❌ [DEBUG] data.datos_especificos NO EXISTE');
+    }
+    
+    // Verificar data.resumen y otros campos
+    console.log('\n📊 [DEBUG] Otros campos importantes:');
+    console.log(`  - data.resumen: ${data.resumen ? 'EXISTE' : 'NO EXISTE'}`);
+    console.log(`  - data.resumen_general: ${data.resumen_general ? 'EXISTE' : 'NO EXISTE'}`);
+    console.log(`  - data.nombre: ${data.nombre || 'NO EXISTE'}`);
+    
+    // Determinar qué estructura de datos tenemos
+    const hasCategoriasDescripcion = data.categorias && 
+                                      data.categorias.transporte && 
+                                      data.categorias.transporte.descripcion;
+    const hasDatosEspecificos = data.datos_especificos && 
+                                 Object.keys(data.datos_especificos).length > 0;
+    
+    console.log('\n📊 [DEBUG] RESULTADO DE DETECCIÓN DE ESTRUCTURA:');
+    console.log(`  - hasCategoriasDescripcion (API externa): ${hasCategoriasDescripcion}`);
+    console.log(`  - hasDatosEspecificos (API local): ${hasDatosEspecificos}`);
+    console.log('═══════════════════════════════════════════════════════════\n');
     
     if (hasCategoriasDescripcion) {
         // === ESTRUCTURA API EXTERNA ===
         // categorias.transporte.descripcion (string)
         // categorias.servicios_financieros.bancos (string con comas)
+        console.log('📊 [DEBUG] Entrando en rama API EXTERNA');
         
         const cats = data.categorias;
         
         // Transporte - usar descripción
         if (cats.transporte?.descripcion) {
+            console.log('✅ [DEBUG] Procesando TRANSPORTE');
             categories.transporte = {
                 icon: '🚇',
                 title: 'Transporte Público',
                 items: [cleanText(cats.transporte.descripcion)]
             };
+        } else {
+            console.log('❌ [DEBUG] TRANSPORTE no tiene descripcion');
         }
         
         // Comercio - usar descripción
         if (cats.comercio?.descripcion) {
+            console.log('✅ [DEBUG] Procesando COMERCIO');
             categories.comercio = {
                 icon: '🛒',
                 title: 'Comercio y Servicios',
@@ -3141,6 +3191,7 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
         
         // Educación - usar descripción
         if (cats.educacion?.descripcion) {
+            console.log('✅ [DEBUG] Procesando EDUCACION');
             categories.educacion = {
                 icon: '🎓',
                 title: 'Educación',
@@ -3150,6 +3201,7 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
         
         // Salud - usar descripción
         if (cats.salud?.descripcion) {
+            console.log('✅ [DEBUG] Procesando SALUD');
             categories.salud = {
                 icon: '🏥',
                 title: 'Salud',
@@ -3160,9 +3212,11 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
         // Servicios Financieros - puede tener bancos como string
         let sfItems = [];
         if (cats.servicios_financieros?.bancos) {
+            console.log('✅ [DEBUG] Procesando SERVICIOS FINANCIEROS - bancos');
             sfItems = processField(cats.servicios_financieros.bancos);
         }
         if (cats.servicios_financieros?.descripcion && sfItems.length === 0) {
+            console.log('✅ [DEBUG] Procesando SERVICIOS FINANCIEROS - descripcion');
             sfItems = [cleanText(cats.servicios_financieros.descripcion)];
         }
         if (sfItems.length > 0) {
@@ -3175,6 +3229,7 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
         
         // Recreación
         if (cats.recreacion?.descripcion) {
+            console.log('✅ [DEBUG] Procesando RECREACION');
             categories.recreacion = {
                 icon: '🌳',
                 title: 'Recreación',
@@ -3185,6 +3240,7 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
     } else if (hasDatosEspecificos) {
         // === ESTRUCTURA API LOCAL ===
         // datos_especificos.transporte[] y categorias.gastronomia.restaurantes_destacados[]
+        console.log('📊 [DEBUG] Entrando en rama API LOCAL');
         
         // TRANSPORTE
         if (data.datos_especificos?.transporte) {
@@ -3313,10 +3369,15 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
                 };
             }
         }
+    } else {
+        console.log('❌ [DEBUG] NO SE DETECTÓ NINGUNA ESTRUCTURA CONOCIDA');
+        console.log('📊 [DEBUG] hasCategoriasDescripcion:', hasCategoriasDescripcion);
+        console.log('📊 [DEBUG] hasDatosEspecificos:', hasDatosEspecificos);
     }
     
     // Si no hay categorías, crear placeholder
     if (Object.keys(categories).length === 0) {
+        console.log('⚠️ [DEBUG] No se crearon categorías, creando placeholder...');
         categories.sin_datos = {
             icon: '📋',
             title: 'Información del Barrio',
@@ -3324,7 +3385,8 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
         };
     }
     
-    console.log('✅ [DB] Categorías procesadas:', Object.keys(categories));
+    console.log('\n📊 [DEBUG] Categorías finales procesadas:', Object.keys(categories));
+    console.log('📊 [DEBUG] transformBarrioDataToDisplay - FIN\n');
     
     return {
         barrio: barrio,
@@ -5087,7 +5149,75 @@ function closePropertyPanel() {
 window.createPropertyPanel = createPropertyPanel;
 window.closePropertyPanel = closePropertyPanel;
 
-console.log('✅ Panel deslizable con entorno IA cargado');// ========================================
+console.log('✅ Panel deslizable con entorno IA cargado');
+
+// ========================================
+// CSS RESPONSIVE PARA PANEL MÓVIL
+// ========================================
+const mobilePanelStyles = document.createElement('style');
+mobilePanelStyles.textContent = `
+    /* Estilos responsive para paneles en dispositivos móviles */
+    @media screen and (max-width: 768px) {
+        /* Panel principal */
+        #property-panel {
+            width: 100% !important;
+            max-width: 100% !important;
+            right: -100% !important;
+            left: 5% !important; /* Desplazar 5% hacia la derecha */
+            border-radius: 20px 0 0 20px !important;
+        }
+        
+        #property-panel-overlay {
+            left: 0 !important;
+            width: 100% !important;
+        }
+        
+        /* Panel simple */
+        #property-panel-simple {
+            width: 100% !important;
+            max-width: 100% !important;
+            right: -100% !important;
+            left: 5% !important; /* Desplazar 5% hacia la derecha */
+            border-radius: 20px 0 0 20px !important;
+        }
+        
+        #property-panel-overlay-simple {
+            left: 0 !important;
+            width: 100% !important;
+        }
+        
+        /* Asegurar que el contenido interno se vea bien */
+        #property-panel > div,
+        #property-panel-simple > div {
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+        }
+        
+        /* Ajuste del header del panel */
+        #property-panel > div:first-child,
+        #property-panel-simple > div:first-child {
+            border-radius: 20px 0 0 0 !important;
+        }
+        
+        /* Botón de cerrar más accesible en móvil */
+        #property-panel button[onclick*="closePropertyPanel"],
+        #property-panel-simple button[onclick*="closePropertyPanelSimple"] {
+            right: 15px !important;
+            left: auto !important;
+        }
+    }
+    
+    /* Pantallas muy pequeñas */
+    @media screen and (max-width: 480px) {
+        #property-panel,
+        #property-panel-simple {
+            left: 0% !important; /* Menos desplazamiento en pantallas muy pequeñas */
+        }
+    }
+`;
+document.head.appendChild(mobilePanelStyles);
+
+// ========================================
 // PANEL DESLIZABLE - VERSIÓN SIMPLE DE RESPALDO
 // ========================================
 
