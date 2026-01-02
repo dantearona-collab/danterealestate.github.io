@@ -3268,15 +3268,25 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
                 let items = [];
                 
                 if (Array.isArray(catData)) {
-                    items = catData.filter(item => item && String(item).trim().length > 3);
-                } else if (typeof catData === 'string' && catData.trim().length > 3) {
-                    items = catData.split(/[.,]+/).map(s => s.trim()).filter(s => s.length > 3);
+                    // Si es un array, tomar todos los elementos (sin filtro de longitud mínima)
+                    items = catData.filter(item => item && String(item).trim().length > 0);
+                } else if (typeof catData === 'string' && catData.trim().length > 0) {
+                    // Si es un string, dividir por puntos, comas o saltos de línea
+                    items = catData.split(/[.\n,;]+/).map(s => s.trim()).filter(s => s.length > 0);
                 } else if (catData && typeof catData === 'object') {
+                    // Si es un objeto, extraer todos los valores
                     Object.values(catData).forEach(value => {
                         if (Array.isArray(value)) {
-                            items.push(...value.filter(item => item && String(item).trim().length > 3));
-                        } else if (typeof value === 'string' && value.trim().length > 3) {
+                            items.push(...value.filter(item => item && String(item).trim().length > 0));
+                        } else if (typeof value === 'string' && value.trim().length > 0) {
                             items.push(value.trim());
+                        } else if (typeof value === 'object' && value !== null) {
+                            // Recursivamente extraer de objetos anidados
+                            Object.values(value).forEach(v => {
+                                if (typeof v === 'string' && v.trim().length > 0) {
+                                    items.push(v.trim());
+                                }
+                            });
                         }
                     });
                 }
@@ -3285,7 +3295,7 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
                     categories[catKey] = {
                         icon: config.icon,
                         title: config.title,
-                        items: items.slice(0, 6)
+                        items: items.slice(0, 50) // Aumentar límite a 50 items para mostrar todo el contenido
                     };
                     console.log(`✅ [DEBUG] Categoria '${catKey}': ${items.length} items`);
                 }
