@@ -2906,13 +2906,13 @@ function closePannellumModal() {
 }
 
 // ========================================
-// FUNCIÓN ENTORNO CON IA - INTEGRACIÓN BASE DE DATOS BARRIOS
+// FUNCIÓN ENTORNO CON IA - INTEGRACIÓN ARCHIVO ENTORNO.JSON (CMS)
 // ========================================
 
 // Función principal para obtener información del entorno
-// PRIORIDAD 1: Base de datos de barrios (API local)
+// PRIORIDAD 1: Archivo entorno.json (datos del CMS)
 // PRIORIDAD 2: Búsqueda web simulada (fallback)
-async function loadEnvironmentInfo(direccion, barrio) {
+async function loadEnvironmentInfo(direccion, barrio, descripcion = '') {
     console.log('🌍 Cargando información del entorno para:', barrio);
     console.log('📍 Dirección recibida:', direccion);
     
@@ -2924,133 +2924,115 @@ async function loadEnvironmentInfo(direccion, barrio) {
     window.currentProperty.direccion = direccion;
     window.currentProperty.barrio = barrio;
     
-    // USAR UBICACIÓN EXACTA DE GOOGLE MAPS SI ESTÁ DISPONIBLE
-    let ubicacionExacta = null;
-    let descripcion = '';
-    if (window.currentProperty && window.currentProperty.googleLocation) {
-        ubicacionExacta = window.currentProperty.googleLocation;
-        console.log('🗺️ Ubicación exacta de Google Maps:', ubicacionExacta);
-    }
-    if (window.currentProperty && window.currentProperty.descripcion) {
-        descripcion = window.currentProperty.descripcion;
-    }
-    
-    // ========================================
-    // CARGAR INFORMACIÓN DEL ENTORNO DEL BARRIO
-    // ========================================
-    async function loadEnvironmentInfo(direccion, barrio, descripcion = '') {
-        console.log('🌍 Cargando información del entorno para:', barrio);
-        console.log('📍 Dirección recibida:', direccion);
+    try {
+        // ========================================
+        // PASO 1: CARGAR DESDE ARCHIVO ENTORNO.JSON (DATOS DEL CMS)
+        // ========================================
+        console.log('🔍 [CMS LOCAL] Cargando datos desde archivo entorno.json...');
         
-        try {
-            // ========================================
-            // PASO 1: CARGAR DESDE ARCHIVO ENTORNO.JSON (DATOS DEL CMS)
-            // ========================================
-            console.log('🔍 [CMS LOCAL] Cargando datos desde archivo entorno.json...');
+        let barrioData = null;
+        
+        // Cargar el archivo entorno.json directamente
+        const response = await fetch('entorno.json');
+        
+        if (response.ok) {
+            const entornoData = await response.json();
+            console.log('✅ [CMS LOCAL] Archivo entorno.json cargado');
             
-            let barrioData = null;
-            
-            // Cargar el archivo entorno.json directamente
-            const response = await fetch('entorno.json');
-            
-            if (response.ok) {
-                const entornoData = await response.json();
-                console.log('✅ [CMS LOCAL] Archivo entorno.json cargado');
-                
-                // Buscar el barrio (comparar en minúsculas)
-                const barrioKey = Object.keys(entornoData).find(
-                    key => key.toLowerCase() === barrio.toLowerCase().trim()
-                );
-                
-                if (barrioKey) {
-                    barrioData = entornoData[barrioKey];
-                    console.log(`✅ [CMS LOCAL] Barrio encontrado: ${barrioKey}`);
-                    console.log('📊 [CMS LOCAL] Keys disponibles:', Object.keys(barrioData));
-                } else {
-                    console.warn(`⚠️ [CMS LOCAL] Barrio '${barrio}' no encontrado en entorno.json`);
-                    console.log('📊 [CMS LOCAL] Barrios disponibles:', Object.keys(entornoData));
-                }
-            } else {
-                console.warn(`⚠️ [CMS LOCAL] Error cargando entorno.json: ${response.status}`);
-            }
-            
-            // ========================================
-            // PROCESAR DATOS DEL CMS SI ESTÁN DISPONIBLES
-            // ========================================
-            if (barrioData && Object.keys(barrioData).length > 0) {
-                console.log('✅ [CMS LOCAL] Transformando datos del barrio para visualización...');
-                
-                // Transformar datos del barrio al formato esperado
-                const environmentData = transformBarrioDataToDisplay(barrioData, barrio, direccion, descripcion);
-                
-                // Verificar que tenga categorías válidas
-                if (environmentData.categories && Object.keys(environmentData.categories).length > 0) {
-                    console.log('✅ [CMS LOCAL] Datos procesados correctamente, mostrando información');
-                    console.log('📊 [CMS LOCAL] Categorías disponibles:', Object.keys(environmentData.categories));
-                    
-                    // Mostrar fuente de datos
-                    console.log('═══════════════════════════════════════════════');
-                    console.log('📊 FUENTE DE DATOS: ARCHIVO ENTORNO.JSON (CMS)');
-                    console.log(`🏢 Barrio: ${barrio}`);
-                    console.log(`📅 Fecha: ${new Date().toLocaleString()}`);
-                    console.log('═══════════════════════════════════════════════');
-                    
-                    displayEnvironmentInfo(environmentData);
-                    return;
-                } else {
-                    console.warn('⚠️ [CMS LOCAL] Datos recibidos pero sin categorías válidas');
-                }
-            }
-            
-            // ========================================
-            // PASO 2: FALLBACK - USAR BÚSQUEDA WEB SIMULADA
-            // ========================================
-            console.log('🔄 [FALLBACK WEB] El archivo CMS no tiene datos, usando búsqueda web simulada...');
-            
-            // Validar que barrio no sea undefined ni vacío
-            const barrioValido = barrio && barrio.trim() !== '' ? barrio : 'Buenos Aires';
-            const direccionValida = direccion && direccion.trim() !== '' ? direccion : `${barrioValido}, Buenos Aires, Argentina`;
-            
-            // Usar ubicación exacta si está disponible, sino usar dirección válida
-            const ubicacionParaBusqueda = window.currentProperty?.googleLocation || direccionValida;
-            
-            console.log('📍 Ubicación para búsqueda:', ubicacionParaBusqueda);
-            console.log('🏢 Barrio válido:', barrioValido);
-            
-            // Ejecutar búsquedas simuladas (lógica existente)
-            const searchResults = await performParallelSearchesReal(
-                [
-                    `${ubicacionParaBusqueda} servicios comercios farmacias heladerías`,
-                    `${ubicacionParaBusqueda} transporte público subte colectivo líneas`,
-                    `${ubicacionParaBusqueda} escuelas colegios universidades educación`,
-                    `${ubicacionParaBusqueda} hospitales clínicas centros médicos salud`,
-                    `${ubicacionParaBusqueda} supermercados centros comerciales shopping`,
-                    `${ubicacionParaBusqueda} restaurantes cafeterías gastronomía`,
-                    `${ubicacionParaBusqueda} parques plazas espacios verdes`,
-                    `${ubicacionParaBusqueda} bancos cajeros servicios financieros`
-                ],
-                ubicacionParaBusqueda,
-                barrioValido
+            // Buscar el barrio (comparar en minúsculas)
+            const barrioKey = Object.keys(entornoData).find(
+                key => key.toLowerCase() === barrio.toLowerCase().trim()
             );
             
-            const environmentData = processEnvironmentData(searchResults, direccionValida, barrioValido, ubicacionParaBusqueda, descripcion);
-            
-            console.log('✅ [FALLBACK WEB] Datos simulados generados correctamente');
-            
-            // Mostrar fuente de datos
-            console.log('═══════════════════════════════════════════════');
-            console.log('📊 FUENTE DE DATOS: BÚSQUEDA WEB SIMULADA');
-            console.log(`🏢 Barrio: ${barrioValido}`);
-            console.log(`📅 Fecha: ${new Date().toLocaleString()}`);
-            console.log('═══════════════════════════════════════════════');
-            
-            displayEnvironmentInfo(environmentData);
-            
-        } catch (error) {
-            console.error('❌ Error cargando información del entorno:', error);
-            showEnvironmentError('Error al cargar la información del entorno. Por favor, intenta nuevamente.');
+            if (barrioKey) {
+                barrioData = entornoData[barrioKey];
+                console.log(`✅ [CMS LOCAL] Barrio encontrado: ${barrioKey}`);
+                console.log('📊 [CMS LOCAL] Keys disponibles:', Object.keys(barrioData));
+            } else {
+                console.warn(`⚠️ [CMS LOCAL] Barrio '${barrio}' no encontrado en entorno.json`);
+                console.log('📊 [CMS LOCAL] Barrios disponibles:', Object.keys(entornoData));
+            }
+        } else {
+            console.warn(`⚠️ [CMS LOCAL] Error cargando entorno.json: ${response.status}`);
         }
+        
+        // ========================================
+        // PROCESAR DATOS DEL CMS SI ESTÁN DISPONIBLES
+        // ========================================
+        if (barrioData && Object.keys(barrioData).length > 0) {
+            console.log('✅ [CMS LOCAL] Transformando datos del barrio para visualización...');
+            
+            // Transformar datos del barrio al formato esperado
+            const environmentData = transformBarrioDataToDisplay(barrioData, barrio, direccion, descripcion);
+            
+            // Verificar que tenga categorías válidas
+            if (environmentData.categories && Object.keys(environmentData.categories).length > 0) {
+                console.log('✅ [CMS LOCAL] Datos procesados correctamente, mostrando información');
+                console.log('📊 [CMS LOCAL] Categorías disponibles:', Object.keys(environmentData.categories));
+                
+                // Mostrar fuente de datos
+                console.log('═══════════════════════════════════════════════');
+                console.log('📊 FUENTE DE DATOS: ARCHIVO ENTORNO.JSON (CMS)');
+                console.log(`🏢 Barrio: ${barrio}`);
+                console.log(`📅 Fecha: ${new Date().toLocaleString()}`);
+                console.log('═══════════════════════════════════════════════');
+                
+                displayEnvironmentInfo(environmentData);
+                return;
+            } else {
+                console.warn('⚠️ [CMS LOCAL] Datos recibidos pero sin categorías válidas');
+            }
+        }
+        
+        // ========================================
+        // PASO 2: FALLBACK - USAR BÚSQUEDA WEB SIMULADA
+        // ========================================
+        console.log('🔄 [FALLBACK WEB] El archivo CMS no tiene datos, usando búsqueda web simulada...');
+        
+        // Validar que barrio no sea undefined ni vacío
+        const barrioValido = barrio && barrio.trim() !== '' ? barrio : 'Buenos Aires';
+        const direccionValida = direccion && direccion.trim() !== '' ? direccion : `${barrioValido}, Buenos Aires, Argentina`;
+        
+        // Usar ubicación exacta si está disponible, sino usar dirección válida
+        const ubicacionParaBusqueda = window.currentProperty?.googleLocation || direccionValida;
+        
+        console.log('📍 Ubicación para búsqueda:', ubicacionParaBusqueda);
+        console.log('🏢 Barrio válido:', barrioValido);
+        
+        // Ejecutar búsquedas simuladas
+        const searchResults = await performParallelSearchesReal(
+            [
+                `${ubicacionParaBusqueda} servicios comercios farmacias heladerías`,
+                `${ubicacionParaBusqueda} transporte público subte colectivo líneas`,
+                `${ubicacionParaBusqueda} escuelas colegios universidades educación`,
+                `${ubicacionParaBusqueda} hospitales clínicas centros médicos salud`,
+                `${ubicacionParaBusqueda} supermercados centros comerciales shopping`,
+                `${ubicacionParaBusqueda} restaurantes cafeterías gastronomía`,
+                `${ubicacionParaBusqueda} parques plazas espacios verdes`,
+                `${ubicacionParaBusqueda} bancos cajeros servicios financieros`
+            ],
+            ubicacionParaBusqueda,
+            barrioValido
+        );
+        
+        const environmentData = processEnvironmentData(searchResults, direccionValida, barrioValido, ubicacionParaBusqueda, descripcion);
+        
+        console.log('✅ [FALLBACK WEB] Datos simulados generados correctamente');
+        
+        // Mostrar fuente de datos
+        console.log('═══════════════════════════════════════════════');
+        console.log('📊 FUENTE DE DATOS: BÚSQUEDA WEB SIMULADA');
+        console.log(`🏢 Barrio: ${barrioValido}`);
+        console.log(`📅 Fecha: ${new Date().toLocaleString()}`);
+        console.log('═══════════════════════════════════════════════');
+        
+        displayEnvironmentInfo(environmentData);
+        
+    } catch (error) {
+        console.error('❌ Error cargando información del entorno:', error);
+        showEnvironmentError('Error al cargar la información del entorno. Por favor, intenta nuevamente.');
     }
+}
 
 // Transformar datos del barrio (base de datos) al formato para display
 // Maneja DOS estructuras diferentes:
