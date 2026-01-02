@@ -1,0 +1,312 @@
+{
+  "boedo": {
+    "nombre": "Boedo",
+    "descripcion_general": "Boedo es un barrio de Buenos Aires con una propuesta gastronómica destacada (72/100) y excelentes servicios financieros (72/100).",
+    "fecha_actualizacion": "2026-01-02 06:01:17",
+    "transporte": [
+      "En Boedo tienes conectividad con 31 líneas de colectivos de CABA (modernizadas en 2025 con color azul). Conexión directa con líneas de subte A",
+      "B",
+      "D",
+      "E",
+      "H. Paradas estratégicas y acceso rápido a todas las zonas de la ciudad."
+    ],
+    "educacion": [
+      "Escuela № 16 Provincia de Santa Fe",
+      "Instituto San Francisco de Asís",
+      "Escuela de Música Juan José Lizarazu",
+      "Centro Educativo San Alberto Magno"
+    ],
+    "salud": [
+      "Hospital General de Agudos Dr. Ignacio Pirovano",
+      "Clínica San Boedo - Urgencias",
+      "Centro de Salud № 7 Boedo",
+      "Farmacia Boedo 24hs"
+    ],
+    "comercio": [
+      "Galería San Miguel de Boedo",
+      "Comercio de barrio tradicional",
+      "Tiendas de ropa en Av. Boedo",
+      "Mercado de Boedo - Frutas y verduras"
+    ],
+    "gastronomia": [
+      "El Sanjorgeño - Parrilla familiar",
+      "Café Los Galgos de Boedo",
+      "Bar Notable El Progresso",
+      "Restaurantes tradicionales de barrio"
+    ],
+    "recreacion": [
+      "Teatro Boedo",
+      "Cine Boedo",
+      "Plaza Boedo - Juegos infantiles",
+      "Club San Lorenzo de Almagro"
+    ],
+    "servicios_financieros": [
+      "Banco Ciudad",
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Comisaría Vecinal 7B - Av. Boedo 800",
+      "Cámaras de seguridad en plaza y accesos",
+      "Vigilancia policial regular",
+      "Nivel de seguridad medio-alto"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ],
+    "espacios_verdes": [
+      "Plaza Boedo - Área verde central",
+      "Plazoleta Héctor G. Oesterheld - Espacio verde",
+      "Parque Chacabuco - A 10 minutos",
+      "Canchas de fútbol y vóley"
+    ],
+    "contaminacion": [
+      "Nivel de ruido medio - barrio familiar",
+      "Calidad del aire regular - 标准 urbano",
+      "Tráfico moderado en horas pico",
+      "Zona predominantly residencial"
+    ],
+    "vida_barrio": [
+      "Barrio tradicional de tango",
+      "Comunidad familiar establecida",
+      "Comercios de barrio y almacenes",
+      "Café theaters y milongas cercanas"
+    ],
+    "conclusion": "Barrio con propuesta urbana completa. Ideal para vivir e invertir en Buenos Aires."
+  },
+  "microcentro": {
+    "nombre": "Microcentro",
+    "descripcion_general": "Microcentro es un barrio de Buenos Aires con una propuesta gastronómica destacada (80/100) y excelentes servicios financieros (100/100).",
+    "fecha_actualizacion": "2026-01-02 06:01:17",
+    "transporte": [
+      "En Microcentro tienes acceso a las líneas de subte Línea D (conecta Palermo con el centro porteño) y Línea C (conecta Retiro y Constitución). Colectivos específicos: 105",
+      "39",
+      "59",
+      "7",
+      "8. Paradas estratégicas en el microcentro con acceso directo a todas las zonas de CABA."
+    ],
+    "educacion": [
+      "Colegio Nacional de Buenos Aires (referencia)",
+      "Universidad de Buenos Aires (facultades)",
+      "Instituto Bilingüe Centro",
+      "Escuelas de idiomas en Florida y Corrientes"
+    ],
+    "salud": [
+      "Hospital General de Agudos Dr. B. Rivadavia",
+      "Clínica Central - Especialidades",
+      "Centro Médico Microcentro",
+      "Farmacia 24hs Florida"
+    ],
+    "comercio": [
+      "Galería Florida - Shopping urbano",
+      "Plaza San Martín - Comercio selecto",
+      "Comercio masivo en Florida y Corrientes",
+      "Tiendas de lujo en Reconquista"
+    ],
+    "gastronomia": [
+      "Bar El Federal - Clásico del centro",
+      "Café Tortoni - Institución porteña",
+      "Restaurantes de lujo en Florida",
+      "Bares de Business lunch"
+    ],
+    "recreacion": [
+      "Teatro Colón - Ópera y ballet",
+      "Cine Monumental",
+      "Plaza San Martín - Eventos",
+      "Centro Cultural Borges"
+    ],
+    "servicios_financieros": [
+      "Banco de la Nación Argentina (Casa Central)",
+      "Banco de la Provincia de Buenos Aires",
+      "Banco Ciudad",
+      "Banco Santander",
+      "Banco BBVA",
+      "Banco Macro",
+      "Banco ICBC",
+      "Banco Supervielle",
+      "Banco Comafi",
+      "Banco Hipotecario",
+      "Alta concentración en Av. Corrientes",
+      "Florida",
+      "Sarmiento",
+      "Red Banelco y Link disponibles 24/7",
+      "Cajeros con función depósito en entidades principales"
+    ],
+    "seguridad": [
+      "Comisaría Vecinal 1A - Florida 1",
+      "Más de 200 cámaras de seguridad",
+      "Policía de la Ciudad y Gendarmería",
+      "Nivel de seguridad alto - vigilancia intensiva"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ],
+    "espacios_verdes": [
+      "Plaza San Martín - Jardín botánico urbano",
+      "Plaza Mayo - Área histórica con verde",
+      "Parque Teatro Colón - Pequeño oasis urbano",
+      "Bancos y áreas de descanso limitadas"
+    ],
+    "contaminacion": [
+      "Nivel de ruido muy alto - centro de la ciudad",
+      "Calidad del aire reducida - много vehículos",
+      "Tráfico muy intenso en horas pico",
+      "Zona netamente comercial y administrativa"
+    ],
+    "vida_barrio": [
+      "Núcleo comercial y administrativo",
+      "Vida profesional intensa",
+      "Turismo y comercio constante",
+      "Poca vida residencial nocturna"
+    ],
+    "conclusion": "Barrio con propuesta urbana completa. Ideal para vivir e invertir en Buenos Aires."
+  },
+  "parque avellaneda": {
+    "nombre": "Parque Avellaneda",
+    "descripcion_general": "Parque Avellaneda es un barrio de Buenos Aires con una propuesta gastronómica destacada (68/100) y excelentes servicios financieros (62/100).",
+    "fecha_actualizacion": "2026-01-02 06:01:17",
+    "transporte": [
+      "En Parque Avellaneda tienes acceso a colectivos específicos: 114",
+      "126",
+      "180",
+      "4",
+      "55",
+      "86",
+      "50",
+      "7. Tren SARMIENTO con estaciones cercanas. Conexión con líneas de subte A y E. Excelente conectividad con el resto de la ciudad."
+    ],
+    "educacion": [
+      "Escuela № 24 \"Domingo F. Sarmiento\"",
+      "Instituto № 8 \"San José de Parque Avellaneda\"",
+      "Escuela Técnica № 12",
+      "Centro Cultural Parque Avellaneda"
+    ],
+    "salud": [
+      "Hospital General de Agudos Dr. D. F. S. A.",
+      "Clínica Parque Avellaneda",
+      "Centro de Salud Avellaneda",
+      "Farmacia Avellaneda 24hs"
+    ],
+    "comercio": [
+      "Centro comercial Avellaneda",
+      "Comercio de barrio tradicional",
+      "Tiendas en Av. Directorio",
+      "Mercado de Avellaneda"
+    ],
+    "gastronomia": [
+      "Restaurante Avellaneda - Parrilla",
+      "Bar del parque",
+      "Café de Parque Avellaneda",
+      "Comida familiar tradicional"
+    ],
+    "recreacion": [
+      "Teatro Parque Avellaneda",
+      "Cine Avellaneda",
+      "Parque Avellaneda - Deportes y piletas",
+      "Centro Cultural Avellaneda"
+    ],
+    "servicios_financieros": [
+      "Banco Macro"
+    ],
+    "seguridad": [
+      "Comisaría Vecinal 9F - Av. Directorio 4200",
+      "Patrullaje en parque y zona comercial",
+      "Vigilancia policial regular",
+      "Nivel de seguridad medio"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ],
+    "espacios_verdes": [
+      "Parque Avellaneda - 15 hectáreas de verde",
+      "Plaza principal con monumento",
+      "Canchas deportivas y piletas públicas",
+      "Área de picnic y fogoneros"
+    ],
+    "contaminacion": [
+      "Nivel de ruido bajo-medio - zona familiar",
+      "Calidad del aire buena - parque cercano",
+      "Tráfico moderado en zonas residenciales",
+      "Buena presencia de espacios verdes"
+    ],
+    "vida_barrio": [
+      "Barrio familiar y tradicional",
+      "Comunidad unida y colaborativa",
+      "Comercios de barrio y mercados",
+      "Actividades deportivas en parque"
+    ],
+    "conclusion": "Barrio con propuesta urbana completa. Ideal para vivir e invertir en Buenos Aires."
+  },
+  "pilar": {
+    "nombre": "Pilar",
+    "descripcion_general": "Pilar es un barrio de Buenos Aires con .",
+    "fecha_actualizacion": "2026-01-02 06:01:17",
+    "transporte": [
+      "En Pilar tienes acceso a la Autopista Acceso Norte Ramal Pilar y Ruta 8. Líneas de colectivo específicas: Línea 57",
+      "Línea 510 (Pilar Bus S.A.)",
+      "Línea 176. Conexiones con Ruta Bus S.A. hacia Moreno",
+      "Areco",
+      "y Cardales."
+    ],
+    "educacion": [
+      "Colegio Northfield School Pilar",
+      "Instituto San José de Pilar",
+      "Escuela № 1 \"República del Paraguay\"",
+      "Universidad de Palermo - Campus Pilar"
+    ],
+    "salud": [
+      "Hospital Austral - Pilar",
+      "Clínica Monte Real Pilar",
+      "Sanatorio Pilar - Especialidades",
+      "Farmacia 24hs Pilar"
+    ],
+    "comercio": [
+      "Pilar Shopping - Gran complejo",
+      "Centro comercial Las Palmas del Pilar",
+      "Comercio en Av. Acceso Norte",
+      "Tiendas de diseño y decoración"
+    ],
+    "gastronomia": [
+      "Sarkis Pilar - Comida armenia",
+      "El Fortín - Parrilla premium",
+      "Café Pilar - Coffee shop",
+      "Restaurantes gourmet en countries"
+    ],
+    "recreacion": [
+      "Pilara Golf Club",
+      "Cine Pilar Shopping",
+      "Centro Cultural Pilar",
+      "Complejo de entretenimiento - Arcadia"
+    ],
+    "servicios_financieros": [
+      "Información del barrio"
+    ],
+    "seguridad": [
+      "Comisaría local - Ruta 8 Km 40",
+      "Seguridad privada en countries",
+      "Patrullaje policial en zonas céntricas",
+      "Nivel de seguridad alto en countries, medio en zona urbana"
+    ],
+    "servicios": [
+      "Información del barrio"
+    ],
+    "espacios_verdes": [
+      "Naciones Unidas Park - Gran parque",
+      "Paseo Pilar - Área comercial con verde",
+      "Countries con canchas de golf",
+      "Lagunas artificiales y áreas de recreación"
+    ],
+    "contaminacion": [
+      "Nivel de ruido bajo - zona de countries",
+      "Calidad del aire muy buena - areas verdes",
+      "Tráfico fluido en zonas residenciales",
+      "Zona predominantemente residencial premium"
+    ],
+    "vida_barrio": [
+      "Zona de countries y barrios cerrados",
+      "Comunidad premium y familiar",
+      "Golf, tennis y deportes sociales",
+      "Centros comerciales y entretenimiento"
+    ],
+    "conclusion": "Barrio con propuesta urbana completa. Ideal para vivir e invertir en Buenos Aires."
+  }
+}
