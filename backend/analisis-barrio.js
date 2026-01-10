@@ -7,7 +7,7 @@
 // CONFIGURACIÓN Y CONSTANTES
 // ============================================
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'http://localhost:8001';
 const API_TIMEOUT = 30000;
 
 // ============================================
@@ -548,7 +548,8 @@ const UIRenderer = {
             'salud': 'preview-salud',
             'espacios_verdes': 'preview-recreacion',
             'contaminacion': 'preview-contaminacion',
-            'vida_barrio': 'preview-gastronomia',
+            'vida_barrio': 'preview-vida_barrio',
+            'gastronomia': 'preview-gastronomia',
             'servicios_financieros': 'preview-finanzas'
         };
         
