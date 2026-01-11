@@ -1,0 +1,27 @@
+# FastAPI y servidor
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+
+# FastAPI y servidor
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+
+# Base de datos
+# sqlite>=3.45.0  # sqlite ya viene incluido en Python 3
+aiosqlite>=0.19.0
+
+# Cliente HTTP para APIs externas
+httpx>=0.26.0
+
+# BeautifulSoup para scraping web
+beautifulsoup4>=4.12.0
+
+# Cliente de Google Gemini
+google-generativeai>=0.4.0
+
+# Manejo de datos
+pydantic>=2.5.0
+python-multipart>=0.0.6
+
+# Utilidades
+python-dateutil>=2.8.0
