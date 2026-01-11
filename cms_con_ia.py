@@ -1294,33 +1294,58 @@ async def health_check():
 # ARCHIVOS ESTÁTICOS
 # ================================================================
 
-# Servir archivos estáticos del directorio actual
 import os
-backend_path = os.path.dirname(os.path.abspath(__file__))
-if os.path.exists(backend_path):
-    app.mount("/static", StaticFiles(directory=backend_path), name="static")
+
+# Directorio donde está este script
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Directorio backend (donde están los HTML)
+BACKEND_DIR = SCRIPT_DIR
+if os.path.exists(os.path.join(SCRIPT_DIR, "backend")):
+    BACKEND_DIR = os.path.join(SCRIPT_DIR, "backend")
+
+# Servir archivos estáticos del directorio backend
+if os.path.exists(BACKEND_DIR):
+    app.mount("/static", StaticFiles(directory=BACKEND_DIR), name="static")
 
 # ================================================================
-# RUTA CATCH-ALL PARA FRONTEND (SPA)
+# RUTAS DEL FRONTEND
 # ================================================================
+
+@app.get("/")
+async def root():
+    """Servir el archivo HTML principal del CMS"""
+    index_path = os.path.join(BACKEND_DIR, "analisis-barrio.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    # Fallback a index.html
+    index_path = os.path.join(BACKEND_DIR, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    raise HTTPException(status_code=404, detail="Archivo HTML no encontrado")
 
 @app.get("/{full_path:path}")
 async def serve_frontend(full_path: str):
     """
     Ruta catch-all para manejar enrutamiento del lado del cliente (SPA).
-    Sirve index.html para cualquier ruta que no coincida con los endpoints API.
+    - Si el archivo existe en el disco, lo sirve
+    - Si no existe, sirve index.html (para SPA)
     """
     # Excluir rutas API y archivos estáticos
     if full_path.startswith("api/") or full_path.startswith("static/"):
         raise HTTPException(status_code=404, detail="Ruta no encontrada")
-    
-    # Buscar index.html en el directorio del backend
-    index_path = os.path.join(backend_path, "index.html")
-    
+
+    # Verificar si es un archivo que existe
+    requested_path = os.path.join(BACKEND_DIR, full_path)
+    if os.path.exists(requested_path) and os.path.isfile(requested_path):
+        return FileResponse(requested_path)
+
+    # Si no existe, servir index.html (para SPA routing)
+    index_path = os.path.join(BACKEND_DIR, "analisis-barrio.html")
     if os.path.exists(index_path):
         return FileResponse(index_path)
-    else:
-        raise HTTPException(status_code=404, detail="Página no encontrada")
+
+    raise HTTPException(status_code=404, detail="Página no encontrada")
 
 # ================================================================
 # EJECUCIÓN PRINCIPAL
