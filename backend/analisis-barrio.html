@@ -345,6 +345,36 @@
                                     </div>
                                 </div>
 
+                                <!-- Gastronomía - NUEVA SECCIÓN AGREGADA -->
+                                <div class="accordion-item">
+                                    <div class="accordion-header" onclick="toggleAccordion('gastronomia')">
+                                        <span class="accordion-icon">🍽️</span>
+                                        <span>Gastronomía</span>
+                                        <span class="accordion-score" id="score-gastronomia">--</span>
+                                        <i class="fas fa-chevron-down accordion-arrow"></i>
+                                    </div>
+                                    <div class="accordion-content" id="content-gastronomia">
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label>Puntuación (0-100)</label>
+                                                <input type="number" id="gastronomia-puntuacion" min="0" max="100" onchange="updateScore('gastronomia'); markAsChanged()">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Descripción</label>
+                                            <textarea id="gastronomia-descripcion" rows="2" onchange="markAsChanged()"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Restaurantes Destacados (separados por coma)</label>
+                                            <input type="text" id="gastronomia-restaurantes" onchange="markAsChanged()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Zonas Gastronómicas (separadas por coma)</label>
+                                            <input type="text" id="gastronomia-zonas" onchange="markAsChanged()">
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- Servicios Financieros -->
                                 <div class="accordion-item">
                                     <div class="accordion-header" onclick="toggleAccordion('servicios_financieros')">
@@ -430,6 +460,6 @@
         <p class="footer-note">Los datos se almacenan en SQLite y pueden regenerarse con IA</p>
     </footer>
 
-    <script src="analisis-barrio.js?v=20241230-0955"></script>
+    <script src="analisis-barrio.js?v=20250111-0800"></script>
 </body>
 </html>
