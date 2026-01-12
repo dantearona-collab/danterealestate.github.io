@@ -866,15 +866,16 @@ const EventHandlers = {
     setupSearchHandlers() {
         const searchInput = document.getElementById('neighborhood-input');
         if (searchInput) {
-            let debounceTimer;
+            // El usuario puede escribir cualquier barrio, no está limitado a las sugerencias
+            // El datalist es solo para referencia/sugerencias, no es una lista restrictiva
             
-            // Cargar lista de barrios existentes en el datalist
+            // Opcional: cargar barrios existentes para mostrar como sugerencias
             this.loadBarriosToDatalist();
             
             searchInput.addEventListener('input', (e) => {
                 const query = e.target.value.trim();
                 
-                // Limpiar resultado anterior cuando el usuario escribe
+                // Limpiar resultado anterior cuando el usuario escribe un nuevo barrio
                 if (query !== AppState.lastQuery) {
                     AppState.currentBarrio = null;
                     this.clearFormDisplay();
@@ -884,7 +885,8 @@ const EventHandlers = {
     },
 
     /**
-     * Carga los barrios existentes en el datalist para sugerencias
+     * Carga los barrios existentes en el datalist para sugerencias (OPCIONAL)
+     * El usuario puede escribir CUALQUIER barrio, no está limitado a esta lista
      */
     async loadBarriosToDatalist() {
         const datalist = document.getElementById('barrios-list');
@@ -897,16 +899,16 @@ const EventHandlers = {
             // Limpiar opciones anteriores
             datalist.innerHTML = '';
             
-            // Agregar cada barrio como opción
+            // Agregar cada barrio como opción de SUGERENCIA (no como restricción)
             barrios.forEach(barrio => {
                 const option = document.createElement('option');
                 option.value = Utils.capitalize(barrio);
                 datalist.appendChild(option);
             });
             
-            console.log(`✅ Cargados ${barrios.length} barrios en el datalist`);
+            console.log(`✅ ${barrios.length} barrios cargados como SUGERENCIAS (puedes escribir cualquier barrio)`);
         } catch (error) {
-            console.warn('No se pudieron cargar los barrios para sugerencias:', error.message);
+            console.warn('No se pudieron cargar las sugerencias de barrios:', error.message);
         }
     },
 
@@ -1140,15 +1142,17 @@ const EventHandlers = {
             if (barrioNoEncontrado) {
                 console.log('📋 El barrio no existe, mostrando opciones de creación...');
                 setTimeout(() => {
-                    const confirmCreate = confirm(
-                        `El barrio "${Utils.capitalize(query)}" no existe en la base de datos.
-
-` +
-                        '¿Deseas crear un nuevo análisis?'
+                    const choice = confirm(
+                        `El barrio "${Utils.capitalize(query)}" no existe en la base de datos.\n\n` +
+                        '¿Qué deseas hacer?\n\n' +
+                        '✅ Aceptar: Crear nuevo barrio con IA\n' +
+                        '❌ Cancelar: Crear manualmente (en blanco)'
                     );
                     
-                    if (confirmCreate) {
+                    if (choice) {
                         this.handleCreateWithAI(query);
+                    } else {
+                        this.handleNewBarrioManual(query);
                     }
                 }, 100);
             } else {
