@@ -103,6 +103,7 @@ class BaseScraper(ABC):
         """
         Limpia texto de precio y devuelve (amount, currency)
         Ej: "$ 150.000.000" -> (150000000.0, "ARS")
+        Ej: "$400.000+ $105.000 expensas" -> (400000.0, "ARS")
         """
         if not price_text:
             return 0.0, "ARS"
@@ -114,80 +115,55 @@ class BaseScraper(ABC):
         if "USD" in price_text or "U$S" in price_text or "DÓLARES" in price_text:
             currency = "USD"
         
-        # Extraer todos los grupos de dígitos
+        # NUEVA ESTRATEGIA: Tomar solo el PRIMER grupo de dígitos antes del "+"
+        # Esto maneja casos como "$400.000+ $105.000 expensas" donde el precio es 400000
+        if '+' in price_text:
+            price_text = price_text.split('+')[0].strip()
+        
+        # Eliminar "EXPENSAS" y类似的
+        price_text = re.sub(r'EXPENSAS.*', '', price_text, flags=re.IGNORECASE)
+        
+        # Extraer grupos de dígitos
         all_numbers = re.findall(r'\d+', price_text)
         
         if not all_numbers:
             return 0.0, currency
         
-        # Unir todos los grupos para buscar dentro del número completo
-        full_number_str = ''.join(all_numbers)
+        # Tomar el primer número (el más largo grupos de dígitos)
+        # Para "$150.000.000" -> ["150", "000", "000"] -> queremos "150000000"
+        # Para "$400.000" -> ["400", "000"] -> queremos "400000"
+        
+        # El primer grupo suele ser el más importante
+        first_group = all_numbers[0] if all_numbers else ""
+        
+        # Si hay múltiples grupos, unir los primeros 2-3 para formar el precio completo
+        if len(all_numbers) >= 2:
+            # Unir los grupos para formar el precio completo
+            # "$150.000.000" = ["150", "000", "000"] -> 150000000
+            # "$400.000" = ["400", "000"] -> 400000
+            full_number = ''.join(all_numbers[:3])  # Tomar hasta 3 grupos
+        else:
+            full_number = first_group
         
         # Rango de precios inmobiliarios realistas
         if currency == "USD":
-            # USD: 30,000 - 1,000,000 (5-7 dígitos)
+            # USD: 30,000 - 1,000,000 (5-7 dígitos) para alquiler/venta
             min_price = 30_000
             max_price = 1_000_000
         else:
-            # ARS: 1,000,000 - 10,000,000,000 (7-11 dígitos)
-            min_price = 1_000_000
-            max_price = 10_000_000_000
+            # ARS: 50,000 - 500,000,000 (alquileres desde 50k hasta propiedades de millones)
+            min_price = 50_000
+            max_price = 500_000_000
         
-        # Estrategia de búsqueda por ventana deslizante
-        # Buscar un substring de 5-7 dígitos (USD) o 7-11 dígitos (ARS) que sea precio válido
+        try:
+            value = int(full_number)
+            if min_price <= value <= max_price:
+                return float(value), currency
+        except ValueError:
+            pass
         
-        best_candidate = None
-        
-        if currency == "USD":
-            # Para USD, buscar en ventanas de 6 dígitos
-            window_size = 6
-            for i in range(len(full_number_str) - window_size + 1):
-                window = full_number_str[i:i+window_size]
-                try:
-                    value = int(window)
-                    if min_price <= value <= max_price:
-                        # Encontramos un precio válido, verificar que sea razonable
-                        # Los precios no deben empezar con 0
-                        if not window.startswith('0'):
-                            best_candidate = value
-                            break
-                except ValueError:
-                    continue
-            
-            # Si no encontramos con ventana de 6, probar con 5 o 7
-            if not best_candidate:
-                for size in [5, 7]:
-                    for i in range(len(full_number_str) - size + 1):
-                        window = full_number_str[i:i+size]
-                        try:
-                            value = int(window)
-                            if min_price <= value <= max_price:
-                                if not window.startswith('0'):
-                                    best_candidate = value
-                                    break
-                        except ValueError:
-                            continue
-                    if best_candidate:
-                        break
-        else:
-            # Para ARS, usar ventana de 8 dígitos
-            window_size = 8
-            for i in range(len(full_number_str) - window_size + 1):
-                window = full_number_str[i:i+window_size]
-                try:
-                    value = int(window)
-                    if min_price <= value <= max_price:
-                        if not window.startswith('0'):
-                            best_candidate = value
-                            break
-                except ValueError:
-                    continue
-        
-        if best_candidate:
-            return float(best_candidate), currency
-        
-        # Si nada funcionó, intentar con grupos individuales
-        for num_str in reversed(all_numbers):  # Empezar por los más largos
+        # Si no funcionó, buscar el mejor candidato individual
+        for num_str in all_numbers[:3]:  # Solo buscar en los primeros 3 grupos
             try:
                 num = int(num_str)
                 if min_price <= num <= max_price:
@@ -298,7 +274,7 @@ class ArgenpropScraper(BaseScraper):
         
         return url
     
-    def parse_properties(self, html: str) -> List[PropertyData]:
+    def parse_properties(self, html: str, operation: str = "venta", property_type: str = "departamento") -> List[PropertyData]:
         """Parsea propiedades de Argenprop"""
         properties = []
         
@@ -315,7 +291,7 @@ class ArgenpropScraper(BaseScraper):
             
             for card in cards:
                 try:
-                    prop = self._parse_card(card)
+                    prop = self._parse_card(card, operation, property_type)
                     if prop:
                         properties.append(prop)
                 except Exception as e:
@@ -331,7 +307,7 @@ class ArgenpropScraper(BaseScraper):
         
         return properties
     
-    def _parse_card(self, card) -> Optional[PropertyData]:
+    def _parse_card(self, card, operation: str = "venta", property_type: str = "departamento") -> Optional[PropertyData]:
         """Parsea una tarjeta individual de Argenprop"""
         try:
             # Extraer precio
@@ -382,8 +358,8 @@ class ArgenpropScraper(BaseScraper):
                 surface_covered=surface,
                 location=address.split(',')[-1].strip() if ',' in address else address,
                 address=address,
-                property_type="departamento",
-                operation_type="venta",
+                property_type=property_type,
+                operation_type=operation,
                 url=url
             )
             
@@ -427,7 +403,7 @@ class ZonapropScraper(BaseScraper):
         
         return url
     
-    def parse_properties(self, html: str) -> List[PropertyData]:
+    def parse_properties(self, html: str, operation: str = "venta", property_type: str = "departamento") -> List[PropertyData]:
         """Parsea propiedades de Zonaprop"""
         properties = []
         
@@ -443,7 +419,7 @@ class ZonapropScraper(BaseScraper):
             
             for card in cards:
                 try:
-                    prop = self._parse_card(card)
+                    prop = self._parse_card(card, operation, property_type)
                     if prop:
                         properties.append(prop)
                 except Exception as e:
@@ -459,7 +435,7 @@ class ZonapropScraper(BaseScraper):
         
         return properties
     
-    def _parse_card(self, card) -> Optional[PropertyData]:
+    def _parse_card(self, card, operation: str = "venta", property_type: str = "departamento") -> Optional[PropertyData]:
         """Parsea una tarjeta individual de Zonaprop"""
         try:
             # Extraer precio
@@ -507,14 +483,203 @@ class ZonapropScraper(BaseScraper):
                 surface_covered=surface,
                 location=address,
                 address=address,
-                property_type="departamento",
-                operation_type="venta",
+                property_type=property_type,
+                operation_type=operation,
                 url=url
             )
             
         except Exception as e:
             logger.debug(f"Error en _parse_card: {e}")
             return None
+
+# ========================================
+# SCRAPER DE MERCADOLIBRE
+# ========================================
+
+class MercadoLibreScraper(BaseScraper):
+    """Scraper específico para MercadoLibre Inmuebles"""
+    
+    def __init__(self):
+        super().__init__("https://inmuebles.mercadolibre.com.ar", "mercadolibre")
+    
+    def build_url(self, zone: str, operation: str, property_type: str) -> str:
+        """Construye URL para MercadoLibre Inmuebles"""
+        # Mapeo de operaciones
+        op_map = {
+            "venta": "venta",
+            "alquiler": "alquiler"
+        }
+        
+        # Mapeo de tipos de propiedad
+        type_map = {
+            "departamento": "departamentos",
+            "casa": "casas",
+            "ph": "ph",
+            "terreno": "terrenos",
+            "local": "locales-comerciales",
+            "oficina": "oficinas",
+            "cochera": "cocheras",
+            "deposito": "depositos-galpones"
+        }
+        
+        op = op_map.get(operation.lower(), "venta")
+        p_type = type_map.get(property_type.lower(), "departamentos")
+        
+        # MercadoLibre usa estructura: /tipo/op/provincia/ciudad/
+        if zone:
+            # Asumimos que zone ya viene formateada o la pasamos tal cual
+            url = f"{self.base_url}/{p_type}/{op}/{zone}/"
+        else:
+            url = f"{self.base_url}/{p_type}/{op}/"
+        
+        return url
+    
+    def parse_properties(self, html: str, operation: str = "venta", property_type: str = "departamento") -> List[PropertyData]:
+        """Parsea propiedades de MercadoLibre"""
+        properties = []
+        
+        try:
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(html, 'html.parser')
+            
+            # Selectores para MercadoLibre Inmuebles
+            # ML usa clases con prefijo ui-search- y andes-
+            cards = soup.select('li.ui-search-layout__item, ol.ui-search-layout > li')
+            
+            # Si no encuentra el layout principal, intentar otros selectores
+            if not cards:
+                cards = soup.select('[data-testid="listing-card"], .listing-card')
+            
+            # Último recurso: buscar artículos con clase de resultado
+            if not cards:
+                cards = soup.select('article.ui-search-result, div.ui-search-result')
+            
+            for card in cards:
+                try:
+                    prop = self._parse_card(card, operation, property_type)
+                    if prop:
+                        properties.append(prop)
+                except Exception as e:
+                    logger.debug(f"Error parseando tarjeta ML: {e}")
+                    continue
+            
+            logger.info(f"[MercadoLibre] Extraídas {len(properties)} propiedades")
+            
+        except ImportError:
+            logger.error("BeautifulSoup no instalado. Instalar: pip install beautifulsoup4")
+        except Exception as e:
+            logger.error(f"[MercadoLibre] Error parseando: {e}")
+        
+        return properties
+    
+    def _parse_card(self, card, operation: str = "venta", property_type: str = "departamento") -> Optional[PropertyData]:
+        """Parsea una tarjeta individual de MercadoLibre"""
+        try:
+            # Extraer precio - MercadoLibre usa andes-money-amount
+            price_elem = card.select_one('.ui-search-price__part--medium, .andes-money-amount')
+            if price_elem:
+                # El precio puede tener símbolo y monto por separado
+                symbol_elem = price_elem.select_one('.andes-money-amount__currency-symbol')
+                fraction_elem = price_elem.select_one('.andes-money-amount__fraction')
+                
+                if symbol_elem and fraction_elem:
+                    symbol = symbol_elem.get_text(strip=True)
+                    fraction = fraction_elem.get_text(strip=True)
+                    price_text = f"{symbol} {fraction}"
+                else:
+                    price_text = price_elem.get_text(strip=True)
+            else:
+                price_text = ""
+            
+            price, currency = self._clean_price(price_text)
+            
+            if price == 0:
+                return None  # Saltar propiedades sin precio válido
+            
+            # Extraer título y link
+            title_elem = card.select_one('.ui-search-item__title a, h2.ui-search-item__title a, .ui-search-result__element h2 a')
+            if not title_elem:
+                title_elem = card.select_one('h2, .ui-search-result__element h3')
+            
+            title = title_elem.get_text(strip=True) if title_elem else ""
+            if not title:
+                title_elem = card.select_one('.ui-search-item__subtitle')
+                title = title_elem.get_text(strip=True) if title_elem else ""
+            
+            # Extraer URL
+            url = ""
+            if title_elem and title_elem.has_attr('href'):
+                url = title_elem['href']
+            else:
+                link_elem = card.select_one('a[href]')
+                if link_elem:
+                    url = link_elem['href']
+            
+            # Extraer ubicación
+            location_elem = card.select_one('.ui-search-item__location, .ui-search-result__location')
+            address = location_elem.get_text(strip=True) if location_elem else ""
+            
+            # Extraer atributos (superficie, ambientes, etc.)
+            attrs_elem = card.select_one('.ui-search-card-attributes, .ui-search-item__attributes')
+            surface = 0.0
+            rooms = None
+            
+            if attrs_elem:
+                attr_items = attrs_elem.select('li, .ui-search-card-attributes li')
+                for attr in attr_items:
+                    text = attr.get_text(strip=True)
+                    # Detectar superficie
+                    if 'm²' in text or 'm2' in text.lower():
+                        surface = self._clean_surface(text)
+                    # Detectar ambientes/dormitorios
+                    elif 'dorm' in text.lower() or 'amb' in text.lower():
+                        room_nums = re.findall(r'\d+', text)
+                        if room_nums:
+                            rooms = int(room_nums[0])
+            
+            # Calcular precio por m2
+            price_m2 = self._calculate_price_per_m2(price, surface, currency)
+            
+            # Extraer ID externo de la URL o data attribute
+            prop_id = ""
+            if card.has_attr('data-id'):
+                prop_id = card['data-id']
+            elif url:
+                # Extraer ID de la URL si es posible
+                id_match = re.search(r'/ML[A-Z]?-?\d+', url)
+                if id_match:
+                    prop_id = id_match.group(0).replace('/', '')
+            
+            # Extraer imagen para thumbnail (opcional)
+            img_elem = card.select_one('img.ui-search-result-image__element, img[data-src], img[data-image]')
+            thumbnail = ""
+            if img_elem:
+                if img_elem.has_attr('src'):
+                    thumbnail = img_elem['src']
+                elif img_elem.has_attr('data-src'):
+                    thumbnail = img_elem['data-src']
+            
+            return PropertyData(
+                source=self.source_name,
+                external_id=prop_id or url.split('/')[-1] if url else "",
+                title=title,
+                price_amount=price,
+                price_currency=currency,
+                price_per_m2=price_m2,
+                surface_total=surface,
+                surface_covered=surface,
+                location=address.split(',')[-1].strip() if ',' in address else address,
+                address=address,
+                property_type=property_type,
+                operation_type=operation,
+                url=url,
+                raw_data={"thumbnail": thumbnail} if thumbnail else {}
+            )
+            
+        except Exception as e:
+            logger.debug(f"Error en _parse_card ML: {e}")
+            return None
+
 
 # ========================================
 # ANALIZADOR DE MERCADO
@@ -576,7 +741,9 @@ class MarketAnalyzer:
                 "price_m2": prop.price_per_m2,
                 "surface": prop.surface_total,
                 "address": prop.address,
-                "url": prop.url
+                "url": prop.url,
+                "operation_type": prop.operation_type,
+                "property_type": prop.property_type
             })
         
         # Calcular estadísticas
@@ -639,7 +806,7 @@ class MarketAnalyzer:
             },
             "currency_distribution": stats.currency_distribution,
             "source_breakdown": stats.source_breakdown,
-            "properties_sample": stats.properties[:10],  # Primeros 10
+            "properties_sample": stats.properties[:50],  # Primeros 50
             "total_properties_analyzed": len(stats.properties),
             "analysis_timestamp": datetime.now().isoformat(),
             "errors": stats.errors
@@ -656,6 +823,7 @@ class ScrapingManager:
     def __init__(self):
         self.argenprop = ArgenpropScraper()
         self.zonaprop = ZonapropScraper()
+        self.mercadolibre = MercadoLibreScraper()
         self.analyzer = MarketAnalyzer()
     
     def scrape_market(self, zone: str, operation: str = "venta", 
@@ -683,7 +851,7 @@ class ScrapingManager:
             
             html = self.argenprop._make_request(argenprop_url)
             if html:
-                properties = self.argenprop.parse_properties(html)
+                properties = self.argenprop.parse_properties(html, operation, property_type)
                 all_properties.extend(properties)
                 logger.info(f"[Argenprop] Obtenidas {len(properties)} propiedades")
             else:
@@ -699,7 +867,7 @@ class ScrapingManager:
             
             html = self.zonaprop._make_request(zonaprop_url)
             if html:
-                properties = self.zonaprop.parse_properties(html)
+                properties = self.zonaprop.parse_properties(html, operation, property_type)
                 all_properties.extend(properties)
                 logger.info(f"[Zonaprop] Obtenidas {len(properties)} propiedades")
             else:
@@ -707,6 +875,22 @@ class ScrapingManager:
         except Exception as e:
             logger.error(f"[Zonaprop] Error: {e}")
             errors.append(f"Zonaprop: {str(e)}")
+        
+        # Escanear MercadoLibre
+        try:
+            mercadolibre_url = self.mercadolibre.build_url(zone, operation, property_type)
+            logger.info(f"[MercadoLibre] URL: {mercadolibre_url}")
+            
+            html = self.mercadolibre._make_request(mercadolibre_url)
+            if html:
+                properties = self.mercadolibre.parse_properties(html, operation, property_type)
+                all_properties.extend(properties)
+                logger.info(f"[MercadoLibre] Obtenidas {len(properties)} propiedades")
+            else:
+                errors.append("MercadoLibre: No se pudo obtener respuesta")
+        except Exception as e:
+            logger.error(f"[MercadoLibre] Error: {e}")
+            errors.append(f"MercadoLibre: {str(e)}")
         
         # Calcular estadísticas
         stats = self.analyzer.calculate_stats(all_properties, zone, operation, property_type)
