@@ -30,20 +30,23 @@
                 <input 
                     type="text" 
                     id="neighborhood-input" 
-                    placeholder="Buscar barrio (ej: Palermo, Belgrano, Microcentro...)"
+                    placeholder="Ingresa CUALQUIER barrio (ej: Palermo, Belgrano, Microcentro...)"
                     autocomplete="off"
                     list="barrios-list"
                 >
                 <datalist id="barrios-list"></datalist>
                 <button id="analyze-btn" class="analyze-btn">
                     <span class="btn-icon">🔍</span>
-                    <span id="btn-text">Buscar</span>
+                    <span id="btn-text">Buscar / Crear</span>
                 </button>
                 <button id="create-new-btn" class="create-btn hidden" onclick="createNewBarrio()">
                     <span class="btn-icon">✨</span>
                     Crear Nuevo
                 </button>
             </div>
+            <p style="text-align: center; margin-top: 8px; color: #666; font-size: 0.85rem;">
+                💡 Escribe el nombre de cualquier barrio - si no existe, podrás crearlo
+            </p>
         </div>
     </header>
 
@@ -454,12 +457,37 @@
         </div>
     </div>
 
+    <!-- Modal para confirmar creación de barrio -->
+    <div id="create-barrio-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🏙️ Barrio No Encontrado</h3>
+            </div>
+            <div class="modal-body">
+                <p id="modal-barrio-name" class="barrio-name"></p>
+                <p class="modal-message">El barrio que buscas no existe en la base de datos.</p>
+                <p class="modal-question">¿Qué deseas hacer?</p>
+            </div>
+            <div class="modal-actions">
+                <button id="modal-btn-ai" class="modal-btn modal-btn-primary">
+                    🤖 Crear con IA
+                </button>
+                <button id="modal-btn-manual" class="modal-btn modal-btn-secondary">
+                    ✏️ Crear Manualmente
+                </button>
+                <button id="modal-btn-cancel" class="modal-btn modal-btn-cancel">
+                    ❌ Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="dashboard-footer">
         <p>© 2025 Dante Propiedades | CMS de Barrios</p>
         <p class="footer-note">Los datos se almacenan en SQLite y pueden regenerarse con IA</p>
     </footer>
 
-    <script src="analisis-barrio.js?v=20250111-0800"></script>
+    <script src="analisis-barrio.js"></script>
 </body>
 </html>

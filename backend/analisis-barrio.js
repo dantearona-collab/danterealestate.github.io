@@ -865,23 +865,50 @@ const EventHandlers = {
      */
     setupSearchHandlers() {
         const searchInput = document.getElementById('neighborhood-input');
-        if (searchInput) {
-            // El usuario puede escribir cualquier barrio, no está limitado a las sugerencias
-            // El datalist es solo para referencia/sugerencias, no es una lista restrictiva
+        if (!searchInput) return;
+
+        console.log('🔧 Configurando manejadores de búsqueda...');
+
+        // IMPORTANTE: El datalist es SOLO para sugerencias, NO es restrictivo
+        // El usuario puede escribir CUALQUIER texto, incluso si no está en el datalist
+        
+        // Opcional: cargar barrios existentes para mostrar como sugerencias
+        this.loadBarriosToDatalist();
+        
+        // Listener para normalizar el valor después de seleccionar del datalist
+        searchInput.addEventListener('change', (e) => {
+            // Cuando el usuario selecciona del datalist, normalizar el texto
+            const selectedValue = e.target.value;
+            const options = document.querySelectorAll('#barrios-list option');
             
-            // Opcional: cargar barrios existentes para mostrar como sugerencias
-            this.loadBarriosToDatalist();
-            
-            searchInput.addEventListener('input', (e) => {
-                const query = e.target.value.trim();
-                
-                // Limpiar resultado anterior cuando el usuario escribe un nuevo barrio
-                if (query !== AppState.lastQuery) {
-                    AppState.currentBarrio = null;
-                    this.clearFormDisplay();
+            // Buscar si el valor escrito coincide exactamente con una opción
+            let matched = false;
+            options.forEach(opt => {
+                if (opt.value.toLowerCase() === selectedValue.toLowerCase()) {
+                    // Coincide exactamente con una opción del datalist
+                    e.target.value = opt.value; // Usar el valor normalizado
+                    matched = true;
                 }
             });
-        }
+            
+            // Si no coincided con ninguna opción del datalist, leave as is (permite texto libre)
+            if (!matched) {
+                console.log('📝 Usuario escribió un barrio que no está en el datalist:', selectedValue);
+            }
+        });
+        
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            
+            // Limpiar resultado anterior cuando el usuario escribe un nuevo barrio
+            if (query !== AppState.lastQuery) {
+                AppState.currentBarrio = null;
+                this.clearFormDisplay();
+            }
+            
+            // DEBUG: Mostrar que el valor es libre
+            console.log('🔍 Input actual:', query, '| ¿Es texto libre?:', true);
+        });
     },
 
     /**
@@ -1086,12 +1113,17 @@ const EventHandlers = {
             return;
         }
 
+        // Mostrar un indicador visual de que estamos procesando
+        const btnText = document.getElementById('btn-text');
+        if (btnText) btnText.textContent = 'Procesando...';
+        
         // Guardar la última consulta
         AppState.lastQuery = query;
         UIRenderer.showLoading('Buscando barrio...');
 
         try {
             console.log('📡 Intentando obtener barrio del API...');
+            console.log('🌐 URL:', `${API_BASE_URL}/api/barrios/${encodeURIComponent(query)}`);
             
             // Intentar obtener el barrio directamente
             const response = await ApiClient.getBarrio(query);
@@ -1127,40 +1159,36 @@ const EventHandlers = {
             }
         } catch (error) {
             console.log('❌ Error capturado:', error.message);
+            console.log('📋 Tipo de error:', error.name);
             
-            // Si el barrio no existe, ofrecer crearlo
+            // Verificar si el error indica que el barrio no existe (404 Not Found)
             const errorMsg = error.message.toLowerCase();
-            console.log('📋 errorMsg:', errorMsg);
-            
-            // Verificar si el error indica que el barrio no existe
-            const barrioNoEncontrado = 
+            const isNotFound = 
                 errorMsg.includes('404') || 
                 errorMsg.includes('no encontrado') || 
                 errorMsg.includes('not found') ||
-                errorMsg.includes('no existe');
+                errorMsg.includes('no existe') ||
+                error.name === 'TypeError'; // El API puede devolver null en caso de 404
             
-            if (barrioNoEncontrado) {
+            console.log('📋 ¿Barrio no encontrado?:', isNotFound);
+            
+            if (isNotFound) {
                 console.log('📋 El barrio no existe, mostrando opciones de creación...');
-                setTimeout(() => {
-                    const choice = confirm(
-                        `El barrio "${Utils.capitalize(query)}" no existe en la base de datos.\n\n` +
-                        '¿Qué deseas hacer?\n\n' +
-                        '✅ Aceptar: Crear nuevo barrio con IA\n' +
-                        '❌ Cancelar: Crear manualmente (en blanco)'
-                    );
-                    
-                    if (choice) {
-                        this.handleCreateWithAI(query);
-                    } else {
-                        this.handleNewBarrioManual(query);
-                    }
-                }, 100);
+                
+                // Pequeno delay para que se vea el loading
+                await new Promise(r => setTimeout(r, 300));
+                
+                // MOSTRAR MODAL EN LUGAR DE confirm()
+                this.showCreateBarrioModal(query);
             } else {
                 console.error('Error al buscar barrio:', error);
                 Utils.showToast(`Error: ${error.message}`, 'error');
             }
         } finally {
             UIRenderer.hideLoading();
+            // Restaurar texto del botón
+            const btnText = document.getElementById('btn-text');
+            if (btnText) btnText.textContent = 'Buscar / Crear';
         }
     },
 
@@ -1233,6 +1261,68 @@ const EventHandlers = {
         UIRenderer.updateFormState(true);
         
         Utils.showToast(`Modo de creación manual activado para "${nombre}". Complete los campos.`, 'info');
+    },
+
+    /**
+     * Muestra el modal de confirmación para crear un nuevo barrio
+     */
+    showCreateBarrioModal(barrioName) {
+        const modal = document.getElementById('create-barrio-modal');
+        const nameEl = document.getElementById('modal-barrio-name');
+        const btnAI = document.getElementById('modal-btn-ai');
+        const btnManual = document.getElementById('modal-btn-manual');
+        const btnCancel = document.getElementById('modal-btn-cancel');
+        
+        if (!modal || !nameEl || !btnAI || !btnManual || !btnCancel) {
+            console.error('❌ Elementos del modal no encontrados');
+            // Fallback a confirm() si el modal no existe
+            const choice = confirm(
+                `El barrio "${Utils.capitalize(barrioName)}" no existe en la base de datos.\n\n` +
+                '¿Qué deseas hacer?\n\n' +
+                '✅ Aceptar: Crear nuevo barrio con IA\n' +
+                '❌ Cancelar: Crear manualmente (en blanco)'
+            );
+            if (choice) {
+                this.handleCreateWithAI(barrioName);
+            } else {
+                this.handleNewBarrioManual(barrioName);
+            }
+            return;
+        }
+        
+        // Configurar el nombre del barrio
+        nameEl.textContent = Utils.capitalize(barrioName);
+        
+        // Mostrar el modal
+        modal.classList.remove('hidden');
+        
+        // Configurar botones (remover listeners anteriores para evitar duplicados)
+        const newBtnAI = btnAI.cloneNode(true);
+        btnAI.parentNode.replaceChild(newBtnAI, btnAI);
+        
+        const newBtnManual = btnManual.cloneNode(true);
+        btnManual.parentNode.replaceChild(newBtnManual, btnManual);
+        
+        const newBtnCancel = btnCancel.cloneNode(true);
+        btnCancel.parentNode.replaceChild(newBtnCancel, btnCancel);
+        
+        // Agregar event listeners
+        newBtnAI.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            this.handleCreateWithAI(barrioName);
+        });
+        
+        newBtnManual.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            this.handleNewBarrioManual(barrioName);
+        });
+        
+        newBtnCancel.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            Utils.showToast('Operación cancelada', 'info');
+        });
+        
+        console.log('✅ Modal de creación mostrado para:', barrioName);
     },
 
     /**
@@ -1838,6 +1928,55 @@ function populateCategoryFields(categoryKey, categoryData) {
 }
 
 // ============================================
+// MANEJO DE PARÁMETROS DE URL
+// ============================================
+
+/**
+ * Lee los parámetros de la URL y los procesa
+ * Se usa cuando se llega a esta página desde estadisticas.html
+ */
+function handleUrlParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const barrio = urlParams.get('barrio');
+    const crear = urlParams.get('crear'); // 'ai' o 'manual'
+    
+    if (barrio) {
+        console.log('📥 URL params recibidos:', { barrio, crear });
+        
+        // Pre-fill el campo de búsqueda
+        const searchInput = document.getElementById('neighborhood-input');
+        if (searchInput) {
+            searchInput.value = decodeURIComponent(barrio);
+        }
+        
+        // Si hay un parámetro de creación, ejecutar la acción correspondiente
+        if (crear === 'ai') {
+            // Ejecutar creación con IA después de un pequeño delay para que la UI esté lista
+            setTimeout(() => {
+                console.log('🤖 Auto-iniciando creación con IA para:', barrio);
+                EventHandlers.handleCreateWithAI(decodeURIComponent(barrio));
+            }, 500);
+        } else if (crear === 'manual') {
+            // Ejecutar creación manual después de un pequeño delay
+            setTimeout(() => {
+                console.log('✏️ Auto-iniciando creación manual para:', barrio);
+                EventHandlers.handleNewBarrioManual(decodeURIComponent(barrio));
+            }, 500);
+        } else {
+            // Si solo viene el barrio pero no la acción, hacer búsqueda normal
+            setTimeout(() => {
+                console.log('🔍 Auto-ejecutando búsqueda para:', barrio);
+                EventHandlers.handleAnalyze();
+            }, 500);
+        }
+        
+        // Limpiar los parámetros de la URL para una experiencia más limpia
+        // (opcional - mantener esto comentando si se quiere que el usuario pueda recargar)
+        // window.history.replaceState({}, document.title, window.location.pathname);
+    }
+}
+
+// ============================================
 // INICIALIZACIÓN DE LA APLICACIÓN
 // ============================================
 
@@ -1876,6 +2015,9 @@ async function initApp() {
     
     // Cargar metadatos de campos para formularios dinámicos
     await loadMetadata();
+    
+    // ✅ PROCESAR PARÁMETROS DE URL (después de que la UI esté lista)
+    handleUrlParams();
     
     console.log('✅ CMS de Barrios inicializado correctamente');
 }
