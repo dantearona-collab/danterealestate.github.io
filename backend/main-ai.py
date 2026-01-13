@@ -83,8 +83,8 @@ def init_barrios_db():
 from logic.barrio_data import get_gastronomy_info, get_financial_info, GASTRONOMY_DATA, FINANCIAL_DATA, get_location_specific_info, LOCATION_SPECIFIC_DATA
 from logic.environ_database import init_environ_analysis_db, get_environ_analysis, save_environ_analysis, is_environ_analysis_expired, log_environ_analysis_request
 
-# Importar API de barrios (para montarla en el servidor principal)
-from api_barrios import barrios_app
+# ⚠️ TEMPORALMENTE COMENTADO - causa conflictos de rutas
+# from api_barrios import barrios_app
 
 # ============================================
 # FUNCIÓN DE MIGRACIÓN DE DATOS ESTÁTICOS
@@ -411,15 +411,6 @@ def _construir_data_cms(nombre: str, gastro_data: dict, financial_data: dict, lo
 # Inicializar base de datos de barrios
 init_barrios_db()
 
-# Importar módulo de scraping de mercado
-try:
-    from logic.scraper import ScrapingManager, MarketAnalyzer
-    SCRAPER_AVAILABLE = True
-    print("✅ Módulo de scraping disponible")
-except ImportError as e:
-    SCRAPER_AVAILABLE = False
-    print(f"⚠️ Módulo de scraping no disponible: {e}")
-
 # ✅ INICIALIZACIÓN Y CONFIGURACIÓN
 verificar_y_reparar_bd()
 CACHE_DURATION = 300  # 5 minutos para cache
@@ -585,9 +576,9 @@ _imgs_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'img
 if os.path.exists(_imgs_path):
     app.mount("/imgs", StaticFiles(directory=_imgs_path), name="images")
 
-# Montar API de barrios (sub-app desde api_barrios.py)
-app.mount("/api/barrios", barrios_app)
-print("✅ API de barrios montada en /api/barrios")
+# ⚠️ DESHABILITADO TEMPORALMENTE - causa conflictos con endpoints locales
+# app.mount("/api/barrios", barrios_app)
+# print("✅ API de barrios montada en /api/barrios")
 
 # ============================================
 # NOTA: El endpoint catch-all para archivos estáticos fue deshabilitado
@@ -944,6 +935,46 @@ def generar_comparacion_propiedad(propiedad: Dict, mercado: Dict) -> Dict[str, A
 def root():
     return FileResponse("index.html")
 
+# ✅ ENDPOINT DE PRUEBA - para diagnóstico (AISLADO)
+@app.get("/debug/barrios")
+def debug_listar_barrios():
+    """Lista todos los barrios - endpoint de prueba"""
+    conn = get_barrios_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT nombre FROM barrios_data ORDER BY nombre')
+    rows = cursor.fetchall()
+    conn.close()
+    return {
+        "success": True,
+        "total": len(rows),
+        "barrios": [r['nombre'] for r in rows]
+    }
+
+@app.get("/debug/barrios/{nombre}")
+def debug_obtener_barrio(nombre: str):
+    """Obtiene un barrio específico - endpoint de prueba AISLADO"""
+    conn = get_barrios_db_connection()
+    cursor = conn.cursor()
+    
+    # Búsqueda simple y directa
+    cursor.execute('SELECT nombre, data FROM barrios_data WHERE LOWER(nombre) = LOWER(?)', (nombre.lower(),))
+    row = cursor.fetchone()
+    conn.close()
+    
+    if row:
+        return {
+            "success": True,
+            "encontrado": True,
+            "nombre": row['nombre']
+        }
+    else:
+        return {
+            "success": False,
+            "encontrado": False,
+            "buscado": nombre,
+            "message": "Barrio no encontrado"
+        }
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     start_time = time.time()
@@ -1269,170 +1300,6 @@ def property_comparison(request: PropertyComparisonRequest):
         }
     else:
         raise HTTPException(status_code=500, detail=resultado.get('error', 'Error en comparación'))
-
-
-# ========================================
-# ENDPOINTS DE SCRAPING DE MERCADO
-# ========================================
-
-@app.get("/market/scraping")
-def scrape_market_data(
-    zone: str = Query(..., description="Barrio o zona a analizar (ej: palermo, microcentro)"),
-    operation: str = Query("venta", description="Tipo de operación: venta o alquiler"),
-    property_type: str = Query("departamento", description="Tipo de propiedad")
-):
-    """
-    Obtiene datos del mercado inmobiliario mediante scraping de portales (Zonaprop, Argenprop)
-    
-    Uso:
-    - GET /market/scraping?zone=palermo
-    - GET /market/scraping?zone=belgrano&operation=venta&property_type=casa
-    
-    Este endpoint extrae propiedades reales de portales inmobiliarios argentinos
-    y calcula estadísticas del mercado.
-    """
-    if not SCRAPER_AVAILABLE:
-        raise HTTPException(
-            status_code=503, 
-            detail="Módulo de scraping no disponible. Verificar instalación de dependencias."
-        )
-    
-    print(f"📊 Solicitud de scraping: zone={zone}, op={operation}, type={property_type}")
-    
-    try:
-        scraping_manager = ScrapingManager()
-        result = scraping_manager.scrape_market(zone, operation, property_type)
-        
-        if result.get('sample_size', 0) == 0:
-            return {
-                "success": False,
-                "message": "No se pudieron obtener datos del mercado",
-                "zone": zone,
-                "errors": result.get('errors', [])
-            }
-        
-        return {
-            "success": True,
-            "message": f"Analizadas {result['sample_size']} propiedades de {result.get('source_breakdown', {})}",
-            "zone": zone,
-            "data": result
-        }
-        
-    except Exception as e:
-        print(f"❌ Error en scraping: {e}")
-        raise HTTPException(status_code=500, detail=f"Error en scraping: {str(e)}")
-
-
-@app.get("/market/stats/{zone}")
-def get_market_stats(
-    zone: str,
-    operation: str = "venta",
-    property_type: str = "departamento"
-):
-    """
-    Obtiene estadísticas resumidas del mercado para una zona
-    
-    Uso:
-    - GET /market/stats/palermo
-    - GET /market/stats/belgrano?operation=alquiler&property_type=casa
-    """
-    if not SCRAPER_AVAILABLE:
-        raise HTTPException(status_code=503, detail="Módulo de scraping no disponible")
-    
-    try:
-        scraping_manager = ScrapingManager()
-        result = scraping_manager.scrape_market(zone, operation, property_type)
-        
-        # Resumen condensado
-        return {
-            "zone": zone,
-            "sample_size": result['sample_size'],
-            "statistics": {
-                "average_price_m2": result['statistics']['average_price_per_m2'],
-                "median_price_m2": result['statistics']['median_price_per_m2'],
-                "min_price_m2": result['statistics']['min_price_per_m2'],
-                "max_price_m2": result['statistics']['max_price_per_m2'],
-                "price_range_total": result['statistics']['price_range_total']
-            },
-            "sources": result['source_breakdown'],
-            "currencies": result['currency_distribution'],
-            "analysis_timestamp": result.get('analysis_timestamp', '')
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.get("/market/comparative/{zone}")
-def get_comparative_analysis(zone: str):
-    """
-    Obtiene análisis comparativo completo del mercado para una zona
-    
-    Combina scraping de portales con análisis de IA
-    """
-    if not SCRAPER_AVAILABLE:
-        raise HTTPException(status_code=503, detail="Módulo de scraping no disponible")
-    
-    try:
-        scraping_manager = ScrapingManager()
-        result = scraping_manager.scrape_market(zone, "venta", "departamento")
-        
-        if result.get('sample_size', 0) == 0:
-            return {
-                "success": False,
-                "message": "No hay datos disponibles para esta zona"
-            }
-        
-        # Generar análisis con IA si hay suficientes datos
-        analysis = {}
-        if result['sample_size'] >= 5:
-            try:
-                # Preparar datos para IA
-                market_summary = f"""
-                Zona: {zone}
-                Muestra: {result['sample_size']} propiedades
-                Precio m² promedio: {result['statistics']['average_price_per_m2']}
-                Precio m² mediana: {result['statistics']['median_price_per_m2']}
-                Rango de precios: {result['statistics']['price_range_total']}
-                Fuentes: {result['source_breakdown']}
-                """
-                
-                prompt = f"""
-                Eres un analista inmobiliario argentino. Genera un breve análisis del mercado basado en estos datos:
-
-                {market_summary}
-
-                Tu análisis debe incluir:
-                1. Breve resumen de la situación del mercado
-                2. Una observación sobre el precio por m²
-                3. Recomendación general para compradores
-
-                Responde en formato JSON con keys: summary, price_obs, recommendation
-                """
-                
-                ai_response = call_gemini_with_rotation(prompt)
-                
-                # Intentar parsear respuesta
-                try:
-                    import re
-                    json_match = re.search(r'\{.*\}', ai_response, re.DOTALL)
-                    if json_match:
-                        analysis = json.loads(json_match.group())
-                except:
-                    analysis = {"raw_analysis": ai_response[:500]}
-                    
-            except Exception as ai_error:
-                print(f"⚠️ Error generando análisis IA: {ai_error}")
-        
-        return {
-            "success": True,
-            "zone": zone,
-            "market_data": result,
-            "ai_analysis": analysis
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ✅ RUTAS PARA ANALISIS DE BARRIOS
@@ -2207,11 +2074,12 @@ def obtener_barrio(nombre: str):
     conn = get_barrios_db_connection()
     cursor = conn.cursor()
     
+    # Usar LOWER() en SQL para búsqueda case-insensitive
     cursor.execute('''
         SELECT nombre, data, actualizado_por, fecha_actualizacion 
         FROM barrios_data 
-        WHERE nombre = ?
-    ''', (nombre.lower().strip(),))
+        WHERE LOWER(nombre) = LOWER(?)
+    ''', (nombre.strip(),))
     
     row = cursor.fetchone()
     conn.close()
@@ -2370,8 +2238,8 @@ def crear_barrio(request: BarrioCreateRequest):
     conn = get_barrios_db_connection()
     cursor = conn.cursor()
     
-    # Verificar si ya existe
-    cursor.execute('SELECT nombre FROM barrios_data WHERE nombre = ?', (nombre,))
+    # Verificar si ya existe (búsqueda case-insensitive)
+    cursor.execute('SELECT nombre FROM barrios_data WHERE LOWER(nombre) = LOWER(?)', (nombre,))
     if cursor.fetchone():
         conn.close()
         raise HTTPException(status_code=400, detail=f"El barrio '{nombre_display}' ya existe")
@@ -2433,8 +2301,8 @@ def actualizar_barrio(nombre: str, request: BarrioUpdateRequest):
     conn = get_barrios_db_connection()
     cursor = conn.cursor()
     
-    # Verificar que existe
-    cursor.execute('SELECT nombre FROM barrios_data WHERE nombre = ?', (nombre,))
+    # Verificar que existe (búsqueda case-insensitive)
+    cursor.execute('SELECT nombre FROM barrios_data WHERE LOWER(nombre) = LOWER(?)', (nombre,))
     if not cursor.fetchone():
         conn.close()
         raise HTTPException(status_code=404, detail=f"Barrio no encontrado")
@@ -2471,8 +2339,8 @@ def regenerar_barrio_ai(nombre: str):
     conn = get_barrios_db_connection()
     cursor = conn.cursor()
     
-    # Verificar que existe
-    cursor.execute('SELECT nombre FROM barrios_data WHERE nombre = ?', (nombre_db,))
+    # Verificar que existe (búsqueda case-insensitive)
+    cursor.execute('SELECT nombre FROM barrios_data WHERE LOWER(nombre) = LOWER(?)', (nombre_db,))
     if not cursor.fetchone():
         conn.close()
         raise HTTPException(status_code=404, detail=f"Barrio no encontrado")
@@ -2517,7 +2385,7 @@ def eliminar_barrio(nombre: str):
     conn = get_barrios_db_connection()
     cursor = conn.cursor()
     
-    cursor.execute('DELETE FROM barrios_data WHERE nombre = ?', (nombre,))
+    cursor.execute('DELETE FROM barrios_data WHERE LOWER(nombre) = LOWER(?)', (nombre,))
     deleted = cursor.rowcount
     conn.commit()
     conn.close()
@@ -2540,7 +2408,7 @@ def verificar_barrio_existe(nombre: str):
     conn = get_barrios_db_connection()
     cursor = conn.cursor()
     
-    cursor.execute('SELECT nombre, fecha_actualizacion FROM barrios_data WHERE nombre = ?', (nombre,))
+    cursor.execute('SELECT nombre, fecha_actualizacion FROM barrios_data WHERE LOWER(nombre) = LOWER(?)', (nombre,))
     row = cursor.fetchone()
     conn.close()
     
@@ -2557,10 +2425,153 @@ def verificar_barrio_existe(nombre: str):
         }
 
 
+# ========================================
+# ENDPOINT PARA EJECUTAR SCRAPER
+# ========================================
+
+@app.get("/api/market/run-scrape")
+def run_scraper_endpoint(
+    zona: str = Query(..., description="Zona o barrio a analizar"),
+    operacion: str = Query("venta", description="Tipo de operación"),
+    tipo: str = Query("departamento", description="Tipo de propiedad")
+):
+    """
+    Endpoint para ejecutar el script de scraping y retornar los resultados.
+    
+    Este endpoint:
+    1. Ejecuta el script scraper.py con los parámetros indicados
+    2. Espera a que genere el archivo scraping.json
+    3. Lee y retorna los datos del scraping
+    
+    Uso:
+    - GET /api/market/run-scrape?zona=palermo
+    - GET /api/market/run-scrape?zona=belgrano&operacion=venta&tipo=casa
+    """
+    import subprocess
+    import sys
+    import os
+    import json
+    import time
+    from threading import Thread
+    
+    print(f"📊 Solicitud de scraping: zona={zona}, op={operacion}, tipo={tipo}")
+    
+    # Ruta del script scraper y del archivo JSON de salida
+    scraper_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scraper.py")
+    output_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scraping.json")
+    
+    # Verificar que el script existe
+    if not os.path.exists(scraper_script):
+        raise HTTPException(status_code=500, detail="Script de scraping no encontrado")
+    
+    try:
+        # Ejecutar el script de scraping en un hilo separado para no bloquear
+        def execute_scraper():
+            try:
+                result = subprocess.run(
+                    [sys.executable, scraper_script, "--zona", zona, "--operacion", operacion, "--tipo", tipo, "--output", output_file],
+                    capture_output=True,
+                    text=True,
+                    timeout=180  # 3 minutos de timeout
+                )
+                if result.returncode != 0:
+                    print(f"❌ Error ejecutando scraper: {result.stderr}")
+            except subprocess.TimeoutExpired:
+                print("⏰ Timeout ejecutando scraper")
+            except Exception as e:
+                print(f"❌ Excepción ejecutando scraper: {e}")
+        
+        # Iniciar el scraper en un hilo separado
+        scraper_thread = Thread(target=execute_scraper)
+        scraper_thread.start()
+        
+        # Esperar un poco para que el scraper starting
+        time.sleep(2)
+        
+        # Mientras el scraper corre, ir leyendo el archivo si existe
+        max_wait = 120  # Esperar hasta 2 minutos
+        waited = 0
+        last_data = None
+        
+        while waited < max_wait:
+            if os.path.exists(output_file):
+                try:
+                    with open(output_file, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                        # Verificar que los datos sean recientes y correspondan a la zona
+                        if data.get('zone', '').lower() == zona.lower():
+                            last_data = data
+                            # Si tiene datos válidos, retornar
+                            if data.get('success') and data.get('data', {}).get('sample_size', 0) > 0:
+                                break
+                except json.JSONDecodeError:
+                    pass  # Archivo aún escribiéndose
+            
+            time.sleep(2)
+            waited += 2
+            
+            # Verificar si el hilo terminó
+            if not scraper_thread.is_alive():
+                # El scraper terminó, hacer una última lectura
+                if os.path.exists(output_file):
+                    try:
+                        with open(output_file, 'r', encoding='utf-8') as f:
+                            data = json.load(f)
+                            last_data = data
+                            break
+                    except:
+                        pass
+                break
+        
+        if last_data:
+            return last_data
+        else:
+            # Si no hay datos, retornar estado de espera
+            return {
+                "success": False,
+                "message": "Scraping en progreso. Por favor espera unos segundos y actualiza la página.",
+                "zone": zona,
+                "waiting": True,
+                "suggestion": "Ejecuta: python backend/scraper.py --zona " + zona
+            }
+            
+    except Exception as e:
+        print(f"❌ Error en endpoint de scraping: {e}")
+        raise HTTPException(status_code=500, detail=f"Error ejecutando scraping: {str(e)}")
+
+
+# ========================================
+# ENDPOINT PARA LEER SCRAPING.JSON
+# ========================================
+
+@app.get("/api/market/scraping-data")
+def get_scraping_data():
+    """
+    Endpoint para leer los datos del archivo scraping.json generado por el scraper.
+    
+    Uso:
+    - GET /api/market/scraping-data
+    """
+    scraping_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scraping.json")
+    
+    if not os.path.exists(scraping_file):
+        return {
+            "success": False,
+            "message": "No hay datos de scraping disponibles. Ejecuta primero el scraper."
+        }
+    
+    try:
+        with open(scraping_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error leyendo datos de scraping: {str(e)}")
+
+
 # ✅ INICIO
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.environ.get("PORT", 8000))
+    port = int(os.environ.get("PORT", 8001))
     uvicorn.run("main-ai:app", host="0.0.0.0", port=port, reload=False)  # reload=False en producción
 
 
