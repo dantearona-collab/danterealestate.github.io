@@ -396,13 +396,39 @@
         const SERVER_URL = 'https://administrador-63nc.onrender.com';
 
         // Función simple para verificar servidor
-        function verificarServidor() {
+        async function verificarServidor() {
             const statusElement = document.getElementById('serverStatus');
-            if (statusElement) {
-                statusElement.textContent = '📱 Modo Local';
-                statusElement.className = 'server-status server-local';
+            if (!statusElement) return;
+
+            statusElement.textContent = '🔄 Verificando...';
+            statusElement.className = 'server-status';
+
+            try {
+                // Usamos el endpoint de health check del backend
+                const response = await fetch(`${SERVER_URL}/health`);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.status === 'healthy') {
+                        statusElement.textContent = '✅ Conectado';
+                        statusElement.className = 'server-status server-connected';
+                        console.log('✅ Servidor conectado:', data);
+                        return true;
+                    }
+                }
+                
+                // Si la respuesta no es OK o el JSON no es 'healthy'
+                statusElement.textContent = '❌ Desconectado';
+                statusElement.className = 'server-status server-disconnected';
+                console.error('El servidor no respondió con un estado saludable.');
+                return false;
+
+            } catch (error) {
+                statusElement.textContent = '❌ Desconectado';
+                statusElement.className = 'server-status server-disconnected';
+                console.error('Error de conexión con el servidor:', error);
+                return false;
             }
-            return false;
         }
 
 
@@ -581,7 +607,7 @@
                     successMessage.style.display = 'none';
                     submitBtn.textContent = originalBtnText;
                     submitBtn.disabled = false;
-                    document.getElementById('serverStatus').textContent = '📱 Modo Local';
+                    verificarServidor();
                     console.log('🔄 Formulario reiniciado');
                 }, 3000);
             }, 1500);
