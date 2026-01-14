@@ -454,31 +454,26 @@
         }
 
         // 📤 ENVIAR AL BACKEND RENDER (VERSIÓN ACTUALIZADA)
+        // 📤 ENVIAR AL BACKEND RENDER (VERSIÓN CORREGIDA CON TOKEN)
+        // 📤 ENVIAR AL BACKEND RENDER (VERSIÓN CORREGIDA Y FUNCIONAL)
         async function enviarAlBackend(datos) {
             try {
-                console.log('📤 Enviando al backend centralizado...');
+                console.log('📤 Enviando al backend...');
                 
-                // URL del endpoint de tu backend en Render
-                const BACKEND_URL = 'https://administrador-63nc.onrender.com/admin/add';
+                // URL EXACTA como la usa tu panel admin - CON TOKEN EN URL
+                const BACKEND_URL = 'https://administrador-63nc.onrender.com/admin/add?token=2205';
                 
-                // Datos que enviaremos - IMPORTANTE: Usar METADATA para campos adicionales
+                // Datos EXACTOS como los acepta tu backend - SOLO 4 CAMPOS
                 const datosParaEnviar = {
                     nombre: datos.nombre,
                     email: datos.email,
                     telefono: datos.telefono || '',
-                    mensaje: datos.mensaje || '',
-                    // Todos los campos adicionales van en metadata como JSON string
-                    metadata: JSON.stringify({
-                        interes: datos.interes || '',
-                        presupuesto: datos.presupuesto || '',
-                        fecha_local: datos.fecha || new Date().toLocaleDateString('es-AR'),
-                        hora_local: datos.hora || new Date().toLocaleTimeString('es-AR'),
-                        source: 'formulario_web',
-                        timestamp: new Date().toISOString()
-                    })
+                    mensaje: datos.mensaje || ''
+                    // IMPORTANTE: No incluir otros campos como 'interes', 'presupuesto', etc.
+                    // Tu backend solo acepta estos 4 campos específicos
                 };
                 
-                console.log('📤 Datos a enviar:', datosParaEnviar);
+                console.log('📤 Enviando datos simplificados:', datosParaEnviar);
                 
                 const response = await fetch(BACKEND_URL, {
                     method: 'POST',
@@ -489,36 +484,30 @@
                     body: JSON.stringify(datosParaEnviar)
                 });
                 
-                console.log('📤 Respuesta del servidor:', response.status);
+                console.log('📤 Respuesta status:', response.status);
                 
                 if (response.ok) {
                     const result = await response.json();
-                    console.log('✅ Guardado en base de datos central:', result);
+                    console.log('✅ Guardado en backend exitoso:', result);
                     return { 
-                        success: true, 
-                        message: 'Datos guardados en sistema central'
+                        success: true,
+                        data: result
                     };
                 } else {
-                    // Intentar leer el error
-                    try {
-                        const errorData = await response.json();
-                        console.error('❌ Error del servidor:', errorData);
-                        throw new Error(errorData.message || `Error ${response.status}`);
-                    } catch {
-                        throw new Error(`Error HTTP ${response.status}`);
-                    }
+                    const errorText = await response.text();
+                    console.error('❌ Error backend:', errorText);
+                    throw new Error(`Error ${response.status}: ${errorText.substring(0, 100)}`);
                 }
                 
             } catch (error) {
-                console.error('❌ Error enviando al backend central:', error);
+                console.error('❌ Error de conexión:', error);
                 return { 
                     success: false, 
                     error: error.message,
-                    fallback: true // Indica que necesitamos respaldo
+                    fallback: true // Indica que debemos usar localStorage
                 };
             }
         }
-
         // Función para guardar en localStorage con respaldo
         function guardarEnLocalStorage(datos) {
             try {
@@ -682,22 +671,23 @@
                 }
 
                 // ✅ CREAR Y ENVIAR WHATSAPP
+                // ✅ CREAR Y ENVIAR WHATSAPP (INCLUYENDO TODOS LOS DATOS)
                 const whatsappMessage = `*NUEVA CONSULTA - DANTE PROPIEDADES*
 
-👤 *Nombre:* ${nombre}
-📧 *Email:* ${email}
-📱 *Teléfono:* ${telefono || 'No especificado'}
-🎯 *Interés:* ${interes || 'Consulta general'}
-💰 *Presupuesto:* ${presupuesto || 'No especificado'}
+                👤 *Nombre:* ${nombre}
+                📧 *Email:* ${email}
+                📱 *Teléfono:* ${telefono || 'No especificado'}
+                🎯 *Interés:* ${interes || 'Consulta general'}
+                💰 *Presupuesto:* ${presupuesto || 'No especificado'}
 
-💬 *Mensaje:*
-${mensaje}
+                💬 *Mensaje:*
+                ${mensaje}
 
----
-📅 *Fecha:* ${new Date().toLocaleDateString('es-AR')}
-⏰ *Hora:* ${new Date().toLocaleTimeString('es-AR')}
-🌐 *Enviado desde:* Formulario Web Dante Propiedades
-${!backendResult.success ? '📱 *Nota:* Guardado localmente (servidor temporalmente no disponible)' : ''}`;
+                ---
+                📅 *Fecha:* ${new Date().toLocaleDateString('es-AR')}
+                ⏰ *Hora:* ${new Date().toLocaleTimeString('es-AR')}
+                🌐 *Enviado desde:* Formulario Web Dante Propiedades
+                ${backendResult.success ? '✅ *Estado:* Guardado en sistema central' : '📱 *Estado:* Guardado localmente (servidor temporalmente no disponible)'}`;
 
                 const whatsappURL = `https://wa.me/5491125368595?text=${encodeURIComponent(whatsappMessage)}`;
 
@@ -779,22 +769,45 @@ ${!backendResult.success ? '📱 *Nota:* Guardado localmente (servidor temporalm
             document.body.appendChild(adminLink);
 
             // Función para verificar endpoints (debug)
+            // Función para verificar endpoints del backend (debug mejorado)
             async function verificarEndpoints() {
-                console.log('🔍 Verificando endpoints del backend...');
+                console.log('🔍 Verificando endpoints REALES del backend...');
                 
+                // Endpoints REALES que usa tu panel admin
                 const endpoints = [
-                    '/admin/add',
-                    '/health',
-                    '/admin/data'
+                    { path: '/health', method: 'GET', needsToken: false },
+                    { path: '/admin/add', method: 'POST', needsToken: true },
+                    { path: '/admin/data', method: 'GET', needsToken: true }
                 ];
                 
                 for (const endpoint of endpoints) {
                     try {
-                        console.log(`🔄 Probando: GET ${SERVER_URL}${endpoint}`);
-                        const response = await fetch(`${SERVER_URL}${endpoint}`, {
-                            method: 'GET'
-                        });
-                        console.log(`   Status: ${response.status} - ${response.statusText}`);
+                        console.log(`🔄 Probando: ${endpoint.method} ${SERVER_URL}${endpoint.path}`);
+                        
+                        const options = {
+                            method: endpoint.method,
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        };
+                        
+                        // Si necesita token, agregarlo como hace tu panel admin
+                        if (endpoint.needsToken) {
+                            const url = `${SERVER_URL}${endpoint.path}?token=2205`;
+                            const response = await fetch(url, options);
+                            console.log(`   Status: ${response.status} - ${response.statusText}`);
+                            
+                            if (response.ok) {
+                                console.log(`   ✅ Endpoint ${endpoint.path} FUNCIONA con token`);
+                            }
+                        } else {
+                            const response = await fetch(`${SERVER_URL}${endpoint.path}`, options);
+                            console.log(`   Status: ${response.status} - ${response.statusText}`);
+                            
+                            if (response.ok) {
+                                console.log(`   ✅ Endpoint ${endpoint.path} FUNCIONA`);
+                            }
+                        }
                     } catch (error) {
                         console.log(`   ❌ Error: ${error.message}`);
                     }
