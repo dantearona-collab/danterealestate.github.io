@@ -456,84 +456,65 @@
         // Función mejorada para enviar datos al backend administrador
         async function enviarAlBackend(datos) {
             try {
-                console.log('📤 Intentando conectar con el backend...');
-
-                const datosBackend = {
-                    nombre: datos.nombre,
-                    email: datos.email,
-                    telefono: datos.telefono || '',
-                    interes: datos.interes || '',
-                    presupuesto: datos.presupuesto || '',
-                    mensaje: datos.mensaje || '',
-                    fecha: datos.fecha || new Date().toLocaleDateString('es-AR'),
-                    hora: datos.hora || new Date().toLocaleTimeString('es-AR')
-                };
-
-                console.log('📤 Datos preparados:', datosBackend);
-
-                // Intentar con diferentes endpoints y métodos
-                const endpoints = [
-                    '/api/guardar-contacto',
-                    '/api/contacto',
-                    '/api/save-contact',
-                    '/contact/save'
-                ];
-
-                let lastError = null;
-
-                for (const endpoint of endpoints) {
-                    try {
-                        console.log(`🔄 Probando endpoint: ${endpoint}`);
-                        
-                        const response = await fetch(`${SERVER_URL}${endpoint}`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json'
-                            },
-                            body: JSON.stringify(datosBackend),
-                            // Timeout después de 5 segundos
-                            signal: AbortSignal.timeout(5000)
-                        });
-
-                        console.log(`📤 Respuesta de ${endpoint}:`, response.status);
-
-                        if (response.ok) {
-                            try {
-                                const result = await response.json();
-                                console.log(`✅ Éxito en ${endpoint}:`, result);
-                                return { success: true, endpoint: endpoint, data: result };
-                            } catch (jsonError) {
-                                console.log(`✅ Éxito en ${endpoint} (sin JSON)`);
-                                return { success: true, endpoint: endpoint };
-                            }
-                        } else if (response.status !== 404 && response.status !== 405) {
-                            // Si no es 404/405, guardar el error pero continuar
-                            lastError = `Error ${response.status} en ${endpoint}`;
-                        }
-                    } catch (error) {
-                        console.log(`❌ Error en ${endpoint}:`, error.message);
-                        if (!lastError) lastError = error.message;
-                    }
+                console.log('📤 Enviando al backend de Render...');
+                
+                // Usar el mismo endpoint que tu panel admin
+                const response = await fetch('https://administrador-63nc.onrender.com/admin/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nombre: datos.nombre,
+                        email: datos.email,
+                        telefono: datos.telefono || '',
+                        mensaje: datos.mensaje || '',
+                        // Agregar los campos adicionales si tu API los acepta
+                        interes: datos.interes || '',
+                        presupuesto: datos.presupuesto || ''
+                    })
+                });
+                
+                if (response.ok) {
+                    console.log('✅ Guardado en base de datos Render');
+                    return { success: true };
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Error del servidor');
                 }
-
-                // Si llegamos aquí, todos los endpoints fallaron
-                console.error('❌ Todos los endpoints fallaron');
-                return { 
-                    success: false, 
-                    error: lastError || 'No se pudo conectar con ningún endpoint',
-                    fallback: true 
-                };
-
+                
             } catch (error) {
-                console.error('❌ Error general en enviarAlBackend:', error);
-                return { 
-                    success: false, 
-                    error: error.message,
-                    fallback: true 
-                };
+                console.error('❌ Error enviando a Render:', error);
+                return { success: false, error: error.message };
             }
         }
+
+        
+        function mostrarDatosGuardados() {
+            console.log('📊 ===== DATOS GUARDADOS EN LOCALSTORAGE =====');
+            
+            const consultas = JSON.parse(localStorage.getItem('consultas_dante_propiedades') || '[]');
+            console.log(`Total de consultas: ${consultas.length}`);
+            
+            if (consultas.length > 0) {
+                console.log('Últimas 3 consultas:');
+                consultas.slice(-3).forEach((consulta, index) => {
+                    console.log(`  ${index + 1}. ${consulta.nombre} - ${consulta.email} - ${consulta.fecha}`);
+                });
+            }
+            
+            // También verifica el backup
+            const backup = JSON.parse(localStorage.getItem('backup_consultas_dante') || '[]');
+            console.log(`Backup: ${backup.length} registros`);
+            
+            console.log('==========================================');
+        }
+
+        // Llama a esta función después de enviar el formulario
+
+
+
+
 
         // Función para guardar en localStorage con respaldo
         function guardarEnLocalStorage(datos) {
@@ -804,6 +785,38 @@ ${(!backendResult || !backendResult.success) ? '📱 *Nota:* Guardado localmente
                 document.body.appendChild(adminLink);
             }
         });
+
+
+        // Función para verificar los endpoints disponibles
+        async function verificarEndpoints() {
+            console.log('🔍 Verificando endpoints del backend...');
+            
+            const endpoints = [
+                '/api/guardar-contacto',
+                '/api/contacto', 
+                '/contact',
+                '/guardar',
+                '/save'
+            ];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    console.log(`🔄 Probando: GET ${SERVER_URL}${endpoint}`);
+                    const response = await fetch(`${SERVER_URL}${endpoint}`, {
+                        method: 'GET'
+                    });
+                    console.log(`   Status: ${response.status} - ${response.statusText}`);
+                } catch (error) {
+                    console.log(`   ❌ Error: ${error.message}`);
+                }
+            }
+        }
+
+        // Llama a esta función al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(verificarEndpoints, 2000);
+        });
+
 
         // Verificar servidor periódicamente cada 2 minutos
         setInterval(verificarServidor, 120000);
