@@ -242,6 +242,15 @@
             display: none;
         }
 
+        .warning-message {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
         .server-status {
             position: fixed;
             top: 20px;
@@ -251,20 +260,22 @@
             font-size: 12px;
             font-weight: 600;
             z-index: 1001;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .server-connected {
-            background: #d4edda;
+            background: rgba(212, 237, 218, 0.9);
             color: #155724;
         }
 
         .server-disconnected {
-            background: #f8d7da;
+            background: rgba(248, 215, 218, 0.9);
             color: #721c24;
         }
 
         .server-local {
-            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            background: linear-gradient(135deg, rgba(106, 17, 203, 0.9), rgba(37, 117, 252, 0.9));
             color: white;
         }
 
@@ -278,6 +289,13 @@
                 height: 50px;
                 font-size: 25px;
             }
+            
+            .server-status {
+                top: 10px;
+                right: 10px;
+                font-size: 10px;
+                padding: 6px 12px;
+            }
         }
     </style>
 </head>
@@ -285,7 +303,7 @@
 <body>
     <!-- Indicador de estado del servidor -->
     <div class="server-status server-local" id="serverStatus">
-        📱 Modo Local
+        🔄 Verificando...
     </div>
 
     <div class="header">
@@ -309,6 +327,10 @@
 
             <div class="success-message" id="successMessage">
                 ✅ ¡Consulta enviada con éxito! Los datos fueron guardados en tu dispositivo.
+            </div>
+
+            <div class="warning-message" id="warningMessage">
+                ⚠️ ¡Consulta guardada localmente! (Servidor temporalmente no disponible)
             </div>
 
             <div class="error-message" id="errorMessage">
@@ -431,11 +453,10 @@
             }
         }
 
-
-        // Función para enviar datos al backend administrador
+        // Función mejorada para enviar datos al backend administrador
         async function enviarAlBackend(datos) {
             try {
-                console.log('📤 Enviando al backend administrador...');
+                console.log('📤 Intentando conectar con el backend...');
 
                 const datosBackend = {
                     nombre: datos.nombre,
@@ -443,51 +464,126 @@
                     telefono: datos.telefono || '',
                     interes: datos.interes || '',
                     presupuesto: datos.presupuesto || '',
-                    mensaje: datos.mensaje || ''
+                    mensaje: datos.mensaje || '',
+                    fecha: datos.fecha || new Date().toLocaleDateString('es-AR'),
+                    hora: datos.hora || new Date().toLocaleTimeString('es-AR')
                 };
 
-                const response = await fetch(`${SERVER_URL}/api/guardar-contacto`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(datosBackend)
-                });
+                console.log('📤 Datos preparados:', datosBackend);
 
-                if (response.ok) {
-                    const result = await response.json();
-                    console.log('✅ Guardado en base de datos:', result);
+                // Intentar con diferentes endpoints y métodos
+                const endpoints = [
+                    '/api/guardar-contacto',
+                    '/api/contacto',
+                    '/api/save-contact',
+                    '/contact/save'
+                ];
 
-                    document.getElementById('successMessage').innerHTML = `
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <div style="font-size: 24px;">✅</div>
-                            <div>
-                                <strong>¡Consulta enviada con éxito!</strong><br>
-                                <small>Datos guardados en nuestro sistema.</small><br>
-                                <small>Abriendo WhatsApp...</small>
-                            </div>
-                        </div>
-                    `;
-                    return true;
-                } else {
-                    console.error('❌ Error del servidor:', response.status);
-                    const error = await response.json();
-                    console.error('Detalles:', error);
-                    return false;
+                let lastError = null;
+
+                for (const endpoint of endpoints) {
+                    try {
+                        console.log(`🔄 Probando endpoint: ${endpoint}`);
+                        
+                        const response = await fetch(`${SERVER_URL}${endpoint}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify(datosBackend),
+                            // Timeout después de 5 segundos
+                            signal: AbortSignal.timeout(5000)
+                        });
+
+                        console.log(`📤 Respuesta de ${endpoint}:`, response.status);
+
+                        if (response.ok) {
+                            try {
+                                const result = await response.json();
+                                console.log(`✅ Éxito en ${endpoint}:`, result);
+                                return { success: true, endpoint: endpoint, data: result };
+                            } catch (jsonError) {
+                                console.log(`✅ Éxito en ${endpoint} (sin JSON)`);
+                                return { success: true, endpoint: endpoint };
+                            }
+                        } else if (response.status !== 404 && response.status !== 405) {
+                            // Si no es 404/405, guardar el error pero continuar
+                            lastError = `Error ${response.status} en ${endpoint}`;
+                        }
+                    } catch (error) {
+                        console.log(`❌ Error en ${endpoint}:`, error.message);
+                        if (!lastError) lastError = error.message;
+                    }
                 }
 
+                // Si llegamos aquí, todos los endpoints fallaron
+                console.error('❌ Todos los endpoints fallaron');
+                return { 
+                    success: false, 
+                    error: lastError || 'No se pudo conectar con ningún endpoint',
+                    fallback: true 
+                };
+
             } catch (error) {
-                console.error('❌ Error enviando al backend:', error);
-                return false;
+                console.error('❌ Error general en enviarAlBackend:', error);
+                return { 
+                    success: false, 
+                    error: error.message,
+                    fallback: true 
+                };
             }
         }
 
-        // Formulario de contacto funcional - VERSIÓN SIMPLE
+        // Función para guardar en localStorage con respaldo
+        function guardarEnLocalStorage(datos) {
+            try {
+                // Guardar en localStorage principal
+                const localKey = 'consultas_dante_propiedades';
+                const existingData = JSON.parse(localStorage.getItem(localKey) || '[]');
+
+                // Limitar a 200 registros máximo
+                if (existingData.length >= 200) {
+                    existingData.shift();
+                }
+
+                // Añadir ID único y timestamp
+                const registroCompleto = {
+                    ...datos,
+                    id: Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+                    storageTimestamp: new Date().toISOString()
+                };
+
+                existingData.push(registroCompleto);
+                localStorage.setItem(localKey, JSON.stringify(existingData));
+
+                console.log('✅ Guardado en localStorage:', datos.nombre);
+                console.log('📊 Total en localStorage:', existingData.length, 'registros');
+
+                // También guardar en respaldo adicional
+                const backupKey = 'backup_consultas_dante';
+                const backupData = JSON.parse(localStorage.getItem(backupKey) || '[]');
+                backupData.push(registroCompleto);
+                if (backupData.length > 100) backupData.shift();
+                localStorage.setItem(backupKey, JSON.stringify(backupData));
+
+                return { success: true, count: existingData.length };
+            } catch (error) {
+                console.error('❌ Error guardando en localStorage:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Formulario de contacto funcional
         document.getElementById('contactForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
             console.log('📱 Iniciando envío del formulario...');
-            document.getElementById('serverStatus').textContent = '📱 Guardando...';
+            
+            // Ocultar mensajes anteriores
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('warningMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
 
             // Obtener datos del formulario
             const nombre = document.getElementById('nombre').value.trim();
@@ -514,15 +610,15 @@
                 return;
             }
 
-            // Ocultar mensajes de error
-            document.getElementById('errorMessage').style.display = 'none';
-
             // Mostrar carga
             const submitBtn = document.getElementById('submitBtn');
-            const successMessage = document.getElementById('successMessage');
             const originalBtnText = submitBtn.textContent;
-            submitBtn.textContent = '⏳ Guardando...';
+            submitBtn.textContent = '⏳ Procesando...';
             submitBtn.disabled = true;
+
+            // Actualizar estado del servidor
+            document.getElementById('serverStatus').textContent = '📱 Procesando...';
+            document.getElementById('serverStatus').className = 'server-status';
 
             // Preparar datos
             const datosFormulario = {
@@ -534,106 +630,183 @@
                 mensaje,
                 timestamp: new Date().toISOString(),
                 fecha: new Date().toLocaleDateString('es-AR'),
-                hora: new Date().toLocaleTimeString('es-AR')
+                hora: new Date().toLocaleTimeString('es-AR'),
+                source: 'formulario_web_dante'
             };
 
             try {
-                // ✅ GUARDAR EN LOCALSTORAGE (clave única)
-                const localKey = 'consultas_dante_propiedades';
-                const existingData = JSON.parse(localStorage.getItem(localKey) || '[]');
-
-                // Limitar a 200 registros máximo
-                if (existingData.length >= 200) {
-                    existingData.shift();
+                // ✅ GUARDAR EN LOCALSTORAGE (siempre primero)
+                const localStorageResult = guardarEnLocalStorage(datosFormulario);
+                
+                if (!localStorageResult.success) {
+                    throw new Error('Error al guardar localmente');
                 }
 
-                existingData.push(datosFormulario);
-                localStorage.setItem(localKey, JSON.stringify(existingData));
+                // ✅ INTENTAR ENVIAR AL BACKEND (sin bloquear el flujo principal)
+                let backendResult = null;
+                let backendPromise = null;
+                
+                try {
+                    // Iniciar el envío al backend pero no esperar si tarda
+                    backendPromise = enviarAlBackend(datosFormulario);
+                    
+                    // Esperar máximo 3 segundos para la respuesta del backend
+                    const timeoutPromise = new Promise(resolve => 
+                        setTimeout(() => resolve({ timeout: true }), 3000)
+                    );
+                    
+                    backendResult = await Promise.race([backendPromise, timeoutPromise]);
+                    
+                    if (backendResult && backendResult.timeout) {
+                        console.log('⏱️ Timeout del backend, continuando con flujo local...');
+                        // Cancelar la promesa pendiente
+                        backendPromise = null;
+                        backendResult = { success: false, timeout: true };
+                    }
+                } catch (backendError) {
+                    console.warn('⚠️ Error en envío backend (no crítico):', backendError);
+                    backendResult = { success: false, error: backendError.message };
+                }
 
-                console.log('✅ Guardado en localStorage:', datosFormulario.nombre);
-                console.log('📊 Total en localStorage:', existingData.length, 'registros');
-
-                // ✅ ENVIAR AL BACKEND ADMINISTRADOR
-                const enviadoABackend = await enviarAlBackend(datosFormulario);
-
-                // ✅ MOSTRAR MENSAJE DE ÉXITO
-                if (!enviadoABackend) {
+                // ✅ DETERMINAR QUÉ MENSAJE MOSTRAR
+                const successMessage = document.getElementById('successMessage');
+                const warningMessage = document.getElementById('warningMessage');
+                
+                if (backendResult && backendResult.success) {
+                    // Éxito completo: backend + localStorage
                     successMessage.innerHTML = `
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <div style="font-size: 24px;">✅</div>
                             <div>
-                                <strong>¡Consulta enviada con éxito!</strong><br>
-                                <small>Los datos fueron guardados en tu dispositivo.</small><br>
+                                <strong>¡Consulta enviada exitosamente!</strong><br>
+                                <small>Datos guardados en nuestro sistema central.</small><br>
                                 <small>Abriendo WhatsApp...</small>
                             </div>
                         </div>
                     `;
+                    successMessage.style.display = 'block';
+                    document.getElementById('serverStatus').textContent = '✅ Enviado';
+                    document.getElementById('serverStatus').className = 'server-status server-connected';
+                } else {
+                    // Solo éxito local (backend falló)
+                    warningMessage.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="font-size: 24px;">⚠️</div>
+                            <div>
+                                <strong>¡Consulta guardada localmente!</strong><br>
+                                <small>Los datos se guardaron en tu dispositivo.</small><br>
+                                <small><em>(El servidor remoto no está disponible)</em></small><br>
+                                <small>Abriendo WhatsApp para contacto inmediato...</small>
+                            </div>
+                        </div>
+                    `;
+                    warningMessage.style.display = 'block';
+                    document.getElementById('serverStatus').textContent = '📱 Local';
+                    document.getElementById('serverStatus').className = 'server-status server-local';
+                    
+                    if (backendResult && backendResult.error) {
+                        console.warn('⚠️ Backend no disponible:', backendResult.error);
+                    }
                 }
 
-                successMessage.style.display = 'block';
+                // ✅ CREAR Y ENVIAR WHATSAPP
+                const whatsappMessage = `*NUEVA CONSULTA - DANTE PROPIEDADES*
+
+👤 *Nombre:* ${nombre}
+📧 *Email:* ${email}
+📱 *Teléfono:* ${telefono || 'No especificado'}
+🎯 *Interés:* ${interes || 'Consulta general'}
+💰 *Presupuesto:* ${presupuesto || 'No especificado'}
+
+💬 *Mensaje:*
+${mensaje}
+
+---
+📅 *Fecha:* ${new Date().toLocaleDateString('es-AR')}
+⏰ *Hora:* ${new Date().toLocaleTimeString('es-AR')}
+🌐 *Enviado desde:* Formulario Web Dante Propiedades
+${(!backendResult || !backendResult.success) ? '📱 *Nota:* Guardado localmente' : ''}`;
+
+                const whatsappURL = `https://wa.me/5491125368595?text=${encodeURIComponent(whatsappMessage)}`;
+
+                // ✅ ABRIR WHATSAPP DESPUÉS DE BREVE PAUSA
+                setTimeout(() => {
+                    console.log('💬 Abriendo WhatsApp...');
+                    window.open(whatsappURL, '_blank');
+
+                    // Limpiar y resetear después de 3 segundos
+                    setTimeout(() => {
+                        document.getElementById('contactForm').reset();
+                        successMessage.style.display = 'none';
+                        warningMessage.style.display = 'none';
+                        submitBtn.textContent = originalBtnText;
+                        submitBtn.disabled = false;
+                        
+                        // Verificar estado del servidor nuevamente
+                        setTimeout(() => verificarServidor(), 1000);
+                        
+                        console.log('🔄 Formulario reiniciado');
+                    }, 3000);
+                }, 1500);
 
             } catch (error) {
-                console.error('❌ Error:', error);
-                successMessage.innerHTML = '⚠️ Error guardando, pero WhatsApp se abrirá igual';
-                successMessage.style.display = 'block';
+                console.error('❌ Error general en el proceso:', error);
+                document.getElementById('errorMessage').innerHTML = 
+                    '❌ Error al procesar el formulario. Por favor, intentá nuevamente o contactanos por WhatsApp directamente.';
+                document.getElementById('errorMessage').style.display = 'block';
+                submitBtn.textContent = originalBtnText;
+                submitBtn.disabled = false;
+                verificarServidor();
             }
-
-            // ✅ CREAR Y ENVIAR WHATSAPP
-            const whatsappMessage = `*NUEVA CONSULTA - DANTE PROPIEDADES*
-
-    👤 *Nombre:* ${nombre}
-    📧 *Email:* ${email}
-    📱 *Teléfono:* ${telefono || 'No especificado'}
-    🎯 *Interés:* ${interes || 'Consulta general'}
-    💰 *Presupuesto:* ${presupuesto || 'No especificado'}
-
-    💬 *Mensaje:*
-    ${mensaje}
-
-    ---
-    📅 *Fecha:* ${new Date().toLocaleDateString('es-AR')}
-    ⏰ *Hora:* ${new Date().toLocaleTimeString('es-AR')}
-    🌐 *Enviado desde:* Formulario Web Dante Propiedades`;
-
-            const whatsappURL = `https://wa.me/5491125368595?text=${encodeURIComponent(whatsappMessage)}`;
-
-            // ✅ ABRIR WHATSAPP
-            setTimeout(() => {
-                console.log('💬 Abriendo WhatsApp...');
-                window.open(whatsappURL, '_blank');
-
-                setTimeout(() => {
-                    document.getElementById('contactForm').reset();
-                    successMessage.style.display = 'none';
-                    submitBtn.textContent = originalBtnText;
-                    submitBtn.disabled = false;
-                    verificarServidor();
-                    console.log('🔄 Formulario reiniciado');
-                }, 3000);
-            }, 1500);
         });
 
         // ✅ INICIALIZAR
         document.addEventListener('DOMContentLoaded', function () {
+            // Verificar servidor al cargar
             verificarServidor();
-            console.log('✅ Formulario listo - Backend Administrador + localStorage + WhatsApp');
+            
+            console.log('✅ Formulario Dante Propiedades listo');
+            console.log('📱 Funcionalidades: localStorage + WhatsApp + Backend (si disponible)');
+            
+            // Mostrar estadísticas de localStorage
+            try {
+                const consultas = JSON.parse(localStorage.getItem('consultas_dante_propiedades') || '[]');
+                console.log(`📊 Consultas guardadas localmente: ${consultas.length}`);
+                
+                if (consultas.length > 0) {
+                    console.log('📝 Última consulta:', consultas[consultas.length - 1].nombre);
+                }
+            } catch (e) {
+                console.log('📊 No hay consultas previas o error al leer localStorage');
+            }
 
-            // Solo un enlace discreto al panel admin (opcional)
-            const adminLink = document.createElement('a');
-            adminLink.href = 'admin_excel.html';
-            adminLink.innerHTML = '📊';
-            adminLink.style.cssText = `
-                position: fixed; bottom: 20px; left: 20px;
-                width: 30px; height: 30px; opacity: 0.3;
-                background: #6c757d; color: white; border: none;
-                border-radius: 50%; cursor: pointer; z-index: 1000;
-                font-size: 16px; display: flex; align-items: center;
-                justify-content: center; text-decoration: none;
-                transition: opacity 0.3s;
-            `;
-            adminLink.title = 'Panel de administración';
-            document.body.appendChild(adminLink);
+            // Enlace discreto al panel admin (solo visible en desarrollo)
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                const adminLink = document.createElement('a');
+                adminLink.href = 'admin_excel.html';
+                adminLink.innerHTML = '📊';
+                adminLink.style.cssText = `
+                    position: fixed; bottom: 20px; left: 20px;
+                    width: 30px; height: 30px; opacity: 0.3;
+                    background: #6c757d; color: white; border: none;
+                    border-radius: 50%; cursor: pointer; z-index: 1000;
+                    font-size: 16px; display: flex; align-items: center;
+                    justify-content: center; text-decoration: none;
+                    transition: opacity 0.3s;
+                `;
+                adminLink.title = 'Panel de administración';
+                adminLink.addEventListener('mouseenter', () => {
+                    adminLink.style.opacity = '0.8';
+                });
+                adminLink.addEventListener('mouseleave', () => {
+                    adminLink.style.opacity = '0.3';
+                });
+                document.body.appendChild(adminLink);
+            }
         });
+
+        // Verificar servidor periódicamente cada 2 minutos
+        setInterval(verificarServidor, 120000);
     </script>
 
 </body>
