@@ -54,7 +54,7 @@ function initializeVariables() {
     pdfViewer = document.getElementById('pdfViewer');
     modalTitle = document.getElementById('modalTitle');
     pdfModal = document.getElementById('pdfModal');
-    
+
     // Log para depuración
     console.log('🔍 Elementos del DOM inicializados:', {
         planoPdf: !!planoPdf,
@@ -63,7 +63,7 @@ function initializeVariables() {
         datosParcelaPdf: !!datosParcelaPdf,
         pdfModal: !!pdfModal
     });
-    
+
     // Configurar event listeners para PDFs
     setupPdfEventListeners();
 }
@@ -75,7 +75,7 @@ function setupPdfEventListeners() {
     // ========== EVENT LISTENERS PARA PDFs ==========
     // (aquí van los event listeners de PDFs que ya teníamos)
     if (entornosPdf && typeof entornosPdf.addEventListener === 'function') {
-        entornosPdf.addEventListener('click', function(e) {
+        entornosPdf.addEventListener('click', function (e) {
             e.stopPropagation();
             console.log('📄 Click en Entornos PDF');
             openPdf('entornos', 'Estudio de Entornos');
@@ -86,21 +86,21 @@ function setupPdfEventListeners() {
     // ========== EVENT LISTENERS PARA MULTIMEDIA ==========
     // Eventos para los iconos de multimedia con verificación
     if (photosIcon && typeof photosIcon.addEventListener === 'function') {
-        photosIcon.addEventListener('click', function(e) {
+        photosIcon.addEventListener('click', function (e) {
             e.stopPropagation();
             alert('Mostrando: ' + propiedadesJSON.propiedad.archivos.fotos);
         });
     }
 
     if (tourIcon && typeof tourIcon.addEventListener === 'function') {
-        tourIcon.addEventListener('click', function(e) {
+        tourIcon.addEventListener('click', function (e) {
             e.stopPropagation();
             alert('Abriendo: ' + propiedadesJSON.propiedad.archivos.tour);
         });
     }
 
     if (videoIcon && typeof videoIcon.addEventListener === 'function') {
-        videoIcon.addEventListener('click', function(e) {
+        videoIcon.addEventListener('click', function (e) {
             e.stopPropagation();
             alert('Reproduciendo: ' + propiedadesJSON.propiedad.archivos.video);
         });
@@ -109,7 +109,7 @@ function setupPdfEventListeners() {
     // ========== EVENT LISTENERS PARA BOTONES ==========
     // Evento para el botón de contacto con verificación
     if (contactButton && typeof contactButton.addEventListener === 'function') {
-        contactButton.addEventListener('click', function(e) {
+        contactButton.addEventListener('click', function (e) {
             e.stopPropagation();
             alert('Redirigiendo al formulario de contacto...');
         });
@@ -118,7 +118,7 @@ function setupPdfEventListeners() {
     // ========== EVENT LISTENERS PARA MODAL ==========
     // Cerrar modal con verificación
     if (closeModal && typeof closeModal.addEventListener === 'function') {
-        closeModal.addEventListener('click', function() {
+        closeModal.addEventListener('click', function () {
             if (pdfModal) {
                 pdfModal.style.display = 'none';
             }
@@ -130,7 +130,7 @@ function setupPdfEventListeners() {
 
     // Cerrar modal al hacer clic fuera del contenido con verificación
     if (pdfModal && typeof pdfModal.addEventListener === 'function') {
-        pdfModal.addEventListener('click', function(e) {
+        pdfModal.addEventListener('click', function (e) {
             if (e.target === pdfModal) {
                 pdfModal.style.display = 'none';
                 if (pdfViewer) {
@@ -146,9 +146,9 @@ function setupPdfEventListeners() {
 function createMultimediaSection(property) {
     const documentos = property.documentos || [];
     const videos = property.videos || [];
-    
+
     let multimediaHTML = '';
-    
+
     // PDFs
     if (documentos.length > 0) {
         multimediaHTML += `
@@ -171,7 +171,7 @@ function createMultimediaSection(property) {
             </div>
         `;
     }
-    
+
     // Videos
     if (videos.length > 0) {
         multimediaHTML += `
@@ -194,7 +194,7 @@ function createMultimediaSection(property) {
             </div>
         `;
     }
-    
+
     return multimediaHTML;
 }
 
@@ -205,7 +205,7 @@ function createMultimediaSection(property) {
 // Función para cerrar modal multimedia - DEFINIR ANTES DE viewPDF
 function closeMultimediaModal() {
     console.log('🔧 DEBUG closeMultimediaModal - multimediaModal:', multimediaModal);
-    
+
     if (multimediaModal) {
         // Detener videos antes de cerrar
         const videos = multimediaModal.querySelectorAll('video');
@@ -213,7 +213,7 @@ function closeMultimediaModal() {
             video.pause();
             video.currentTime = 0;
         });
-        
+
         multimediaModal.remove();
         multimediaModal = null;
         console.log('✅ Modal multimedia cerrado');
@@ -234,27 +234,27 @@ function viewPDF(pdfUrl, titulo) {
 // Función para visualizar PDFs - VERSIÓN CON MANEJO DE ERRORES
 function viewPDF(pdfUrl, titulo) {
     console.log('🔧 DEBUG viewPDF - INICIANDO...');
-    
+
     // Verificar que multimediaModal esté disponible
     if (typeof multimediaModal === 'undefined') {
         console.warn('⚠️ multimediaModal no definida, inicializando...');
         window.multimediaModal = null;
     }
-    
+
     // CORRECCIÓN: Cambiar cualquier extensión .PDF a .pdf
     const pdfUrlCorregido = pdfUrl.replace(/\.PDF$/i, '.pdf');
     const fileName = pdfUrlCorregido.split('/').pop();
-    
+
     console.log('📄 URL original:', pdfUrl);
     console.log('📄 URL corregida:', pdfUrlCorregido);
     console.log('📄 multimediaModal estado:', multimediaModal);
-    
+
     // Crear o reutilizar modal de PDF
     if (multimediaModal) {
         console.log('🔄 Reutilizando modal existente');
         multimediaModal.remove();
     }
-    
+
     try {
         multimediaModal = document.createElement('div');
         multimediaModal.id = 'pdf-modal';
@@ -271,7 +271,7 @@ function viewPDF(pdfUrl, titulo) {
             align-items: center !important;
             padding: 20px !important;
         `;
-        
+
         multimediaModal.innerHTML = `
             <div style="position: relative; width: 90%; max-width: 1000px; height: 90%; background: white; 
                         border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;">
@@ -294,13 +294,13 @@ function viewPDF(pdfUrl, titulo) {
                 </div>
             </div>
         `;
-        
+
         document.body.appendChild(multimediaModal);
         document.body.style.overflow = 'hidden';
-        
+
         console.log('✅ PDF modal creado exitosamente');
         console.log('📄 Abriendo PDF:', pdfUrlCorregido);
-        
+
     } catch (error) {
         console.error('❌ Error creando modal PDF:', error);
         // Fallback: abrir en nueva pestaña
@@ -315,12 +315,12 @@ function viewVideo(videoUrl, titulo) {
     // CORRECCIÓN: Cambiar extensiones de video a minúsculas
     const videoUrlCorregido = videoUrl.replace(/\.(MP4|WEBM|OGG|AVI|MOV)$/i, (match) => match.toLowerCase());
     const fileName = videoUrlCorregido.split('/').pop();
-    
+
     // Crear o reutilizar modal de video
     if (multimediaModal) {
         multimediaModal.remove();
     }
-    
+
     multimediaModal = document.createElement('div');
     multimediaModal.id = 'video-modal';
     multimediaModal.style.cssText = `
@@ -336,7 +336,7 @@ function viewVideo(videoUrl, titulo) {
         align-items: center !important;
         padding: 20px !important;
     `;
-    
+
     multimediaModal.innerHTML = `
         <div style="position: relative; width: 90%; max-width: 1000px; height: 70%; background: white; 
                     border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;">
@@ -361,23 +361,23 @@ function viewVideo(videoUrl, titulo) {
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(multimediaModal);
     document.body.style.overflow = 'hidden';
-    
+
     console.log('🎥 Abriendo video:', videoUrlCorregido);
 }
 
 
 // Cerrar modal con tecla Escape
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape') {
         closeMultimediaModal();
     }
 });
 
 // Cerrar modal al hacer clic fuera
-document.addEventListener('click', function(event) {
+document.addEventListener('click', function (event) {
     if (multimediaModal && event.target === multimediaModal) {
         closeMultimediaModal();
     }
@@ -393,7 +393,7 @@ let tituloPropiedad = '';
 // Función para crear el slider de imágenes (Ahora clickeable para abrir modal)
 function createImageSlider(property) {
     const fotos = property.fotos || [];
-    
+
     if (fotos.length === 0) {
         // Sin imágenes - usar imagen por defecto
         return `
@@ -410,7 +410,7 @@ function createImageSlider(property) {
             </div>
         `;
     }
-    
+
     if (fotos.length === 1) {
         // Una sola imagen - hacer clickeable
         return `
@@ -427,7 +427,7 @@ function createImageSlider(property) {
             </div>
         `;
     }
-    
+
     // Múltiples imágenes - crear slider clickeable
     const imageSlides = fotos.map((foto, index) => `
         <div class="property-slide ${index === 0 ? 'active' : ''}" data-slide="${index}">
@@ -437,11 +437,11 @@ function createImageSlider(property) {
                  onerror="this.src='INSTITUCIONAL 3.png'">
         </div>
     `).join('');
-    
+
     const navigationDots = fotos.map((_, index) => `
         <span class="property-nav-dot ${index === 0 ? 'active' : ''}" onclick="showSlide('${property.id_temporal}', ${index})"></span>
     `).join('');
-    
+
     return `
         <div class="property-slider" data-property="${property.id_temporal}" style="position: relative; cursor: pointer;" 
              onclick="expandPropertyImages('${property.id_temporal}')">
@@ -493,24 +493,24 @@ function createImageSlider(property) {
 function showSlide(propertyId, slideIndex) {
     const slider = document.querySelector(`[data-property="${propertyId}"]`);
     if (!slider) return;
-    
+
     const slides = slider.querySelectorAll('.property-slide');
     const dots = slider.querySelectorAll('.property-nav-dot');
-    
+
     slides.forEach((slide, index) => {
         slide.classList.remove('active');
         if (index === slideIndex) {
             slide.classList.add('active');
         }
     });
-    
+
     dots.forEach((dot, index) => {
         dot.classList.remove('active');
         if (index === slideIndex) {
             dot.classList.add('active');
         }
     });
-    
+
     currentSlides[propertyId] = slideIndex;
 }
 
@@ -518,11 +518,11 @@ function showSlide(propertyId, slideIndex) {
 function prevSlide(propertyId) {
     const slider = document.querySelector(`[data-property="${propertyId}"]`);
     if (!slider) return;
-    
+
     const current = currentSlides[propertyId] || 0;
     const totalSlides = slider.querySelectorAll('.property-slide').length;
     const newIndex = current > 0 ? current - 1 : totalSlides - 1;
-    
+
     showSlide(propertyId, newIndex);
 }
 
@@ -530,11 +530,11 @@ function prevSlide(propertyId) {
 function nextSlide(propertyId) {
     const slider = document.querySelector(`[data-property="${propertyId}"]`);
     if (!slider) return;
-    
+
     const current = currentSlides[propertyId] || 0;
     const totalSlides = slider.querySelectorAll('.property-slide').length;
     const newIndex = current < totalSlides - 1 ? current + 1 : 0;
-    
+
     showSlide(propertyId, newIndex);
 }
 
@@ -611,31 +611,31 @@ let globalData = {
 // Cargar propiedades - Solo desde archivo externo propiedades.json
 async function loadProperties() {
     console.log('🔄 Iniciando carga de propiedades desde propiedades.json...');
-    
+
     try {
         console.log('📂 Cargando propiedades.json desde servidor...');
-        
+
         const response = await fetch('propiedades.json');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         console.log('✅ Datos cargados exitosamente:', data.length, 'propiedades');
-        
+
         // Datos cargados exitosamente
         globalData.properties = data;
         globalData.filteredProperties = data;
-        
+
         // Llenar filtros y mostrar
         populateFilters(data);
         displayProperties(data);
-        
+
     } catch (error) {
         // Error - archivo no encontrado o no accesible
         console.error('❌ Error al cargar propiedades.json:', error.message);
         console.log('💡 Asegúrate de que el archivo propiedades.json esté disponible');
-        
+
         // Mostrar mensaje de error en la interfaz
         showErrorMessage();
     }
@@ -644,13 +644,13 @@ async function loadProperties() {
 // Mostrar mensaje de error cuando no se puede cargar el archivo
 function showErrorMessage() {
     console.log('🔧 Mostrando mensaje de error en la interfaz...');
-    
+
     // Ocultar spinner de carga
     const loadingSpinner = document.getElementById('loadingSpinner');
     if (loadingSpinner) {
         loadingSpinner.style.display = 'none';
     }
-    
+
     // Mostrar mensaje de error en la interfaz
     const errorDiv = document.createElement('div');
     errorDiv.id = 'errorMessage';
@@ -668,7 +668,7 @@ function showErrorMessage() {
         <p>No se pudo cargar el archivo <strong>propiedades.json</strong></p>
         <p>Verifica que el archivo esté disponible en el servidor</p>
     `;
-    
+
     // Insertar después del header
     const header = document.querySelector('header');
     if (header && header.nextSibling) {
@@ -682,48 +682,48 @@ function showErrorMessage() {
 function populateFilters(properties) {
     const barrios = [...new Set(properties.map(p => p.barrio).filter(Boolean))].sort();
     const tipos = [...new Set(properties.map(p => p.tipo).filter(Boolean))].sort();
-    
+
     const barrioSelect = document.getElementById('barrio-select-styled');
     const tipoSelect = document.getElementById('tipo-select-styled');
-    
+
     // Solo poblar si el select está vacío o tiene solo la opción por defecto
     // Esto previene que se reseteen las opciones seleccionadas si se llama accidentalmente
     if (barrioSelect && barrioSelect.options.length <= 1) {
-        barrioSelect.innerHTML = '<option value="">Todos los barrios</option>' + 
+        barrioSelect.innerHTML = '<option value="">Todos los barrios</option>' +
             barrios.map(barrio => `<option value="${barrio}">${barrio}</option>`).join('');
     }
-    
+
     if (tipoSelect && tipoSelect.options.length <= 1) {
-        tipoSelect.innerHTML = '<option value="">Todos los tipos</option>' + 
+        tipoSelect.innerHTML = '<option value="">Todos los tipos</option>' +
             tipos.map(tipo => `<option value="${tipo}">${tipo}</option>`).join('');
     }
-    
+
     console.log('🔧 Filtros poblados - Barrios:', barrios.length, 'Tipos:', tipos.length);
 }
 
 // Nueva función de filtrado que NO recarga los datos desde cero
 // Mantiene la persistencia de los filtros seleccionados
-window.filterGlobalProperties = function() {
+window.filterGlobalProperties = function () {
     console.log('🔍 Filtrando propiedades globalmente (Sin recargar)...');
-    
+
     // Obtener valores actuales de los selectores styled
     const operacionVal = document.getElementById('operacion-select-styled')?.value || '';
     const barrioVal = document.getElementById('barrio-select-styled')?.value || '';
     const tipoVal = document.getElementById('tipo-select-styled')?.value || '';
-    
+
     console.log('📊 Filtros aplicados:', { operacionVal, barrioVal, tipoVal });
-    
+
     // Filtrar sobre los datos globales originales
     const filtered = globalData.properties.filter(p => {
         const matchOperacion = !operacionVal || (p.operacion && p.operacion.toLowerCase() === operacionVal.toLowerCase());
         const matchBarrio = !barrioVal || (p.barrio && p.barrio === barrioVal);
         const matchTipo = !tipoVal || (p.tipo && p.tipo === tipoVal);
-        
+
         return matchOperacion && matchBarrio && matchTipo;
     });
-    
+
     console.log(`✅ ${filtered.length} propiedades encontradas de ${globalData.properties.length}`);
-    
+
     // Actualizar datos filtrados globales
     globalData.filteredProperties = filtered;
     globalData.filters = {
@@ -731,10 +731,10 @@ window.filterGlobalProperties = function() {
         barrio: barrioVal,
         tipo: tipoVal
     };
-    
+
     // Mostrar resultados
     displayProperties(filtered);
-    
+
     // Si tenemos la función de conteo en app.js
     if (typeof updateResultsCount === 'function') {
         updateResultsCount(filtered.length);
@@ -742,7 +742,7 @@ window.filterGlobalProperties = function() {
         // Fallback manualmente
         const counter = document.getElementById('results-counter-styled');
         if (counter) {
-             counter.innerHTML = `
+            counter.innerHTML = `
                 <div style="background: #e8f5e9; color: #2e7d32; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid #c8e6c9;">
                     <strong>📊 Resultados de la búsqueda:</strong> Se encontraron ${filtered.length} propiedades
                 </div>
@@ -766,10 +766,10 @@ function createPropertyCard(property) {
         transition: transform 0.3s ease !important;
         border: 1px solid #e1e5e9 !important;
     `;
-    
+
     // Crear galería de imágenes inicial
     const imageSection = createExpandableGallery(property);
-    
+
     card.innerHTML = `
         ${imageSection}
         <div style="position: absolute; top: 10px; left: 10px;">
@@ -857,7 +857,7 @@ function createPropertyCard(property) {
             </button>
         </div>
     `;
-    
+
     return card;
 }
 
@@ -869,7 +869,7 @@ function toggleMap(button, direccionCompleta, titulo) {
     const propertyId = propertyCard.getAttribute('data-property-card');
     const mapContainer = document.getElementById(`map-container-${propertyId}`);
     const mapPlaceholder = document.getElementById(`map-placeholder-${propertyId}`);
-    
+
     if (mapContainer.style.height === '200px') {
         // Ocultar mapa
         mapContainer.style.height = '0';
@@ -888,7 +888,7 @@ function toggleMap(button, direccionCompleta, titulo) {
         button.style.background = '#232deb';
         button.style.borderColor = '#232deb';
         button.style.color = 'white';
-        
+
         // Cargar mapa si no está cargado (PASANDO EL propertyId)
         if (!mapPlaceholder.classList.contains('loaded')) {
             loadGoogleMap(mapPlaceholder, direccionCompleta, titulo, propertyId);
@@ -900,7 +900,7 @@ function toggleMap(button, direccionCompleta, titulo) {
 
 function loadGoogleMap(placeholder, direccionCompleta, titulo, propertyId) {
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccionCompleta)}`;
-    
+
     placeholder.innerHTML = `
         <div style="text-align: center; padding: 15px; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8f9fa; border-radius: 8px;">
             <div style="margin-bottom: 15px;">
@@ -950,36 +950,36 @@ function loadGoogleMap(placeholder, direccionCompleta, titulo, propertyId) {
 // Función para mostrar el mapa en pantalla completa con botón Volver
 function showPropertyMap(propertyId, address, title) {
     console.log('🗺️ Mostrando mapa para propiedad:', propertyId, address, title);
-    
+
     try {
         // 1. Guardar la ubicación de Google Maps para la IA
         const googleLocation = `${address}, Argentina`;
-        
+
         // 2. Actualizar la propiedad actual con la ubicación exacta de Google
         window.currentProperty = window.currentProperty || {};
         window.currentProperty.googleLocation = googleLocation;
         window.currentProperty.googleMapOpened = true;
-        
+
         console.log('📍 Ubicación de Google Maps guardada:', googleLocation);
-        
+
         // 3. Ocultar el contenedor de propiedades
         const propertiesContainer = document.getElementById('properties-container');
         const filters = document.querySelector('.filters');
         const resultsCounter = document.getElementById('results-counter-styled');
-        
+
         if (propertiesContainer) propertiesContainer.style.display = 'none';
         if (filters) filters.style.display = 'none';
         if (resultsCounter) resultsCounter.style.display = 'none';
-        
+
         // 4. Mostrar el botón Volver
         showBackButton(title || 'Propiedad');
-        
+
         // 5. Integrar el mapa (sin API key problemática)
         showActualMap(propertyId, address, title);
-        
+
         // 6. Añadir clase al body para modo mapa
         document.body.classList.add('map-view-active');
-        
+
         console.log('✅ Mapa mostrado correctamente con ubicación de Google');
     } catch (error) {
         console.error('❌ Error al mostrar mapa:', error);
@@ -990,7 +990,7 @@ function showPropertyMap(propertyId, address, title) {
 function showBackButton(title) {
     try {
         let backButton = document.getElementById('mapBackButton');
-        
+
         if (!backButton) {
             // Crear el botón si no existe
             backButton = document.createElement('div');
@@ -1002,10 +1002,10 @@ function showBackButton(title) {
                 </button>
             `;
             document.body.appendChild(backButton);
-            
+
             console.log('✅ Botón Volver creado');
         }
-        
+
         backButton.style.display = 'block';
         console.log('✅ Botón Volver mostrado');
     } catch (error) {
@@ -1016,32 +1016,32 @@ function showBackButton(title) {
 // Función para volver a las propiedades
 function backToProperties() {
     console.log('🏠 Volviendo a propiedades');
-    
+
     try {
         // 1. Mostrar el contenedor de propiedades
         const propertiesContainer = document.getElementById('properties-container');
         const filters = document.querySelector('.filters');
         const resultsCounter = document.getElementById('results-counter-styled');
-        
+
         if (propertiesContainer) propertiesContainer.style.display = 'grid';
         if (filters) filters.style.display = 'block';
         if (resultsCounter) resultsCounter.style.display = 'block';
-        
+
         // 2. Ocultar el botón Volver
         const backButton = document.getElementById('mapBackButton');
         if (backButton) {
             backButton.style.display = 'none';
         }
-        
+
         // 3. Cerrar/limpiar el mapa
         closeMap();
-        
+
         // 4. Remover clase del body
         document.body.classList.remove('map-view-active');
-        
+
         // 5. Scroll al inicio suavemente
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        
+
         console.log('✅ Vuelta a propiedades exitosa');
     } catch (error) {
         console.error('❌ Error al volver a propiedades:', error);
@@ -1056,7 +1056,7 @@ function showActualMap(propertyId, address, title) {
         if (existingMap) {
             existingMap.remove();
         }
-        
+
         // Crear contenedor del mapa
         const mapContainer = document.createElement('div');
         mapContainer.id = 'fullscreen-map-container';
@@ -1069,13 +1069,13 @@ function showActualMap(propertyId, address, title) {
             background: white !important;
             z-index: 9998 !important;
         `;
-        
+
         // Codificar la dirección para Google Maps (sin API key)
         const encodedAddress = encodeURIComponent(address);
-        
+
         // Usar Google Maps Embed sin API key (modo place)
         const mapUrl = `https://www.google.com/maps/embed/v1/place?q=${encodedAddress}&zoom=15&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`;
-        
+
         // Crear iframe de Google Maps
         mapContainer.innerHTML = `
             <iframe 
@@ -1094,7 +1094,7 @@ function showActualMap(propertyId, address, title) {
                 <p style="margin: 0; color: #666; font-size: 14px; line-height: 1.4;">${address}</p>
             </div>
         `;
-        
+
         document.body.appendChild(mapContainer);
         console.log('✅ Mapa creado correctamente');
     } catch (error) {
@@ -1119,7 +1119,7 @@ function closeMap() {
     }
 }
 // Cerrar con tecla Escape
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape' && document.body.classList.contains('map-view-active')) {
         console.log('⎋ Tecla Escape presionada - Volviendo a propiedades');
         backToProperties();
@@ -1127,7 +1127,7 @@ document.addEventListener('keydown', function(event) {
 });
 
 // Inicializar estilos cuando se carga la página
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Verificar que los estilos estén presentes
     if (!document.querySelector('#map-back-styles')) {
         const styles = document.createElement('style');
@@ -1229,7 +1229,7 @@ function openDirectionsFromCard(propertyId, address) {
 }
 
 // Cerrar con tecla Escape
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape' && document.body.classList.contains('map-view-active')) {
         backToProperties();
     }
@@ -1252,7 +1252,7 @@ function scrollToProperty(propertyId) {
         // Cerrar el mapa primero
         const mapContainer = document.getElementById(`map-container-${propertyId}`);
         const mapButton = propertyCard.querySelector('button[onclick*="toggleMap"]');
-        
+
         if (mapContainer && mapButton) {
             mapContainer.style.height = '0';
             mapContainer.style.opacity = '0';
@@ -1262,17 +1262,17 @@ function scrollToProperty(propertyId) {
             mapButton.style.borderColor = '#dee2e6';
             mapButton.style.color = '#495057';
         }
-        
+
         // Scroll suave a la propiedad
-        propertyCard.scrollIntoView({ 
-            behavior: 'smooth', 
+        propertyCard.scrollIntoView({
+            behavior: 'smooth',
             block: 'center'
         });
-        
+
         // Efecto visual de highlight
         propertyCard.style.boxShadow = '0 0 0 3px rgba(35, 45, 235, 0.3)';
         propertyCard.style.transition = 'box-shadow 0.5s ease';
-        
+
         setTimeout(() => {
             propertyCard.style.boxShadow = '0 4px 16px rgba(0,0,0,0.1)';
         }, 2000);
@@ -1322,20 +1322,20 @@ document.addEventListener('DOMContentLoaded', initializeMapStyles);
 function displayProperties(properties) {
     const container = document.getElementById('properties-container');
     if (!container) return;
-    
+
     container.innerHTML = '';
-    
+
     if (properties.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #666;">No se encontraron propiedades</p>';
         updateResultsCount(0);
         return;
     }
-    
+
     properties.forEach(property => {
         const card = createPropertyCard(property);
         container.appendChild(card);
     });
-    
+
     updateResultsCount(properties.length);
     console.log('📋 Mostrando', properties.length, 'propiedades');
 }
@@ -1343,7 +1343,7 @@ function displayProperties(properties) {
 function updateResultsCount(count) {
     const counter = document.getElementById('results-counter-styled');
     if (!counter) return;
-    
+
     if (count === 0) {
         counter.innerHTML = '<div>No se encontraron propiedades</div>';
     } else {
@@ -1360,7 +1360,7 @@ function setupFilterEvents() {
     const operacionSelect = document.getElementById('operacion-select-styled');
     const barrioSelect = document.getElementById('barrio-select-styled');
     const tipoSelect = document.getElementById('tipo-select-styled');
-    
+
     if (operacionSelect) {
         operacionSelect.addEventListener('change', applyFilters);
     }
@@ -1376,20 +1376,20 @@ function applyFilters() {
     const operacionSelect = document.getElementById('operacion-select-styled');
     const barrioSelect = document.getElementById('barrio-select-styled');
     const tipoSelect = document.getElementById('tipo-select-styled');
-    
+
     const selectedOperacion = operacionSelect ? operacionSelect.value : '';
     const selectedBarrio = barrioSelect ? barrioSelect.value : '';
     const selectedTipo = tipoSelect ? tipoSelect.value : '';
-    
+
     console.log('🔍 Aplicando filtros:', { selectedOperacion, selectedBarrio, selectedTipo });
-    
+
     const filtered = globalData.properties.filter(property => {
         if (selectedOperacion && property.operacion !== selectedOperacion) return false;
         if (selectedBarrio && property.barrio !== selectedBarrio) return false;
         if (selectedTipo && property.tipo !== selectedTipo) return false;
         return true;
     });
-    
+
     globalData.filteredProperties = filtered;
     displayProperties(filtered);
 }
@@ -1401,22 +1401,22 @@ function applyFilters() {
 // REEMPLAZADA POR createPropertyPanel() - CON RESPALDO
 function showPropertyDetails(propertyId) {
     console.log('🔧 showPropertyDetails llamada - Intentando panel completo');
-    
+
     const property = globalData.properties.find(p => p.id_temporal === propertyId);
     if (property) {
         try {
             // Intentar panel completo primero
             console.log('🚀 Intentando createPropertyPanel completo...');
             createPropertyPanel(
-                property.id_temporal, 
-                property.titulo, 
-                property.precio, 
-                property.moneda_precio || 'USD', 
-                property.direccion, 
-                property.barrio, 
-                property.ambientes, 
-                property.metros_cuadrados, 
-                property.estado, 
+                property.id_temporal,
+                property.titulo,
+                property.precio,
+                property.moneda_precio || 'USD',
+                property.direccion,
+                property.barrio,
+                property.ambientes,
+                property.metros_cuadrados,
+                property.estado,
                 property.tipo,
                 property.descripcion
             );
@@ -1424,15 +1424,15 @@ function showPropertyDetails(propertyId) {
             console.warn('⚠️ Panel completo falló, usando panel simple:', error);
             // Fallback a panel simple
             createPropertyPanelSimple(
-                property.id_temporal, 
-                property.titulo, 
-                property.precio, 
-                property.moneda_precio || 'USD', 
-                property.direccion, 
-                property.barrio, 
-                property.ambientes, 
-                property.metros_cuadrados, 
-                property.estado, 
+                property.id_temporal,
+                property.titulo,
+                property.precio,
+                property.moneda_precio || 'USD',
+                property.direccion,
+                property.barrio,
+                property.ambientes,
+                property.metros_cuadrados,
+                property.estado,
                 property.tipo,
                 property.descripcion
             );
@@ -1444,19 +1444,19 @@ function showPropertyDetails(propertyId) {
 // INICIALIZACIÓN
 // ========================================
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('🏠 Sistema Dante Propiedades - Sin errores + Slider cargando...');
     console.log('🎯 Sistema de slider de múltiples fotos incluido');
     console.log('✅ Sin dependencias de Font Awesome');
     console.log('🎬 Sistema de multimedia activado');
-    
+
     // Cargar CSS del slider
     addSliderStyles();
-    
+
     // Cargar propiedades
     loadProperties();
-    
-    
+
+
     console.log('✅ Sistema inicializado sin errores de consola');
     console.log('🎠 Slider de múltiples fotos disponible');
     console.log('📄 Soporte para PDFs activado');
@@ -1469,20 +1469,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function checkResourceErrors() {
     const imageErrors = [];
-    
+
     // Verificar imágenes que no cargan
     document.querySelectorAll('img').forEach(img => {
-        img.addEventListener('error', function() {
+        img.addEventListener('error', function () {
             imageErrors.push(this.src);
             console.warn('⚠️ Imagen no encontrada:', this.src);
         });
     });
-    
+
     return imageErrors;
 }
 
 // Verificar errores al cargar
-window.addEventListener('load', function() {
+window.addEventListener('load', function () {
     setTimeout(() => {
         const errors = checkResourceErrors();
         if (errors.length === 0) {
@@ -1492,7 +1492,7 @@ window.addEventListener('load', function() {
             console.log('⚠️ Errores de recursos:', errors.length);
         }
     }, 1000);
-    
+
     setTimeout(setupFilterEvents, 100);
 });
 
@@ -1504,25 +1504,25 @@ window.addEventListener('load', function() {
 // Función principal para abrir el modal con verificación completa
 function abrirModalImagenesComplete(propertyId) {
     console.log('📸 Iniciando apertura de modal para propiedad:', propertyId);
-    
+
     try {
         const property = globalData.properties.find(p => p.id_temporal === propertyId);
-        
+
         if (!property) {
             console.error('❌ Propiedad no encontrada:', propertyId);
             return;
         }
-        
+
         console.log('✅ Propiedad encontrada:', property.titulo, 'con', property.fotos?.length || 0, 'imágenes');
-        
+
         if (!property.fotos || property.fotos.length === 0) {
             console.log('⚠️ La propiedad no tiene imágenes disponibles');
             alert('Esta propiedad no tiene imágenes disponibles.');
             return;
         }
-        
+
         abrirModalImagenes(property);
-        
+
     } catch (error) {
         console.error('❌ Error al abrir modal:', error);
         alert('Error al abrir la galería de imágenes.');
@@ -1532,63 +1532,63 @@ function abrirModalImagenesComplete(propertyId) {
 // Función principal para abrir el modal
 function abrirModalImagenes(property) {
     console.log('🔍 Abriendo modal para:', property.titulo);
-    
+
     // Configurar datos del modal
     imagenesModal = property.fotos || [];
     imagenActual = 0;
     tituloPropiedad = property.titulo || 'Galería de Imágenes';
-    
+
     // Verificar elementos del DOM
     const modalElement = document.getElementById('modal-imagenes');
     const imagenPrincipalElement = document.getElementById('imagen-principal');
     const contadorElement = document.getElementById('imagen-contador');
     const tituloElement = document.getElementById('imagen-titulo-display');
-    
+
     if (!modalElement) {
         console.error('❌ Elemento modal-imagenes no encontrado en el DOM');
         alert('Error: No se pudo encontrar el elemento del modal.');
         return;
     }
-    
+
     if (!imagenPrincipalElement) {
         console.error('❌ Elemento imagen-principal no encontrado en el DOM');
         alert('Error: No se pudo encontrar el elemento de imagen principal.');
         return;
     }
-    
+
     if (!contadorElement) {
         console.error('❌ Elemento imagen-contador no encontrado en el DOM');
         alert('Error: No se pudo encontrar el contador de imágenes.');
         return;
     }
-    
+
     if (!tituloElement) {
         console.error('❌ Elemento imagen-titulo-display no encontrado en el DOM');
         alert('Error: No se pudo encontrar el título de imagen.');
         return;
     }
-    
+
     // Actualizar información del modal
     tituloElement.textContent = tituloPropiedad;
-    
+
     // Mostrar la primera imagen
     mostrarImagenActual();
-    
+
     // Mostrar modal
     modalElement.style.display = 'block';
-    
+
     // Aplicar layout específico para móviles
     if (window.innerWidth <= 480) {
         modalElement.style.display = 'flex';
         modalElement.style.alignItems = 'center';
         modalElement.style.justifyContent = 'center';
     }
-    
+
     document.body.style.overflow = 'hidden';
-    
+
     // Agregar event listener para teclado
     document.addEventListener('keydown', manejarTecladoModal);
-    
+
     console.log('✅ Modal abierto para:', property.titulo);
 }
 
@@ -1596,37 +1596,37 @@ function abrirModalImagenes(property) {
 function mostrarImagenActual() {
     const imagenPrincipalElement = document.getElementById('imagen-principal');
     const contadorElement = document.getElementById('imagen-contador');
-    
+
     if (!imagenPrincipalElement || !contadorElement) {
         console.error('❌ Elementos del modal no disponibles para mostrar imagen');
         return;
     }
-    
+
     if (imagenesModal.length === 0) {
         imagenPrincipalElement.style.backgroundImage = 'none';
         imagenPrincipalElement.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666; font-size: 18px;">No hay imágenes disponibles</div>';
         contadorElement.textContent = '0 / 0';
         return;
     }
-    
+
     const imagenUrl = imagenesModal[imagenActual];
-    
+
     // Configurar imagen de fondo
     imagenPrincipalElement.style.backgroundImage = `url('${imagenUrl}')`;
     imagenPrincipalElement.style.backgroundSize = 'contain';
     imagenPrincipalElement.style.backgroundRepeat = 'no-repeat';
     imagenPrincipalElement.style.backgroundPosition = 'center';
-    
+
     // Actualizar contador
     contadorElement.textContent = `${imagenActual + 1} / ${imagenesModal.length}`;
-    
+
     console.log('🖼️ Imagen mostrada:', imagenActual + 1, '/', imagenesModal.length);
 }
 
 // Función para cerrar el modal
 function cerrarModalImagenes() {
     const modalElement = document.getElementById('modal-imagenes');
-    
+
     if (modalElement) {
         modalElement.style.display = 'none';
         // Resetear estilos específicos de móviles
@@ -1636,10 +1636,10 @@ function cerrarModalImagenes() {
         }
         document.body.style.overflow = 'auto';
     }
-    
+
     // Remover event listener
     document.removeEventListener('keydown', manejarTecladoModal);
-    
+
     console.log('🔒 Modal cerrado');
 }
 
@@ -1670,7 +1670,7 @@ function imagenSiguiente() {
 // Función para crear galería expandible (una imagen que se expande al hacer clic)
 function createExpandableGallery(property) {
     const fotos = property.fotos || [];
-    
+
     if (fotos.length === 0) {
         // Sin imágenes - usar imagen por defecto
         return `
@@ -1688,11 +1688,11 @@ function createExpandableGallery(property) {
             </div>
         `;
     }
-    
+
     // Mostrar la primera imagen como vista inicial
     const firstImage = fotos[0];
     const totalPhotos = fotos.length;
-    
+
     return `
         <div class="expandable-gallery-container" style="position: relative; cursor: pointer;" 
              onclick="expandPropertyImages('${property.id_temporal}')" 
@@ -1726,15 +1726,15 @@ function createExpandableGallery(property) {
 function calcularDistribucionMasonry(totalFotos, anchoDisponible, altoDisponible) {
     console.log('🏗️ Calculando distribución MASONRY para', totalFotos, 'fotos');
     console.log('📐 Espacio disponible:', anchoDisponible, 'x', altoDisponible, 'px');
-    
+
     // CONFIGURACIÓN MASONRY OPTIMIZADA
     const esMobile = anchoDisponible < 768;
     const columnas = esMobile ? 2 : 4;
     const gap = 8;
     const anchoColumna = Math.floor((anchoDisponible - (columnas - 1) * gap) / columnas);
-    
+
     console.log('🔧 Masonry: ' + columnas + ' columnas, gap: ' + gap + 'px, ancho columna: ' + anchoColumna + 'px');
-    
+
     // ALTURAS VARIADAS PARA EFECTO MASONRY
     const alturasPosibles = [
         Math.floor(anchoColumna * 0.8),   // Pequeña
@@ -1742,20 +1742,20 @@ function calcularDistribucionMasonry(totalFotos, anchoDisponible, altoDisponible
         Math.floor(anchoColumna * 1.6),   // Grande
         Math.floor(anchoColumna * 2.0)    // Extra grande
     ];
-    
+
     // INICIALIZAR COLUMNAS
     const alturasColumnas = new Array(columnas).fill(0);
     const patrones = [];
-    
+
     // GENERAR PATRONES MASONRY
     for (let i = 0; i < totalFotos; i++) {
         // Encontrar la columna con menor altura
         const columnaMasBaja = alturasColumnas.indexOf(Math.min(...alturasColumnas));
-        
+
         // VARIEDAD DE TAMAÑOS - distribución 30% pequeñas, 40% medianas, 20% grandes, 10% extra grandes
         let alturaFoto;
         const random = Math.random();
-        
+
         if (random < 0.3) {
             alturaFoto = alturasPosibles[0]; // Pequeña
         } else if (random < 0.7) {
@@ -1765,14 +1765,14 @@ function calcularDistribucionMasonry(totalFotos, anchoDisponible, altoDisponible
         } else {
             alturaFoto = alturasPosibles[3]; // Extra grande
         }
-        
+
         // POSICIÓN EN LA COLUMNA SELECCIONADA
         const left = columnaMasBaja * (anchoColumna + gap);
         const top = alturasColumnas[columnaMasBaja];
-        
+
         // ACTUALIZAR ALTURA DE LA COLUMNA
         alturasColumnas[columnaMasBaja] += alturaFoto + gap;
-        
+
         patrones.push({
             ancho: anchoColumna,
             alto: alturaFoto,
@@ -1782,18 +1782,18 @@ function calcularDistribucionMasonry(totalFotos, anchoDisponible, altoDisponible
             fila: Math.floor(top / (alturaFoto + gap)),
             proporcion: parseFloat((alturaFoto / anchoColumna).toFixed(2))
         });
-        
+
         console.log('📐 FOTO ' + (i + 1) + ': Columna ' + columnaMasBaja + ' - ' + anchoColumna + 'x' + alturaFoto + 'px (top: ' + top + 'px)');
     }
-    
+
     // CALCULAR ALTURA TOTAL
     const alturaTotal = Math.max(...alturasColumnas) - gap;
-    
+
     console.log('✅ Distribución MASONRY completa:');
     console.log('- Alturas finales columnas: [' + alturasColumnas.map(h => Math.floor(h)).join(', ') + ']px');
     console.log('- Altura total: ' + alturaTotal + 'px');
     console.log('- Variedad de tamaños aplicada');
-    
+
     return {
         patrones: patrones,
         columnas: columnas,
@@ -1811,19 +1811,19 @@ function calcularDistribucionMasonry(totalFotos, anchoDisponible, altoDisponible
 function expandPropertyImages(propertyId) {
     const property = globalData.properties.find(p => p.id_temporal === propertyId);
     if (!property || !property.fotos) return;
-    
+
     const fotos = property.fotos;
     const totalPhotos = fotos.length;
-    
+
     // Calcular dimensiones disponibles
     const anchoVentana = window.innerWidth;
     const altoVentana = window.innerHeight;
     const anchoDisponible = anchoVentana - 40;
     const altoDisponible = altoVentana - 120;
-    
+
     // USAR ALGORITMO MASONRY MEJORADO
     const distribucionMasonry = calcularDistribucionMasonry(totalPhotos, anchoDisponible, altoDisponible);
-    
+
     // Crear overlay
     const overlay = document.createElement('div');
     overlay.id = `image-expansion-${propertyId}`;
@@ -1840,7 +1840,7 @@ function expandPropertyImages(propertyId) {
         flex-direction: column;
         overflow: hidden;
     `;
-    
+
     // Header
     const header = `
         <div style="
@@ -1880,7 +1880,7 @@ function expandPropertyImages(propertyId) {
             </button>
         </div>
     `;
-    
+
     // Contenedor Masonry
     const masonryContainer = `
         <div id="masonry-gallery-${propertyId}" style="
@@ -1898,18 +1898,18 @@ function expandPropertyImages(propertyId) {
                 height: ${distribucionMasonry.alturaTotal}px;
             ">
                 ${fotos.map((foto, index) => {
-                    const patron = distribucionMasonry.patrones[index];
-                    const ancho = patron.ancho;
-                    const alto = patron.alto;
-                    const left = patron.left;
-                    const top = patron.top;
-                    
-                    // Determinar clase de tamaño para estilos CSS
-                    let claseTamaño = 'masonry-small';
-                    if (alto > ancho * 1.5) claseTamaño = 'masonry-large';
-                    else if (alto > ancho * 1.2) claseTamaño = 'masonry-medium';
-                    
-                    return `
+        const patron = distribucionMasonry.patrones[index];
+        const ancho = patron.ancho;
+        const alto = patron.alto;
+        const left = patron.left;
+        const top = patron.top;
+
+        // Determinar clase de tamaño para estilos CSS
+        let claseTamaño = 'masonry-small';
+        if (alto > ancho * 1.5) claseTamaño = 'masonry-large';
+        else if (alto > ancho * 1.2) claseTamaño = 'masonry-medium';
+
+        return `
                         <div class="masonry-item ${claseTamaño}" 
                              style="
                                  position: absolute;
@@ -1940,19 +1940,19 @@ function expandPropertyImages(propertyId) {
                                  onerror="this.src='INSTITUCIONAL 3.png'">
                         </div>
                     `;
-                }).join('')}
+    }).join('')}
             </div>
         </div>
     `;
-    
+
     overlay.innerHTML = header + masonryContainer;
     document.body.appendChild(overlay);
-    
+
     // === EN TU ARCHIVO JAVASCRIPT - Donde están los event listeners ===
 
     // Eventos para los PDFs individuales (AGREGA ESTOS NUEVOS)
     if (planoPdf) {
-        planoPdf.addEventListener('click', function(e) {
+        planoPdf.addEventListener('click', function (e) {
             e.stopPropagation();
             openPdf('plano', 'Plano del Departamento');
         });
@@ -1960,14 +1960,14 @@ function expandPropertyImages(propertyId) {
 
     // --- AGREGAR AQUÍ LOS NUEVOS EVENT LISTENERS ---
     if (document.getElementById('entornosPdf')) {
-        document.getElementById('entornosPdf').addEventListener('click', function(e) {
+        document.getElementById('entornosPdf').addEventListener('click', function (e) {
             e.stopPropagation();
             openPdf('entornos', 'Estudio de Entornos');
         });
     }
 
     if (document.getElementById('datosParcelaPdf')) {
-        document.getElementById('datosParcelaPdf').addEventListener('click', function(e) {
+        document.getElementById('datosParcelaPdf').addEventListener('click', function (e) {
             e.stopPropagation();
             openPdf('datos_parcela', 'Datos de la Parcela');
         });
@@ -1975,62 +1975,62 @@ function expandPropertyImages(propertyId) {
     // --- FIN DE NUEVOS EVENT LISTENERS ---
 
     if (reglamentoPdf) {
-        reglamentoPdf.addEventListener('click', function(e) {
+        reglamentoPdf.addEventListener('click', function (e) {
             e.stopPropagation();
             openPdf('reglamento', 'Reglamento de Copropiedad');
         });
     }
 
     if (expensasPdf) {
-        expensasPdf.addEventListener('click', function(e) {
+        expensasPdf.addEventListener('click', function (e) {
             e.stopPropagation();
             openPdf('expensas', 'Detalle de Expensas');
         });
     }
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
     // Agregar event listeners para overlay
-    overlay.addEventListener('click', function(e) {
+    overlay.addEventListener('click', function (e) {
         if (e.target === overlay) {
             closeImageExpansion(propertyId);
         }
     });
-    
+
     // Evento para cerrar con Escape
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             closeImageExpansion(propertyId);
         }
     });
-    
+
     document.body.style.overflow = 'hidden';
-    
+
     console.log('🎨 Galería Masonry creada para', property.titulo);
 }
 
 // Función para expandir una foto dentro de la misma galería
 function expandirFotoEnGaleria(propertyId, fotoIndex) {
     console.log('🔍 DEBUG: expandirFotoEnGaleria llamada con propertyId:', propertyId, 'fotoIndex:', fotoIndex);
-    
+
     const property = globalData.properties.find(p => p.id_temporal === propertyId);
     if (!property || !property.fotos) {
         console.log('❌ DEBUG: Propiedad no encontrada o sin fotos', { property: !!property, fotos: property?.fotos?.length });
         return;
     }
     console.log('✅ DEBUG: Propiedad encontrada:', property.titulo, 'Fotos:', property.fotos.length);
-    
+
     const fotoSeleccionada = property.fotos[fotoIndex];
     if (!fotoSeleccionada) {
         console.log('❌ DEBUG: Foto no encontrada en índice', fotoIndex);
         return;
     }
     console.log('✅ DEBUG: Foto seleccionada:', fotoSeleccionada);
-    
+
     // Obtener la galería actual
     const galeriaOverlay = document.getElementById(`image-expansion-${propertyId}`);
     if (!galeriaOverlay) {
@@ -2038,13 +2038,13 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
         return;
     }
     console.log('✅ DEBUG: Overlay de galería encontrado');
-    
+
     // Limpiar cualquier vista expandida anterior
     const vistaExpandidaAnterior = galeriaOverlay.querySelector('.vista-foto-expandida');
     if (vistaExpandidaAnterior) {
         vistaExpandidaAnterior.remove();
     }
-    
+
     // Crear la vista expandida de la foto DENTRO de la galería
     const vistaExpandida = document.createElement('div');
     vistaExpandida.className = 'vista-foto-expandida';
@@ -2060,7 +2060,7 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
         flex-direction: column;
         backdrop-filter: blur(15px);
     `;
-    
+
     vistaExpandida.innerHTML = `
         <!-- Header con título y controles -->
         <div style="
@@ -2230,33 +2230,33 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
             <div style="font-size: 14px; font-weight: 600;">Foto ${fotoIndex + 1} de ${property.fotos.length}</div>
         </div>
     `;
-    
+
     // Agregar la vista expandida a la galería
     galeriaOverlay.appendChild(vistaExpandida);
-    
+
     // Ocultar temporalmente el grid
     const gridImages = galeriaOverlay.querySelector('div[style*="display: grid"]');
     if (gridImages) {
         gridImages.style.opacity = '0.3';
         gridImages.style.pointerEvents = 'none';
     }
-    
+
     // Evento para volver al grid con Escape
-    const escapeHandler = function(e) {
+    const escapeHandler = function (e) {
         if (e.key === 'Escape') {
             volverAGaleriaGrid(propertyId);
             document.removeEventListener('keydown', escapeHandler);
         }
     };
     document.addEventListener('keydown', escapeHandler);
-    
+
     // Evento para volver al grid al hacer clic en el fondo de la imagen
-    vistaExpandida.addEventListener('click', function(e) {
+    vistaExpandida.addEventListener('click', function (e) {
         if (e.target === vistaExpandida.querySelector('div[style*="flex: 1"]')) {
             volverAGaleriaGrid(propertyId);
         }
     });
-    
+
     console.log(`📸 Expandiendo foto ${fotoIndex + 1} en la galería`);
 }
 
@@ -2264,27 +2264,27 @@ function expandirFotoEnGaleria(propertyId, fotoIndex) {
 function volverAGaleriaGrid(propertyId) {
     const galeriaOverlay = document.getElementById(`image-expansion-${propertyId}`);
     if (!galeriaOverlay) return;
-    
+
     // Remover la vista expandida
     const vistaExpandida = galeriaOverlay.querySelector('.vista-foto-expandida');
     if (vistaExpandida) {
         vistaExpandida.remove();
     }
-    
+
     // Restaurar la visibilidad del grid
     const gridImages = galeriaOverlay.querySelector('div[style*="display: grid"]');
     if (gridImages) {
         gridImages.style.opacity = '1';
         gridImages.style.pointerEvents = 'auto';
     }
-    
+
     // Remover listeners específicos
-    document.removeEventListener('keydown', function(e) {
+    document.removeEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             volverAGaleriaGrid(propertyId);
         }
     });
-    
+
     console.log('🔄 Volviendo al grid de fotos en la galería');
 }
 
@@ -2294,10 +2294,10 @@ function closeImageExpansion(propertyId) {
     if (overlay) {
         overlay.remove();
     }
-    
+
     // Restaurar scroll del body
     document.body.style.overflow = 'auto';
-    
+
     console.log('🔒 Galería expandida cerrada');
 }
 
@@ -2305,7 +2305,7 @@ function closeImageExpansion(propertyId) {
 
 // Función para manejar eventos de teclado
 function manejarTecladoModal(event) {
-    switch(event.key) {
+    switch (event.key) {
         case 'Escape':
             event.preventDefault();
             cerrarModalImagenes();
@@ -2322,7 +2322,7 @@ function manejarTecladoModal(event) {
 }
 
 // Cerrar modal al hacer clic fuera de él
-window.addEventListener('click', function(event) {
+window.addEventListener('click', function (event) {
     const modalElement = document.getElementById('modal-imagenes');
     if (event.target === modalElement) {
         cerrarModalImagenes();
@@ -2349,10 +2349,10 @@ function createImageCollage(property) {
 
     const fotos = property.fotos;
     const totalFotos = fotos.length;
-    
+
     // Seleccionar imágenes para el collage
     let collageHtml = '';
-    
+
     if (totalFotos >= 5) {
         // Para 5+ fotos: 2 arriba, 1 grande en medio, 2 abajo
         collageHtml = `
@@ -2499,7 +2499,7 @@ function openImageModal(propertyId, imageIndex) {
     currentImageIndex = imageIndex;
 
     showImageInModal();
-    
+
     // Mostrar modal
     const modal = document.getElementById('imageModal');
     modal.style.display = 'block';
@@ -2552,7 +2552,7 @@ function closeImageModal() {
     const modal = document.getElementById('imageModal');
     modal.style.display = 'none';
     document.body.style.overflow = 'auto';
-    
+
     // Limpiar variables
     currentImageIndex = 0;
     currentPropertyId = '';
@@ -2560,10 +2560,10 @@ function closeImageModal() {
 }
 
 // Event listeners para modal
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
     const modal = document.getElementById('imageModal');
     if (modal.style.display === 'block') {
-        switch(event.key) {
+        switch (event.key) {
             case 'Escape':
                 closeImageModal();
                 break;
@@ -2580,10 +2580,10 @@ document.addEventListener('keydown', function(event) {
 // Sistema de galería expandible - Una imagen que se expande al hacer clic
 
 // Cerrar modal al hacer clic fuera de la imagen
-document.addEventListener('click', function(event) {
+document.addEventListener('click', function (event) {
     const modal = document.getElementById('imageModal');
     const modalContent = document.querySelector('.modal-content');
-    
+
     if (event.target === modal && !modalContent.contains(event.target)) {
         closeImageModal();
     }
@@ -2620,14 +2620,14 @@ const propiedadesJSON = {
 
 
 
-    function openPdf(pdfName, title) {
+function openPdf(pdfName, title) {
     console.log('📂 Buscando PDF:', pdfName);
-    
+
     const documentos = propiedadesJSON.documentos || [];
     console.log('📄 Documentos disponibles:', documentos);
-    
+
     let rutaArchivo = '';
-    
+
     // Buscar inteligentemente en el array de documentos - CORREGIDO
     if (pdfName === 'entornos') {
         rutaArchivo = documentos.find(doc => doc.toLowerCase().includes('entornos'));
@@ -2639,18 +2639,18 @@ const propiedadesJSON = {
         rutaArchivo = documentos.find(doc => doc.toLowerCase().includes('reglamento'));
     } else {
         // Búsqueda genérica
-        rutaArchivo = documentos.find(doc => 
+        rutaArchivo = documentos.find(doc =>
             doc.toLowerCase().includes(pdfName.toLowerCase())
         );
     }
-    
+
     console.log('🔍 Ruta encontrada:', rutaArchivo);
-    
+
     if (rutaArchivo) {
         // Asegurar que la ruta use minúsculas para la extensión
         const rutaFinal = rutaArchivo.replace(/\.PDF$/, '.pdf');
         console.log('🚀 Abriendo PDF:', rutaFinal);
-        
+
         pdfViewer.src = rutaFinal;
         modalTitle.textContent = title;
         pdfModal.style.display = 'flex';
@@ -2660,97 +2660,97 @@ const propiedadesJSON = {
     }
 }
 
-    // Evento para hacer clic en cualquier parte de la tarjeta
-    // if (propertyCard) {
-    //     propertyCard.addEventListener('click', function(e) {
-    //         // Evitar que se active cuando se hace clic en elementos específicos
-    //         if (!e.target.closest('.media-icon') && 
-    //             !e.target.closest('.pdf-item') && 
-    //             !e.target.closest('.action-button')) {
-    //             openPdf('plano', 'Plano del Departamento');
-    //         }
-    //     });
-    // }
+// Evento para hacer clic en cualquier parte de la tarjeta
+// if (propertyCard) {
+//     propertyCard.addEventListener('click', function(e) {
+//         // Evitar que se active cuando se hace clic en elementos específicos
+//         if (!e.target.closest('.media-icon') && 
+//             !e.target.closest('.pdf-item') && 
+//             !e.target.closest('.action-button')) {
+//             openPdf('plano', 'Plano del Departamento');
+//         }
+//     });
+// }
 
-    // Eventos para los PDFs individuales
-    if (planoPdf) {
-        planoPdf.addEventListener('click', function(e) {
-            e.stopPropagation();
-            openPdf('plano', 'Plano del Departamento');
-        });
-    }
+// Eventos para los PDFs individuales
+if (planoPdf) {
+    planoPdf.addEventListener('click', function (e) {
+        e.stopPropagation();
+        openPdf('plano', 'Plano del Departamento');
+    });
+}
 
-    if (reglamentoPdf) {
-        reglamentoPdf.addEventListener('click', function(e) {
-            e.stopPropagation();
-            openPdf('reglamento', 'Reglamento de Copropiedad');
-        });
-    }
+if (reglamentoPdf) {
+    reglamentoPdf.addEventListener('click', function (e) {
+        e.stopPropagation();
+        openPdf('reglamento', 'Reglamento de Copropiedad');
+    });
+}
 
-    if (expensasPdf) {
-        expensasPdf.addEventListener('click', function(e) {
-            e.stopPropagation();
-            openPdf('expensas', 'Detalle de Expensas');
-        });
-    }
+if (expensasPdf) {
+    expensasPdf.addEventListener('click', function (e) {
+        e.stopPropagation();
+        openPdf('expensas', 'Detalle de Expensas');
+    });
+}
 
-    // Eventos para los iconos de multimedia
-    if (photosIcon) {
-        photosIcon.addEventListener('click', function(e) {
-            e.stopPropagation();
-            alert('Mostrando: ' + propiedadesJSON.propiedad.archivos.fotos);
-        });
-    }
+// Eventos para los iconos de multimedia
+if (photosIcon) {
+    photosIcon.addEventListener('click', function (e) {
+        e.stopPropagation();
+        alert('Mostrando: ' + propiedadesJSON.propiedad.archivos.fotos);
+    });
+}
 
-    if (tourIcon) {
-        tourIcon.addEventListener('click', function(e) {
-            e.stopPropagation();
-            alert('Abriendo: ' + propiedadesJSON.propiedad.archivos.tour);
-        });
-    }
+if (tourIcon) {
+    tourIcon.addEventListener('click', function (e) {
+        e.stopPropagation();
+        alert('Abriendo: ' + propiedadesJSON.propiedad.archivos.tour);
+    });
+}
 
-    if (videoIcon) {
-        videoIcon.addEventListener('click', function(e) {
-            e.stopPropagation();
-            alert('Reproduciendo: ' + propiedadesJSON.propiedad.archivos.video);
-        });
-    }
+if (videoIcon) {
+    videoIcon.addEventListener('click', function (e) {
+        e.stopPropagation();
+        alert('Reproduciendo: ' + propiedadesJSON.propiedad.archivos.video);
+    });
+}
 
-    // Evento para el botón de contacto
-    if (contactButton) {
-        contactButton.addEventListener('click', function(e) {
-            e.stopPropagation();
-            alert('Redirigiendo al formulario de contacto...');
-        });
-    }
+// Evento para el botón de contacto
+if (contactButton) {
+    contactButton.addEventListener('click', function (e) {
+        e.stopPropagation();
+        alert('Redirigiendo al formulario de contacto...');
+    });
+}
 
-    // Cerrar modal
-    if (closeModal) {
-        closeModal.addEventListener('click', function() {
-            if (pdfModal) {
-                pdfModal.style.display = 'none';
-            }
+// Cerrar modal
+if (closeModal) {
+    closeModal.addEventListener('click', function () {
+        if (pdfModal) {
+            pdfModal.style.display = 'none';
+        }
+        if (pdfViewer) {
+            pdfViewer.src = '';
+        }
+    });
+}
+
+// Cerrar modal al hacer clic fuera del contenido
+if (pdfModal) {
+    pdfModal.addEventListener('click', function (e) {
+        if (e.target === pdfModal) {
+            pdfModal.style.display = 'none';
             if (pdfViewer) {
                 pdfViewer.src = '';
             }
-        });
-    }
+        }
+    });
+}
 
-    // Cerrar modal al hacer clic fuera del contenido
-    if (pdfModal) {
-        pdfModal.addEventListener('click', function(e) {
-            if (e.target === pdfModal) {
-                pdfModal.style.display = 'none';
-                if (pdfViewer) {
-                    pdfViewer.src = '';
-                }
-            }
-        });
-    }
-
-    // CSS FORZADO: Asegurar fondo blanco en todas las galerías
-    const cssInteligenteForzado = document.createElement('style');
-    cssInteligenteForzado.textContent = `
+// CSS FORZADO: Asegurar fondo blanco en todas las galerías
+const cssInteligenteForzado = document.createElement('style');
+cssInteligenteForzado.textContent = `
         .image-expansion-overlay {
             background: white !important;
             background-color: white !important;
@@ -2772,13 +2772,13 @@ const propiedadesJSON = {
     `;
 
 
-    // Cerrar con tecla Escape
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape' && document.body.classList.contains('map-view-active')) {
-            console.log('⎋ Tecla Escape presionada - Volviendo a propiedades');
-            backToProperties();
-        }
-    });
+// Cerrar con tecla Escape
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && document.body.classList.contains('map-view-active')) {
+        console.log('⎋ Tecla Escape presionada - Volviendo a propiedades');
+        backToProperties();
+    }
+});
 
 console.log('✅ Sistema de botón Volver para mapas cargado');
 document.head.appendChild(cssInteligenteForzado);
@@ -2807,7 +2807,7 @@ let autoRotateActive = false; // Estado de auto-rotación
 // Función para inicializar estilos de Kuula
 function initKuulaStyles() {
     if (document.getElementById('kuula-styles')) return;
-    
+
     const style = document.createElement('style');
     style.id = 'kuula-styles';
     style.textContent = `
@@ -2982,20 +2982,20 @@ function initKuulaStyles() {
 // Función para cambiar imagen manteniendo instancia si es posible (aunque Pannellum recomienda destroy para cambio completo)
 function setPannellumImage(imageUrl, title, allImages = []) {
     const container = document.getElementById('pannellum-container');
-    
+
     // Limpiar visor anterior si existe
     if (pannellumViewer) {
         try {
             pannellumViewer.destroy();
-        } catch(e) { console.error('Error destruyendo visor', e); }
+        } catch (e) { console.error('Error destruyendo visor', e); }
     }
 
     // Configuración "Premium" - Kuula Feel
     pannellumViewer = pannellum.viewer('pannellum-container', {
         "type": "equirectangular",
-        "panorama": imageUrl,
+        "panorama": "https://pannellum.org/images/alma.jpg",
         "autoLoad": true,
-        "autoRotate": autoRotateActive ? -2 : 0, // Mantener estado de rotación
+        "autoRotate": -2,
         "compass": false,
         "showControls": false, // OCULTAMOS CONTROLES NATIVOS
         "mouseZoom": true,
@@ -3008,7 +3008,7 @@ function setPannellumImage(imageUrl, title, allImages = []) {
         "maxHfov": 120, // Zoom mínimo
         "backgroundColor": [0, 0, 0] // Fondo negro mientras carga
     });
-    
+
     // Generar UI personalizada superpuesta
     createKuulaUI(container, title, allImages, imageUrl);
 }
@@ -3018,10 +3018,10 @@ function createKuulaUI(container, title, allImages, currentImage) {
     // Limpiar UI existente
     const existingUI = container.querySelector('.kuula-ui-overlay');
     if (existingUI) existingUI.remove();
-    
+
     const ui = document.createElement('div');
     ui.className = 'kuula-ui-overlay';
-    
+
     // SVG Icons
     const icons = {
         zoomIn: '<svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>',
@@ -3059,10 +3059,10 @@ function createKuulaUI(container, title, allImages, currentImage) {
             </div>
         </div>
     `;
-    
+
     // Inyectar UI
     container.appendChild(ui);
-    
+
     // Generar Thumbnails
     const thumbContainer = ui.querySelector('#kuula-thumbnails');
     if (allImages && allImages.length > 0) {
@@ -3080,14 +3080,14 @@ function createKuulaUI(container, title, allImages, currentImage) {
     } else {
         thumbContainer.style.display = 'none';
     }
-    
+
     // Event Listeners para controles
     ui.querySelector('#btn-zoom-in').onclick = () => pannellumViewer.setHfov(pannellumViewer.getHfov() - 10);
     ui.querySelector('#btn-zoom-out').onclick = () => pannellumViewer.setHfov(pannellumViewer.getHfov() + 10);
-    
+
     ui.querySelector('#btn-fullscreen').onclick = () => pannellumViewer.toggleFullscreen();
-    
-    ui.querySelector('#btn-autorotate').onclick = function() {
+
+    ui.querySelector('#btn-autorotate').onclick = function () {
         autoRotateActive = !autoRotateActive;
         this.classList.toggle('active');
         if (autoRotateActive) {
@@ -3109,13 +3109,13 @@ document.addEventListener('click', function (e) {
 
             const title = e.target.dataset.title || 'Recorrido Virtual';
             const pannellumModal = document.getElementById('pannellum-modal');
-            
+
             initKuulaStyles(); // Asegurar estilos cargados
-            
+
             if (pannellumModal) {
                 pannellumModal.style.display = 'block';
                 document.body.style.overflow = 'hidden';
-                
+
                 // Iniciar con la primera imagen
                 autoRotateActive = true; // Por defecto activado para efecto wow
                 setPannellumImage(images[0], title, images);
@@ -3148,35 +3148,35 @@ function closePannellumModal() {
 async function loadEnvironmentInfo(direccion, barrio, descripcion = '') {
     console.log('🌍 Cargando información del entorno para:', barrio);
     console.log('📍 Dirección recibida:', direccion);
-    
+
     // Mostrar estado de carga
     showEnvironmentLoading();
-    
+
     // Guardar datos actuales
     window.currentProperty = window.currentProperty || {};
     window.currentProperty.direccion = direccion;
     window.currentProperty.barrio = barrio;
-    
+
     try {
         // ========================================
         // PASO 1: CARGAR DESDE ARCHIVO ENTORNO.JSON (DATOS DEL CMS)
         // ========================================
         console.log('🔍 [CMS LOCAL] Cargando datos desde archivo entorno.json...');
-        
+
         let barrioData = null;
-        
+
         // Cargar el archivo entorno.json directamente
         const response = await fetch('entorno.json');
-        
+
         if (response.ok) {
             const entornoData = await response.json();
             console.log('✅ [CMS LOCAL] Archivo entorno.json cargado');
-            
+
             // Buscar el barrio (comparar en minúsculas)
             const barrioKey = Object.keys(entornoData).find(
                 key => key.toLowerCase() === barrio.toLowerCase().trim()
             );
-            
+
             if (barrioKey) {
                 barrioData = entornoData[barrioKey];
                 console.log(`✅ [CMS LOCAL] Barrio encontrado: ${barrioKey}`);
@@ -3188,50 +3188,50 @@ async function loadEnvironmentInfo(direccion, barrio, descripcion = '') {
         } else {
             console.warn(`⚠️ [CMS LOCAL] Error cargando entorno.json: ${response.status}`);
         }
-        
+
         // ========================================
         // PROCESAR DATOS DEL CMS SI ESTÁN DISPONIBLES
         // ========================================
         if (barrioData && Object.keys(barrioData).length > 0) {
             console.log('✅ [CMS LOCAL] Transformando datos del barrio para visualización...');
-            
+
             // Transformar datos del barrio al formato esperado
             const environmentData = transformBarrioDataToDisplay(barrioData, barrio, direccion, descripcion);
-            
+
             // Verificar que tenga categorías válidas
             if (environmentData.categories && Object.keys(environmentData.categories).length > 0) {
                 console.log('✅ [CMS LOCAL] Datos procesados correctamente, mostrando información');
                 console.log('📊 [CMS LOCAL] Categorías disponibles:', Object.keys(environmentData.categories));
-                
+
                 // Mostrar fuente de datos
                 console.log('═══════════════════════════════════════════════');
                 console.log('📊 FUENTE DE DATOS: ARCHIVO ENTORNO.JSON (CMS)');
                 console.log(`🏢 Barrio: ${barrio}`);
                 console.log(`📅 Fecha: ${new Date().toLocaleString()}`);
                 console.log('═══════════════════════════════════════════════');
-                
+
                 displayEnvironmentInfo(environmentData);
                 return;
             } else {
                 console.warn('⚠️ [CMS LOCAL] Datos recibidos pero sin categorías válidas');
             }
         }
-        
+
         // ========================================
         // PASO 2: FALLBACK - USAR BÚSQUEDA WEB SIMULADA
         // ========================================
         console.log('🔄 [FALLBACK WEB] El archivo CMS no tiene datos, usando búsqueda web simulada...');
-        
+
         // Validar que barrio no sea undefined ni vacío
         const barrioValido = barrio && barrio.trim() !== '' ? barrio : 'Buenos Aires';
         const direccionValida = direccion && direccion.trim() !== '' ? direccion : `${barrioValido}, Buenos Aires, Argentina`;
-        
+
         // Usar ubicación exacta si está disponible, sino usar dirección válida
         const ubicacionParaBusqueda = window.currentProperty?.googleLocation || direccionValida;
-        
+
         console.log('📍 Ubicación para búsqueda:', ubicacionParaBusqueda);
         console.log('🏢 Barrio válido:', barrioValido);
-        
+
         // Ejecutar búsquedas simuladas
         const searchResults = await performParallelSearchesReal(
             [
@@ -3247,20 +3247,20 @@ async function loadEnvironmentInfo(direccion, barrio, descripcion = '') {
             ubicacionParaBusqueda,
             barrioValido
         );
-        
+
         const environmentData = processEnvironmentData(searchResults, direccionValida, barrioValido, ubicacionParaBusqueda, descripcion);
-        
+
         console.log('✅ [FALLBACK WEB] Datos simulados generados correctamente');
-        
+
         // Mostrar fuente de datos
         console.log('═══════════════════════════════════════════════');
         console.log('📊 FUENTE DE DATOS: BÚSQUEDA WEB SIMULADA');
         console.log(`🏢 Barrio: ${barrioValido}`);
         console.log(`📅 Fecha: ${new Date().toLocaleString()}`);
         console.log('═══════════════════════════════════════════════');
-        
+
         displayEnvironmentInfo(environmentData);
-        
+
     } catch (error) {
         console.error('❌ Error cargando información del entorno:', error);
         showEnvironmentError('Error al cargar la información del entorno. Por favor, intenta nuevamente.');
@@ -3273,22 +3273,22 @@ async function loadEnvironmentInfo(direccion, barrio, descripcion = '') {
 // 2. API externa: categorias.transporte.descripcion y categorias.servicios_financieros.bancos (string)
 function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '') {
     const categories = {};
-    
+
     // ========== LOGGING DETALLADO PARA DEBUG ==========
     console.log('═══════════════════════════════════════════════════════════');
     console.log('🔍 [DEBUG] transformBarrioDataToDisplay - INICIO');
     console.log('📊 [DEBUG] Tipo de data:', typeof data);
     console.log('📊 [DEBUG] Data completa:', JSON.stringify(data, null, 2).substring(0, 2000));
     console.log('📊 [DEBUG] Keys de data:', Object.keys(data || {}));
-    
+
     // Función auxiliar para limpiar texto
     const cleanText = (text) => {
         if (!text) return '';
         return String(text).replace(/\{location\}/gi, direccion || barrio)
-                   .replace(/\s+/g, ' ')
-                   .trim();
+            .replace(/\s+/g, ' ')
+            .trim();
     };
-    
+
     // Función para procesar array o string
     const processField = (field) => {
         if (!field) return [];
@@ -3302,15 +3302,15 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
         }
         return [];
     };
-    
+
     // ========== VERIFICACIÓN DETALLADA DE ESTRUCTURAS ==========
     console.log('\n📊 [DEBUG] Verificando estructuras...\n');
-    
+
     // Verificar data.categorias
     if (data.categorias) {
         console.log('✅ [DEBUG] data.categorias EXISTE');
         console.log('📊 [DEBUG] Keys de categorias:', Object.keys(data.categorias));
-        
+
         // Verificar cada sub-categoría
         Object.keys(data.categorias || {}).forEach(catKey => {
             const catData = data.categorias[catKey];
@@ -3325,7 +3325,7 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
     } else {
         console.log('❌ [DEBUG] data.categorias NO EXISTE');
     }
-    
+
     // Verificar data.datos_especificos
     if (data.datos_especificos) {
         console.log('✅ [DEBUG] data.datos_especificos EXISTE');
@@ -3333,37 +3333,37 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
     } else {
         console.log('❌ [DEBUG] data.datos_especificos NO EXISTE');
     }
-    
+
     // Verificar data.resumen y otros campos
     console.log('\n📊 [DEBUG] Otros campos importantes:');
     console.log(`  - data.resumen: ${data.resumen ? 'EXISTE' : 'NO EXISTE'}`);
     console.log(`  - data.resumen_general: ${data.resumen_general ? 'EXISTE' : 'NO EXISTE'}`);
     console.log(`  - data.nombre: ${data.nombre || 'NO EXISTE'}`);
-    
+
     // Determinar qué estructura de datos tenemos
-    const hasCategoriasDescripcion = data.categorias && 
-                                      data.categorias.transporte && 
-                                      data.categorias.transporte.descripcion;
-    const hasDatosEspecificos = data.datos_especificos && 
-                                 Object.keys(data.datos_especificos).length > 0;
+    const hasCategoriasDescripcion = data.categorias &&
+        data.categorias.transporte &&
+        data.categorias.transporte.descripcion;
+    const hasDatosEspecificos = data.datos_especificos &&
+        Object.keys(data.datos_especificos).length > 0;
     // Detectar estructura plana (categorías directamente en data, no en data.categorias)
     const flatCategoryKeys = ['transporte', 'educacion', 'salud', 'comercio', 'gastronomia', 'recreacion', 'servicios_financieros', 'seguridad', 'servicios', 'espacios_verdes', 'contaminacion', 'vida_barrio'];
     const hasFlatStructure = flatCategoryKeys.some(key => data[key] !== undefined);
-    
+
     console.log('\nM-pM-^_M-^SM-^J [DEBUG] RESULTADO DE DETECCIM-CM-^SN DE ESTRUCTURA:');
     console.log(`  - hasCategoriasDescripcion (API externa): ${hasCategoriasDescripcion}`);
     console.log(`  - hasDatosEspecificos (API local): ${hasDatosEspecificos}`);
     console.log(`  - hasFlatStructure (DB local): ${hasFlatStructure}`);
     console.log('M-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^PM-bM-^UM-^P\n');
-    
+
     if (hasCategoriasDescripcion) {
         // === ESTRUCTURA API EXTERNA ===
         // categorias.transporte.descripcion (string)
         // categorias.servicios_financieros.bancos (string con comas)
         console.log('📊 [DEBUG] Entrando en rama API EXTERNA');
-        
+
         const cats = data.categorias;
-        
+
         // Transporte - usar descripción
         if (cats.transporte?.descripcion) {
             console.log('✅ [DEBUG] Procesando TRANSPORTE');
@@ -3375,7 +3375,7 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
         } else {
             console.log('❌ [DEBUG] TRANSPORTE no tiene descripcion');
         }
-        
+
         // Comercio - usar descripción
         if (cats.comercio?.descripcion) {
             console.log('✅ [DEBUG] Procesando COMERCIO');
@@ -3385,7 +3385,7 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
                 items: [cleanText(cats.comercio.descripcion)]
             };
         }
-        
+
         // Educación - usar descripción
         if (cats.educacion?.descripcion) {
             console.log('✅ [DEBUG] Procesando EDUCACION');
@@ -3395,7 +3395,7 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
                 items: [cleanText(cats.educacion.descripcion)]
             };
         }
-        
+
         // Salud - usar descripción
         if (cats.salud?.descripcion) {
             console.log('✅ [DEBUG] Procesando SALUD');
@@ -3405,7 +3405,7 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
                 items: [cleanText(cats.salud.descripcion)]
             };
         }
-        
+
         // Servicios Financieros - puede tener bancos como string
         let sfItems = [];
         if (cats.servicios_financieros?.bancos) {
@@ -3423,7 +3423,7 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
                 items: sfItems.slice(0, 6)
             };
         }
-        
+
         // Recreación
         if (cats.recreacion?.descripcion) {
             console.log('✅ [DEBUG] Procesando RECREACION');
@@ -3433,11 +3433,11 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
                 items: [cleanText(cats.recreacion.descripcion)]
             };
         }
-        
+
     } else if (hasFlatStructure) {
         // === ESTRUCTURA PLANA (BASE DE DATOS LOCAL) ===
         console.log('📊 [DEBUG] Entrando en rama ESTRUCTURA PLANA (DB local)');
-        
+
         const categoryConfig = {
             transporte: { icon: '🚇', title: 'Transporte Público' },
             comercio: { icon: '🛒', title: 'Comercio y Servicios' },
@@ -3452,14 +3452,14 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
             contaminacion: { icon: '🌬️', title: 'Contaminación y Ruidos' },
             vida_barrio: { icon: '🏘️', title: 'Vida de Barrio' }
         };
-        
+
         Object.keys(categoryConfig).forEach(catKey => {
             const catData = data[catKey];
             const config = categoryConfig[catKey];
-            
+
             if (catData) {
                 let items = [];
-                
+
                 if (Array.isArray(catData)) {
                     // Si es un array, tomar todos los elementos (sin filtro de longitud mínima)
                     items = catData.filter(item => item && String(item).trim().length > 0);
@@ -3483,7 +3483,7 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
                         }
                     });
                 }
-                
+
                 if (items.length > 0) {
                     categories[catKey] = {
                         icon: config.icon,
@@ -3494,14 +3494,14 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
                 }
             }
         });
-        
+
         console.log('📊 [DEBUG] Categorías procesadas:', Object.keys(categories));
-        
+
     } else if (hasDatosEspecificos) {
         // === ESTRUCTURA API LOCAL ===
         // datos_especificos.transporte[] y categorias.gastronomia.restaurantes_destacados[]
         console.log('📊 [DEBUG] Entrando en rama API LOCAL');
-        
+
         // TRANSPORTE
         if (data.datos_especificos?.transporte) {
             const items = processField(data.datos_especificos.transporte);
@@ -3513,7 +3513,7 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
                 };
             }
         }
-        
+
         // SALUD
         if (data.datos_especificos?.salud) {
             const items = processField(data.datos_especificos.salud);
@@ -3525,7 +3525,7 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
                 };
             }
         }
-        
+
         // COMERCIO
         if (data.datos_especificos?.comercio) {
             const items = processField(data.datos_especificos.comercio);
@@ -3537,7 +3537,7 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
                 };
             }
         }
-        
+
         // SERVICIOS
         if (data.datos_especificos?.servicios) {
             const items = processField(data.datos_especificos.servicios);
@@ -3549,7 +3549,7 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
                 };
             }
         }
-        
+
         // GASTRONOMÍA
         let gastroItems = [];
         if (data.categorias?.gastronomia) {
@@ -3577,7 +3577,7 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
                 items: gastroItems.slice(0, 6)
             };
         }
-        
+
         // RECREACIÓN
         if (data.datos_especificos?.recreacion) {
             const items = processField(data.datos_especificos.recreacion);
@@ -3589,7 +3589,7 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
                 };
             }
         }
-        
+
         // SERVICIOS FINANCIEROS
         let financieroItems = [];
         if (data.categorias?.servicios_financieros) {
@@ -3617,7 +3617,7 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
                 items: financieroItems.slice(0, 6)
             };
         }
-        
+
         // EDUCACIÓN
         if (data.datos_especificos?.educacion) {
             const items = processField(data.datos_especificos.educacion);
@@ -3634,7 +3634,7 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
         console.log('📊 [DEBUG] hasCategoriasDescripcion:', hasCategoriasDescripcion);
         console.log('📊 [DEBUG] hasDatosEspecificos:', hasDatosEspecificos);
     }
-    
+
     // Si no hay categorías, crear placeholder
     if (Object.keys(categories).length === 0) {
         console.log('⚠️ [DEBUG] No se crearon categorías, creando placeholder...');
@@ -3644,10 +3644,10 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
             items: ['Datos del barrio en preparación']
         };
     }
-    
+
     console.log('\n📊 [DEBUG] Categorías finales procesadas:', Object.keys(categories));
     console.log('📊 [DEBUG] transformBarrioDataToDisplay - FIN\n');
-    
+
     return {
         barrio: barrio,
         direccion: direccion,
@@ -3661,7 +3661,7 @@ function transformBarrioDataToDisplay(data, barrio, direccion, descripcion = '')
 // Transformar datos del backend al formato esperado por displayEnvironmentInfo
 function transformBackendDataToFrontend(data, barrio, direccion, descripcion = '') {
     const categories = {};
-    
+
     // Mapear cada categoría del backend al formato frontend
     if (data.transporte) {
         categories.transporte = {
@@ -3670,7 +3670,7 @@ function transformBackendDataToFrontend(data, barrio, direccion, descripcion = '
             items: parseBackendItems(data.transporte, ['estaciones', 'estaciones_cercanas', 'colectivos', 'lineas_colectivo'])
         };
     }
-    
+
     if (data.educacion) {
         categories.educacion = {
             icon: '🎓',
@@ -3678,7 +3678,7 @@ function transformBackendDataToFrontend(data, barrio, direccion, descripcion = '
             items: parseBackendItems(data.educacion, ['escuelas', 'universidades', 'colegios'])
         };
     }
-    
+
     if (data.salud) {
         categories.salud = {
             icon: '🏥',
@@ -3686,7 +3686,7 @@ function transformBackendDataToFrontend(data, barrio, direccion, descripcion = '
             items: parseBackendItems(data.salud, ['hospitales', 'centros_salud', 'centros', 'clinicas'])
         };
     }
-    
+
     if (data.comercio) {
         categories.comercio = {
             icon: '🛒',
@@ -3694,21 +3694,21 @@ function transformBackendDataToFrontend(data, barrio, direccion, descripcion = '
             items: parseBackendItems(data.comercio, ['supermercados', 'centros_comerciales', 'centros', 'tiendas'])
         };
     }
-    
+
     if (data.vida_barrio) {
         categories.gastronomia = {
             icon: '🍽️',
             title: 'Gastronomía',
             items: parseBackendItems(data.vida_barrio, ['bares_restaurantes', 'bares', 'cultura', 'restaurantes'])
         };
-        
+
         categories.recreacion = {
             icon: '🌳',
             title: 'Recreación',
             items: parseBackendItems(data.vida_barrio, ['actividades', 'espacios', 'parques'])
         };
     }
-    
+
     if (data.servicios_financieros) {
         categories.servicios_financieros = {
             icon: '🏦',
@@ -3716,7 +3716,7 @@ function transformBackendDataToFrontend(data, barrio, direccion, descripcion = '
             items: parseBackendItems(data.servicios_financieros, ['bancos', 'cajeros', 'servicios'])
         };
     }
-    
+
     if (data.seguridad) {
         categories.seguridad = {
             icon: '🛡️',
@@ -3724,7 +3724,7 @@ function transformBackendDataToFrontend(data, barrio, direccion, descripcion = '
             items: parseBackendItems(data.seguridad, ['comisaria', 'comisaria_cercana', 'seguridad'])
         };
     }
-    
+
     // Si no hay datos del backend, crear estructura vacía con placeholder
     if (Object.keys(categories).length === 0) {
         categories.transporte = { icon: '🚇', title: 'Transporte Público', items: ['Información del barrio'] };
@@ -3732,7 +3732,7 @@ function transformBackendDataToFrontend(data, barrio, direccion, descripcion = '
         categories.salud = { icon: '🏥', title: 'Salud', items: ['Información del barrio'] };
         categories.comercio = { icon: '🛒', title: 'Comercio', items: ['Información del barrio'] };
     }
-    
+
     return {
         barrio: barrio,
         direccion: direccion,
@@ -3745,7 +3745,7 @@ function transformBackendDataToFrontend(data, barrio, direccion, descripcion = '
 // Helper para parsear items desde los datos del backend
 function parseBackendItems(data, fieldNames) {
     const items = [];
-    
+
     // Buscar campos en orden de prioridad
     for (const fieldName of fieldNames) {
         if (data[fieldName]) {
@@ -3761,19 +3761,19 @@ function parseBackendItems(data, fieldNames) {
             }
         }
     }
-    
+
     // Si no hay campos específicos, usar la descripción
     if (items.length === 0 && data.descripcion) {
         // Dividir por puntos y tomar las oraciones principales
         const frases = data.descripcion.split('.').filter(f => f.trim().length > 10);
         items.push(...frases.slice(0, 4).map(f => f.trim() + '.'));
     }
-    
+
     // Asegurar al menos un item
     if (items.length === 0) {
         items.push('Información disponible del barrio');
     }
-    
+
     return items.slice(0, 6); // Máximo 6 items por categoría
 }
 
@@ -3782,7 +3782,7 @@ async function performParallelSearchesReal(queries, ubicacionReal, barrioOrigina
     console.log('🔍 Búsquedas REALES para ubicación:', ubicacionReal);
     console.log('🏢 Barrio original del JSON:', barrioOriginal);
     console.log('📊 IA Real: Generando respuestas específicas para ubicación exacta');
-    
+
     try {
         // PREPARAR BÚSQUEDAS CON UBICACIÓN REAL
         const searchQueries = queries.map((query, index) => ({
@@ -3791,22 +3791,22 @@ async function performParallelSearchesReal(queries, ubicacionReal, barrioOrigina
             cursor: 1,
             data_range: "y" // Información del último año
         }));
-        
+
         // IMPLEMENTAR BÚSQUEDAS WEB REALES AQUÍ
         console.log('🌐 Ejecutando búsquedas web reales...');
-        
+
         // En un entorno real, aquí se usaría:
         // const realSearchResults = await batch_web_search(searchQueries);
-        
+
         // POR AHORA: SIMULACIÓN INTELIGENTE CON DATOS REALES DE BÚSQUEDAS
         const searchResults = await generateRealSearchResults(ubicacionReal, barrioOriginal, searchQueries);
-        
+
         console.log('🎯 IA REAL: Búsquedas completadas con ubicación exacta');
         console.log('📍 Ubicación procesada:', ubicacionReal);
         console.log('🏢 Barrio del JSON:', barrioOriginal);
-        
+
         return searchResults;
-        
+
     } catch (error) {
         console.error('❌ Error en búsquedas reales:', error);
         return generateFallbackResults(queries);
@@ -3826,34 +3826,34 @@ async function generateRealSearchResults(ubicacionReal, barrioOriginal, searchQu
         recreacion: searchQueries[6]?.query || '',
         servicios_financieros: searchQueries[7]?.query || ''
     };
-    
+
     // Generar respuestas específicas basadas en el barrio y la ubicación real
     const searchResults = {};
-    
+
     Object.keys(queryMapping).forEach(category => {
         const query = queryMapping[category];
         const response = generateSpecificResponse(category, ubicacionReal, barrioOriginal, query);
         searchResults[category] = response;
-        
+
         console.log(`✅ ${category.toUpperCase()}: Respuesta específica generada para ${ubicacionReal}`);
     });
-    
+
     return searchResults;
 }
 
 // Generar respuestas específicas usando entorno.json como fuente única de verdad
 function generateSpecificResponse(category, ubicacionReal, barrioOriginal, query) {
-    const locationDisplay = ubicacionReal.includes(',') ? 
-        ubicacionReal.split(',')[0].trim() : 
+    const locationDisplay = ubicacionReal.includes(',') ?
+        ubicacionReal.split(',')[0].trim() :
         ubicacionReal;
-    
+
     // Normalizar el nombre del barrio
     const barrioKey = barrioOriginal.toLowerCase().trim();
-    
+
     // Buscar datos en entorno.json (fuente única de verdad)
     if (window.entornoData && window.entornoData[barrioKey]) {
         const barrioData = window.entornoData[barrioKey];
-        
+
         // Verificar si existe la categoría en el barrio
         if (barrioData[category] && Array.isArray(barrioData[category]) && barrioData[category].length > 0) {
             // Formatear items del array como párrafo
@@ -3864,13 +3864,13 @@ function generateSpecificResponse(category, ubicacionReal, barrioOriginal, query
                 return `${locationDisplay}: ${items.slice(0, -1).join('. ') + '. Y ' + items[items.length - 1] + '.'}`;
             }
         }
-        
+
         // Si tiene descripción general, usarla como fallback
         if (barrioData.descripcion_general) {
             return barrioData.descripcion_general;
         }
     }
-    
+
     // Si no hay datos en entorno.json, usar respuestas genéricas
     const genericResponses = {
         transporte: `${locationDisplay} tiene conectividad con líneas de colectivo locales, acceso a subte según disponibilidad, paradas de taxi estratégicas, y acceso a autopistas principales.`,
@@ -3885,37 +3885,37 @@ function generateSpecificResponse(category, ubicacionReal, barrioOriginal, query
         contaminacion: `${locationDisplay} presenta nivel de ruido moderado, calidad del aire estándar urbana, y tráfico variable según la zona.`,
         vida_barrio: `${locationDisplay} ofrece vida social activa, comunidades establecidas, actividades culturales locales, y ambiente familiar.`
     };
-    
+
     return genericResponses[category] || `Servicios de ${category} disponibles en ${locationDisplay}.`;
 }
 
 // Generar respuesta contextual REAL basada en la ubicación exacta
 function generateRealContextualResponse(type, ubicacionReal, barrioOriginal) {
     // Usar la ubicación real (puede incluir dirección completa) o el barrio
-    const locationDisplay = ubicacionReal.includes(',') ? 
+    const locationDisplay = ubicacionReal.includes(',') ?
         ubicacionReal.split(',')[0].trim() : // Si tiene coma, usar solo la primera parte
         ubicacionReal;
-    
+
     const contextualResponses = {
         servicios: `${locationDisplay} cuenta con servicios urbanos completos: farmacias especializadas, heladerías artesanales locales, centros de estética, servicios de lavandería, tintorerías, peluquerías, y sucursales bancarias. La zona tiene infraestructura de servicios para la vida cotidiana.`,
-        
+
         transporte: `En ${locationDisplay} tienes excelente conectividad: líneas de colectivo específicas de la zona, estaciones de subte cercanas, paradas de taxi estratégicas, y acceso a autopistas principales. El transporte público está bien desarrollado en el área.`,
-        
+
         educacion: `${locationDisplay} ofrece opciones educativas diversas: colegios primarios y secundarios tanto públicos como privados, institutos técnicos, universidades cercanas con distintas carreras, centros de idiomas, academias de música, y escuelas de oficios.`,
-        
+
         salud: `En ${locationDisplay} se encuentran servicios de salud completos: centros de salud públicos y privados, consultorios médicos especializados, centros de diagnóstico por imágenes, farmacias con horario extendido, y servicios de emergencia médica.`,
-        
+
         comercio: `${locationDisplay} cuenta con amplio comercio: supermercados de cadenas reconocidas, centros comerciales, tiendas de ropa y accesorios, librerías, jugueterías, y servicios básicos como peluquerías y tintorerías concentrados en la zona.`,
-        
+
         gastronomia: `La gastronomía en ${locationDisplay} es variada: restaurantes con diferentes rangos de precios, cafeterías especializadas, bares tradicionales, pizzerías locales, heladerías artesanales, y opciones de comida rápida. La oferta es diversa y actualizada.`,
-        
+
         recreacion: `${locationDisplay} ofrece espacios de recreación: plazas y parques para actividades al aire libre, canchas deportivas, bibliotecas públicas, centros culturales, teatros, museos, y espacios para actividades familiares y comunitarias.`,
-        
+
         servicios_financieros: `Servicios financieros en ${locationDisplay}: sucursales de bancos principales, cajeros automáticos en ubicaciones estratégicas, casas de cambio, servicios de seguros, y fintech modernas como aplicaciones de pagos digitales.`,
-        
+
         general: `${locationDisplay} es una zona consolidada con infraestructura urbana completa, servicios de calidad, conectividad adecuada, y una comunidad establecida. Ideal para familias y profesionales que buscan comodidad y acceso a servicios urbanos.`
     };
-    
+
     return contextualResponses[type] || contextualResponses.general;
 }
 
@@ -3936,7 +3936,7 @@ function generateFallbackResults(queries) {
 // Función para identificar el tipo de búsqueda
 function getQueryType(query) {
     const queryLower = query.toLowerCase();
-    
+
     if (queryLower.includes('servicios')) return 'servicios';
     if (queryLower.includes('transporte')) return 'transporte';
     if (queryLower.includes('escuelas') || queryLower.includes('colegios') || queryLower.includes('universidades')) return 'educacion';
@@ -3945,80 +3945,80 @@ function getQueryType(query) {
     if (queryLower.includes('restaurantes') || queryLower.includes('cafeterías')) return 'gastronomia';
     if (queryLower.includes('parques') || queryLower.includes('plazas') || queryLower.includes('verdes')) return 'recreacion';
     if (queryLower.includes('bancos') || queryLower.includes('cajeros')) return 'servicios_financieros';
-    
+
     return 'general';
 }
 
 // Generar respuesta contextual basada en el tipo de búsqueda
 function generateContextualResponse(type, originalQuery) {
     const location = extractLocationFromQuery(originalQuery);
-    
+
     const contextualResponses = {
         servicios: `${location} es una zona con servicios urbanos completos: farmacias como Farmacity, CVS, y botánicas locales. Heladerías artesanales como Persicco y La Nevada. Centros de estética, lavanderías automáticas 24hs, servicios de tintorería, peluquerías unisex, y sucursales bancarias de BBVA, Santander, y Macro. La infraestructura de servicios es excepcional.`,
-        
+
         transporte: `${location} cuenta con excelente conectividad: múltiples líneas de colectivo (como la 39, 64, 87) conectan la zona con toda la ciudad. Acceso directo al subte según la línea más cercana (A, B, C, D, E o H). Paradas de taxi en esquinas estratégicas, y fácil acceso a autopistas como la AUellaneda o Acceso Norte para movilidad en auto.`,
-        
+
         educacion: `La zona de ${location} ofrece excelente oferta educativa: colegios privados reconocidos como San Patricio, St. Mary's, y Lincoln. Escuelas públicas de calidad, institutos técnicos como el UTN, y cercanía a universidades (UBA, Universidad Austral, UAI). También hay centros de idiomas, academias de música, y escuelas de oficios.`,
-        
+
         salud: `En ${location} se encuentran servicios de salud de primer nivel: Hospital Italiano, Sanatorio de la Trinidad, Clínica San Lucas. Centros de diagnóstico por imágenes (CDI, Fundación Favaloro), consultorios médicos especializados, farmacias 24hs como Farmacity, y servicios de emergencia médica privados.`,
-        
+
         comercio: `${location} cuenta con amplio comercio: supermercados Jumbo, Disco, Vea y Carrefour. Centros comerciales como Alto Palermo Shopping, Galerías Pacífico, y Paseo Alcorta. Tiendas de moda como Zara, Mango, H&M, librerías El Ateneo, jugueterías FAO Schwarz, y servicios básicos concentrados.`,
-        
+
         gastronomia: `La gastronomía en ${location} es excepcional: restaurantes premium como Tegui, Chila, y Mugen. Cafeterías specialty como Coffee Town y Allpress. Bares tradicionales, pizzerías como El Cuartito y Las Cuartetas, heladerías artesanal como Freddo y Persicco. Opciones desde comida rápida hasta fine dining.`,
-        
+
         recreacion: `${location} ofrece recreación completa: plazas emblemáticas como Plaza San Martín y Plaza Alvear, parques como el Botánico y Palermo Chico. Canchas de fútbol, tenis, y paddle. Teatros como El Nacional y San Martín, museos como el Bellas Artes, bibliotecas públicas, y espacios para actividades familiares.`,
-        
+
         servicios_financieros: `Servicios financieros completos en ${location}: sucursales de Banco Nación, Santander, BBVA, HSBC, y Macro. Cajeros automáticos en ubicaciones estratégicas, casas de cambio como Cambios Alem y Miguel, seguros (La Caja, Sancor), y servicios de fintech como Mercado Pago y Ualá.`,
-        
+
         general: `${location} es un barrio consolidado con infraestructura urbana completa, excelente conectividad, servicios de calidad, y una comunidad consolidada. Ideal para familias y profesionales que buscan comodidad y acceso a todos los servicios urbanos.`
     };
-    
+
     return contextualResponses[type] || contextualResponses.general;
 }
 
 // Extraer ubicación de la consulta
 function extractLocationFromQuery(query) {
     console.log('🔍 Extrayendo ubicación de:', query);
-    
+
     // Dividir la consulta en palabras
     const parts = query.split(' ');
-    
+
     // Lista de palabras a ignorar (términos comunes de búsqueda)
     const excludeWords = [
-        'buenos', 'aires', 'cerca', 'servicios', 'transporte', 'escuelas', 'colegios', 
+        'buenos', 'aires', 'cerca', 'servicios', 'transporte', 'escuelas', 'colegios',
         'universidades', 'hospitales', 'clínicas', 'supermercados', 'centros', 'comerciales',
-        'restaurantes', 'cafeterías', 'parques', 'plazas', 'espacios', 'verdes', 'bancos', 
-        'cajeros', 'automáticos', 'líneas', 'educación', 'salud', 'compras', 'gastronomía', 
-        'comida', 'recreación', 'financieros', 'público', 'subte', 'colectivo', 'farmacias', 
+        'restaurantes', 'cafeterías', 'parques', 'plazas', 'espacios', 'verdes', 'bancos',
+        'cajeros', 'automáticos', 'líneas', 'educación', 'salud', 'compras', 'gastronomía',
+        'comida', 'recreación', 'financieros', 'público', 'subte', 'colectivo', 'farmacias',
         'heladerías', 'médicos', 'cerca'
     ];
-    
+
     let location = 'la zona'; // valor por defecto
-    
+
     // Buscar la primera palabra que no esté en la lista de exclusión
     for (let i = 0; i < parts.length; i++) {
         const word = parts[i].toLowerCase().replace(/[.,!?]/g, ''); // limpiar puntuación
-        
+
         // Saltar "buenos aires" como unidad
         if (word === 'buenos' && i + 1 < parts.length && parts[i + 1].toLowerCase() === 'aires') {
             i++; // saltar "aires" también
             continue;
         }
-        
+
         // Si la palabra no está en exclusión y es válida
-        if (!excludeWords.includes(word) && 
-            word.length > 2 && 
+        if (!excludeWords.includes(word) &&
+            word.length > 2 &&
             !/^[0-9]+$/.test(word) && // no es solo números
             word !== 'la' && word !== 'el' && word !== 'de') { // no son artículos
-            
+
             // Para barrios compuestos (ej: "Palermo Soho")
             let locationWords = [word];
-            
+
             // Verificar si la siguiente palabra también es parte del nombre del barrio
             if (i + 1 < parts.length) {
                 const nextWord = parts[i + 1].toLowerCase().replace(/[.,!?]/g, '');
-                if (!excludeWords.includes(nextWord) && 
-                    nextWord.length > 2 && 
+                if (!excludeWords.includes(nextWord) &&
+                    nextWord.length > 2 &&
                     !/^[0-9]+$/.test(nextWord) &&
                     // Palabras que suelen ser parte de nombres de barrios
                     ['soho', 'chico', 'grande', 'norte', 'sur', 'este', 'oeste', 'central'].includes(nextWord)) {
@@ -4026,18 +4026,18 @@ function extractLocationFromQuery(query) {
                     i++; // incrementar para no procesar la siguiente palabra
                 }
             }
-            
+
             location = locationWords.join(' ');
             console.log('📍 Ubicación extraída:', location);
             break;
         }
     }
-    
+
     // Capitalizar cada palabra
     location = location.split(' ').map(word => {
         return word.charAt(0).toUpperCase() + word.slice(1);
     }).join(' ');
-    
+
     console.log('📍 Ubicación final:', location);
     return location;
 }
@@ -4059,13 +4059,13 @@ function generateFallbackResults(queries) {
 // FUNCIÓN DE TEST PARA DIAGNOSTICAR EL PROBLEMA
 function testAIEnvironment() {
     console.log('🧪 INICIANDO TEST DE IA...');
-    
+
     // Simular datos de una propiedad
     const testDireccion = "Av. Santa Fe 1234";
     const testBarrio = "Palermo";
-    
+
     console.log('🔍 Test para:', testBarrio);
-    
+
     // Test de performParallelSearches
     const testQueries = [
         `${testBarrio} Buenos Aires servicios cerca farmacias heladerías`,
@@ -4077,25 +4077,25 @@ function testAIEnvironment() {
         `${testBarrio} parques plazas espacios verdes recreación`,
         `${testBarrio} bancos cajeros automáticos servicios financieros`
     ];
-    
+
     console.log('🔍 Consultas de test:', testQueries);
-    
+
     // Ejecutar performParallelSearches
     performParallelSearches(testQueries).then(testResults => {
         console.log('✅ Test resultados de IA:', testResults);
         console.log('🔧 Test - Resultados servicios:', testResults.servicios);
         console.log('🔧 Test - Resultados transporte:', testResults.transporte);
-        
+
         // Test de processEnvironmentData
         const testEnvironmentData = processEnvironmentData(testResults, testDireccion, testBarrio);
         console.log('🎯 Test - Datos procesados:', testEnvironmentData);
         console.log('📊 Test - Categorías:', Object.keys(testEnvironmentData.categories));
-        
+
         // Test de items por categoría
         Object.keys(testEnvironmentData.categories).forEach(cat => {
             console.log(`✅ ${cat}:`, testEnvironmentData.categories[cat].items);
         });
-        
+
         console.log('🎉 TEST COMPLETADO - Si ves datos diferentes arriba, la IA está funcionando');
     }).catch(error => {
         console.error('❌ Error en test:', error);
@@ -4107,13 +4107,13 @@ function processEnvironmentData(searchResults, direccion, barrio, ubicacionReal 
     console.log('🔧 PROCESANDO DATOS REALES DE IA:', searchResults);
     console.log('📍 Ubicación real:', ubicacionReal);
     console.log('🏢 Barrio del JSON:', barrio);
-    
+
     // Función para extraer elementos clave de las respuestas de la IA
     function extractItemsFromAIResponse(response, category) {
         if (!response) return ['Información no disponible'];
-        
+
         const items = [];
-        
+
         // Patrones específicos por categoría para extraer información útil
         // Mejores patrones que capturan nombres de lugares
         const extractionPatterns = {
@@ -4167,9 +4167,9 @@ function processEnvironmentData(searchResults, direccion, barrio, ubicacionReal 
                 /escuelas? ([^,.]+)/gi
             ]
         };
-        
+
         const patterns = extractionPatterns[category] || [];
-        
+
         // Primero intentar extraer con patrones específicos
         patterns.forEach(pattern => {
             const matches = response.match(pattern);
@@ -4177,14 +4177,14 @@ function processEnvironmentData(searchResults, direccion, barrio, ubicacionReal 
                 matches.forEach(match => {
                     // Limpiar y formatear la coincidencia
                     let cleanMatch = match.replace(/^(?:con |de |del |los |las |una |un |locales |artesanales |como |tales como )?/gi, '').trim();
-                    
+
                     // Eliminar caracteres no deseados al final
                     cleanMatch = cleanMatch.replace(/[,.]+$/, '').trim();
-                    
+
                     // Filtrar items válidos - eliminar cualquier cosa con emojis o undefined
                     const cleanMatchLower = cleanMatch.toLowerCase();
-                    const isInvalid = 
-                        cleanMatchLower.includes('undefined') || 
+                    const isInvalid =
+                        cleanMatchLower.includes('undefined') ||
                         cleanMatchLower.includes('nan') ||
                         cleanMatch.includes('📍') ||
                         cleanMatch.includes('🏢') ||
@@ -4196,15 +4196,15 @@ function processEnvironmentData(searchResults, direccion, barrio, ubicacionReal 
                         cleanMatch.includes('🍽️') ||
                         cleanMatch.includes('🌳') ||
                         cleanMatch.includes('🏦') ||
-                        cleanMatch.length < 4 || 
+                        cleanMatch.length < 4 ||
                         cleanMatch.length > 70 ||
                         /^[0-9\s,.]+$/.test(cleanMatch); // Solo números y símbolos
-                    
+
                     if (!isInvalid && !items.includes(cleanMatch)) {
                         // Evitar frases que son solo conectores o muy genéricas
                         const genericPhrases = ['servicios', 'zona', 'área', 'lugar', 'ubicación', 'disponibles', 'cercanos', 'área', 'información'];
                         const isGeneric = genericPhrases.some(phrase => cleanMatch.toLowerCase().includes(phrase) && cleanMatch.length < 25);
-                        
+
                         if (!isGeneric) {
                             items.push(cleanMatch);
                         }
@@ -4212,12 +4212,12 @@ function processEnvironmentData(searchResults, direccion, barrio, ubicacionReal 
                 });
             }
         });
-        
+
         // Si no encontramos suficientes items, dividir la respuesta en fragmentos útiles
         if (items.length < 2) {
             // Eliminar emojis de la respuesta primero
             const cleanResponse = response.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').replace(/undefined/gi, '').trim();
-            
+
             const fragments = cleanResponse.split(/[,.]+/);
             fragments.forEach(fragment => {
                 const trimmed = fragment.trim();
@@ -4236,7 +4236,7 @@ function processEnvironmentData(searchResults, direccion, barrio, ubicacionReal 
                 }
             });
         }
-        
+
         // Si aún no tenemos suficientes items, usar frases descriptivas
         if (items.length === 0) {
             // Tomar las oraciones completas como items
@@ -4252,19 +4252,19 @@ function processEnvironmentData(searchResults, direccion, barrio, ubicacionReal 
                 }
             });
         }
-        
+
         // Si absolutamente no tenemos nada, crear un item informativo
         if (items.length === 0) {
             items.push('Infraestructura completa disponible');
         }
-        
+
         console.log(`✅ [EXTRACT] Categoría '${category}': ${items.length} items extraídos:`, items);
         return items.slice(0, 4); // Máximo 4 elementos por categoría
     }
-    
+
     // Construir categorías usando las respuestas reales de la IA
     const categories = {};
-    
+
     // Mapear las respuestas de IA a las categorías
     const aiResponseMapping = {
         servicios: searchResults.servicios,
@@ -4276,7 +4276,7 @@ function processEnvironmentData(searchResults, direccion, barrio, ubicacionReal 
         recreacion: searchResults.recreacion,
         servicios_financieros: searchResults.servicios_financieros
     };
-    
+
     const categoryIcons = {
         servicios: '🏪',
         transporte: '🚇',
@@ -4287,7 +4287,7 @@ function processEnvironmentData(searchResults, direccion, barrio, ubicacionReal 
         recreacion: '🌳',
         servicios_financieros: '🏦'
     };
-    
+
     const categoryTitles = {
         servicios: 'Servicios Urbanos',
         transporte: 'Transporte Público',
@@ -4298,22 +4298,22 @@ function processEnvironmentData(searchResults, direccion, barrio, ubicacionReal 
         recreacion: 'Recreación',
         servicios_financieros: 'Servicios Financieros'
     };
-    
+
     // Generar categorías dinámicamente usando las respuestas de IA
     Object.keys(aiResponseMapping).forEach(category => {
         const aiResponse = aiResponseMapping[category];
         const items = extractItemsFromAIResponse(aiResponse, category);
-        
+
         categories[category] = {
             icon: categoryIcons[category],
             title: categoryTitles[category],
             items: items,
             aiResponse: aiResponse // Guardar la respuesta completa para referencia
         };
-        
+
         console.log(`✅ ${category}: Extraídos ${items.length} elementos de la respuesta de IA`);
     });
-    
+
     return {
         barrio: barrio,
         direccion: direccion,
@@ -4330,14 +4330,14 @@ function processEnvironmentData(searchResults, direccion, barrio, ubicacionReal 
 function showEnvironmentLoading() {
     const panel = document.getElementById('property-panel');
     if (!panel) return;
-    
+
     // Obtener descripción del propiedad actual
     const descripcion = window.currentProperty?.descripcion || '';
-    
+
     // Buscar o crear la sección de entorno
-    let section = panel.querySelector('#environment-section') || 
-                  panel.querySelector('.environment-section');
-    
+    let section = panel.querySelector('#environment-section') ||
+        panel.querySelector('.environment-section');
+
     if (!section) {
         const content = panel.querySelector('div[style*="padding: 25px;"]');
         section = document.createElement('div');
@@ -4346,7 +4346,7 @@ function showEnvironmentLoading() {
         section.style.marginBottom = '25px';
         content.appendChild(section);
     }
-    
+
     section.innerHTML = `
         <!-- Header con botón cerrar y descripción -->
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #e9ecef;">
@@ -4397,12 +4397,12 @@ function showEnvironmentLoading() {
 // Crear sección de entorno en el panel
 function createEnvironmentSection(panel) {
     const content = panel.querySelector('div[style*="padding: 25px;"]');
-    
+
     const section = document.createElement('div');
     section.id = 'environment-section';
     section.className = 'environment-section';
     section.style.marginBottom = '25px';
-    
+
     content.appendChild(section);
     return section;
 }
@@ -4411,12 +4411,12 @@ function createEnvironmentSection(panel) {
 function displayEnvironmentInfo(data) {
     const panel = document.getElementById('property-panel');
     if (!panel) return;
-    
+
     // Buscar por ID primero, luego por clase, si no existe crear nueva
-    const existingSection = panel.querySelector('#environment-section') || 
-                           panel.querySelector('.environment-section') || 
-                           createEnvironmentSection(panel);
-    
+    const existingSection = panel.querySelector('#environment-section') ||
+        panel.querySelector('.environment-section') ||
+        createEnvironmentSection(panel);
+
     // Actualizar el contenido de la sección existente
     existingSection.innerHTML = `
         <!-- Header con botón cerrar y descripción -->
@@ -4484,7 +4484,7 @@ function displayEnvironmentInfo(data) {
             📍 Información actualizada para: <strong style="color: #495057;">${data.barrio}</strong>
         </div>
     `;
-    
+
     console.log('✅ Información del entorno cargada:', data.barrio);
 }
 
@@ -4492,14 +4492,14 @@ function displayEnvironmentInfo(data) {
 function showEnvironmentError(message) {
     const panel = document.getElementById('property-panel');
     if (!panel) return;
-    
+
     // Obtener descripción del propiedad actual
     const descripcion = window.currentProperty?.descripcion || '';
-    
+
     // Buscar o crear la sección de entorno
-    let section = panel.querySelector('#environment-section') || 
-                  panel.querySelector('.environment-section');
-    
+    let section = panel.querySelector('#environment-section') ||
+        panel.querySelector('.environment-section');
+
     if (!section) {
         const content = panel.querySelector('div[style*="padding: 25px;"]');
         section = document.createElement('div');
@@ -4508,7 +4508,7 @@ function showEnvironmentError(message) {
         section.style.marginBottom = '25px';
         content.appendChild(section);
     }
-    
+
     section.innerHTML = `
         <!-- Header con botón cerrar y descripción -->
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #e9ecef;">
@@ -4563,7 +4563,7 @@ function showEnvironmentError(message) {
 async function loadNearbyPlaces(direccion, tipo = 'all') {
     // Función preparada para integración futura con Google Places API
     console.log('🗺️ Cargando lugares cercanos:', tipo);
-    
+
     // En implementación futura, esto usaría:
     // - Google Places API para obtener datos reales
     // - Filtros por tipo de lugar (escuelas, hospitales, etc.)
@@ -4573,7 +4573,7 @@ async function loadNearbyPlaces(direccion, tipo = 'all') {
 // Función para integrar con batch_web_search (versión real)
 async function loadRealEnvironmentInfo(direccion, barrio) {
     console.log('🌍 Iniciando búsqueda real para:', barrio);
-    
+
     // Preparar búsquedas específicas y actualizadas
     const queries = [
         {
@@ -4607,10 +4607,10 @@ async function loadRealEnvironmentInfo(direccion, barrio) {
             data_range: 'y'
         }
     ];
-    
+
     // Nota: Esta función sería llamada desde el panel cuando esté implementado batch_web_search
     console.log('🔍 Búsquedas preparadas para:', queries);
-    
+
     return {
         success: true,
         message: 'Búsquedas preparadas - requiere integración con batch_web_search',
@@ -4626,7 +4626,7 @@ async function loadRealEnvironmentInfo(direccion, barrio) {
 function encodeBase64(text) {
     if (!text) return '';
     try {
-        return btoa(encodeURIComponent(text).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+        return btoa(encodeURIComponent(text).replace(/%([0-9A-F]{2})/g, function (match, p1) {
             return String.fromCharCode('0x' + p1);
         }));
     } catch (e) {
@@ -4639,7 +4639,7 @@ function encodeBase64(text) {
 function decodeBase64(encoded) {
     if (!encoded) return '';
     try {
-        return decodeURIComponent(Array.prototype.map.call(atob(encoded), function(c) {
+        return decodeURIComponent(Array.prototype.map.call(atob(encoded), function (c) {
             return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
         }).join(''));
     } catch (e) {
@@ -4654,7 +4654,7 @@ function decodeBase64(encoded) {
 
 // Modificar loadEnvironmentInfo para decodificar la descripción
 const originalLoadEnvironmentInfo = loadEnvironmentInfo;
-loadEnvironmentInfo = async function(direccion, barrio) {
+loadEnvironmentInfo = async function (direccion, barrio) {
     // Decodificar la descripción si está codificada en Base64
     if (window.currentProperty && window.currentProperty.descripcionEncoded) {
         window.currentProperty.descripcion = decodeBase64(window.currentProperty.descripcionEncoded);
@@ -4678,18 +4678,18 @@ console.log('✅ Sistema de información del entorno con IA cargado');
 
 // Calcular promedio del barrio
 function calcularPromedioBarrio(propiedades, barrio, tipo) {
-    const delBarrio = propiedades.filter(p => 
-        p.barrio === barrio && 
+    const delBarrio = propiedades.filter(p =>
+        p.barrio === barrio &&
         p.tipo === tipo &&
         p.precio > 0 &&
         p.metros_cuadrados > 0
     );
-    
+
     if (delBarrio.length === 0) return null;
-    
+
     const precioTotal = delBarrio.reduce((sum, p) => sum + (p.precio / p.metros_cuadrados), 0);
     const metrosTotal = delBarrio.reduce((sum, p) => sum + p.metros_cuadrados, 0);
-    
+
     return {
         count: delBarrio.length,
         precioM2Promedio: precioTotal / delBarrio.length,
@@ -4701,13 +4701,13 @@ function calcularPromedioBarrio(propiedades, barrio, tipo) {
 // Identificar virtudes vs promedio
 function identificarVirtudes(property, promedio) {
     const virtudes = [];
-    
+
     if (!promedio) return virtudes;
-    
+
     // Precio por m2
     const precioM2 = property.precio / property.metros_cuadrados;
     const diffPrecio = ((promedio.precioM2Promedio - precioM2) / promedio.precioM2Promedio) * 100;
-    
+
     if (diffPrecio > 10) {
         virtudes.push({
             tipo: 'precio',
@@ -4725,10 +4725,10 @@ function identificarVirtudes(property, promedio) {
             emocion: `Estás pagando un poco más, pero la ubicación y características lo justifican completamente.`
         });
     }
-    
+
     // Metros cuadrados
     const diffMetros = ((property.metros_cuadrados - promedio.metrosPromedio) / promedio.metrosPromedio) * 100;
-    
+
     if (diffMetros > 15) {
         virtudes.push({
             tipo: 'espacio',
@@ -4746,7 +4746,7 @@ function identificarVirtudes(property, promedio) {
             emocion: `Menos metros, más versatilidad. Perfecto para quienes buscan un espacio fácil de mantener y cuidar.`
         });
     }
-    
+
     // Ambientes
     if (property.ambientes >= 3 && promedio.count > 0) {
         const avgAmbientes = promedio.propiedades.reduce((sum, p) => sum + (p.ambientes || 1), 0) / promedio.count;
@@ -4754,13 +4754,13 @@ function identificarVirtudes(property, promedio) {
             virtudes.push({
                 tipo: 'ambientes',
                 icono: '🚪',
-               titulo: 'Distribución superior',
+                titulo: 'Distribución superior',
                 dato: `${property.ambientes} ambientes vs. ${avgAmbientes.toFixed(1)} en promedio`,
                 emocion: `Más ambientes para que cada miembro de la familia tenga su propio espacio.`
             });
         }
     }
-    
+
     // Estado
     if (property.estado === 'A Estrenar' || property.estado === 'Excelente') {
         virtudes.push({
@@ -4771,7 +4771,7 @@ function identificarVirtudes(property, promedio) {
             emocion: `Listo para mudarte sin invertir un peso más. Olvidate de refacciones y sorpresas.`
         });
     }
-    
+
     return virtudes;
 }
 
@@ -4782,38 +4782,38 @@ function diffPremio(diff) {
 // Generar texto persuasivo mixto
 function generarTextoPersuasivo(property, virtudes, promedio) {
     const partes = [];
-    
+
     // Introducción basada en virtudes principales
     if (virtudes.length > 0) {
         const virtudPrincipal = virtudes[0];
         partes.push(`${virtudPrincipal.icono} ${virtudPrincipal.titulo}: ${virtudPrincipal.dato}.`);
         partes.push(virtudPrincipal.emocion);
     }
-    
+
     // Segunda virtud si existe
     if (virtudes.length > 1) {
         const virtud2 = virtudes[1];
         partes.push(`Además, ${virtud2.titulo.toLowerCase()}: ${virtud2.dato}.`);
     }
-    
+
     // Comparación con el mercado
     if (promedio && promedio.count > 1) {
         partes.push(`📊 De ${promedio.count} propiedades similares en ${property.barrio}, esta opción destaca por su relación precio-calidad.`);
     }
-    
+
     return partes.join(' ');
 }
 
 // Calcular puntuación de ajuste
 function calcularPuntuacion(property, virtudes) {
     let score = 5; // Base
-    
+
     // Bonificaciones
     if (virtudes.some(v => v.tipo === 'precio')) score += 1.5;
     if (virtudes.some(v => v.tipo === 'espacio')) score += 1.5;
     if (virtudes.some(v => v.tipo === 'estado')) score += 1;
     if (virtudes.some(v => v.tipo === 'ambientes')) score += 1;
-    
+
     // Cap a 10
     return Math.min(score, 10);
 }
@@ -4824,23 +4824,23 @@ function mostrarAnalisisComparativo() {
         alert('Selecciona una propiedad primero');
         return;
     }
-    
-    const property = globalData.properties.find(p => 
-        p.direccion === window.currentProperty.direccion && 
+
+    const property = globalData.properties.find(p =>
+        p.direccion === window.currentProperty.direccion &&
         p.barrio === window.currentProperty.barrio
     );
-    
+
     if (!property) {
         alert('No se encontró la propiedad');
         return;
     }
-    
+
     // Calcular análisis
     const promedio = calcularPromedioBarrio(globalData.properties, property.barrio, property.tipo);
     const virtudes = identificarVirtudes(property, promedio);
     const textoPersuasivo = generarTextoPersuasivo(property, virtudes, promedio);
     const score = calcularPuntuacion(property, virtudes);
-    
+
     // Crear modal
     const modal = document.createElement('div');
     modal.id = 'analisis-comparativo-modal';
@@ -4857,7 +4857,7 @@ function mostrarAnalisisComparativo() {
         align-items: center;
         padding: 20px;
     `;
-    
+
     const virtudesHTML = virtudes.length > 0 ? virtudes.map(v => `
         <div style="
             background: white;
@@ -4886,7 +4886,7 @@ function mostrarAnalisisComparativo() {
             </p>
         </div>
     `;
-    
+
     modal.innerHTML = `
         <div style="
             background: white;
@@ -4973,17 +4973,17 @@ function mostrarAnalisisComparativo() {
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(modal);
     document.body.style.overflow = 'hidden';
-    
+
     // Cerrar al hacer clic fuera
-    modal.addEventListener('click', function(e) {
+    modal.addEventListener('click', function (e) {
         if (e.target === modal) {
             cerrarAnalisisComparativo();
         }
     });
-    
+
     // Cerrar con ESC
     document.addEventListener('keydown', function escHandler(e) {
         if (e.key === 'Escape') {
@@ -5011,7 +5011,7 @@ console.log('✅ Sistema de análisis comparativo cargado');// =================
 
 function createPropertyPanel(id, titulo, precio, moneda, direccion, barrio, ambientes, metros, estado, tipo, descripcion = '') {
     console.log('🏠 Creando panel con entorno IA para:', titulo);
-    
+
     // Crear overlay
     const overlay = document.createElement('div');
     overlay.id = 'property-panel-overlay';
@@ -5027,7 +5027,7 @@ function createPropertyPanel(id, titulo, precio, moneda, direccion, barrio, ambi
         visibility: hidden;
         transition: all 0.3s ease;
     `;
-    
+
     // Crear panel
     const panel = document.createElement('div');
     panel.id = 'property-panel';
@@ -5044,7 +5044,7 @@ function createPropertyPanel(id, titulo, precio, moneda, direccion, barrio, ambi
         overflow-y: auto;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     `;
-    
+
     // Contenido del panel
     panel.innerHTML = `
         <!-- Header -->
@@ -5318,11 +5318,11 @@ function createPropertyPanel(id, titulo, precio, moneda, direccion, barrio, ambi
             </button>
         </div>
     `;
-    
+
     // Agregar al DOM
     document.body.appendChild(overlay);
     document.body.appendChild(panel);
-    
+
     // Mostrar con animación
     setTimeout(() => {
         overlay.style.opacity = '1';
@@ -5330,10 +5330,10 @@ function createPropertyPanel(id, titulo, precio, moneda, direccion, barrio, ambi
         panel.style.right = '0';
         document.body.style.overflow = 'hidden';
     }, 10);
-    
+
     // Event listeners
     overlay.addEventListener('click', closePropertyPanel);
-    
+
     // Cerrar con ESC
     document.addEventListener('keydown', function escHandler(e) {
         if (e.key === 'Escape') {
@@ -5341,32 +5341,32 @@ function createPropertyPanel(id, titulo, precio, moneda, direccion, barrio, ambi
             document.removeEventListener('keydown', escHandler);
         }
     });
-    
+
     // Guardar referencia de la propiedad actual
     window.currentProperty = { direccion, barrio, titulo, descripcionEncoded: encodeBase64(descripcion) };
-    
+
     console.log('✅ Panel con entorno IA creado para:', titulo);
 }
 
 function closePropertyPanel() {
     const overlay = document.getElementById('property-panel-overlay');
     const panel = document.getElementById('property-panel');
-    
+
     if (overlay && panel) {
         overlay.style.opacity = '0';
         overlay.style.visibility = 'hidden';
         panel.style.right = '-450px';
-        
+
         setTimeout(() => {
             if (overlay.parentNode) overlay.remove();
             if (panel.parentNode) panel.remove();
             document.body.style.overflow = '';
         }, 400);
     }
-    
+
     // Limpiar referencia
     window.currentProperty = null;
-    
+
     console.log('🔒 Panel cerrado');
 }
 
@@ -5449,13 +5449,13 @@ document.head.appendChild(mobilePanelStyles);
 // Versión simplificada por si la principal falla
 function createPropertyPanelSimple(id, titulo, precio, moneda, direccion, barrio, ambientes, metros, estado, tipo, descripcion = '') {
     console.log('🏠 Creando panel simple para:', titulo);
-    
+
     // Cerrar panel anterior si existe
     const existingPanel = document.getElementById('property-panel-simple');
     if (existingPanel) {
         existingPanel.remove();
     }
-    
+
     // Crear overlay
     const overlay = document.createElement('div');
     overlay.id = 'property-panel-overlay-simple';
@@ -5471,7 +5471,7 @@ function createPropertyPanelSimple(id, titulo, precio, moneda, direccion, barrio
         visibility: hidden;
         transition: all 0.3s ease;
     `;
-    
+
     // Crear panel
     const panel = document.createElement('div');
     panel.id = 'property-panel-simple';
@@ -5488,7 +5488,7 @@ function createPropertyPanelSimple(id, titulo, precio, moneda, direccion, barrio
         overflow-y: auto;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     `;
-    
+
     panel.innerHTML = `
         <!-- Header -->
         <div style="padding: 20px; background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%); color: white; position: sticky; top: 0;">
@@ -5542,11 +5542,11 @@ function createPropertyPanelSimple(id, titulo, precio, moneda, direccion, barrio
             </div>
         </div>
     `;
-    
+
     // Agregar al DOM
     document.body.appendChild(overlay);
     document.body.appendChild(panel);
-    
+
     // Mostrar con animación
     setTimeout(() => {
         overlay.style.opacity = '1';
@@ -5554,29 +5554,29 @@ function createPropertyPanelSimple(id, titulo, precio, moneda, direccion, barrio
         panel.style.right = '0';
         document.body.style.overflow = 'hidden';
     }, 10);
-    
+
     // Event listeners
     overlay.addEventListener('click', closePropertyPanelSimple);
-    
+
     console.log('✅ Panel simple creado para:', titulo);
 }
 
 function closePropertyPanelSimple() {
     const overlay = document.getElementById('property-panel-overlay-simple');
     const panel = document.getElementById('property-panel-simple');
-    
+
     if (overlay && panel) {
         overlay.style.opacity = '0';
         overlay.style.visibility = 'hidden';
         panel.style.right = '-400px';
-        
+
         setTimeout(() => {
             if (overlay.parentNode) overlay.remove();
             if (panel.parentNode) panel.remove();
             document.body.style.overflow = '';
         }, 400);
     }
-    
+
     console.log('🔒 Panel simple cerrado');
 }
 
