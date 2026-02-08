@@ -2993,9 +2993,9 @@ function setPannellumImage(imageUrl, title, allImages = []) {
     // Configuración "Premium" - Kuula Feel
     pannellumViewer = pannellum.viewer('pannellum-container', {
         "type": "equirectangular",
-        "panorama": "https://pannellum.org/images/alma.jpg",
+        "panorama": imageUrl,
         "autoLoad": true,
-        "autoRotate": -2,
+        "autoRotate": autoRotateActive ? -2 : 0, // Mantener estado de rotación
         "compass": false,
         "showControls": false, // OCULTAMOS CONTROLES NATIVOS
         "mouseZoom": true,
