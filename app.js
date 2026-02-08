@@ -2797,98 +2797,331 @@ console.log('🎥 Sistema de videos integrado');
 // PANNELLUM 360 VIEWER - CON GALERÍA
 // ========================================
 
-let pannellumViewer = null;
+// ========================================
+// PANNELLUM 360 VIEWER - KUULA STYLE
+// ========================================
 
-// Función para cambiar la imagen en el visor Pannellum activo
-function setPannellumImage(imageUrl) {
+let pannellumViewer = null;
+let autoRotateActive = false; // Estado de auto-rotación
+
+// Función para inicializar estilos de Kuula
+function initKuulaStyles() {
+    if (document.getElementById('kuula-styles')) return;
+    
+    const style = document.createElement('style');
+    style.id = 'kuula-styles';
+    style.textContent = `
+        /* Contenedor principal del visor */
+        #pannellum-modal {
+            background: #000 !important; /* Fondo negro premium */
+        }
+
+        /* Ocultar controles por defecto de Pannellum */
+        .pnlm-controls-container {
+            display: none !important;
+        }
+        
+        /* Overlay de UI personalizada */
+        .kuula-ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Permitir interacción con el visor debajo */
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        /* Header del visor */
+        .kuula-header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 100%);
+            pointer-events: auto;
+        }
+        
+        .kuula-title {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        .kuula-close-btn {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 20px;
+        }
+        
+        .kuula-close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        /* Controles inferiores */
+        .kuula-bottom-bar {
+            padding: 20px;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+            pointer-events: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        /* Botones de control flotantes */
+        .kuula-controls-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .kuula-btn {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            border-radius: 30px;
+            padding: 8px 16px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        
+        .kuula-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .kuula-btn.active {
+            background: rgba(35, 45, 235, 0.7);
+            border-color: rgba(35, 45, 235, 1);
+        }
+        
+        .kuula-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+        
+        /* Tira de imágenes (Filmstrip) */
+        .kuula-filmstrip {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 5px 0 10px 0;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.3) transparent;
+        }
+        
+        .kuula-filmstrip::-webkit-scrollbar {
+            height: 4px;
+        }
+        
+        .kuula-filmstrip::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+        }
+        
+        .kuula-thumb {
+            width: 80px;
+            height: 50px;
+            border-radius: 6px;
+            border: 2px solid rgba(255,255,255,0.3);
+            cursor: pointer;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.6;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            position: relative;
+        }
+        
+        .kuula-thumb:hover {
+            opacity: 1;
+            transform: translateY(-2px);
+            border-color: white;
+        }
+        
+        .kuula-thumb.active {
+            opacity: 1;
+            border-color: #232deb;
+            box-shadow: 0 0 10px rgba(35, 45, 235, 0.5);
+            transform: scale(1.05);
+        }
+        
+        /* Animación de carga */
+        .pnlm-load-box {
+            background: rgba(0,0,0,0.5) !important;
+            border-radius: 8px !important;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Función para cambiar imagen manteniendo instancia si es posible (aunque Pannellum recomienda destroy para cambio completo)
+function setPannellumImage(imageUrl, title, allImages = []) {
+    const container = document.getElementById('pannellum-container');
+    
+    // Limpiar visor anterior si existe
     if (pannellumViewer) {
-        console.log(`🔄 Recreando visor para: ${imageUrl}`);
-        pannellumViewer.destroy();
+        try {
+            pannellumViewer.destroy();
+        } catch(e) { console.error('Error destruyendo visor', e); }
     }
 
-    // Obtenemos el título desde el botón que abrió el modal. 
-    // Es un poco indirecto, pero funciona sin cambiar mucho el resto del código.
-    const title = document.querySelector('.btn-360[data-images]').dataset.title || 'Visor 360';
-
+    // Configuración "Premium" - Kuula Feel
     pannellumViewer = pannellum.viewer('pannellum-container', {
         "type": "equirectangular",
         "panorama": imageUrl,
-        "title": title,
         "autoLoad": true,
-        "autoRotate": -2,
-        "showControls": true
+        "autoRotate": autoRotateActive ? -2 : 0, // Mantener estado de rotación
+        "compass": false,
+        "showControls": false, // OCULTAMOS CONTROLES NATIVOS
+        "mouseZoom": true,
+        "keyboardZoom": true,
+        "draggable": true,
+        "friction": 0.15, // Más inercia (feel más pesado/premium)
+        "touchPanSpeedCoeffFactor": 1,
+        "hfov": 100, // Campo de visión inicial amplio
+        "minHfov": 50, // Zoom máximo
+        "maxHfov": 120, // Zoom mínimo
+        "backgroundColor": [0, 0, 0] // Fondo negro mientras carga
     });
+    
+    // Generar UI personalizada superpuesta
+    createKuulaUI(container, title, allImages, imageUrl);
+}
+
+// Crear interfaz personalizada
+function createKuulaUI(container, title, allImages, currentImage) {
+    // Limpiar UI existente
+    const existingUI = container.querySelector('.kuula-ui-overlay');
+    if (existingUI) existingUI.remove();
+    
+    const ui = document.createElement('div');
+    ui.className = 'kuula-ui-overlay';
+    
+    // SVG Icons
+    const icons = {
+        zoomIn: '<svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>',
+        zoomOut: '<svg viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2z"/></svg>',
+        rotate: '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/><path d="M7.11 8.53L5.7 7.11C4.8 8.27 4.24 9.61 4.07 11h2.02c.14-.87.49-1.72 1.02-2.47zM6.09 13H4.07c.17 1.39.72 2.73 1.62 3.89l1.41-1.42c-.52-.75-.87-1.59-1.01-2.47zm1.01 5.32c.51.64 1.13 1.18 1.83 1.59l1.09-1.76c-.52-.28-.97-.67-1.35-1.12l-1.57 1.29zm8.56-4.32l-1.41 1.42c.52.75.87 1.59 1.01 2.47h2.02c-.17-1.39-.72-2.73-1.62-3.89zM12 20c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.9-3.09c.38-.45.83-.84 1.35-1.12l1.09 1.76c-.7.41-1.32.95-1.83 1.59l-1.57-1.29-.04.06zM15.07 5.09c-.39-.23-.81-.43-1.26-.59v2.05c.27.09.52.22.75.36l.51-1.82z"/></svg>', // Simplified rotate icon
+        fullscreen: '<svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>'
+    };
+
+    ui.innerHTML = `
+        <div class="kuula-header">
+            <div class="kuula-title">${title}</div>
+            <div class="kuula-close-btn" onclick="closePannellumModal()">✕</div>
+        </div>
+        
+        <div class="kuula-bottom-bar">
+            <!-- Controles flotantes -->
+            <div class="kuula-controls-group">
+                <button class="kuula-btn" id="btn-zoom-in" title="Acercar">
+                    ${icons.zoomIn} 
+                </button>
+                <button class="kuula-btn" id="btn-zoom-out" title="Alejar">
+                    ${icons.zoomOut}
+                </button>
+                <button class="kuula-btn ${autoRotateActive ? 'active' : ''}" id="btn-autorotate" title="Auto-rotación">
+                    Auto-Rotate
+                </button>
+                <button class="kuula-btn" id="btn-fullscreen" title="Pantalla completa">
+                    ${icons.fullscreen}
+                </button>
+            </div>
+            
+            <!-- Tira de imágenes -->
+            <div class="kuula-filmstrip" id="kuula-thumbnails">
+                <!-- Se generan dinámicamente -->
+            </div>
+        </div>
+    `;
+    
+    // Inyectar UI
+    container.appendChild(ui);
+    
+    // Generar Thumbnails
+    const thumbContainer = ui.querySelector('#kuula-thumbnails');
+    if (allImages && allImages.length > 0) {
+        allImages.forEach((img, idx) => {
+            const thumb = document.createElement('div');
+            thumb.className = `kuula-thumb ${img === currentImage ? 'active' : ''}`;
+            thumb.style.backgroundImage = `url('${img}')`;
+            thumb.onclick = (e) => {
+                e.stopPropagation();
+                // Cambiar imagen
+                setPannellumImage(img, title, allImages);
+            };
+            thumbContainer.appendChild(thumb);
+        });
+    } else {
+        thumbContainer.style.display = 'none';
+    }
+    
+    // Event Listeners para controles
+    ui.querySelector('#btn-zoom-in').onclick = () => pannellumViewer.setHfov(pannellumViewer.getHfov() - 10);
+    ui.querySelector('#btn-zoom-out').onclick = () => pannellumViewer.setHfov(pannellumViewer.getHfov() + 10);
+    
+    ui.querySelector('#btn-fullscreen').onclick = () => pannellumViewer.toggleFullscreen();
+    
+    ui.querySelector('#btn-autorotate').onclick = function() {
+        autoRotateActive = !autoRotateActive;
+        this.classList.toggle('active');
+        if (autoRotateActive) {
+            pannellumViewer.setAutoRotate(-2); // Rotación suave izquierda
+        } else {
+            pannellumViewer.stopAutoRotate();
+        }
+    };
 }
 
 document.addEventListener('click', function (e) {
     if (e.target && e.target.classList.contains('btn-360')) {
         const imagesAttr = e.target.dataset.images;
-        if (!imagesAttr) {
-            console.warn('⚠️ Botón 360 sin atributo data-images.');
-            return;
-        }
+        if (!imagesAttr) return;
 
         try {
             const images = JSON.parse(imagesAttr);
-            if (!Array.isArray(images) || images.length === 0) {
-                console.warn('⚠️ data-images no es un array válido o está vacío.');
-                return;
-            }
+            if (!Array.isArray(images) || images.length === 0) return;
 
-            const title = e.target.dataset.title;
+            const title = e.target.dataset.title || 'Recorrido Virtual';
             const pannellumModal = document.getElementById('pannellum-modal');
+            
+            initKuulaStyles(); // Asegurar estilos cargados
             
             if (pannellumModal) {
                 pannellumModal.style.display = 'block';
-                document.body.style.overflow = 'hidden'; // Bloquear scroll del body
+                document.body.style.overflow = 'hidden';
                 
-                if (pannellumViewer) {
-                    pannellumViewer.destroy();
-                }
-
-                const thumbnailsContainer = document.getElementById('pannellum-thumbnails');
-                if (thumbnailsContainer) {
-                    thumbnailsContainer.innerHTML = ''; // Limpiar
-
-                    if (images.length > 1) {
-                        thumbnailsContainer.style.display = 'flex';
-                        images.forEach((imgUrl, index) => {
-                            const thumb = document.createElement('div');
-                            thumb.className = 'pannellum-thumb';
-                            thumb.style.backgroundImage = `url('${imgUrl}')`;
-                            thumb.title = `Ver imagen ${index + 1}`;
-                            thumb.onclick = (event) => {
-                                event.stopPropagation();
-                                setPannellumImage(imgUrl);
-                                // Marcar thumbnail activo
-                                Array.from(thumbnailsContainer.children).forEach(t => t.classList.remove('active'));
-                                thumb.classList.add('active');
-                            };
-                            thumbnailsContainer.appendChild(thumb);
-                        });
-                    } else {
-                        thumbnailsContainer.style.display = 'none';
-                    }
-                } else {
-                    console.warn('⚠️ Contenedor de miniaturas #pannellum-thumbnails no encontrado.');
-                }
-                
-                pannellumViewer = pannellum.viewer('pannellum-container', {
-                    "type": "equirectangular",
-                    "panorama": images[0],
-                    "title": title,
-                    "autoLoad": true,
-                    "autoRotate": -2,
-                    "showControls": true
-                });
-
-                // Marcar primer thumbnail como activo
-                if (thumbnailsContainer && thumbnailsContainer.firstChild) {
-                    thumbnailsContainer.firstChild.classList.add('active');
-                }
+                // Iniciar con la primera imagen
+                autoRotateActive = true; // Por defecto activado para efecto wow
+                setPannellumImage(images[0], title, images);
             }
         } catch (error) {
-            console.error('❌ Error al procesar data-images o inicializar Pannellum:', error);
+            console.error('❌ Error inicializando 360:', error);
         }
     }
 });
