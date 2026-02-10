@@ -245,7 +245,7 @@
     "ambientes": 3,
     "metros_cuadrados": 80,
     "operacion": "venta",
-    "tipo": "ph",
+    "tipo": "departamanto",
     "descripcion": "DEPARTAMENTO ..........",
     "direccion": "",
     "direccion_completa": "Remedios 2834, CABA, Argentina",
@@ -290,12 +290,7 @@
       "imgs/UF005-23.jpeg",
       "imgs/UF005-24.jpeg"
     ],
-    "imagenes_360": [
-      "imgs/360/UF004-13.png",
-      "imgs/360/UF004-14.jpg",
-      "imgs/360/UF004-15.jpg",
-      "imgs/360/UF004-14.jpg"
-    ],
+    "imagenes_360": [],
     "fecha_procesamiento": "2025-11-06T14:30:15.456789"
   }
 ]
