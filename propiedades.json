@@ -293,4 +293,58 @@
     "imagenes_360": [],
     "fecha_procesamiento": "2025-11-06T14:30:15.456789"
   }
+  {
+    "id_temporal": "UF006",
+    "titulo": "Departamento en Balvanera",
+    "barrio": "Balvanera"
+    "precio": 750000,
+    "ambientes": 3,
+    "metros_cuadrados": 50,
+    "operacion": "alquiler",
+    "tipo": "departamanto",
+    "descripcion": "Departamento en Alquiler 3 Ambientes con Expensas Incluidas - Balvanera",
+    "direccion": "",
+    "direccion_completa": "Rincon 336, CABA, Argentina",
+    "antiguedad": 20,
+    "estado": "bueno",
+    "orientacion": "norte",
+    "expensas": 0,
+    "moneda_precio": "ARS",
+    "moneda_expensas": "ARS",
+    "amenities": "xxx",
+    "cochera": "No",
+    "balcon": "Si",
+    "pileta": "No",
+    "acepta_mascotas": "Sí",
+    "aire_acondicionado": "No",
+    "info_multimedia": "Fotos de la propiedad y terraza",
+    "documentos": [],
+    "videos": [],
+    "fotos": [
+      "imgs/UF006-1.jpeg",
+      "imgs/UF006-2.jpeg",
+      "imgs/UF006-3.jpeg",
+      "imgs/UF006-4.jpeg",
+      "imgs/UF006-5.jpeg",
+      "imgs/UF006-6.jpeg",
+      "imgs/UF006-7.jpeg",
+      "imgs/UF006-8.jpeg",
+      "imgs/UF006-9.jpeg",
+      "imgs/UF006-10.jpeg",
+      "imgs/UF006-11.jpeg",
+      "imgs/UF006-12.jpeg"
+    ],
+    "imagenes_360": [
+      "imgs/360/UF006-14.jpeg",
+      "imgs/360/UF006-15.jpeg",
+      "imgs/360/UF006-16.jpeg",
+      "imgs/360/UF006-17.jpeg",
+      "imgs/360/UF006-18.jpeg",
+      "imgs/360/UF006-19.jpeg",
+      "imgs/360/UF006-20.jpeg",
+      "imgs/360/UF006-21.jpeg",
+      "imgs/360/UF006-22.jpeg"
+    ],
+    "fecha_procesamiento": "2025-11-06T14:30:15.456789"
+  }
 ]
