@@ -321,6 +321,7 @@
     "documentos": [],
     "videos": [],
     "fotos": [
+      "imgs/UF006-0.JPG",
       "imgs/UF006-1.JPG",
       "imgs/UF006-2.JPG",
       "imgs/UF006-3.JPG",
@@ -340,7 +341,8 @@
       "imgs/UF006-17.JPG",
       "imgs/UF006-18.JPG",
       "imgs/UF006-19.JPG", 
-      "imgs/UF006-20.JPG"
+      "imgs/UF006-20.JPG",
+      "imgs/UF006-21.JPG"
     ],
     "imagenes_360": [
       "imgs/360/UF006-14.jpeg",
