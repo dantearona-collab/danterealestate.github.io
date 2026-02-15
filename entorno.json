@@ -133,8 +133,8 @@
   },
   "balvanera": {
     "nombre": "Balvanera",
-    "descripcion_general": "Balvanera, un barrio céntrico de Buenos Aires, se caracteriza por su diversidad arquitectónica, que combina edificios históricos con construcciones modernas. Tradicionalmente un barrio de inmigrantes, hoy ofrece una rica mezcla cultural y comercial. Presenta una alta densidad poblacional y una intensa actividad durante el día, disminuyendo considerablemente por la noche en algunas zonas. Su ubicación estratégica, con fácil acceso a otros puntos de la ciudad, lo convierte en un punto atractivo tanto para residentes como para inversores, aunque presenta desafíos en términos de seguridad y congestión vehicular.",
-    "conclusion": "Balvanera presenta un atractivo para inversores inmobiliarios debido a su ubicación estratégica, excelente conectividad y alta densidad poblacional. La demanda de alquileres es constante, especialmente entre estudiantes y jóvenes profesionales. Sin embargo, es crucial considerar los desafíos en términos de seguridad y contaminación al momento de evaluar una inversión. La zona de Once, si bien presenta oportunidades comerciales, requiere un análisis cuidadoso debido a los riesgos asociados a la inseguridad. La revalorización de ciertas áreas, impulsada por proyectos de renovación urbana, podría generar nuevas oportunidades de inversión a mediano y largo plazo.",
+    "descripcion_general": "Balvanera es un barrio de Buenos Aires.",
+    "conclusion": "Balvanera presenta un atractivo para inversores inmobiliarios debido a su ubicación estratégica, excelente conectividad y alta densidad poblacional. La demanda de alquileres es constante, especialmente entre estudiantes y jóvenes profesionales. Sin embargo, es crucial considerar los desafíos en términos de seguridad y contaminación al momento de evaluar una inversión. La zona de Once, si bien presenta oportunidades comerciales, requiere un análisis cuidadoso debido a los riesgos asociados a la inseguridad. La revalorización de ciertas áreas, impulsada por proyectos de renovación urbana, podría generar nuevas oportunidades de inversión a mediano y largo plazo. Ok",
     "puntuacion_general": 74,
     "gastronomia": {
       "puntuacion": 75,
@@ -159,7 +159,10 @@
         "BBVA",
         "ICBC"
       ],
-      "cajeros_automaticos": [],
+      "cajeros_automaticos": [
+        "Red Link",
+        "Banelco"
+      ],
       "sucursales_bancarias": [],
       "otros_servicios": []
     },
@@ -269,11 +272,7 @@
       "puntuacion": 50,
       "descripcion": "La contaminación es un problema significativo en Balvanera, principalmente debido al alto volumen de tráfico vehicular y la actividad comercial intensa. Los niveles de ruido son elevados, especialmente en las avenidas principales y en la zona de Once. La calidad del aire puede verse afectada por las emisiones de los vehículos y la falta de espacios verdes que actúen como pulmones urbanos.",
       "nivel_ruido": "Alto",
-      "fuente": [
-        "Tráfico vehicular",
-        "Actividad comercial",
-        "Construcciones"
-      ]
+      "fuente": "Tráfico vehicular, Actividad comercial, Construcciones"
     },
     "vida_barrio": {
       "puntuacion": 80,
@@ -422,68 +421,122 @@
   },
   "boedo": {
     "nombre": "Boedo",
-    "descripcion_general": "Boedo es un barrio de Buenos Aires.",
-    "conclusion": "Boedo presenta una opción viable para vivir e invertir.",
-    "puntuacion_general": 58,
+    "descripcion_general": "Boedo, ubicado en el sureste de la Ciudad Autónoma de Buenos Aires, es un barrio con una rica historia y una fuerte identidad cultural. Se caracteriza por su arquitectura de casas bajas y sus calles arboladas, aunque también presenta un desarrollo inmobiliario creciente con edificios de mediana altura. Tradicionalmente asociado al tango y a la bohemia, Boedo ha sabido mantener su esencia a la vez que se adapta a los nuevos tiempos. Su ubicación estratégica, con fácil acceso al centro y a otras zonas de la ciudad, lo convierte en un barrio atractivo tanto para residentes como para inversores.",
+    "conclusion": "Boedo presenta un buen potencial para la inversión inmobiliaria. Su ubicación estratégica, su rica historia y su fuerte identidad cultural lo convierten en un barrio atractivo para residentes y turistas. Si bien hay algunos desafíos en materia de seguridad y espacios verdes, las perspectivas de crecimiento son favorables. Se recomienda considerar proyectos de vivienda de mediana altura y locales comerciales que se integren al espíritu del barrio.",
+    "puntuacion_general": 74,
     "gastronomia": {
-      "puntuacion": 72,
-      "descripcion": "Barrio tanguero con oferta gastronómica tradicional. Famoso por sus Parrillas y bodegones de barrio.",
-      "restaurantes_destacados": [],
-      "zonas_gastronomicas": []
+      "puntuacion": 85,
+      "descripcion": "La oferta gastronómica en Boedo es variada y de buena calidad. Se encuentran restaurantes de cocina tradicional argentina, bodegones, pizzerías y parrillas. También hay opciones de cocina internacional y bares de tapas. La Avenida Boedo es un buen lugar para disfrutar de una cena o un almuerzo.",
+      "restaurantes_destacados": [
+        "El Buzón",
+        "La Buena Medida",
+        "Parrilla El Gallego"
+      ],
+      "zonas_gastronomicas": [
+        "La Avenida Boedo concentra gran parte de la oferta gastronómica."
+      ]
     },
     "servicios_financieros": {
-      "puntuacion": 72,
-      "descripcion": "Servicios financieros adecuados con bancos de barrio y cajeros automáticos.",
-      "bancos": [],
+      "puntuacion": 70,
+      "descripcion": "Boedo cuenta con sucursales de los principales bancos del país, así como cajeros automáticos de diferentes redes. También se encuentran casas de cambio y servicios de pago. La disponibilidad de servicios financieros es adecuada para las necesidades de los residentes.",
+      "bancos": [
+        "Banco Nación",
+        "Banco Santander",
+        "Banco Galicia"
+      ],
       "cajeros_automaticos": [],
       "sucursales_bancarias": [],
       "otros_servicios": []
     },
     "transporte": {
-      "puntuacion": 31,
-      "descripcion": "En Boedo tienes conectividad con 31 líneas de colectivos de CABA (modernizadas en 2025 con color azul). Conexión directa con líneas de subte A, B, D, E, H. Paradas estratégicas y acceso rápido a todas las zonas de la ciudad.",
-      "estaciones": [],
-      "colectivos": []
+      "puntuacion": 82,
+      "descripcion": "Boedo cuenta con una buena conectividad gracias a la Línea E del Subte, que lo atraviesa de este a oeste. Además, numerosas líneas de colectivos circulan por sus principales avenidas, facilitando el acceso a diferentes puntos de la ciudad. La cercanía con la autopista 25 de Mayo también es un factor a considerar para quienes se desplazan en automóvil.",
+      "estaciones": [
+        "Boedo (Línea E)",
+        "Inclán (Línea E)",
+        "Caseros (Línea H - Cercana)"
+      ],
+      "colectivos": [
+        "7",
+        "23",
+        "53",
+        "75",
+        "88",
+        "97",
+        "115",
+        "126",
+        "127",
+        "128",
+        "160",
+        "180"
+      ]
     },
     "comercio": {
-      "puntuacion": 70,
-      "descripcion": "Boedo tiene supermercados (Disco, Vea), centros comerciales, tiendas de barrio, librerías, jugueterías, y comercio local completo con acceso a centros comerciales mayores.",
-      "supermercados": [],
-      "centros_comerciales": []
+      "puntuacion": 75,
+      "descripcion": "El barrio ofrece una amplia variedad de comercios, desde los tradicionales almacenes y ferreterías hasta locales de indumentaria y servicios. La Avenida Boedo es el principal eje comercial, donde se concentran la mayoría de los negocios. También se encuentran supermercados de diversas cadenas y algunos centros comerciales de cercanía.",
+      "supermercados": [
+        "Coto",
+        "Día",
+        "Carrefour Express"
+      ],
+      "centros_comerciales": [
+        "No hay grandes centros comerciales dentro de Boedo, pero el Shopping Spinetto se encuentra relativamente cerca."
+      ]
     },
     "seguridad": {
-      "puntuacion": 50,
-      "descripcion": "Información de seguridad para Boedo.",
-      "comisaria": ""
+      "puntuacion": 68,
+      "descripcion": "La seguridad en Boedo es un tema que preocupa a los vecinos. Si bien la presencia policial ha aumentado en los últimos años, se registran robos y hurtos, especialmente en las zonas más transitadas. Es importante tomar precauciones y estar atento al entorno.",
+      "comisaria": "Comisaría Vecinal 7 A"
     },
     "educacion": {
-      "puntuacion": 70,
-      "descripcion": "Boedo tiene colegios públicos y privados, institutos técnicos, cercanía a universidades, centros de idiomas, academias, y acceso a la oferta educativa de CABA.",
-      "escuelas": [],
-      "universidades": []
+      "puntuacion": 78,
+      "descripcion": "Boedo cuenta con una buena oferta educativa, tanto pública como privada, que abarca todos los niveles. Se encuentran escuelas primarias y secundarias de renombre, así como jardines de infantes y centros de formación profesional. La cercanía con la Ciudad Universitaria también es un factor a considerar para estudiantes universitarios.",
+      "escuelas": [
+        "Colegio Nuestra Señora de la Misericordia",
+        "Escuela N° 11 República de México",
+        "Instituto Vocacional de Arte (IVA)"
+      ],
+      "universidades": [
+        "No hay universidades dentro de Boedo, pero la Universidad Tecnológica Nacional (UTN) y la Universidad de Buenos Aires (UBA) se encuentran relativamente cerca."
+      ]
     },
     "salud": {
-      "puntuacion": 70,
-      "descripcion": "Boedo cuenta con Hospital Durand, centros de salud comunitarios, consultorios médicos, Farmacity, centros de diagnóstico, y servicios de salud públicos y privados.",
-      "hospitales": [],
-      "centros_salud": []
+      "puntuacion": 72,
+      "descripcion": "El barrio cuenta con varios centros de salud, tanto públicos como privados, que brindan atención médica a los vecinos. Se encuentran consultorios, laboratorios y farmacias. Si bien no hay hospitales de gran envergadura dentro de Boedo, el Hospital Ramos Mejía se encuentra a poca distancia.",
+      "hospitales": [
+        "No hay hospitales dentro de Boedo, pero el Hospital Ramos Mejía se encuentra cerca."
+      ],
+      "centros_salud": [
+        "CeSAC N° 21"
+      ]
     },
     "espacios_verdes": {
-      "puntuacion": 50,
-      "descripcion": "Parques y plazas en Boedo.",
-      "parques": []
+      "puntuacion": 60,
+      "descripcion": "La cantidad de espacios verdes en Boedo es limitada. Si bien hay algunas plazas y plazoletas, la falta de grandes parques es una de las principales carencias del barrio. La Plaza Boedo es el principal punto de encuentro de los vecinos.",
+      "parques": [
+        "Plaza Boedo",
+        "Plazoleta Homero Manzi"
+      ]
     },
     "contaminacion": {
-      "puntuacion": 50,
-      "descripcion": "Niveles de contaminación en Boedo.",
-      "nivel_ruido": "Medio",
-      "fuente": ""
+      "puntuacion": 65,
+      "descripcion": "La contaminación en Boedo es moderada. El nivel de ruido es alto en las principales avenidas debido al intenso tráfico vehicular. La calidad del aire se ve afectada por la emisión de gases contaminantes. La gestión de residuos es adecuada, aunque se podrían implementar mejoras.",
+      "nivel_ruido": "Medio-Alto",
+      "fuente": "Tráfico vehicular en Av. Boedo, Av. La Plata y Av. San Juan."
     },
     "vida_barrio": {
-      "puntuacion": 50,
-      "descripcion": "Vida cultural y social en Boedo.",
-      "bares": [],
-      "cultura": []
+      "puntuacion": 88,
+      "descripcion": "La vida de barrio en Boedo es muy activa. Los vecinos se conocen y participan en actividades culturales y sociales. Hay numerosos bares, restaurantes y centros culturales que ofrecen opciones para el entretenimiento y la recreación. El tango sigue siendo una parte importante de la identidad del barrio.",
+      "bares": [
+        "Café Homero",
+        "Esquina Sur",
+        "Bar Seddon"
+      ],
+      "cultura": [
+        "Espacio Cultural Julián Centeya",
+        "Teatro Boedo XXI",
+        "Milongas en diferentes clubes del barrio"
+      ]
     }
   },
   "caballito": {
