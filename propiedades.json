@@ -185,7 +185,7 @@
     "id_temporal": "UF004",
     "titulo": "Barrio Privado, Km- 50 Pilar, 2.000 m2 de terreno propios",
     "barrio": "Pilar",
-    "precio": 1500000,
+    "precio": 160000,
     "ambientes": 8,
     "metros_cuadrados": 200,
     "operacion": "alquiler",
@@ -233,6 +233,7 @@
       "imgs/360/UF004-13.png",
       "imgs/360/UF004-14.jpg",
       "imgs/360/UF004-15.jpg",
+      "imgs/360/UF004-16.WEBP",
       "imgs/360/UF004-14.jpg"
     ],
     "fecha_procesamiento": "2025-11-06T14:30:15.456789"
