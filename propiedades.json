@@ -383,7 +383,13 @@
     "info_multimedia": "Fotos de la propiedad y terraza",
     "documentos": [],
     "videos": [],
-    "fotos": [],
+    "fotos": [
+      "INSTITUCIONALES/INSTITUCIONAL 1.png",
+      "INSTITUCIONALES/INSTITUCIONAL 2.png",
+      "INSTITUCIONALES/INSTITUCIONAL 3.png",
+      "INSTITUCIONALES/INSTITUCIONAL 4.png",
+      "INSTITUCIONALES/INSTITUCIONAL 5.png"
+    ],
     "imagenes_360": [],
     "fecha_procesamiento": "2025-11-06T14:30:15.456789"
   }
