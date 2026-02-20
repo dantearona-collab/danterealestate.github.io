@@ -355,5 +355,36 @@
       "imgs/360/UF006-21.jpeg"
     ],
     "fecha_procesamiento": "2025-11-06T14:30:15.456789"
+  },
+  {
+    "id_temporal": "UF007",
+    "titulo": "Departamento en Venta 4 Ambientes - Villa Lugano",
+    "barrio": "Balvanera",
+    "precio": 68000,
+    "ambientes": 4,
+    "metros_cuadrados": 67,
+    "operacion": "venta",
+    "tipo": "departamento",
+    "descripcion": "Avenida Teniente General Luis Dellepiane 4961, Villa Lugano, CABA",
+    "direccion": "",
+    "direccion_completa": "Avenida Teniente General Luis Dellepiane 4961, Villa Lugano, CABA",
+    "antiguedad": 50,
+    "estado": "bueno",
+    "orientacion": "NE",
+    "expensas": 80000,
+    "moneda_precio": "USD",
+    "moneda_expensas": "ARS",
+    "amenities": "",
+    "cochera": "No",
+    "balcon": "Si",
+    "pileta": "No",
+    "acepta_mascotas": "Sí",
+    "aire_acondicionado": "No",
+    "info_multimedia": "Fotos de la propiedad y terraza",
+    "documentos": [],
+    "videos": [],
+    "fotos": [],
+    "imagenes_360": [],
+    "fecha_procesamiento": "2025-11-06T14:30:15.456789"
   }
 ]
