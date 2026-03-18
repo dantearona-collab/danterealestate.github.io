@@ -97,9 +97,9 @@ class PropertyComparisonRequest(BaseModel):
 class ValuationRequest(BaseModel):
     barrio: str
     tipo: str
-    m2: float
     ambientes: int
     estado: str
+    operacion: str = "venta"
 
     
 # ============================================
@@ -1095,42 +1095,56 @@ def market_analysis(request: MarketAnalysisRequest):
 @app.post("/api/valoracion")
 def property_valuation(request: ValuationRequest):
     """
-    Calcula una valoración estimada para una propiedad
+    Calcula una valoración estimada para una propiedad con lógica de fallback
     """
     try:
-        # 1. Obtener datos de mercado del barrio
-        propiedades = query_properties({"barrio": request.barrio})
+        is_fallback = False
+        fallback_reason = None
         
-        # Filtrar solo ventas y tipos similares si es posible
-        propiedades_filtradas = [p for p in propiedades if p.get('operacion', '').lower() == 'venta']
-        if not propiedades_filtradas:
-            # Si no hay ventas, usar todo lo disponible (fallback)
-            propiedades_filtradas = propiedades
+        # 1. Intentar obtener datos del barrio solicitado
+        operacion = request.operacion.lower()
+        propiedades = query_properties({"barrio": request.barrio, "operacion": operacion})
+        
+        # 2. Si no hay datos en ese barrio, buscar promedios generales de la base de datos
+        if not propiedades:
+            is_fallback = True
+            fallback_reason = f"No hay suficientes datos comparativos de {operacion} en {request.barrio}."
+            print(f"⚠️ Fallback: No hay datos de {operacion} para {request.barrio}. Buscando promedio general...")
+            propiedades = query_properties({"operacion": operacion})
             
-        if not propiedades_filtradas:
-            return {
-                "success": False,
-                "message": f"No hay suficientes datos comparativos en {request.barrio}."
-            }
-            
-        # 2. Calcular precio promedio por m2 (en USD)
+        # 3. Calcular precios m2 y fuentes
         precios_m2 = []
-        for p in propiedades_filtradas:
+        fuentes = set()
+        for p in propiedades:
             m2 = p.get('metros_cuadrados', 0)
-            if m2 > 5: # Filtro de seguridad
+            if m2 > 5:
                 precio = p.get('precio', 0)
-                # Normalizar a USD para el cálculo si es necesario
-                # En este proyecto, parece que la mayoría son USD, pero check moneda
                 if p.get('moneda_precio') == 'ARS':
-                    precio = precio / 1050 # Conversión según market_analyzer.py
+                    precio = precio / 1050
                 precios_m2.append(precio / m2)
+                
+                # Guardar fuente si existe
+                fuente = p.get('source', '') or p.get('fuente', '')
+                if fuente:
+                    fuentes.add(fuente.capitalize())
         
+        # 4. Si aún no hay datos (base vacía), usar promedio hardcoded de CABA (USD 2150)
         if not precios_m2:
-             return {"success": False, "message": "Datos de superficie no disponibles para el análisis."}
-             
-        avg_precio_m2 = sum(precios_m2) / len(precios_m2)
+            is_fallback = True
+            fallback_reason = "Base de datos de mercado vacía."
+            if operacion == "alquiler":
+                avg_precio_m2 = 8500.0  # Promedio referencial CABA Alquiler ARS/m2
+                moneda = "ARS"
+            else:
+                avg_precio_m2 = 2150.0  # Promedio referencial CABA Venta USD/m2
+                moneda = "USD"
+            print(f"⚠️ Fallback Crítico: Usando promedio referencial de CABA ({moneda})")
+            fuentes = {"Referencia de mercado"}
+        else:
+            avg_precio_m2 = sum(precios_m2) / len(precios_m2)
+            moneda = "USD" if operacion == "venta" else "ARS"
         
-        # 3. Aplicar coeficientes de ajuste
+        # 5. Aplicar coeficientes de ajuste
         coef_estado = {
             "Excelente": 1.10,
             "Muy bueno": 1.05,
@@ -1140,32 +1154,36 @@ def property_valuation(request: ValuationRequest):
         }.get(request.estado, 1.0)
         
         coef_tipo = {
-            "Casa": 0.95, # A veces casa tiene menor m2 por m2 de terreno
+            "Casa": 0.95,
             "PH": 1.05,
             "Departamento": 1.00,
             "Terreno": 0.50
         }.get(request.tipo, 1.0)
         
-        # Ajuste por ambientes (penalizar si son muchos ambientes en pocos m2 o viceversa)
         m2_por_ambiente = request.m2 / max(request.ambientes, 1)
         coef_densidad = 1.0
-        if m2_por_ambiente < 20: coef_densidad = 0.95 # Muy apretado
-        elif m2_por_ambiente > 45: coef_densidad = 1.05 # Muy espacioso
+        if m2_por_ambiente < 20: coef_densidad = 0.95
+        elif m2_por_ambiente > 45: coef_densidad = 1.05
         
-        # 4. Cálculo final
+        # 6. Cálculo final
         valor_estimado = avg_precio_m2 * request.m2 * coef_estado * coef_tipo * coef_densidad
         
         return {
             "success": True,
-            "valor_estimado": round(valor_estimado, -2), # Redondear a cientos
+            "valor_estimado": round(valor_estimado, -2),
             "precio_m2_referencia": round(avg_precio_m2, 2),
-            "moneda": "USD",
+            "moneda": moneda,
+            "operacion": operacion,
+            "is_fallback": is_fallback,
+            "fallback_reason": fallback_reason,
+            "fuentes": list(fuentes),
+            "muestra_size": len(precios_m2),
             "detalles": {
                 "barrio": request.barrio,
                 "metros": request.m2,
                 "ajuste_estado": coef_estado,
                 "ajuste_tipo": coef_tipo,
-                "muestra_size": len(precios_m2)
+                "muestra_size": len(precios_m2) if not (is_fallback and not precios_m2) else 0
             }
         }
     except Exception as e:
