@@ -3526,5 +3526,62 @@
       "bares": [],
       "cultura": []
     }
+  },
+  "once": {
+    "nombre": "Once",
+    "descripcion_general": [
+      "Once es un barrio vibrante y comercial de Buenos Aires, conocido por su fuerte presencia de la comunidad judía y su intensa actividad comercial, especialmente en el rubro textil y de indumentaria. Es un punto neurálgico de transporte y un crisol de culturas."
+    ],
+    "conclusion": "",
+    "fecha_actualizacion": "2026-03-18",
+    "transporte": [
+      "Estación Once de Septiembre: Conexión con trenes (Ferrocarril Sarmiento) y subte (Línea A).",
+      "Múltiples líneas de colectivos: Amplia cobertura a diferentes puntos de la ciudad y el Gran Buenos Aires.",
+      "Proximidad a la Autopista 25 de Mayo: Facilita el acceso en automóvil desde y hacia el sur de la ciudad."
+    ],
+    "educacion": [
+      "ORT Belgrano: Reconocida institución educativa con orientación tecnológica.",
+      "Colegio Bialik de Villa Crespo (cercano a Once): Colegio con fuerte tradición judía.",
+      "Escuela de Comercio N° 10 \"Dr. Antonio Bermejo\": Escuela pública de nivel secundario.",
+      "Instituto Superior de Estudios de Radio y Televisión (ISER): Importante instituto de formación en medios."
+    ],
+    "salud": [
+      "Hospital Ramos Mejía: Hospital público de referencia en la zona.",
+      "Hospital de Clínicas José de San Martín (cercano a Once): Hospital universitario con diversas especialidades.",
+      "Clínica Modelo de Once: Institución privada con servicios de internación y consultorios externos.",
+      "Centros de Atención Primaria de la Salud (CAPS): Distribuidos en el barrio, ofrecen atención básica."
+    ],
+    "comercio": [
+      "Comercio textil y de indumentaria: Amplia oferta de telas, avíos y prendas de vestir al por mayor y menor.",
+      "Comercio mayorista y minorista: Variedad de productos, desde electrónica hasta artículos para el hogar.",
+      "Galerías comerciales: Concentración de locales con diferentes rubros."
+    ],
+    "gastronomia": [
+      "Comida judía: Restaurantes y panaderías especializadas en platos tradicionales.",
+      "Restaurantes económicos: Variedad de opciones para comer a precios accesibles.",
+      "Confiterías y cafés tradicionales: Lugares de encuentro para los vecinos."
+    ],
+    "recreacion": [],
+    "servicios_financieros": [
+      "Sucursales bancarias: Presencia de bancos nacionales e internacionales.",
+      "Cajeros automáticos: Amplia disponibilidad en la zona comercial."
+    ],
+    "seguridad": [
+      "Presencia policial: Mayor despliegue en las zonas comerciales.",
+      "Robos y hurtos: Riesgo de delitos menores, especialmente en horas pico y zonas concurridas."
+    ],
+    "espacios_verdes": [
+      "Plaza Miserere: Principal espacio verde del barrio, punto de encuentro y recreación.",
+      "Plazoleta Primero de Mayo: Espacio verde más pequeño, ubicado sobre la calle Moreno."
+    ],
+    "contaminacion": [
+      "Contaminación sonora: Elevado nivel de ruido debido al intenso tráfico y la actividad comercial.",
+      "Contaminación atmosférica: Presencia de smog y partículas contaminantes debido al tránsito vehicular."
+    ],
+    "vida_barrio": [
+      "Fuerte identidad cultural judía: Presencia de sinagogas, centros comunitarios y celebraciones religiosas.",
+      "Intensa actividad comercial: El barrio nunca duerme, con actividad desde temprano hasta tarde."
+    ],
+    "generado_por_ia": true
   }
 }
