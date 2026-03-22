@@ -260,7 +260,7 @@ function displayResultsInModal(properties) {
 function initWhatsApp() {
     const whatsappLink = document.getElementById('whatsappLink');
     if (whatsappLink) {
-        whatsappLink.href = 'https://wa.me/5491125368595';
+        whatsappLink.href = 'https://wa.me/5491176596523';
         
         // Mejorar usabilidad táctil
         whatsappLink.addEventListener('touchstart', function(e) {

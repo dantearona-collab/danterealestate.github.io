@@ -30,7 +30,7 @@ const FormSystemConfig = {
 
     // WhatsApp
     whatsapp: {
-        number: '+5491125368595',
+        number: '+5491176596523',
         enabled: true
     },
 
