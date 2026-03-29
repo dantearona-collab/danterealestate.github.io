@@ -21,10 +21,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from logic.gemini_client import call_gemini_with_rotation, build_prompt
-from logic.database import query_properties, get_historial_canal, log_conversation
-from logic.filters import detect_filters
-from logic.filter_data import BARRIOS, OPERACIONES, TIPOS
+from backend.logic.gemini_client import call_gemini_with_rotation, build_prompt
+from backend.logic.database import query_properties, get_historial_canal, log_conversation
+from backend.logic.filters import detect_filters
+from backend.logic.filter_data import BARRIOS, OPERACIONES, TIPOS
 from backend.logic.environ_database import (
     init_environ_analysis_db, get_environ_analysis, save_environ_analysis,
     is_environ_analysis_expired, log_environ_analysis_request
