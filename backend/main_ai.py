@@ -29,8 +29,8 @@ from backend.logic.environ_database import (
     init_environ_analysis_db, get_environ_analysis, save_environ_analysis,
     is_environ_analysis_expired, log_environ_analysis_request
 )
-from logic.barrio_data import get_gastronomy_info, get_financial_info
-from logic.gemini_client import call_gemini_with_rotation
+from backend.logic.barrio_data import get_gastronomy_info, get_financial_info
+from backend.logic.gemini_client import call_gemini_with_rotation
 
 # ============================================
 # CONFIGURACIÓN
