@@ -138,7 +138,7 @@ def main():
     print("🔍 Verificando conexión con backend...")
     if not check_backend_status():
         print("\n⚠️ El backend no está corriendo. Asegúrate de ejecutar:")
-        print("   cd backend && python main-ai.py")
+        print("   cd backend && python main_ai.py")
         print("\n📝 Alternativamente, puedes usar el CMS manualmente:")
         print("   1. Abre analisis-barrio.html en tu navegador")
         print("   2. Agrega cada barrio manualmente")
