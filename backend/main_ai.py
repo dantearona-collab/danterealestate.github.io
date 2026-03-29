@@ -107,7 +107,7 @@ class ValuationRequest(BaseModel):
 # ============================================
 
 # En main-ai.py - IMPORTAR LOS DATOS DE barrio_data.py
-from logic.barrio_data import (
+from backend.logic.barrio_data import (
     GASTRONOMY_DATA, 
     FINANCIAL_DATA, 
     LOCATION_SPECIFIC_DATA,
