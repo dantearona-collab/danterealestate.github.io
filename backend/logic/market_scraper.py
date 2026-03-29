@@ -1061,58 +1061,50 @@ class MarketAnalyzer:
     MIN_SURFACE_THRESHOLD = 10
     
 
+  
     @staticmethod
     def _is_in_zone(prop_location: str, prop_address: str, zone: str) -> bool:
-        """
-        Verifica si la propiedad pertenece REALMENTE al barrio solicitado
-        Evita falsos positivos como:
-        - Calle Belgrano
-        - Villa General Belgrano
-        """
         if not zone:
             return True
 
         zone = zone.lower().strip()
-        zone_clean = zone.replace("villa ", "").strip()
-
         text = f"{prop_location} {prop_address}".lower()
 
         # ========================================
-        # 1. MATCH FUERTE (FORMATO BARRIO)
+        # ❌ EXCLUSIONES FUERTES (PRIMERO)
         # ========================================
-        # Ej: "Belgrano, Capital Federal", "Belgrano, CABA"
-        strong_patterns = [
-            rf"\b{zone}\b\s*,",              # "Belgrano,"
-            rf",\s*{zone}\b",               # ", Belgrano"
-            rf"\b{zone}\s+(caba|capital)",  # "Belgrano CABA"
+        forbidden_patterns = [
+            rf"villa\s+general\s+{zone}",
+            rf"villa\s+gral\.?\s+{zone}",
+            rf"villa\s+{zone}",              # Villa Belgrano (Córdoba)
+            rf"{zone}\s+al\s+\d+",           # Belgrano al 5800 (calle)
+            rf"av\.?\s+{zone}",              # Av Belgrano
+            rf"avenida\s+{zone}",
         ]
 
-        for pattern in strong_patterns:
+        for pattern in forbidden_patterns:
+            if re.search(pattern, text):
+                return False
+
+        # ========================================
+        # ✅ MATCH REAL DE BARRIO (CABA)
+        # ========================================
+        valid_patterns = [
+            rf"\b{zone}\b\s*,\s*(caba|capital federal|bs as|buenos aires)",
+            rf"(caba|capital federal).*\b{zone}\b",
+            rf"\b{zone}\b\s*,\s*[a-z\s]+,\s*(caba|capital federal)",
+        ]
+
+        for pattern in valid_patterns:
             if re.search(pattern, text):
                 return True
 
         # ========================================
-        # 2. EXCLUSIONES CLAVE
+        # ⚠️ FALLBACK CONTROLADO
         # ========================================
-        exclusions = [
-            f"villa general {zone_clean}",
-            f"{zone_clean} al",   # ej: "Belgrano al 1200"
-            f"{zone_clean} av",   # "Belgrano Av"
-            f"avenida {zone_clean}",
-            f"calle {zone_clean}",
-        ]
-
-        for ex in exclusions:
-            if ex in text:
-                return False
-
-        # ========================================
-        # 3. MATCH EXACTO DE PALABRA (NO PARCIAL)
-        # ========================================
-        # Evita "Belgrano" dentro de "Villa General Belgrano"
+        # Solo aceptar si NO hay otra provincia
         if re.search(rf"\b{zone}\b", text):
-            # Chequeo extra: que no esté dentro de algo más largo
-            if f"general {zone_clean}" in text:
+            if any(x in text for x in ["córdoba", "santa fe", "mendoza", "tucumán"]):
                 return False
             return True
 
@@ -1357,6 +1349,7 @@ class ScrapingManager:
             errors.append(f"MercadoLibre: {str(e)}")
         
         # Calcular estadísticas
+        all_properties = self._deduplicate_properties(all_properties)
         stats = self.analyzer.calculate_stats(all_properties, search_zone, operation, property_type)
         
         if errors:
@@ -1369,6 +1362,26 @@ class ScrapingManager:
         logger.info(f"[ScrapingManager] Completado: {stats.sample_size} propiedades analizadas")
         
         return result
+
+
+def _deduplicate_properties(self, properties):
+    seen = set()
+    unique = []
+
+    for prop in properties:
+        # Prioridad: external_id > url
+        key = prop.external_id or prop.url
+
+        if not key:
+            continue
+
+        if key in seen:
+            continue
+
+        seen.add(key)
+        unique.append(prop)
+
+    return unique
 
 
 # ========================================
