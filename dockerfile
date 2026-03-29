@@ -10,4 +10,4 @@ RUN pip install -r requirements.txt
 COPY . .
 
 # Ejecutar desde la carpeta backend
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10000"]
+CMD ["uvicorn", "backend.main_ai:app", "--host", "0.0.0.0", "--port", "10000"]
