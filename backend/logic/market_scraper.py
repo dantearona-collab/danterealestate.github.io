@@ -2,6 +2,9 @@
 Módulo de Scraping y Análisis de Mercado Inmobiliario
 Extrae datos de portales inmobiliarios argentinos y genera estadísticas de mercado
 """
+
+import hashlib
+
 import os
 import sys
 import json
@@ -1254,7 +1257,118 @@ class MarketAnalyzer:
             "errors": stats.errors
         }
 
+    def normalize_url(url: str) -> str:
+        if not url:
+            return ""
+    
+        url = url.lower().strip()
 
+        # eliminar params
+        url = url.split("?")[0]
+
+        # eliminar trailing slash
+        url = url.rstrip("/")
+
+        # eliminar www
+        url = url.replace("www.", "")
+
+        return url
+    
+    def clean_text(text: str) -> str:
+        if not text:
+            return ""
+
+        text = text.lower()
+        text = re.sub(r"\s+", " ", text)
+        text = re.sub(r"[^\w\s]", "", text)
+
+        return text.strip()
+
+
+    def generate_fingerprint(prop) -> str:
+        try:
+            price = getattr(prop, "price", None) or prop.get("price", "")
+            surface = getattr(prop, "surface", None) or prop.get("surface", "")
+            barrio = getattr(prop, "barrio", None) or prop.get("barrio", "")
+            rooms = getattr(prop, "rooms", None) or prop.get("rooms", "")
+
+            # 👉 NORMALIZACIÓN ACÁ
+            barrio = normalize_barrio(barrio)
+
+            base = f"{price}_{surface}_{barrio}_{rooms}".lower()
+
+            import hashlib
+            return hashlib.md5(base.encode()).hexdigest()
+
+        except Exception:
+            return ""
+
+
+    def _deduplicate_properties(self, properties):
+        seen_ids = set()
+        seen_urls = set()
+        seen_fp = set()
+
+        unique = []
+
+        for prop in properties:
+            ext_id = str(prop.external_id).strip() if prop.external_id else ""
+            url = normalize_url(prop.url)
+            fingerprint = generate_fingerprint(prop)
+
+            # 🚨 chequeo por prioridad
+            if ext_id and ext_id in seen_ids:
+                continue
+
+            if url and url in seen_urls:
+                continue
+
+            if fingerprint and fingerprint in seen_fp:
+                continue
+
+            # guardar en sets
+            if ext_id:
+                seen_ids.add(ext_id)
+
+            if url:
+                seen_urls.add(url)
+
+            if fingerprint:
+                seen_fp.add(fingerprint)
+
+            unique.append(prop)
+
+        return unique
+    
+    
+
+    def es_barrio_valido(texto: str, barrio_objetivo: str) -> bool:
+        if not texto:
+            return False
+
+        texto = texto.lower()
+        barrio = barrio_objetivo.lower()
+
+        # match exacto como palabra (evita "belgrano r", etc.)
+        match = re.search(rf"\b{re.escape(barrio)}\b", texto)
+
+        if not match:
+            return False
+
+        # exclusiones genéricas
+        exclusiones = [
+            "cerca de",
+            "a metros de",
+            "próximo a",
+            "zona",
+        ]
+
+        for ex in exclusiones:
+            if ex in texto:
+                return False
+
+        return True
+    
 # ========================================
 # GESTOR DE SCRAPING
 # ========================================
@@ -1364,65 +1478,26 @@ class ScrapingManager:
         
         return result
 
-
-    def normalize_url(url: str) -> str:
-        if not url:
+    def normalize_barrio(barrio: str) -> str:
+        if not barrio:
             return ""
+
+        barrio = barrio.lower()
+
+        if "belgrano" in barrio:
+            return "belgrano"
+
+        return barrio.strip()
+
     
-        url = url.lower().strip()
-
-        # eliminar params
-        url = url.split("?")[0]
-
-        # eliminar trailing slash
-        url = url.rstrip("/")
-
-        # eliminar www
-        url = url.replace("www.", "")
-
-        return url
 
 
-    def generate_fingerprint(prop) -> str:
-        try:
-            title = getattr(prop, "title", None) or prop.get("title", "")
-            price = getattr(prop, "price", None) or prop.get("price", "")
-            barrio = getattr(prop, "barrio", None) or prop.get("barrio", "")
-            surface = getattr(prop, "surface", None) or prop.get("surface", "")
-            rooms = getattr(prop, "rooms", None) or prop.get("rooms", "")
-
-            base = f"{title}_{price}_{barrio}_{surface}_{rooms}"
-            base = base.lower()
-
-            import re
-            base = re.sub(r"\s+", "_", base)
-            base = re.sub(r"[^\w_]", "", base)
-
-            return base
-
-        except Exception as e:
-            return ""
 
 
-    def _deduplicate_properties(self, properties):
-        seen = set()
-        unique = []
+    
 
-        for prop in properties:
-            ext_id = str(prop.external_id).strip() if prop.external_id else ""
-            url = normalize_url(prop.url)
-            fingerprint = generate_fingerprint(prop)
 
-            # combinación más fuerte
-            key = f"{ext_id}|{url}|{fingerprint}"
-
-            if key in seen:
-                continue
-
-            seen.add(key)
-            unique.append(prop)
-
-        return unique
+    
     
     
 # ========================================
