@@ -539,11 +539,39 @@ def exportar_json():
 # ============================================
 
 @app.get("/api/barrios")
-def listar_barrios():
+def listar_barrios(q: Optional[str] = None):
     conn = get_barrios_db_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute('SELECT nombre FROM barrios_data ORDER BY nombre')
+        if q:
+            # Normalizar entrada: quitar espacios extras, convertir a minúsculas
+            query = q.strip().lower()
+            
+            # Palabras que indican que NO es un barrio (para excluir coincidencias falsas)
+            exclusiones = [
+                'calle', 'avenida', 'av', 'villa', 'general', 'san', 'santa',
+                'localidad', 'partido', 'departamento', 'provincia'
+            ]
+            
+            # Verificar si la consulta contiene términos excluyentes
+            es_excluyente = any(exc in query for exc in exclusiones)
+            
+            if es_excluyente:
+                # Si es excluyente, hacer coincidencia exacta (muy probable que no haya resultados)
+                cursor.execute(
+                    'SELECT nombre FROM barrios_data WHERE LOWER(nombre) = ? ORDER BY nombre',
+                    (query,)
+                )
+            else:
+                # Buscar barrios que COMENZAN con el texto o coinciden exactamente
+                # Esto evita que "Belgrano" coincida con "Villa General Belgrano"
+                cursor.execute(
+                    "SELECT nombre FROM barrios_data WHERE LOWER(nombre) LIKE ? OR LOWER(nombre) = ? ORDER BY nombre",
+                    (f"{query}%", query)
+                )
+        else:
+            cursor.execute('SELECT nombre FROM barrios_data ORDER BY nombre')
+        
         rows = cursor.fetchall()
         barrios = [{'nombre': row[0], 'puntuacion_general': 50, 'generado_por_ia': False} for row in rows]
         return {"success": True, "total": len(barrios), "barrios": barrios}
