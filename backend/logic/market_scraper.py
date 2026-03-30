@@ -71,12 +71,6 @@ class MarketStats:
 # CLASE BASE DEL SCRAPER
 # ========================================
 
-def normalize_text(text):
-    import re
-    text = text.lower()
-    text = re.sub(r"\s+", " ", text)
-    return text.strip()
-
 
 def normalize_url(url: str) -> str:
         if not url:
@@ -188,9 +182,12 @@ def normalize_barrio(barrio: str) -> str:
     
 def normalize_text(text):
     import re
-    text = text.lower()
+    text = (text or "").lower()
     text = re.sub(r"\s+", " ", text)
     return text.strip()
+
+
+
 
 def is_exact_barrio(texto, barrio_objetivo):
     texto = normalize_text(texto)
@@ -620,38 +617,6 @@ class ArgenpropScraper(BaseScraper):
         
         return url
     
-    def parse_properties(self, html: str, operation: str = "venta", property_type: str = "departamento") -> List[PropertyData]:
-        """Parsea propiedades de Argenprop"""
-        properties = []
-        
-        try:
-            from bs4 import BeautifulSoup
-            soup = BeautifulSoup(html, 'html.parser')
-            
-            # Selectores para Argenprop (adaptativos a cambios)
-            cards = soup.select('div.listing__item, div.card, div[class*="listing__item"]')
-            
-            if not cards:
-                # Intentar selectores alternativos
-                cards = soup.select('article.posting-card, div.posting-card, .listing-item')
-            
-            for card in cards:
-                try:
-                    prop = self._parse_card(card, operation, property_type)
-                    if prop:
-                        properties.append(prop)
-                except Exception as e:
-                    logger.debug(f"Error parseando tarjeta: {e}")
-                    continue
-            
-            logger.info(f"[Argenprop] Extraídas {len(properties)} propiedades")
-            
-        except ImportError:
-            logger.error("BeautifulSoup no instalado. Instalar: pip install beautifulsoup4")
-        except Exception as e:
-            logger.error(f"[Argenprop] Error parseando: {e}")
-        
-        return properties
     
     def _parse_card(self, card, operation: str = "venta", property_type: str = "departamento") -> Optional[PropertyData]:
         """Parsea una tarjeta individual de Argenprop"""
@@ -771,7 +736,8 @@ class ZonapropScraper(BaseScraper):
         
         return url
     
-    def parse_properties(self, html: str, operation: str = "venta", property_type: str = "departamento") -> List[PropertyData]:
+    
+    def parse_properties(self, html: str, operation: str = "venta", property_type: str = "departamento", zona: str = "") -> List[PropertyData]:
         """Parsea propiedades de Zonaprop"""
         properties = []
         
@@ -789,8 +755,23 @@ class ZonapropScraper(BaseScraper):
             for card in cards:
                 try:
                     prop = self._parse_card(card, operation, property_type)
-                    if prop:
-                        properties.append(prop)
+
+                    if not prop:
+                        continue
+
+                    # 🔴 FILTRO DE BARRIO (ACÁ VA)
+                    texto = " ".join([
+                        str(getattr(prop, "title", "")),
+                        str(getattr(prop, "barrio", "")),
+                        str(getattr(prop, "location", "")),
+                    ])
+
+                    if not is_exact_barrio(texto, zona):
+                        continue
+
+                    # ✅ recién acá agregás
+                    properties.append(prop)
+
                 except Exception as e:
                     logger.debug(f"Error parseando tarjeta: {e}")
                     continue
