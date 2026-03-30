@@ -1368,17 +1368,40 @@ class ScrapingManager:
     def normalize_url(url: str) -> str:
         if not url:
             return ""
+    
+        url = url.lower().strip()
 
-        parsed = urlparse(url)
-        return f"{parsed.netloc}{parsed.path}".rstrip("/")
+        # eliminar params
+        url = url.split("?")[0]
+
+        # eliminar trailing slash
+        url = url.rstrip("/")
+
+        # eliminar www
+        url = url.replace("www.", "")
+
+        return url
 
 
-    def generate_fingerprint(prop):
-        return (
-            (prop.title or "").strip().lower(),
-            (prop.price or "").strip(),
-            (prop.barrio or "").strip().lower()
-        )
+    def generate_fingerprint(prop) -> str:
+        try:
+            title = getattr(prop, "title", None) or prop.get("title", "")
+            price = getattr(prop, "price", None) or prop.get("price", "")
+            barrio = getattr(prop, "barrio", None) or prop.get("barrio", "")
+            surface = getattr(prop, "surface", None) or prop.get("surface", "")
+            rooms = getattr(prop, "rooms", None) or prop.get("rooms", "")
+
+            base = f"{title}_{price}_{barrio}_{surface}_{rooms}"
+            base = base.lower()
+
+            import re
+            base = re.sub(r"\s+", "_", base)
+            base = re.sub(r"[^\w_]", "", base)
+
+            return base
+
+        except Exception as e:
+            return ""
 
 
     def _deduplicate_properties(self, properties):
@@ -1386,14 +1409,12 @@ class ScrapingManager:
         unique = []
 
         for prop in properties:
-            key = (
-                prop.external_id
-                or normalize_url(prop.url)
-                or generate_fingerprint(prop)
-            )
+            ext_id = str(prop.external_id).strip() if prop.external_id else ""
+            url = normalize_url(prop.url)
+            fingerprint = generate_fingerprint(prop)
 
-            if not key:
-                continue
+            # combinación más fuerte
+            key = f"{ext_id}|{url}|{fingerprint}"
 
             if key in seen:
                 continue
