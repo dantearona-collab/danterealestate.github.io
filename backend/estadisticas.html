@@ -953,12 +953,13 @@
         }
         
         // Run scraping
+        // Run scraping
         async function runScraping() {
-            let barrio = document.getElementById('filter-barrio').value.trim();
+            const barrioInput = document.getElementById('filter-barrio').value.trim();
             const operacion = document.getElementById('filter-operacion').value;
             const tipo = document.getElementById('filter-tipo').value;
             
-            if (!barrio) {
+            if (!barrioInput) {
                 alert('Por favor ingresa el nombre de un barrio');
                 return;
             }
@@ -967,12 +968,12 @@
             // ✅ NORMALIZAR EL NOMBRE DEL BARRIO
             // ========================================
             const exclusiones = ['avenida', 'av', 'calle', 'villa', 'general', 'san', 'santa', 'localidad', 'partido'];
-            let barrioNormalizado = barrio.toLowerCase().trim();
+            let barrioNormalizado = barrioInput.toLowerCase().trim();
             
-            // Lista de barrios válidos (debería coincidir con los del datalist)
+            // Lista de barrios válidos
             const barriosValidos = [
-                'palermo', 'belgrano', 'recoleta', 'microcentro', 'nordelta', 
-                'tigre', 'pilar', 'san-isidro', 'balvanera', 'chacarita', 
+                'palermo', 'belgrano', 'recoleta', 'microcentro', 'nordelta',
+                'tigre', 'pilar', 'san-isidro', 'balvanera', 'chacarita',
                 'almagro', 'boedo', 'caballito', 'flores', 'villa crespo'
             ];
             
@@ -994,28 +995,27 @@
                 if (!esBarrioValido) {
                     for (const excl of exclusiones) {
                         if (barrioNormalizado.includes(excl)) {
-                            console.warn(`⚠️ "${barrio}" contiene término excluido "${excl}"`);
-                            alert(`"${barrio}" no es un barrio válido. Usá un nombre como "Belgrano", "Palermo", etc.`);
+                            alert(`"${barrioInput}" no es un nombre de barrio válido.\n\nUsá nombres como: Palermo, Belgrano, Recoleta, etc.`);
                             return;
                         }
                     }
                 }
             }
             
-            // Usar el barrio normalizado
-            barrio = barrioNormalizado;
+            // Usar el barrio normalizado para el scraping
+            const zona = barrioNormalizado;
             
-            console.log(`🌐 Scraping solicitado: ${barrio} (original: ${document.getElementById('filter-barrio').value})`);
+            console.log(`🌐 Scraping solicitado: ${zona} (original: ${barrioInput})`);
             
             // Mostrar loading
             document.getElementById('scraping-loading').style.display = 'flex';
             document.getElementById('scrape-btn').disabled = true;
-            document.getElementById('scraping-loading-text').textContent = `Scraping ${barrio} (${operacion} - ${tipo})...`;
+            document.getElementById('scraping-loading-text').textContent = `Scraping ${zona} (${operacion || 'venta'} - ${tipo || 'departamento'})...`;
             
             try {
-                // Iniciar scraping con el barrio normalizado
+                // Iniciar scraping con los parámetros seleccionados
                 const params = new URLSearchParams({
-                    zona: barrioParaScraping,
+                    zona: zona,
                     operacion: operacion || 'venta',
                     tipo: tipo || 'departamento'
                 });
@@ -1024,32 +1024,35 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    console.log(`✅ Scraping iniciado para ${barrio}`);
+                    console.log(`✅ Scraping iniciado para ${zona}`);
                     
                     // Esperar y consultar datos
                     let attempts = 0;
-                    const maxAttempts = 30;
+                    const maxAttempts = 30; // 60 segundos máximo
+                    let checkInterval = null;
                     
-                    const checkInterval = setInterval(async () => {
+                    const checkData = async () => {
                         try {
                             const dataResponse = await fetch('/api/scraping-data');
                             const scrapingData = await dataResponse.json();
                             
+                            // Verificar que los datos correspondan al barrio solicitado
                             if (scrapingData.success && 
-                                scrapingData.zone?.toLowerCase() === barrio.toLowerCase() &&
+                                scrapingData.zone?.toLowerCase() === zona.toLowerCase() &&
                                 scrapingData.operation === (operacion || 'venta')) {
                                 
-                                clearInterval(checkInterval);
+                                if (checkInterval) clearInterval(checkInterval);
                                 document.getElementById('scraping-loading').style.display = 'none';
                                 document.getElementById('scrape-btn').disabled = false;
                                 
+                                // Renderizar con los nuevos datos
                                 renderScrapedTable(scrapingData.data);
                                 renderScrapedCharts(scrapingData.data);
                                 
                                 document.getElementById('scraping-status').style.display = 'block';
                                 document.getElementById('scraping-message').innerHTML = 
                                     `<i class="fas fa-check-circle" style="color:var(--success);"></i> 
-                                    ${scrapingData.message || 'Scraping completado'} - ${barrio}`;
+                                    ${scrapingData.message || 'Scraping completado'} - ${zona}`;
                                 
                                 showContent();
                             }
@@ -1059,12 +1062,14 @@
                         
                         attempts++;
                         if (attempts >= maxAttempts) {
-                            clearInterval(checkInterval);
+                            if (checkInterval) clearInterval(checkInterval);
                             document.getElementById('scraping-loading').style.display = 'none';
                             document.getElementById('scrape-btn').disabled = false;
                             alert('Tiempo de espera agotado. Intenta de nuevo.');
                         }
-                    }, 2000);
+                    };
+                    
+                    checkInterval = setInterval(checkData, 2000);
                     
                 } else {
                     throw new Error(data.message || 'Error iniciando scraping');
@@ -1075,7 +1080,7 @@
                 document.getElementById('scrape-btn').disabled = false;
                 alert('Error: ' + error.message);
             }
-        }       
+        }   
         // Render table with scraped properties
         // ✅ CÓDIGO CORREGIDO
         function renderScrapedTable(scrapedData) {
