@@ -14,6 +14,7 @@ from typing import Optional, Dict, Any, List
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
+from urllib.parse import urlparse
 
 # Configurar logging
 logging.basicConfig(
@@ -1364,26 +1365,45 @@ class ScrapingManager:
         return result
 
 
-def _deduplicate_properties(self, properties):
-    seen = set()
-    unique = []
+    def normalize_url(url: str) -> str:
+        if not url:
+            return ""
 
-    for prop in properties:
-        # Prioridad: external_id > url
-        key = prop.external_id or prop.url
-
-        if not key:
-            continue
-
-        if key in seen:
-            continue
-
-        seen.add(key)
-        unique.append(prop)
-
-    return unique
+        parsed = urlparse(url)
+        return f"{parsed.netloc}{parsed.path}".rstrip("/")
 
 
+    def generate_fingerprint(prop):
+        return (
+            (prop.title or "").strip().lower(),
+            (prop.price or "").strip(),
+            (prop.barrio or "").strip().lower()
+        )
+
+
+    def _deduplicate_properties(self, properties):
+        seen = set()
+        unique = []
+
+        for prop in properties:
+            key = (
+                prop.external_id
+                or normalize_url(prop.url)
+                or generate_fingerprint(prop)
+            )
+
+            if not key:
+                continue
+
+            if key in seen:
+                continue
+
+            seen.add(key)
+            unique.append(prop)
+
+        return unique
+    
+    
 # ========================================
 # INTEGRACIÓN CON MAIN-AI
 # ========================================
