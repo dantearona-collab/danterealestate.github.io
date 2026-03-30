@@ -71,6 +71,166 @@ class MarketStats:
 # CLASE BASE DEL SCRAPER
 # ========================================
 
+def normalize_text(text):
+    import re
+    text = text.lower()
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()
+
+
+def normalize_url(url: str) -> str:
+        if not url:
+            return ""
+    
+        url = url.lower().strip()
+
+        # eliminar params
+        url = url.split("?")[0]
+
+        # eliminar trailing slash
+        url = url.rstrip("/")
+
+        # eliminar www
+        url = url.replace("www.", "")
+
+        return url
+    
+def clean_text(text: str) -> str:
+    if not text:
+        return ""
+
+    text = text.lower()
+    text = re.sub(r"\s+", " ", text)
+    text = re.sub(r"[^\w\s]", "", text)
+
+    return text.strip()
+
+
+
+def generate_fingerprint(prop) -> str:
+    try:
+        price = normalize_price(
+            getattr(prop, "price", None) or prop.get("price", "")
+        )
+
+        surface = normalize_surface(
+            getattr(prop, "surface", None) or prop.get("surface", "")
+        )
+
+        barrio = normalize_barrio(
+            getattr(prop, "barrio", None) or prop.get("barrio", "")
+        )
+
+        base = f"{price}_{surface}_{barrio}"
+
+        return hashlib.md5(base.encode()).hexdigest()
+
+    except Exception:
+        return ""
+
+def es_barrio_valido(texto: str, barrio_objetivo: str) -> bool:
+        if not texto:
+            return False
+
+        texto = texto.lower()
+        barrio = barrio_objetivo.lower()
+
+        # match exacto como palabra (evita "belgrano r", etc.)
+        match = re.search(rf"\b{re.escape(barrio)}\b", texto)
+
+        if not match:
+            return False
+
+        # exclusiones genéricas
+        exclusiones = [
+            "cerca de",
+            "a metros de",
+            "próximo a",
+            "zona",
+        ]
+
+        for ex in exclusiones:
+            if ex in texto:
+                return False
+
+        return True
+    
+def normalize_surface(surface):
+        if not surface:
+            return ""
+
+        surface = str(surface).lower()
+        surface = re.sub(r"[^\d]", "", surface)  # deja solo números
+
+        return surface
+
+
+def normalize_price(price):
+        if not price:
+            return ""
+
+        price = str(price)
+        price = re.sub(r"[^\d]", "", price)
+
+        return price
+    
+    
+def normalize_barrio(barrio: str) -> str:
+        if not barrio:
+            return ""
+
+        barrio = barrio.lower()
+
+        if "belgrano" in barrio:
+            return "belgrano"
+
+        return barrio   
+    
+def normalize_text(text):
+    import re
+    text = text.lower()
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()
+
+def is_exact_barrio(texto, barrio_objetivo):
+    texto = normalize_text(texto)
+    barrio_objetivo = normalize_text(barrio_objetivo)
+
+    # match exacto tipo palabra completa
+    pattern = rf"\b{re.escape(barrio_objetivo)}\b"
+
+    if not re.search(pattern, texto):
+        return False
+
+    # excluir variantes
+    blacklist = ["r", "c", "norte", "sur", "este", "oeste"]
+
+    for suffix in blacklist:
+        if f"{barrio_objetivo} {suffix}" in texto:
+            return False
+
+    return True
+
+ 
+
+        
+    
+
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
 class BaseScraper(ABC):
     """Clase base para todos los scrapers de portales inmobiliarios"""
     
@@ -105,118 +265,6 @@ class BaseScraper(ABC):
         })
     
     
-    
-    def normalize_url(url: str) -> str:
-        if not url:
-            return ""
-    
-        url = url.lower().strip()
-
-        # eliminar params
-        url = url.split("?")[0]
-
-        # eliminar trailing slash
-        url = url.rstrip("/")
-
-        # eliminar www
-        url = url.replace("www.", "")
-
-        return url
-    
-    def clean_text(text: str) -> str:
-        if not text:
-            return ""
-
-        text = text.lower()
-        text = re.sub(r"\s+", " ", text)
-        text = re.sub(r"[^\w\s]", "", text)
-
-        return text.strip()
-
-
-
-    def generate_fingerprint(prop) -> str:
-        try:
-            price = normalize_price(
-                getattr(prop, "price", None) or prop.get("price", "")
-            )
-
-            surface = normalize_surface(
-                getattr(prop, "surface", None) or prop.get("surface", "")
-            )
-
-            barrio = normalize_barrio(
-                getattr(prop, "barrio", None) or prop.get("barrio", "")
-            )
-
-            base = f"{price}_{surface}_{barrio}"
-
-            return hashlib.md5(base.encode()).hexdigest()
-
-        except Exception:
-            return ""
-
-
-    def es_barrio_valido(texto: str, barrio_objetivo: str) -> bool:
-        if not texto:
-            return False
-
-        texto = texto.lower()
-        barrio = barrio_objetivo.lower()
-
-        # match exacto como palabra (evita "belgrano r", etc.)
-        match = re.search(rf"\b{re.escape(barrio)}\b", texto)
-
-        if not match:
-            return False
-
-        # exclusiones genéricas
-        exclusiones = [
-            "cerca de",
-            "a metros de",
-            "próximo a",
-            "zona",
-        ]
-
-        for ex in exclusiones:
-            if ex in texto:
-                return False
-
-        return True
-    
-
-
-    def normalize_surface(surface):
-        if not surface:
-            return ""
-
-        surface = str(surface).lower()
-        surface = re.sub(r"[^\d]", "", surface)  # deja solo números
-
-        return surface
-
-
-    def normalize_price(price):
-        if not price:
-            return ""
-
-        price = str(price)
-        price = re.sub(r"[^\d]", "", price)
-
-        return price
-    
-    
-    def normalize_barrio(barrio: str) -> str:
-        if not barrio:
-            return ""
-
-        barrio = barrio.lower()
-
-        if "belgrano" in barrio:
-            return "belgrano"
-
-        return barrio
-
     
     
     
