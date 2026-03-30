@@ -91,33 +91,25 @@ class StatsHandler(SimpleHTTPRequestHandler):
         
         def ejecutar_scraper():
             try:
-                result = subprocess.run(
-                    [sys.executable, SCRAPER_SCRIPT, "--zona", zona, "--operacion", operacion, "--tipo", tipo, "--output", SCRAPING_JSON],
-                    capture_output=True,
-                    text=True,
-                    timeout=180
-                )
-                if result.returncode == 0:
-                    print(f"✅ Scraping completado para {zona}")
-                    print("📤 STDOUT:")
-                    print(result.stdout)
-                else:
-                    print(f"❌ Error en scraper (code {result.returncode})")
-                    print("📤 STDOUT:")
-                    print(result.stdout)
-                    print("📤 STDERR:")
-                    print(result.stderr)
+                print(f"🚀 Ejecutando scraper DIRECTO: {zona}")
+
+                from backend.logic.market_scraper import ScrapingManager
+                import json
+
+                manager = ScrapingManager()
+                result = manager.scrape_market(zona, operacion, tipo)
+
+                # guardar JSON (igual que antes)
+                result["zone"] = zona
+                result["operation"] = operacion
+
+                with open(SCRAPING_JSON, "w", encoding="utf-8") as f:
+                    json.dump(result, f, ensure_ascii=False, indent=2)
+
+                print(f"✅ Scraping completado para {zona}")
+
             except Exception as e:
-                print(f"❌ Excepción: {e}")
-        
-        Thread(target=ejecutar_scraper).start()
-        
-        self.wfile.write(json.dumps({
-            "success": True,
-            "message": f"Scraping iniciado para {zona}",
-            "zone": zona,
-            "waiting": True
-        }).encode())
+                print(f"❌ Error en scraper: {e}")
     
     def handle_scraping_data(self):
 
