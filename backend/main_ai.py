@@ -544,13 +544,12 @@ def listar_barrios(q: Optional[str] = None):
     cursor = conn.cursor()
     try:
         if q:
-            # Normalizar entrada: quitar espacios extras, convertir a minúsculas
             query = q.strip().lower()
             
             # Palabras que indican que NO es un barrio (para excluir coincidencias falsas)
             exclusiones = [
                 'calle', 'avenida', 'av', 'villa', 'general', 'san', 'santa',
-                'localidad', 'partido', 'departamento', 'provincia'
+                'localidad', 'partido', 'departamento', 'provincia', 'barrio'
             ]
             
             # Verificar si la consulta contiene términos excluyentes
@@ -563,7 +562,7 @@ def listar_barrios(q: Optional[str] = None):
                     (query,)
                 )
             else:
-                # Buscar barrios que COMENZAN con el texto o coinciden exactamente
+                # Buscar barrios que COMIENZAN con el texto o coinciden exactamente
                 # Esto evita que "Belgrano" coincida con "Villa General Belgrano"
                 cursor.execute(
                     "SELECT nombre FROM barrios_data WHERE LOWER(nombre) LIKE ? OR LOWER(nombre) = ? ORDER BY nombre",
