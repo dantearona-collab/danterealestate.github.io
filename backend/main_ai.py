@@ -31,7 +31,7 @@ from backend.logic.environ_database import (
 )
 from backend.logic.barrio_data import get_gastronomy_info, get_financial_info
 from backend.logic.gemini_client import call_gemini_with_rotation
-from backend.logic.gemini_client import call_gemini_with_rotation, build_prompt
+
 
 # ============================================
 # CONFIGURACIÓN
@@ -1224,6 +1224,7 @@ def property_valuation(request: ValuationRequest):
 # ============================================
 
 @app.api_route("/ai/regenerate-analysis", methods=["GET", "POST"])
+@app.api_route("/ai/regenerate-analysis", methods=["GET", "POST"])
 async def regenerate_with_ai(
     zone: str = Query(..., description="Barrio a regenerar"),
     force_refresh: bool = Query(False, description="Forzar regeneración")
@@ -1243,9 +1244,7 @@ async def regenerate_with_ai(
             return {"success": False, "error": "Barrio no encontrado"}
         conn.close()
         
-        # Llamar a Gemini con un prompt mejorado
-        from backend.logic.gemini_client import call_gemini_with_rotation
-        
+        # ✅ USAR LA FUNCIÓN YA IMPORTADA AL INICIO (NO RE-IMPORTAR)
         prompt = f"""Eres un experto analista inmobiliario y urbanista especializado en Buenos Aires, Argentina.
 
 Tu tarea es generar un análisis COMPLETO y DETALLADO del barrio **{zone}** con datos REALES y verificables.
@@ -1277,7 +1276,9 @@ AHORA GENERA EL ANÁLISIS PARA: {zone}
 """
         
         print(f"📤 Enviando prompt mejorado a Gemini para {zone}")
-        response_text = call_gemini_with_rotation(prompt)
+        response_text = call_gemini_with_rotation(prompt)  # ✅ YA ESTÁ IMPORTADA
+
+
         
         if not response_text:
             print("⚠️ Gemini no devolvió respuesta, usando datos de ejemplo")
