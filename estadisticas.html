@@ -1,0 +1,2307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas de Mercado - Dante Propiedades</title>
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!--  SheetJS para Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #2563EB;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --bg-light: #F3F4F6;
+            --bg-card: #FFFFFF;
+            --text-dark: #1F2937;
+            --text-muted: #6B7280;
+            --border: #E5E7EB;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        
+        /* Header */
+        .header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .header-brand i {
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+        
+        .header-brand h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .header-nav {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .nav-link {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .nav-link:hover {
+            background: var(--bg-light);
+            color: var(--text-dark);
+        }
+        
+        .nav-link.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        /* Page Title */
+        .page-header {
+            margin-bottom: 2rem;
+        }
+        
+        .page-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+        
+        /* Filters */
+        .filters-section {
+            background: var(--bg-card);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+        
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            position: relative;
+        }
+        
+        .filter-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+        
+        .filter-select, .filter-input {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            background: var(--bg-card);
+            color: var(--text-dark);
+            transition: all 0.2s;
+            min-width: 180px;
+        }
+        
+        /* Estilos específicos para el input de texto (no select) */
+        .filter-input {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: none;
+        }
+        
+        .filter-input:hover {
+            border-color: var(--primary);
+        }
+        
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        /* Firefox dropdown arrow fix */
+        @supports (-moz-appearance: none) {
+            .filter-select {
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E") !important;
+            }
+        }
+        
+        .filter-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .filter-btn:hover {
+            background: var(--primary-dark);
+        }
+        
+        .filter-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .scrape-btn {
+            background: #7c3aed;
+        }
+        
+        .scrape-btn:hover {
+            background: #6d28d9;
+        }
+        }
+        
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .kpi-card {
+            background: var(--bg-card);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        
+        .kpi-icon.blue { background: rgba(37, 99, 235, 0.1); color: var(--primary); }
+        .kpi-icon.green { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .kpi-icon.orange { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .kpi-icon.red { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        
+        .kpi-trend {
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+        }
+        
+        .kpi-trend.up { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .kpi-trend.down { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        
+        .kpi-value {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+        
+        .kpi-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+        
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        @media (max-width: 1024px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .chart-card {
+            background: var(--bg-card);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+        
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+        
+        .chart-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        
+        /* Table Section */
+        .table-section {
+            background: var(--bg-card);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+        
+        .table-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+        
+        .table-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th, .data-table td {
+            padding: 0.875rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .data-table th {
+            background: var(--bg-light);
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .data-table tbody tr {
+            transition: background 0.2s;
+        }
+        
+        .data-table tbody tr:hover {
+            background: var(--bg-light);
+        }
+        
+        .data-table td {
+            font-size: 0.875rem;
+            color: var(--text-dark);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .badge.venta { background: rgba(37, 99, 235, 0.1); color: var(--primary); }
+        .badge.alquiler { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        
+        .price-value {
+            font-weight: 600;
+            color: var(--success);
+        }
+        
+        /* Loading State */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem;
+            color: var(--text-muted);
+        }
+        
+        .loading i {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Error State */
+        .error-state {
+            text-align: center;
+            padding: 4rem;
+            color: var(--danger);
+        }
+        
+        .error-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* Bar Chart Horizontal */
+        .bar-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .bar-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+        }
+        
+        .bar-track {
+            height: 8px;
+            background: var(--bg-light);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        /* Scatter Legend */
+        .scatter-legend {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+        
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .header-nav {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-brand">
+            <i class="fas fa-building"></i>
+            <h1>Dante Propiedades CMS</h1>
+        </div>
+        <nav class="header-nav">
+            <a href="/" class="nav-link" id="nav-barrios">Barrios</a>
+            <a href="/estadisticas.html" class="nav-link active" id="nav-estadisticas">Estadísticas</a>
+            
+            
+            <a href="http://localhost:8001/api/barrios/generate-json" 
+                class="nav-link" 
+                target="_blank"
+                onclick="window.open(this.href, '_blank'); return false;">
+                <i class="fas fa-download"></i> Download JSON
+            </a>
+
+        </nav>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="main-content fade-in">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h2 class="page-title">Análisis de Mercado Inmobiliario</h2>
+            <p class="page-subtitle">Extrae datos en tiempo real de portales inmobiliarios (Argenprop, Zonaprop, MercadoLibre)</p>
+        </div>
+        
+        <!-- Filters -->
+        <section class="filters-section">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label class="filter-label">Barrio/Zona</label>
+                    <input 
+                        type="text" 
+                        class="filter-input" 
+                        id="filter-barrio"
+                        list="barrios-list"
+                        placeholder="Ej: palermo, belgrano, microcentro..."
+                        autocomplete="off"
+                    >
+                    <datalist id="barrios-list">
+                        <option value="palermo">Palermo - Capital Federal</option>
+                        <option value="belgrano">Belgrano - Capital Federal</option>
+                        <option value="recoleta">Recoleta - Capital Federal</option>
+                        <option value="microcentro">Microcentro - Capital Federal</option>
+                        <option value="nordelta">Nordelta - Tigre</option>
+                        <option value="tigre">Tigre - Partido del Tigre</option>
+                        <option value="pilar">Pilar - Buenos Aires</option>
+                        <option value="san-isidro">San Isidro - Buenos Aires</option>
+                    </datalist>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Operación</label>
+                    <select class="filter-select" id="filter-operacion">
+                        <option value="">Todas las operaciones</option>
+                        <option value="venta">Venta</option>
+                        <option value="alquiler">Alquiler</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Tipo de Propiedad</label>
+                    <select class="filter-select" id="filter-tipo">
+                        <option value="">Todos los tipos</option>
+                        <option value="departamento">Departamento</option>
+                        <option value="casa">Casa</option>
+                        <option value="ph">PH</option>
+                        <option value="terreno">Terreno</option>
+                        <option value="oficina">Oficina</option>
+                    </select>
+                </div>
+                <!--<button class="filter-btn" onclick="applyFilters()">
+                    <i class="fas fa-search"></i>
+                    Analizar
+                </button>  -->
+                <button class="filter-btn scrape-btn" onclick="runScraping()" id="scrape-btn">
+                    <i class="fas fa-spider"></i>
+                    Scraping Mercado
+                </button>
+                <button class="filter-btn excel-btn" onclick="descargarScrapingExcel()" id="excel-btn" style="background: #28a745;">
+                    <i class="fas fa-file-excel"></i>
+                    Descargar Excel
+                </button>
+            </div>
+            <p style="text-align: center; margin-top: 8px; color: #666; font-size: 0.85rem;">
+                💡 Escribe cualquier barrio de Argentina y ejecuta scraping para ver estadísticas en tiempo real
+            </p>
+        </section>
+        
+        <!-- Scraping Status -->
+        <section id="scraping-status" class="filters-section" style="display: none;">
+            <div class="filters-grid">
+                <div id="scraping-message" style="color: var(--text-muted);"></div>
+            </div>
+        </section>
+        
+        <!-- Loading State -->
+        <div id="loading-state" class="loading">
+            <i class="fas fa-chart-bar"></i>
+            <span style="margin-left: 1rem;">Cargando estadísticas...</span>
+        </div>
+        
+        <!-- Scraping Loading State -->
+        <div id="scraping-loading" class="loading" style="display: none;">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span style="margin-left: 1rem;" id="scraping-loading-text">Ejecutando scraping...</span>
+        </div>
+        
+        <!-- Error State -->
+        <div id="error-state" class="error-state" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>Error al cargar las estadísticas</p>
+            <button class="filter-btn" onclick="loadData()" style="margin-top: 1rem;">
+                <i class="fas fa-refresh"></i>
+                Reintentar
+            </button>
+        </div>
+        
+        <!-- Content -->
+        <div id="content" style="display: none;">
+            <!-- KPI Cards -->
+            <section class="kpi-grid" id="kpi-grid">
+                <!-- KPIs injected by JS -->
+            </section>
+            
+            <!-- Charts Grid -->
+            <section class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Precio Promedio por Barrio (USD)</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="bar-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Precio vs Superficie</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="scatter-chart"></canvas>
+                    </div>
+                    <div class="scatter-legend">
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background: rgba(37, 99, 235, 0.6);"></div>
+                            <span>Venta</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background: rgba(16, 185, 129, 0.6);"></div>
+                            <span>Alquiler</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Distribución por Tipo de Propiedad</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="pie-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Rango de Precios</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="range-chart"></canvas>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Resumen Estadístico -->
+            <section class="table-section" id="resumen-estadistico" style="margin-bottom: 1.5rem;">
+                <div class="table-header">
+                    <h3 class="table-title">
+                        <i class="fas fa-chart-pie" style="margin-right: 8px;"></i>
+                        Indicadores de Mercado - Resumen Estadístico
+                    </h3>
+                    <span id="resumen-timestamp" style="color: var(--text-muted); font-size: 0.875rem;"></span>
+                </div>
+                <div class="table-container">
+                    <table class="data-table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Indicador</th>
+                                <th>Valor</th>
+                                <th>Unidad</th>
+                                <th>Muestra</th>
+                                <th>Interpretación</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resumen-estadistico-body">
+                            <!-- Se llena con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            
+            
+            
+            
+            
+            <!-- Table Section -->
+            <section class="table-section">
+                <div class="table-header">
+                    <h3 class="table-title">Propiedades Analizadas</h3>
+                    <span id="table-count" style="color: var(--text-muted); font-size: 0.875rem;"></span>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Propiedad</th>
+                                <th>Barrio</th>
+                                <th>Operación</th>
+                                <th>Superficie</th>
+                                <th>Precio</th>
+                                <th>Precio/m²</th>
+                            </tr>
+                        </thead>
+                        <tbody id="properties-table">
+                            <!-- Table rows injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+    
+    <script>
+
+        // Global state and API Configuration
+        const API_BASE_URL = 'http://localhost:8001';
+        let marketData = null;
+        let charts = {};
+
+        // ========================================
+        // LISTA DE BARRIOS VÁLIDOS PARA SCRAPING
+        // ========================================
+        const BARRIOS_VALIDOS = [
+            'palermo', 'belgrano', 'recoleta', 'microcentro', 'nordelta',
+            'tigre', 'pilar', 'san-isidro', 'balvanera', 'chacarita',
+            'almagro', 'boedo', 'caballito', 'flores', 'villa crespo',
+            'villa devoto', 'villa urquiza', 'colegiales', 'nuñez', 'saavedra'
+        ];
+
+        // ========================================
+        // FUNCIÓN PARA NORMALIZAR EL NOMBRE DEL BARRIO
+        // ========================================
+        function normalizarBarrio(input) {
+            if (!input) return '';
+            
+            const exclusiones = ['avenida', 'av', 'calle', 'villa', 'general', 'san', 'santa', 'localidad', 'partido'];
+            let texto = input.toLowerCase().trim();
+            
+            // 1. Verificar si es un barrio válido directamente
+            if (BARRIOS_VALIDOS.includes(texto)) {
+                return texto;
+            }
+            
+            // 2. Intentar extraer la parte que podría ser un barrio
+            const partes = texto.split(' ');
+            for (const parte of partes) {
+                if (BARRIOS_VALIDOS.includes(parte)) {
+                    return parte;
+                }
+            }
+            
+            // 3. Verificar si contiene términos excluyentes
+            for (const excl of exclusiones) {
+                if (texto.includes(excl)) {
+                    console.warn(`⚠️ "${input}" contiene término excluido "${excl}"`);
+                    return null; // No es válido
+                }
+            }
+            
+            // 4. Si llegamos acá, devolver el original (pero alertar)
+            console.warn(`⚠️ "${input}" no está en la lista de barrios válidos`);
+            return texto;
+        }
+
+        // Initialize - NO carga datos automáticamente
+        document.addEventListener('DOMContentLoaded', () => {
+            showInitialState();
+            
+            // ========================================
+            // ✅ VALIDACIÓN DEL INPUT DE BARRIO
+            // ========================================
+            const filterBarrio = document.getElementById('filter-barrio');
+            
+            if (filterBarrio) {
+                // Validar al cambiar el valor
+                filterBarrio.addEventListener('change', function() {
+                    const original = this.value;
+                    const normalizado = normalizarBarrio(original);
+                    
+                    if (normalizado === null) {
+                        alert(`"${original}" no es un nombre de barrio válido.\n\nUsá nombres como: Palermo, Belgrano, Recoleta, etc.`);
+                        this.value = '';
+                    } else if (normalizado !== original.toLowerCase()) {
+                        this.value = normalizado;
+                        console.log(`📝 Barrio corregido: "${original}" → "${normalizado}"`);
+                    }
+                });
+                
+                // También validar al presionar Enter
+                filterBarrio.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        const original = this.value;
+                        const normalizado = normalizarBarrio(original);
+                        
+                        if (normalizado === null) {
+                            e.preventDefault();
+                            alert(`"${original}" no es un nombre de barrio válido.\n\nUsá nombres como: Palermo, Belgrano, Recoleta, etc.`);
+                            this.value = '';
+                        } else if (normalizado !== original.toLowerCase()) {
+                            this.value = normalizado;
+                            console.log(`📝 Barrio corregido: "${original}" → "${normalizado}"`);
+                        }
+                    }
+                });
+            }
+        });
+
+        // Validación en tiempo real del input de barrio
+        const filterBarrio = document.getElementById('filter-barrio');
+        if (filterBarrio) {
+            filterBarrio.addEventListener('change', function() {
+                const original = this.value;
+                const normalizado = normalizarBarrio(original);
+                
+                if (normalizado === null) {
+                    alert(`"${original}" no es un barrio válido.`);
+                    this.value = '';
+                } else if (normalizado !== original.toLowerCase()) {
+                    this.value = normalizado;
+                    console.log(`📝 Barrio corregido: "${original}" → "${normalizado}"`);
+                }
+            });
+        }
+
+
+        // ========================================
+        // ✅ FUNCIÓN PARA MOSTRAR NOTIFICACIONES TEMPORALES
+        // ========================================
+        function mostrarNotificacion(mensaje, tipo = 'info') {
+            // Buscar o crear contenedor de notificaciones
+            let container = document.getElementById('notification-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'notification-container';
+                container.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    z-index: 9999;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                `;
+                document.body.appendChild(container);
+            }
+            
+            const notif = document.createElement('div');
+            notif.style.cssText = `
+                background: ${tipo === 'error' ? '#EF4444' : tipo === 'success' ? '#10B981' : '#3B82F6'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                font-size: 14px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                animation: slideIn 0.3s ease;
+                max-width: 300px;
+            `;
+            notif.textContent = mensaje;
+            container.appendChild(notif);
+            
+            setTimeout(() => {
+                notif.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notif.remove(), 300);
+            }, 3000);
+        }
+
+        // Agregar animaciones si no existen
+        if (!document.querySelector('#notification-styles')) {
+            const style = document.createElement('style');
+            style.id = 'notification-styles';
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Mostrar estado inicial (esperando scraping)
+        function showInitialState() {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('error-state').style.display = 'none';
+            document.getElementById('scraping-loading').style.display = 'none';
+            document.getElementById('content').style.display = 'none';
+            
+            // Mostrar estado inicial con instrucciones
+            const kpiGrid = document.getElementById('kpi-grid');
+            kpiGrid.innerHTML = `
+                <div class="kpi-card" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                    <div class="kpi-icon blue" style="width: 80px; height: 80px; font-size: 2rem; margin: 0 auto 1rem;">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="kpi-value" style="font-size: 1.5rem;">Análisis de Mercado</div>
+                    <div class="kpi-label" style="font-size: 1rem; margin-top: 0.5rem;">
+                        Completa los filtros y ejecuta "Scraping Mercado" para ver estadísticas
+                    </div>
+                </div>
+            `;
+            
+            // Limpiar gráficos
+            ['bar', 'scatter', 'pie', 'range'].forEach(key => {
+                if (charts[key]) {
+                    charts[key].destroy();
+                    charts[key] = null;
+                }
+            });
+            
+            // Limpiar tabla
+            document.getElementById('properties-table').innerHTML = '';
+            document.getElementById('table-count').textContent = '0 propiedades';
+        }
+        
+        // Apply filters - Solo ejecuta scraping
+        function applyFilters() {
+            runScraping();
+        }
+        
+        // Run scraping
+        // Run scraping
+        async function runScraping() {
+            const barrioInput = document.getElementById('filter-barrio').value.trim();
+            const operacion = document.getElementById('filter-operacion').value;
+            const tipo = document.getElementById('filter-tipo').value;
+            
+            if (!barrioInput) {
+                alert('Por favor ingresa el nombre de un barrio');
+                return;
+            }
+            
+            // ✅ NORMALIZAR EL BARRIO
+            const barrioNormalizado = normalizarBarrio(barrioInput);
+            
+            if (barrioNormalizado === null) {
+                alert(`"${barrioInput}" no es un nombre de barrio válido.\n\nUsá nombres como: Palermo, Belgrano, Recoleta, etc.`);
+                return;
+            }
+            
+            const zona = barrioNormalizado;
+            
+            console.log(`🌐 Scraping solicitado: ${zona} (original: ${barrioInput})`);
+            
+            // Mostrar loading
+            document.getElementById('scraping-loading').style.display = 'flex';
+            document.getElementById('scrape-btn').disabled = true;
+            document.getElementById('scraping-loading-text').textContent = `Scraping ${zona} (${operacion || 'venta'} - ${tipo || 'departamento'})...`;
+            
+            try {
+                // Iniciar scraping con los parámetros seleccionados
+                const params = new URLSearchParams({
+                    zona: zona,
+                    operacion: operacion || 'venta',
+                    tipo: tipo || 'departamento'
+                });
+                
+                const response = await fetch(`/api/run-scrape?${params}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log(`✅ Scraping iniciado para ${zona}`);
+                    
+                    // Esperar y consultar datos
+                    let attempts = 0;
+                    const maxAttempts = 30;
+                    let checkInterval = null;
+                    
+                    const checkData = async () => {
+                        try {
+                            const dataResponse = await fetch('/api/scraping-data');
+                            const scrapingData = await dataResponse.json();
+                            
+                            if (scrapingData.success && 
+                                scrapingData.zone?.toLowerCase() === zona.toLowerCase() &&
+                                scrapingData.operation === (operacion || 'venta')) {
+                                
+                                if (checkInterval) clearInterval(checkInterval);
+                                document.getElementById('scraping-loading').style.display = 'none';
+                                document.getElementById('scrape-btn').disabled = false;
+                                
+                                renderScrapedTable(scrapingData.data);
+                                renderScrapedCharts(scrapingData.data);
+                                
+                                document.getElementById('scraping-status').style.display = 'block';
+                                document.getElementById('scraping-message').innerHTML = 
+                                    `<i class="fas fa-check-circle" style="color:var(--success);"></i> 
+                                    ${scrapingData.message || 'Scraping completado'} - ${zona}`;
+                                
+                                showContent();
+                            }
+                        } catch (e) {
+                            console.log('Esperando datos...');
+                        }
+                        
+                        attempts++;
+                        if (attempts >= maxAttempts) {
+                            if (checkInterval) clearInterval(checkInterval);
+                            document.getElementById('scraping-loading').style.display = 'none';
+                            document.getElementById('scrape-btn').disabled = false;
+                            alert('Tiempo de espera agotado. Intenta de nuevo.');
+                        }
+                    };
+                    
+                    checkInterval = setInterval(checkData, 2000);
+                    
+                } else {
+                    throw new Error(data.message || 'Error iniciando scraping');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('scraping-loading').style.display = 'none';
+                document.getElementById('scrape-btn').disabled = false;
+                alert('Error: ' + error.message);
+            }
+        }
+        // Render table with scraped properties
+        // ✅ CÓDIGO CORREGIDO
+        function renderScrapedTable(scrapedData) {
+            const tbody = document.getElementById('properties-table');
+            const countSpan = document.getElementById('table-count');
+            
+            const properties = scrapedData.properties_sample || [];
+            const validProperties = properties.filter(p => !p.surface_warning);
+            const warningProperties = properties.filter(p => p.surface_warning);
+            
+            const rawCount = scrapedData.raw_properties_count || 
+                            scrapedData.total_properties_analyzed || 
+                            properties.length;
+            
+            // Encabezado con estadísticas
+            countSpan.innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 8px; background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <span style="color: var(--text-dark); font-weight: 600; font-size: 1.1rem;">
+                            📊 <strong>${properties.length}</strong> propiedades mostradas
+                        </span>
+                        <span style="color: var(--text-muted);">
+                            🔍 Total extraídas: <strong>${rawCount}</strong> 
+                            ${rawCount > properties.length ? 
+                                `<span style="color: #F59E0B;">(${rawCount - properties.length} filtradas)</span>` 
+                                : ''}
+                        </span>
+                    </div>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap; font-size: 0.9rem;">
+                        <span style="color: #10B981;">
+                            ✅ <strong>${validProperties.length}</strong> válidas
+                        </span>
+                        ${warningProperties.length > 0 ? `
+                            <span style="color: #F59E0B;">
+                                ⚠️ <strong>${warningProperties.length}</strong> con superficie irreal
+                            </span>
+                        ` : ''}
+                        <span style="color: #3B82F6;">
+                            📍 <strong>${scrapedData.zone || 'N/A'}</strong> - ${scrapedData.operation_type || 'venta'}
+                        </span>
+                    </div>
+                    ${scrapedData.errors && scrapedData.errors.length > 0 ? `
+                        <div style="color: #EF4444; font-size: 0.85rem; background: #FEE2E2; padding: 8px; border-radius: 4px; margin-top: 5px;">
+                            <i class="fas fa-exclamation-circle"></i>
+                            ${scrapedData.errors.join(' • ')}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            if (properties.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">No se encontraron propiedades</td></tr>';
+                return;
+            }
+            
+            // Renderizar TODAS las propiedades
+            tbody.innerHTML = properties.map((prop, index) => {
+                // Determinar moneda y símbolo
+                const currencySymbol = prop.currency === 'USD' ? 'US$' : '$';
+                const currencyName = prop.currency === 'USD' ? 'Dólares' : 'Pesos';
+                const currencyColor = prop.currency === 'USD' ? '#2563EB' : '#10B981';
+                
+                // Formatear números
+                const formattedPrice = prop.price ? prop.price.toLocaleString('es-AR') : '0';
+                const formattedPriceM2 = prop.price_m2 ? prop.price_m2.toFixed(0).toLocaleString('es-AR') : '0';
+                
+                // Determinar si es válida
+                const isValid = !prop.surface_warning;
+                const rowClass = isValid ? '' : 'warning-row';
+                
+                // Truncar título
+                const shortTitle = prop.title && prop.title.length > 60 
+                    ? prop.title.substring(0, 60) + '...' 
+                    : prop.title || 'Sin título';
+                
+                return `
+                <tr class="${rowClass}" style="${!isValid ? 'background-color: #FEF3C7;' : ''}">
+                    <td style="max-width: 300px;">
+                        <div style="font-weight: 500; margin-bottom: 4px;">${shortTitle}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <span><i class="fas fa-map-marker-alt" style="margin-right: 2px;"></i> ${prop.address || 'Sin dirección'}</span>
+                            <span><i class="fas fa-building"></i> ${prop.source || 'N/A'}</span>
+                        </div>
+                        ${prop.surface_warning ? `
+                            <div style="font-size: 0.7rem; color: #F59E0B; margin-top: 4px; background: #FEF3C7; padding: 2px 6px; border-radius: 4px; display: inline-block;">
+                                <i class="fas fa-exclamation-triangle" style="margin-right: 4px;"></i>
+                                Superficie irreal (${prop.surface || 0}m²)
+                            </div>
+                        ` : ''}
+                    </td>
+                    <td style="font-weight: 500;">${scrapedData.zone || 'N/A'}</td>
+                    <td>
+                        <span class="badge ${prop.operation_type || 'venta'}" style="padding: 4px 8px; border-radius: 12px; font-weight: 500;">
+                            ${prop.operation_type === 'alquiler' ? '🏠 Alquiler' : '💰 Venta'}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="font-weight: 500;">${prop.surface || 0} m²</div>
+                        ${prop.surface && prop.surface < 10 ? 
+                            '<div style="font-size: 0.7rem; color: #F59E0B;">Superficie muy baja</div>' 
+                            : ''}
+                    </td>
+                    <td class="price-value">
+                        <div style="font-weight: 600; color: ${currencyColor};">
+                            ${currencySymbol} ${formattedPrice}
+                        </div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">
+                            ${currencyName}
+                        </div>
+                    </td>
+                    <td>
+                        <div style="font-weight: 500; color: #6B7280;">
+                            ${currencySymbol} ${formattedPriceM2}/m²
+                        </div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">
+                            ${currencyName}
+                        </div>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+        // Render charts with scraped data
+        function renderScrapedCharts(scrapedData) {
+            const properties = scrapedData.properties_sample || [];
+            const stats = scrapedData.statistics || {};
+            const zone = scrapedData.zone || 'Sin definir';
+            const operation = scrapedData.operation_type || 'venta';
+            
+            console.log(`📊 Renderizando gráficos para: ${zone} (${operation})`);
+            
+            // ✅ ACTUALIZAR TÍTULO/MOSTRAR BARRIO ACTUAL
+            const zoneDisplay = document.getElementById('current-zone-display');
+            if (zoneDisplay) {
+                zoneDisplay.innerHTML = `📍 <strong>${zone}</strong> - ${operation} (${properties.length} propiedades)`;
+            } else {
+                // Crear el elemento si no existe
+                const kpiGrid = document.getElementById('kpi-grid');
+                if (kpiGrid) {
+                    const displayDiv = document.createElement('div');
+                    displayDiv.id = 'current-zone-display';
+                    displayDiv.style.cssText = 'grid-column: 1 / -1; font-size: 1.2rem; margin-bottom: 1rem; padding: 1rem; background: #e3f2fd; border-radius: 8px; text-align: center;';
+                    displayDiv.innerHTML = `📍 <strong>${zone}</strong> - ${operation} (${properties.length} propiedades)`;
+                    kpiGrid.parentNode.insertBefore(displayDiv, kpiGrid);
+                }
+            }
+            
+            // Render KPIs
+            renderScrapedKPIs(scrapedData, stats, zone, operation);
+            renderResumenEstadistico(scrapedData); 
+
+            
+            // Destruir gráficos existentes
+            if (charts.bar) { charts.bar.destroy(); charts.bar = null; }
+            if (charts.scatter) { charts.scatter.destroy(); charts.scatter = null; }
+            if (charts.pie) { charts.pie.destroy(); charts.pie = null; }
+            if (charts.range) { charts.range.destroy(); charts.range = null; }
+            
+            // Renderizar nuevos gráficos con los datos actuales
+            renderScrapedBarChart(properties, zone);
+            renderScrapedScatterChart(properties, operation);
+            renderScrapedPieChart(scrapedData.currency_distribution || {});
+            renderScrapedRangeChart(properties);
+            
+            // Mostrar contenido
+            showContent();
+        }
+        
+        // Render KPIs with scraped data
+        function renderScrapedKPIs(scrapedData, stats, zone, operation) {
+            const grid = document.getElementById('kpi-grid');
+            
+            const properties = scrapedData.properties_sample || [];
+            const validProperties = properties.filter(p => !p.surface_warning);
+            const totalExtraidas = scrapedData.raw_properties_count || 
+                                scrapedData.total_properties_analyzed || 
+                                properties.length;
+            
+            const currencyDist = scrapedData.currency_distribution || {};
+            const primaryCurrency = currencyDist.USD > currencyDist.ARS ? 'USD' : 'ARS';
+            const currencySymbol = primaryCurrency === 'USD' ? 'US$' : '$';
+            
+            grid.innerHTML = `
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon blue">
+                            <i class="fas fa-building"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-value">${totalExtraidas}</div>
+                    <div class="kpi-label">
+                        Propiedades extraídas en ${zone}
+                        <span style="display: block; font-size: 0.7rem; color: #F59E0B;">
+                            ${validProperties.length} válidas para promedio
+                        </span>
+                    </div>
+                </div>
+                <!-- ... resto de KPIs ... -->
+            `;
+        }
+        
+        // Bar chart with scraped data
+        function renderScrapedBarChart(properties, zone) {
+            const ctx = document.getElementById('bar-chart').getContext('2d');
+            
+
+            const displayProps = properties;
+            
+            // Prepare data - truncate titles
+            const labels = displayProps.map((p, i) => `Prop ${i + 1}: ${(p.title || 'N/A').substring(0, 20)}...`);
+            const prices = displayProps.map(p => p.price || 0);
+            const surfaces = displayProps.map(p => p.surface || 0);
+            
+            charts.bar = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Precio (ARS)',
+                        data: prices,
+                        backgroundColor: prices.map((p, i) => {
+                            const color = p >= 1000000 ? '235, 99, 132' : '37, 99, 235';
+                            return `rgba(${color}, 0.7)`;
+                        }),
+                        borderColor: prices.map((p, i) => {
+                            const color = p >= 1000000 ? '235, 99, 132' : '37, 99, 235';
+                            return `rgba(${color}, 1)`;
+                        }),
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'x',
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: `Precios en ${zone} - Top ${displayProps.length} propiedades`
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const idx = context.dataIndex;
+                                    return [
+                                        `Precio: ARS ${prices[idx].toLocaleString()}`,
+                                        `Superficie: ${surfaces[idx]} m²`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: (value) => `ARS ${(value / 1000).toFixed(0)}k`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Scatter chart with scraped data
+        function renderScrapedScatterChart(properties, operation) {
+            const ctx = document.getElementById('scatter-chart').getContext('2d');
+            
+            // Filter properties with valid data
+            const validProps = properties.filter(p => p.surface > 0 && p.price > 0);
+            
+            const scatterData = validProps.map(p => ({
+                x: p.surface,
+                y: p.price,
+                title: p.title,
+                address: p.address
+            }));
+            
+            const operationColor = operation === 'alquiler' ? '16, 185, 129' : '37, 99, 235';
+            
+            charts.scatter = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: operation.charAt(0).toUpperCase() + operation.slice(1),
+                        data: scatterData,
+                        backgroundColor: `rgba(${operationColor}, 0.6)`,
+                        borderColor: `rgba(${operationColor}, 1)`,
+                        pointRadius: 8,
+                        pointHoverRadius: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Precio vs Superficie (${operation})`
+                        },
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const point = scatterData[context.dataIndex];
+                                    return [
+                                        `${point.title.substring(0, 30)}...`,
+                                        `Superficie: ${point.x} m²`,
+                                        `Precio: ARS ${point.y.toLocaleString()}`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Superficie (m²)' },
+                            beginAtZero: true
+                        },
+                        y: {
+                            title: { display: true, text: 'Precio (ARS)' },
+                            ticks: {
+                                callback: (value) => `ARS ${(value / 1000).toFixed(0)}k`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Pie chart with scraped data
+        function renderScrapedPieChart(currencyDist) {
+            const ctx = document.getElementById('pie-chart').getContext('2d');
+            
+            const labels = Object.keys(currencyDist);
+            const values = Object.values(currencyDist);
+            
+            const colors = [
+                'rgba(37, 99, 235, 0.8)',
+                'rgba(16, 185, 129, 0.8)',
+                'rgba(245, 158, 11, 0.8)',
+                'rgba(239, 68, 68, 0.8)'
+            ];
+            
+            charts.pie = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Distribución por Moneda'
+                        },
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Range chart with scraped data
+        function renderScrapedRangeChart(properties) {
+            const ctx = document.getElementById('range-chart').getContext('2d');
+            
+            // Create price ranges
+            const ranges = {
+                '0-200k': 0,
+                '200k-500k': 0,
+                '500k-1M': 0,
+                '1M-5M': 0,
+                '5M+': 0
+            };
+            
+            properties.forEach(p => {
+                const price = p.price || 0;
+                if (price < 200000) ranges['0-200k']++;
+                else if (price < 500000) ranges['200k-500k']++;
+                else if (price < 1000000) ranges['500k-1M']++;
+                else if (price < 5000000) ranges['1M-5M']++;
+                else ranges['5M+']++;
+            });
+            
+            const labels = Object.keys(ranges);
+            const values = Object.values(ranges);
+            
+            charts.range = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Cantidad',
+                        data: values,
+                        backgroundColor: 'rgba(139, 92, 246, 0.8)',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Rango de Precios'
+                        },
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+        
+        // Populate filters
+        function populateFilters(barrios) {
+            console.log('PopulateFilters called with:', barrios);
+            
+            // Llenar el datalist para el input de texto
+            const datalist = document.getElementById('barrios-list');
+            if (datalist) {
+                // Mantener la primera opción
+                datalist.innerHTML = '<option value="">Todos los barrios</option>';
+                
+                if (!barrios || !Array.isArray(barrios) || barrios.length === 0) {
+                    console.warn('No hay barrios para mostrar');
+                    return;
+                }
+                
+                barrios.forEach((barrio, index) => {
+                    const option = document.createElement('option');
+                    option.value = barrio;
+                    option.textContent = barrio;
+                    datalist.appendChild(option);
+                });
+                
+                console.log('Opciones agregadas al datalist. Total:', datalist.options.length);
+            }
+            
+            // También llenar el select legacy por compatibilidad
+            const select = document.getElementById('filter-barrio');
+            if (select && select.tagName === 'SELECT') {
+                select.innerHTML = '<option value="">Todos los barrios</option>';
+                barrios.forEach((barrio) => {
+                    const option = document.createElement('option');
+                    option.value = barrio;
+                    option.textContent = barrio;
+                    select.appendChild(option);
+                });
+            }
+        }
+        
+
+        
+        // Render KPIs
+        function renderKPIs(overview) {
+            const grid = document.getElementById('kpi-grid');
+            
+            const kpis = [
+                {
+                    icon: 'building',
+                    iconClass: 'blue',
+                    label: 'Total Propiedades',
+                    value: overview.total_propiedades.toLocaleString(),
+                    trend: null
+                },
+                {
+                    icon: 'map-marker-alt',
+                    iconClass: 'green',
+                    label: 'Barrios Analizados',
+                    value: overview.barrios_analizados.toString(),
+                    trend: null
+                },
+                {
+                    icon: 'dollar-sign',
+                    iconClass: 'orange',
+                    label: 'Precio Promedio',
+                    value: overview.precio_promedio_general_usd ? 
+                          `USD ${Math.round(overview.precio_promedio_general_usd).toLocaleString()}` : 'N/A',
+                    trend: null
+                },
+                {
+                    icon: 'chart-line',
+                    iconClass: 'red',
+                    label: 'Precio/m² Promedio',
+                    value: overview.precio_m2_promedio_general_usd ? 
+                          `USD ${Math.round(overview.precio_m2_promedio_general_usd).toLocaleString()}` : 'N/A',
+                    trend: null
+                }
+            ];
+            
+            grid.innerHTML = kpis.map(kpi => `
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon ${kpi.iconClass}">
+                            <i class="fas fa-${kpi.icon}"></i>
+                        </div>
+                        ${kpi.trend ? `<span class="kpi-trend ${kpi.trend}">${kpi.trend}</span>` : ''}
+                    </div>
+                    <div class="kpi-value">${kpi.value}</div>
+                    <div class="kpi-label">${kpi.label}</div>
+                </div>
+            `).join('');
+        }
+        
+        // Render charts
+        function renderCharts(data) {
+            renderBarChart(data.barrios);
+            renderScatterChart();
+            renderPieChart(data.overview.distribucion_tipos);
+            renderRangeChart(data.overview.distribucion_precios);
+        }
+        
+        // Bar Chart - Precio promedio por barrio
+        function renderBarChart(barrios) {
+            const ctx = document.getElementById('bar-chart').getContext('2d');
+            
+            if (charts.bar) charts.bar.destroy();
+            
+            const labels = barrios.map(b => b.nombre);
+            const values = barrios.map(b => b.precio_promedio || 0);
+            const counts = barrios.map(b => b.cantidad_propiedades);
+            
+            // Normalizar tamaños de barra
+            const maxCount = Math.max(...counts);
+            const sizes = counts.map(c => (c / maxCount) * 20 + 5);
+            
+            charts.bar = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Precio Promedio (USD)',
+                        data: values,
+                        backgroundColor: values.map((v, i) => {
+                            const alpha = 0.4 + (counts[i] / maxCount) * 0.6;
+                            return `rgba(37, 99, 235, ${alpha})`;
+                        }),
+                        borderColor: 'rgba(37, 99, 235, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const count = counts[context.dataIndex];
+                                    return [
+                                        `Precio: USD ${Math.round(context.raw).toLocaleString()}`,
+                                        `Propiedades: ${count}`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: (value) => `USD ${(value / 1000).toFixed(0)}k`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Scatter Chart - Precio vs Superficie
+        async function renderScatterChart() {
+            const ctx = document.getElementById('scatter-chart').getContext('2d');
+            
+            if (charts.scatter) charts.scatter.destroy();
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/stats/scatter`);
+                const data = await response.json();
+                
+                const venta = data.data.filter(p => p.operacion === 'venta');
+                const alquiler = data.data.filter(p => p.operacion === 'alquiler');
+                
+                charts.scatter = new Chart(ctx, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            {
+                                label: 'Venta',
+                                data: venta.map(p => ({ x: p.x, y: p.y })),
+                                backgroundColor: 'rgba(37, 99, 235, 0.6)',
+                                borderColor: 'rgba(37, 99, 235, 1)',
+                                pointRadius: 6,
+                                pointHoverRadius: 8
+                            },
+                            {
+                                label: 'Alquiler',
+                                data: alquiler.map(p => ({ x: p.x, y: p.y })),
+                                backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                                borderColor: 'rgba(16, 185, 129, 1)',
+                                pointRadius: 6,
+                                pointHoverRadius: 8
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: (context) => {
+                                        const punto = data.data[context.dataIndex];
+                                        return [
+                                            `${punto.titulo.substring(0, 30)}...`,
+                                            `Superficie: ${punto.x} m²`,
+                                            `Precio: USD ${Math.round(punto.y).toLocaleString()}`
+                                        ];
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: { display: true, text: 'Superficie (m²)' },
+                                beginAtZero: true
+                            },
+                            y: {
+                                title: { display: true, text: 'Precio (USD)' },
+                                ticks: {
+                                    callback: (value) => `USD ${(value / 1000).toFixed(0)}k`
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading scatter data:', error);
+            }
+        }
+        
+        // Pie Chart - Distribución por tipo
+        function renderPieChart(distribucion) {
+            const ctx = document.getElementById('pie-chart').getContext('2d');
+            
+            if (charts.pie) charts.pie.destroy();
+            
+            const labels = Object.keys(distribucion);
+            const values = Object.values(distribucion);
+            
+            const colors = [
+                'rgba(37, 99, 235, 0.8)',
+                'rgba(16, 185, 129, 0.8)',
+                'rgba(245, 158, 11, 0.8)',
+                'rgba(239, 68, 68, 0.8)',
+                'rgba(139, 92, 246, 0.8)',
+                'rgba(236, 72, 153, 0.8)'
+            ];
+            
+            charts.pie = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        
+        // Función para descargar scraping.json como Excel (formato XLSX real)
+        function descargarScrapingExcel() {
+            console.log("📥 Solicitando scraping.json para Excel...");
+            
+            fetch(`${API_BASE_URL}/api/market/scraping-data`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success || !data.data) {
+                        alert('No hay datos de scraping disponibles. Ejecuta scraping primero.');
+                        return;
+                    }
+                    
+                    console.log("✅ Datos cargados, generando Excel...");
+                    
+                    // Extraer propiedades
+                    const propiedades = data.data.properties_sample || [];
+                    const stats = data.data.statistics || {};
+                    const zone = data.zone || 'N/A';
+                    const operation = data.operation || 'N/A';
+                    
+                    if (propiedades.length === 0) {
+                        alert('No hay propiedades en los datos de scraping');
+                        return;
+                    }
+                    
+                    // Crear libro de Excel
+                    const wb = XLSX.utils.book_new();
+                    
+                    // ========================================
+                    // HOJA 1: PROPIEDADES
+                    // ========================================
+                    const propData = propiedades.map(p => ({
+                        'Título': p.title || 'Sin título',
+                        'Precio': p.price || 0,
+                        'Moneda': p.currency || 'ARS',
+                        'Superficie (m²)': p.surface || 0,
+                        'Precio/m²': p.price_m2 ? p.price_m2.toFixed(2) : 0,
+                        'Dirección': p.address || '',
+                        'Fuente': p.source || '',
+                        'Operación': p.operation_type || '',
+                        'Tipo': p.property_type || '',
+                        'URL': p.url || '',
+                        'Advertencia': p.surface_warning ? 'Superficie irreal' : ''
+                    }));
+                    
+                    const wsProps = XLSX.utils.json_to_sheet(propData);
+                    
+                    // Ajustar ancho de columnas
+                    wsProps['!cols'] = [
+                        { wch: 50 }, // Título
+                        { wch: 15 }, // Precio
+                        { wch: 8 },  // Moneda
+                        { wch: 12 }, // Superficie
+                        { wch: 12 }, // Precio/m²
+                        { wch: 40 }, // Dirección
+                        { wch: 12 }, // Fuente
+                        { wch: 10 }, // Operación
+                        { wch: 12 }, // Tipo
+                        { wch: 30 }, // URL
+                        { wch: 18 }  // Advertencia
+                    ];
+                    
+                    XLSX.utils.book_append_sheet(wb, wsProps, "Propiedades");
+                    
+                    // ========================================
+                    // HOJA 2: ESTADÍSTICAS
+                    // ========================================
+                    const validProperties = propiedades.filter(p => !p.surface_warning);
+                    const currencyDist = data.data.currency_distribution || {};
+                    const sourceBreakdown = data.data.source_breakdown || {};
+                    
+                    const statsData = [
+                        ['📍 ZONA', zone],
+                        ['🔄 OPERACIÓN', operation],
+                        ['📊 TOTAL PROPIEDADES', propiedades.length],
+                        ['✅ VÁLIDAS PARA ESTADÍSTICAS', validProperties.length],
+                        ['⚠️ CON SUPERFICIE IRREAL', propiedades.length - validProperties.length],
+                        [''],
+                        ['📈 PRECIOS'],
+                        ['Precio Promedio', stats.average_total_price || 0],
+                        ['Precio Mediano', stats.median_price_per_m2 ? stats.median_price_per_m2 * (validProperties.reduce((a, b) => a + (b.surface || 0), 0) / validProperties.length) : 0],
+                        ['Precio Mínimo', stats.price_range_total ? stats.price_range_total.split(' - ')[0] : 0],
+                        ['Precio Máximo', stats.price_range_total ? stats.price_range_total.split(' - ')[1] : 0],
+                        ['Rango de Precios', stats.price_range_total || 'N/A'],
+                        [''],
+                        ['📏 SUPERFICIE'],
+                        ['Superficie Promedio', (validProperties.reduce((a, b) => a + (b.surface || 0), 0) / validProperties.length || 0).toFixed(2)],
+                        ['Superficie Mínima', Math.min(...validProperties.map(p => p.surface).filter(s => s > 0)) || 0],
+                        ['Superficie Máxima', Math.max(...validProperties.map(p => p.surface).filter(s => s > 0)) || 0],
+                        [''],
+                        ['💵 PRECIO POR m²'],
+                        ['Precio/m² Promedio', stats.average_price_per_m2 || 0],
+                        ['Precio/m² Mínimo', stats.min_price_per_m2 || 0],
+                        ['Precio/m² Máximo', stats.max_price_per_m2 || 0],
+                        [''],
+                        ['🔄 DISTRIBUCIÓN POR FUENTE'],
+                        ...Object.entries(sourceBreakdown).map(([src, count]) => [src, count, `${((count/propiedades.length)*100).toFixed(1)}%`]),
+                        [''],
+                        ['💱 DISTRIBUCIÓN POR MONEDA'],
+                        ...Object.entries(currencyDist).map(([curr, count]) => [curr, count, `${((count/propiedades.length)*100).toFixed(1)}%`]),
+                        [''],
+                        ['⚠️ ERRORES'],
+                        ...(data.data.errors || []).map(err => ['•', err])
+                    ];
+                    
+                    const wsStats = XLSX.utils.aoa_to_sheet(statsData);
+                    wsStats['!cols'] = [{ wch: 30 }, { wch: 20 }, { wch: 10 }];
+                    XLSX.utils.book_append_sheet(wb, wsStats, "Estadísticas");
+                    
+                    // ========================================
+                    // HOJA 3: RESUMEN EJECUTIVO
+                    // ========================================
+                    const fecha = new Date().toLocaleString('es-AR');
+                    const primaryCurrency = currencyDist.USD > currencyDist.ARS ? 'USD' : 'ARS';
+                    
+                    const resumenData = [
+                        ['ANÁLISIS DE MERCADO INMOBILIARIO - DANTE PROPIEDADES'],
+                        [`Generado: ${fecha}`],
+                        [''],
+                        ['DATOS GENERALES'],
+                        ['Barrio/Zona:', zone],
+                        ['Operación:', operation],
+                        ['Fecha de extracción:', data.data.analysis_timestamp || fecha],
+                        [''],
+                        ['INDICADORES CLAVE'],
+                        ['Total de propiedades:', propiedades.length],
+                        ['Propiedades válidas:', validProperties.length],
+                        ['Moneda predominante:', primaryCurrency],
+                        ['Precio promedio:', `${primaryCurrency === 'USD' ? 'US$' : '$'} ${(stats.average_total_price || 0).toLocaleString('es-AR')}`],
+                        ['Precio por m² promedio:', `${primaryCurrency === 'USD' ? 'US$' : '$'} ${(stats.average_price_per_m2 || 0).toFixed(2)}/m²`],
+                        ['Superficie promedio:', `${(validProperties.reduce((a, b) => a + (b.surface || 0), 0) / validProperties.length || 0).toFixed(2)} m²`],
+                        [''],
+                        ['FUENTES CONSULTADAS'],
+                        ...Object.entries(sourceBreakdown).map(([src, count]) => [src, `${count} propiedades (${((count/propiedades.length)*100).toFixed(1)}%)`]),
+                        [''],
+                        ['⚠️ ADVERTENCIAS'],
+                        ...(data.data.errors || ['Sin advertencias']).map(err => ['•', err])
+                    ];
+                    
+                    const wsResumen = XLSX.utils.aoa_to_sheet(resumenData);
+                    wsResumen['!cols'] = [{ wch: 25 }, { wch: 50 }];
+                    XLSX.utils.book_append_sheet(wb, wsResumen, "Resumen Ejecutivo");
+                    
+                    // ========================================
+                    // DESCARGAR ARCHIVO
+                    // ========================================
+                    const fileName = `scraping_${zone}_${new Date().toISOString().slice(0,10)}.xlsx`;
+                    XLSX.writeFile(wb, fileName);
+                    
+                    console.log(`✅ Excel generado: ${fileName}`);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al descargar: ' + error.message);
+                });
+        }
+        // Range Chart - Distribución de precios
+        function renderRangeChart(distribucion) {
+            const ctx = document.getElementById('range-chart').getContext('2d');
+            
+            if (charts.range) charts.range.destroy();
+            
+            const labels = Object.keys(distribucion);
+            const values = Object.values(distribucion);
+            
+            charts.range = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Cantidad',
+                        data: values,
+                        backgroundColor: 'rgba(139, 92, 246, 0.8)',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+        
+        // Render table
+        function renderTable(data) {
+            const tbody = document.getElementById('properties-table');
+            const countSpan = document.getElementById('table-count');
+            
+            // Recopilar todas las propiedades
+            let allProps = [];
+            data.barrios.forEach(barrio => {
+                if (barrio.propiedades) {
+                    allProps = allProps.concat(barrio.propiedades);
+                }
+            });
+            
+            countSpan.textContent = `${allProps.length} propiedades`;
+            
+            // ✅ CORREGIDO: Mostrar TODAS las propiedades (sin límite)
+            tbody.innerHTML = allProps.map(prop => `
+                <tr>
+                    <td>
+                        <div style="font-weight: 500;">${prop.titulo.substring(0, 40)}...</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">${prop.direccion.substring(0, 30)}...</div>
+                    </td>
+                    <td>${prop.barrio}</td>
+                    <td><span class="badge ${prop.operacion}">${prop.operacion}</span></td>
+                    <td>${prop.metros} m²</td>
+                    <td class="price-value">USD ${Math.round(prop.precio_usd).toLocaleString()}</td>
+                    <td>USD ${Math.round(prop.precio_m2).toLocaleString()}/m²</td>
+                </tr>
+            `).join(''); // 👈 QUITAMOS EL .slice(0,20)
+        }
+        
+        // Render filtered data
+        function renderFilteredData(data) {
+            // Update KPIs
+            const grid = document.getElementById('kpi-grid');
+            grid.innerHTML = `
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon blue">
+                            <i class="fas fa-building"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-value">${data.result_count}</div>
+                    <div class="kpi-label">Propiedades Encontradas</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon orange">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-value">${data.statistics.precio_promedio_usd ? `USD ${Math.round(data.statistics.precio_promedio_usd).toLocaleString()}` : 'N/A'}</div>
+                    <div class="kpi-label">Precio Promedio</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon green">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-value">${data.statistics.precio_mediana_usd ? `USD ${Math.round(data.statistics.precio_mediana_usd).toLocaleString()}` : 'N/A'}</div>
+                    <div class="kpi-label">Precio Mediana</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon red">
+                            <i class="fas fa-ruler-combined"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-value">${data.statistics.metros_promedio ? `${Math.round(data.statistics.metros_promedio)} m²` : 'N/A'}</div>
+                    <div class="kpi-label">Superficie Promedio</div>
+                </div>
+            `;
+            
+            // Clear charts and table
+            ['bar', 'scatter', 'pie', 'range'].forEach(key => {
+                if (charts[key]) {
+                    charts[key].destroy();
+                    charts[key] = null;
+                }
+            });
+            
+            document.getElementById('properties-table').innerHTML = '';
+            document.getElementById('table-count').textContent = '';
+        }
+        
+        // UI State functions
+        function showLoading() {
+            document.getElementById('loading-state').style.display = 'flex';
+            document.getElementById('error-state').style.display = 'none';
+            document.getElementById('content').style.display = 'none';
+        }
+        
+        function showError() {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('error-state').style.display = 'block';
+            document.getElementById('content').style.display = 'none';
+        }
+        
+        function showContent() {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('error-state').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+        }
+        
+        // Modal para confirmar creación de barrio
+        function showCreateBarrioModal(barrioName) {
+            const modal = document.getElementById('create-barrio-modal');
+            const nameEl = document.getElementById('modal-barrio-name');
+            const btnAI = document.getElementById('modal-btn-ai');
+            const btnManual = document.getElementById('modal-btn-manual');
+            const btnCancel = document.getElementById('modal-btn-cancel');
+            
+            if (!modal || !nameEl) {
+                console.error('Elementos del modal no encontrados');
+                alert(`El barrio "${barrioName}" no existe. Puedes crearlo en el CMS de Barrios.`);
+                return;
+            }
+            
+            // Capitalizar primera letra del barrio
+            const capitalizeBarrio = barrioName.charAt(0).toUpperCase() + barrioName.slice(1).toLowerCase();
+            nameEl.textContent = capitalizeBarrio;
+            
+            // Mostrar el modal
+            modal.classList.remove('hidden');
+            
+            // Configurar botones
+            btnAI.onclick = () => {
+                modal.classList.add('hidden');
+                // Redirigir al CMS de barrios con el nombre preloaded
+                const encodedBarrio = encodeURIComponent(barrioName);
+                window.location.href = `/analisis-barrio.html?barrio=${encodedBarrio}&crear=ai`;
+            };
+            
+            btnManual.onclick = () => {
+                modal.classList.add('hidden');
+                // Redirigir al CMS de barrios con el nombre preloaded
+                const encodedBarrio = encodeURIComponent(barrioName);
+                window.location.href = `/analisis-barrio.html?barrio=${encodedBarrio}&crear=manual`;
+            };
+            
+            btnCancel.onclick = () => {
+                modal.classList.add('hidden');
+            };
+            
+            console.log('✅ Modal de creación mostrado para:', barrioName);
+        }
+
+
+        function renderResumenEstadistico(scrapedData) {
+            const tbody = document.getElementById('resumen-estadistico-body');
+            const timestampSpan = document.getElementById('resumen-timestamp');
+            
+            const stats = scrapedData.statistics || {};
+            const properties = scrapedData.properties_sample || [];
+            const validProperties = properties.filter(p => !p.surface_warning);
+            const currencyDist = scrapedData.currency_distribution || {};
+            
+            // Moneda predominante
+            const mainCurrency = currencyDist.USD > currencyDist.ARS ? 'USD' : 'ARS';
+            const currencySymbol = mainCurrency === 'USD' ? 'US$' : '$';
+            
+            // Calcular adicionales
+            const prices = validProperties.map(p => p.price).filter(p => p > 0);
+            const surfaces = validProperties.map(p => p.surface).filter(s => s > 0);
+            const pricesPerM2 = validProperties.map(p => p.price_m2).filter(p => p > 0);
+            
+            // Estadísticas avanzadas
+            const sortedPrices = [...prices].sort((a, b) => a - b);
+            const q1 = sortedPrices[Math.floor(sortedPrices.length * 0.25)];
+            const q3 = sortedPrices[Math.floor(sortedPrices.length * 0.75)];
+            const iqr = q3 - q1;
+            
+            // Precio por ambiente (aproximado)
+            const ambientes = validProperties.map(p => {
+                const match = p.title?.match(/(\d+)\s*(?:ambientes?|dormitorios?)/i);
+                return match ? parseInt(match[1]) : null;
+            }).filter(a => a !== null && a > 0);
+            
+            const precioPorAmbiente = ambientes.length > 0 
+                ? prices.reduce((sum, p, i) => sum + (p / ambientes[i]), 0) / ambientes.length 
+                : null;
+            
+            tbody.innerHTML = `
+                <tr>
+                    <td><strong>🏠 Precio Promedio</strong></td>
+                    <td class="price-value">${currencySymbol} ${(stats.average_total_price || 0).toLocaleString('es-AR')}</td>
+                    <td>${mainCurrency}</td>
+                    <td>${validProperties.length} props.</td>
+                    <td>Media aritmética de todos los precios</td>
+                </tr>
+                <tr>
+                    <td><strong>📊 Precio Mediano</strong></td>
+                    <td class="price-value">${currencySymbol} ${(stats.median_price_per_m2 ? (stats.median_price_per_m2 * (surfaces.reduce((a, b) => a + b, 0) / surfaces.length)).toLocaleString('es-AR') : 'N/A')}</td>
+                    <td>${mainCurrency}</td>
+                    <td>${validProperties.length} props.</td>
+                    <td>Valor central (50% por encima, 50% por debajo)</td>
+                </tr>
+                <tr>
+                    <td><strong>📏 Precio por m² Promedio</strong></td>
+                    <td class="price-value">${currencySymbol} ${(stats.average_price_per_m2 || 0).toFixed(0)}/m²</td>
+                    <td>${mainCurrency}/m²</td>
+                    <td>${validProperties.length} props.</td>
+                    <td>Indicador clave para tasaciones</td>
+                </tr>
+                <tr>
+                    <td><strong>📐 Superficie Promedio</strong></td>
+                    <td>${(surfaces.reduce((a, b) => a + b, 0) / surfaces.length || 0).toFixed(0)} m²</td>
+                    <td>m²</td>
+                    <td>${surfaces.length} props.</td>
+                    <td>Tamaño típico de propiedad</td>
+                </tr>
+                <tr>
+                    <td><strong>💰 Rango de Precios</strong></td>
+                    <td>${currencySymbol} ${stats.price_range_total || 'N/A'}</td>
+                    <td>${mainCurrency}</td>
+                    <td>${validProperties.length} props.</td>
+                    <td>Mínimo - Máximo</td>
+                </tr>
+                <tr>
+                    <td><strong>📦 Desviación Estándar</strong></td>
+                    <td>${currencySymbol} ${(pricesPerM2.length > 1 ? Math.sqrt(pricesPerM2.map(p => Math.pow(p - (stats.average_price_per_m2 || 0), 2)).reduce((a, b) => a + b, 0) / (pricesPerM2.length - 1)).toFixed(0) : 'N/A')}</td>
+                    <td>${mainCurrency}/m²</td>
+                    <td>${pricesPerM2.length} props.</td>
+                    <td>Variabilidad del precio/m²</td>
+                </tr>
+                <tr>
+                    <td><strong>📉 Cuartil Inferior (Q1)</strong></td>
+                    <td class="price-value">${currencySymbol} ${(q1 || 0).toLocaleString('es-AR')}</td>
+                    <td>${mainCurrency}</td>
+                    <td>25% de props.</td>
+                    <td>Precio del primer cuartil</td>
+                </tr>
+                <tr>
+                    <td><strong>📈 Cuartil Superior (Q3)</strong></td>
+                    <td class="price-value">${currencySymbol} ${(q3 || 0).toLocaleString('es-AR')}</td>
+                    <td>${mainCurrency}</td>
+                    <td>75% de props.</td>
+                    <td>Precio del tercer cuartil</td>
+                </tr>
+                <tr>
+                    <td><strong>📊 Rango Intercuartil (IQR)</strong></td>
+                    <td class="price-value">${currencySymbol} ${(iqr || 0).toLocaleString('es-AR')}</td>
+                    <td>${mainCurrency}</td>
+                    <td>50% central</td>
+                    <td>Dispersión del 50% central</td>
+                </tr>
+                <tr>
+                    <td><strong>🏢 Precio por Ambiente</strong></td>
+                    <td class="price-value">${currencySymbol} ${(precioPorAmbiente || 0).toLocaleString('es-AR')}</td>
+                    <td>${mainCurrency}/amb.</td>
+                    <td>${ambientes.length} props.</td>
+                    <td>Costo aproximado por ambiente</td>
+                </tr>
+                <tr>
+                    <td><strong>🔄 Distribución por Fuente</strong></td>
+                    <td colspan="4">
+                        ${Object.entries(scrapedData.source_breakdown || {}).map(([source, count]) => 
+                            `<span style="display: inline-block; margin-right: 15px;"><strong>${source}:</strong> ${count} props. (${((count/validProperties.length)*100).toFixed(0)}%)</span>`
+                        ).join('')}
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>💱 Distribución por Moneda</strong></td>
+                    <td colspan="4">
+                        ${Object.entries(currencyDist).map(([curr, count]) => 
+                            `<span style="display: inline-block; margin-right: 15px;"><strong>${curr}:</strong> ${count} props. (${((count/properties.length)*100).toFixed(0)}%)</span>`
+                        ).join('')}
+                    </td>
+                </tr>
+            `;
+            
+            timestampSpan.textContent = `Actualizado: ${new Date().toLocaleString('es-AR')}`;
+        }
+
+
+
+    </script>
+    
+    <!-- Modal para confirmar creación de barrio -->
+    <div id="create-barrio-modal" class="modal-overlay hidden" style="z-index: 3000;">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header" style="padding: 16px 20px; border-bottom: 1px solid var(--border-color);">
+                <h3 style="font-size: 18px; font-weight: 600; color: var(--text-primary); margin: 0;">🏙️ Barrio No Encontrado</h3>
+            </div>
+            <div class="modal-body" style="padding: 20px; text-align: center;">
+                <p id="modal-barrio-name" class="barrio-name" style="font-size: 20px; font-weight: 700; color: var(--primary-color); margin: 0 0 12px 0;"></p>
+                <p style="font-size: 14px; color: var(--text-secondary); margin: 0 0 8px 0;">El barrio que buscas no existe en la base de datos.</p>
+                <p style="font-size: 13px; color: var(--text-muted); margin: 0;">¿Qué deseas hacer?</p>
+            </div>
+            <div class="modal-actions" style="display: flex; flex-direction: column; gap: 10px; padding: 0 20px 20px;">
+                <button id="modal-btn-ai" class="modal-btn" style="padding: 12px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%); color: white; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    🤖 Crear con IA
+                </button>
+                <button id="modal-btn-manual" class="modal-btn" style="padding: 12px 16px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; background: var(--bg-primary); color: var(--text-primary); display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    ✏️ Crear Manualmente
+                </button>
+                <button id="modal-btn-cancel" class="modal-btn" style="padding: 10px; border: none; background: transparent; color: var(--text-muted); font-size: 13px; cursor: pointer;">
+                    ❌ Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Estilos del modal -->
+    <style>
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.2s ease;
+        }
+        
+        .modal-overlay.hidden {
+            display: none !important;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</body>
+</html>
