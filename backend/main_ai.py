@@ -31,6 +31,7 @@ from backend.logic.environ_database import (
 )
 from backend.logic.barrio_data import get_gastronomy_info, get_financial_info
 from backend.logic.gemini_client import call_gemini_with_rotation
+from backend.logic.gemini_client import call_gemini_with_rotation, build_prompt
 
 # ============================================
 # CONFIGURACIÓN
@@ -1243,7 +1244,7 @@ async def regenerate_with_ai(
         conn.close()
         
         # Llamar a Gemini con un prompt mejorado
-        from logic.gemini_client import call_gemini_with_rotation
+        from backend.logic.gemini_client import call_gemini_with_rotation
         
         prompt = f"""Eres un experto analista inmobiliario y urbanista especializado en Buenos Aires, Argentina.
 
