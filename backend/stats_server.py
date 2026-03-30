@@ -2,6 +2,7 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 import json
 import os
 import subprocess
+import argparse
 import sys
 from threading import Thread
 from urllib.parse import urlparse, parse_qs
@@ -119,22 +120,29 @@ class StatsHandler(SimpleHTTPRequestHandler):
         }).encode())
     
     def handle_scraping_data(self):
-        """Leer y retornar los datos del scraping.json"""
+
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
         self.end_headers()
-        
-        if not os.path.exists(SCRAPING_JSON):
-            self.wfile.write(json.dumps({
-                "success": False,
-                "message": "No hay datos de scraping"
-            }).encode())
-            return
-        
+
         try:
-            with open(SCRAPING_JSON, 'r', encoding='utf-8') as f:
+            path = SCRAPING_JSON  # ya lo tenés definido arriba
+
+            if not os.path.exists(path):
+                self.wfile.write(json.dumps({"success": False}).encode())
+                return
+
+            with open(path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            self.wfile.write(json.dumps(data, ensure_ascii=False).encode())
+
+            self.wfile.write(json.dumps({
+                "success": True,
+                "data": data,
+                "zone": data.get("zone"),
+                "operation": data.get("operation"),
+                "message": "Scraping listo"
+            }).encode())
+
         except Exception as e:
             self.wfile.write(json.dumps({
                 "success": False,
