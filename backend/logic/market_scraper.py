@@ -1517,8 +1517,13 @@ class ScrapingManager:
         except Exception as e:
             errors.append(f"MercadoLibre: {str(e)}")
         
+        
         # Calcular estadísticas
+        
+        print("ANTES DEDUP:", len(all_properties))
         all_properties = self._deduplicate_properties(all_properties)
+        print("DESPUÉS DEDUP:", len(all_properties))
+        
         stats = self.analyzer.calculate_stats(all_properties, search_zone, operation, property_type)
         
         if errors:
