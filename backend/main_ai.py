@@ -1744,7 +1744,19 @@ def analisis_barrio_js():
 # ENTRY POINT
 # ============================================
 
+# if __name__ == "__main__":
+#     import uvicorn
+#     port = int(os.environ.get("PORT", 8001))
+#     uvicorn.run("main_ai:app", host="0.0.0.0", port=port, reload=False)
+
 if __name__ == "__main__":
     import uvicorn
+    import os
+
     port = int(os.environ.get("PORT", 8001))
-    uvicorn.run("main_ai:app", host="0.0.0.0", port=port, reload=False)
+
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=port
+    )
