@@ -1564,6 +1564,15 @@ class ScrapingManager:
         
         logger.info(f"[ScrapingManager] Completado: {stats.sample_size} propiedades analizadas")
         
+
+        output_path = os.environ.get("SCRAPING_JSON", "scraping_data.json")
+
+        result["zone"] = zone
+        result["operation"] = operation
+
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump(result, f, ensure_ascii=False, indent=2)
+        
         return result
 
     
@@ -1668,18 +1677,27 @@ def integrate_with_main_ai(app, gemini_client_func=None):
 
 if __name__ == "__main__":
     import argparse
-    
+    import json
+
     parser = argparse.ArgumentParser(description="Scraper de Mercado Inmobiliario")
-    parser.add_argument("zone", help="Zona a analizar (ej: palermo, microcentro)")
-    parser.add_argument("--operation", default="venta", help="Tipo de operación")
-    parser.add_argument("--type", default="departamento", help="Tipo de propiedad")
-    
+
+    # 🔴 mismos nombres que usa tu backend
+    parser.add_argument("--zona", required=True, help="Zona a analizar")
+    parser.add_argument("--operacion", default="venta")
+    parser.add_argument("--tipo", default="departamento")
+    parser.add_argument("--output", default="scraping_data.json")
+
     args = parser.parse_args()
-    
+
     manager = ScrapingManager()
-    result = manager.scrape_market(args.zone, args.operation, args.type)
-    
-    print("\n" + "=" * 70)
-    print("📊 RESULTADO DEL ANÁLISIS DE MERCADO")
-    print("=" * 70)
-    print(json.dumps(result, indent=2, ensure_ascii=False))
+    result = manager.scrape_market(args.zona, args.operacion, args.tipo)
+
+    # ✅ AGREGAR ESTO (CLAVE)
+    result["zone"] = args.zona
+    result["operation"] = args.operacion
+
+    # ✅ GUARDAR ARCHIVO (CLAVE)
+    with open(args.output, "w", encoding="utf-8") as f:
+        json.dump(result, f, ensure_ascii=False, indent=2)
+
+    print(f"✅ Resultado guardado en {args.output}")
