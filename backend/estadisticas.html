@@ -756,14 +756,14 @@
     </main>
     
     <script>
-        // Global state and API Configuration
+
         // Global state and API Configuration
         const API_BASE_URL = 'http://localhost:8001';
         let marketData = null;
         let charts = {};
 
         // ========================================
-        // ✅ LISTA DE BARRIOS VÁLIDOS
+        // LISTA DE BARRIOS VÁLIDOS PARA SCRAPING
         // ========================================
         const BARRIOS_VALIDOS = [
             'palermo', 'belgrano', 'recoleta', 'microcentro', 'nordelta',
@@ -773,12 +773,12 @@
         ];
 
         // ========================================
-        // ✅ FUNCIÓN PARA NORMALIZAR EL NOMBRE DEL BARRIO
+        // FUNCIÓN PARA NORMALIZAR EL NOMBRE DEL BARRIO
         // ========================================
         function normalizarBarrio(input) {
             if (!input) return '';
             
-            const exclusiones = ['avenida', 'av', 'calle', 'villa', 'general', 'san', 'santa', 'localidad', 'partido', 'provincia'];
+            const exclusiones = ['avenida', 'av', 'calle', 'villa', 'general', 'san', 'santa', 'localidad', 'partido'];
             let texto = input.toLowerCase().trim();
             
             // 1. Verificar si es un barrio válido directamente
@@ -798,7 +798,7 @@
             for (const excl of exclusiones) {
                 if (texto.includes(excl)) {
                     console.warn(`⚠️ "${input}" contiene término excluido "${excl}"`);
-                    return null; // Indica que no es válido
+                    return null; // No es válido
                 }
             }
             
@@ -812,48 +812,61 @@
             showInitialState();
             
             // ========================================
-            // ✅ AGREGAR VALIDACIÓN AL INPUT DE BARRIO
+            // ✅ VALIDACIÓN DEL INPUT DE BARRIO
             // ========================================
             const filterBarrio = document.getElementById('filter-barrio');
-            const barriosList = document.getElementById('barrios-list');
             
             if (filterBarrio) {
                 // Validar al cambiar el valor
                 filterBarrio.addEventListener('change', function() {
-                    const valorOriginal = this.value;
-                    const barrioNormalizado = normalizarBarrio(valorOriginal);
+                    const original = this.value;
+                    const normalizado = normalizarBarrio(original);
                     
-                    if (barrioNormalizado === null) {
-                        // No es válido, mostrar alerta y limpiar
-                        alert(`"${valorOriginal}" no es un nombre de barrio válido.\n\nUsá nombres como: ${BARRIOS_VALIDOS.slice(0, 8).join(', ')}...`);
+                    if (normalizado === null) {
+                        alert(`"${original}" no es un nombre de barrio válido.\n\nUsá nombres como: Palermo, Belgrano, Recoleta, etc.`);
                         this.value = '';
-                    } else if (barrioNormalizado !== valorOriginal.toLowerCase()) {
-                        // Corregir automáticamente
-                        console.log(`📝 Barrio corregido: "${valorOriginal}" → "${barrioNormalizado}"`);
-                        this.value = barrioNormalizado;
-                        // Opcional: mostrar tooltip de corrección
-                        mostrarNotificacion(`Barrio corregido a: ${barrioNormalizado}`, 'info');
+                    } else if (normalizado !== original.toLowerCase()) {
+                        this.value = normalizado;
+                        console.log(`📝 Barrio corregido: "${original}" → "${normalizado}"`);
                     }
                 });
                 
                 // También validar al presionar Enter
                 filterBarrio.addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') {
-                        const valorOriginal = this.value;
-                        const barrioNormalizado = normalizarBarrio(valorOriginal);
+                        const original = this.value;
+                        const normalizado = normalizarBarrio(original);
                         
-                        if (barrioNormalizado === null) {
+                        if (normalizado === null) {
                             e.preventDefault();
-                            alert(`"${valorOriginal}" no es un nombre de barrio válido.\n\nUsá nombres como: ${BARRIOS_VALIDOS.slice(0, 8).join(', ')}...`);
+                            alert(`"${original}" no es un nombre de barrio válido.\n\nUsá nombres como: Palermo, Belgrano, Recoleta, etc.`);
                             this.value = '';
-                        } else if (barrioNormalizado !== valorOriginal.toLowerCase()) {
-                            this.value = barrioNormalizado;
-                            mostrarNotificacion(`Barrio corregido a: ${barrioNormalizado}`, 'info');
+                        } else if (normalizado !== original.toLowerCase()) {
+                            this.value = normalizado;
+                            console.log(`📝 Barrio corregido: "${original}" → "${normalizado}"`);
                         }
                     }
                 });
             }
         });
+
+        // Validación en tiempo real del input de barrio
+        const filterBarrio = document.getElementById('filter-barrio');
+        if (filterBarrio) {
+            filterBarrio.addEventListener('change', function() {
+                const original = this.value;
+                const normalizado = normalizarBarrio(original);
+                
+                if (normalizado === null) {
+                    alert(`"${original}" no es un barrio válido.`);
+                    this.value = '';
+                } else if (normalizado !== original.toLowerCase()) {
+                    this.value = normalizado;
+                    console.log(`📝 Barrio corregido: "${original}" → "${normalizado}"`);
+                }
+            });
+        }
+
 
         // ========================================
         // ✅ FUNCIÓN PARA MOSTRAR NOTIFICACIONES TEMPORALES
@@ -964,45 +977,14 @@
                 return;
             }
             
-            // ========================================
-            // ✅ NORMALIZAR EL NOMBRE DEL BARRIO
-            // ========================================
-            const exclusiones = ['avenida', 'av', 'calle', 'villa', 'general', 'san', 'santa', 'localidad', 'partido'];
-            let barrioNormalizado = barrioInput.toLowerCase().trim();
+            // ✅ NORMALIZAR EL BARRIO
+            const barrioNormalizado = normalizarBarrio(barrioInput);
             
-            // Lista de barrios válidos
-            const barriosValidos = [
-                'palermo', 'belgrano', 'recoleta', 'microcentro', 'nordelta',
-                'tigre', 'pilar', 'san-isidro', 'balvanera', 'chacarita',
-                'almagro', 'boedo', 'caballito', 'flores', 'villa crespo'
-            ];
-            
-            // Verificar si es un barrio válido directamente
-            let esBarrioValido = barriosValidos.includes(barrioNormalizado);
-            
-            if (!esBarrioValido) {
-                // Intentar extraer la parte que podría ser un barrio
-                const partes = barrioNormalizado.split(' ');
-                for (const parte of partes) {
-                    if (barriosValidos.includes(parte)) {
-                        barrioNormalizado = parte;
-                        esBarrioValido = true;
-                        break;
-                    }
-                }
-                
-                // Si aún no es válido, verificar si contiene términos excluyentes
-                if (!esBarrioValido) {
-                    for (const excl of exclusiones) {
-                        if (barrioNormalizado.includes(excl)) {
-                            alert(`"${barrioInput}" no es un nombre de barrio válido.\n\nUsá nombres como: Palermo, Belgrano, Recoleta, etc.`);
-                            return;
-                        }
-                    }
-                }
+            if (barrioNormalizado === null) {
+                alert(`"${barrioInput}" no es un nombre de barrio válido.\n\nUsá nombres como: Palermo, Belgrano, Recoleta, etc.`);
+                return;
             }
             
-            // Usar el barrio normalizado para el scraping
             const zona = barrioNormalizado;
             
             console.log(`🌐 Scraping solicitado: ${zona} (original: ${barrioInput})`);
@@ -1028,7 +1010,7 @@
                     
                     // Esperar y consultar datos
                     let attempts = 0;
-                    const maxAttempts = 30; // 60 segundos máximo
+                    const maxAttempts = 30;
                     let checkInterval = null;
                     
                     const checkData = async () => {
@@ -1036,7 +1018,6 @@
                             const dataResponse = await fetch('/api/scraping-data');
                             const scrapingData = await dataResponse.json();
                             
-                            // Verificar que los datos correspondan al barrio solicitado
                             if (scrapingData.success && 
                                 scrapingData.zone?.toLowerCase() === zona.toLowerCase() &&
                                 scrapingData.operation === (operacion || 'venta')) {
@@ -1045,9 +1026,9 @@
                                 document.getElementById('scraping-loading').style.display = 'none';
                                 document.getElementById('scrape-btn').disabled = false;
                                 
-                                // Renderizar con los nuevos datos
-                                renderScrapedTable(scrapingData.data);
-                                renderScrapedCharts(scrapingData.data);
+                                const datosReales = scrapingData.data?.data || scrapingData.data;
+                                renderScrapedTable(datosReales);
+                                renderScrapedCharts(datosReales);
                                 
                                 document.getElementById('scraping-status').style.display = 'block';
                                 document.getElementById('scraping-message').innerHTML = 
@@ -1080,7 +1061,7 @@
                 document.getElementById('scrape-btn').disabled = false;
                 alert('Error: ' + error.message);
             }
-        }   
+        }
         // Render table with scraped properties
         // ✅ CÓDIGO CORREGIDO
         function renderScrapedTable(scrapedData) {
