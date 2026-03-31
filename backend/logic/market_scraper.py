@@ -1473,6 +1473,23 @@ class MarketAnalyzer:
 
     
 
+    
+    
+    
+# ========================================
+# GESTOR DE SCRAPING
+# ========================================
+
+class ScrapingManager:
+    """Gestiona el scraping de múltiples portales"""
+    
+    def __init__(self):
+        self.argenprop = ArgenpropScraper()
+        self.zonaprop = ZonapropScraper()
+        self.mercadolibre = MercadoLibreScraper()
+        self.analyzer = MarketAnalyzer()
+    
+    
     def _deduplicate_properties(self, properties):
         """Elimina propiedades duplicadas basado en URL y título"""
         seen = {}
@@ -1493,18 +1510,9 @@ class MarketAnalyzer:
 
     
     
-# ========================================
-# GESTOR DE SCRAPING
-# ========================================
-
-class ScrapingManager:
-    """Gestiona el scraping de múltiples portales"""
     
-    def __init__(self):
-        self.argenprop = ArgenpropScraper()
-        self.zonaprop = ZonapropScraper()
-        self.mercadolibre = MercadoLibreScraper()
-        self.analyzer = MarketAnalyzer()
+    
+    
     
     def scrape_market(self, zone: str, operation: str = "venta", 
                       property_type: str = "departamento") -> Dict[str, Any]:
