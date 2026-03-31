@@ -12,6 +12,7 @@ import time
 import random
 import logging
 import re
+from xml.sax.handler import all_properties
 import requests
 from typing import Optional, Dict, Any, List
 from abc import ABC, abstractmethod
@@ -1490,6 +1491,53 @@ class ScrapingManager:
         self.analyzer = MarketAnalyzer()
     
     
+    def _filter_by_exact_barrio(self, properties, target_barrio):
+        """Filtra propiedades que pertenezcan EXACTAMENTE al barrio buscado"""
+        filtered = []
+        target_lower = target_barrio.lower()
+        
+        # Lista de palabras que indican que NO es el barrio exacto
+        exclusiones = [
+            'general', 'villa', 'partido', 'localidad', 'provincia',
+            'calle', 'avenida', 'av', 'san', 'santa'
+        ]
+        
+        for prop in properties:
+            # Obtener ubicación de la propiedad
+            location = prop.location.lower() if prop.location else ''
+            address = prop.address.lower() if prop.address else ''
+            title = prop.title.lower() if prop.title else ''
+            
+            # Verificar si la ubicación contiene el barrio exacto
+            es_barrio_exacto = False
+            
+            # Si la ubicación es exactamente el barrio o contiene el barrio rodeado de comas
+            if location == target_lower:
+                es_barrio_exacto = True
+            elif f", {target_lower}," in location or f" {target_lower} " in location:
+                es_barrio_exacto = True
+            # Verificar en dirección
+            elif target_lower in address:
+                # Asegurar que no sea parte de una calle (ej: "Av. Belgrano")
+                partes = address.split()
+                for i, parte in enumerate(partes):
+                    if parte == target_lower and i > 0 and partes[i-1] not in ['av', 'avenida', 'calle']:
+                        es_barrio_exacto = True
+                        break
+            
+            # Excluir si contiene palabras excluyentes
+            es_excluido = any(excl in location or excl in address for excl in exclusiones)
+            
+            if es_barrio_exacto and not es_excluido:
+                filtered.append(prop)
+            else:
+                print(f"  ⚠️ Excluido: {prop.title[:50]}... (ubicación: {prop.location})")
+        
+        print(f"📌 Filtro exacto: {len(properties)} → {len(filtered)} propiedades")
+        return filtered
+    
+    
+    
     def _deduplicate_properties(self, properties):
         """Elimina propiedades duplicadas basado en URL y título"""
         seen = {}
@@ -1601,6 +1649,8 @@ class ScrapingManager:
         print("ANTES DEDUP:", len(all_properties))
         all_properties = self._deduplicate_properties(all_properties)
         print("DESPUÉS DEDUP:", len(all_properties))
+        all_properties = self._filter_by_exact_barrio(all_properties, zone)
+        print(f"DESPUÉS FILTRO EXACTO: {len(all_properties)}")
         
         stats = self.analyzer.calculate_stats(all_properties, search_zone, operation, property_type)
         
