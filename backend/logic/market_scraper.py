@@ -578,36 +578,20 @@ class BaseScraper(ABC):
 # SCRAPER DE ARGENPROP
 # ========================================
 
-class ArgenpropScraper(BaseScraper):
-    """Scraper específico para Argenprop"""
+class MercadoLibreScraper(BaseScraper):
+    """Scraper específico para MercadoLibre Inmuebles"""
     
     def __init__(self):
-        super().__init__("https://www.argenprop.com", "argenprop")
+        super().__init__("https://inmuebles.mercadolibre.com.ar", "mercadolibre")
         self.target_zone = ""  # Se seteará antes de parsear
     
-    def _normalize_zone(self, zone: str) -> str:
-        """Normaliza el nombre de la zona para la URL"""
-        # Convertir a minúsculas y reemplazar espacios por guiones
-        normalized = zone.lower().strip()
-        normalized = normalized.replace(' ', '-')
-        # Eliminar acentos básicos
-        replacements = {
-            'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
-            'ñ': 'n', 'ü': 'u'
-        }
-        for acc, plain in replacements.items():
-            normalized = normalized.replace(acc, plain)
-        return normalized
-    
     def build_url(self, zone: str, operation: str, property_type: str) -> str:
-        """Construye URL para Argenprop"""
-        # Mapeo de operaciones
+        """Construye URL para MercadoLibre Inmuebles"""
         op_map = {
             "venta": "venta",
             "alquiler": "alquiler"
         }
         
-        # Mapeo de tipos de propiedad
         type_map = {
             "departamento": "departamentos",
             "casa": "casas",
@@ -622,118 +606,212 @@ class ArgenpropScraper(BaseScraper):
         op = op_map.get(operation.lower(), "venta")
         p_type = type_map.get(property_type.lower(), "departamentos")
         
-        # Normalizar zona
-        z_norm = self._normalize_zone(zone)
-        
-        # Construir URL
-        if z_norm:
-            url = f"{self.base_url}/{p_type}/{op}/{z_norm}"
+        if zone:
+            url = f"{self.base_url}/{p_type}/{op}/{zone}/"
         else:
-            url = f"{self.base_url}/{p_type}/{op}"
+            url = f"{self.base_url}/{p_type}/{op}/"
         
         return url
     
     def parse_properties(self, html: str, operation: str = "venta", property_type: str = "departamento") -> List[PropertyData]:
-        """Parsea propiedades de Argenprop"""
+        """Parsea propiedades de MercadoLibre"""
         properties = []
-        # Guardar la zona objetivo para usar en _parse_card
-        self.target_zone = operation  # No es ideal, mejor pasar como parámetro
         
         try:
             from bs4 import BeautifulSoup
             soup = BeautifulSoup(html, 'html.parser')
             
-            # Selectores para Argenprop
-            cards = soup.select('div.listing__item, div.card, div[data-qa="posting"]')
+            cards = soup.select('li.ui-search-layout__item')
             
             if not cards:
-                cards = soup.select('articleposting-card, divposting')
+                ol_layout = soup.select_one('ol.ui-search-layout')
+                if ol_layout:
+                    cards = ol_layout.select('li')
+            
+            if not cards:
+                cards = soup.select('article.ui-search-result')
+            
+            if not cards:
+                cards = soup.select('div.ui-search-result__item')
+            
+            if not cards:
+                cards = soup.select('[data-qa="listing-item"]')
+            
+            if not cards:
+                ml_items = soup.select('a[href*="/ML"]')
+                for item in ml_items[:50]:
+                    card = item.find_parent(['li', 'div', 'article'], limit=5)
+                    if card and card not in cards:
+                        cards.append(card)
+            
+            logger.info(f"[MercadoLibre] Encontradas {len(cards)} tarjetas candidatas")
             
             for card in cards:
                 try:
                     prop = self._parse_card(card, operation, property_type)
-                    if prop:
+                    if prop and prop.price_amount > 0:
                         properties.append(prop)
                 except Exception as e:
-                    logger.debug(f"Error parseando tarjeta: {e}")
+                    logger.debug(f"Error parseando tarjeta ML: {e}")
                     continue
             
-            logger.info(f"[Argenprop] Extraídas {len(properties)} propiedades")
+            logger.info(f"[MercadoLibre] Extraídas {len(properties)} propiedades válidas")
             
         except ImportError:
             logger.error("BeautifulSoup no instalado. Instalar: pip install beautifulsoup4")
         except Exception as e:
-            logger.error(f"[Argenprop] Error parseando: {e}")
+            logger.error(f"[MercadoLibre] Error parseando: {e}")
         
         return properties
     
     def _parse_card(self, card, operation: str = "venta", property_type: str = "departamento") -> Optional[PropertyData]:
-        """Parsea una tarjeta individual de Argenprop"""
+        """Parsea una tarjeta individual de MercadoLibre"""
         try:
             # Extraer precio
-            price_elem = card.select_one('.card__price, [data-qa="card-price"], .price')
             price_text = ""
+            price = 0.0
+            currency = "ARS"
+            
+            price_elem = card.select_one('.poly-component__price')
             if price_elem:
-                # Argenprop suele tener la moneda en un span
-                currency_span = price_elem.select_one('.card__currency')
-                if currency_span:
-                    currency_text = currency_span.get_text(strip=True)
-                    # Eliminar el span para obtener solo el número
-                    temp_price = price_elem.get_text(strip=True).replace(currency_text, "").strip()
-                    price_text = f"{currency_text} {temp_price}"
+                symbol_elem = price_elem.select_one('.andes-money-amount__currency-symbol')
+                fraction_elem = price_elem.select_one('.andes-money-amount__fraction')
+                
+                if symbol_elem and fraction_elem:
+                    symbol = symbol_elem.get_text(strip=True)
+                    fraction = fraction_elem.get_text(strip=True)
+                    price_text = f"{symbol} {fraction}"
                 else:
+                    price_text = price_elem.get_text(strip=True)
+            
+            if not price_text:
+                money_elem = card.select_one('.andes-money-amount')
+                if money_elem:
+                    symbol_elem = money_elem.select_one('.andes-money-amount__currency-symbol')
+                    fraction_elem = money_elem.select_one('.andes-money-amount__fraction')
+                    
+                    if symbol_elem and fraction_elem:
+                        symbol = symbol_elem.get_text(strip=True)
+                        fraction = fraction_elem.get_text(strip=True)
+                        price_text = f"{symbol} {fraction}"
+            
+            if not price_text:
+                price_elem = card.select_one('.ui-search-price__part--medium')
+                if price_elem:
                     price_text = price_elem.get_text(strip=True)
             
             price, currency = self._clean_price(price_text)
             
-            if price == 0:
-                return None  # Saltar propiedades sin precio
+            # Extraer título
+            title = ""
             
-            # Extraer dirección
-            addr_elem = card.select_one('.card__address, [data-qa="card-address"], .address')
-            address = addr_elem.get_text(strip=True) if addr_elem else ""
+            title_elem = card.select_one('.poly-component__title a')
+            if title_elem:
+                title = title_elem.get_text(strip=True)
+            
+            if not title:
+                img_elem = card.select_one('.poly-component__picture')
+                if img_elem and img_elem.has_attr('alt'):
+                    title = img_elem['alt']
+            
+            if not title:
+                title_elem = card.select_one('.ui-search-item__title')
+                if title_elem:
+                    title = title_elem.get_text(strip=True)
+            
+            # Extraer URL
+            url = ""
+            link_elem = card.select_one('.poly-component__title a')
+            if link_elem and link_elem.has_attr('href'):
+                url = link_elem['href']
+            else:
+                link_elem = card.select_one('a[href*="/ML"]')
+                if link_elem:
+                    url = link_elem['href']
             
             # ========================================
-            # EXTRAER BARRIO DE LA DIRECCIÓN
+            # EXTRAER UBICACIÓN Y BARRIO
             # ========================================
+            address = ""
             barrio = ""
-            if address:
-                partes_dir = address.split(',')
-                if len(partes_dir) >= 2:
-                    # La segunda parte suele ser el barrio
-                    barrio = partes_dir[1].strip().lower()
-                elif len(partes_dir) == 1:
+            
+            location_elem = card.select_one('.poly-component__location')
+            if location_elem:
+                address = location_elem.get_text(strip=True)
+                partes = address.split(',')
+                if len(partes) >= 2:
+                    barrio = partes[1].strip().lower()
+                else:
                     barrio = address.strip().lower()
             
-            # Extraer título
-            title_elem = card.select_one('.card__title, h2, h3, [data-qa="card-title"]')
-            title = title_elem.get_text(strip=True) if title_elem else address
+            if not address:
+                location_elem = card.select_one('.ui-search-item__location')
+                if location_elem:
+                    address = location_elem.get_text(strip=True)
+                    partes = address.split(',')
+                    if len(partes) >= 2:
+                        barrio = partes[1].strip().lower()
+                    else:
+                        barrio = address.strip().lower()
             
             # Extraer superficie
-            surface_elem = card.select_one('.card__main-features, [data-qa="card-features"]')
-            surface_text = surface_elem.get_text(strip=True) if surface_elem else ""
-            surface = self._clean_surface(surface_text)
+            surface = 0.0
+            rooms = None
+            
+            card_content = card.select_one('.poly-component__card, .poly-card')
+            if card_content:
+                all_text = card_content.get_text(strip=True)
+                surface_patterns = re.findall(r'(\d{1,4})\s*(?:m²|m2|mts2|mts²)', all_text, re.IGNORECASE)
+                if surface_patterns:
+                    surface = float(surface_patterns[0])
+            
+            if surface == 0:
+                attrs_containers = card.select('.poly-card__attributes, .poly-component__attributes, .poly-card__card, .ui-search-result-attributes, .ui-search-card-attributes')
+                for attrs_container in attrs_containers:
+                    attr_items = attrs_container.select('li, span, div')
+                    for attr in attr_items:
+                        text = attr.get_text(strip=True)
+                        if 'm²' in text or 'm2' in text.lower():
+                            surface = self._clean_surface(text)
+                            if surface > 0:
+                                break
+                        elif 'dorm' in text.lower() or 'ambiente' in text.lower():
+                            room_nums = re.findall(r'\d+', text)
+                            if room_nums:
+                                rooms = int(room_nums[0])
+                    if surface > 0:
+                        break
+            
+            if surface == 0 and title:
+                surface_patterns = re.findall(r'(\d{1,4})\s*(?:m²|m2|mts2|mts²)', title, re.IGNORECASE)
+                if surface_patterns:
+                    surface = float(surface_patterns[0])
             
             # Calcular precio por m2
             price_m2 = self._calculate_price_per_m2(price, surface, currency)
             
-            # Extraer URL
-            link_elem = card.select_one('a[href]')
-            url = link_elem['href'] if link_elem and link_elem.has_attr('href') else ""
-            if url and not url.startswith('http'):
-                url = f"{self.base_url}{url}"
-            
-            # Extraer ID externo
+            # Extraer ID externo de la URL
             prop_id = ""
-            if card.has_attr('data-id'):
-                prop_id = card['data-id']
-            elif card.has_attr('id'):
-                prop_id = card['id']
+            if url:
+                id_match = re.search(r'/ML[A-Z]?-?\d+', url)
+                if id_match:
+                    prop_id = id_match.group(0).replace('/', '')
+                else:
+                    prop_id = url.split('/')[-1].replace('.html', '').replace('_JM', '')
+            
+            # Extraer thumbnail
+            thumbnail = ""
+            img_elem = card.select_one('.poly-component__picture')
+            if img_elem:
+                if img_elem.has_attr('src'):
+                    thumbnail = img_elem['src']
+                elif img_elem.has_attr('data-src'):
+                    thumbnail = img_elem['data-src']
             
             return PropertyData(
                 source=self.source_name,
                 external_id=prop_id or url.split('/')[-1] if url else "",
-                title=title,
+                title=title if title else "Sin título",
                 price_amount=price,
                 price_currency=currency,
                 price_per_m2=price_m2,
@@ -743,11 +821,12 @@ class ArgenpropScraper(BaseScraper):
                 address=address,
                 property_type=property_type,
                 operation_type=operation,
-                url=url
+                url=url,
+                raw_data={"thumbnail": thumbnail} if thumbnail else {}
             )
             
         except Exception as e:
-            logger.debug(f"Error en _parse_card: {e}")
+            logger.debug(f"Error en _parse_card ML: {e}")
             return None
 
 # ========================================
