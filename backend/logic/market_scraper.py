@@ -583,6 +583,26 @@ class ArgenpropScraper(BaseScraper):
     def __init__(self):
         super().__init__("https://www.argenprop.com", "argenprop")
     
+    class ArgenpropScraper(BaseScraper):
+        """Scraper específico para Argenprop"""
+    
+    def __init__(self):
+        super().__init__("https://www.argenprop.com", "argenprop")
+    
+    def _normalize_zone(self, zone: str) -> str:
+        """Normaliza el nombre de la zona para la URL"""
+        # Convertir a minúsculas y reemplazar espacios por guiones
+        normalized = zone.lower().strip()
+        normalized = normalized.replace(' ', '-')
+        # Eliminar acentos básicos
+        replacements = {
+            'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
+            'ñ': 'n', 'ü': 'u'
+        }
+        for acc, plain in replacements.items():
+            normalized = normalized.replace(acc, plain)
+        return normalized
+    
     def build_url(self, zone: str, operation: str, property_type: str) -> str:
         """Construye URL para Argenprop"""
         # Mapeo de operaciones
@@ -616,6 +636,47 @@ class ArgenpropScraper(BaseScraper):
             url = f"{self.base_url}/{p_type}/{op}"
         
         return url
+    
+    def parse_properties(self, html: str, operation: str = "venta", property_type: str = "departamento") -> List[PropertyData]:
+        """Parsea propiedades de Argenprop"""
+        properties = []
+        
+        try:
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(html, 'html.parser')
+            
+            # Selectores para Argenprop
+            cards = soup.select('div.listing__item, div.card, div[data-qa="posting"]')
+            
+            if not cards:
+                cards = soup.select('articleposting-card, divposting')
+            
+            for card in cards:
+                try:
+                    prop = self._parse_card(card, operation, property_type)
+                    if prop:
+                        properties.append(prop)
+                except Exception as e:
+                    logger.debug(f"Error parseando tarjeta: {e}")
+                    continue
+            
+            logger.info(f"[Argenprop] Extraídas {len(properties)} propiedades")
+            
+        except ImportError:
+            logger.error("BeautifulSoup no instalado. Instalar: pip install beautifulsoup4")
+        except Exception as e:
+            logger.error(f"[Argenprop] Error parseando: {e}")
+        
+        return properties
+    
+    def _parse_card(self, card, operation: str = "venta", property_type: str = "departamento") -> Optional[PropertyData]:
+        """Parsea una tarjeta individual de Argenprop"""
+        try:
+            # ... tu código existente de _parse_card ...
+            pass
+        except Exception as e:
+            logger.debug(f"Error en _parse_card: {e}")
+            return None
     
     
     def _parse_card(self, card, operation: str = "venta", property_type: str = "departamento") -> Optional[PropertyData]:
@@ -1413,39 +1474,19 @@ class MarketAnalyzer:
     
 
     def _deduplicate_properties(self, properties):
-        seen_ids = set()
-        seen_urls = set()
-        seen_fp = set()
-
+        """Elimina propiedades duplicadas basado en URL y título"""
+        seen = {}
         unique = []
-
+        
         for prop in properties:
-            ext_id = str(prop.external_id).strip() if prop.external_id else ""
-            url = normalize_url(prop.url)
-            fingerprint = generate_fingerprint(prop)
-
-            # 🚨 chequeo por prioridad
-            if ext_id and ext_id in seen_ids:
-                continue
-
-            if url and url in seen_urls:
-                continue
-
-            if fingerprint and fingerprint in seen_fp:
-                continue
-
-            # guardar en sets
-            if ext_id:
-                seen_ids.add(ext_id)
-
-            if url:
-                seen_urls.add(url)
-
-            if fingerprint:
-                seen_fp.add(fingerprint)
-
-            unique.append(prop)
-
+            # Usar URL como clave principal para deduplicación
+            key = prop.url if prop.url else prop.title.lower()
+            
+            if key not in seen:
+                seen[key] = True
+                unique.append(prop)
+        
+        print(f"🔄 Eliminados {len(properties) - len(unique)} duplicados")
         return unique
     
     
