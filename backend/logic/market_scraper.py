@@ -583,12 +583,7 @@ class ArgenpropScraper(BaseScraper):
     
     def __init__(self):
         super().__init__("https://www.argenprop.com", "argenprop")
-    
-    class ArgenpropScraper(BaseScraper):
-        """Scraper específico para Argenprop"""
-    
-    def __init__(self):
-        super().__init__("https://www.argenprop.com", "argenprop")
+        self.target_zone = ""  # Se seteará antes de parsear
     
     def _normalize_zone(self, zone: str) -> str:
         """Normaliza el nombre de la zona para la URL"""
@@ -641,6 +636,8 @@ class ArgenpropScraper(BaseScraper):
     def parse_properties(self, html: str, operation: str = "venta", property_type: str = "departamento") -> List[PropertyData]:
         """Parsea propiedades de Argenprop"""
         properties = []
+        # Guardar la zona objetivo para usar en _parse_card
+        self.target_zone = operation  # No es ideal, mejor pasar como parámetro
         
         try:
             from bs4 import BeautifulSoup
@@ -673,16 +670,6 @@ class ArgenpropScraper(BaseScraper):
     def _parse_card(self, card, operation: str = "venta", property_type: str = "departamento") -> Optional[PropertyData]:
         """Parsea una tarjeta individual de Argenprop"""
         try:
-            # ... tu código existente de _parse_card ...
-            pass
-        except Exception as e:
-            logger.debug(f"Error en _parse_card: {e}")
-            return None
-    
-    
-    def _parse_card(self, card, operation: str = "venta", property_type: str = "departamento") -> Optional[PropertyData]:
-        """Parsea una tarjeta individual de Argenprop"""
-        try:
             # Extraer precio
             price_elem = card.select_one('.card__price, [data-qa="card-price"], .price')
             price_text = ""
@@ -705,6 +692,18 @@ class ArgenpropScraper(BaseScraper):
             # Extraer dirección
             addr_elem = card.select_one('.card__address, [data-qa="card-address"], .address')
             address = addr_elem.get_text(strip=True) if addr_elem else ""
+            
+            # ========================================
+            # EXTRAER BARRIO DE LA DIRECCIÓN
+            # ========================================
+            barrio = ""
+            if address:
+                partes_dir = address.split(',')
+                if len(partes_dir) >= 2:
+                    # La segunda parte suele ser el barrio
+                    barrio = partes_dir[1].strip().lower()
+                elif len(partes_dir) == 1:
+                    barrio = address.strip().lower()
             
             # Extraer título
             title_elem = card.select_one('.card__title, h2, h3, [data-qa="card-title"]')
@@ -731,13 +730,6 @@ class ArgenpropScraper(BaseScraper):
             elif card.has_attr('id'):
                 prop_id = card['id']
             
-            # Ubicación y Dirección
-            location = address.split(',')[-1].strip() if ',' in address else address
-            
-            # Enriquecer ubicación con el barrio buscado si no está presente
-            if self.target_zone and self.target_zone.lower() not in location.lower():
-                location = f"{location}, {self.target_zone}"
-
             return PropertyData(
                 source=self.source_name,
                 external_id=prop_id or url.split('/')[-1] if url else "",
@@ -747,7 +739,7 @@ class ArgenpropScraper(BaseScraper):
                 price_per_m2=price_m2,
                 surface_total=surface,
                 surface_covered=surface,
-                location=location,
+                location=barrio,  # ← Guardar el barrio extraído
                 address=address,
                 property_type=property_type,
                 operation_type=operation,
@@ -767,6 +759,21 @@ class ZonapropScraper(BaseScraper):
     
     def __init__(self):
         super().__init__("https://www.zonaprop.com.ar", "zonaprop")
+        self.target_zone = ""  # Se seteará antes de parsear
+    
+    def _normalize_zone(self, zone: str) -> str:
+        """Normaliza el nombre de la zona para la URL"""
+        # Convertir a minúsculas y reemplazar espacios por guiones
+        normalized = zone.lower().strip()
+        normalized = normalized.replace(' ', '-')
+        # Eliminar acentos básicos
+        replacements = {
+            'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
+            'ñ': 'n', 'ü': 'u'
+        }
+        for acc, plain in replacements.items():
+            normalized = normalized.replace(acc, plain)
+        return normalized
     
     def build_url(self, zone: str, operation: str, property_type: str) -> str:
         """Construye URL para Zonaprop"""
@@ -798,8 +805,7 @@ class ZonapropScraper(BaseScraper):
         
         return url
     
-    
-    def parse_properties(self, html: str, operation: str = "venta", property_type: str = "departamento", zona: str = "") -> List[PropertyData]:
+    def parse_properties(self, html: str, operation: str = "venta", property_type: str = "departamento") -> List[PropertyData]:
         """Parsea propiedades de Zonaprop"""
         properties = []
         
@@ -817,23 +823,8 @@ class ZonapropScraper(BaseScraper):
             for card in cards:
                 try:
                     prop = self._parse_card(card, operation, property_type)
-
-                    if not prop:
-                        continue
-
-                    # 🔴 FILTRO DE BARRIO (ACÁ VA)
-                    texto = " ".join([
-                        str(getattr(prop, "title", "")),
-                        str(getattr(prop, "barrio", "")),
-                        str(getattr(prop, "location", "")),
-                    ])
-
-                    if not is_exact_barrio(texto, zona):
-                        continue
-
-                    # ✅ recién acá agregás
-                    properties.append(prop)
-
+                    if prop:
+                        properties.append(prop)
                 except Exception as e:
                     logger.debug(f"Error parseando tarjeta: {e}")
                     continue
@@ -876,10 +867,24 @@ class ZonapropScraper(BaseScraper):
             
             if not location and address:
                 location = address
-                
-            # Enriquecer ubicación con el barrio buscado si no está presente
-            if self.target_zone and self.target_zone.lower() not in location.lower():
-                location = f"{location}, {self.target_zone}"
+            
+            # ========================================
+            # EXTRAER BARRIO DE LA DIRECCIÓN/UBICACIÓN
+            # ========================================
+            barrio = ""
+            # Primero intentar con location
+            if location:
+                partes_loc = location.split(',')
+                if len(partes_loc) >= 2:
+                    barrio = partes_loc[1].strip().lower()
+                else:
+                    barrio = location.strip().lower()
+            elif address:
+                partes_dir = address.split(',')
+                if len(partes_dir) >= 2:
+                    barrio = partes_dir[1].strip().lower()
+                elif len(partes_dir) == 1:
+                    barrio = address.strip().lower()
             
             # Extraer título / descripción
             title_elem = card.select_one('[data-qa="POSTING_CARD_DESCRIPTION"], .postingCard-module__posting-description, h2')
@@ -891,6 +896,15 @@ class ZonapropScraper(BaseScraper):
             if features_elem:
                 features_text = features_elem.get_text(" ", strip=True)
                 surface = self._clean_surface(features_text)
+            
+            # Si no se encontró superficie, buscar en otros elementos
+            if surface == 0:
+                features = card.select('[data-qa="POSTING_CARD_FEATURES"], .features, .posting-features li')
+                for feature in features:
+                    text = feature.get_text(strip=True)
+                    if 'm²' in text or 'm2' in text.lower():
+                        surface = self._clean_surface(text)
+                        break
             
             # Extraer URL
             link_elem = card.select_one('a[href], [data-to-posting]')
@@ -923,35 +937,7 @@ class ZonapropScraper(BaseScraper):
                 price_per_m2=price_m2,
                 surface_total=surface,
                 surface_covered=surface,
-                location=location or (address.split(',')[-1].strip() if ',' in address else address),
-                address=address,
-                property_type=property_type,
-                operation_type=operation,
-                url=url
-            )
-            
-            # Superficie
-            features = card.select('[data-qa="POSTING_CARD_FEATURES"], .features, .posting-features li')
-            surface = 0.0
-            for feature in features:
-                text = feature.get_text(strip=True)
-                if 'm²' in text or 'm2' in text.lower():
-                    surface = self._clean_surface(text)
-                    break
-            
-            # Calcular precio por m2
-            price_m2 = self._calculate_price_per_m2(price, surface, currency)
-            
-            return PropertyData(
-                source=self.source_name,
-                external_id=url.split('/')[-1].replace('.html', '') if url else "",
-                title=title,
-                price_amount=price,
-                price_currency=currency,
-                price_per_m2=price_m2,
-                surface_total=surface,
-                surface_covered=surface,
-                location=address,
+                location=barrio,  # ← Guardar el barrio extraído
                 address=address,
                 property_type=property_type,
                 operation_type=operation,
@@ -971,6 +957,7 @@ class MercadoLibreScraper(BaseScraper):
     
     def __init__(self):
         super().__init__("https://inmuebles.mercadolibre.com.ar", "mercadolibre")
+        self.target_zone = ""  # Se seteará antes de parsear
     
     def build_url(self, zone: str, operation: str, property_type: str) -> str:
         """Construye URL para MercadoLibre Inmuebles"""
@@ -997,7 +984,6 @@ class MercadoLibreScraper(BaseScraper):
         
         # MercadoLibre usa estructura: /tipo/op/provincia/ciudad/
         if zone:
-            # Asumimos que zone ya viene formateada o la pasamos tal cual
             url = f"{self.base_url}/{p_type}/{op}/{zone}/"
         else:
             url = f"{self.base_url}/{p_type}/{op}/"
@@ -1005,35 +991,30 @@ class MercadoLibreScraper(BaseScraper):
         return url
     
     def parse_properties(self, html: str, operation: str = "venta", property_type: str = "departamento") -> List[PropertyData]:
-        """Parsea propiedades de MercadoLibre usando Playwright para renderizar JS"""
+        """Parsea propiedades de MercadoLibre"""
         properties = []
         
         try:
             from bs4 import BeautifulSoup
             soup = BeautifulSoup(html, 'html.parser')
             
-            # Selectores para MercadoLibre Inmuebles - nueva estructura poly-component
+            # Selectores para MercadoLibre Inmuebles
             cards = soup.select('li.ui-search-layout__item')
             
-            # Estrategia 2: Buscar en ol.ui-search-layout
             if not cards:
                 ol_layout = soup.select_one('ol.ui-search-layout')
                 if ol_layout:
                     cards = ol_layout.select('li')
             
-            # Estrategia 3: Buscar por artículos con clase de resultado (estructura vieja)
             if not cards:
                 cards = soup.select('article.ui-search-result')
             
-            # Estrategia 4: Buscar divs con classe de item
             if not cards:
                 cards = soup.select('div.ui-search-result__item')
             
-            # Estrategia 5: Buscar por data-qa attribute
             if not cards:
                 cards = soup.select('[data-qa="listing-item"]')
             
-            # Estrategia 6: Buscar todos los enlaces con /ML y filtrar por container
             if not cards:
                 ml_items = soup.select('a[href*="/ML"]')
                 for item in ml_items[:50]:
@@ -1064,7 +1045,7 @@ class MercadoLibreScraper(BaseScraper):
     def _parse_card(self, card, operation: str = "venta", property_type: str = "departamento") -> Optional[PropertyData]:
         """Parsea una tarjeta individual de MercadoLibre"""
         try:
-            # Extraer precio - nueva estructura poly-component
+            # Extraer precio
             price_text = ""
             price = 0.0
             currency = "ARS"
@@ -1082,7 +1063,7 @@ class MercadoLibreScraper(BaseScraper):
                 else:
                     price_text = price_elem.get_text(strip=True)
             
-            # Estrategia 2: Buscar cualquier andes-money-amount en la tarjeta
+            # Estrategia 2: Buscar cualquier andes-money-amount
             if not price_text:
                 money_elem = card.select_one('.andes-money-amount')
                 if money_elem:
@@ -1102,21 +1083,18 @@ class MercadoLibreScraper(BaseScraper):
             
             price, currency = self._clean_price(price_text)
             
-            # Extraer título - nueva estructura poly-component
+            # Extraer título
             title = ""
             
-            # Estrategia 1: poly-component__title > a
             title_elem = card.select_one('.poly-component__title a')
             if title_elem:
                 title = title_elem.get_text(strip=True)
             
-            # Estrategia 2: img con atributo alt
             if not title:
                 img_elem = card.select_one('.poly-component__picture')
                 if img_elem and img_elem.has_attr('alt'):
                     title = img_elem['alt']
             
-            # Estrategia 3: ui-search-item__title (estructura vieja)
             if not title:
                 title_elem = card.select_one('.ui-search-item__title')
                 if title_elem:
@@ -1132,31 +1110,45 @@ class MercadoLibreScraper(BaseScraper):
                 if link_elem:
                     url = link_elem['href']
             
-            # Extraer ubicación - nueva estructura poly-component
+            # ========================================
+            # EXTRAER UBICACIÓN Y BARRIO
+            # ========================================
             address = ""
+            barrio = ""
+            
             location_elem = card.select_one('.poly-component__location')
             if location_elem:
                 address = location_elem.get_text(strip=True)
+                # MercadoLibre formato: "Dirección, Barrio, Ciudad"
+                partes = address.split(',')
+                if len(partes) >= 2:
+                    barrio = partes[1].strip().lower()
+                else:
+                    barrio = address.strip().lower()
             
             if not address:
                 location_elem = card.select_one('.ui-search-item__location')
                 if location_elem:
                     address = location_elem.get_text(strip=True)
+                    partes = address.split(',')
+                    if len(partes) >= 2:
+                        barrio = partes[1].strip().lower()
+                    else:
+                        barrio = address.strip().lower()
             
-            # Extraer atributos (superficie, ambientes) - MEJORADO
+            # Extraer superficie
             surface = 0.0
             rooms = None
             
-            # Estrategia 1: Buscar en poly-component__card con todos los atributos
+            # Estrategia 1: Buscar en poly-component__card
             card_content = card.select_one('.poly-component__card, .poly-card')
             if card_content:
                 all_text = card_content.get_text(strip=True)
-                # Buscar patrón de superficie en todo el texto
                 surface_patterns = re.findall(r'(\d{1,4})\s*(?:m²|m2|mts2|mts²)', all_text, re.IGNORECASE)
                 if surface_patterns:
                     surface = float(surface_patterns[0])
             
-            # Estrategia 2: Buscar en contenedores de atributos específicos
+            # Estrategia 2: Buscar en contenedores de atributos
             if surface == 0:
                 attrs_containers = card.select('.poly-card__attributes, .poly-component__attributes, .poly-card__card, .ui-search-result-attributes, .ui-search-card-attributes')
                 for attrs_container in attrs_containers:
@@ -1174,54 +1166,11 @@ class MercadoLibreScraper(BaseScraper):
                     if surface > 0:
                         break
             
-            # Estrategia 3: Buscar elementos con clase que contenga 'surface' o 'area'
-            if surface == 0:
-                surface_elems = card.select('[class*="surface"], [class*="area"], [class*="m2"], [data-qa*="surface"]')
-                for elem in surface_elems:
-                    text = elem.get_text(strip=True)
-                    if 'm²' in text or 'm2' in text.lower():
-                        surface = self._clean_surface(text)
-                        if surface > 0:
-                            break
-            
-            # Estrategia 4: Buscar en toda la tarjeta elementos que contengan m²
-            if surface == 0:
-                m2_elements = card.select('span:contains("m²"), span:contains("m2"), div:contains("m²")')
-                for elem in m2_elements:
-                    text = elem.get_text(strip=True)
-                    surface = self._clean_surface(text)
-                    if surface > 0:
-                        break
-            
-            # Estrategia 5: Buscar en el título por patrones de superficie
+            # Estrategia 3: Buscar en el título
             if surface == 0 and title:
                 surface_patterns = re.findall(r'(\d{1,4})\s*(?:m²|m2|mts2|mts²)', title, re.IGNORECASE)
                 if surface_patterns:
                     surface = float(surface_patterns[0])
-            
-            # Estrategia 6: Buscar elementos específicos de ML con aria-label o title
-            if surface == 0:
-                area_elements = card.select('[aria-label*="superficie"], [title*="superficie"], [title*="m²"]')
-                for elem in area_elements:
-                    text = elem.get_text(strip=True) or elem.get('title', '')
-                    if 'm²' in text or 'm2' in text.lower():
-                        surface = self._clean_surface(text)
-                        if surface > 0:
-                            break
-            
-            # Estrategia 7: Buscar en etiquetas svg que contengan m²
-            if surface == 0:
-                svg_elements = card.select('svg')
-                for svg in svg_elements:
-                    next_siblings = svg.find_next_siblings(['span', 'div', 'li'])
-                    for sibling in next_siblings[:2]:  # Solo primeros 2 hermanos
-                        text = sibling.get_text(strip=True)
-                        if 'm²' in text or 'm2' in text.lower():
-                            surface = self._clean_surface(text)
-                            if surface > 0:
-                                break
-                    if surface > 0:
-                        break
             
             # Calcular precio por m2
             price_m2 = self._calculate_price_per_m2(price, surface, currency)
@@ -1253,7 +1202,7 @@ class MercadoLibreScraper(BaseScraper):
                 price_per_m2=price_m2,
                 surface_total=surface,
                 surface_covered=surface,
-                location=address.split(',')[-1].strip() if ',' in address else address,
+                location=barrio,  # ← Guardar el barrio extraído
                 address=address,
                 property_type=property_type,
                 operation_type=operation,
@@ -1264,8 +1213,6 @@ class MercadoLibreScraper(BaseScraper):
         except Exception as e:
             logger.debug(f"Error en _parse_card ML: {e}")
             return None
-
-
 
     
     
