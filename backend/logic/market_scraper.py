@@ -729,25 +729,49 @@ class ZonapropScraper(BaseScraper):
             # ========================================
             # EXTRAER BARRIO DE LA DIRECCIÓN/UBICACIÓN
             # ========================================
-            barrio = ""
-            # Primero intentar con location
+            barrio = self.target_zone # Prevenir fallos con ubicaciones incompletas
             if location:
                 partes_loc = location.split(',')
                 if len(partes_loc) >= 2:
-                    barrio = partes_loc[1].strip().lower()
-                else:
-                    barrio = location.strip().lower()
+                    posible_barrio = partes_loc[1].strip().lower()
+                    if posible_barrio != "capital federal": barrio = posible_barrio
             elif address:
                 partes_dir = address.split(',')
                 if len(partes_dir) >= 2:
-                    barrio = partes_dir[1].strip().lower()
-                elif len(partes_dir) == 1:
-                    barrio = address.strip().lower()
+                    posible_barrio = partes_dir[1].strip().lower()
+                    if posible_barrio != "capital federal": barrio = posible_barrio
             
+            # Extraer URL
+            link_elem = card.select_one('a[href], [data-to-posting]')
+            url = ""
+            if link_elem:
+                if link_elem.has_attr('href'):
+                    url = link_elem['href']
+                elif link_elem.has_attr('data-to-posting'):
+                    url = link_elem['data-to-posting']
+            
+            if url and not url.startswith('http'):
+                url = f"{self.base_url}{url}"
+
             # Extraer título / descripción
             title_elem = card.select_one('[data-qa="POSTING_CARD_DESCRIPTION"], .postingCard-module__posting-description, h2')
             title = title_elem.get_text(strip=True) if title_elem else address
             
+            # Si el título agarró un precio, intentar sacarlo de la URL o el body
+            if title and (title.startswith('$') or 'USD' in title.upper() or 'U$S' in title.upper() or title.replace('.','').isdigit()):
+                if url:
+                    try:
+                        slug = url.split('/')[-1].split('?')[0].replace('.html', '').split('-')
+                        words = [w.capitalize() for w in slug if not w.isdigit()]
+                        if len(words) > 2:
+                            if len(words[0]) > 5 and not any(v in words[0].lower() for v in ['a','e','i','o','u']):
+                                words = words[1:]
+                            title = " ".join(words).replace('Clasificado ', '')
+                    except:
+                        pass
+                if title.startswith('$') or not title:
+                    title = address
+
             # Extraer superficie y características
             features_elem = card.select_one('[data-qa="POSTING_CARD_FEATURES"], .postingMainFeatures-module__posting-main-features-block')
             surface = 0
@@ -763,18 +787,6 @@ class ZonapropScraper(BaseScraper):
                     if 'm²' in text or 'm2' in text.lower():
                         surface = self._clean_surface(text)
                         break
-            
-            # Extraer URL
-            link_elem = card.select_one('a[href], [data-to-posting]')
-            url = ""
-            if link_elem:
-                if link_elem.has_attr('href'):
-                    url = link_elem['href']
-                elif link_elem.has_attr('data-to-posting'):
-                    url = link_elem['data-to-posting']
-            
-            if url and not url.startswith('http'):
-                url = f"{self.base_url}{url}"
             
             # Extraer ID externo
             prop_id = ""
@@ -1392,13 +1404,12 @@ class ArgenpropScraper(BaseScraper):
             # ========================================
             # EXTRAER BARRIO DE LA DIRECCIÓN
             # ========================================
-            barrio = ""
+            barrio = self.target_zone
             if address:
                 partes = address.split(',')
                 if len(partes) >= 2:
-                    barrio = partes[1].strip().lower()
-                else:
-                    barrio = address.strip().lower()
+                    posible_barrio = partes[1].strip().lower()
+                    if posible_barrio != "capital federal": barrio = posible_barrio
             
             # Extraer título
             title_elem = card.select_one('.card__title, h2, h3, [data-qa="card-title"]')
