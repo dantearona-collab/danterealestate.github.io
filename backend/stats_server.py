@@ -2,16 +2,49 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 import json
 import os
 import subprocess
-import argparse
 import sys
 from threading import Thread
 from urllib.parse import urlparse, parse_qs
 from datetime import datetime
 
+# ========================================
+# CONFIGURACIÓN
+# ========================================
 PORT = 8005
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SCRAPER_SCRIPT = os.path.join(BASE_DIR, "scrape_market.py")
 SCRAPING_JSON = os.path.join(BASE_DIR, "scraping.json")
+
+# ========================================
+# AGREGAR LA CARPETA LOGIC AL PATH
+# ========================================
+logic_dir = os.path.join(BASE_DIR, 'logic')
+if logic_dir not in sys.path:
+    sys.path.insert(0, logic_dir)
+
+# ========================================
+# IMPORTAR CONSTANTES CENTRALIZADAS
+# ========================================
+try:
+    from logic.constants import BARRIOS_FALLBACK, BARRIOS_VALIDOS
+    print("✅ Constantes cargadas correctamente")
+except ImportError as e:
+    print(f"⚠️ Error importando constants: {e}")
+    # Fallback manual si no encuentra constants.py
+    BARRIOS_VALIDOS = ['belgrano', 'palermo', 'recoleta', 'microcentro', 'puerto madero']
+    BARRIOS_FALLBACK = [
+        {"valor": b, "display": f"{b.capitalize()} - Capital Federal"}
+        for b in BARRIOS_VALIDOS
+    ]
+
+# ========================================
+# VERIFICACIÓN DE ARCHIVOS (OPCIONAL)
+# ========================================
+print(f"📁 Archivo scraping.json en: {SCRAPING_JSON}")
+print(f"📁 ¿Existe? {os.path.exists(SCRAPING_JSON)}")
+
+
+
 
 class StatsHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
@@ -42,15 +75,19 @@ class StatsHandler(SimpleHTTPRequestHandler):
         elif path == "/api/scraping-data":
             self.handle_scraping_data()
             return
+        
+        # ✅ NUEVO: Endpoint para obtener lista de barrios
+        elif path == "/api/barrios-lista":
+            self.handle_barrios_lista()
+            return
 
         # Endpoint: obtener overview (para gráficos)
         elif path == "/api/stats/overview":
             self.handle_overview()
             return
-
-        # Servir archivos estáticos
-        else:
-            super().do_GET()
+        
+        # Servir archivos estáticos (sin return, super() ya envía respuesta)
+        super().do_GET()
     
     def handle_status(self):
         """Retornar estado del servidor"""
@@ -91,29 +128,31 @@ class StatsHandler(SimpleHTTPRequestHandler):
         
         def ejecutar_scraper():
             try:
+                # ✅ CORREGIDO: Usar los argumentos correctamente
+                cmd = [
+                    sys.executable, SCRAPER_SCRIPT,
+                    "--zona", zona,
+                    "--operacion", operacion,
+                    "--tipo", tipo,
+                    "--output", SCRAPING_JSON
+                ]
+                print(f"🔧 Ejecutando: {' '.join(cmd)}")
+                
                 result = subprocess.run(
-                    [
-                        sys.executable,
-                        SCRAPER_SCRIPT,
-                        zona,  # ⚠️ IMPORTANTE: SIN --zona
-                        "--operation", operacion,
-                        "--type", tipo
-                    ],
+                    cmd,
                     capture_output=True,
                     text=True,
+                    encoding='utf-8',
                     timeout=180
                 )
-
                 if result.returncode == 0:
                     print(f"✅ Scraping completado para {zona}")
-                    print("STDOUT:", result.stdout)
                 else:
-                    print("❌ Error en scraper")
-                    print("STDOUT:", result.stdout)
-                    print("STDERR:", result.stderr)
-
+                    print(f"❌ Error en scraper (Exit {result.returncode}):")
+                    if result.stderr: print(f"--- STDERR ---\n{result.stderr}")
+                    if result.stdout: print(f"--- STDOUT ---\n{result.stdout}")
             except Exception as e:
-                print(f"❌ Excepción ejecutando scraper: {e}")
+                print(f"❌ Excepción: {e}")
         
         Thread(target=ejecutar_scraper).start()
         
@@ -124,7 +163,67 @@ class StatsHandler(SimpleHTTPRequestHandler):
             "waiting": True
         }).encode())
         
+    def handle_barrios_lista(self):
+        """Retorna la lista de barrios válidos desde constants.py"""
+        try:
+            import sys
+            import os
+            
+            # Agregar la carpeta logic al path
+            backend_dir = os.path.dirname(os.path.abspath(__file__))
+            logic_dir = os.path.join(backend_dir, 'logic')
+            if logic_dir not in sys.path:
+                sys.path.insert(0, logic_dir)
+            
+            # Importar constantes
         
+            
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            
+            response = {
+                "success": True,
+                "barrios": BARRIOS_FALLBACK,
+                "total": len(BARRIOS_VALIDOS)
+            }
+            
+            self.wfile.write(json.dumps(response, ensure_ascii=False).encode())
+            
+        except Exception as e:
+            print(f"❌ Error en handle_barrios_lista: {e}")
+            
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            
+            # Fallback manual
+            barrios_fallback = [
+                {"valor": "belgrano", "display": "Belgrano - Capital Federal"},
+                {"valor": "palermo", "display": "Palermo - Capital Federal"},
+                {"valor": "recoleta", "display": "Recoleta - Capital Federal"},
+                {"valor": "microcentro", "display": "Microcentro - Capital Federal"},
+                {"valor": "puerto madero", "display": "Puerto Madero - Capital Federal"},
+                {"valor": "caballito", "display": "Caballito - Capital Federal"},
+                {"valor": "almagro", "display": "Almagro - Capital Federal"},
+                {"valor": "boedo", "display": "Boedo - Capital Federal"},
+                {"valor": "chacarita", "display": "Chacarita - Capital Federal"},
+                {"valor": "villa crespo", "display": "Villa Crespo - Capital Federal"},
+                {"valor": "nordelta", "display": "Nordelta - Tigre"},
+                {"valor": "tigre", "display": "Tigre - Buenos Aires"},
+                {"valor": "pilar", "display": "Pilar - Buenos Aires"},
+                {"valor": "san isidro", "display": "San Isidro - Buenos Aires"}
+            ]
+            
+            response = {
+                "success": True,
+                "barrios": barrios_fallback,
+                "total": len(barrios_fallback),
+                "warning": "Usando fallback del servidor"
+            }
+            
+            self.wfile.write(json.dumps(response, ensure_ascii=False).encode())
+    
     
     def handle_scraping_data(self):
 
