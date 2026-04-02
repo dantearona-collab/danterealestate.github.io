@@ -130,7 +130,7 @@ class StatsHandler(SimpleHTTPRequestHandler):
             try:
                 # ✅ CORREGIDO: Usar los argumentos correctamente
                 cmd = [
-                    sys.executable, SCRAPER_SCRIPT,
+                    sys.executable, "-X", "utf8", SCRAPER_SCRIPT,
                     "--zona", zona,
                     "--operacion", operacion,
                     "--tipo", tipo,
@@ -138,12 +138,16 @@ class StatsHandler(SimpleHTTPRequestHandler):
                 ]
                 print(f"🔧 Ejecutando: {' '.join(cmd)}")
                 
+                env = os.environ.copy()
+                env["PYTHONIOENCODING"] = "utf-8"
+
                 result = subprocess.run(
                     cmd,
                     capture_output=True,
                     text=True,
                     encoding='utf-8',
-                    timeout=180
+                    timeout=180,
+                    env=env
                 )
                 if result.returncode == 0:
                     print(f"✅ Scraping completado para {zona}")
