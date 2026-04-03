@@ -209,6 +209,7 @@ class StatsHandler(SimpleHTTPRequestHandler):
                 {"valor": "microcentro", "display": "Microcentro - Capital Federal"},
                 {"valor": "puerto madero", "display": "Puerto Madero - Capital Federal"},
                 {"valor": "caballito", "display": "Caballito - Capital Federal"},
+                {"valor": "congreso", "display": "Congreso - Capital Federal"},
                 {"valor": "almagro", "display": "Almagro - Capital Federal"},
                 {"valor": "boedo", "display": "Boedo - Capital Federal"},
                 {"valor": "chacarita", "display": "Chacarita - Capital Federal"},
