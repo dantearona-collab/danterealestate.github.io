@@ -555,24 +555,34 @@
             <div class="filters-grid">
                 <div class="filter-group">
                     <label class="filter-label">Barrio/Zona</label>
-                    <input 
-                        type="text" 
-                        class="filter-input" 
-                        id="filter-barrio"
-                        list="barrios-list"
-                        placeholder="Ej: palermo, belgrano, microcentro..."
-                        autocomplete="off"
-                    >
-                    <datalist id="barrios-list">
+                    <select class="filter-select" id="filter-barrio">
+                        <option value="">Seleccionar barrio...</option>
                         <option value="palermo">Palermo - Capital Federal</option>
                         <option value="belgrano">Belgrano - Capital Federal</option>
                         <option value="recoleta">Recoleta - Capital Federal</option>
-                        <option value="microcentro">Microcentro - Capital Federal</option>
+                        <option value="congreso">Congreso - Capital Federal</option>
+                        <option value="microcentroMicrocentro - Capital Federal</option>
+                        <option value="puerto madero">Puerto Madero - Capital Federal</option>
+                        <option value="caballito">Caballito - Capital Federal</option>
+                        <option value="almagro">Almagro - Capital Federal</option>
+                        <option value="boedo">Boedo - Capital Federal</option>
+                        <option value="chacarita">Chacarita - Capital Federal</option>
+                        <option value="villa crespo">Villa Crespo - Capital Federal</option>
+                        <option value="villa urquiza">Villa Urquiza - Capital Federal</option>
+                        <option value="colegiales">Colegiales - Capital Federal</option>
+                        <option value="nuñez">Nuñez - Capital Federal</option>
+                        <option value="saavedra">Saavedra - Capital Federal</option>
+                        <option value="flores">Flores - Capital Federal</option>
+                        <option value="balvanera">Balvanera - Capital Federal</option>
+                        <option value="san telmo">San Telmo - Capital Federal</option>
+                        <option value="barracas">Barracas - Capital Federal</option>
+                        <option value="la boca">La Boca - Capital Federal</option>
+                        <option value="retiro">Retiro - Capital Federal</option>
                         <option value="nordelta">Nordelta - Tigre</option>
-                        <option value="tigre">Tigre - Partido del Tigre</option>
+                        <option value="tigre">Tigre - Buenos Aires</option>
                         <option value="pilar">Pilar - Buenos Aires</option>
-                        <option value="san-isidro">San Isidro - Buenos Aires</option>
-                    </datalist>
+                        <option value="san isidro">San Isidro - Buenos Aires</option>
+                    </select>
                 </div>
                 <div class="filter-group">
                     <label class="filter-label">Operación</label>
@@ -762,14 +772,35 @@
         let marketData = null;
         let charts = {};
 
+        
         // ========================================
-        // LISTA DE BARRIOS VÁLIDOS PARA SCRAPING
+        // LISTA DE BARRIOS VÁLIDOS (CABA y zona norte)
         // ========================================
         const BARRIOS_VALIDOS = [
-            'palermo', 'belgrano', 'recoleta', 'microcentro', 'nordelta',
-            'tigre', 'pilar', 'san-isidro', 'balvanera', 'chacarita',
-            'almagro', 'boedo', 'caballito', 'flores', 'villa crespo',
-            'villa devoto', 'villa urquiza', 'colegiales', 'nuñez', 'saavedra'
+            { nombre: "Belgrano", valor: "belgrano", display: "Belgrano, Capital Federal" },
+            { nombre: "Palermo", valor: "palermo", display: "Palermo, Capital Federal" },
+            { nombre: "Recoleta", valor: "recoleta", display: "Recoleta, Capital Federal" },
+            { nombre: "Microcentro", valor: "microcentro", display: "Microcentro, Capital Federal" },
+            { nombre: "Puerto Madero", valor: "puerto madero", display: "Puerto Madero, Capital Federal" },
+            { nombre: "Caballito", valor: "caballito", display: "Caballito, Capital Federal" },
+            { nombre: "Almagro", valor: "almagro", display: "Almagro, Capital Federal" },
+            { nombre: "Boedo", valor: "boedo", display: "Boedo, Capital Federal" },
+            { nombre: "Chacarita", valor: "chacarita", display: "Chacarita, Capital Federal" },
+            { nombre: "Villa Crespo", valor: "villa crespo", display: "Villa Crespo, Capital Federal" },
+            { nombre: "Villa Urquiza", valor: "villa urquiza", display: "Villa Urquiza, Capital Federal" },
+            { nombre: "Colegiales", valor: "colegiales", display: "Colegiales, Capital Federal" },
+            { nombre: "Nuñez", valor: "nuñez", display: "Nuñez, Capital Federal" },
+            { nombre: "Saavedra", valor: "saavedra", display: "Saavedra, Capital Federal" },
+            { nombre: "Flores", valor: "flores", display: "Flores, Capital Federal" },
+            { nombre: "Balvanera", valor: "balvanera", display: "Balvanera, Capital Federal" },
+            { nombre: "San Telmo", valor: "san telmo", display: "San Telmo, Capital Federal" },
+            { nombre: "Barracas", valor: "barracas", display: "Barracas, Capital Federal" },
+            { nombre: "La Boca", valor: "la boca", display: "La Boca, Capital Federal" },
+            { nombre: "Retiro", valor: "retiro", display: "Retiro, Capital Federal" },
+            { nombre: "Nordelta", valor: "nordelta", display: "Nordelta, Tigre" },
+            { nombre: "Tigre", valor: "tigre", display: "Tigre, Buenos Aires" },
+            { nombre: "Pilar", valor: "pilar", display: "Pilar, Buenos Aires" },
+            { nombre: "San Isidro", valor: "san isidro", display: "San Isidro, Buenos Aires" }
         ];
 
         // ========================================
@@ -782,14 +813,14 @@
             let texto = input.toLowerCase().trim();
             
             // 1. Verificar si es un barrio válido directamente
-            if (BARRIOS_VALIDOS.includes(texto)) {
+            if (BARRIOS_VALIDOS.some(b => b.valor === texto)) {
                 return texto;
             }
             
             // 2. Intentar extraer la parte que podría ser un barrio
             const partes = texto.split(' ');
             for (const parte of partes) {
-                if (BARRIOS_VALIDOS.includes(parte)) {
+                if (BARRIOS_VALIDOS.some(b => b.valor === parte)) {
                     return parte;
                 }
             }
@@ -808,65 +839,64 @@
         }
 
         // Initialize - NO carga datos automáticamente
+
         document.addEventListener('DOMContentLoaded', () => {
             showInitialState();
             
             // ========================================
-            // ✅ VALIDACIÓN DEL INPUT DE BARRIO
+            // ✅ VALIDACIÓN DEL INPUT DE BARRIO (con datalist)
             // ========================================
             const filterBarrio = document.getElementById('filter-barrio');
+            
+            // Lista de barrios válidos (debe coincidir con el datalist)
+            const BARRIOS_VALIDOS = [
+                'palermo', 'belgrano', 'recoleta', 'microcentro', 'puerto madero',
+                'caballito', 'almagro', 'boedo', 'chacarita', 'villa crespo',
+                'villa urquiza', 'colegiales', 'nuñez', 'saavedra', 'flores',
+                'balvanera', 'san telmo', 'barracas', 'la boca', 'retiro',
+                'nordelta', 'tigre', 'pilar', 'san isidro'
+            ];
+            
+            function esBarrioValido(valor) {
+                return BARRIOS_VALIDOS.includes(valor.toLowerCase().trim());
+            }
             
             if (filterBarrio) {
                 // Validar al cambiar el valor
                 filterBarrio.addEventListener('change', function() {
-                    const original = this.value;
-                    const normalizado = normalizarBarrio(original);
+                    const original = this.value.trim();
                     
-                    if (normalizado === null) {
-                        alert(`"${original}" no es un nombre de barrio válido.\n\nUsá nombres como: Palermo, Belgrano, Recoleta, etc.`);
+                    if (original === '') return;
+                    
+                    if (!esBarrioValido(original)) {
+                        alert(`"${original}" no es un barrio válido.\n\nBarrios disponibles:\n${BARRIOS_VALIDOS.map(b => `• ${b}`).join('\n')}`);
                         this.value = '';
-                    } else if (normalizado !== original.toLowerCase()) {
-                        this.value = normalizado;
-                        console.log(`📝 Barrio corregido: "${original}" → "${normalizado}"`);
+                    } else {
+                        // Normalizar a minúsculas para consistencia
+                        this.value = original.toLowerCase();
+                        console.log(`📍 Barrio seleccionado: ${this.value}`);
                     }
                 });
                 
                 // También validar al presionar Enter
                 filterBarrio.addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') {
-                        const original = this.value;
-                        const normalizado = normalizarBarrio(original);
+                        const original = this.value.trim();
                         
-                        if (normalizado === null) {
+                        if (original === '') return;
+                        
+                        if (!esBarrioValido(original)) {
                             e.preventDefault();
-                            alert(`"${original}" no es un nombre de barrio válido.\n\nUsá nombres como: Palermo, Belgrano, Recoleta, etc.`);
+                            alert(`"${original}" no es un barrio válido.\n\nBarrios disponibles:\n${BARRIOS_VALIDOS.map(b => `• ${b}`).join('\n')}`);
                             this.value = '';
-                        } else if (normalizado !== original.toLowerCase()) {
-                            this.value = normalizado;
-                            console.log(`📝 Barrio corregido: "${original}" → "${normalizado}"`);
+                        } else {
+                            this.value = original.toLowerCase();
+                            console.log(`📍 Barrio seleccionado: ${this.value}`);
                         }
                     }
                 });
             }
         });
-
-        // Validación en tiempo real del input de barrio
-        const filterBarrio = document.getElementById('filter-barrio');
-        if (filterBarrio) {
-            filterBarrio.addEventListener('change', function() {
-                const original = this.value;
-                const normalizado = normalizarBarrio(original);
-                
-                if (normalizado === null) {
-                    alert(`"${original}" no es un barrio válido.`);
-                    this.value = '';
-                } else if (normalizado !== original.toLowerCase()) {
-                    this.value = normalizado;
-                    console.log(`📝 Barrio corregido: "${original}" → "${normalizado}"`);
-                }
-            });
-        }
-
 
         // ========================================
         // ✅ FUNCIÓN PARA MOSTRAR NOTIFICACIONES TEMPORALES
@@ -965,7 +995,44 @@
             runScraping();
         }
         
-        // Run scraping
+        
+        // Obtener barrios desde el backend
+        document.addEventListener('DOMContentLoaded', () => {
+            showInitialState();
+            
+            // ========================================
+            // ✅ CARGAR BARRIOS DESDE EL BACKEND
+            // ========================================
+            async function cargarBarrios() {
+                try {
+                    const response = await fetch('/api/barrios-lista');
+                    const data = await response.json();
+                    
+                    const select = document.getElementById('filter-barrio');
+                    select.innerHTML = '<option value="">Seleccionar barrio...</option>';
+                    
+                    if (data.success && data.barrios) {
+                        data.barrios.forEach(barrio => {
+                            const option = document.createElement('option');
+                            option.value = barrio.valor;
+                            option.textContent = barrio.display;
+                            select.appendChild(option);
+                        });
+                        console.log(`✅ ${data.barrios.length} barrios cargados`);
+                    } else {
+                        console.error('Error en respuesta:', data);
+                    }
+                } catch (error) {
+                    console.error('Error cargando barrios:', error);
+                }
+            }
+            
+            // Cargar barrios al iniciar
+            cargarBarrios();
+            
+            // Resto del código...
+        });
+
         // Run scraping
         async function runScraping() {
             const barrioInput = document.getElementById('filter-barrio').value.trim();
@@ -1026,8 +1093,9 @@
                                 document.getElementById('scraping-loading').style.display = 'none';
                                 document.getElementById('scrape-btn').disabled = false;
                                 
-                                renderScrapedTable(scrapingData.data);
-                                renderScrapedCharts(scrapingData.data);
+                                const datosReales = scrapingData.data?.data || scrapingData.data;
+                                renderScrapedTable(datosReales);
+                                renderScrapedCharts(datosReales);
                                 
                                 document.getElementById('scraping-status').style.display = 'block';
                                 document.getElementById('scraping-message').innerHTML = 
