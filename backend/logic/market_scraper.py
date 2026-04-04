@@ -33,7 +33,8 @@ try:
         BARRIOS_VALIDOS,
         BARRIOS_DISPLAY,
         UBICACIONES_EXCLUIDAS,
-        BARRIOS_URL_MAP
+        BARRIOS_URL_MAP,
+        USD_RATE
     )
     print("✅ Constantes importadas desde .constants")
 except ImportError:
@@ -43,7 +44,8 @@ except ImportError:
             BARRIOS_VALIDOS,
             BARRIOS_DISPLAY,
             UBICACIONES_EXCLUIDAS,
-            BARRIOS_URL_MAP
+            BARRIOS_URL_MAP,
+            USD_RATE
         )
         print("✅ Constantes importadas desde constants")
     except ImportError as e:
@@ -53,6 +55,7 @@ except ImportError:
         BARRIOS_DISPLAY = {}
         UBICACIONES_EXCLUIDAS = ['general belgrano', 'villa general belgrano']
         BARRIOS_URL_MAP = {}
+        USD_RATE = 1200.0
 
 # Resto del código...
 
@@ -96,6 +99,7 @@ class MarketStats:
     source_breakdown: Dict[str, int]
     properties: List[Dict] = field(default_factory=list)
     errors: List[str] = field(default_factory=list)
+    usd_rate: float = 1200.0
 
 # ========================================
 # CLASE BASE DEL SCRAPER
@@ -1099,6 +1103,23 @@ class MarketAnalyzer:
 
   
     @staticmethod
+    def _remove_outliers(data_list: List[float]) -> List[float]:
+        """Elimina valores atípicos usando el Rango Intercuartílico (IQR)"""
+        if len(data_list) < 4:
+            return data_list
+            
+        data_sorted = sorted(data_list)
+        n = len(data_sorted)
+        q1 = data_sorted[int(n * 0.25)]
+        q3 = data_sorted[int(n * 0.75)]
+        iqr = q3 - q1
+        
+        lower_bound = q1 - 1.5 * iqr
+        upper_bound = q3 + 1.5 * iqr
+        
+        return [x for x in data_list if lower_bound <= x <= upper_bound]
+
+    @staticmethod
     def _is_in_zone(prop_location: str, prop_address: str, zone: str) -> bool:
         if not zone:
             return True
@@ -1148,34 +1169,32 @@ class MarketAnalyzer:
 
     @staticmethod
     def calculate_stats(properties: List[PropertyData], zone: str, operation: str, prop_type: str) -> MarketStats:
-        """Calcula estadísticas del mercado desde propiedades scrappeadas"""
+        """Calcula estadísticas del mercado inmobiliario con normalización y limpieza de outliers"""
+        global USD_RATE
         errors = []
         source_breakdown = {}
         currency_dist = {}
         properties_list = []
-        low_surface_count = 0  # Contador de propiedades con superficie muy baja
+        low_surface_count = 0 
         
         if not properties:
             return MarketStats(
-                zone=zone,
-                operation_type=operation,
-                property_type=prop_type,
-                sample_size=0,
-                average_price_per_m2=None,
-                average_total_price=None,
-                median_price_per_m2=None,
-                min_price_per_m2=None,
-                max_price_per_m2=None,
-                price_range_total=None,
-                currency_distribution={},
-                source_breakdown={},
-                properties=[],
-                errors=["No se pudieron obtener datos del mercado"]
+                zone=zone, operation_type=operation, property_type=prop_type,
+                sample_size=0, average_price_per_m2=None, average_total_price=None,
+                median_price_per_m2=None, min_price_per_m2=None, max_price_per_m2=None,
+                price_range_total=None, currency_distribution={}, source_breakdown={},
+                properties=[], errors=["No se pudieron obtener datos del mercado"],
+                usd_rate=USD_RATE
             )
         
-        # Recopilar precios por m2
-        prices_per_m2 = []
-        total_prices = []
+        # 1. Determinar Moneda Base para el análisis estadístico
+        # Ventas y Terrenos -> USD. Alquileres (excepto terrenos) -> ARS.
+        is_terrain = prop_type.lower() in ["terreno", "terrenos"]
+        is_sale = operation.lower() == "venta"
+        base_currency = "USD" if (is_terrain or is_sale) else "ARS"
+        
+        normalized_total_prices = []
+        normalized_m2_prices = []
         
         for prop in properties:
             # FILTRO DE BARRIO: Evitar que Zonaprop meta Belgrano en Villa Lugano
@@ -1194,13 +1213,25 @@ class MarketAnalyzer:
             # Contabilizar por moneda
             currency_dist[prop.price_currency] = currency_dist.get(prop.price_currency, 0) + 1
             
+            # Normalizar precio si es necesario
+            current_price = prop.price_amount
+            current_price_m2 = prop.price_per_m2
+            
+            if normalize_to_usd and prop.price_currency == "ARS":
+                current_price = current_price / usd_rate
+                current_price_m2 = current_price_m2 / usd_rate
+            elif not normalize_to_usd and prop.operation_type == "alquiler" and prop.price_currency == "USD":
+                # Si es alquiler y está en USD, pero no deseamos USD, normalizar a ARS
+                current_price = current_price * usd_rate
+                current_price_m2 = current_price_m2 * usd_rate
+
             # Solo calcular estadísticas para propiedades con superficie válida
             # Esto evita que departamentos de 1-9m² alteren los promedios
-            if not has_low_surface and prop.price_per_m2 > 0:
-                prices_per_m2.append(prop.price_per_m2)
+            if not has_low_surface and current_price_m2 > 0:
+                prices_per_m2.append(current_price_m2)
             
-            if not has_low_surface and prop.price_amount > 0:
-                total_prices.append(prop.price_amount)
+            if not has_low_surface and current_price > 0:
+                total_prices.append(current_price)
             
             # Agregar a lista de propiedades (todas, incluyendo las con superficie baja)
             # Las que tienen superficie baja tendrán surface_warning: true
@@ -1279,7 +1310,8 @@ class MarketAnalyzer:
                 "median_price_per_m2": round(stats.median_price_per_m2, 2) if stats.median_price_per_m2 else None,
                 "min_price_per_m2": round(stats.min_price_per_m2, 2) if stats.min_price_per_m2 else None,
                 "max_price_per_m2": round(stats.max_price_per_m2, 2) if stats.max_price_per_m2 else None,
-                "price_range_total": stats.price_range_total
+                "price_range_total": stats.price_range_total,
+                "usd_rate_used": stats.usd_rate
             },
             "currency_distribution": stats.currency_distribution,
             "source_breakdown": stats.source_breakdown,

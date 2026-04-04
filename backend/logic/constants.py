@@ -1,12 +1,17 @@
 # backend/logic/constants.py
 
 # ========================================
+# TASA DE CAMBIO (USD / ARS)
+# ========================================
+USD_RATE = 1400.0
+
+# ========================================
 # BARRIOS VÁLIDOS PARA SCRAPING Y FILTROS
 # ========================================
 BARRIOS_VALIDOS = [
     # CABA
     'belgrano', 'palermo', 'recoleta', 'microcentro', 'puerto madero',
-    'caballito', 'almagro', 'boedo', 'chacarita', 'villa crespo',
+    'caballito', 'almagro', 'boedo', 'chacarita', 'congreso','villa crespo',
     'villa urquiza', 'colegiales', 'nuñez', 'saavedra', 'flores',
     'balvanera', 'san telmo', 'barracas', 'la boca', 'retiro',
     # Zona Norte
@@ -81,6 +86,7 @@ BARRIOS_URL_MAP = {
     "once": "balvanera",
     "microcentro": "san-nicolas",
     "abasto": "almagro",
+    "congreso": "congreso",
     "congreso": "balvanera"
 }
 
