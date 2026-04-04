@@ -6,6 +6,8 @@ import sys
 from threading import Thread
 from urllib.parse import urlparse, parse_qs
 from datetime import datetime
+from pdf_generator import generate_market_report
+from logic.database import save_market_stats, get_historical_stats, verificar_y_reparar_bd
 
 # ========================================
 # CONFIGURACIÓN
@@ -26,20 +28,27 @@ if logic_dir not in sys.path:
 # IMPORTAR CONSTANTES CENTRALIZADAS
 # ========================================
 try:
-    from logic.constants import BARRIOS_FALLBACK, BARRIOS_VALIDOS
-    print("✅ Constantes cargadas correctamente")
+    from logic.constants import BARRIOS_VALIDOS, BARRIOS_FALLBACK
+    print(f"✅ Constantes cargadas: {len(BARRIOS_VALIDOS)} barrios")
 except ImportError as e:
-    print(f"⚠️ Error importando constants: {e}")
+    print(f"⚠️ No se pudo importar de logic.constants: {e}")
     # Fallback manual si no encuentra constants.py
-    BARRIOS_VALIDOS = ['belgrano', 'palermo', 'recoleta', 'microcentro', 'puerto madero']
+    BARRIOS_VALIDOS = [
+        'belgrano', 'palermo', 'recoleta', 'microcentro', 'puerto madero',
+        'caballito', 'almagro', 'boedo', 'chacarita', 'congreso', 'villa crespo',
+        'villa urquiza', 'colegiales', 'nuñez', 'saavedra', 'flores',
+        'balvanera', 'san telmo', 'barracas', 'la boca', 'retiro',
+        'nordelta', 'tigre', 'pilar', 'san isidro'
+    ]
     BARRIOS_FALLBACK = [
         {"valor": b, "display": f"{b.capitalize()} - Capital Federal"}
         for b in BARRIOS_VALIDOS
     ]
 
 # ========================================
-# VERIFICACIÓN DE ARCHIVOS (OPCIONAL)
+# VERIFICACIÓN DE ARCHIVOS Y BASE DE DATOS
 # ========================================
+verificar_y_reparar_bd()
 print(f"📁 Archivo scraping.json en: {SCRAPING_JSON}")
 print(f"📁 ¿Existe? {os.path.exists(SCRAPING_JSON)}")
 
@@ -86,6 +95,11 @@ class StatsHandler(SimpleHTTPRequestHandler):
             self.handle_overview()
             return
         
+        # Endpoint: exportar PDF
+        elif path == "/api/export-pdf":
+            self.handle_export_pdf()
+            return
+
         # Servir archivos estáticos (sin return, super() ya envía respuesta)
         super().do_GET()
     
@@ -151,6 +165,23 @@ class StatsHandler(SimpleHTTPRequestHandler):
                 )
                 if result.returncode == 0:
                     print(f"✅ Scraping completado para {zona}")
+                    # ✅ GUARDAR EN HISTORIAL
+                    try:
+                        with open(SCRAPING_JSON, 'r', encoding='utf-8') as f:
+                            s_data = json.load(f)
+                            stats = s_data.get('data', {}).get('statistics', {})
+                            save_market_stats({
+                                'zona': zona,
+                                'operacion': operacion,
+                                'tipo_propiedad': tipo,
+                                'precio_promedio': stats.get('average_total_price'),
+                                'precio_m2_promedio': stats.get('average_price_per_m2'),
+                                'cantidad_muestra': s_data.get('data', {}).get('sample_size'),
+                                'moneda': 'USD' if tipo.lower() in ['terreno', 'terrenos'] or operacion.lower() == 'venta' else 'ARS'
+                            })
+                            print(f"💾 Historial guardado para {zona}")
+                    except Exception as ex:
+                        print(f"⚠️ Error al guardar historial: {ex}")
                 else:
                     print(f"❌ Error en scraper (Exit {result.returncode}):")
                     if result.stderr: print(f"--- STDERR ---\n{result.stderr}")
@@ -351,6 +382,50 @@ class StatsHandler(SimpleHTTPRequestHandler):
                 "success": False,
                 "error": str(e)
             }).encode())
+
+    def handle_export_pdf(self):
+        """Generar y retornar el reporte PDF"""
+        print("pdf")
+        if not os.path.exists(SCRAPING_JSON):
+            self.send_response(404)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({"error": "No hay datos de scraping disponibles"}).encode())
+            return
+        
+        try:
+            with open(SCRAPING_JSON, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            # ✅ OBTENER HISTÓRICO PARA COMPARATIVA
+            operation = data.get('operation', 'venta')
+            prop_type = data.get('property_type', 'departamento')
+            currency = 'USD' if prop_type.lower() in ['terreno', 'terrenos'] or operation.lower() == 'venta' else 'ARS'
+            
+            history = get_historical_stats(operation, prop_type, currency)
+            data['history'] = history # Pasar al generador
+            
+            pdf_bytes = generate_market_report(data)
+            
+            # Formatear nombre del archivo
+            zona = data.get('zone', 'mercado').replace(' ', '_')
+            filename = f"Informe_Mercado_{zona}_{datetime.now().strftime('%Y%m%d')}.pdf"
+            
+            self.send_response(200)
+            self.send_header('Content-type', 'application/pdf')
+            self.send_header('Content-Disposition', f'attachment; filename="{filename}"')
+            self.send_header('Content-Length', len(pdf_bytes))
+            self.end_headers()
+            
+            self.wfile.write(pdf_bytes)
+            print(f"✅ PDF generado correctamente: {filename}")
+            
+        except Exception as e:
+            print(f"❌ Error generando PDF: {e}")
+            self.send_response(500)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({"error": str(e)}).encode())
 
 print("=" * 50)
 print(f"🚀 Servidor COMPLETO de estadísticas (TODAS las funcionalidades)")

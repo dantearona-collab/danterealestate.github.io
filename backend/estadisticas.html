@@ -615,6 +615,10 @@
                     <i class="fas fa-file-excel"></i>
                     Descargar Excel
                 </button>
+                <button class="filter-btn pdf-btn" onclick="exportarPDF()" id="pdf-btn" style="background: #e11d48;">
+                    <i class="fas fa-file-pdf"></i>
+                    Descargar PDF
+                </button>
             </div>
             <p style="text-align: center; margin-top: 8px; color: #666; font-size: 0.85rem;">
                 💡 Escribe cualquier barrio de Argentina y ejecuta scraping para ver estadísticas en tiempo real
@@ -1989,6 +1993,14 @@
                     alert('Error al descargar: ' + error.message);
                 });
         }
+
+        // Nueva función para exportar PDF desde stats_server.py
+        function exportarPDF() {
+            console.log("📥 Solicitando exportación a PDF...");
+            // Usamos la misma base que la URL actual para asegurar que pegue al stats_server (puerto 8005)
+            const pdfUrl = `${window.location.origin}/api/export-pdf`;
+            window.location.href = pdfUrl;
+        }
         // Range Chart - Distribución de precios
         function renderRangeChart(distribucion) {
             const ctx = document.getElementById('range-chart').getContext('2d');
@@ -2182,7 +2194,14 @@
             const currencyDist = scrapedData.currency_distribution || {};
             
             // Moneda predominante
-            const mainCurrency = currencyDist.USD > currencyDist.ARS ? 'USD' : 'ARS';
+            let mainCurrency = currencyDist.USD > currencyDist.ARS ? 'USD' : 'ARS';
+            
+            // Forzar USD para terrenos (como pidió el cliente)
+            const tipoPropiedad = (scrapedData.property_type || '').toLowerCase();
+            if (tipoPropiedad === 'terreno' || tipoPropiedad === 'terrenos') {
+                mainCurrency = 'USD';
+            }
+            
             const currencySymbol = mainCurrency === 'USD' ? 'US$' : '$';
             
             // Calcular adicionales
