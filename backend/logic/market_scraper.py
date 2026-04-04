@@ -1197,103 +1197,81 @@ class MarketAnalyzer:
         normalized_m2_prices = []
         
         for prop in properties:
-            # FILTRO DE BARRIO: Evitar que Zonaprop meta Belgrano en Villa Lugano
+            # 1. Filtro de Zona
             if not MarketAnalyzer._is_in_zone(prop.location, prop.address, zone):
                 continue
                 
-            # Verificar si tiene superficie muy baja (menor a 10m²)
-            has_low_surface = prop.surface_total < MarketAnalyzer.MIN_SURFACE_THRESHOLD
+            # 2. Contabilizar metadatos originales
+            source_breakdown[prop.source] = source_breakdown.get(prop.source, 0) + 1
+            currency_dist[prop.price_currency] = currency_dist.get(prop.price_currency, 0) + 1
             
+            # 3. Normalización a Moneda Base
+            price_norm = prop.price_amount
+            m2_norm = prop.price_per_m2
+            
+            if base_currency == "USD" and prop.price_currency == "ARS":
+                price_norm /= USD_RATE
+                m2_norm /= USD_RATE
+            elif base_currency == "ARS" and prop.price_currency == "USD":
+                price_norm *= USD_RATE
+                m2_norm *= USD_RATE
+            
+            # 4. Validaciones de Superficie/Precio
+            has_low_surface = prop.surface_total < MarketAnalyzer.MIN_SURFACE_THRESHOLD
             if has_low_surface:
                 low_surface_count += 1
             
-            # Contabilizar por fuente
-            source_breakdown[prop.source] = source_breakdown.get(prop.source, 0) + 1
+            # Solo incluir para cálculos estadísticos si no tiene advertencias y el precio > 0
+            if not has_low_surface and price_norm > 0:
+                normalized_total_prices.append(price_norm)
+                if m2_norm > 0:
+                    normalized_m2_prices.append(m2_norm)
             
-            # Contabilizar por moneda
-            currency_dist[prop.price_currency] = currency_dist.get(prop.price_currency, 0) + 1
-            
-            # Normalizar precio si es necesario
-            current_price = prop.price_amount
-            current_price_m2 = prop.price_per_m2
-            
-            if normalize_to_usd and prop.price_currency == "ARS":
-                current_price = current_price / usd_rate
-                current_price_m2 = current_price_m2 / usd_rate
-            elif not normalize_to_usd and prop.operation_type == "alquiler" and prop.price_currency == "USD":
-                # Si es alquiler y está en USD, pero no deseamos USD, normalizar a ARS
-                current_price = current_price * usd_rate
-                current_price_m2 = current_price_m2 * usd_rate
-
-            # Solo calcular estadísticas para propiedades con superficie válida
-            # Esto evita que departamentos de 1-9m² alteren los promedios
-            if not has_low_surface and current_price_m2 > 0:
-                prices_per_m2.append(current_price_m2)
-            
-            if not has_low_surface and current_price > 0:
-                total_prices.append(current_price)
-            
-            # Agregar a lista de propiedades (todas, incluyendo las con superficie baja)
-            # Las que tienen superficie baja tendrán surface_warning: true
+            # Guardar en lista detallada (originales)
             properties_list.append({
-                "source": prop.source,
-                "title": prop.title,
-                "price": prop.price_amount,
-                "currency": prop.price_currency,
-                "price_m2": prop.price_per_m2,
-                "surface": prop.surface_total,
-                "address": prop.address,
-                "url": prop.url,
-                "operation_type": prop.operation_type,
-                "property_type": prop.property_type,
-                "surface_warning": has_low_surface  # Marcar propiedades con superficie irreal
+                "source": prop.source, "title": prop.title, "price": prop.price_amount,
+                "currency": prop.price_currency, "price_m2": prop.price_per_m2,
+                "surface": prop.surface_total, "address": prop.address, "url": prop.url,
+                "operation_type": prop.operation_type, "property_type": prop.property_type,
+                "surface_warning": has_low_surface
             })
         
-        # Calcular estadísticas
-        from statistics import mean, median, stdev
+        # 5. FILTRO DE OUTLIERS (IQR)
+        # Esto elimina precios absurdos de portales (ej: alquileres de $250M)
+        clean_total_prices = MarketAnalyzer._remove_outliers(normalized_total_prices)
+        clean_m2_prices = MarketAnalyzer._remove_outliers(normalized_m2_prices)
         
-        avg_price_m2 = None
-        median_price_m2 = None
-        min_price_m2 = None
-        max_price_m2 = None
+        outliers_count = len(normalized_total_prices) - len(clean_total_prices)
         
-        if prices_per_m2:
-            avg_price_m2 = mean(prices_per_m2)
-            median_price_m2 = median(prices_per_m2)
-            min_price_m2 = min(prices_per_m2)
-            max_price_m2 = max(prices_per_m2)
+        # 6. Cálculos Finales
+        from statistics import mean, median
         
-        avg_total = None
-        if total_prices:
-            avg_total = mean(total_prices)
+        avg_total = mean(clean_total_prices) if clean_total_prices else None
+        avg_m2 = mean(clean_m2_prices) if clean_m2_prices else None
+        med_m2 = median(clean_m2_prices) if clean_m2_prices else None
+        min_m2 = min(clean_m2_prices) if clean_m2_prices else None
+        max_m2 = max(clean_m2_prices) if clean_m2_prices else None
         
-        # Rango de precios total
         price_range = None
-        if total_prices:
-            min_p = min(total_prices)
-            max_p = max(total_prices)
-            price_range = f"{min_p:,.0f} - {max_p:,.0f}"
+        if clean_total_prices:
+            price_range = f"{min(clean_total_prices):,.0f} - {max(clean_total_prices):,.0f}"
         
-        # Agregar advertencia si hay propiedades con superficie baja
+        # Notificar filtros aplicados en los errores/warnings
         warnings = []
         if low_surface_count > 0:
-            warnings.append(f"{low_surface_count} propiedades con superficie < {MarketAnalyzer.MIN_SURFACE_THRESHOLD}m² excluidas del promedio")
+            warnings.append(f"{low_surface_count} propiedades con sup. < {MarketAnalyzer.MIN_SURFACE_THRESHOLD}m² excluidas")
+        if outliers_count > 0:
+            warnings.append(f"{outliers_count} valores atípicos (outliers) descartados")
         
         return MarketStats(
-            zone=zone,
-            operation_type=operation,
-            property_type=prop_type,
-            sample_size=len(properties),
-            average_price_per_m2=avg_price_m2,
-            average_total_price=avg_total,
-            median_price_per_m2=median_price_m2,
-            min_price_per_m2=min_price_m2,
-            max_price_per_m2=max_price_m2,
-            price_range_total=price_range,
-            currency_distribution=currency_dist,
-            source_breakdown=source_breakdown,
-            properties=properties_list,
-            errors=warnings if warnings else errors
+            zone=zone, operation_type=operation, property_type=prop_type,
+            sample_size=len(clean_total_prices), # Reportar muestra REAL utilizada
+            average_price_per_m2=avg_m2, average_total_price=avg_total,
+            median_price_per_m2=med_m2, min_price_per_m2=min_m2, max_price_per_m2=max_m2,
+            price_range_total=price_range, currency_distribution=currency_dist,
+            source_breakdown=source_breakdown, properties=properties_list,
+            errors=warnings if warnings else errors,
+            usd_rate=USD_RATE
         )
     
     @staticmethod
