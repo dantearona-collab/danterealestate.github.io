@@ -447,11 +447,11 @@ def manejar_listado_propiedades(text_lower, estado_usuario, user_id):
     """Maneja la selección de propiedades del listado"""
     log(f"[DEBUG] manejar_listado_propiedades: text_lower='{text_lower}', paso={estado_usuario.get('paso')}, ultimo_indice={estado_usuario.get('ultimo_indice_preguntado')}, propiedades_count={len(estado_usuario.get('propiedades_filtradas', []))}, operacion={estado_usuario.get('operacion_seleccionada')}")
     
-    # 👇 NUEVO: Comandos de navegación en LETRAS (prioritarios)
+    # 👇 ACTUALIZAR: Comandos de navegación en LETRAS (versiones cortas)
     text_lower_clean = text_lower.lower().strip()
     
-    # Comando para volver al menú principal
-    if text_lower_clean in ["menu", "volver", "hola", "menu principal"]:
+    # Comando para volver al menú principal (acepta M, MENU, etc.)
+    if text_lower_clean in ["m", "menu", "volver", "hola", "menu principal"]:
         log(f"[DEBUG] Usuario solicitó volver al MENÚ principal")
         estado_usuario['paso'] = 'menu_principal'
         estado_usuario['operacion_seleccionada'] = None
@@ -461,8 +461,8 @@ def manejar_listado_propiedades(text_lower, estado_usuario, user_id):
         actualizar_estado_usuario(user_id, estado_usuario)
         return "WELCOME_FLOW_TRIGGER"
     
-    # Comando para salir completamente
-    if text_lower_clean in ["salir", "chau", "adios", "exit", "0"]:
+    # Comando para salir (acepta S, SALIR, 0, etc.)
+    if text_lower_clean in ["s", "salir", "chau", "adios", "exit", "0"]:
         log(f"[DEBUG] Usuario solicitó SALIR")
         estado_usuario['paso'] = 'menu_principal'
         estado_usuario['propiedades_filtradas'] = []
@@ -474,10 +474,10 @@ def manejar_listado_propiedades(text_lower, estado_usuario, user_id):
         propiedades_count = len(estado_usuario.get('propiedades_filtradas', []))
         return f"""❌ No entendí '{text_lower}'
 
-📌 *Comandos válidos ahora:*
+📌 *Comandos válidos:*
 • Enviá el *NÚMERO de la propiedad* (1 al {propiedades_count}) para ver detalles
-• Enviá *MENU* para volver al menú principal
-• Enviá *SALIR* para terminar la conversación
+• Enviá *M* para volver al menú principal
+• Enviá *S* para terminar la conversación
 
 💡 *Ejemplo:* Si querés la propiedad 9, enviá '9' (sin comillas)"""
     
@@ -491,10 +491,7 @@ def manejar_listado_propiedades(text_lower, estado_usuario, user_id):
         estado_usuario['paso'] = 'menu_principal'
         estado_usuario['ultima_accion'] = None
         actualizar_estado_usuario(user_id, estado_usuario)
-        return "⚠️ No hay propiedades para mostrar o la sesión expiró.\n\n📱 Enviá *MENU* para volver al inicio."
-    
-    # NOTA: Ya NO tratamos el "0" como número especial porque "0" se captura arriba como "salir"
-    # Si el usuario envía "0" (cero), va a entrar en el comando SALIR
+        return "⚠️ No hay propiedades para mostrar o la sesión expiró.\n\n📱 Enviá *M* para volver al inicio."
     
     if 1 <= indice <= len(propiedades):
         propiedad = propiedades[indice - 1]
@@ -513,8 +510,8 @@ def manejar_listado_propiedades(text_lower, estado_usuario, user_id):
         titulo_op = "💰 VENTA" if operacion == 'venta' else "🔑 ALQUILER" if operacion == 'alquiler' else "🏠 PROPIEDAD"
         return f"{titulo_op}\n" + "─" * 30 + "\n" + formatear_detalle_propiedad(propiedad)
     else:
-        return f"❌ El número {indice} está fuera de rango (1-{len(propiedades)}).\n\n📱 Enviá *MENU* para volver al inicio o *SALIR* para terminar."
-
+        return f"❌ El número {indice} está fuera de rango (1-{len(propiedades)}).\n\n📱 Enviá *M* para volver al inicio o *S* para salir."
+    
 def manejar_nombre_lead(text, estado_usuario, user_id):
     """Maneja la captura del nombre del lead"""
     nombre_cliente = text.strip()
