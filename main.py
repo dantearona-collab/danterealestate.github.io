@@ -3062,6 +3062,31 @@ print("=" * 60)
 
 print("🚀 PASO 12: Iniciando servidor")
 
+
+@app.route("/api/version-check", methods=["GET"])
+def version_check():
+    """Verifica qué versión del código está corriendo"""
+    from menu_handlers import generar_listado_propiedades
+    import inspect
+    
+    # Obtener la línea donde está definida la función
+    try:
+        source_lines = inspect.getsourcelines(generar_listado_propiedades)
+        # Buscar si contiene 'Envía M'
+        tiene_m = any("Envía 'M'" in line for line in source_lines[0])
+        tiene_menu = any("Envía 'MENU'" in line for line in source_lines[0])
+        
+        return jsonify({
+            "version": "2.3" if tiene_m else "2.2",
+            "comando_menu": "M" if tiene_m else "MENU",
+            "tiene_M": tiene_m,
+            "tiene_MENU": tiene_menu,
+            "timestamp": datetime.now().isoformat()
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == "__main__":
 
     print("\n" + "=" * 60)
