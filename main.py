@@ -2994,7 +2994,10 @@ def debug_calendar_key_status():
     
     return jsonify(result)
 
-
+# Al final del archivo, antes de if __name__ == "__main__":
+print("=" * 60)
+print("🚀 SERVIDOR INICIADO - VERSIÓN CON COMANDOS M y S")
+print("=" * 60)
 
 if __name__ == "__main__":
 
