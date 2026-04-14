@@ -23,6 +23,43 @@ from logic.gemini_client import call_gemini_with_rotation
 import logging
 logger = logging.getLogger(__name__)
 
+
+# Al principio del archivo main.py, después de los imports
+print("🚀 PASO 1: Iniciando main.py")
+
+from config import *
+print("✅ PASO 2: Config importado")
+
+from utils import *
+print("✅ PASO 3: Utils importado")
+
+from database import *
+print("✅ PASO 4: Database importado")
+
+from whatsapp_api import *
+print("✅ PASO 5: WhatsApp API importado")
+
+from tasaciones import *
+print("✅ PASO 6: Tasaciones importado")
+
+from citas import *
+print("✅ PASO 7: Citas importado")
+
+from menu_handlers import *
+print("✅ PASO 8: Menu handlers importado")
+
+from logic.barrio_data import GASTRONOMY_DATA, FINANCIAL_DATA
+print("✅ PASO 9: Barrio data importado")
+
+
+
+
+print("🚀 PASO 11: Configurando rutas")
+# ... todas las rutas ...
+
+print("🚀 PASO 12: Iniciando servidor")
+
+
 # ============================================
 # INICIALIZACIÓN DEL SCRAPER
 # ============================================
@@ -103,7 +140,7 @@ import time
 
 
 
-
+print("🚀 PASO 10: Creando app Flask")
 app = Flask(__name__)
 
 
@@ -135,6 +172,14 @@ CITAS_DISPONIBLES = [
 # ========== FUNCIONES UTILITARIAS ==========
 
 # ========== ENDPOINT PARA FICHAS PDF ==========
+
+# ============================================
+# DESPUÉS DE CREAR app, ANTES DE LAS RUTAS
+# ============================================
+print("🚀 PASO 11: Configurando rutas")
+
+
+
 @app.route('/fichas/<prop_id>')
 def serve_ficha_pdf(prop_id):
     """Sirve la ficha técnica en PDF de una propiedad (debe estar pre-generada)"""
@@ -2998,6 +3043,8 @@ def debug_calendar_key_status():
 print("=" * 60)
 print("🚀 SERVIDOR INICIADO - VERSIÓN CON COMANDOS M y S")
 print("=" * 60)
+
+print("🚀 PASO 12: Iniciando servidor")
 
 if __name__ == "__main__":
 
