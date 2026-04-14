@@ -24,6 +24,22 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+# Al principio de main.py, ANTES que cualquier otra cosa
+import sys
+print("=" * 60, file=sys.stderr)
+print("🚀 INICIANDO MAIN.PY - VERSIÓN DIAGNÓSTICO", file=sys.stderr)
+print("=" * 60, file=sys.stderr)
+sys.stderr.flush()
+
+# Luego el resto de los imports
+try:
+    from menu_handlers import *
+    print("✅ menu_handlers importado correctamente", file=sys.stderr)
+except Exception as e:
+    print(f"❌ ERROR importando menu_handlers: {e}", file=sys.stderr)
+    sys.stderr.flush()
+    raise  # Esto hace que falle y muestre el error
+
 # Al principio del archivo main.py, después de los imports
 print("🚀 PASO 1: Iniciando main.py")
 
