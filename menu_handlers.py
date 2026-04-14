@@ -1,6 +1,5 @@
 import importlib
 import utilidades
-importlib.reload(utilidades)
 from utilidades import *
 from database import *
 
