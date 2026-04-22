@@ -2,8 +2,52 @@
 // Versión sin dependencias de Font Awesome + Slider de múltiples fotos + Modal de galería - 2025-11-13
 
 // ========================================
+// IMAGE QUALITY OPTIMIZER - INICIALIZACIÓN GLOBAL
+// ========================================
+let imageOptimizer = null;
+
+function initImageOptimizer(options = {}) {
+    if (!imageOptimizer) {
+        // Inicializar con opciones por defecto
+        const defaultOptions = {
+            blurRadius: 15,
+            fadeInDuration: 300,
+            preloadNext: true,
+            ...options
+        };
+        
+        // Crear instancia global
+        imageOptimizer = {
+            options: defaultOptions,
+            preloadedImages: new Set(),
+            supportsWebP: false,
+            
+            checkWebPSupport: function() {
+                const webpCanvas = document.createElement('canvas');
+                webpCanvas.width = 1;
+                webpCanvas.height = 1;
+                this.supportsWebP = webpCanvas.toDataURL('image/webp') !== webpCanvas.toDataURL('image/png');
+                console.log('🖼️ WebP soportado:', this.supportsWebP);
+            },
+            
+            preloadImage: function(src) {
+                if (this.preloadedImages.has(src)) return;
+                const img = new Image();
+                img.src = src;
+                this.preloadedImages.add(src);
+            }
+        };
+        
+        imageOptimizer.checkWebPSupport();
+        console.log('✅ Image Quality Optimizer inicializado');
+    }
+    return imageOptimizer;
+}
+
+// ========================================
 // SISTEMA DE SLIDER DE MÚLTIPLES FOTOS
 // ========================================
+// (Con optimización de imágenes integrada)
 
 // Variables globales para el slider
 // ========================================
@@ -390,9 +434,17 @@ let imagenesModal = [];
 let imagenActual = 0;
 let tituloPropiedad = '';
 
-// Función para crear el slider de imágenes (Ahora clickeable para abrir modal)
+// Función para crear el slider de imágenes (Ahora clickeable para abrir modal + OPTIMIZADO)
 function createImageSlider(property) {
     const fotos = property.fotos || [];
+    
+    // Inicializar optimizador si no está listo
+    if (!imageOptimizer) initImageOptimizer();
+    
+    // Precarga inteligente: precargar la siguiente imagen
+    if (fotos.length > 1) {
+        setTimeout(() => imageOptimizer.preloadImage(fotos[1]), 100);
+    }
 
     if (fotos.length === 0) {
         // Sin imágenes - usar imagen por defecto
@@ -428,15 +480,29 @@ function createImageSlider(property) {
         `;
     }
 
-    // Múltiples imágenes - crear slider clickeable
+    // Múltiples imágenes - crear slider clickeable CON OPTIMIZACIÓN
     const imageSlides = fotos.map((foto, index) => `
         <div class="property-slide ${index === 0 ? 'active' : ''}" data-slide="${index}">
             <img src="${foto}" 
                  alt="${property.titulo} - Foto ${index + 1}" 
                  style="width: 100% !important; height: 200px !important; object-fit: cover !important;"
+                 loading="${index === 0 ? 'eager' : 'lazy'}"
+                 decoding="async"
+                 data-index="${index}"
+                 data-property="${property.id_temporal}"
                  onerror="this.src='INSTITUCIONAL 3.png'">
         </div>
     `).join('');
+    
+    // Precarga de imágenes adyacentes para mejor UX
+    const preloadAdjacentImages = () => {
+        fotos.forEach((foto, idx) => {
+            if (Math.abs(idx - 0) <= 2) {
+                imageOptimizer.preloadImage(foto);
+            }
+        });
+    };
+    setTimeout(preloadAdjacentImages, 500);
 
     const navigationDots = fotos.map((_, index) => `
         <span class="property-nav-dot ${index === 0 ? 'active' : ''}" onclick="showSlide('${property.id_temporal}', ${index})"></span>
@@ -514,7 +580,7 @@ function showSlide(propertyId, slideIndex) {
     currentSlides[propertyId] = slideIndex;
 }
 
-// Función para slide anterior
+// Función para slide anterior (CON PRECARGA)
 function prevSlide(propertyId) {
     const slider = document.querySelector(`[data-property="${propertyId}"]`);
     if (!slider) return;
@@ -524,9 +590,17 @@ function prevSlide(propertyId) {
     const newIndex = current > 0 ? current - 1 : totalSlides - 1;
 
     showSlide(propertyId, newIndex);
+    
+    // Precarga de la siguiente imagen
+    if (imageOptimizer) {
+        const property = globalData.properties.find(p => p.id_temporal === propertyId);
+        if (property && property.fotos && property.fotos[newIndex]) {
+            imageOptimizer.preloadImage(property.fotos[newIndex]);
+        }
+    }
 }
 
-// Función para slide siguiente
+// Función para slide siguiente (CON PRECARGA)
 function nextSlide(propertyId) {
     const slider = document.querySelector(`[data-property="${propertyId}"]`);
     if (!slider) return;
@@ -536,6 +610,14 @@ function nextSlide(propertyId) {
     const newIndex = current < totalSlides - 1 ? current + 1 : 0;
 
     showSlide(propertyId, newIndex);
+    
+    // Precarga de la siguiente imagen
+    if (imageOptimizer) {
+        const property = globalData.properties.find(p => p.id_temporal === propertyId);
+        if (property && property.fotos && property.fotos[newIndex]) {
+            imageOptimizer.preloadImage(property.fotos[newIndex]);
+        }
+    }
 }
 
 // CSS para el slider (agregar al head)
@@ -1449,6 +1531,10 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('🎯 Sistema de slider de múltiples fotos incluido');
     console.log('✅ Sin dependencias de Font Awesome');
     console.log('🎬 Sistema de multimedia activado');
+
+    // ✅ INICIALIZAR OPTIMIZADOR DE IMÁGENES
+    initImageOptimizer();
+    console.log('🖼️ Optimizador de imágenes activado (lazy loading + precarga inteligente)');
 
     // Cargar CSS del slider
     addSliderStyles();
