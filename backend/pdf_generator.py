@@ -54,9 +54,11 @@ class MarketReportPDF(FPDF):
         self.cell(0, 10, f'Reporte generado automáticamente el {date_str} - Página {self.page_no()}', 0, 0, 'C')
 
     def draw_bar_chart(self, title, data_dict, max_val=None, color=(37, 99, 235), suffix="", width=100):
+        start_x = self.get_x()
         self.set_font('Arial', 'B', 11)
         self.set_text_color(31, 41, 55)
-        self.cell(0, 10, title, 0, 1, 'L')
+        self.cell(width, 10, title, 0, 1, 'L')
+        self.set_x(start_x)
         
         if not data_dict: 
             self.set_font('Arial', 'I', 9)
@@ -88,11 +90,12 @@ class MarketReportPDF(FPDF):
             self.set_x(start_x)
         self.ln(5)
 
-    def draw_scatter_plot(self, title, points, currency_symbol):
-        # ... (keep existing implementation)
+    def draw_scatter_plot(self, title, points, currency_symbol, width=80):
+        x_base = self.get_x()
         self.set_font('Arial', 'B', 11)
         self.set_text_color(31, 41, 55)
-        self.cell(0, 10, title, 0, 1, 'L')
+        self.cell(width, 10, title, 0, 1, 'L')
+        self.set_x(x_base)
         
         valid_points = [p for p in points if p.get('surface', 0) > 2 and p.get('price', 0) > 0]
         if not valid_points: 
@@ -100,8 +103,8 @@ class MarketReportPDF(FPDF):
             self.cell(0, 10, 'No hay suficientes datos válidos para este gráfico.', 0, 1)
             return
 
-        chart_w, chart_h = 75, 45 # Reducido para que quepa mejor en columnas
-        start_x, start_y = self.get_x() + 12, self.get_y()
+        chart_w, chart_h = width - 20, 45 
+        start_x, start_y = self.get_x() + 15, self.get_y()
         max_x = max(p['surface'] for p in valid_points) * 1.1
         max_y = max(p['price'] for p in valid_points) * 1.1
         
@@ -204,8 +207,9 @@ def generate_market_report(data):
         else: price_ranges['5M+'] += 1
     
     # Dibujar manualmente para que flote a la derecha
+    pdf.set_x(110)
     pdf.set_font('Arial', 'B', 11); pdf.set_text_color(31, 41, 55)
-    pdf.cell(0, 10, 'DISTRIBUCIÓN POR RANGO', 0, 1, 'L')
+    pdf.cell(90, 10, 'DISTRIBUCIÓN POR RANGO', 0, 1, 'L')
     max_range = max(price_ranges.values()) if price_ranges.values() else 1
     for label, val in price_ranges.items():
         pdf.set_x(110)
@@ -235,7 +239,7 @@ def generate_market_report(data):
     # 4. Gráfico de dispersión
     pdf.set_y(curr_y)
     pdf.set_x(110)
-    pdf.draw_scatter_plot('TENDENCIA: PRECIO vs SUPERFICIE', properties, currency_symbol)
+    pdf.draw_scatter_plot('TENDENCIA: PRECIO vs SUPERFICIE', properties, currency_symbol, width=90)
     mid_y2 = pdf.get_y()
     
     pdf.set_y(max(mid_y1, mid_y2) + 10)
