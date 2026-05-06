@@ -58,8 +58,8 @@ class MarketReportPDF(FPDF):
         self.set_font('Arial', 'B', 11)
         self.set_text_color(31, 41, 55)
         self.cell(width, 10, title, 0, 0, 'L')
-        self.ln(10)
-        self.set_x(start_x)
+        self.set_y(self.get_y() + 10)
+        self.set_x(start_x) # Forzar X después de set_y
         
         if not data_dict: 
             self.set_font('Arial', 'I', 9)
@@ -75,6 +75,7 @@ class MarketReportPDF(FPDF):
         for label, value in data_dict.items():
             self.set_font('Arial', '', 9)
             self.set_text_color(31, 41, 55)
+            self.set_x(start_x) # Asegurar X en cada línea
             self.cell(40, 7, label[:20].capitalize(), 0, 0)
             
             curr_x, curr_y = self.get_x(), self.get_y() + 1.5
@@ -88,16 +89,16 @@ class MarketReportPDF(FPDF):
             self.set_x(curr_x + full_width + 5)
             val_text = f"{value:,.0f} {suffix}" if isinstance(value, (int, float)) else f"{value}"
             self.cell(20, 7, val_text, 0, 1)
-            self.set_x(start_x)
-        self.ln(5)
+        
+        self.set_y(self.get_y() + 5)
 
     def draw_scatter_plot(self, title, points, currency_symbol, width=80):
         x_base = self.get_x()
         self.set_font('Arial', 'B', 11)
         self.set_text_color(31, 41, 55)
         self.cell(width, 10, title, 0, 0, 'L')
-        self.ln(10)
-        self.set_x(x_base)
+        self.set_y(self.get_y() + 10)
+        self.set_x(x_base) # Forzar X después de set_y
         
         valid_points = [p for p in points if p.get('surface', 0) > 2 and p.get('price', 0) > 0]
         if not valid_points: 
@@ -135,6 +136,7 @@ class MarketReportPDF(FPDF):
             self.line(px - 1, py + 1, px + 1, py - 1)
             
         self.set_y(start_y + chart_h + 10)
+        self.set_x(x_base)
 
 def generate_market_report(data):
     base_dir = os.path.dirname(os.path.abspath(__file__))
