@@ -752,6 +752,7 @@
         let marketData = null;
         let charts = {};
         let barrios_disponibles = []; // Se llena desde el backend
+        let filterBarrio = null; // Variable global para el input de barrio
 
         // ========================================
         // FUNCIÓN PARA NORMALIZAR EL NOMBRE DEL BARRIO
@@ -785,6 +786,7 @@
             cargarBarrios();
             
             const barrioInput = document.getElementById('filter-barrio');
+            filterBarrio = barrioInput;
             
             async function cargarBarrios() {
                 try {
@@ -818,6 +820,14 @@
                 });
             }
         });
+
+        // ========================================
+        // ✅ EVENTOS DE CAMBIO
+        // ========================================
+        function onBarrioChange() {
+            const val = document.getElementById('filter-barrio').value;
+            if (val) console.log("📍 Barrio seleccionado (onchange):", val);
+        }
 
         // ========================================
         // ✅ FUNCIÓN PARA MOSTRAR NOTIFICACIONES TEMPORALES
@@ -1292,7 +1302,7 @@
                                 label: (context) => {
                                     const idx = context.dataIndex;
                                     return [
-                                        `Precio: ARS ${prices[idx].toLocaleString()}`,
+                                        `Precio: ${currencySymbol} ${prices[idx].toLocaleString()}`,
                                         `Superficie: ${surfaces[idx]} m²`
                                     ];
                                 }
@@ -1303,7 +1313,7 @@
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                callback: (value) => `ARS ${(value / 1000).toFixed(0)}k`
+                                callback: (value) => `${currencySymbol} ${(value / 1000).toFixed(0)}k`
                             }
                         }
                     }
@@ -1355,7 +1365,7 @@
                                     return [
                                         `${point.title.substring(0, 30)}...`,
                                         `Superficie: ${point.x} m²`,
-                                        `Precio: ARS ${point.y.toLocaleString()}`
+                                        `Precio: ${currencySymbol} ${point.y.toLocaleString()}`
                                     ];
                                 }
                             }
@@ -1367,9 +1377,9 @@
                             beginAtZero: true
                         },
                         y: {
-                            title: { display: true, text: 'Precio (ARS)' },
+                            title: { display: true, text: `Precio (${primaryCurrency})` },
                             ticks: {
-                                callback: (value) => `ARS ${(value / 1000).toFixed(0)}k`
+                                callback: (value) => `${currencySymbol} ${(value / 1000).toFixed(0)}k`
                             }
                         }
                     }

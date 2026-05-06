@@ -207,7 +207,7 @@ def generate_market_report(data):
         else: price_ranges['5M+'] += 1
     
     pdf.set_font('Arial', 'B', 11); pdf.set_text_color(31, 41, 55)
-    pdf.cell(180, 10, 'DISTRIBUCIÓN POR RANGO DE PRECIOS', 0, 1, 'L')
+    pdf.cell(180, 10, f'DISTRIBUCIÓN POR RANGO DE PRECIOS ({currency_symbol})', 0, 1, 'L')
     max_range = max(price_ranges.values()) if price_ranges.values() else 1
     for label, val in price_ranges.items():
         pdf.set_font('Arial', '', 9); pdf.cell(30, 7, label, 0, 0)
