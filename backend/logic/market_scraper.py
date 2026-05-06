@@ -89,8 +89,8 @@ class MarketStats:
     operation_type: str
     property_type: str
     sample_size: int
-    average_price_per_m2: Optional[float]
     average_total_price: Optional[float]
+    median_total_price: Optional[float]
     median_price_per_m2: Optional[float]
     min_price_per_m2: Optional[float]
     max_price_per_m2: Optional[float]
@@ -1295,6 +1295,7 @@ class MarketAnalyzer:
         from statistics import mean, median
         
         avg_total = mean(clean_total_prices) if clean_total_prices else None
+        med_total = median(clean_total_prices) if clean_total_prices else None
         avg_m2 = mean(clean_m2_prices) if clean_m2_prices else None
         med_m2 = median(clean_m2_prices) if clean_m2_prices else None
         min_m2 = min(clean_m2_prices) if clean_m2_prices else None
@@ -1314,8 +1315,12 @@ class MarketAnalyzer:
         return MarketStats(
             zone=zone, operation_type=operation, property_type=prop_type,
             sample_size=len(clean_total_prices), # Reportar muestra REAL utilizada
-            average_price_per_m2=avg_m2, average_total_price=avg_total,
-            median_price_per_m2=med_m2, min_price_per_m2=min_m2, max_price_per_m2=max_m2,
+            average_price_per_m2=avg_m2, 
+            average_total_price=avg_total,
+            median_total_price=med_total,
+            median_price_per_m2=med_m2, 
+            min_price_per_m2=min_m2, 
+            max_price_per_m2=max_m2,
             price_range_total=price_range, currency_distribution=currency_dist,
             source_breakdown=source_breakdown, properties=properties_list,
             errors=warnings if warnings else errors,
@@ -1333,6 +1338,7 @@ class MarketAnalyzer:
             "statistics": {
                 "average_price_per_m2": round(stats.average_price_per_m2, 2) if stats.average_price_per_m2 else None,
                 "average_total_price": round(stats.average_total_price, 2) if stats.average_total_price else None,
+                "median_total_price": round(stats.median_total_price, 2) if stats.median_total_price else None,
                 "median_price_per_m2": round(stats.median_price_per_m2, 2) if stats.median_price_per_m2 else None,
                 "min_price_per_m2": round(stats.min_price_per_m2, 2) if stats.min_price_per_m2 else None,
                 "max_price_per_m2": round(stats.max_price_per_m2, 2) if stats.max_price_per_m2 else None,
