@@ -1,0 +1,156 @@
+{
+  "palermo": {
+    "departamento": {
+      "avg_m2": 3664.87,
+      "muestra": 185,
+      "last_update": "2026-03-14 21:36",
+      "source": "scraping.json"
+    },
+    "venta": {
+      "departamento": {
+        "avg_m2": 3574.19,
+        "muestra": 184,
+        "last_update": "2026-03-29 14:27",
+        "source": "scraping.json",
+        "currency": "USD"
+      }
+    }
+  },
+  "balvanera": {
+    "departamento": {
+      "avg_m2": 1735.85,
+      "muestra": 189,
+      "last_update": "2026-03-14 21:46",
+      "source": "scraping.json"
+    }
+  },
+  "microcentro": {
+    "departamento": {
+      "avg_m2": 1605.86,
+      "muestra": 189,
+      "last_update": "2026-03-14 21:48",
+      "source": "scraping.json"
+    },
+    "alquiler": {
+      "departamento": {
+        "avg_m2": 13777.58,
+        "muestra": 159,
+        "last_update": "2026-03-14 22:33",
+        "source": "scraping.json",
+        "currency": "ARS"
+      }
+    }
+  },
+  "parque avellaneda": {
+    "departamento": {
+      "avg_m2": 1500.06,
+      "muestra": 189,
+      "last_update": "2026-03-14 21:51",
+      "source": "scraping.json"
+    }
+  },
+  "villa lugano": {
+    "departamento": {
+      "avg_m2": 1372.97,
+      "muestra": 189,
+      "last_update": "2026-03-14 21:52",
+      "source": "scraping.json"
+    },
+    "venta": {
+      "departamento": {
+        "avg_m2": 1439.06,
+        "muestra": 189,
+        "last_update": "2026-03-17 23:16",
+        "source": "scraping.json",
+        "currency": "USD"
+      }
+    }
+  },
+  "once": {
+    "venta": {
+      "departamento": {
+        "avg_m2": 1742.16,
+        "muestra": 189,
+        "last_update": "2026-03-17 23:26",
+        "source": "scraping.json",
+        "currency": "USD"
+      },
+      "terreno": {
+        "avg_m2": 2025.1,
+        "muestra": 174,
+        "last_update": "2026-03-19 19:52",
+        "source": "scraping.json",
+        "currency": "USD"
+      }
+    },
+    "alquiler": {
+      "departamento": {
+        "avg_m2": 13993.59,
+        "muestra": 148,
+        "last_update": "2026-03-19 19:34",
+        "source": "scraping.json",
+        "currency": "ARS"
+      }
+    }
+  },
+  "almagro": {
+    "venta": {
+      "departamento": {
+        "avg_m2": 2187.44,
+        "muestra": 189,
+        "last_update": "2026-03-27 23:37",
+        "source": "scraping.json",
+        "currency": "USD"
+      },
+      "terreno": {
+        "avg_m2": 4234.36,
+        "muestra": 110,
+        "last_update": "2026-04-04 14:31",
+        "source": "scraping.json",
+        "currency": "USD"
+      }
+    },
+    "alquiler": {
+      "departamento": {
+        "avg_m2": 17649.15,
+        "muestra": 80,
+        "last_update": "2026-04-02 14:19",
+        "source": "scraping.json",
+        "currency": "ARS"
+      }
+    }
+  },
+  "caballito": {
+    "venta": {
+      "departamento": {
+        "avg_m2": 2647.42,
+        "muestra": 189,
+        "last_update": "2026-03-28 11:07",
+        "source": "scraping.json",
+        "currency": "USD"
+      }
+    }
+  },
+  "belgrano": {
+    "venta": {
+      "terreno": {
+        "avg_m2": 2722.94,
+        "muestra": 153,
+        "last_update": "2026-03-29 14:35",
+        "source": "scraping.json",
+        "currency": "USD"
+      }
+    }
+  },
+  "san telmo": {
+    "alquiler": {
+      "departamento": {
+        "avg_m2": 17009.04,
+        "muestra": 57,
+        "last_update": "2026-05-06 08:16",
+        "source": "scraping.json",
+        "currency": "ARS"
+      }
+    }
+  }
+}

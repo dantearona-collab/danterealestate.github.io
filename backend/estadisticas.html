@@ -555,34 +555,10 @@
             <div class="filters-grid">
                 <div class="filter-group">
                     <label class="filter-label">Barrio/Zona</label>
-                    <select class="filter-select" id="filter-barrio">
-                        <option value="">Seleccionar barrio...</option>
-                        <option value="palermo">Palermo - Capital Federal</option>
-                        <option value="belgrano">Belgrano - Capital Federal</option>
-                        <option value="recoleta">Recoleta - Capital Federal</option>
-                        <option value="congreso">Congreso - Capital Federal</option>
-                        <option value="microcentro">Microcentro - Capital Federal</option>
-                        <option value="puerto madero">Puerto Madero - Capital Federal</option>
-                        <option value="caballito">Caballito - Capital Federal</option>
-                        <option value="almagro">Almagro - Capital Federal</option>
-                        <option value="boedo">Boedo - Capital Federal</option>
-                        <option value="chacarita">Chacarita - Capital Federal</option>
-                        <option value="villa crespo">Villa Crespo - Capital Federal</option>
-                        <option value="villa urquiza">Villa Urquiza - Capital Federal</option>
-                        <option value="colegiales">Colegiales - Capital Federal</option>
-                        <option value="nuñez">Nuñez - Capital Federal</option>
-                        <option value="saavedra">Saavedra - Capital Federal</option>
-                        <option value="flores">Flores - Capital Federal</option>
-                        <option value="balvanera">Balvanera - Capital Federal</option>
-                        <option value="san telmo">San Telmo - Capital Federal</option>
-                        <option value="barracas">Barracas - Capital Federal</option>
-                        <option value="la boca">La Boca - Capital Federal</option>
-                        <option value="retiro">Retiro - Capital Federal</option>
-                        <option value="nordelta">Nordelta - Tigre</option>
-                        <option value="tigre">Tigre - Buenos Aires</option>
-                        <option value="pilar">Pilar - Buenos Aires</option>
-                        <option value="san isidro">San Isidro - Buenos Aires</option>
-                    </select>
+                    <input type="text" class="filter-input" id="filter-barrio" list="barrios-list" placeholder="Escribe un barrio..." onchange="onBarrioChange()">
+                    <datalist id="barrios-list">
+                        <!-- Cargando barrios dinámicamente... -->
+                    </datalist>
                 </div>
                 <div class="filter-group">
                     <label class="filter-label">Operación</label>
@@ -772,40 +748,10 @@
     <script>
 
         // Global state and API Configuration
-        const API_BASE_URL = 'http://localhost:8001';
+        const API_BASE_URL = window.location.origin; // Puerto 8005 si se sirve desde ahí
         let marketData = null;
         let charts = {};
-
-        
-        // ========================================
-        // LISTA DE BARRIOS VÁLIDOS (CABA y zona norte)
-        // ========================================
-        const BARRIOS_VALIDOS = [
-            { nombre: "Belgrano", valor: "belgrano", display: "Belgrano, Capital Federal" },
-            { nombre: "Palermo", valor: "palermo", display: "Palermo, Capital Federal" },
-            { nombre: "Recoleta", valor: "recoleta", display: "Recoleta, Capital Federal" },
-            { nombre: "Microcentro", valor: "microcentro", display: "Microcentro, Capital Federal" },
-            { nombre: "Puerto Madero", valor: "puerto madero", display: "Puerto Madero, Capital Federal" },
-            { nombre: "Caballito", valor: "caballito", display: "Caballito, Capital Federal" },
-            { nombre: "Almagro", valor: "almagro", display: "Almagro, Capital Federal" },
-            { nombre: "Boedo", valor: "boedo", display: "Boedo, Capital Federal" },
-            { nombre: "Chacarita", valor: "chacarita", display: "Chacarita, Capital Federal" },
-            { nombre: "Villa Crespo", valor: "villa crespo", display: "Villa Crespo, Capital Federal" },
-            { nombre: "Villa Urquiza", valor: "villa urquiza", display: "Villa Urquiza, Capital Federal" },
-            { nombre: "Colegiales", valor: "colegiales", display: "Colegiales, Capital Federal" },
-            { nombre: "Nuñez", valor: "nuñez", display: "Nuñez, Capital Federal" },
-            { nombre: "Saavedra", valor: "saavedra", display: "Saavedra, Capital Federal" },
-            { nombre: "Flores", valor: "flores", display: "Flores, Capital Federal" },
-            { nombre: "Balvanera", valor: "balvanera", display: "Balvanera, Capital Federal" },
-            { nombre: "San Telmo", valor: "san telmo", display: "San Telmo, Capital Federal" },
-            { nombre: "Barracas", valor: "barracas", display: "Barracas, Capital Federal" },
-            { nombre: "La Boca", valor: "la boca", display: "La Boca, Capital Federal" },
-            { nombre: "Retiro", valor: "retiro", display: "Retiro, Capital Federal" },
-            { nombre: "Nordelta", valor: "nordelta", display: "Nordelta, Tigre" },
-            { nombre: "Tigre", valor: "tigre", display: "Tigre, Buenos Aires" },
-            { nombre: "Pilar", valor: "pilar", display: "Pilar, Buenos Aires" },
-            { nombre: "San Isidro", valor: "san isidro", display: "San Isidro, Buenos Aires" }
-        ];
+        let barrios_disponibles = []; // Se llena desde el backend
 
         // ========================================
         // FUNCIÓN PARA NORMALIZAR EL NOMBRE DEL BARRIO
@@ -817,28 +763,18 @@
             let texto = input.toLowerCase().trim();
             
             // 1. Verificar si es un barrio válido directamente
-            if (BARRIOS_VALIDOS.some(b => b.valor === texto)) {
+            if (barrios_disponibles.some(b => b.valor === texto)) {
                 return texto;
             }
             
             // 2. Intentar extraer la parte que podría ser un barrio
             const partes = texto.split(' ');
             for (const parte of partes) {
-                if (BARRIOS_VALIDOS.some(b => b.valor === parte)) {
+                if (barrios_disponibles.some(b => b.valor === parte)) {
                     return parte;
                 }
             }
             
-            // 3. Verificar si contiene términos excluyentes
-            for (const excl of exclusiones) {
-                if (texto.includes(excl)) {
-                    console.warn(`⚠️ "${input}" contiene término excluido "${excl}"`);
-                    return null; // No es válido
-                }
-            }
-            
-            // 4. Si llegamos acá, devolver el original (pero alertar)
-            console.warn(`⚠️ "${input}" no está en la lista de barrios válidos`);
             return texto;
         }
 
@@ -846,58 +782,39 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             showInitialState();
+            cargarBarrios();
             
-            // ========================================
-            // ✅ VALIDACIÓN DEL INPUT DE BARRIO (con datalist)
-            // ========================================
-            const filterBarrio = document.getElementById('filter-barrio');
+            const barrioInput = document.getElementById('filter-barrio');
             
-            // Lista de barrios válidos (debe coincidir con el datalist)
-            const BARRIOS_VALIDOS = [
-                'palermo', 'belgrano', 'recoleta', 'microcentro', 'puerto madero',
-                'caballito', 'congreso','almagro', 'boedo', 'chacarita', 'villa crespo',
-                'villa urquiza', 'colegiales', 'nuñez', 'saavedra', 'flores',
-                'balvanera', 'san telmo', 'barracas', 'la boca', 'retiro',
-                'nordelta', 'tigre', 'pilar', 'san isidro'
-            ];
-            
-            function esBarrioValido(valor) {
-                return BARRIOS_VALIDOS.includes(valor.toLowerCase().trim());
+            async function cargarBarrios() {
+                try {
+                    console.log("⏳ Cargando lista de barrios...");
+                    const response = await fetch(`${API_BASE_URL}/api/barrios-lista`);
+                    const data = await response.json();
+                    
+                    if (data.success && data.barrios) {
+                        barrios_disponibles = data.barrios;
+                        const datalist = document.getElementById('barrios-list');
+                        datalist.innerHTML = '';
+                        
+                        data.barrios.forEach(barrio => {
+                            const option = document.createElement('option');
+                            option.value = barrio.valor;
+                            option.textContent = barrio.display;
+                            datalist.appendChild(option);
+                        });
+                        console.log(`✅ ${data.barrios.length} barrios cargados`);
+                    }
+                } catch (error) {
+                    console.error('❌ Error cargando barrios:', error);
+                    mostrarNotificacion('Error cargando lista de barrios', 'error');
+                }
             }
             
             if (filterBarrio) {
-                // Validar al cambiar el valor
                 filterBarrio.addEventListener('change', function() {
-                    const original = this.value.trim();
-                    
-                    if (original === '') return;
-                    
-                    if (!esBarrioValido(original)) {
-                        alert(`"${original}" no es un barrio válido.\n\nBarrios disponibles:\n${BARRIOS_VALIDOS.map(b => `• ${b}`).join('\n')}`);
-                        this.value = '';
-                    } else {
-                        // Normalizar a minúsculas para consistencia
-                        this.value = original.toLowerCase();
-                        console.log(`📍 Barrio seleccionado: ${this.value}`);
-                    }
-                });
-                
-                // También validar al presionar Enter
-                filterBarrio.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        const original = this.value.trim();
-                        
-                        if (original === '') return;
-                        
-                        if (!esBarrioValido(original)) {
-                            e.preventDefault();
-                            alert(`"${original}" no es un barrio válido.\n\nBarrios disponibles:\n${BARRIOS_VALIDOS.map(b => `• ${b}`).join('\n')}`);
-                            this.value = '';
-                        } else {
-                            this.value = original.toLowerCase();
-                            console.log(`📍 Barrio seleccionado: ${this.value}`);
-                        }
-                    }
+                    const val = this.value.trim();
+                    if (val) console.log(`📍 Barrio seleccionado: ${val}`);
                 });
             }
         });
@@ -1000,42 +917,6 @@
         }
         
         
-        // Obtener barrios desde el backend
-        document.addEventListener('DOMContentLoaded', () => {
-            showInitialState();
-            
-            // ========================================
-            // ✅ CARGAR BARRIOS DESDE EL BACKEND
-            // ========================================
-            async function cargarBarrios() {
-                try {
-                    const response = await fetch('/api/barrios-lista');
-                    const data = await response.json();
-                    
-                    const select = document.getElementById('filter-barrio');
-                    select.innerHTML = '<option value="">Seleccionar barrio...</option>';
-                    
-                    if (data.success && data.barrios) {
-                        data.barrios.forEach(barrio => {
-                            const option = document.createElement('option');
-                            option.value = barrio.valor;
-                            option.textContent = barrio.display;
-                            select.appendChild(option);
-                        });
-                        console.log(`✅ ${data.barrios.length} barrios cargados`);
-                    } else {
-                        console.error('Error en respuesta:', data);
-                    }
-                } catch (error) {
-                    console.error('Error cargando barrios:', error);
-                }
-            }
-            
-            // Cargar barrios al iniciar
-            cargarBarrios();
-            
-            // Resto del código...
-        });
 
         // Run scraping
         async function runScraping() {
@@ -1196,8 +1077,8 @@
                 const currencyColor = prop.currency === 'USD' ? '#2563EB' : '#10B981';
                 
                 // Formatear números
-                const formattedPrice = prop.price ? prop.price.toLocaleString('es-AR') : '0';
-                const formattedPriceM2 = prop.price_m2 ? prop.price_m2.toFixed(0).toLocaleString('es-AR') : '0';
+                const formattedPrice = prop.price ? prop.price.toLocaleString('es-AR', {minimumFractionDigits: 0, maximumFractionDigits: 0}) : '0';
+                const formattedPriceM2 = prop.price_m2 ? prop.price_m2.toLocaleString('es-AR', {minimumFractionDigits: 0, maximumFractionDigits: 0}) : '0';
                 
                 // Determinar si es válida
                 const isValid = !prop.surface_warning;
@@ -1626,7 +1507,7 @@
                     iconClass: 'orange',
                     label: 'Precio Promedio',
                     value: overview.precio_promedio_general_usd ? 
-                          `USD ${Math.round(overview.precio_promedio_general_usd).toLocaleString()}` : 'N/A',
+                          `USD ${Math.round(overview.precio_promedio_general_usd).toLocaleString('es-AR', {minimumFractionDigits: 0, maximumFractionDigits: 0})}` : 'N/A',
                     trend: null
                 },
                 {
@@ -1634,7 +1515,7 @@
                     iconClass: 'red',
                     label: 'Precio/m² Promedio',
                     value: overview.precio_m2_promedio_general_usd ? 
-                          `USD ${Math.round(overview.precio_m2_promedio_general_usd).toLocaleString()}` : 'N/A',
+                          `USD ${Math.round(overview.precio_m2_promedio_general_usd).toLocaleString('es-AR', {minimumFractionDigits: 0, maximumFractionDigits: 0})}` : 'N/A',
                     trend: null
                 }
             ];
@@ -1873,7 +1754,7 @@
                         'Precio': p.price || 0,
                         'Moneda': p.currency || 'ARS',
                         'Superficie (m²)': p.surface || 0,
-                        'Precio/m²': p.price_m2 ? p.price_m2.toFixed(2) : 0,
+                        'Precio/m²': p.price_m2 ? p.price_m2.toFixed(0) : 0,
                         'Dirección': p.address || '',
                         'Fuente': p.source || '',
                         'Operación': p.operation_type || '',
@@ -1923,7 +1804,7 @@
                         ['Rango de Precios', stats.price_range_total || 'N/A'],
                         [''],
                         ['📏 SUPERFICIE'],
-                        ['Superficie Promedio', (validProperties.reduce((a, b) => a + (b.surface || 0), 0) / validProperties.length || 0).toFixed(2)],
+                        ['Superficie Promedio', (validProperties.reduce((a, b) => a + (b.surface || 0), 0) / validProperties.length || 0).toFixed(0)],
                         ['Superficie Mínima', Math.min(...validProperties.map(p => p.surface).filter(s => s > 0)) || 0],
                         ['Superficie Máxima', Math.max(...validProperties.map(p => p.surface).filter(s => s > 0)) || 0],
                         [''],
@@ -1933,10 +1814,10 @@
                         ['Precio/m² Máximo', stats.max_price_per_m2 || 0],
                         [''],
                         ['🔄 DISTRIBUCIÓN POR FUENTE'],
-                        ...Object.entries(sourceBreakdown).map(([src, count]) => [src, count, `${((count/propiedades.length)*100).toFixed(1)}%`]),
+                        ...Object.entries(sourceBreakdown).map(([src, count]) => [src, count, `${((count/propiedades.length)*100).toFixed(0)}%`]),
                         [''],
                         ['💱 DISTRIBUCIÓN POR MONEDA'],
-                        ...Object.entries(currencyDist).map(([curr, count]) => [curr, count, `${((count/propiedades.length)*100).toFixed(1)}%`]),
+                        ...Object.entries(currencyDist).map(([curr, count]) => [curr, count, `${((count/propiedades.length)*100).toFixed(0)}%`]),
                         [''],
                         ['⚠️ ERRORES'],
                         ...(data.data.errors || []).map(err => ['•', err])
@@ -1965,12 +1846,12 @@
                         ['Total de propiedades:', propiedades.length],
                         ['Propiedades válidas:', validProperties.length],
                         ['Moneda predominante:', primaryCurrency],
-                        ['Precio promedio:', `${primaryCurrency === 'USD' ? 'US$' : '$'} ${(stats.average_total_price || 0).toLocaleString('es-AR')}`],
-                        ['Precio por m² promedio:', `${primaryCurrency === 'USD' ? 'US$' : '$'} ${(stats.average_price_per_m2 || 0).toFixed(2)}/m²`],
-                        ['Superficie promedio:', `${(validProperties.reduce((a, b) => a + (b.surface || 0), 0) / validProperties.length || 0).toFixed(2)} m²`],
+                        ['Precio promedio:', `${primaryCurrency === 'USD' ? 'US$' : '$'} ${(stats.average_total_price || 0).toLocaleString('es-AR', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`],
+                        ['Precio por m² promedio:', `${primaryCurrency === 'USD' ? 'US$' : '$'} ${(stats.average_price_per_m2 || 0).toFixed(0)}/m²`],
+                        ['Superficie promedio:', `${(validProperties.reduce((a, b) => a + (b.surface || 0), 0) / validProperties.length || 0).toFixed(0)} m²`],
                         [''],
                         ['FUENTES CONSULTADAS'],
-                        ...Object.entries(sourceBreakdown).map(([src, count]) => [src, `${count} propiedades (${((count/propiedades.length)*100).toFixed(1)}%)`]),
+                        ...Object.entries(sourceBreakdown).map(([src, count]) => [src, `${count} propiedades (${((count/propiedades.length)*100).toFixed(0)}%)`]),
                         [''],
                         ['⚠️ ADVERTENCIAS'],
                         ...(data.data.errors || ['Sin advertencias']).map(err => ['•', err])
@@ -2086,7 +1967,7 @@
                             <i class="fas fa-dollar-sign"></i>
                         </div>
                     </div>
-                    <div class="kpi-value">${data.statistics.precio_promedio_usd ? `USD ${Math.round(data.statistics.precio_promedio_usd).toLocaleString()}` : 'N/A'}</div>
+                    <div class="kpi-value">${data.statistics.precio_promedio_usd ? `USD ${Math.round(data.statistics.precio_promedio_usd).toLocaleString('es-AR', {minimumFractionDigits: 0, maximumFractionDigits: 0})}` : 'N/A'}</div>
                     <div class="kpi-label">Precio Promedio</div>
                 </div>
                 <div class="kpi-card">
@@ -2095,7 +1976,7 @@
                             <i class="fas fa-chart-line"></i>
                         </div>
                     </div>
-                    <div class="kpi-value">${data.statistics.precio_mediana_usd ? `USD ${Math.round(data.statistics.precio_mediana_usd).toLocaleString()}` : 'N/A'}</div>
+                    <div class="kpi-value">${data.statistics.precio_mediana_usd ? `USD ${Math.round(data.statistics.precio_mediana_usd).toLocaleString('es-AR', {minimumFractionDigits: 0, maximumFractionDigits: 0})}` : 'N/A'}</div>
                     <div class="kpi-label">Precio Mediana</div>
                 </div>
                 <div class="kpi-card">
@@ -2228,14 +2109,14 @@
             tbody.innerHTML = `
                 <tr>
                     <td><strong>🏠 Precio Promedio</strong></td>
-                    <td class="price-value">${currencySymbol} ${(stats.average_total_price || 0).toLocaleString('es-AR')}</td>
+                    <td class="price-value">${currencySymbol} ${(stats.average_total_price || 0).toLocaleString('es-AR', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
                     <td>${mainCurrency}</td>
                     <td>${validProperties.length} props.</td>
                     <td>Media aritmética de todos los precios</td>
                 </tr>
                 <tr>
                     <td><strong>📊 Precio Mediano</strong></td>
-                    <td class="price-value">${currencySymbol} ${(stats.median_price_per_m2 ? (stats.median_price_per_m2 * (surfaces.reduce((a, b) => a + b, 0) / surfaces.length)).toLocaleString('es-AR') : 'N/A')}</td>
+                    <td class="price-value">${currencySymbol} ${(stats.median_price_per_m2 ? (stats.median_price_per_m2 * (surfaces.reduce((a, b) => a + b, 0) / (surfaces.length || 1))).toLocaleString('es-AR', {minimumFractionDigits: 0, maximumFractionDigits: 0}) : 'N/A')}</td>
                     <td>${mainCurrency}</td>
                     <td>${validProperties.length} props.</td>
                     <td>Valor central (50% por encima, 50% por debajo)</td>
@@ -2270,28 +2151,28 @@
                 </tr>
                 <tr>
                     <td><strong>📉 Cuartil Inferior (Q1)</strong></td>
-                    <td class="price-value">${currencySymbol} ${(q1 || 0).toLocaleString('es-AR')}</td>
+                    <td class="price-value">${currencySymbol} ${(q1 || 0).toLocaleString('es-AR', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
                     <td>${mainCurrency}</td>
                     <td>25% de props.</td>
-                    <td>Precio del primer cuartil</td>
+                    <td>Precio del primer cuartil (P25)</td>
                 </tr>
                 <tr>
                     <td><strong>📈 Cuartil Superior (Q3)</strong></td>
-                    <td class="price-value">${currencySymbol} ${(q3 || 0).toLocaleString('es-AR')}</td>
+                    <td class="price-value">${currencySymbol} ${(q3 || 0).toLocaleString('es-AR', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
                     <td>${mainCurrency}</td>
                     <td>75% de props.</td>
-                    <td>Precio del tercer cuartil</td>
+                    <td>Precio del tercer cuartil (P75)</td>
                 </tr>
                 <tr>
                     <td><strong>📊 Rango Intercuartil (IQR)</strong></td>
-                    <td class="price-value">${currencySymbol} ${(iqr || 0).toLocaleString('es-AR')}</td>
+                    <td class="price-value">${currencySymbol} ${(iqr || 0).toLocaleString('es-AR', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
                     <td>${mainCurrency}</td>
                     <td>50% central</td>
                     <td>Dispersión del 50% central</td>
                 </tr>
                 <tr>
                     <td><strong>🏢 Precio por Ambiente</strong></td>
-                    <td class="price-value">${currencySymbol} ${(precioPorAmbiente || 0).toLocaleString('es-AR')}</td>
+                    <td class="price-value">${currencySymbol} ${(precioPorAmbiente || 0).toLocaleString('es-AR', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
                     <td>${mainCurrency}/amb.</td>
                     <td>${ambientes.length} props.</td>
                     <td>Costo aproximado por ambiente</td>

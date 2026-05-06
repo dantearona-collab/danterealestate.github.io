@@ -53,7 +53,7 @@ class MarketReportPDF(FPDF):
         date_str = datetime.now().strftime("%d/%m/%Y %H:%M")
         self.cell(0, 10, f'Reporte generado automáticamente el {date_str} - Página {self.page_no()}', 0, 0, 'C')
 
-    def draw_bar_chart(self, title, data_dict, max_val=None, color=(37, 99, 235), suffix=""):
+    def draw_bar_chart(self, title, data_dict, max_val=None, color=(37, 99, 235), suffix="", width=100):
         self.set_font('Arial', 'B', 11)
         self.set_text_color(31, 41, 55)
         self.cell(0, 10, title, 0, 1, 'L')
@@ -66,10 +66,10 @@ class MarketReportPDF(FPDF):
         if max_val is None:
             max_val = max(data_dict.values()) if data_dict.values() else 1
             
-        full_width = 100
+        full_width = width - 60 # Espacio para etiquetas y valores
+        start_x = self.get_x()
+        
         for label, value in data_dict.items():
-            bar_width = (value / max_val) * full_width if max_val > 0 else 0
-            
             self.set_font('Arial', '', 9)
             self.set_text_color(31, 41, 55)
             self.cell(40, 7, label[:20].capitalize(), 0, 0)
@@ -77,12 +77,15 @@ class MarketReportPDF(FPDF):
             curr_x, curr_y = self.get_x(), self.get_y() + 1.5
             self.set_fill_color(243, 244, 246)
             self.rect(curr_x, curr_y, full_width, 4, 'F')
+            
+            bar_width = (value / max_val) * full_width if max_val > 0 else 0
             self.set_fill_color(*color)
             self.rect(curr_x, curr_y, bar_width, 4, 'F')
             
             self.set_x(curr_x + full_width + 5)
             val_text = f"{value:,.0f} {suffix}" if isinstance(value, (int, float)) else f"{value}"
             self.cell(20, 7, val_text, 0, 1)
+            self.set_x(start_x)
         self.ln(5)
 
     def draw_scatter_plot(self, title, points, currency_symbol):
@@ -97,8 +100,8 @@ class MarketReportPDF(FPDF):
             self.cell(0, 10, 'No hay suficientes datos válidos para este gráfico.', 0, 1)
             return
 
-        chart_w, chart_h = 160, 60 # Reducido de 80 a 60 para que quepa mejor
-        start_x, start_y = self.get_x() + 15, self.get_y()
+        chart_w, chart_h = 75, 45 # Reducido para que quepa mejor en columnas
+        start_x, start_y = self.get_x() + 12, self.get_y()
         max_x = max(p['surface'] for p in valid_points) * 1.1
         max_y = max(p['price'] for p in valid_points) * 1.1
         
@@ -127,7 +130,6 @@ class MarketReportPDF(FPDF):
             self.line(px - 1, py + 1, px + 1, py - 1)
             
         self.set_y(start_y + chart_h + 10)
-        self.ln(5)
 
 def generate_market_report(data):
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -164,8 +166,7 @@ def generate_market_report(data):
     pdf.cell(box_w, 8, ' MUESTRA', 1, 1, 'C', fill=True)
     
     pdf.set_font('Arial', 'B', 14); pdf.set_text_color(*pdf.primary_color)
-    # avg_total = stats.get('average_total_price')
-    avg_total = stats.get('average_price_per_m2')
+    avg_total = stats.get('average_total_price')
     avg_m2 = stats.get('average_price_per_m2')
     pdf.cell(box_w, 12, f"{currency_symbol} {(avg_total or 0):,.0f}", 1, 0, 'C')
     pdf.cell(5, 12, '', 0, 0)
@@ -179,12 +180,12 @@ def generate_market_report(data):
     
     # 1. Distribución por Portal
     sources = data.get('data', {}).get('source_breakdown', {})
-    pdf.draw_bar_chart('DISTRIBUCIÓN POR PORTAL', sources, color=pdf.primary_color)
+    pdf.draw_bar_chart('DISTRIBUCIÓN POR PORTAL', sources, color=pdf.primary_color, width=90)
+    mid_y1 = pdf.get_y()
     
     # 2. Rango de Precios (Fijos)
-    mid_y = pdf.get_y()
     pdf.set_y(curr_y)
-    pdf.set_x(115) # Mover a la derecha
+    pdf.set_x(110) # Mover a la derecha
     
     properties = data.get('data', {}).get('properties_sample', [])
     price_ranges = {
@@ -203,7 +204,6 @@ def generate_market_report(data):
         else: price_ranges['5M+'] += 1
     
     # Dibujar manualmente para que flote a la derecha
-    pdf.set_x(110)
     pdf.set_font('Arial', 'B', 11); pdf.set_text_color(31, 41, 55)
     pdf.cell(0, 10, 'DISTRIBUCIÓN POR RANGO', 0, 1, 'L')
     max_range = max(price_ranges.values()) if price_ranges.values() else 1
@@ -216,7 +216,8 @@ def generate_market_report(data):
         pdf.set_x(pdf.get_x() + 55)
         pdf.cell(10, 7, str(val), 0, 1)
     
-    pdf.set_y(max(mid_y, pdf.get_y()) + 5)
+    mid_y2 = pdf.get_y()
+    pdf.set_y(max(mid_y1, mid_y2) + 5)
     
     # --- BLOQUE DE GRÁFICOS 2 (COMPARATIVA BARRIOS Y TENDENCIA) ---
     curr_y = pdf.get_y()
@@ -228,15 +229,16 @@ def generate_market_report(data):
         history = [{'zona': zone, 'precio_promedio': avg_total}]
     
     hist_dict = {h['zona']: h['precio_promedio'] for h in history}
-    pdf.draw_bar_chart('PRECIO PROMEDIO POR BARRIO', hist_dict, color=pdf.success_color, suffix=currency_symbol)
+    pdf.draw_bar_chart('PRECIO PROMEDIO POR BARRIO', hist_dict, color=pdf.success_color, suffix=currency_symbol, width=90)
+    mid_y1 = pdf.get_y()
     
     # 4. Gráfico de dispersión
-    mid_y = pdf.get_y()
     pdf.set_y(curr_y)
     pdf.set_x(110)
     pdf.draw_scatter_plot('TENDENCIA: PRECIO vs SUPERFICIE', properties, currency_symbol)
+    mid_y2 = pdf.get_y()
     
-    pdf.set_y(max(mid_y, pdf.get_y()) + 10)
+    pdf.set_y(max(mid_y1, mid_y2) + 10)
     
     if pdf.get_y() > 180: pdf.add_page()
 
