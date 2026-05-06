@@ -1107,18 +1107,34 @@ class MarketAnalyzer:
   
     @staticmethod
     def _remove_outliers(data_list: List[float]) -> List[float]:
-        """Elimina valores atípicos usando el Rango Intercuartílico (IQR)"""
-        if len(data_list) < 4:
+        """Elimina valores atípicos usando el Rango Intercuartílico (IQR) y límites absolutos"""
+        if not data_list:
+            return []
+            
+        # 1. Filtro básico absoluto para eliminar precios de $1 o similares (errores de carga)
+        # Para USD, menos de 5000 es sospechoso para venta. 
+        # Pero esta función se usa para m2 y total, así que mejor usar algo relativo o IQR.
+        
+        if len(data_list) < 3:
             return data_list
             
         data_sorted = sorted(data_list)
         n = len(data_sorted)
+        
+        # Usar percentiles para mayor estabilidad en muestras pequeñas
         q1 = data_sorted[int(n * 0.25)]
         q3 = data_sorted[int(n * 0.75)]
         iqr = q3 - q1
         
+        # Ser más estricto con los outliers (1.5 * IQR es estándar)
         lower_bound = q1 - 1.5 * iqr
         upper_bound = q3 + 1.5 * iqr
+        
+        # Asegurar que lower_bound no sea menor que un mínimo razonable (ej. 10% de la mediana)
+        from statistics import median
+        med = median(data_sorted)
+        lower_bound = max(lower_bound, med * 0.1)
+        upper_bound = min(upper_bound, med * 10.0) # Evitar errores de coma (1.000.000 -> 100.000.000)
         
         return [x for x in data_list if lower_bound <= x <= upper_bound]
 
@@ -1245,14 +1261,18 @@ class MarketAnalyzer:
                 m2_norm *= USD_RATE
             
             # 4. Validaciones de Superficie/Precio
-            has_low_surface = prop.surface_total < MarketAnalyzer.MIN_SURFACE_THRESHOLD
-            if has_low_surface:
+            has_valid_price = price_norm > 0
+            has_valid_surface = prop.surface_total >= MarketAnalyzer.MIN_SURFACE_THRESHOLD
+            
+            if not has_valid_surface:
                 low_surface_count += 1
             
-            # Solo incluir para cálculos estadísticos si no tiene advertencias y el precio > 0
-            if not has_low_surface and price_norm > 0:
+            # Incluir para estadísticas de precio total si el precio es válido
+            if has_valid_price:
                 normalized_total_prices.append(price_norm)
-                if m2_norm > 0:
+                
+                # Incluir para estadísticas de m2 solo si el precio Y la superficie son válidos
+                if has_valid_surface and m2_norm > 0:
                     normalized_m2_prices.append(m2_norm)
             
             # Guardar en lista detallada (originales)
@@ -1542,19 +1562,37 @@ class ScrapingManager:
         return filtered
     
     def _deduplicate_properties(self, properties):
-        """Elimina propiedades duplicadas basado en URL y título"""
-        seen = {}
+        """Elimina propiedades duplicadas basado en URL y huella digital (Precio + Superficie)"""
+        seen_urls = {}
+        seen_fingerprints = {}
         unique = []
         
         for prop in properties:
-            # Usar URL como clave principal para deduplicación
-            key = prop.url if prop.url else prop.title.lower()
+            # 1. Deduplicación por URL (mismo portal)
+            url_key = prop.url if prop.url else f"{prop.source}_{prop.external_id}"
+            if url_key in seen_urls:
+                continue
+                
+            # 2. Deduplicación por Huella Digital (diferentes portales suelen tener mismos datos)
+            # Combinamos precio, superficie (redondeada) y barrio para detectar duplicados cruzados
+            price_key = round(prop.price_amount / 100) * 100 # Redondear a cientos
+            surface_key = round(prop.surface_total)
             
-            if key not in seen:
-                seen[key] = True
-                unique.append(prop)
+            # Solo aplicar huella digital si tenemos datos sólidos
+            if price_key > 0 and surface_key > 10:
+                fingerprint = f"{prop.operation_type}_{price_key}_{surface_key}_{prop.location.lower()[:10]}"
+                if fingerprint in seen_fingerprints:
+                    # Si ya lo vimos con estos datos, probablemente es duplicado
+                    # Pero solo lo descartamos si la fuente es diferente para no perder datos
+                    if seen_fingerprints[fingerprint] != prop.source:
+                        continue
+                else:
+                    seen_fingerprints[fingerprint] = prop.source
+            
+            seen_urls[url_key] = True
+            unique.append(prop)
         
-        print(f"🔄 Eliminados {len(properties) - len(unique)} duplicados")
+        print(f"🔄 Eliminados {len(properties) - len(unique)} duplicados (URL y Huella)")
         return unique
     
     def scrape_market(self, zone: str, operation: str = "venta", 
