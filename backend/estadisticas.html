@@ -1260,6 +1260,8 @@
         function renderScrapedBarChart(properties, zone) {
             const ctx = document.getElementById('bar-chart').getContext('2d');
             
+            const primaryCurrency = properties.length > 0 ? (properties[0].currency || 'USD') : 'USD';
+            const currencySymbol = primaryCurrency === 'USD' ? 'US$' : '$';
 
             const displayProps = properties;
             
@@ -1324,6 +1326,9 @@
         // Scatter chart with scraped data
         function renderScrapedScatterChart(properties, operation) {
             const ctx = document.getElementById('scatter-chart').getContext('2d');
+            
+            const primaryCurrency = properties.length > 0 ? (properties[0].currency || 'USD') : 'USD';
+            const currencySymbol = primaryCurrency === 'USD' ? 'US$' : '$';
             
             // Filter properties with valid data
             const validProps = properties.filter(p => p.surface > 0 && p.price > 0);
