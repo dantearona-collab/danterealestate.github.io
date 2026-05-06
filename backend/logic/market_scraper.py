@@ -356,24 +356,31 @@ class BaseScraper(ABC):
                 break
         
         # ========================================
-        # 2. LIMPIEZA DE TEXTO
+        # 2. LIMPIEZA DE TEXTO Y MANEJO DE DECIMALES
         # ========================================
         # Manejar casos con "+" (precio + expensas)
         if '+' in price_text:
             price_text = price_text.split('+')[0].strip()
         
-        # Eliminar "EXPENSAS" y textos similares
-        price_text = re.sub(r'EXPENSAS.*', '', price_text, flags=re.IGNORECASE)
-        price_text = re.sub(r'ALQUILER.*', '', price_text, flags=re.IGNORECASE)
-        price_text = re.sub(r'VENTA.*', '', price_text, flags=re.IGNORECASE)
+        # Eliminar "EXPENSAS", "ALQUILER", etc.
+        price_text = re.sub(r'(EXPENSAS|ALQUILER|VENTA|DESDE|HASTA|MES|DÍA|NOCHE).*', '', price_text, flags=re.IGNORECASE)
         
+        # Manejar coma decimal argentina (1.234,56 -> 1.234)
+        if ',' in price_text:
+            partes = price_text.split(',')
+            # Si lo que sigue a la última coma son 1 o 2 dígitos, son centavos
+            if len(partes[-1].strip()) <= 2:
+                price_text = ','.join(partes[:-1])
+            # Si no, simplemente quitar la coma (posible separador de miles alternativo)
+            price_text = price_text.replace(',', '')
+
         # Eliminar cualquier símbolo de moneda que haya quedado
-        price_text = re.sub(r'[$€]', '', price_text)
+        price_text = re.sub(r'[$€£]|AR\$', '', price_text)
         
         # ========================================
         # 3. EXTRACCIÓN DE NÚMEROS
         # ========================================
-        # Extraer todos los números (incluyendo los que tienen puntos)
+        # Extraer todos los grupos de números
         all_numbers = re.findall(r'[\d.]+', price_text)
         
         if not all_numbers:
@@ -1264,6 +1271,14 @@ class MarketAnalyzer:
             # 4. Validaciones de Superficie/Precio
             has_valid_price = price_norm > 0
             has_valid_surface = prop.surface_total >= MarketAnalyzer.MIN_SURFACE_THRESHOLD
+            
+            # --- FILTRO DE SEGURIDAD CRÍTICO PARA ALQUILERES ---
+            # Si es alquiler, un precio > 10.000.000 ARS es probablemente un error de carga 
+            # o una venta mal categorizada (ej. 80.000 USD convertido a ARS)
+            if operation == "alquiler":
+                price_ars = price_norm if base_currency == "ARS" else price_norm * USD_RATE
+                if price_ars > 10_000_000:
+                    continue # Ignorar esta propiedad para promedios
             
             if not has_valid_surface:
                 low_surface_count += 1
