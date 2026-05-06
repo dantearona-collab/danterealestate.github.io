@@ -316,21 +316,15 @@ class BaseScraper(ABC):
         if z.endswith('s') and z not in barrios_con_s and not z.endswith('es'):
              z = z[:-1]
 
-        # Mapeo manual de barrios CABA para URLs
-        mapping = {
-            "lugano": "villa-lugano",
-            "villa lugano": "villa-lugano",
-            "villa luganos": "villa-lugano",
-            "barracas": "barracas",
-            "constitucion": "constitucion",
-            "once": "balvanera",
-            "microcentro": "san-nicolas",
-            "abasto": "almagro",
-            "congreso": "balvanera"
-        }
+        # ✅ MEJORADO: Usar constantes centralizadas
+        try:
+            from .constants import BARRIOS_URL_MAP
+        except:
+            try: from constants import BARRIOS_URL_MAP
+            except: BARRIOS_URL_MAP = {}
         
-        if z in mapping:
-            return mapping[z]
+        if z in BARRIOS_URL_MAP:
+            return BARRIOS_URL_MAP[z]
             
         return z.replace(" ", "-")
 
@@ -559,13 +553,13 @@ class BaseScraper(ABC):
             logger.info(f"[{self.source_name}] Navegando a: {url}")
             driver.get(url)
             
-            # Esperar a que aparezcan los resultados (más robusto que sleep fijo)
-            wait = WebDriverWait(driver, 15)
+            # Esperar a que aparezcan los resultados (Zonaprop es pesado)
+            wait = WebDriverWait(driver, 25)
             try:
                 # Buscar cualquier indicador de que hay contenido
                 wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "body")))
-                # Dar un tiempo extra para JS dinámico
-                time.sleep(random.uniform(5, 8))
+                # Dar un tiempo extra generoso para Zonaprop y otros sitios reactivos
+                time.sleep(random.uniform(8, 12))
             except:
                 logger.warning(f"[{self.source_name}] Timeout esperando carga completa, continuando...")
             
@@ -623,19 +617,7 @@ class ZonapropScraper(BaseScraper):
         super().__init__("https://www.zonaprop.com.ar", "zonaprop")
         self.target_zone = ""  # Se seteará antes de parsear
     
-    def _normalize_zone(self, zone: str) -> str:
-        """Normaliza el nombre de la zona para la URL"""
-        # Convertir a minúsculas y reemplazar espacios por guiones
-        normalized = zone.lower().strip()
-        normalized = normalized.replace(' ', '-')
-        # Eliminar acentos básicos
-        replacements = {
-            'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
-            'ñ': 'n', 'ü': 'u'
-        }
-        for acc, plain in replacements.items():
-            normalized = normalized.replace(acc, plain)
-        return normalized
+    # ✅ Usar _normalize_zone heredado que ya consume BARRIOS_URL_MAP
     
     def build_url(self, zone: str, operation: str, property_type: str) -> str:
         """Construye URL para Zonaprop"""
@@ -735,15 +717,19 @@ class ZonapropScraper(BaseScraper):
             # ========================================
             barrio = self.target_zone # Prevenir fallos con ubicaciones incompletas
             if location:
-                partes_loc = location.split(',')
-                if len(partes_loc) >= 2:
-                    posible_barrio = partes_loc[1].strip().lower()
-                    if posible_barrio != "capital federal": barrio = posible_barrio
+                partes_loc = [p.strip().lower() for p in location.split(',')]
+                # Buscar el barrio en las partes (usualmente la primera o segunda)
+                for parte in partes_loc:
+                    if parte in [self.target_zone.lower(), "capital federal", "caba"]:
+                        if parte != "capital federal" and parte != "caba":
+                            barrio = parte
+                            break
             elif address:
-                partes_dir = address.split(',')
-                if len(partes_dir) >= 2:
-                    posible_barrio = partes_dir[1].strip().lower()
-                    if posible_barrio != "capital federal": barrio = posible_barrio
+                partes_dir = [p.strip().lower() for p in address.split(',')]
+                for parte in partes_dir:
+                    if self.target_zone.lower() in parte:
+                        barrio = self.target_zone.lower()
+                        break
             
             # Extraer URL
             link_elem = card.select_one('a[href], [data-to-posting]')
@@ -776,8 +762,8 @@ class ZonapropScraper(BaseScraper):
                 if title.startswith('$') or not title:
                     title = address
 
-            # Extraer superficie y características
-            features_elem = card.select_one('[data-qa="POSTING_CARD_FEATURES"], .postingMainFeatures-module__posting-main-features-block')
+            # Extraer superficie y características (mejorado para Zonaprop actual)
+            features_elem = card.select_one('[data-qa="POSTING_CARD_FEATURES"], .postingMainFeatures-module__posting-main-features-block, [class*="features"]')
             surface = 0
             if features_elem:
                 features_text = features_elem.get_text(" ", strip=True)
@@ -785,12 +771,17 @@ class ZonapropScraper(BaseScraper):
             
             # Si no se encontró superficie, buscar en otros elementos
             if surface == 0:
-                features = card.select('[data-qa="POSTING_CARD_FEATURES"], .features, .posting-features li')
+                features = card.select('[data-qa="POSTING_CARD_FEATURES"], .features, .posting-features li, [class*="feature"]')
                 for feature in features:
                     text = feature.get_text(strip=True)
                     if 'm²' in text or 'm2' in text.lower():
                         surface = self._clean_surface(text)
-                        break
+                        if surface > 0: break
+            
+            # Si a pesar de todo no hay datos básicos, descartamos para no ensuciar estadísticas
+            if not title and not address and surface == 0:
+                logger.debug("[Zonaprop] Descartada tarjeta vacía (posible esqueleto)")
+                return None
             
             # Extraer ID externo
             prop_id = ""
@@ -831,37 +822,49 @@ class MercadoLibreScraper(BaseScraper):
     
     def __init__(self):
         super().__init__("https://inmuebles.mercadolibre.com.ar", "mercadolibre")
-        self.target_zone = ""  # Se seteará antes de parsear
+        self.target_zone = ""
+        # Headers específicos para ML
+        self.session.headers.update({
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
+            "Sec-Ch-Ua": '"Google Chrome";v="119", "Chromium";v="119", "Not?A_Brand";v="24"',
+            "Sec-Ch-Ua-Mobile": "?0",
+            "Sec-Ch-Ua-Platform": '"Windows"',
+        })
     
     def build_url(self, zone: str, operation: str, property_type: str) -> str:
         """Construye URL para MercadoLibre Inmuebles"""
-        # Mapeo de operaciones
-        op_map = {
-            "venta": "venta",
-            "alquiler": "alquiler"
-        }
-        
-        # Mapeo de tipos de propiedad
+        op_map = {"venta": "venta", "alquiler": "alquiler"}
         type_map = {
-            "departamento": "departamentos",
-            "casa": "casas",
-            "ph": "ph",
-            "terreno": "terrenos",
-            "local": "locales-comerciales",
-            "oficina": "oficinas",
-            "cochera": "cocheras",
-            "deposito": "depositos-galpones"
+            "departamento": "departamentos", "casa": "casas", "ph": "ph",
+            "terreno": "terrenos", "local": "locales-comerciales",
+            "oficina": "oficinas", "cochera": "cocheras", "deposito": "depositos-galpones"
         }
         
         op = op_map.get(operation.lower(), "venta")
         p_type = type_map.get(property_type.lower(), "departamentos")
         
-        # MercadoLibre usa estructura: /tipo/op/provincia/ciudad/
-        if zone:
-            url = f"{self.base_url}/{p_type}/{op}/{zone}/"
-        else:
-            url = f"{self.base_url}/{p_type}/{op}/"
+        # ✅ MEJORADO: Usar mapeo específico de ML si existe, fallback a URL_MAP
+        try:
+            from .constants import BARRIOS_URL_MAP, BARRIOS_ML_MAP
+        except:
+            try: from constants import BARRIOS_URL_MAP, BARRIOS_ML_MAP
+            except: 
+                BARRIOS_URL_MAP = {}; BARRIOS_ML_MAP = {}
         
+        # Prioridad 1: Mapeo exacto de ML
+        # Prioridad 2: Mapeo general de URLS
+        # Prioridad 3: Slug simple
+        path = BARRIOS_ML_MAP.get(zone.lower()) or BARRIOS_URL_MAP.get(zone.lower()) or zone.lower().replace(' ', '-')
+        
+        # Si el path ya es absoluto (tiene slashes), lo usamos tal cual
+        # Si no, lo concatenamos al formato estándar
+        if '/' in path:
+            url = f"{self.base_url}/{p_type}/{op}/{path}/"
+        else:
+            url = f"{self.base_url}/{p_type}/{op}/{path}/"
+            
         return url
     
     def parse_properties(self, html: str, operation: str = "venta", property_type: str = "departamento") -> List[PropertyData]:
@@ -1120,49 +1123,74 @@ class MarketAnalyzer:
         return [x for x in data_list if lower_bound <= x <= upper_bound]
 
     @staticmethod
+    def _normalize_text(text: str) -> str:
+        """Elimina acentos y normaliza texto para comparaciones"""
+        if not text: return ""
+        import unicodedata
+        text = text.lower().strip()
+        return "".join(
+            c for c in unicodedata.normalize('NFD', text)
+            if unicodedata.category(c) != 'Mn'
+        )
+
+    @staticmethod
     def _is_in_zone(prop_location: str, prop_address: str, zone: str) -> bool:
+        """Determina si una propiedad está en la zona buscada (flexibilizado y sin acentos)"""
         if not zone:
             return True
 
-        zone = zone.lower().strip()
-        text = f"{prop_location} {prop_address}".lower()
+        zone_norm = MarketAnalyzer._normalize_text(zone)
+        # Combinar ubicación y dirección para tener contexto completo
+        text_norm = MarketAnalyzer._normalize_text(f"{prop_location or ''} {prop_address or ''}")
 
         # ========================================
-        # ❌ EXCLUSIONES FUERTES (PRIMERO)
+        # ❌ EXCLUSIONES ESPECÍFICAS DE ZONA
         # ========================================
-        forbidden_patterns = [
-            rf"villa\s+general\s+{zone}",
-            rf"villa\s+gral\.?\s+{zone}",
-            rf"villa\s+{zone}",              # Villa Belgrano (Córdoba)
-            rf"{zone}\s+al\s+\d+",           # Belgrano al 5800 (calle)
-            rf"av\.?\s+{zone}",              # Av Belgrano
-            rf"avenida\s+{zone}",
+        # Evitar que "Belgrano" coincida con "General Belgrano" o "Villa General Belgrano"
+        if zone_norm == "belgrano":
+            for excl in ["general belgrano", "manuel belgrano", "m. belgrano"]:
+                if excl in text_norm:
+                    # Solo excluir si NO aparece "capital federal" o "caba" para confirmar que es el barrio de CABA
+                    if not any(x in text_norm for x in ["capital federal", "caba", "buenos aires c.f."]):
+                        return False
+
+        # ========================================
+        # ❌ EXCLUSIONES DE PATRONES DE CALLE
+        # ========================================
+        # Si el nombre del barrio aparece SOLO como nombre de calle (ej: "Avenida Belgrano 1234")
+        # y no hay otra mención del barrio como ubicación.
+        street_patterns = [
+            rf"avenida\s+{re.escape(zone_norm)}\s+\d+", 
+            rf"av\.?\s+{re.escape(zone_norm)}\s+\d+",
+            rf"calle\s+{re.escape(zone_norm)}\s+\d+",
         ]
-
-        for pattern in forbidden_patterns:
-            if re.search(pattern, text):
-                return False
+        
+        is_street_name = False
+        for pattern in street_patterns:
+            if re.search(pattern, text_norm):
+                is_street_name = True
+                break
+        
+        # Si aparece como calle, verificamos si aparece en otra parte del texto (como barrio)
+        if is_street_name:
+            # Contar ocurrencias del nombre de la zona
+            count = len(re.findall(rf"\b{re.escape(zone_norm)}\b", text_norm))
+            # Si solo aparece una vez, y es el patrón de calle, probablemente no es el barrio
+            if count <= 1:
+                # Excepción: si el texto explícitamente dice "en [Barrio]" o similar
+                if not any(f"en {zone_norm}" in text_norm for zone_norm in [zone_norm]):
+                    return False
 
         # ========================================
-        # ✅ MATCH REAL DE BARRIO (CABA)
+        # ✅ MATCH DE ZONA CON LÍMITES DE PALABRA
         # ========================================
-        valid_patterns = [
-            rf"\b{zone}\b\s*,\s*(caba|capital federal|bs as|buenos aires)",
-            rf"(caba|capital federal).*\b{zone}\b",
-            rf"\b{zone}\b\s*,\s*[a-z\s]+,\s*(caba|capital federal)",
-        ]
-
-        for pattern in valid_patterns:
-            if re.search(pattern, text):
-                return True
-
-        # ========================================
-        # ⚠️ FALLBACK CONTROLADO
-        # ========================================
-        # Solo aceptar si NO hay otra provincia
-        if re.search(rf"\b{zone}\b", text):
-            if any(x in text for x in ["córdoba", "santa fe", "mendoza", "tucumán"]):
-                return False
+        if re.search(rf"\b{re.escape(zone_norm)}\b", text_norm):
+            # Excluir otras provincias si no se menciona CABA y no es la zona buscada
+            provincias = ["cordoba", "mendoza", "santa fe", "neuquen", "chubut", "misiones"]
+            if any(p in text_norm for p in provincias):
+                # Si menciona otra provincia y NO menciona Capital Federal, desconfiar
+                if not any(x in text_norm for x in ["capital federal", "caba", "c.f."]):
+                    return False
             return True
 
         return False
@@ -1416,10 +1444,11 @@ class ArgenpropScraper(BaseScraper):
             # ========================================
             barrio = self.target_zone
             if address:
-                partes = address.split(',')
-                if len(partes) >= 2:
-                    posible_barrio = partes[1].strip().lower()
-                    if posible_barrio != "capital federal": barrio = posible_barrio
+                partes = [p.strip().lower() for p in address.split(',')]
+                for parte in partes:
+                    if self.target_zone.lower() in parte:
+                        barrio = self.target_zone.lower()
+                        break
             
             # Extraer título
             title_elem = card.select_one('.card__title, h2, h3, [data-qa="card-title"]')
@@ -1484,57 +1513,32 @@ class ScrapingManager:
         self.analyzer = MarketAnalyzer()
     
     def _filter_by_exact_barrio(self, properties, target_barrio):
-        """Filtra propiedades usando constantes centralizadas"""
-        # Importar constantes (por si no están en el ámbito global)
+        """Filtra propiedades usando constantes centralizadas con soporte GBA y tildes"""
         try:
-            from .constants import BARRIOS_VALIDOS, UBICACIONES_EXCLUIDAS
-        except ImportError:
-            try:
-                from constants import BARRIOS_VALIDOS, UBICACIONES_EXCLUIDAS
-            except ImportError:
-                # Fallback
-                BARRIOS_VALIDOS = ['belgrano', 'palermo', 'recoleta', 'microcentro']
-                UBICACIONES_EXCLUIDAS = ['general belgrano', 'villa general belgrano']
+            from .constants import UBICACIONES_EXCLUIDAS
+        except:
+            try: from constants import UBICACIONES_EXCLUIDAS
+            except: UBICACIONES_EXCLUIDAS = []
         
         filtered = []
-        target_lower = target_barrio.lower()
-        
-        # Validar que el barrio esté en la lista
-        if target_lower not in BARRIOS_VALIDOS:
-            print(f"⚠️ Barrio '{target_barrio}' no está en la lista de válidos")
-            return []
+        target_norm = MarketAnalyzer._normalize_text(target_barrio)
         
         for prop in properties:
-            location = prop.location.lower() if prop.location else ''
-            address = prop.address.lower() if prop.address else ''
+            location_norm = MarketAnalyzer._normalize_text(prop.location)
+            address_norm = MarketAnalyzer._normalize_text(prop.address)
+            text_context = f"{location_norm} {address_norm}"
             
-            # ❌ Excluir ubicaciones no deseadas
-            es_excluido = False
-            for excl in UBICACIONES_EXCLUIDAS:
-                if excl in location or excl in address:
-                    es_excluido = True
-                    print(f"  ⚠️ Excluido ({excl}): {prop.title[:50]}...")
-                    break
-            
-            if es_excluido:
+            # ❌ Excluir ubicaciones negras (normalizadas)
+            if any(MarketAnalyzer._normalize_text(excl) in text_context for excl in UBICACIONES_EXCLUIDAS):
                 continue
             
-            # ✅ Incluir si es el barrio buscado en CABA
-            es_valido = False
-            
-            if location == target_lower:
-                es_valido = True
-            elif f"{target_lower}, capital federal" in location or f"{target_lower}, caba" in location:
-                es_valido = True
-            elif target_lower in address and ('caba' in address or 'capital federal' in address):
-                es_valido = True
-            
-            if es_valido:
+            # ✅ Validar pertenencia a zona
+            if re.search(rf"\b{re.escape(target_norm)}\b", text_context):
                 filtered.append(prop)
             else:
-                print(f"  ⚠️ Excluido: {prop.title[:50]}... (ubicación: {prop.location})")
+                logger.debug(f"Filtrado por barrio: {prop.title[:30]}... ({prop.location})")
         
-        print(f"📌 Filtro exacto: {len(properties)} → {len(filtered)} propiedades")
+        print(f"📌 Filtro exacto ({target_barrio}): {len(properties)} → {len(filtered)} propiedades")
         return filtered
     
     def _deduplicate_properties(self, properties):
@@ -1556,91 +1560,94 @@ class ScrapingManager:
     def scrape_market(self, zone: str, operation: str = "venta", 
                       property_type: str = "departamento") -> Dict[str, Any]:
         """
-        Realiza scraping de mercado inmobiliario
+        Realiza scraping de mercado inmobiliario en paralelo para mayor velocidad.
         """
+        import concurrent.futures
+        
         # Normalizar barrio para la búsqueda
         search_zone = zone
         if "lugano" in zone.lower() and "villa" not in zone.lower():
             search_zone = "villa lugano"
             
-        logger.info(f"[ScrapingManager] Iniciando scraping para {search_zone} ({operation}, {property_type})")
+        logger.info(f"[ScrapingManager] Iniciando scraping PARALELO para {search_zone} ({operation}, {property_type})")
         
         all_properties = []
         errors = []
         
-        # Escanear Argenprop
-        try:
-            self.argenprop.target_zone = search_zone
-            argenprop_url = self.argenprop.build_url(search_zone, operation, property_type)
-            logger.info(f"[Argenprop] URL: {argenprop_url}")
-            
-            html = self.argenprop._render_with_selenium(argenprop_url)
-            if not html:
-                html = self.argenprop._make_request(argenprop_url)
-            
-            if html:
-                properties = self.argenprop.parse_properties(html, operation, property_type)
-                all_properties.extend(properties)
-            else:
-                errors.append("Argenprop: No se pudo obtener respuesta")
-        except Exception as e:
-            errors.append(f"Argenprop: {str(e)}")
-        
-        # Escanear Zonaprop
-        try:
-            self.zonaprop.target_zone = search_zone
-            zonaprop_url = self.zonaprop.build_url(search_zone, operation, property_type)
-            logger.info(f"[Zonaprop] URL: {zonaprop_url}")
-            
-            html = self.zonaprop._render_with_selenium(zonaprop_url)
-            if not html:
-                html = self.zonaprop._make_request(zonaprop_url)
-            
-            if html:
-                properties = self.zonaprop.parse_properties(html, operation, property_type)
-                all_properties.extend(properties)
-            else:
-                errors.append("Zonaprop: No se pudo obtener respuesta")
-        except Exception as e:
-            errors.append(f"Zonaprop: {str(e)}")
-        
-        # Escanear MercadoLibre
-        try:
-            self.mercadolibre.target_zone = search_zone
-            mercadolibre_url = self.mercadolibre.build_url(search_zone, operation, property_type)
-            logger.info(f"[MercadoLibre] URL: {mercadolibre_url}")
-            
-            html = self.mercadolibre._render_with_selenium(mercadolibre_url)
-            if not html:
-                html = self.mercadolibre._make_request(mercadolibre_url)
-            
-            if html:
-                properties = self.mercadolibre.parse_properties(html, operation, property_type)
-                all_properties.extend(properties)
-            else:
-                errors.append("MercadoLibre: No se pudo obtener respuesta")
-        except Exception as e:
-            errors.append(f"MercadoLibre: {str(e)}")
-        
+        # Definir las tareas de scraping
+        def get_argenprop():
+            try:
+                self.argenprop.target_zone = search_zone
+                url = self.argenprop.build_url(search_zone, operation, property_type)
+                logger.info(f"[Argenprop] URL: {url}")
+                html = self.argenprop._render_with_selenium(url)
+                if not html: html = self.argenprop._make_request(url)
+                return self.argenprop.parse_properties(html, operation, property_type) if html else []
+            except Exception as e:
+                errors.append(f"Argenprop: {str(e)}")
+                return []
+
+        def get_zonaprop():
+            try:
+                self.zonaprop.target_zone = search_zone
+                url = self.zonaprop.build_url(search_zone, operation, property_type)
+                logger.info(f"[Zonaprop] URL: {url}")
+                html = self.zonaprop._render_with_selenium(url)
+                if not html: html = self.zonaprop._make_request(url)
+                return self.zonaprop.parse_properties(html, operation, property_type) if html else []
+            except Exception as e:
+                errors.append(f"Zonaprop: {str(e)}")
+                return []
+
+        def get_mercadolibre():
+            try:
+                self.mercadolibre.target_zone = search_zone
+                url = self.mercadolibre.build_url(search_zone, operation, property_type)
+                logger.info(f"[MercadoLibre] URL: {url}")
+                # ML suele funcionar bien sin Selenium, probamos request directo primero para velocidad
+                html = self.mercadolibre._make_request(url)
+                if not html: html = self.mercadolibre._render_with_selenium(url)
+                return self.mercadolibre.parse_properties(html, operation, property_type) if html else []
+            except Exception as e:
+                errors.append(f"MercadoLibre: {str(e)}")
+                return []
+
+        # Ejecutar en paralelo
+        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+            future_to_portal = {
+                executor.submit(get_argenprop): "Argenprop",
+                executor.submit(get_zonaprop): "Zonaprop",
+                executor.submit(get_mercadolibre): "MercadoLibre"
+            }
+            for future in concurrent.futures.as_completed(future_to_portal):
+                portal = future_to_portal[future]
+                try:
+                    props = future.result()
+                    all_properties.extend(props)
+                    logger.info(f"[ScrapingManager] {portal} completado ({len(props)} prop)")
+                except Exception as e:
+                    logger.error(f"[ScrapingManager] Error en {portal}: {e}")
+
         # Calcular estadísticas
+        if not all_properties:
+            return self.analyzer.calculate_stats([], zone, operation, property_type).__dict__
+
         print("ANTES DEDUP:", len(all_properties))
         all_properties = self._deduplicate_properties(all_properties)
         print("DESPUÉS DEDUP:", len(all_properties))
         all_properties = self._filter_by_exact_barrio(all_properties, zone)
         print(f"DESPUÉS FILTRO EXACTO: {len(all_properties)}")
         
-        stats = self.analyzer.calculate_stats(all_properties, search_zone, operation, property_type)
-        
-        if errors:
-            stats.errors.extend(errors)
-        
-        # Convertir a diccionario
+        # Calcular estadísticas finales
+        stats = self.analyzer.calculate_stats(all_properties, zone, operation, property_type)
         result = MarketAnalyzer.to_dict(stats)
+        result['errors'].extend(errors)
+        
+        # Guardar conteo total de crudos para el mensaje
         result['raw_properties_count'] = len(all_properties)
         
-        logger.info(f"[ScrapingManager] Completado: {stats.sample_size} propiedades analizadas")
-        
         return result
+        
 
     
     
