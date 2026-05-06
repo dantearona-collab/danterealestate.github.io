@@ -57,7 +57,8 @@ class MarketReportPDF(FPDF):
         start_x = self.get_x()
         self.set_font('Arial', 'B', 11)
         self.set_text_color(31, 41, 55)
-        self.cell(width, 10, title, 0, 1, 'L')
+        self.cell(width, 10, title, 0, 0, 'L')
+        self.ln(10)
         self.set_x(start_x)
         
         if not data_dict: 
@@ -94,7 +95,8 @@ class MarketReportPDF(FPDF):
         x_base = self.get_x()
         self.set_font('Arial', 'B', 11)
         self.set_text_color(31, 41, 55)
-        self.cell(width, 10, title, 0, 1, 'L')
+        self.cell(width, 10, title, 0, 0, 'L')
+        self.ln(10)
         self.set_x(x_base)
         
         valid_points = [p for p in points if p.get('surface', 0) > 2 and p.get('price', 0) > 0]
@@ -241,7 +243,12 @@ def generate_market_report(data):
     pdf.draw_scatter_plot('TENDENCIA: PRECIO vs SUPERFICIE', properties, currency_symbol, width=80)
     mid_y2 = pdf.get_y()
     
-    pdf.set_y(max(mid_y1, mid_y2) + 10)
+    pdf.set_y(max(mid_y1, mid_y2) + 15)
+    
+    # Salto de página preventivo si queda poco espacio
+    if pdf.get_y() > 220:
+        pdf.add_page()
+        pdf.set_y(35)
     
     if pdf.get_y() > 180: pdf.add_page()
 
