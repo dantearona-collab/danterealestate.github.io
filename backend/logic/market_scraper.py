@@ -898,7 +898,7 @@ class MercadoLibreScraper(BaseScraper):
                 cards = soup.select('div.ui-search-result__item')
             
             if not cards:
-                cards = soup.select('[data-qa="listing-item"]')
+                cards = soup.select('.poly-card, .poly-component__card, [data-qa="listing-item"]')
             
             if not cards:
                 ml_items = soup.select('a[href*="/ML"]')
