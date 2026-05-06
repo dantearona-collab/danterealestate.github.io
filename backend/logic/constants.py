@@ -15,7 +15,11 @@ BARRIOS_VALIDOS = [
     'villa urquiza', 'colegiales', 'nuñez', 'saavedra', 'flores',
     'balvanera', 'san telmo', 'barracas', 'la boca', 'retiro',
     # Zona Norte
-    'nordelta', 'tigre', 'pilar', 'san isidro'
+    'nordelta', 'tigre', 'pilar', 'san isidro',
+    # Zona Oeste (Nuevas localidades)
+    'ituzaingo', 'castelar',
+     # Zona Sur (Nuevas localidades)
+    'valentin alsina'
 ]
 
 # ========================================
@@ -46,8 +50,13 @@ BARRIOS_DISPLAY = {
     'nordelta': 'Nordelta - Tigre',
     'tigre': 'Tigre - Buenos Aires',
     'pilar': 'Pilar - Buenos Aires',
-    'san isidro': 'San Isidro - Buenos Aires'
+    'san isidro': 'San Isidro - Buenos Aires',
+    # Nuevas localidades
+    'ituzaingo': 'Ituzaingó - Buenos Aires',
+    'castelar': 'Castelar - Buenos Aires',
+    'valentin alsina': 'Valentín Alsina - Buenos Aires'
 }
+
 
 # ========================================
 # CONSTANTES PARA FALLBACK (si la API falla)
@@ -74,6 +83,7 @@ UBICACIONES_EXCLUIDAS = [
     'el molino', 'los manantiales', 'tierras del sauce', 'los molles'
 ]
 
+
 # ========================================
 # MAPEO DE BARRIOS PARA URLS (normalización)
 # ========================================
@@ -87,8 +97,19 @@ BARRIOS_URL_MAP = {
     "microcentro": "san-nicolas",
     "abasto": "almagro",
     "congreso": "congreso",
-    "congreso": "balvanera"
+    # Nuevas localidades (GBA - MercadoLibre requiere jerarquía completa)
+    "ituzaingo": "buenos-aires-gba-oeste/ituzaingo/ituzaingo",
+    "castelar": "buenos-aires-gba-oeste/moron/castelar",
+    "valentin alsina": "valentin-alsina"
 }
+
+# Mapeo específico para MercadoLibre (Rutas jerárquicas)
+BARRIOS_ML_MAP = {
+    "valentin alsina": "buenos-aires-gba-sur/lanus/valentin-alsina",
+    "ituzaingo": "buenos-aires-gba-oeste/ituzaingo/ituzaingo",
+    "castelar": "buenos-aires-gba-oeste/moron/castelar"
+}
+
 
 # ========================================
 # TIPOS DE OPERACIÓN

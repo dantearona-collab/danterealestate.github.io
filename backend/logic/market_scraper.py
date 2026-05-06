@@ -1664,9 +1664,20 @@ class ScrapingManager:
                 self.mercadolibre.target_zone = search_zone
                 url = self.mercadolibre.build_url(search_zone, operation, property_type)
                 logger.info(f"[MercadoLibre] URL: {url}")
-                # ML suele funcionar bien sin Selenium, probamos request directo primero para velocidad
+                
+                # Intentar request directo primero (más rápido)
                 html = self.mercadolibre._make_request(url)
-                if not html: html = self.mercadolibre._render_with_selenium(url)
+                
+                # ✅ DETECCIÓN DE BLOQUEO / CHALLENGE
+                is_blocked = False
+                if html:
+                    if "JavaScript to work" in html or "micro-landing" in html or "captcha" in html.lower():
+                        logger.warning("[MercadoLibre] Bloqueo detectado (Challenge/JS). Reintentando con Selenium...")
+                        is_blocked = True
+                
+                if not html or is_blocked:
+                    html = self.mercadolibre._render_with_selenium(url)
+                
                 return self.mercadolibre.parse_properties(html, operation, property_type) if html else []
             except Exception as e:
                 errors.append(f"MercadoLibre: {str(e)}")
