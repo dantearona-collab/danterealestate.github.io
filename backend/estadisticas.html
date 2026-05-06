@@ -641,7 +641,7 @@
             <section class="charts-grid">
                 <div class="chart-card">
                     <div class="chart-header">
-                        <h3 class="chart-title">Precio Promedio por Barrio (USD)</h3>
+                        <h3 class="chart-title">Precio Mercado por Barrio (Mediana)</h3>
                     </div>
                     <div class="chart-container">
                         <canvas id="bar-chart"></canvas>
@@ -1210,7 +1210,39 @@
                         </span>
                     </div>
                 </div>
-                <!-- ... resto de KPIs ... -->
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon green">
+                            <i class="fas fa-tag"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-value">
+                        ${currencySymbol} ${(stats.median_total_price || stats.average_total_price || 0).toLocaleString('es-AR', {maximumFractionDigits: 0})}
+                    </div>
+                    <div class="kpi-label">
+                        Precio Mercado (Mediana)
+                        <span style="display: block; font-size: 0.7rem; color: #6B7280;">
+                            Promedio: ${currencySymbol} ${(stats.average_total_price || 0).toLocaleString('es-AR', {maximumFractionDigits: 0})}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon purple">
+                            <i class="fas fa-ruler-combined"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-value">
+                        ${currencySymbol} ${(stats.median_price_per_m2 || stats.average_price_per_m2 || 0).toLocaleString('es-AR', {maximumFractionDigits: 0})}
+                    </div>
+                    <div class="kpi-label">
+                        m2 Estimado (Mediana)
+                        <span style="display: block; font-size: 0.7rem; color: #6B7280;">
+                            Promedio: ${currencySymbol} ${(stats.average_price_per_m2 || 0).toLocaleString('es-AR', {maximumFractionDigits: 0})}
+                        </span>
+                    </div>
+                </div>
             `;
         }
         

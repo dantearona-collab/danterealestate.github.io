@@ -31,19 +31,8 @@ try:
     from logic.constants import BARRIOS_VALIDOS, BARRIOS_FALLBACK
     print(f"✅ Constantes cargadas: {len(BARRIOS_VALIDOS)} barrios")
 except ImportError as e:
-    print(f"⚠️ No se pudo importar de logic.constants: {e}")
-    # Fallback manual si no encuentra constants.py
-    BARRIOS_VALIDOS = [
-        'belgrano', 'palermo', 'recoleta', 'microcentro', 'puerto madero',
-        'caballito', 'almagro', 'boedo', 'chacarita', 'congreso', 'villa crespo',
-        'villa urquiza', 'colegiales', 'nuñez', 'saavedra', 'flores',
-        'balvanera', 'san telmo', 'barracas', 'la boca', 'retiro',
-        'nordelta', 'tigre', 'pilar', 'san isidro'
-    ]
-    BARRIOS_FALLBACK = [
-        {"valor": b, "display": f"{b.capitalize()} - Capital Federal"}
-        for b in BARRIOS_VALIDOS
-    ]
+    print(f"❌ Error crítico: No se pudo importar de logic.constants: {e}")
+    sys.exit(1) # Si no hay constantes, el servidor no debe seguir con datos inconsistentes
 
 # ========================================
 # VERIFICACIÓN DE ARCHIVOS Y BASE DE DATOS
@@ -174,8 +163,8 @@ class StatsHandler(SimpleHTTPRequestHandler):
                                 'zona': zona,
                                 'operacion': operacion,
                                 'tipo_propiedad': tipo,
-                                'precio_promedio': stats.get('average_total_price'),
-                                'precio_m2_promedio': stats.get('average_price_per_m2'),
+                                'precio_promedio': stats.get('median_total_price') or stats.get('average_total_price'),
+                                'precio_m2_promedio': stats.get('median_price_per_m2') or stats.get('average_price_per_m2'),
                                 'cantidad_muestra': s_data.get('data', {}).get('sample_size'),
                                 'moneda': 'USD' if tipo.lower() in ['terreno', 'terrenos'] or operacion.lower() == 'venta' else 'ARS'
                             })
@@ -199,66 +188,19 @@ class StatsHandler(SimpleHTTPRequestHandler):
         }).encode())
         
     def handle_barrios_lista(self):
-        """Retorna la lista de barrios válidos desde constants.py"""
-        try:
-            import sys
-            import os
-            
-            # Agregar la carpeta logic al path
-            backend_dir = os.path.dirname(os.path.abspath(__file__))
-            logic_dir = os.path.join(backend_dir, 'logic')
-            if logic_dir not in sys.path:
-                sys.path.insert(0, logic_dir)
-            
-            # Importar constantes
+        """Retorna la lista de barrios válidos directamente desde constants.py"""
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*') # Asegurar CORS
+        self.end_headers()
         
-            
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            
-            response = {
-                "success": True,
-                "barrios": BARRIOS_FALLBACK,
-                "total": len(BARRIOS_VALIDOS)
-            }
-            
-            self.wfile.write(json.dumps(response, ensure_ascii=False).encode())
-            
-        except Exception as e:
-            print(f"❌ Error en handle_barrios_lista: {e}")
-            
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            
-            # Fallback manual
-            barrios_fallback = [
-                {"valor": "belgrano", "display": "Belgrano - Capital Federal"},
-                {"valor": "palermo", "display": "Palermo - Capital Federal"},
-                {"valor": "recoleta", "display": "Recoleta - Capital Federal"},
-                {"valor": "microcentro", "display": "Microcentro - Capital Federal"},
-                {"valor": "puerto madero", "display": "Puerto Madero - Capital Federal"},
-                {"valor": "caballito", "display": "Caballito - Capital Federal"},
-                {"valor": "congreso", "display": "Congreso - Capital Federal"},
-                {"valor": "almagro", "display": "Almagro - Capital Federal"},
-                {"valor": "boedo", "display": "Boedo - Capital Federal"},
-                {"valor": "chacarita", "display": "Chacarita - Capital Federal"},
-                {"valor": "villa crespo", "display": "Villa Crespo - Capital Federal"},
-                {"valor": "nordelta", "display": "Nordelta - Tigre"},
-                {"valor": "tigre", "display": "Tigre - Buenos Aires"},
-                {"valor": "pilar", "display": "Pilar - Buenos Aires"},
-                {"valor": "san isidro", "display": "San Isidro - Buenos Aires"}
-            ]
-            
-            response = {
-                "success": True,
-                "barrios": barrios_fallback,
-                "total": len(barrios_fallback),
-                "warning": "Usando fallback del servidor"
-            }
-            
-            self.wfile.write(json.dumps(response, ensure_ascii=False).encode())
+        response = {
+            "success": True,
+            "barrios": BARRIOS_FALLBACK,
+            "total": len(BARRIOS_VALIDOS)
+        }
+        
+        self.wfile.write(json.dumps(response, ensure_ascii=False).encode())
     
     
     def handle_scraping_data(self):
@@ -308,75 +250,8 @@ class StatsHandler(SimpleHTTPRequestHandler):
             with open(SCRAPING_JSON, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             
-            if data.get('success') and data.get('data'):
-                scraperData = data['data']
-                properties_sample = scraperData.get('properties_sample', [])
-                count = len(properties_sample)
-                
-                # Calcular distribuciones para gráficos
-                distribucion_precios = {
-                    '0-100k': 0,
-                    '100k-200k': 0,
-                    '200k-350k': 0,
-                    '350k-500k': 0,
-                    '500k+': 0
-                }
-                
-                for p in properties_sample:
-                    price = p.get('price', 0)
-                    if price < 100000:
-                        distribucion_precios['0-100k'] += 1
-                    elif price < 200000:
-                        distribucion_precios['100k-200k'] += 1
-                    elif price < 350000:
-                        distribucion_precios['200k-350k'] += 1
-                    elif price < 500000:
-                        distribucion_precios['350k-500k'] += 1
-                    else:
-                        distribucion_precios['500k+'] += 1
-                
-                overview = {
-                    'total_propiedades': count,
-                    'barrios_analizados': 1,
-                    'precio_promedio_general': scraperData.get('statistics', {}).get('average_total_price', 0),
-                    'precio_m2_promedio_general': scraperData.get('statistics', {}).get('average_price_per_m2', 0),
-                    'distribucion_precios': distribucion_precios,
-                    'distribucion_fuentes': scraperData.get('source_breakdown', {}),
-                    'distribucion_moneda': scraperData.get('currency_distribution', {}),
-                    'timestamp': scraperData.get('analysis_timestamp', datetime.now().isoformat())
-                }
-                
-                # Datos para gráfico de dispersión
-                scatter_data = []
-                for p in properties_sample:
-                    if p.get('surface', 0) > 0 and p.get('price', 0) > 0:
-                        scatter_data.append({
-                            'x': p.get('surface', 0),
-                            'y': p.get('price', 0),
-                            'operacion': p.get('operation_type', 'venta'),
-                            'titulo': p.get('title', '')[:30]
-                        })
-                
-                response = {
-                    'success': True,
-                    'zone': scraperData.get('zone', ''),
-                    'sample_size': count,
-                    'overview': overview,
-                    'scatter_data': scatter_data,
-                    'barrios': [{
-                        'nombre': scraperData.get('zone', ''),
-                        'precio_promedio': scraperData.get('statistics', {}).get('average_total_price', 0),
-                        'cantidad_propiedades': count,
-                        'propiedades': properties_sample
-                    }]
-                }
-                
-                self.wfile.write(json.dumps(response, ensure_ascii=False).encode())
-            else:
-                self.wfile.write(json.dumps({
-                    "success": False,
-                    "message": data.get('message', 'Error en datos')
-                }).encode())
+            # Devolver los datos tal cual están en el archivo
+            self.wfile.write(json.dumps(data, ensure_ascii=False).encode())
         except Exception as e:
             self.wfile.write(json.dumps({
                 "success": False,

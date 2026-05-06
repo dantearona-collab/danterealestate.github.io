@@ -123,7 +123,7 @@ class MarketReportPDF(FPDF):
         for i in range(6):
             val_y = (max_y / 5) * i
             y_pos = start_y + chart_h - (val_y / max_y) * chart_h
-            self.text(start_x - 18, y_pos + 2, f"{currency_symbol} {(val_y/1000 if val_y else 0):,.0f}k")
+            self.text(start_x - 14, y_pos + 1.5, f"{currency_symbol}{(val_y/1000 if val_y else 0):,.0f}k")
             
         self.set_draw_color(*self.primary_color)
         for p in valid_points:
@@ -164,13 +164,13 @@ def generate_market_report(data):
     box_w = (pdf.w - 30) / 3
     pdf.set_font('Arial', 'B', 9)
     pdf.set_text_color(*pdf.secondary_color)
-    pdf.cell(box_w, 8, ' PRECIO PROMEDIO', 1, 0, 'C', fill=True); pdf.cell(5, 8, '', 0, 0)
-    pdf.cell(box_w, 8, ' PRECIO / m2', 1, 0, 'C', fill=True); pdf.cell(5, 8, '', 0, 0)
+    pdf.cell(box_w, 8, ' PRECIO MERCADO', 1, 0, 'C', fill=True); pdf.cell(5, 8, '', 0, 0)
+    pdf.cell(box_w, 8, ' m2 ESTIMADO', 1, 0, 'C', fill=True); pdf.cell(5, 8, '', 0, 0)
     pdf.cell(box_w, 8, ' MUESTRA', 1, 1, 'C', fill=True)
     
     pdf.set_font('Arial', 'B', 14); pdf.set_text_color(*pdf.primary_color)
-    avg_total = stats.get('average_total_price')
-    avg_m2 = stats.get('average_price_per_m2')
+    avg_total = stats.get('median_total_price') or stats.get('average_total_price')
+    avg_m2 = stats.get('median_price_per_m2') or stats.get('average_price_per_m2')
     pdf.cell(box_w, 12, f"{currency_symbol} {(avg_total or 0):,.0f}", 1, 0, 'C')
     pdf.cell(5, 12, '', 0, 0)
     pdf.cell(box_w, 12, f"{currency_symbol} {(avg_m2 or 0):,.0f}", 1, 0, 'C')
@@ -183,13 +183,14 @@ def generate_market_report(data):
     
     # 1. Distribución por Portal
     sources = data.get('data', {}).get('source_breakdown', {})
-    pdf.draw_bar_chart('DISTRIBUCIÓN POR PORTAL', sources, color=pdf.primary_color, width=90)
+    pdf.draw_bar_chart('DISTRIBUCIÓN POR PORTAL', sources, color=pdf.primary_color, width=80)
     mid_y1 = pdf.get_y()
     
     # 2. Rango de Precios (Fijos)
     pdf.set_y(curr_y)
-    pdf.set_x(110) # Mover a la derecha
+    pdf.set_x(120) # Mover más a la derecha
     
+    # ... (rest of price range logic)
     properties = data.get('data', {}).get('properties_sample', [])
     price_ranges = {
         '0-200k': 0,
@@ -206,18 +207,17 @@ def generate_market_report(data):
         elif price < 5000000: price_ranges['1M-5M'] += 1
         else: price_ranges['5M+'] += 1
     
-    # Dibujar manualmente para que flote a la derecha
-    pdf.set_x(110)
+    pdf.set_x(120)
     pdf.set_font('Arial', 'B', 11); pdf.set_text_color(31, 41, 55)
-    pdf.cell(90, 10, 'DISTRIBUCIÓN POR RANGO', 0, 1, 'L')
+    pdf.cell(80, 10, 'DISTRIBUCIÓN POR RANGO', 0, 1, 'L')
     max_range = max(price_ranges.values()) if price_ranges.values() else 1
     for label, val in price_ranges.items():
-        pdf.set_x(110)
+        pdf.set_x(120)
         pdf.set_font('Arial', '', 9); pdf.cell(25, 7, label, 0, 0)
-        bar_w = (val / max_range) * 50 if max_range > 0 else 0
-        pdf.set_fill_color(243, 244, 246); pdf.rect(pdf.get_x(), pdf.get_y()+1.5, 50, 4, 'F')
+        bar_w = (val / max_range) * 40 if max_range > 0 else 0
+        pdf.set_fill_color(243, 244, 246); pdf.rect(pdf.get_x(), pdf.get_y()+1.5, 40, 4, 'F')
         pdf.set_fill_color(*pdf.primary_color); pdf.rect(pdf.get_x(), pdf.get_y()+1.5, bar_w, 4, 'F')
-        pdf.set_x(pdf.get_x() + 55)
+        pdf.set_x(pdf.get_x() + 45)
         pdf.cell(10, 7, str(val), 0, 1)
     
     mid_y2 = pdf.get_y()
@@ -229,17 +229,16 @@ def generate_market_report(data):
     # 3. Comparativa por Barrio (Histórico)
     history = data.get('history', [])
     if not history:
-        # Si no hay historia, mostrar solo el barrio actual como barra destacada
         history = [{'zona': zone, 'precio_promedio': avg_total}]
     
     hist_dict = {h['zona']: h['precio_promedio'] for h in history}
-    pdf.draw_bar_chart('PRECIO PROMEDIO POR BARRIO', hist_dict, color=pdf.success_color, suffix=currency_symbol, width=90)
+    pdf.draw_bar_chart('PRECIO MERCADO POR BARRIO', hist_dict, color=pdf.success_color, suffix=currency_symbol, width=80)
     mid_y1 = pdf.get_y()
     
     # 4. Gráfico de dispersión
     pdf.set_y(curr_y)
-    pdf.set_x(110)
-    pdf.draw_scatter_plot('TENDENCIA: PRECIO vs SUPERFICIE', properties, currency_symbol, width=90)
+    pdf.set_x(120)
+    pdf.draw_scatter_plot('TENDENCIA: PRECIO vs SUPERFICIE', properties, currency_symbol, width=80)
     mid_y2 = pdf.get_y()
     
     pdf.set_y(max(mid_y1, mid_y2) + 10)
