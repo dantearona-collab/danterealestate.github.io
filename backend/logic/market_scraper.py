@@ -564,17 +564,23 @@ class BaseScraper(ABC):
             # Esperar a que aparezcan los resultados (Zonaprop es pesado)
             wait = WebDriverWait(driver, 25)
             try:
-                # Buscar cualquier indicador de que hay contenido
-                wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "body")))
-                
-                # Zonaprop es muy pesado y reactivo, requiere más tiempo
-                if self.source_name == 'zonaprop':
-                    time.sleep(random.uniform(8, 12))
+                # Espera inteligente dependiendo del portal
+                if self.source_name == 'mercadolibre':
+                    # Esperar hasta 15s a que se resuelva el Challenge y aparezcan las tarjetas
+                    wait = WebDriverWait(driver, 15)
+                    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".poly-card, .ui-search-layout__item, .ui-search-result")))
+                    time.sleep(1) # Pequeña pausa extra para asegurar renderizado completo
                 else:
-                    # MercadoLibre y Argenprop cargan más rápido
-                    time.sleep(random.uniform(2, 4))
+                    # Buscar cualquier indicador de que hay contenido
+                    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "body")))
+                    
+                    # Zonaprop es muy pesado y reactivo, requiere más tiempo
+                    if self.source_name == 'zonaprop':
+                        time.sleep(random.uniform(8, 12))
+                    else:
+                        time.sleep(random.uniform(2, 4))
             except:
-                logger.warning(f"[{self.source_name}] Timeout esperando carga completa, continuando...")
+                logger.warning(f"[{self.source_name}] Timeout esperando carga de elementos específicos, continuando...")
             
             # Intentar scroll para cargar contenido perezoso
             try:
