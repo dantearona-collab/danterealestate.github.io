@@ -223,13 +223,25 @@ def generate_market_report(data):
         pdf.set_y(35)
     
     # --- BLOQUE DE GRÁFICOS 2 (COMPARATIVA BARRIOS Y TENDENCIA) ---
-    # --- BLOQUE DE GRÁFICOS 2 (COMPARATIVA BARRIOS Y TENDENCIA) ---
     # 3. Comparativa por Barrio (Histórico)
     history = data.get('history', [])
     if not history:
         history = [{'zona': zone, 'precio_promedio': avg_total}]
     
-    hist_dict = {h['zona']: h['precio_promedio'] for h in history}
+    # ✅ FILTRO DE SEGURIDAD PARA EL HISTORIAL
+    # Evita que valores absurdos (outliers viejos) arruinen el gráfico
+    hist_filtered = []
+    for h in history:
+        val = h.get('precio_promedio', 0)
+        # Si es alquiler y supera 2M, es un error histórico, lo ignoramos
+        if operation == 'alquiler' and val > 2000000:
+            continue
+        hist_filtered.append(h)
+    
+    if not hist_filtered:
+        hist_filtered = [{'zona': zone, 'precio_promedio': avg_total}]
+
+    hist_dict = {h['zona']: h['precio_promedio'] for h in hist_filtered}
     pdf.draw_bar_chart('PRECIO MERCADO POR BARRIO', hist_dict, color=pdf.success_color, suffix=currency_symbol, width=180)
     pdf.ln(10)
     
