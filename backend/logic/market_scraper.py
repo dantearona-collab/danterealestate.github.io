@@ -1297,7 +1297,7 @@ class MarketAnalyzer:
                 "currency": prop.price_currency, "price_m2": prop.price_per_m2,
                 "surface": prop.surface_total, "address": prop.address, "url": prop.url,
                 "operation_type": prop.operation_type, "property_type": prop.property_type,
-                "surface_warning": has_low_surface
+                "surface_warning": not has_valid_surface
             })
         
         # 5. FILTRO DE OUTLIERS (IQR)
