@@ -566,8 +566,13 @@ class BaseScraper(ABC):
             try:
                 # Buscar cualquier indicador de que hay contenido
                 wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "body")))
-                # Dar un tiempo extra generoso para Zonaprop y otros sitios reactivos
-                time.sleep(random.uniform(8, 12))
+                
+                # Zonaprop es muy pesado y reactivo, requiere más tiempo
+                if self.source_name == 'zonaprop':
+                    time.sleep(random.uniform(8, 12))
+                else:
+                    # MercadoLibre y Argenprop cargan más rápido
+                    time.sleep(random.uniform(2, 4))
             except:
                 logger.warning(f"[{self.source_name}] Timeout esperando carga completa, continuando...")
             
