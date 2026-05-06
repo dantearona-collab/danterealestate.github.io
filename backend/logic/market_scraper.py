@@ -91,6 +91,7 @@ class MarketStats:
     sample_size: int
     average_total_price: Optional[float]
     median_total_price: Optional[float]
+    average_price_per_m2: Optional[float]
     median_price_per_m2: Optional[float]
     min_price_per_m2: Optional[float]
     max_price_per_m2: Optional[float]
