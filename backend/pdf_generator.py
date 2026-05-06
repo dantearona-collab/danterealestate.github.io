@@ -183,18 +183,13 @@ def generate_market_report(data):
     pdf.ln(10)
 
     # --- BLOQUE DE GRÁFICOS 1 (FUENTES Y RANGOS) ---
-    curr_y = pdf.get_y()
-    
+    # --- BLOQUE DE GRÁFICOS 1 (FUENTES Y RANGOS) ---
     # 1. Distribución por Portal
     sources = data.get('data', {}).get('source_breakdown', {})
-    pdf.draw_bar_chart('DISTRIBUCIÓN POR PORTAL', sources, color=pdf.primary_color, width=80)
-    mid_y1 = pdf.get_y()
+    pdf.draw_bar_chart('DISTRIBUCIÓN POR PORTAL', sources, color=pdf.primary_color, width=180)
+    pdf.ln(10)
     
-    # 2. Rango de Precios (Fijos)
-    pdf.set_y(curr_y)
-    pdf.set_x(120) # Mover más a la derecha
-    
-    # ... (rest of price range logic)
+    # 2. Rango de Precios
     properties = data.get('data', {}).get('properties_sample', [])
     price_ranges = {
         '0-200k': 0,
@@ -211,48 +206,46 @@ def generate_market_report(data):
         elif price < 5000000: price_ranges['1M-5M'] += 1
         else: price_ranges['5M+'] += 1
     
-    pdf.set_x(120)
     pdf.set_font('Arial', 'B', 11); pdf.set_text_color(31, 41, 55)
-    pdf.cell(80, 10, 'DISTRIBUCIÓN POR RANGO', 0, 1, 'L')
+    pdf.cell(180, 10, 'DISTRIBUCIÓN POR RANGO DE PRECIOS', 0, 1, 'L')
     max_range = max(price_ranges.values()) if price_ranges.values() else 1
     for label, val in price_ranges.items():
-        pdf.set_x(120)
-        pdf.set_font('Arial', '', 9); pdf.cell(25, 7, label, 0, 0)
-        bar_w = (val / max_range) * 40 if max_range > 0 else 0
-        pdf.set_fill_color(243, 244, 246); pdf.rect(pdf.get_x(), pdf.get_y()+1.5, 40, 4, 'F')
+        pdf.set_font('Arial', '', 9); pdf.cell(30, 7, label, 0, 0)
+        bar_w = (val / max_range) * 120 if max_range > 0 else 0
+        pdf.set_fill_color(243, 244, 246); pdf.rect(pdf.get_x(), pdf.get_y()+1.5, 120, 4, 'F')
         pdf.set_fill_color(*pdf.primary_color); pdf.rect(pdf.get_x(), pdf.get_y()+1.5, bar_w, 4, 'F')
-        pdf.set_x(pdf.get_x() + 45)
-        pdf.cell(10, 7, str(val), 0, 1)
+        pdf.set_x(pdf.get_x() + 125)
+        pdf.cell(20, 7, str(val), 0, 1)
     
-    mid_y2 = pdf.get_y()
-    pdf.set_y(max(mid_y1, mid_y2) + 5)
+    pdf.ln(10)
+    if pdf.get_y() > 200:
+        pdf.add_page()
+        pdf.set_y(35)
     
     # --- BLOQUE DE GRÁFICOS 2 (COMPARATIVA BARRIOS Y TENDENCIA) ---
-    curr_y = pdf.get_y()
-    
+    # --- BLOQUE DE GRÁFICOS 2 (COMPARATIVA BARRIOS Y TENDENCIA) ---
     # 3. Comparativa por Barrio (Histórico)
     history = data.get('history', [])
     if not history:
         history = [{'zona': zone, 'precio_promedio': avg_total}]
     
     hist_dict = {h['zona']: h['precio_promedio'] for h in history}
-    pdf.draw_bar_chart('PRECIO MERCADO POR BARRIO', hist_dict, color=pdf.success_color, suffix=currency_symbol, width=80)
-    mid_y1 = pdf.get_y()
+    pdf.draw_bar_chart('PRECIO MERCADO POR BARRIO', hist_dict, color=pdf.success_color, suffix=currency_symbol, width=180)
+    pdf.ln(10)
     
-    # 4. Gráfico de dispersión
-    pdf.set_y(curr_y)
-    pdf.set_x(120)
-    pdf.draw_scatter_plot('TENDENCIA: PRECIO vs SUPERFICIE', properties, currency_symbol, width=80)
-    mid_y2 = pdf.get_y()
-    
-    pdf.set_y(max(mid_y1, mid_y2) + 15)
-    
-    # Salto de página preventivo si queda poco espacio
-    if pdf.get_y() > 220:
+    # Verificar espacio para el gráfico de tendencia
+    if pdf.get_y() > 200:
         pdf.add_page()
         pdf.set_y(35)
+
+    # 4. Gráfico de dispersión
+    pdf.draw_scatter_plot('TENDENCIA: PRECIO vs SUPERFICIE', properties, currency_symbol, width=180)
+    pdf.ln(15)
     
-    if pdf.get_y() > 180: pdf.add_page()
+    # Salto de página para el listado detallado
+    if pdf.get_y() > 180:
+        pdf.add_page()
+        pdf.set_y(35)
 
     # --- LISTADO DETALLADO ---
     pdf.set_fill_color(*pdf.primary_color); pdf.set_text_color(255, 255, 255)
