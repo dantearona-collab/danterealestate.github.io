@@ -2,6 +2,14 @@
 Backend para Dante Propiedades - Asistente Inmobiliario con IA
 """
 import os
+import sys
+
+# ✅ ASEGURAR QUE LA CARPETA BACKEND ESTÉ EN EL PYTHONPATH
+# Esto corrige errores de ModuleNotFoundError en Render/Producción
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
 import re
 import json
 import time
@@ -42,7 +50,6 @@ from logic.database import (
     DB_PATH,
     LOG_PATH
 )
-from logic.environ_database import init_environ_analysis_db, get_environ_analysis, save_environ_analysis, is_environ_analysis_expired, log_environ_analysis_request
 from logic.filters import detect_filters
 from logic.gemini_client import call_gemini_with_rotation, build_prompt
 from logic.filter_data import BARRIOS, OPERACIONES, TIPOS
