@@ -81,6 +81,13 @@
         "last_update": "2026-03-19 19:52",
         "source": "scraping.json",
         "currency": "USD"
+      },
+      "ph": {
+        "avg_m2": 1197.63,
+        "muestra": 36,
+        "last_update": "2026-05-06 21:41",
+        "source": "scraping.json",
+        "currency": "USD"
       }
     },
     "alquiler": {
@@ -145,9 +152,9 @@
   "san telmo": {
     "alquiler": {
       "departamento": {
-        "avg_m2": 17009.04,
-        "muestra": 57,
-        "last_update": "2026-05-06 08:16",
+        "avg_m2": 17252.24,
+        "muestra": 62,
+        "last_update": "2026-05-06 12:34",
         "source": "scraping.json",
         "currency": "ARS"
       }
