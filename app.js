@@ -5697,7 +5697,7 @@ function closePropertyPanelSimple() {
 window.createPropertyPanelSimple = createPropertyPanelSimple;
 window.closePropertyPanelSimple = closePropertyPanelSimple;
 // ---------- 360 Viewer Modal ----------
-let pannellumViewer = null;
+// Duplicate declaration removed – using earlier pannellumViewer variable
 let tourState = { images: [], index: 0, title: '' };
 
 function openPannellumModal(baseImages, title) {
