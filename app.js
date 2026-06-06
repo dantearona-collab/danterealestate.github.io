@@ -927,7 +927,7 @@ function createPropertyCard(property) {
 
             <!-- BOTÓN 360 -->
             ${(property.imagenes_360 && Array.isArray(property.imagenes_360) && property.imagenes_360.length > 0) ? `
-            <button class="btn-360" data-images='${JSON.stringify(property.imagenes_360)}' data-title="${property.titulo}">
+            <button class="btn-360" data-images='${JSON.stringify((property.imagenes_360 || []).filter(Boolean))}' data-title="${property.titulo}">
                 🔄 Ver recorrido 360
             </button>
             ` : ''}
