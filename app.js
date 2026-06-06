@@ -5784,19 +5784,20 @@ function prevTour() {
 }
 
 function closePannellumModal(event) {
-    // Ensure overlay exists
     const overlay = document.getElementById('pannellumOverlay');
     if (!overlay) return;
-    // If an event is provided, only close when clicking on the overlay background
-    if (event && event.target !== overlay) return;
-    // Remove overlay (which also removes its child elements like close button and nav)
+    // Allow closing when clicking the overlay background or the close button
+    if (event && event.target !== overlay && !event.target.classList.contains('pannellum-close')) {
+        return;
+    }
+    // Remove overlay and its children
     overlay.remove();
-    // Destroy pannellum viewer instance safely
+    // Destroy viewer
     if (window.pannellumViewer) {
         window.pannellumViewer.destroy();
         window.pannellumViewer = null;
     }
-    // Optionally, remove the injected style element to avoid duplicates (if present)
+    // Cleanup injected style
     const styleEl = document.querySelector('style[data-pannellum-close]');
     if (styleEl) styleEl.remove();
 }
