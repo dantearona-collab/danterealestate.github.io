@@ -5719,6 +5719,16 @@ function openPannellumModal(baseImages, title) {
         `;
         overlay.onclick = closePannellumModal;
         document.body.appendChild(overlay);
+        // Close button (glass‑morphic)
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'pannellum-close';
+        closeBtn.innerHTML = '&times;';
+        closeBtn.onclick = closePannellumModal;
+        overlay.appendChild(closeBtn);
+// Add glass‑morphic close button style
+const overlayStyle = document.createElement('style');
+overlayStyle.textContent = `.pannellum-close{\n    position:absolute;\n    top:12px;\n    right:12px;\n    background:rgba(255,255,255,0.15);\n    border:none;\n    border-radius:50%;\n    width:36px;\n    height:36px;\n    font-size:24px;\n    color:white;\n    backdrop-filter:blur(5px);\n    cursor:pointer;\n    transition:transform 0.2s ease,background 0.2s ease;\n}\n.pannellum-close:hover{\n    transform:scale(1.1);\n    background:rgba(255,255,255,0.25);\n}`;
+document.head.appendChild(overlayStyle);
     }
 
     // Create container for viewer
