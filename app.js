@@ -6,6 +6,21 @@
 // ========================================
 let imageOptimizer = null;
 
+function getBestImagePath(baseName) {
+    const dir = IMG_DIR.replace('Api PAGINAWEB-IA', 'Api PAGINAWEB-IA/imgs/360'); // ruta relativa al sitio
+    if (imageOptimizer.supportsAVIF) {
+        return `${dir}/${baseName}.avif`;
+    }
+    if (imageOptimizer.supportsWebP) {
+        return `${dir}/${baseName}.webp`;
+    }
+    // Fallback a la original (jpg / png)
+    return `${dir}/${baseName}.jpg`;
+}
+
+
+
+
 function initImageOptimizer(options = {}) {
     if (!imageOptimizer) {
         // Inicializar con opciones por defecto
@@ -15,30 +30,42 @@ function initImageOptimizer(options = {}) {
             preloadNext: true,
             ...options
         };
-        
+
         // Crear instancia global
         imageOptimizer = {
             options: defaultOptions,
             preloadedImages: new Set(),
             supportsWebP: false,
-            
-            checkWebPSupport: function() {
+
+            checkWebPSupport: function () {
                 const webpCanvas = document.createElement('canvas');
                 webpCanvas.width = 1;
                 webpCanvas.height = 1;
                 this.supportsWebP = webpCanvas.toDataURL('image/webp') !== webpCanvas.toDataURL('image/png');
                 console.log('🖼️ WebP soportado:', this.supportsWebP);
             },
-            
-            preloadImage: function(src) {
+
+            // En app.js – justo después de la función checkWebPSupport
+            checkAVIFSupport: function () {
+                const avifCanvas = document.createElement('canvas');
+                avifCanvas.width = 1; avifCanvas.height = 1;
+                // Si el dato resultante es distinto del PNG, AVIF está soportado
+                this.supportsAVIF = avifCanvas.toDataURL('image/avif')
+                    !== avifCanvas.toDataURL('image/png');
+                console.log('🖼️ AVIF soportado:', this.supportsAVIF);
+            },
+
+
+            preloadImage: function (src) {
                 if (this.preloadedImages.has(src)) return;
                 const img = new Image();
                 img.src = src;
                 this.preloadedImages.add(src);
             }
         };
-        
+
         imageOptimizer.checkWebPSupport();
+        imageOptimizer.checkAVIFSupport();
         console.log('✅ Image Quality Optimizer inicializado');
     }
     return imageOptimizer;
@@ -437,10 +464,10 @@ let tituloPropiedad = '';
 // Función para crear el slider de imágenes (Ahora clickeable para abrir modal + OPTIMIZADO)
 function createImageSlider(property) {
     const fotos = property.fotos || [];
-    
+
     // Inicializar optimizador si no está listo
     if (!imageOptimizer) initImageOptimizer();
-    
+
     // Precarga inteligente: precargar la siguiente imagen
     if (fotos.length > 1) {
         setTimeout(() => imageOptimizer.preloadImage(fotos[1]), 100);
@@ -493,7 +520,7 @@ function createImageSlider(property) {
                  onerror="this.src='INSTITUCIONAL 3.png'">
         </div>
     `).join('');
-    
+
     // Precarga de imágenes adyacentes para mejor UX
     const preloadAdjacentImages = () => {
         fotos.forEach((foto, idx) => {
@@ -590,7 +617,7 @@ function prevSlide(propertyId) {
     const newIndex = current > 0 ? current - 1 : totalSlides - 1;
 
     showSlide(propertyId, newIndex);
-    
+
     // Precarga de la siguiente imagen
     if (imageOptimizer) {
         const property = globalData.properties.find(p => p.id_temporal === propertyId);
@@ -610,7 +637,7 @@ function nextSlide(propertyId) {
     const newIndex = current < totalSlides - 1 ? current + 1 : 0;
 
     showSlide(propertyId, newIndex);
-    
+
     // Precarga de la siguiente imagen
     if (imageOptimizer) {
         const property = globalData.properties.find(p => p.id_temporal === propertyId);
@@ -5669,6 +5696,92 @@ function closePropertyPanelSimple() {
 // Hacer función disponible globalmente
 window.createPropertyPanelSimple = createPropertyPanelSimple;
 window.closePropertyPanelSimple = closePropertyPanelSimple;
+// ---------- 360 Viewer Modal ----------
+let pannellumViewer = null;
+let tourState = { images: [], index: 0, title: '' };
+
+function openPannellumModal(baseImages, title) {
+    // Convert base names to optimal paths
+    const imgPaths = baseImages.map(name => getBestImagePath(name));
+    tourState.images = imgPaths;
+    tourState.index = 0;
+    tourState.title = title;
+
+    // Create overlay if not exists
+    let overlay = document.getElementById('pannellumOverlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'pannellumOverlay';
+        overlay.style.cssText = `
+            position: fixed; top:0; left:0; width:100vw; height:100vh;
+            background: rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center;
+            z-index:10000; backdrop-filter: blur(5px);
+        `;
+        overlay.onclick = closePannellumModal;
+        document.body.appendChild(overlay);
+    }
+
+    // Create container for viewer
+    let container = document.getElementById('pannellumContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'pannellumContainer';
+        container.style.width = '80vw';
+        container.style.height = '80vh';
+        container.style.position = 'relative';
+        overlay.appendChild(container);
+    }
+
+    // Add navigation controls
+    const nav = document.createElement('div');
+    nav.style.position = 'absolute';
+    nav.style.bottom = '10px';
+    nav.style.left = '50%';
+    nav.style.transform = 'translateX(-50%)';
+    nav.style.display = 'flex';
+    nav.style.gap = '12px';
+    nav.innerHTML = `
+        <button onclick="prevTour()" style="background:#232deb;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;">◀ Prev</button>
+        <button onclick="nextTour()" style="background:#232deb;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;">Next ▶</button>
+    `;
+    container.appendChild(nav);
+
+    // Initialize pannellum
+    if (pannellumViewer) {
+        pannellumViewer.destroy();
+    }
+    pannellumViewer = pannellum.viewer('pannellumContainer', {
+        type: 'equirectangular',
+        panorama: imgPaths[0],
+        autoLoad: true,
+        showZoomCtrl: false,
+        compass: false,
+        title: title
+    });
+}
+
+function nextTour() {
+    if (tourState.images.length === 0) return;
+    tourState.index = (tourState.index + 1) % tourState.images.length;
+    pannellumViewer.setPanorama(tourState.images[tourState.index]);
+}
+
+function prevTour() {
+    if (tourState.images.length === 0) return;
+    tourState.index = (tourState.index - 1 + tourState.images.length) % tourState.images.length;
+    pannellumViewer.setPanorama(tourState.images[tourState.index]);
+}
+
+function closePannellumModal(event) {
+    // Close only when clicking on overlay background
+    if (event && event.target !== document.getElementById('pannellumOverlay')) return;
+    const overlay = document.getElementById('pannellumOverlay');
+    if (overlay) overlay.remove();
+    if (pannellumViewer) {
+        pannellumViewer.destroy();
+        pannellumViewer = null;
+    }
+}
 
 console.log('✅ Panel simple de respaldo cargado');
 console.log('✅ Sistema Dante Propiedades completamente cargado');
