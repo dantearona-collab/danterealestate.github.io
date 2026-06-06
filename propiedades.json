@@ -456,9 +456,9 @@
     "barrio": "Belgrano",
     "precio": 695000,
     "ambientes": 4,
-    "metros_cuadrados": 400,
+    "metros_cuadrados": 450,
     "operacion": "venta",
-    "tipo": "departamento",
+    "tipo": "Casa",
     "descripcion": "Casa en Venta Belgrano - Lote. 8,66 X 37 m. - 400 m². - Bajo Belgrano CABA",
     "direccion": "",
     "direccion_completa": "Coronel Carlos Sourigues 2500, Bajo Belgrano, CABA",
@@ -476,7 +476,7 @@
     "aire_acondicionado": "Si",
     "info_multimedia": "Fotos de la propiedad y terraza",
     "documentos": [
-      "fichas/FICHA_UF015.pdf"
+      "fichas/FICHA_UF016.pdf"
     ],
     "videos": [],
     "fotos": [
@@ -513,7 +513,6 @@
       "imgs/UF016-31.jpeg",
       "imgs/UF016-32.jpeg",
       "imgs/UF016-33.jpeg"
-
     ],
     "imagenes_360": [],
     "fecha_procesamiento": "2025-11-06T14:30:15.456789"
