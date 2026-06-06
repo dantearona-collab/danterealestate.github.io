@@ -5784,14 +5784,21 @@ function prevTour() {
 }
 
 function closePannellumModal(event) {
-    // Close only when clicking on overlay background
-    if (event && event.target !== document.getElementById('pannellumOverlay')) return;
+    // Ensure overlay exists
     const overlay = document.getElementById('pannellumOverlay');
-    if (overlay) overlay.remove();
-    if (pannellumViewer) {
-        pannellumViewer.destroy();
-        pannellumViewer = null;
+    if (!overlay) return;
+    // If an event is provided, only close when clicking on the overlay background
+    if (event && event.target !== overlay) return;
+    // Remove overlay (which also removes its child elements like close button and nav)
+    overlay.remove();
+    // Destroy pannellum viewer instance safely
+    if (window.pannellumViewer) {
+        window.pannellumViewer.destroy();
+        window.pannellumViewer = null;
     }
+    // Optionally, remove the injected style element to avoid duplicates (if present)
+    const styleEl = document.querySelector('style[data-pannellum-close]');
+    if (styleEl) styleEl.remove();
 }
 
 console.log('✅ Panel simple de respaldo cargado');
