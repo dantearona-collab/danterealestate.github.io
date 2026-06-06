@@ -938,7 +938,7 @@ function createPropertyCard(property) {
                     📍 ${property.direccion_completa || `${property.direccion}, ${property.barrio}, Argentina`}
                 </div>
                 <div style="text-align: center !important; margin-bottom: 10px !important;">
-                    <button onclick="showPropertyMap('${property.id_temporal}', '${property.direccion_completa ? property.direccion_completa.replace(/'/g, "\\'") : `${property.direccion}, ${property.barrio}, Argentina`.replace(/'/g, "\\'")}', '${property.titulo.replace(/'/g, "\\'")}')"
+                    <button onclick="showPropertyMap('${property.id_temporal}', '${(property.direccion_completa || `${property.direccion}, ${property.barrio}, Argentina`).replace(/'/g, "\\'")}', '${(property.titulo || '').replace(/'/g, "\\'")}')"
                             style="background: #232deb !important; color: white !important; border: none !important; padding: 10px 20px !important; border-radius: 6px !important; cursor: pointer !important; font-size: 14px !important; font-weight: 600 !important; transition: all 0.3s ease !important; display: inline-flex !important; align-items: center !important; gap: 8px !important;"
                             onmouseover="this.style.background='#1a1db4' !important; transform: 'translateY(-2px)' !important" 
                             onmouseout="this.style.background='#232deb' !important; transform: 'translateY(0)' !important">
