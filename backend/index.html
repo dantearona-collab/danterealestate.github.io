@@ -3004,10 +3004,9 @@
                     </div>
 
                     <!-- Botón 360 en fallback -->
-                    ${(prop.imagenes_360 && Array.isArray(prop.imagenes_360) && prop.imagenes_360.length > 0) ? `
+                                        ${(prop.imagenes_360 && Array.isArray(prop.imagenes_360) && prop.imagenes_360.length > 0) ? `
                     <div style="margin-top: 10px; margin-bottom: 10px;">
-                        <button class="btn-360" data-images='${JSON.stringify(prop.imagenes_360)}' data-title="${prop.titulo}"
-                                onclick='if(typeof openPannellumModal==="function") openPannellumModal(${JSON.stringify(prop.imagenes_360)}, "${prop.titulo}")'>
+                        
                             🔄 Ver recorrido 360
                         </button>
                     </div>
