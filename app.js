@@ -3268,7 +3268,6 @@ document.addEventListener('keydown', function(event) {
 
 console.log('✅ Sistema 360 Viewer unificado y corregido');
 
-
 // ========================================
 // FUNCIÓN ENTORNO CON IA - INTEGRACIÓN ARCHIVO ENTORNO.JSON (CMS)
 // ========================================
@@ -5714,111 +5713,6 @@ function closePropertyPanelSimple() {
 // Hacer función disponible globalmente
 window.createPropertyPanelSimple = createPropertyPanelSimple;
 window.closePropertyPanelSimple = closePropertyPanelSimple;
-// ---------- 360 Viewer Modal ----------
-// Duplicate declaration removed – using earlier pannellumViewer variable
-let tourState = { images: [], index: 0, title: '' };
-
-function openPannellumModal(baseImages, title) {
-    // Convert base names to optimal paths
-    const imgPaths = baseImages.map(name => getBestImagePath(name));
-    tourState.images = imgPaths;
-    tourState.index = 0;
-    tourState.title = title;
-
-    // Create overlay if not exists
-    let overlay = document.getElementById('pannellumOverlay');
-    if (!overlay) {
-        function closePannellumModal(event) {
-            // Close the 360 viewer overlay and clean up the viewer instance
-            const overlay = document.getElementById('pannellumOverlay');
-            if (overlay) {
-                overlay.remove();
-            }
-            if (pannellumViewer) {
-                pannellumViewer.destroy();
-                pannellumViewer = null;
-            }
-        }
-        overlay = document.createElement('div');
-        overlay.id = 'pannellumOverlay';
-        overlay.style.cssText = `
-            position: fixed; top:0; left:0; width:100vw; height:100vh;
-            background: rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center;
-            z-index:10000; backdrop-filter: blur(5px);
-        `;
-        overlay.onclick = closePannellumModal;
-        document.body.appendChild(overlay);
-    }
-
-    // Create container for viewer
-    let container = document.getElementById('pannellumContainer');
-    if (!container) {
-        container = document.createElement('div');
-        container.id = 'pannellumContainer';
-        container.style.width = '80vw';
-        container.style.height = '80vh';
-        container.style.position = 'relative';
-        overlay.appendChild(container);
-    }
-
-    // Add navigation controls
-    const nav = document.createElement('div');
-    nav.style.position = 'absolute';
-    nav.style.bottom = '10px';
-    nav.style.left = '50%';
-    nav.style.transform = 'translateX(-50%)';
-    nav.style.display = 'flex';
-    nav.style.gap = '12px';
-    nav.innerHTML = `
-        <button onclick="prevTour()" style="background:#232deb;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;">◀ Prev</button>
-        <button onclick="nextTour()" style="background:#232deb;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;">Next ▶</button>
-    `;
-    container.appendChild(nav);
-
-    // Initialize pannellum
-    if (pannellumViewer) {
-        pannellumViewer.destroy();
-    }
-    pannellumViewer = pannellum.viewer('pannellumContainer', {
-        type: 'equirectangular',
-        panorama: imgPaths[0],
-        autoLoad: true,
-        showZoomCtrl: false,
-        compass: false,
-        title: title
-    });
-}
-
-function nextTour() {
-    if (tourState.images.length === 0) return;
-    tourState.index = (tourState.index + 1) % tourState.images.length;
-    pannellumViewer.setPanorama(tourState.images[tourState.index]);
-}
-
-function prevTour() {
-    if (tourState.images.length === 0) return;
-    tourState.index = (tourState.index - 1 + tourState.images.length) % tourState.images.length;
-    pannellumViewer.setPanorama(tourState.images[tourState.index]);
-}
-
-function closePannellumModal(event) {
-    const overlay = document.getElementById('pannellumOverlay');
-    if (!overlay) return;
-    // Allow closing when clicking the overlay background or the close button
-    if (event && event.target !== overlay && !event.target.classList.contains('pannellum-close')) {
-        return;
-    }
-    // Remove overlay and its children
-    overlay.remove();
-    // Destroy viewer
-    if (window.pannellumViewer) {
-        window.pannellumViewer.destroy();
-        window.pannellumViewer = null;
-    }
-    // Cleanup injected style
-    const styleEl = document.querySelector('style[data-pannellum-close]');
-    if (styleEl) styleEl.remove();
-}
 
 console.log('✅ Panel simple de respaldo cargado');
 console.log('✅ Sistema Dante Propiedades completamente cargado');
