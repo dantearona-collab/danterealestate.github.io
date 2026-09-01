@@ -8,3 +8,11 @@ venv/
 env/
 contactos_dante_propiedades.xlsx
 registro_contactos.log
+
+__pycache__/
+*.pyc
+  # tus claves de Gemini nunca deben subirse
+instance/     # base de datos SQLite local (puedes subirla si lo deseas)
+.envrc
+*.sqlite
+*.db
