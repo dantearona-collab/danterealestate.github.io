@@ -29,12 +29,19 @@ from datetime import datetime
 # ✅ CARGAR VARIABLES DE ENTORNO DESDE .env
 try:
     from dotenv import load_dotenv
-    # Buscar archivo .env en la misma carpeta que main-ai.py
-    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
-    if os.path.exists(env_path):
-        load_dotenv(env_path)
-        print("✅ Variables de entorno cargadas desde .env")
-    else:
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    candidate_paths = [
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env'),
+        os.path.join(project_root, '.env'),
+    ]
+    loaded = False
+    for env_path in candidate_paths:
+        if os.path.exists(env_path):
+            load_dotenv(env_path)
+            print(f"✅ Variables de entorno cargadas desde: {env_path}")
+            loaded = True
+            break
+    if not loaded:
         print("⚠️ Archivo .env no encontrado, usando variables del sistema")
 except ImportError:
     print("⚠️ python-dotenv no instalado, usando variables del sistema")
