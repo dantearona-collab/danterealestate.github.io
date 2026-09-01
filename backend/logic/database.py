@@ -80,6 +80,20 @@ def initialize_databases():
         )
     ''')
     
+    # Tabla de historial de conversaciones
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS historial_conversaciones (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            canal TEXT,
+            mensaje_usuario TEXT,
+            respuesta_bot TEXT,
+            timestamp REAL,
+            response_time REAL,
+            search_performed INTEGER,
+            results_count INTEGER
+        )
+    ''')
+
     # Tabla de historial de estadísticas de mercado
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS market_stats_history (
