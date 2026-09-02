@@ -199,6 +199,11 @@ No uses lenguaje técnico innecesario.
     return prompt.strip()
 
 
+def build_public_ai_prompt(context: Dict[str, Any]) -> str:
+    """Alias compatible con la integración del backend."""
+    return build_public_prompt(context)
+
+
 def build_public_ai_context_from_files(props_path: str = "propiedades.json", barrio_path: str = "entorno.json", market_map_path: str = "backend/market_valuation_map.json") -> Dict[str, Any]:
     """Combina propiedades + barrio + mercado para generar un contexto listo para la IA."""
     with open(props_path, "r", encoding="utf-8") as f:
