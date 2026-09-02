@@ -2,7 +2,11 @@ import os
 from typing import List
 
 from dotenv import load_dotenv
-from google import genai
+
+try:
+    from google import genai
+except Exception:
+    genai = None
 
 load_dotenv()
 
@@ -51,6 +55,10 @@ def get_fallback_response() -> str:
 
 def call_gemini_with_rotation(prompt: str) -> str:
     """Llama a Gemini usando una clave válida o retorna un fallback."""
+    if genai is None:
+        print("⚠️ google-genai no está instalado en este entorno; usando fallback.")
+        return get_fallback_response()
+
     if not API_KEYS:
         print("⚠️ No hay API keys configuradas")
         return get_fallback_response()
