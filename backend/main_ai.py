@@ -4,11 +4,14 @@ Backend para Dante Propiedades - Asistente Inmobiliario con IA
 import os
 import sys
 
-# ✅ ASEGURAR QUE LA CARPETA BACKEND ESTÉ EN EL PYTHONPATH
-# Esto corrige errores de ModuleNotFoundError en Render/Producción
+# ✅ ASEGURAR QUE EL PROYECTO Y LA CARPETA BACKEND ESTÉN EN EL PYTHONPATH
+# Esto corrige errores de ModuleNotFoundError en Render/Docker cuando se ejecuta
+# el backend como `uvicorn backend.main_ai:app` o desde un entorno sin CWD del repo.
 current_dir = os.path.dirname(os.path.abspath(__file__))
-if current_dir not in sys.path:
-    sys.path.insert(0, current_dir)
+project_root = os.path.dirname(current_dir)
+for path in [project_root, current_dir]:
+    if path and path not in sys.path:
+        sys.path.insert(0, path)
 
 import re
 import json
