@@ -4,14 +4,23 @@ Backend para Dante Propiedades - Asistente Inmobiliario con IA
 import os
 import sys
 
-# ✅ ASEGURAR QUE EL PROYECTO Y LA CARPETA BACKEND ESTÉN EN EL PYTHONPATH
-# Esto corrige errores de ModuleNotFoundError en Render/Docker cuando se ejecuta
-# el backend como `uvicorn backend.main_ai:app` o desde un entorno sin CWD del repo.
+# ✅ PRIORIDAD CORRECTA DEL PYTHONPATH
+# La raíz del proyecto debe ir primero para que `logic.*` resuelva el paquete correcto
+# y no el paquete duplicado que existe dentro de /backend.
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 for path in [project_root, current_dir]:
     if path and path not in sys.path:
-        sys.path.insert(0, path)
+        sys.path.append(path)
+
+# Reordenar explícitamente para garantizar prioridad de la raíz.
+if project_root in sys.path:
+    sys.path.remove(project_root)
+    sys.path.insert(0, project_root)
+
+if current_dir in sys.path:
+    sys.path.remove(current_dir)
+    sys.path.insert(1, current_dir)
 
 import re
 import json
