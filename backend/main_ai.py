@@ -38,8 +38,10 @@ from logic.database import (
 )
 from logic.filters import detect_filters
 from logic.gemini_client import call_gemini_with_rotation, build_prompt
+from logic.gemini_client import get_fallback_response
 from logic.filter_data import BARRIOS, OPERACIONES, TIPOS
 from logic.barrio_data import get_gastronomy_info, get_financial_info
+from logic.public_ai_context import build_property_public_context, build_public_prompt
 from logic.constants import USD_RATE
 from logic.environ_database import init_environ_analysis_db, get_environ_analysis, save_environ_analysis, is_environ_analysis_expired, log_environ_analysis_request
 
@@ -88,6 +90,39 @@ except ImportError:
 # ============================================
 
 BARRIOS_DB_PATH = os.environ.get('BARRIOS_DB_PATH', 'instance/barrios_data.db')
+ENTORNO_JSON_PATH = os.path.join(current_dir, 'entorno.json')
+MARKET_VALUATION_PATH = os.path.join(current_dir, 'market_valuation_map.json')
+
+
+def _load_json_file(path: str) -> Dict[str, Any]:
+    try:
+        with open(path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+            return data if isinstance(data, dict) else {}
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def _get_barrio_context(entorno_data: Dict[str, Any], barrio: str) -> Dict[str, Any]:
+    barrio_key = (barrio or '').strip().lower()
+    for key, value in entorno_data.items():
+        if str(key).strip().lower() == barrio_key and isinstance(value, dict):
+            return value
+    return {}
+
+
+def build_enriched_property_context(properties: List[Dict[str, Any]]) -> str:
+    entorno_data = _load_json_file(ENTORNO_JSON_PATH)
+    market_data = _load_json_file(MARKET_VALUATION_PATH)
+    prompts = []
+    for property_data in properties[:5]:
+        barrio = property_data.get('barrio', '')
+        barrio_context = _get_barrio_context(entorno_data, barrio)
+        barrio_context['gastronomia_detallada'] = get_gastronomy_info(barrio)
+        barrio_context['servicios_financieros_detallados'] = get_financial_info(barrio)
+        context = build_property_public_context(property_data, barrio_context, market_data)
+        prompts.append(build_public_prompt(context))
+    return '\n\n--- OTRA PROPIEDAD ---\n\n'.join(prompts)
 
 def get_barrios_db_connection():
     """Obtiene conexión a la base de datos de barrios"""
@@ -872,10 +907,27 @@ Te ayudo a encontrar la propiedad ideal. Podés:
 
 ¿En qué tipo de propiedad estás interesado hoy?"""
         else:
-            # Siempre usar build_prompt (sin contexto enriquecido de public_ai_context)
             prompt = build_prompt(user_text, results, filters, channel, f"{style_hint}\n{contexto_dinamico}\n{contexto_historial}")
+            if results:
+                prompt += f"""
+
+CONTEXTO VERIFICADO DE LAS PROPIEDADES:
+{build_enriched_property_context(results)}
+
+Usa estos datos para responder. No inventes información y aclara cuando
+la valoración de mercado no esté disponible.
+"""
             metrics.increment_gemini_calls()
             answer = call_gemini_with_rotation(prompt)
+
+            if results and answer == get_fallback_response():
+                answer = "Encontré estas propiedades:\n" + "\n".join(
+                    f"- {item.get('titulo', 'Propiedad disponible')}: "
+                    f"{item.get('ambientes', 'N/D')} ambientes, "
+                    f"{item.get('metros_cuadrados', 'N/D')} m², "
+                    f"{item.get('moneda_precio', 'USD')} {item.get('precio', 'Consultar')}."
+                    for item in results[:5]
+                )
             
             if results and len(results) > 0:
                 print("🎯 DETECTADO: Hay resultados - limpiando duplicación en respuesta")
