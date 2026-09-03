@@ -22,6 +22,7 @@ BARRIOS = [
     "Mataderos",
     "Monte Castro",
     "Montserrat",
+    "Microcentro",
     "Nueva Pompeya",
     "Núñez",
     "Palermo",
