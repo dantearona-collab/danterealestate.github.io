@@ -32,6 +32,7 @@ from logic.database import (
     get_last_bot_response,
     log_conversation,
     add_property, 
+    get_db_connection, 
     DB_PATH,
     LOG_PATH
 )
