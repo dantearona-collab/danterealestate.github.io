@@ -7,69 +7,43 @@ import sys
 # ============================================
 # CONFIGURACIÓN DE SYS.PATH (SIMPLE Y ROBUSTA)
 # ============================================
-# Asegurar que el directorio donde está main_ai.py (backend) esté en sys.path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
-    sys.path.insert(0, current_dir)   # Prioridad máxima
+    sys.path.insert(0, current_dir)
 
-# Opcional: también agregar la raíz del proyecto si contiene 'logic'
 project_root = os.path.dirname(current_dir)
 logic_in_root = os.path.exists(os.path.join(project_root, "logic", "barrio_data.py"))
 if logic_in_root and project_root not in sys.path:
-    sys.path.append(project_root)     # Segundo lugar
+    sys.path.append(project_root)
 
-# (Opcional) Imprimir diagnóstico para verificar en logs de Render
-print(f"✅ sys.path configurado. current_dir: {current_dir}")
-print(f"✅ ¿logic/barrio_data.py en current_dir? {os.path.exists(os.path.join(current_dir, 'logic', 'barrio_data.py'))}")
-print(f"✅ ¿logic/barrio_data.py en project_root? {logic_in_root}")
+# Diagnóstico (para ver en los logs de Render)
+print(f"✅ current_dir: {current_dir}")
+print(f"✅ logic/barrio_data.py en current_dir? {os.path.exists(os.path.join(current_dir, 'logic', 'barrio_data.py'))}")
+print(f"✅ logic/barrio_data.py en project_root? {logic_in_root}")
 print(f"✅ sys.path final: {sys.path}")
 # ============================================
 
-# Ahora las importaciones de logic.* funcionarán
-from logic.database import ...
-from logic.filters import ...
+# Importaciones de lógica
+from logic.database import (
+    initialize_databases,
+    verificar_y_reparar_bd,
+    query_properties,
+    get_historial_canal,
+    get_last_bot_response,
+    log_conversation,
+    DB_PATH,
+    LOG_PATH
+)
+from logic.filters import detect_filters
+from logic.gemini_client import call_gemini_with_rotation, build_prompt
+from logic.filter_data import BARRIOS, OPERACIONES, TIPOS
 from logic.barrio_data import get_gastronomy_info, get_financial_info
-# ... resto del código
-
-import re
-import json
-import time
-from functools import lru_cache
-from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, HTTPException, Query
-from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
-from fastapi.openapi.utils import get_openapi
-from typing import Optional, Dict, Any, List
-from pydantic import BaseModel, Field
-from pathlib import Path
-import sqlite3
-from datetime import datetime"""
-Backend para Dante Propiedades - Asistente Inmobiliario con IA
-"""
-import os
-import sys
+from logic.constants import USD_RATE
+from logic.environ_database import init_environ_analysis_db, get_environ_analysis, save_environ_analysis, is_environ_analysis_expired, log_environ_analysis_request
+from logic.public_ai_context import build_property_public_context, build_public_prompt
 
 # ============================================
-# CONFIGURACIÓN DE SYS.PATH (SIMPLE Y ROBUSTA)
-# ============================================
-# Asegurar que el directorio donde está main_ai.py (backend) esté en sys.path
-current_dir = os.path.dirname(os.path.abspath(__file__))
-if current_dir not in sys.path:
-    sys.path.insert(0, current_dir)   # Prioridad máxima
-
-# Opcional: también agregar la raíz del proyecto si contiene 'logic'
-project_root = os.path.dirname(current_dir)
-logic_in_root = os.path.exists(os.path.join(project_root, "logic", "barrio_data.py"))
-if logic_in_root and project_root not in sys.path:
-    sys.path.append(project_root)     # Segundo lugar
-
-# (Opcional) Imprimir diagnóstico para verificar en logs de Render
-print(f"✅ sys.path configurado. current_dir: {current_dir}")
-print(f"✅ ¿logic/barrio_data.py en current_dir? {os.path.exists(os.path.join(current_dir, 'logic', 'barrio_data.py'))}")
-print(f"✅ ¿logic/barrio_data.py en project_root? {logic_in_root}")
-print(f"✅ sys.path final: {sys.path}")
+# FIN DE LA SECCIÓN DE IMPORTACIONES
 # ============================================
 
 import re
@@ -108,25 +82,6 @@ try:
 except ImportError:
     print("⚠️ python-dotenv no instalado, usando variables del sistema")
 
-# Importar lógica de negocio
-from logic.database import (
-    initialize_databases,
-    verificar_y_reparar_bd,
-    query_properties,
-    get_historial_canal,
-    get_last_bot_response,
-    log_conversation,
-    DB_PATH,
-    LOG_PATH
-)
-from logic.filters import detect_filters
-from logic.gemini_client import call_gemini_with_rotation, build_prompt
-from logic.filter_data import BARRIOS, OPERACIONES, TIPOS
-from logic.barrio_data import get_gastronomy_info, get_financial_info
-from logic.constants import USD_RATE
-from logic.environ_database import init_environ_analysis_db, get_environ_analysis, save_environ_analysis, is_environ_analysis_expired, log_environ_analysis_request
-from logic.public_ai_context import build_property_public_context, build_public_prompt
-
 # ============================================
 # INICIALIZACIÓN DE BASE DE DATOS DE BARRIOS (CMS)
 # ============================================
@@ -158,9 +113,6 @@ def init_barrios_db():
     conn.close()
     print("✅ Tabla barrios_data inicializada")
 
-
-
-
 def get_public_ai_context_for_property(property_data: Optional[dict]) -> Optional[dict]:
     """Construye el contexto público resumido para la IA usando barrio + mercado + propiedad."""
     if not property_data:
@@ -188,13 +140,6 @@ def get_public_ai_context_for_property(property_data: Optional[dict]) -> Optiona
 
     return build_property_public_context(property_data, barrio_context, market_map)
 
-
-from logic.barrio_data import get_gastronomy_info, get_financial_info, GASTRONOMY_DATA, FINANCIAL_DATA, get_location_specific_info, LOCATION_SPECIFIC_DATA
-from logic.environ_database import init_environ_analysis_db, get_environ_analysis, save_environ_analysis, is_environ_analysis_expired, log_environ_analysis_request
-
-# ⚠️ TEMPORALMENTE COMENTADO - causa conflictos de rutas
-# from api_barrios import barrios_app
-
 # ============================================
 # FUNCIÓN DE MIGRACIÓN DE DATOS ESTÁTICOS
 # ============================================
@@ -202,22 +147,8 @@ from logic.environ_database import init_environ_analysis_db, get_environ_analysi
 def migrar_datos_estaticos_a_db(solo_ejecutar_una_vez: bool = True, forzar: bool = False):
     """
     Migra los datos estáticos de barrio_data.py a la base de datos barrios_data.db.
-    
-    Esta función:
-    1. Lee los datos de GASTRONOMY_DATA y FINANCIAL_DATA de barrio_data.py
-    2. Los transforma al formato del CMS
-    3. Los inserta en la base de datos (solo si no existen o si se fuerza)
-    
-    Args:
-        solo_ejecutar_una_vez: Si True, solo ejecuta si no hay registros migrados previamente
-        forzar: Si True, sobrescribe datos existentes
-    
-    Returns:
-        dict con estadísticas de la migración
     """
     import os
-    
-    # Verificar flag de migración ya ejecutada
     migration_flag_file = os.path.join(os.path.dirname(BARRIOS_DB_PATH), '.migracion_estatica_completa')
     
     if solo_ejecutar_una_vez and os.path.exists(migration_flag_file) and not forzar:
@@ -234,24 +165,19 @@ def migrar_datos_estaticos_a_db(solo_ejecutar_una_vez: bool = True, forzar: bool
     conn = get_barrios_db_connection()
     cursor = conn.cursor()
     
-    # Contadores
     migrados = 0
     existentes = 0
     errores = 0
     barrios_procesados = set()
     
-    # Combinar todas las claves de ambos diccionarios
+    # Combinar todas las claves de los diccionarios importados
+    from logic.barrio_data import GASTRONOMY_DATA, FINANCIAL_DATA, LOCATION_SPECIFIC_DATA
     todos_barrios = set(GASTRONOMY_DATA.keys()) | set(FINANCIAL_DATA.keys()) | set(LOCATION_SPECIFIC_DATA.keys())
     
     print(f"📊 Barrios a procesar: {len(todos_barrios)}")
-    print(f"   - De GASTRONOMY_DATA: {len(GASTRONOMY_DATA)}")
-    print(f"   - De FINANCIAL_DATA: {len(FINANCIAL_DATA)}")
-    print(f"   - De LOCATION_SPECIFIC_DATA: {len(LOCATION_SPECIFIC_DATA)}")
-    print(f"   - Únicos: {len(todos_barrios)}")
     
     for barrio_nombre in sorted(todos_barrios):
         try:
-            # Verificar si ya existe en la base de datos
             cursor.execute('SELECT nombre, data FROM barrios_data WHERE nombre = ?', (barrio_nombre,))
             row = cursor.fetchone()
             
@@ -260,25 +186,19 @@ def migrar_datos_estaticos_a_db(solo_ejecutar_una_vez: bool = True, forzar: bool
                 existentes += 1
                 continue
             
-            # Obtener datos de gastronomía
             gastro_data = GASTRONOMY_DATA.get(barrio_nombre, {})
             financial_data = FINANCIAL_DATA.get(barrio_nombre, {})
             location_data = LOCATION_SPECIFIC_DATA.get(barrio_nombre, {})
             
-            # Si no hay datos de ninguno, skip
             if not gastro_data and not financial_data and not location_data:
                 print(f"   ⚠️  Sin datos para '{barrio_nombre}'")
                 continue
             
-            # Construir estructura de datos para el CMS
             data = _construir_data_cms(barrio_nombre, gastro_data, financial_data, location_data)
-            
-            # Guardar en base de datos
             data_json = json.dumps(data, ensure_ascii=False, indent=2)
             actualizado_por = 'migracion_estatica'
             
             if row:
-                # Actualizar existente
                 cursor.execute('''
                     UPDATE barrios_data 
                     SET data = ?, actualizado_por = ?, fecha_actualizacion = CURRENT_TIMESTAMP
@@ -286,7 +206,6 @@ def migrar_datos_estaticos_a_db(solo_ejecutar_una_vez: bool = True, forzar: bool
                 ''', (data_json, actualizado_por, barrio_nombre))
                 print(f"   🔄 Actualizado: '{barrio_nombre}'")
             else:
-                # Insertar nuevo
                 cursor.execute('''
                     INSERT INTO barrios_data (nombre, data, actualizado_por)
                     VALUES (?, ?, ?)
@@ -301,8 +220,6 @@ def migrar_datos_estaticos_a_db(solo_ejecutar_una_vez: bool = True, forzar: bool
             errores += 1
     
     conn.commit()
-    
-    # Crear flag de migración completada
     if migrados > 0 or existentes > 0:
         with open(migration_flag_file, 'w') as f:
             f.write(f"Migración completada: {datetime.now().isoformat()}\n")
@@ -311,7 +228,6 @@ def migrar_datos_estaticos_a_db(solo_ejecutar_una_vez: bool = True, forzar: bool
             f.write(f"Barrios: {', '.join(sorted(barrios_procesados))}\n")
     
     conn.close()
-    
     print("=" * 60)
     print(f"📈 RESUMEN DE MIGRACIÓN:")
     print(f"   - Nuevos: {migrados}")
@@ -328,37 +244,19 @@ def migrar_datos_estaticos_a_db(solo_ejecutar_una_vez: bool = True, forzar: bool
         "barrios": sorted(list(barrios_procesados))
     }
 
-
 def _construir_data_cms(nombre: str, gastro_data: dict, financial_data: dict, location_specific_data: dict = None) -> dict:
-    """
-    Construye la estructura de datos completa para el CMS
-    combinando datos de gastronomía, servicios financieros y datos específicos de ubicación.
-    
-    La estructura generada es compatible con analisis-barrio.js:
-    - categorias: {transporte, comercio, seguridad, educacion, salud, espacios_verdes, contaminacion, vida_barrio, servicios_financieros}
-    
-    Args:
-        nombre: Nombre del barrio
-        gastro_data: Datos de gastronomía (de GASTRONOMY_DATA)
-        financial_data: Datos financieros (de FINANCIAL_DATA)
-        location_specific_data: Datos específicos de ubicación (de LOCATION_SPECIFIC_DATA)
-    """
-    # Calcular puntuación general basada en los datos disponibles
+    """Construye la estructura de datos para el CMS"""
     puntuaciones = []
     if gastro_data and gastro_data.get('puntuacion'):
         puntuaciones.append(gastro_data['puntuacion'])
     if financial_data and financial_data.get('puntuacion'):
         puntuaciones.append(financial_data['puntuacion'])
-    
     puntuacion_general = int(sum(puntuaciones) / len(puntuaciones)) if puntuaciones else 70
     
-    # Reemplazar {location} con el nombre del barrio
     location_display = nombre.title()
-    
-    # Construir estructura de categorías - ESTA ES LA ESTRUCTURA QUE ESPERA EL FRONTEND
     categorias = {}
     
-    # TRANSPORTE - desde LOCATION_SPECIFIC_DATA
+    # Transporte
     if location_specific_data:
         categorias['transporte'] = {
             'puntuacion': 70,
@@ -374,7 +272,7 @@ def _construir_data_cms(nombre: str, gastro_data: dict, financial_data: dict, lo
             'colectivos': []
         }
     
-    # COMERCIO - desde LOCATION_SPECIFIC_DATA
+    # Comercio
     if location_specific_data:
         categorias['comercio'] = {
             'puntuacion': 75,
@@ -390,14 +288,14 @@ def _construir_data_cms(nombre: str, gastro_data: dict, financial_data: dict, lo
             'centros_comerciales': []
         }
     
-    # SEGURIDAD -默认值
+    # Seguridad
     categorias['seguridad'] = {
         'puntuacion': 70,
         'descripcion': f'{location_display} tiene nivel de seguridad estándar para la zona.',
         'comisaria': ''
     }
     
-    # EDUCACION - desde LOCATION_SPECIFIC_DATA
+    # Educación
     if location_specific_data:
         categorias['educacion'] = {
             'puntuacion': 75,
@@ -413,7 +311,7 @@ def _construir_data_cms(nombre: str, gastro_data: dict, financial_data: dict, lo
             'universidades': []
         }
     
-    # SALUD - desde LOCATION_SPECIFIC_DATA
+    # Salud
     if location_specific_data:
         categorias['salud'] = {
             'puntuacion': 75,
@@ -429,14 +327,14 @@ def _construir_data_cms(nombre: str, gastro_data: dict, financial_data: dict, lo
             'centros_salud': []
         }
     
-    # ESPACIOS VERDES -默认值
+    # Espacios verdes
     categorias['espacios_verdes'] = {
         'puntuacion': 65,
         'descripcion': f'{location_display} tiene áreas verdes disponibles.',
         'parques': []
     }
     
-    # CONTAMINACIÓN -默认值
+    # Contaminación
     categorias['contaminacion'] = {
         'puntuacion': 70,
         'descripcion': f'Nivel de contaminación moderado en {location_display}.',
@@ -444,7 +342,7 @@ def _construir_data_cms(nombre: str, gastro_data: dict, financial_data: dict, lo
         'fuente': 'Tráfico urbano'
     }
     
-    # VIDA BARRIO - desde GASTRONOMY_DATA (bares y cultura)
+    # Vida barrio
     if gastro_data:
         categorias['vida_barrio'] = {
             'puntuacion': gastro_data.get('puntuacion', 75),
@@ -460,12 +358,10 @@ def _construir_data_cms(nombre: str, gastro_data: dict, financial_data: dict, lo
             'cultura': []
         }
     
-    # SERVICIOS FINANCIEROS - desde FINANCIAL_DATA
+    # Servicios financieros
     if financial_data:
-        # Combinar bancos de FINANCIAL_DATA
         bancos = financial_data.get('bancos', [])[:5]
         cajeros = financial_data.get('cajeros_automaticos', [])[:2]
-        
         categorias['servicios_financieros'] = {
             'puntuacion': financial_data.get('puntuacion', 80),
             'descripcion': financial_data.get('descripcion', ''),
@@ -480,7 +376,7 @@ def _construir_data_cms(nombre: str, gastro_data: dict, financial_data: dict, lo
             'cajeros': ''
         }
     
-    # Construir conclusión basada en los datos
+    # Conclusión y resumen
     conclusiones = []
     if gastro_data:
         conclusiones.append(f"gastronomía ({gastro_data.get('puntuacion', 'N/A')}/100)")
@@ -488,23 +384,18 @@ def _construir_data_cms(nombre: str, gastro_data: dict, financial_data: dict, lo
         conclusiones.append(f"servicios financieros ({financial_data.get('puntuacion', 'N/A')}/100)")
     if location_specific_data:
         conclusiones.append("datos específicos de ubicación")
-    
     if conclusiones:
-        conclusion = f"{location_display} presenta: " + ", ".join(conclusiones) + ". " + \
-                    "Información recopilada de fuentes especializadas."
+        conclusion = f"{location_display} presenta: " + ", ".join(conclusiones) + ". " + "Información recopilada de fuentes especializadas."
     else:
         conclusion = f"{location_display} - Análisis básico disponible. Se recomienda completar con datos actualizados."
     
-    # Resumen general
     resumen_parts = []
     if gastro_data:
         resumen_parts.append(f"gastronomía destacada ({gastro_data.get('puntuacion', 50)}/100)")
     if financial_data:
         resumen_parts.append(f"servicios financieros completos ({financial_data.get('puntuacion', 50)}/100)")
-    
     if resumen_parts:
-        resumen = f"{location_display} es un barrio de Buenos Aires con " + \
-                  " y ".join(resumen_parts) + "."
+        resumen = f"{location_display} es un barrio de Buenos Aires con " + " y ".join(resumen_parts) + "."
     else:
         resumen = f"{location_display} es un barrio de Buenos Aires con características únicas."
     
@@ -564,48 +455,20 @@ app = FastAPI(
 
 @app.post("/api/admin/migrate-static-data")
 def ejecutar_migracion(request: dict = None):
-    """
-    Endpoint para ejecutar la migración de datos estáticos.
-    
-    POST /api/admin/migrate-static-data
-    
-    Body (opcional):
-    {
-        "forzar": false  // Si true, sobrescribe datos existentes
-    }
-    """
     forzar = request.get('forzar', False) if request else False
-    
-    resultado = migrar_datos_estaticos_a_db(
-        solo_ejecutar_una_vez=True,
-        forzar=forzar
-    )
-    
+    resultado = migrar_datos_estaticos_a_db(solo_ejecutar_una_vez=True, forzar=forzar)
     return resultado
-
 
 @app.get("/api/admin/migration-status")
 def estado_migracion():
-    """
-    Endpoint para verificar el estado de la migración.
-    """
     import os
-    
     migration_flag_file = os.path.join(os.path.dirname(BARRIOS_DB_PATH), '.migracion_estatica_completa')
-    
     if os.path.exists(migration_flag_file):
         with open(migration_flag_file, 'r') as f:
             contenido = f.read()
-        return {
-            "migracion_completada": True,
-            "detalles": contenido
-        }
+        return {"migracion_completada": True, "detalles": contenido}
     else:
-        return {
-            "migracion_completada": False,
-            "mensaje": "La migración de datos estáticos no ha sido ejecutada"
-        }
-
+        return {"migracion_completada": False, "mensaje": "La migración de datos estáticos no ha sido ejecutada"}
 
 # ========================================
 # ENDPOINTS DE DATOS ESPECÍFICOS POR UBICACIÓN
@@ -613,53 +476,28 @@ def estado_migracion():
 
 @app.get("/api/data/location-specific/{location_key}")
 def obtener_datos_ubicacion(location_key: str):
-    """
-    Obtiene datos específicos para una ubicación desde la base de datos.
-    
-    Uso:
-    - GET /api/data/location-specific/pilar
-    - GET /api/data/location-specific/nordelta
-    """
     try:
         conn = get_barrios_db_connection()
         cursor = conn.cursor()
-        
-        # Buscar coincidencia exacta
         cursor.execute("SELECT data FROM barrios_data WHERE LOWER(nombre) = LOWER(?)", (location_key.lower(),))
         result = cursor.fetchone()
-        
         conn.close()
-        
         if result:
             data = json.loads(result['data'])
-            return {
-                "success": True,
-                "location": location_key,
-                "data": data
-            }
+            return {"success": True, "location": location_key, "data": data}
         else:
-            # Retornar estructura vacía con las categorías
-            return {
-                "success": False,
-                "location": location_key,
-                "data": {},
-                "message": "No hay datos disponibles para esta ubicación"
-            }
+            return {"success": False, "location": location_key, "data": {}, "message": "No hay datos disponibles para esta ubicación"}
     except Exception as e:
-        return {
-            "success": False,
-            "error": str(e)
-        }
+        return {"success": False, "error": str(e)}
 
-
-# Definir los orígenes permitidos para CORS
+# ========================================
+# CORS
+# ========================================
 origins = [
-    # Orígenes de desarrollo
     "http://localhost",
     "http://localhost:8000",
     "http://127.0.0.1",
     "http://127.0.0.1:8000",
-    # Orígenes de producción
     "https://artarona.github.io",
     "https://dantepropiedades.com.ar",
     "https://www.dantepropiedades.com.ar",
@@ -667,7 +505,6 @@ origins = [
     "http://www.dantepropiedades.com.ar",
     "https://pagina-web-g82d.onrender.com",
     "https://*.onrender.com",
-    # Permitir cualquier origen para desarrollo (temporal)
     "*"
 ]
 
@@ -679,47 +516,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Servir archivos estáticos de la carpeta 'imgs' (solo si existe)
-# Usar ruta absoluta basada en la ubicación del archivo main-ai.py
 _imgs_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'imgs')
 if os.path.exists(_imgs_path):
     app.mount("/imgs", StaticFiles(directory=_imgs_path), name="images")
 
-# ⚠️ DESHABILITADO TEMPORALMENTE - causa conflictos con endpoints locales
-# app.mount("/api/barrios", barrios_app)
-# print("✅ API de barrios montada en /api/barrios")
-
-# ============================================
-# NOTA: El endpoint catch-all para archivos estáticos fue deshabilitado
-# porque estaba interfiriendo con los endpoints de la API.
-# Los archivos estáticos (logo.png, llave.png, etc.) pueden servirse
-# de otras formas si son necesarios.
-# ============================================
-# @app.get("/{file_path:path}")
-# async def serve_root_files(file_path: str):
-#     """Serve static files from root directory like logo.png, llave.png, etc."""
-#     # Lista de archivos permitidos en la raíz
-#     allowed_files = ['logo.png', 'llave.png', 'favicon.ico', 'robots.txt', 'sitemap.xml']
-#     
-#     # Extraer solo el nombre del archivo
-#     import os
-#     filename = os.path.basename(file_path)
-#     
-#     # Verificar si es un archivo permitido
-#     if filename in allowed_files:
-#         root_dir = os.path.dirname(os.path.abspath(__file__))
-#         file_path_abs = os.path.join(root_dir, filename)
-#         
-#         if os.path.exists(file_path_abs):
-#             from fastapi.responses import FileResponse
-#             return FileResponse(file_path_abs)
-#         else:
-#             raise HTTPException(status_code=404, detail=f"Archivo {filename} no encontrado")
-#     
-#     # Si no es un archivo permitido, retornar 404
-#     raise HTTPException(status_code=404, detail="Archivo no encontrado")
-
-# ✅ CACHE
+# ========================================
+# CACHE
+# ========================================
 query_cache = {}
 
 def get_cache_key(filters: Dict[str, Any]) -> str:
@@ -741,7 +544,9 @@ def query_properties_cached(filters_json: str):
     filters = json.loads(filters_json) if filters_json else {}
     return query_properties(filters)
 
-# ✅ MODELOS DE DATOS
+# ========================================
+# MODELOS DE DATOS
+# ========================================
 class PropertyResponse(BaseModel):
     id_temporal: str
     titulo: str
@@ -784,10 +589,6 @@ class ChatResponse(BaseModel):
     search_performed: bool
     propiedades: Optional[List[PropertyResponse]] = None
 
-# ========================================
-# MODELOS PARA ANÁLISIS DE MERCADO
-# ========================================
-
 class MarketAnalysisRequest(BaseModel):
     barrio: str = Field(..., min_length=1, max_length=100)
     search_results: Optional[List[Dict[str, Any]]] = None
@@ -805,7 +606,7 @@ class MarketAnalysisResponse(BaseModel):
     tendencias: Dict[str, Any] = {}
     conectividad: Dict[str, Any] = {}
     amenities_proximos: List[str] = []
-    analisis_oportunidad: Dict[str, Any] = []
+    analisis_oportunidad: Dict[str, Any] = {}
     nota_analista: str = ""
     fuentes_procesadas: int = 0
     barrio: str = ""
@@ -817,7 +618,7 @@ class PropertyComparisonResponse(BaseModel):
     llamada_accion: str = ""
 
 # ========================================
-# PROMPTS ESPECIALIZADOS PARA ANÁLISIS
+# PROMPTS ESPECIALIZADOS
 # ========================================
 
 MARKET_ANALYSIS_PROMPT = """
@@ -860,12 +661,6 @@ Procesa los siguientes resultados de búsqueda sobre propiedades en {barrio} y e
     "nota_analista": "texto explicando cómo se obtuvo cada dato",
     "fuentes_procesadas": NUMERO
 }}
-
-## REGLAS ESTRICTAS
-- No inventes datos que no estén en los textos
-- Si un precio es "aproximado", usa el valor dado
-- Las características deben ser verificables en los textos
-- La recomendación debe ser objetiva basada en los datos
 """
 
 PROPERTY_COMPARISON_PROMPT = """
@@ -897,12 +692,6 @@ Genera un análisis que destaque las virtudes de la propiedad comparado con el m
     "texto_persuasivo": "párrafo de 2-3 oraciones que resuma por qué esta propiedad es una buena oportunidad",
     "llamada_accion": "oración que motive al comprador a actuar"
 }}
-
-## REGLAS
-- Las virtudes deben estar respaldadas por datos objetivos
-- El beneficio emocional debe ser realista y alcanzable
-- El score debe reflejar genuinamente la oportunidad
-- No exaggerar ni hacer promesas falsas
 """
 
 # ========================================
@@ -910,13 +699,9 @@ Genera un análisis que destaque las virtudes de la propiedad comparado con el m
 # ========================================
 
 def analizar_mercado_inmobiliario(barrio: str, search_results: List[Dict]) -> Dict[str, Any]:
-    """
-    Analiza datos del mercado inmobiliario usando Gemini AI
-    """
     print(f"📊 Analizando mercado para: {barrio}")
     print(f"📄 Procesando {len(search_results)} resultados de búsqueda...")
     
-    # Combinar todos los textos de resultados
     combined_text = ""
     for i, result in enumerate(search_results, 1):
         combined_text += f"\n--- RESULTADO {i} ---\n"
@@ -926,19 +711,10 @@ def analizar_mercado_inmobiliario(barrio: str, search_results: List[Dict]) -> Di
             contenido = result['content'][:2000] if len(result.get('content', '')) > 2000 else result['content']
             combined_text += f"CONTENIDO: {contenido}\n"
     
-    # Construir prompt
-    prompt = MARKET_ANALYSIS_PROMPT.format(
-        barrio=barrio,
-        search_results=combined_text,
-        rate=USD_RATE
-    )
-    
+    prompt = MARKET_ANALYSIS_PROMPT.format(barrio=barrio, search_results=combined_text, rate=USD_RATE)
     print("🤖 Enviando a Gemini para análisis de mercado...")
-    
-    # Llamar a Gemini
     response = call_gemini_with_rotation(prompt)
     
-    # Parsear respuesta JSON
     try:
         clean_response = response.strip()
         if clean_response.startswith('```json'):
@@ -947,35 +723,17 @@ def analizar_mercado_inmobiliario(barrio: str, search_results: List[Dict]) -> Di
             clean_response = clean_response[3:]
         if clean_response.endswith('```'):
             clean_response = clean_response[:-3]
-        
         analisis = json.loads(clean_response)
         analisis['fuentes_procesadas'] = len(search_results)
         analisis['barrio'] = barrio
-        
         print(f"✅ Análisis de mercado completado")
-        
-        return {
-            'success': True,
-            'data': analisis,
-            'raw_response': response
-        }
-        
+        return {'success': True, 'data': analisis, 'raw_response': response}
     except json.JSONDecodeError as e:
         print(f"❌ Error parseando JSON: {e}")
-        return {
-            'success': False,
-            'error': 'Error al procesar respuesta de IA',
-            'details': str(e)
-        }
-
+        return {'success': False, 'error': 'Error al procesar respuesta de IA', 'details': str(e)}
 
 def generar_comparacion_propiedad(propiedad: Dict, mercado: Dict) -> Dict[str, Any]:
-    """
-    Genera análisis comparativo persuasivo de una propiedad vs el mercado
-    """
     print(f"📈 Generando comparación para: {propiedad.get('direccion', 'Unknown')}")
-    
-    # Preparar datos de la propiedad
     precio = propiedad.get('precio', 0)
     metros = propiedad.get('metros_cuadrados', 1)
     precio_m2 = precio / max(metros, 1)
@@ -991,7 +749,6 @@ def generar_comparacion_propiedad(propiedad: Dict, mercado: Dict) -> Dict[str, A
         'estado': propiedad.get('estado', ''),
         'moneda': propiedad.get('moneda_precio', 'ARS')
     }
-    
     datos_mercado = {
         'precio_m2_promedio': mercado.get('precio_m2_promedio'),
         'precio_m2_min': mercado.get('precio_m2_min'),
@@ -1000,19 +757,12 @@ def generar_comparacion_propiedad(propiedad: Dict, mercado: Dict) -> Dict[str, A
         'tendencias': mercado.get('tendencias', {}),
         'amenities_proximos': mercado.get('amenities_proximos', [])
     }
-    
-    # Construir prompt
     prompt = PROPERTY_COMPARISON_PROMPT.format(
         datos_propiedad=json.dumps(datos_propiedad, indent=2, ensure_ascii=False),
         datos_mercado=json.dumps(datos_mercado, indent=2, ensure_ascii=False)
     )
-    
     print("🤖 Generando comparación con Gemini...")
-    
-    # Llamar a Gemini
     response = call_gemini_with_rotation(prompt)
-    
-    # Parsear respuesta
     try:
         clean_response = response.strip()
         if clean_response.startswith('```json'):
@@ -1021,99 +771,63 @@ def generar_comparacion_propiedad(propiedad: Dict, mercado: Dict) -> Dict[str, A
             clean_response = clean_response[3:]
         if clean_response.endswith('```'):
             clean_response = clean_response[:-3]
-        
         comparacion = json.loads(clean_response)
-        
         print(f"✅ Comparación generada: {len(comparacion.get('virtudes', []))} virtudes identificadas")
-        
-        return {
-            'success': True,
-            'data': comparacion,
-            'raw_response': response
-        }
-        
+        return {'success': True, 'data': comparacion, 'raw_response': response}
     except json.JSONDecodeError as e:
         print(f"❌ Error parseando comparación: {e}")
-        return {
-            'success': False,
-            'error': 'Error al generar comparacion',
-            'details': str(e)
-        }
+        return {'success': False, 'error': 'Error al generar comparacion', 'details': str(e)}
 
-# ✅ ENDPOINTS
+# ========================================
+# ENDPOINTS PRINCIPALES
+# ========================================
+
 @app.get("/")
 def root():
     return FileResponse("index.html")
 
-# ✅ ENDPOINT DE PRUEBA - para diagnóstico (AISLADO)
 @app.get("/debug/barrios")
 def debug_listar_barrios():
-    """Lista todos los barrios - endpoint de prueba"""
     conn = get_barrios_db_connection()
     cursor = conn.cursor()
     cursor.execute('SELECT nombre FROM barrios_data ORDER BY nombre')
     rows = cursor.fetchall()
     conn.close()
-    return {
-        "success": True,
-        "total": len(rows),
-        "barrios": [r['nombre'] for r in rows]
-    }
+    return {"success": True, "total": len(rows), "barrios": [r['nombre'] for r in rows]}
 
 @app.get("/debug/barrios/{nombre}")
 def debug_obtener_barrio(nombre: str):
-    """Obtiene un barrio específico - endpoint de prueba AISLADO"""
     conn = get_barrios_db_connection()
     cursor = conn.cursor()
-    
-    # Búsqueda simple y directa
     cursor.execute('SELECT nombre, data FROM barrios_data WHERE LOWER(nombre) = LOWER(?)', (nombre.lower(),))
     row = cursor.fetchone()
     conn.close()
-    
     if row:
-        return {
-            "success": True,
-            "encontrado": True,
-            "nombre": row['nombre']
-        }
+        return {"success": True, "encontrado": True, "nombre": row['nombre']}
     else:
-        return {
-            "success": False,
-            "encontrado": False,
-            "buscado": nombre,
-            "message": "Barrio no encontrado"
-        }
+        return {"success": False, "encontrado": False, "buscado": nombre, "message": "Barrio no encontrado"}
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     start_time = time.time()
     metrics.increment_requests()
-    
     try:
         user_text = request.message.strip()
         if not user_text:
             raise HTTPException(status_code=400, detail="El mensaje no puede estar vacío")
-
         channel = request.channel.strip()
         filters_from_frontend = request.filters or {}
         contexto_anterior = request.contexto_anterior
-        es_seguimiento = request.es_seguimiento
-
         text_lower = user_text.lower()
         filters = filters_from_frontend.copy()
         detected_filters = detect_filters(text_lower)
         filters.update(detected_filters)
-
-        # ✅ AGREGAR DIAGNÓSTICO AQUÍ
         print(f"🎯 CONSULTA USUARIO: '{user_text}'")
         print(f"🔍 FILTROS DETECTADOS: {detected_filters}")
-        print(f"🔍 FILTROS FRONTEND: {filters_from_frontend}")
         print(f"🔍 FILTROS COMBINADOS: {filters}")
 
         results = None
         search_performed = False
-        
         if filters:
             search_performed = True
             metrics.increment_searches()
@@ -1122,16 +836,13 @@ async def chat(request: ChatRequest):
 
         historial = get_historial_canal(channel)
         contexto_historial = "\nHistorial reciente:\n" + "\n".join(f"- {m}" for m in historial) if historial else ""
-        
         contexto_dinamico = (
             f"Barrios disponibles: {', '.join(BARRIOS)}.\n"
             f"Tipos de propiedad: {', '.join(TIPOS)}.\n"
             f"Operaciones disponibles: {', '.join(OPERACIONES)}."
         )
-
         style_hint = "Respondé de forma breve, directa y cálida como si fuera un mensaje de WhatsApp." if channel == "whatsapp" else "Respondé de forma explicativa, profesional y cálida como si fuera una consulta web."
         
-        # ✅ EVITAR DOBLE BIENVENIDA - Detectar si es un saludo inicial
         palabras_bienvenida = ['hola', 'hi', 'hello', 'buenas', 'empezar', 'inicio', 'ayuda']
         es_saludo_inicial = any(palabra in text_lower for palabra in palabras_bienvenida) and not contexto_anterior
 
@@ -1146,7 +857,6 @@ Te ayudo a encontrar la propiedad ideal. Podés:
 
 ¿En qué tipo de propiedad estás interesado hoy?"""
         else:
-            # Procesamiento normal con IA, pero con contexto público enriquecido cuando existe una propiedad relevante
             if results and len(results) > 0:
                 property_context = get_public_ai_context_for_property(results[0])
                 if property_context:
@@ -1159,64 +869,44 @@ Te ayudo a encontrar la propiedad ideal. Podés:
                     prompt = build_prompt(user_text, results, filters, channel, f"{style_hint}\n{contexto_dinamico}\n{contexto_historial}")
             else:
                 prompt = build_prompt(user_text, results, filters, channel, f"{style_hint}\n{contexto_dinamico}\n{contexto_historial}")
-
             metrics.increment_gemini_calls()
             answer = call_gemini_with_rotation(prompt)
             
-            # ✅ NUEVA MODIFICACIÓN: Limpiar respuesta cuando hay resultados
             if results and len(results) > 0:
                 print("🎯 DETECTADO: Hay resultados - limpiando duplicación en respuesta")
-                
-                # Eliminar listados numerados de propiedades del texto
                 lines = answer.split('\n')
                 clean_lines = []
                 skip_next_lines = False
-                
                 for i, line in enumerate(lines):
                     line_stripped = line.strip()
-                    
-                    # Detectar inicio de listado (líneas que empiezan con número)
                     if (line_stripped and 
                         (line_stripped[0].isdigit() and 
                          ('.' in line_stripped or ')' in line_stripped or '🏠' in line_stripped or '📍' in line_stripped))):
                         skip_next_lines = True
                         continue
-                    
-                    # Detectar líneas con emojis de propiedades que deben omitirse
                     if any(emoji in line for emoji in ['🏠', '📍', '💰', '📋', '💬']):
                         continue
-                        
-                    # Si estamos en modo salto, buscar dónde termina el listado
                     if skip_next_lines:
                         if line_stripped == "" or i == len(lines) - 1:
                             skip_next_lines = False
                         continue
-                    
                     clean_lines.append(line)
-                
-                # Reconstruir la respuesta
                 answer = '\n'.join(clean_lines).strip()
-                
-                # Si la respuesta quedó muy corta, usar un mensaje genérico
                 if not answer or len(answer) < 20:
                     answer = f"✅ Encontré {len(results)} propiedades que coinciden con tu búsqueda. Te las muestro abajo:"
                 else:
-                    # Asegurar que termine con indicación de ver propiedades
                     if "propiedad" not in answer.lower() and "encontré" not in answer.lower():
                         answer += f"\n\n📊 **Encontré {len(results)} propiedades** - Te las muestro en detalle abajo 👇"
         
         response_time = time.time() - start_time
         log_conversation(user_text, answer, channel, response_time, search_performed, len(results) if results else 0)
         metrics.increment_success()
-        
-        # ✅ AGREGAR DIAGNÓSTICO DE RESPUESTA AQUÍ
         response_data = ChatResponse(
             response=answer,
             results_count=len(results) if results is not None else None,
             search_performed=search_performed,
             propiedades=results
         )
-        
         print(f"📤 ENVIANDO RESPUESTA AL FRONTEND:")
         print(f"   📝 Respuesta: {answer[:100]}...")
         print(f"   📊 Resultados: {len(results) if results else 0} propiedades")
@@ -1224,9 +914,7 @@ Te ayudo a encontrar la propiedad ideal. Podés:
         if results:
             for i, prop in enumerate(results[:2]):
                 print(f"   🏠 Prop {i+1}: {prop['titulo']} - {prop['operacion']}")
-        
         return response_data
-    
     except Exception as e:
         metrics.increment_failures()
         print(f"❌ ERROR en endpoint /chat: {type(e).__name__}: {e}")
@@ -1234,16 +922,10 @@ Te ayudo a encontrar la propiedad ideal. Podés:
 
 @app.get("/filters")
 def get_all_filters():
-    """Endpoint para obtener filtros estáticos desde filter_data."""
-    return {
-        "operaciones": OPERACIONES,
-        "tipos": TIPOS,
-        "barrios": BARRIOS
-    }
+    return {"operaciones": OPERACIONES, "tipos": TIPOS, "barrios": BARRIOS}
 
 @app.get("/properties/filter-options")
 def get_filter_options():
-    """Endpoint para obtener opciones de filtros (alias de /filters para compatibilidad)."""
     return {
         "operaciones": OPERACIONES,
         "tipos": TIPOS,
@@ -1274,10 +956,8 @@ def status():
         "search_queries": metrics.search_queries
     }
 
-
 @app.get("/debug-images")
 def debug_images():
-    """Endpoint para verificar qué imágenes están disponibles"""
     import os
     try:
         if os.path.exists("imgs"):
@@ -1286,37 +966,20 @@ def debug_images():
                 "message": "Carpeta imgs encontrada",
                 "path_absoluto": os.path.abspath("imgs"),
                 "total_images": len(image_files),
-                "images": sorted(image_files)[:20]  # Primeras 20 imágenes ordenadas
+                "images": sorted(image_files)[:20]
             }
         else:
             return {"error": "Carpeta 'imgs' no encontrada en el servidor"}
     except Exception as e:
         return {"error": f"Error al leer carpeta: {str(e)}"}
 
-
-# ========================================
-# ENDPOINTS DE ANÁLISIS DE MERCADO
-# ========================================
-
 @app.post("/market/analysis")
 def market_analysis(request: MarketAnalysisRequest):
-    """
-    Analiza el mercado inmobiliario de un barrio específico.
-    
-    Uso:
-    - Envía el nombre del barrio
-    - Opcionalmente envía resultados de búsqueda web para contexto
-    """
     print(f"📊 Endpoint: Análisis de mercado para {request.barrio}")
-    
-    # Si no hay resultados de búsqueda, usar datos de la base de datos local
     if not request.search_results:
-        # Obtener propiedades del barrio para análisis básico
         propiedades = query_properties({"barrio": request.barrio})
-        
-        # Generar contexto básico desde propiedades locales
         search_results = []
-        for prop in propiedades[:10]:  # Usar hasta 10 propiedades
+        for prop in propiedades[:10]:
             search_results.append({
                 "url": f"propiedad/{prop.get('id_temporal', '')}",
                 "title": f"{prop.get('tipo', '')} en {prop.get('direccion', '')}",
@@ -1331,42 +994,22 @@ def market_analysis(request: MarketAnalysisRequest):
                 Descripción: {prop.get('descripcion', '')}
                 """
             })
-        
         print(f"📊 Usando {len(search_results)} propiedades locales para análisis")
-    
-    # Si hay search_results del frontend, usarlos directamente
     elif isinstance(request.search_results, list):
         search_results = request.search_results
         print(f"📊 Usando {len(search_results)} resultados de búsqueda del frontend")
-    
     else:
         search_results = []
     
-    # Realizar análisis
     resultado = analizar_mercado_inmobiliario(request.barrio, search_results)
-    
     if resultado['success']:
-        return {
-            "success": True,
-            "barrio": request.barrio,
-            "analysis": resultado['data']
-        }
+        return {"success": True, "barrio": request.barrio, "analysis": resultado['data']}
     else:
         raise HTTPException(status_code=500, detail=resultado.get('error', 'Error en análisis'))
 
-
 @app.post("/market/comparison")
 def property_comparison(request: PropertyComparisonRequest):
-    """
-    Genera análisis comparativo de una propiedad vs el mercado.
-    
-    Uso:
-    - Envía el ID de una propiedad O los datos directamente
-    - El sistema analiza la propiedad vs el mercado de su barrio
-    """
-    # Obtener datos de la propiedad
     if request.propiedad_id:
-        # Buscar en la base de datos
         propiedades = query_properties({"id_temporal": request.propiedad_id})
         if not propiedades:
             raise HTTPException(status_code=404, detail="Propiedad no encontrada")
@@ -1377,11 +1020,7 @@ def property_comparison(request: PropertyComparisonRequest):
         raise HTTPException(status_code=400, detail="Se requiere propiedad_id o propiedad")
     
     barrio = propiedad.get('barrio', '')
-    
-    # Primero obtener análisis del mercado del barrio
     propiedades_barrio = query_properties({"barrio": barrio})
-    
-    # Generar contexto del mercado desde propiedades locales
     mercado_data = {
         "precio_m2_promedio": None,
         "precio_m2_min": None,
@@ -1390,39 +1029,30 @@ def property_comparison(request: PropertyComparisonRequest):
         "tendencias": {"direccion": "estable", "descripcion": "Datos del mercado local"},
         "amenities_proximos": []
     }
-    
     if propiedades_barrio:
         precios_m2 = []
         for prop in propiedades_barrio:
             precio = prop.get('precio', 0)
             metros = prop.get('metros_cuadrados', 1)
             if metros > 0:
-                precio_m2 = precio / metros
-                precios_m2.append(precio_m2)
-        
+                precios_m2.append(precio / metros)
         if precios_m2:
-            # ✅ MEJORADO: Usar mediana y eliminar outliers
-            from statistics import median, mean
+            from statistics import median
             try:
                 from logic.market_scraper import MarketAnalyzer
                 clean_precios_m2 = MarketAnalyzer._remove_outliers(precios_m2)
             except:
-                # Fallback si no se puede importar
                 clean_precios_m2 = sorted(precios_m2)[1:-1] if len(precios_m2) > 4 else precios_m2
-            
             if clean_precios_m2:
                 mercado_data["precio_m2_promedio"] = median(clean_precios_m2)
                 mercado_data["precio_m2_min"] = min(clean_precios_m2)
                 mercado_data["precio_m2_max"] = max(clean_precios_m2)
             else:
-                # Si falló la limpieza, usar median del original
                 mercado_data["precio_m2_promedio"] = median(precios_m2)
                 mercado_data["precio_m2_min"] = min(precios_m2)
                 mercado_data["precio_m2_max"] = max(precios_m2)
     
-    # Generar comparación
     resultado = generar_comparacion_propiedad(propiedad, mercado_data)
-    
     if resultado['success']:
         return {
             "success": True,
@@ -1438,65 +1068,35 @@ def property_comparison(request: PropertyComparisonRequest):
     else:
         raise HTTPException(status_code=500, detail=resultado.get('error', 'Error en comparación'))
 
-
-# ✅ RUTAS PARA ANALISIS DE BARRIOS
 @app.get("/analisis-barrio")
 def analisis_barrio_page():
-    """Sirve la página principal del Analytics Dashboard"""
     return FileResponse("analisis-barrio.html")
-
 
 @app.get("/analisis-barrio.css")
 def analisis_barrio_css():
-    """Sirve los estilos del Analytics Dashboard"""
     return FileResponse("analisis-barrio.css")
-
 
 @app.get("/analisis-barrio.js")
 def analisis_barrio_js():
-    """Sirve el JavaScript del Analytics Dashboard"""
     return FileResponse("analisis-barrio.js")
 
-
-# ✅ ENDPOINT DE ANÁLISIS DE ENTORNO CON IA
 @app.post("/ai/environment-analysis")
 async def generate_environment_analysis(
     zone: str = Query(..., description="Nombre del barrio o zona a analizar"),
     force_refresh: bool = Query(False, description="Forzar regeneración del análisis")
 ):
-    """
-    Genera análisis del entorno usando Gemini AI con caché en base de datos.
-    
-    Este endpoint:
-    1. Verifica si existe análisis válido en caché
-    2. Si no existe o está expirado, genera nuevo análisis usando Gemini AI
-    3. Guarda resultados en base de datos para reutilizar
-    4. Retorna el análisis completo con estructura detallada
-    """
     zone_clean = zone.strip()
-    
     print(f"🌍 Solicitud de análisis de entorno para: {zone_clean} (force_refresh: {force_refresh})")
-    
-    # Verificar caché primero si no se fuerza actualización
     if not force_refresh:
         try:
             cached = get_environ_analysis(zone_clean)
             if cached:
                 print(f"✅ Análisis encontrado en caché para: {zone_clean}")
-                return {
-                    "success": True,
-                    "source": "cache",
-                    "zone": zone_clean,
-                    "entorno": cached,
-                    "message": "Análisis obtenido desde caché"
-                }
+                return {"success": True, "source": "cache", "zone": zone_clean, "entorno": cached, "message": "Análisis obtenido desde caché"}
         except Exception as e:
             print(f"⚠️ Error consultando caché: {e}")
     
-    # Generar nuevo análisis con Gemini
     print(f"🔄 Generando nuevo análisis con IA para: {zone_clean}")
-    
-    # Prompt detallado para Gemini - Estructura mejorada
     prompt = f"""
 Eres un analista inmobiliario experto en Buenos Aires, Argentina. Genera un análisis exhaustivo y profesional del barrio '{zone_clean}' con la siguiente estructura detallada:
 
@@ -1562,74 +1162,46 @@ Eres un analista inmobiliario experto en Buenos Aires, Argentina. Genera un aná
 - La conclusión debe ser profesional y orientada a inversores
 - Todos los arrays deben tener al menos 2-3 elementos si es posible
 """
-    
     try:
-        # Llamar a Gemini
         print(f"📤 Enviando prompt a Gemini para zona: {zone_clean}")
         ai_response = call_gemini_with_rotation(prompt)
-        
         print(f"📥 Respuesta de Gemini recibida ({len(ai_response)} caracteres)")
         print("=" * 80)
         print(ai_response)
         print("=" * 80)
-        
-        # Limpiar markdown y extraer JSON de forma más robusta
         clean_response = ai_response.strip()
-        
-        # Remover bloques de markdown ```json ... ```
         if clean_response.startswith('```json'):
             clean_response = clean_response[7:]
         elif clean_response.startswith('```'):
             clean_response = clean_response[3:]
-        
         if clean_response.endswith('```'):
             clean_response = clean_response[:-3]
-        
         clean_response = clean_response.strip()
-        
         print(f"🧹 Respuesta limpia ({len(clean_response)} caracteres):")
         print("=" * 80)
         print(clean_response)
         print("=" * 80)
-        
-        # Intentar parsear directamente primero
         try:
             analysis_data = json.loads(clean_response)
             print(f"✅ JSON parseado directamente")
         except json.JSONDecodeError as e:
-            # Si falla, intentar corregir errores comunes
             print(f"🔧 Error de parsing: {e}")
             print(f"🔍 Intentando corregir...")
-            
-            # Corregir errores comunes
             corrected = clean_response
-            
-            # Corregir comillas simples a dobles (pero preservar contenido)
-            # Reemplazar ' por " solo en claves JSON
             corrected = re.sub(r"'([^']+)':", r'"\1":', corrected)
-            
-            # Corregir trailing commas
             corrected = re.sub(r',\s*([}\]])', r'\1', corrected)
-            
             print(f"🧹 Respuesta corregida:")
             print("=" * 80)
             print(corrected)
             print("=" * 80)
-            
             try:
                 analysis_data = json.loads(corrected)
                 print(f"✅ JSON corregido y parseado")
             except json.JSONDecodeError as e2:
                 raise ValueError(f"JSON inválido incluso después de corrección: {str(e2)}\n\nRespuesta original:\n{ai_response[:1000]}...")
-        
-        # Validar que tenga la estructura esperada
         if not isinstance(analysis_data, dict):
             raise ValueError("La respuesta no es un objeto JSON válido")
-        
-        # ✅ COMPLETAR CAMPOS VACÍOS CON DATOS DE RESPALDO
         print(f"🔍 Verificando campos vacíos para completar...")
-        
-        # Obtener datos de gastronomía
         gastro_info = get_gastronomy_info(zone_clean)
         if 'gastronomia' not in analysis_data or not analysis_data.get('gastronomia') or analysis_data['gastronomia'].get('puntuacion') in [None, 0, '--', '']:
             analysis_data['gastronomia'] = {
@@ -1640,8 +1212,6 @@ Eres un analista inmobiliario experto en Buenos Aires, Argentina. Genera un aná
                 'tipo_comida': gastro_info.get('tipo_comida', [])
             }
             print(f"✅ Campo 'gastronomia' completado con datos de respaldo")
-        
-        # Obtener datos de servicios financieros
         financial_info = get_financial_info(zone_clean)
         if 'servicios_financieros' not in analysis_data or not analysis_data.get('servicios_financieros') or analysis_data['servicios_financieros'].get('puntuacion') in [None, 0, '--', '']:
             analysis_data['servicios_financieros'] = {
@@ -1652,56 +1222,30 @@ Eres un analista inmobiliario experto en Buenos Aires, Argentina. Genera un aná
                 'sucursales': financial_info.get('sucursales_bancarias', [])
             }
             print(f"✅ Campo 'servicios_financieros' completado con datos de respaldo")
-        
-        # Guardar en base de datos (7 días de caché)
         save_environ_analysis(zone_clean, analysis_data, cache_days=7)
-        
-        # Log exitoso
         log_environ_analysis_request(zone_clean, True, analysis_json=json.dumps(analysis_data))
-        
         print(f"✅ Análisis generado y guardado para: {zone_clean}")
-        
-        return {
-            "success": True,
-            "source": "ai",
-            "zone": zone_clean,
-            "entorno": analysis_data,
-            "message": "Análisis generado exitosamente con IA"
-        }
-            
+        return {"success": True, "source": "ai", "zone": zone_clean, "entorno": analysis_data, "message": "Análisis generado exitosamente con IA"}
     except Exception as e:
         error_msg = str(e)
         print(f"❌ Error generando análisis: {error_msg}")
         print(f"📄 Respuesta completa de Gemini: {ai_response[:500]}...")
-        
-        # Log de error
         log_environ_analysis_request(zone_clean, False, error=error_msg)
-        
-        return {
-            "success": False,
-            "error": f"Error generando análisis: {error_msg}",
-            "message": "No se pudo generar el análisis"
-        }
-
+        return {"success": False, "error": f"Error generando análisis: {error_msg}", "message": "No se pudo generar el análisis"}
 
 # ========================================
 # CMS DE GESTIÓN DE BARRIOS - ENDPOINTS API
 # ========================================
 
 class BarrioCreateRequest(BaseModel):
-    """Request para crear un nuevo barrio"""
     nombre: str = Field(..., min_length=1, max_length=100, description="Nombre del barrio")
     generar_ia: bool = Field(default=True, description="Si es True, genera datos con IA")
 
 class BarrioUpdateRequest(BaseModel):
-    """Request para actualizar un barrio"""
     data: Dict[str, Any] = Field(..., description="Datos completos del barrio en formato JSON")
     actualizado_por: Optional[str] = Field(default="admin", description="Usuario que actualiza")
 
 def generar_datos_barrio_ai(nombre_barrio: str) -> Dict[str, Any]:
-    """
-    Genera datos completos de un barrio usando Gemini AI
-    """
     prompt = f"""
     Eres un experto analista inmobiliario de Buenos Aires, Argentina. Genera un análisis completo del barrio '{nombre_barrio}' en formato JSON con la siguiente estructura:
 
@@ -1772,15 +1316,10 @@ def generar_datos_barrio_ai(nombre_barrio: str) -> Dict[str, Any]:
     - La conclusión debe ser profesional e informativa
     - NO uses comillas simples dentro de las descripciones, usa comillas dobles correctamente
     """
-    
     print(f"🤖 Generando datos con IA para: {nombre_barrio}")
     
     def clean_and_parse_json(response: str) -> Dict:
-        """Limpia y parsea la respuesta JSON con manejo de errores avanzado"""
-        
         print(f"   📄 Recibiendo respuesta de {len(response)} caracteres")
-        
-        # Guardar respuesta cruda para debug en la carpeta backend
         import os
         debug_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'debug_json_error.json')
         try:
@@ -1790,59 +1329,33 @@ def generar_datos_barrio_ai(nombre_barrio: str) -> Dict[str, Any]:
         except Exception as e:
             print(f"   ⚠️ No se pudo guardar debug: {e}")
         
-        # Extraer el JSON entre el primer { y el último }
         first_brace = response.find('{')
         last_brace = response.rfind('}')
-        
         if first_brace == -1 or last_brace == -1 or last_brace <= first_brace:
             print(f"   ❌ No se encontró estructura JSON válida")
             return None
-        
         json_str = response[first_brace:last_brace + 1]
         print(f"   📋 JSON extraído ({len(json_str)} caracteres)")
-        
-        # Intentar parsear directamente primero
         try:
             result = json.loads(json_str)
             print(f"   ✅ JSON parseado directamente")
             return result
         except json.JSONDecodeError as e:
             print(f"   ⚠️ Error en JSON directo: {e}")
-        
-        # Si falla, limpiar progresivamente
         clean = json_str.strip()
-        
-        # Remover bloques markdown ```json ... ```
         clean = re.sub(r'```json\s*', '', clean)
         clean = re.sub(r'\s*```', '', clean)
-        
-        # Corrección paso a paso
         problems_found = []
-        
         for iteration in range(20):
             original_clean = clean
-            
-            # 1. Eliminar trailing commas antes de } o ]
             clean = re.sub(r',\s*([}\]])', r'\1', clean)
-            
-            # 2. Eliminar trailing commas antes de , en arrays
             clean = re.sub(r',(\s*[\]\}])', r'\1', clean)
-            
-            # 3. Convertir comillas simples en keys
             clean = re.sub(r"'([^'\"жа]+)':", r'"\1":', clean)
-            
-            # 4. Convertir comillas simples en strings (cuidadosamente)
             clean = re.sub(r"'([^'\\]*)'", r'"\1"', clean)
-            
-            # 5. Eliminar caracteres de control problemáticos
             clean = clean.replace('\n', ' ')
             clean = clean.replace('\r', ' ')
             clean = clean.replace('\t', ' ')
-            
-            # 6. Eliminar múltiples espacios
             clean = re.sub(r'\s+', ' ', clean)
-            
-            # 7. Corregir patrones comunes problemáticos
             clean = re.sub(r'"\s*:\s*"', '": "', clean)
             clean = re.sub(r'{\s*"', '{"', clean)
             clean = re.sub(r'"\s*{', '" {', clean)
@@ -1850,12 +1363,8 @@ def generar_datos_barrio_ai(nombre_barrio: str) -> Dict[str, Any]:
             clean = re.sub(r'"\s*}', '" }', clean)
             clean = re.sub(r'\[\s*"', '["', clean)
             clean = re.sub(r'"\s*\]', '"]', clean)
-            
-            # Verificar si hubo cambios
             if clean == original_clean:
                 break
-                
-            # Intentar parsear
             try:
                 result = json.loads(clean)
                 print(f"   ✅ JSON reparado en iteración {iteration + 1}")
@@ -1863,18 +1372,11 @@ def generar_datos_barrio_ai(nombre_barrio: str) -> Dict[str, Any]:
             except json.JSONDecodeError as e:
                 problems_found.append(f"Iteración {iteration + 1}: {e}")
                 continue
-        
-        # Último recurso: buscar el objeto JSON más interno y usarlo
         print(f"   🔧 Intentando recuperación avanzada...")
-        
-        # Encontrar todos los objetos JSON completos
         try:
-            # Buscar objetos que parezcan válidos desde el final
-            for end_pos in range(len(clean), 0, -100):  # Reducir de 100 en 100
-                start_estimate = max(0, end_pos - 5000)  # Máximo 5000 caracteres
+            for end_pos in range(len(clean), 0, -100):
+                start_estimate = max(0, end_pos - 5000)
                 test_json = clean[start_estimate:end_pos]
-                
-                # Encontrar el primer { en el rango
                 first = test_json.find('{')
                 if first != -1:
                     test_json = test_json[first:]
@@ -1886,25 +1388,17 @@ def generar_datos_barrio_ai(nombre_barrio: str) -> Dict[str, Any]:
                         continue
         except Exception as e:
             print(f"   ⚠️ Error en recuperación: {e}")
-        
-        # Si todo falla, informar el error
         print(f"   ❌ No se pudo parsear después de {len(problems_found)} intentos")
         print(f"   Últimos errores: {problems_found[-3:] if problems_found else 'Ninguno'}")
-        
         return None
     
     try:
         ai_response = call_gemini_with_rotation(prompt)
-        
         print(f"📄 Respuesta cruda ({len(ai_response)} caracteres):")
         print("=" * 80)
         print(ai_response[:500] + "..." if len(ai_response) > 500 else ai_response)
         print("=" * 80)
-        
-        # Parsear con la nueva función
         data = clean_and_parse_json(ai_response)
-        
-        # Si el parser falló, intentar una vez más con un prompt más simple
         if data is None:
             print(f"⚠️ Parser falló, intentando con formato más simple...")
             simple_prompt = '''
@@ -1936,10 +1430,8 @@ Solo responde con el JSON, sin markdown, sin explicaciones.
 '''.replace('{nombre}', nombre_barrio)
             retry_response = call_gemini_with_rotation(simple_prompt)
             data = clean_and_parse_json(retry_response)
-        
         if data is None:
             print(f"⚠️ Parser falló, generando estructura con valores por defecto")
-            # Generar estructura por defecto pero con datos básicos del barrio
             data = {
                 "resumen_general": f"{nombre_barrio} es un barrio de Buenos Aires con características únicas.",
                 "puntuacion_general": 70,
@@ -1954,10 +1446,8 @@ Solo responde con el JSON, sin markdown, sin explicaciones.
                 "servicios_financieros": {"puntuacion": 70, "descripcion": "Acceso a servicios bancarios."},
                 "conclusion": f"{nombre_barrio} presenta una opción viable para vivir e invertir en Buenos Aires."
             }
-        
         print(f"✅ Datos generados para: {nombre_barrio}")
         return data
-        
     except json.JSONDecodeError as e:
         print(f"❌ Error parseando JSON: {e}")
         raise ValueError(f"Error al generar datos: {str(e)}")
@@ -1967,21 +1457,11 @@ Solo responde con el JSON, sin markdown, sin explicaciones.
 
 @app.get("/api/barrios")
 def listar_barrios():
-    """
-    Lista todos los barrios disponibles en el CMS
-    """
     conn = get_barrios_db_connection()
     cursor = conn.cursor()
-    
-    cursor.execute('''
-        SELECT nombre, data, actualizado_por, fecha_actualizacion 
-        FROM barrios_data 
-        ORDER BY nombre
-    ''')
-    
+    cursor.execute('SELECT nombre, data, actualizado_por, fecha_actualizacion FROM barrios_data ORDER BY nombre')
     rows = cursor.fetchall()
     conn.close()
-    
     barrios = []
     for row in rows:
         try:
@@ -1999,31 +1479,15 @@ def listar_barrios():
                 'generado_por_ia': row['actualizado_por'] == 'ai',
                 'fecha_actualizacion': row['fecha_actualizacion']
             })
-    
-    return {
-        "success": True,
-        "total": len(barrios),
-        "barrios": barrios
-    }
+    return {"success": True, "total": len(barrios), "barrios": barrios}
 
 @app.get("/api/barrios/search")
 def buscar_barrios(q: str = Query(..., description="Término de búsqueda")):
-    """
-    Busca barrios por nombre
-    """
     conn = get_barrios_db_connection()
     cursor = conn.cursor()
-    
-    cursor.execute('''
-        SELECT nombre, data, actualizado_por, fecha_actualizacion 
-        FROM barrios_data 
-        WHERE nombre LIKE ?
-        ORDER BY nombre
-    ''', (f'%{q.lower()}%',))
-    
+    cursor.execute('SELECT nombre, data, actualizado_por, fecha_actualizacion FROM barrios_data WHERE nombre LIKE ? ORDER BY nombre', (f'%{q.lower()}%',))
     rows = cursor.fetchall()
     conn.close()
-    
     barrios = []
     for row in rows:
         try:
@@ -2041,138 +1505,55 @@ def buscar_barrios(q: str = Query(..., description="Término de búsqueda")):
                 'generado_por_ia': row['actualizado_por'] == 'ai',
                 'fecha_actualizacion': row['fecha_actualizacion']
             })
-    
-    return {
-        "success": True,
-        "total": len(barrios),
-        "barrios": barrios
-    }
+    return {"success": True, "total": len(barrios), "barrios": barrios}
 
-
-# ✅ ENDPOINT PARA GENERAR entorno.json
 @app.get("/api/barrios/generate-json")
 def generar_entorno_json():
-    """
-    Genera el archivo entorno.json con todos los barrios para el frontend del sitio principal.
-    Este endpoint es usado por el CMS para exportar los datos.
-    """
     conn = get_barrios_db_connection()
     cursor = conn.cursor()
-    
     cursor.execute('SELECT nombre, data, fecha_actualizacion FROM barrios_data ORDER BY nombre')
     rows = cursor.fetchall()
     conn.close()
-    
     if not rows:
         raise HTTPException(status_code=404, detail="No hay barrios registrados")
-    
-    # Datos de respaldo mejorados por categoría
     FALLBACK_DATA = {
-        'transporte': [
-            "Estación de tren cercana con conexiones a toda la ciudad",
-            "Líneas de colectivo con parada principal en la zona",
-            "Acceso fácil a centro de la ciudad",
-            "Parada de taxi y remise a pocas cuadras"
-        ],
-        'educacion': [
-            "Escuela primaria pública en el barrio",
-            "Instituto secundario cercano",
-            "Centro de educación inicial disponible",
-            "Universidad o terciario a distancia accesible"
-        ],
-        'salud': [
-            "Centro de atención primaria a pocas cuadras",
-            "Farmacia de turno disponible",
-            "Consultorios médicos privados en la zona",
-            "Hospital público de referencia en zona cercana"
-        ],
-        'comercio': [
-            "Comercio local de barrio con productos frescos",
-            "Supermercado mayorista y minorista en zona",
-            "Locales comerciales con variedad de rubros",
-            "Mercado de frutos del país cercano"
-        ],
-        'gastronomia': [
-            "Restaurante local con comida tradicional",
-            "Café y panadería de barrio",
-            "Rotisería y local de comidas para llevar",
-            "Bar pub con ambiente familiar"
-        ],
-        'recreacion': [
-            "Plaza principal del barrio con juegos",
-            "Area verde con jardín y bancos",
-            "Club social y deportivo del barrio",
-            "Ciclovía y sendero para caminar"
-        ],
-        'servicios_financieros': [
-            "Banco con sucursal en zona",
-            "Cajero automático disponible 24hs",
-            "Casa de cambios y transferencia",
-            "Cooperativa de ahorro y crédito"
-        ],
-        'seguridad': [
-            "Comisaría de barrio con atención",
-            "Vigilancia privada en zonas residenciales",
-            "Alumbrado público en todas las calles",
-            "Vecinos organizados con ronda nocturna"
-        ],
-        'servicios': [
-            "Correo y oficina postal cercana",
-            "Centro de atención municipal",
-            "Gomería y servicio mecánico",
-            "Lavadero y tintorería en zona"
-        ]
+        'transporte': ["Estación de tren cercana con conexiones a toda la ciudad", "Líneas de colectivo con parada principal en la zona", "Acceso fácil a centro de la ciudad", "Parada de taxi y remise a pocas cuadras"],
+        'educacion': ["Escuela primaria pública en el barrio", "Instituto secundario cercano", "Centro de educación inicial disponible", "Universidad o terciario a distancia accesible"],
+        'salud': ["Centro de atención primaria a pocas cuadras", "Farmacia de turno disponible", "Consultorios médicos privados en la zona", "Hospital público de referencia en zona cercana"],
+        'comercio': ["Comercio local de barrio con productos frescos", "Supermercado mayorista y minorista en zona", "Locales comerciales con variedad de rubros", "Mercado de frutos del país cercano"],
+        'gastronomia': ["Restaurante local con comida tradicional", "Café y panadería de barrio", "Rotisería y local de comidas para llevar", "Bar pub con ambiente familiar"],
+        'recreacion': ["Plaza principal del barrio con juegos", "Area verde con jardín y bancos", "Club social y deportivo del barrio", "Ciclovía y sendero para caminar"],
+        'servicios_financieros': ["Banco con sucursal en zona", "Cajero automático disponible 24hs", "Casa de cambios y transferencia", "Cooperativa de ahorro y crédito"],
+        'seguridad': ["Comisaría de barrio con atención", "Vigilancia privada en zonas residenciales", "Alumbrado público en todas las calles", "Vecinos organizados con ronda nocturna"],
+        'servicios': ["Correo y oficina postal cercana", "Centro de atención municipal", "Gomería y servicio mecánico", "Lavadero y tintorería en zona"]
     }
-    
-    # Mensajes de respaldo por categoría cuando no hay datos específicos
-    FALLBACK_MESSAGES = {
-        'transporte': "Transporte público disponible con fácil acceso a distintas zonas de la ciudad",
-        'educacion': "Cuenta con instituciones educativas para todos los niveles en el barrio o zonas cercanas",
-        'salud': "Servicios de salud accesibles con centros de atención primaria y farmacias en la zona",
-        'comercio': "Variedad de comercios locales que satisfacen las necesidades cotidianas",
-        'gastronomia': "Opciones gastronómicas variadas con locales de comida tradicional y modernos",
-        'recreacion': "Espacios de recreación y áreas verdes para actividades al aire libre",
-        'servicios_financieros': "Servicios bancarios y financieros disponibles en la zona",
-        'seguridad': "Nivel de seguridad estándar con presencia policial y vigilancia comunitaria",
-        'servicios': "Servicios generales y utilitarios disponibles en el barrio"
+    field_mappings = {
+        'transporte': ['estaciones', 'colectivos', 'descripcion'],
+        'educacion': ['escuelas', 'universidades', 'colegios', 'nivel_inicial', 'primario', 'secundario', 'universitario'],
+        'salud': ['hospitales', 'centros_salud', 'clinicas', 'farmacias'],
+        'comercio': ['supermercados', 'centros_comerciales', 'tiendas'],
+        'gastronomia': ['bares_restaurantes', 'restaurantes', 'cafeterias'],
+        'recreacion': ['plazas', 'parques', 'espacios_verdes', 'actividades', 'areas_deportivas'],
+        'servicios_financieros': ['bancos', 'cajeros', 'cajeros_automaticos'],
+        'seguridad': ['comisarias', 'comisaria', 'seguridad'],
+        'servicios': ['farmacias', 'centros_servicios', 'otros_servicios'],
+        'espacios_verdes': ['parques'],
+        'contaminacion': ['nivel_ruido', 'fuente', 'principal_fuente'],
+        'vida_barrio': ['bares', 'cultura']
     }
-    
-    # Transformar datos al formato de entorno.json para el frontend
     entorno_data = {}
-    
     for row in rows:
         nombre = row['nombre']
         data = json.loads(row['data'])
         fecha = row['fecha_actualizacion']
         nombre_title = nombre.title()
-        
-        # Mapeo de campos del backend al formato frontend
-        field_mappings = {
-            'transporte': ['estaciones', 'colectivos', 'descripcion'],
-            'educacion': ['escuelas', 'universidades', 'colegios', 'nivel_inicial', 'primario', 'secundario', 'universitario'],
-            'salud': ['hospitales', 'centros_salud', 'clinicas', 'farmacias'],
-            'comercio': ['supermercados', 'centros_comerciales', 'tiendas'],
-            'gastronomia': ['bares_restaurantes', 'restaurantes', 'cafeterias'],
-            'recreacion': ['plazas', 'parques', 'espacios_verdes', 'actividades', 'areas_deportivas'],
-            'servicios_financieros': ['bancos', 'cajeros', 'cajeros_automaticos'],
-            'seguridad': ['comisarias', 'comisaria', 'seguridad'],
-            'servicios': ['farmacias', 'centros_servicios', 'otros_servicios'],
-            'espacios_verdes': ['parques'],
-            'contaminacion': ['nivel_ruido', 'fuente', 'principal_fuente'],
-            'vida_barrio': ['bares', 'cultura']
-        }
-        
-        # Convertir datos al formato requerido
         barrio_json = {
             'nombre': nombre_title,
             'descripcion_general': data.get('resumen_general', data.get('perfil_barrio', f"{nombre_title} es un barrio con características propias de la zona norte del Gran Buenos Aires, ofreciendo una combinación de residentialidad y servicios locales.")),
             'fecha_actualizacion': fecha
         }
-        
         for cat_key, fields in field_mappings.items():
             cat_data = data.get('categorias', {}).get(cat_key, {}) if 'categorias' in data else data.get(cat_key, {})
-            
-            # Extraer items de los campos disponibles
             items = []
             for field_name in fields:
                 if field_name in cat_data and cat_data[field_name]:
@@ -2182,10 +1563,7 @@ def generar_entorno_json():
                     elif isinstance(value, str) and value.strip():
                         parts = [p.strip() for p in value.split(',') if p.strip()]
                         items.extend(parts)
-            
-            # Si hay items, usarlos; si no, proporcionar fallback mejorado
             if items:
-                # Filtrar duplicados manteniendo el orden
                 seen = set()
                 unique_items = []
                 for item in items:
@@ -2195,41 +1573,22 @@ def generar_entorno_json():
                         unique_items.append(item)
                 barrio_json[cat_key] = unique_items
             else:
-                # Usar datos de respaldo específicos por categoría
                 barrio_json[cat_key] = FALLBACK_DATA.get(cat_key, FALLBACK_DATA['servicios']).copy()
-        
         entorno_data[nombre] = barrio_json
-    
     return entorno_data
-
 
 @app.get("/api/barrios/{nombre}")
 def obtener_barrio(nombre: str):
-    """
-    Obtiene los datos de un barrio específico
-    """
     conn = get_barrios_db_connection()
     cursor = conn.cursor()
-    
-    # Usar LOWER() en SQL para búsqueda case-insensitive
-    cursor.execute('''
-        SELECT nombre, data, actualizado_por, fecha_actualizacion 
-        FROM barrios_data 
-        WHERE LOWER(nombre) = LOWER(?)
-    ''', (nombre.strip(),))
-    
+    cursor.execute('SELECT nombre, data, actualizado_por, fecha_actualizacion FROM barrios_data WHERE LOWER(nombre) = LOWER(?)', (nombre.strip(),))
     row = cursor.fetchone()
     conn.close()
-    
     if not row:
         raise HTTPException(status_code=404, detail=f"Barrio '{nombre}' no encontrado")
-    
     data = json.loads(row['data'])
     nombre_display = row['nombre']
-    
-    # Transformar datos al formato esperado por el frontend
     frontend_data = transformar_a_formatofrontend(data, nombre_display)
-    
     return {
         "success": True,
         "nombre": nombre_display,
@@ -2240,34 +1599,13 @@ def obtener_barrio(nombre: str):
     }
 
 def transformar_a_formatofrontend(data: dict, nombre: str) -> dict:
-    """
-    Transforma los datos del formato interno al formato esperado por el frontend.
-    El frontend espera: resumen, conclusion, categorias.transporte.puntuacion, etc.
-
-    El backend puede almacenar dos formatos:
-    1. Formato flat (antiguo): transporte.puntuacion, comercio.puntuacion, etc. a nivel raíz
-    2. Formato nested (nuevo): categorias.transporte.puntuacion, categorias.comercio.puntuacion, etc.
-    """
     if not data:
-        return {
-            'nombre': nombre,
-            'resumen': '',
-            'conclusion': '',
-            'categorias': {}
-        }
-
-    # Detectar si los datos están anidados bajo 'categorias'
-    # El frontend envía datos con estructura: { categorias: { transporte: {...}, comercio: {...} } }
+        return {'nombre': nombre, 'resumen': '', 'conclusion': '', 'categorias': {}}
     if 'categorias' in data and isinstance(data['categorias'], dict):
-        # Nuevo formato nested: extraer las categorías de data.categorias
         categorias_data = data['categorias']
     else:
-        # Formato antiguo flat: las categorías están directamente en data
         categorias_data = data
-
     categorias = {}
-
-    # Transporte
     if 'transporte' in categorias_data:
         t = categorias_data['transporte']
         categorias['transporte'] = {
@@ -2276,8 +1614,6 @@ def transformar_a_formatofrontend(data: dict, nombre: str) -> dict:
             'estaciones': ', '.join(t.get('estaciones', []) or t.get('estaciones_cercanas', [])),
             'colectivos': ', '.join(t.get('colectivos', []) or t.get('lineas_colectivo', []))
         }
-
-    # Comercio
     if 'comercio' in categorias_data:
         c = categorias_data['comercio']
         categorias['comercio'] = {
@@ -2286,8 +1622,6 @@ def transformar_a_formatofrontend(data: dict, nombre: str) -> dict:
             'supermercados': ', '.join(c.get('supermercados', [])) if c.get('supermercados') else c.get('supermercados', ''),
             'centros_comerciales': ', '.join(c.get('centros_comerciales', [])) if c.get('centros_comerciales') else c.get('centros', '')
         }
-
-    # Seguridad
     if 'seguridad' in categorias_data:
         s = categorias_data['seguridad']
         categorias['seguridad'] = {
@@ -2295,8 +1629,6 @@ def transformar_a_formatofrontend(data: dict, nombre: str) -> dict:
             'descripcion': s.get('descripcion', ''),
             'comisaria': s.get('comisaria_cercana', '') or s.get('comisaria', '')
         }
-
-    # Educación
     if 'educacion' in categorias_data:
         e = categorias_data['educacion']
         categorias['educacion'] = {
@@ -2305,8 +1637,6 @@ def transformar_a_formatofrontend(data: dict, nombre: str) -> dict:
             'escuelas': ', '.join(e.get('escuelas', [])) if e.get('escuelas') else e.get('escuelas', ''),
             'universidades': ', '.join(e.get('universidades', [])) if e.get('universidades') else e.get('universidades', '')
         }
-
-    # Salud
     if 'salud' in categorias_data:
         s = categorias_data['salud']
         categorias['salud'] = {
@@ -2315,8 +1645,6 @@ def transformar_a_formatofrontend(data: dict, nombre: str) -> dict:
             'hospitales': ', '.join(s.get('hospitales', [])) if s.get('hospitales') else s.get('hospitales', ''),
             'centros_salud': ', '.join(s.get('centros_salud', [])) if s.get('centros_salud') else s.get('centros', '')
         }
-
-    # Espacios Verdes
     if 'espacios_verdes' in categorias_data:
         e = categorias_data['espacios_verdes']
         categorias['espacios_verdes'] = {
@@ -2324,8 +1652,6 @@ def transformar_a_formatofrontend(data: dict, nombre: str) -> dict:
             'descripcion': e.get('descripcion', ''),
             'parques': ', '.join(e.get('parques', [])) if e.get('parques') else e.get('parques', '')
         }
-
-    # Contaminación
     if 'contaminacion' in categorias_data:
         c = categorias_data['contaminacion']
         categorias['contaminacion'] = {
@@ -2334,8 +1660,6 @@ def transformar_a_formatofrontend(data: dict, nombre: str) -> dict:
             'nivel_ruido': c.get('nivel_ruido', '') or c.get('ruido', ''),
             'fuente': c.get('principal_fuente', '') or c.get('fuente', '')
         }
-
-    # Vida del Barrio
     if 'vida_barrio' in categorias_data:
         v = categorias_data['vida_barrio']
         categorias['vida_barrio'] = {
@@ -2344,8 +1668,6 @@ def transformar_a_formatofrontend(data: dict, nombre: str) -> dict:
             'bares': ', '.join(v.get('bares_restaurantes', [])) if v.get('bares_restaurantes') else v.get('bares', ''),
             'cultura': ', '.join(v.get('cultura', [])) if v.get('cultura') else v.get('cultura', '')
         }
-
-    # Servicios Financieros
     if 'servicios_financieros' in categorias_data:
         s = categorias_data['servicios_financieros']
         categorias['servicios_financieros'] = {
@@ -2354,7 +1676,6 @@ def transformar_a_formatofrontend(data: dict, nombre: str) -> dict:
             'bancos': ', '.join(s.get('bancos', [])) if s.get('bancos') else s.get('bancos', ''),
             'cajeros': ', '.join(s.get('cajeros_automaticos', [])) if s.get('cajeros_automaticos') else s.get('cajeros', '')
         }
-
     return {
         'nombre': nombre,
         'resumen': data.get('resumen_general', '') or data.get('resumen', ''),
@@ -2363,30 +1684,20 @@ def transformar_a_formatofrontend(data: dict, nombre: str) -> dict:
         'categorias': categorias
     }
 
-
 @app.post("/api/barrios")
 def crear_barrio(request: BarrioCreateRequest):
-    """
-    Crea un nuevo barrio. Si generar_ia=True, usa Gemini para crear los datos.
-    """
     nombre = request.nombre.strip().lower()
     nombre_display = request.nombre.strip()
-    
     conn = get_barrios_db_connection()
     cursor = conn.cursor()
-    
-    # Verificar si ya existe (búsqueda case-insensitive)
     cursor.execute('SELECT nombre FROM barrios_data WHERE LOWER(nombre) = LOWER(?)', (nombre,))
     if cursor.fetchone():
         conn.close()
         raise HTTPException(status_code=400, detail=f"El barrio '{nombre_display}' ya existe")
-    
     try:
         if request.generar_ia:
-            # Generar con IA
             data = generar_datos_barrio_ai(nombre_display)
         else:
-            # Crear con estructura vacía
             data = {
                 "resumen_general": "",
                 "puntuacion_general": 50,
@@ -2401,20 +1712,11 @@ def crear_barrio(request: BarrioCreateRequest):
                 "servicios_financieros": {"puntuacion": 50, "descripcion": "", "bancos": [], "cajeros_automaticos": []},
                 "conclusion": ""
             }
-        
-        # Guardar en base de datos
         data_json = json.dumps(data, ensure_ascii=False, indent=2)
-        cursor.execute('''
-            INSERT INTO barrios_data (nombre, data, actualizado_por)
-            VALUES (?, ?, ?)
-        ''', (nombre, data_json, 'ai' if request.generar_ia else 'admin'))
-        
+        cursor.execute('INSERT INTO barrios_data (nombre, data, actualizado_por) VALUES (?, ?, ?)', (nombre, data_json, 'ai' if request.generar_ia else 'admin'))
         conn.commit()
         conn.close()
-        
-        # Transformar datos al formato esperado por el frontend
         frontend_data = transformar_a_formatofrontend(data, nombre_display)
-        
         return {
             "success": True,
             "message": f"Barrio '{nombre_display}' creado exitosamente",
@@ -2423,83 +1725,46 @@ def crear_barrio(request: BarrioCreateRequest):
             "generado_por_ia": request.generar_ia,
             "fecha_actualizacion": datetime.now().isoformat()
         }
-        
     except Exception as e:
         conn.close()
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.put("/api/barrios/{nombre}")
 def actualizar_barrio(nombre: str, request: BarrioUpdateRequest):
-    """
-    Actualiza los datos de un barrio existente
-    """
     nombre = nombre.lower().strip()
-    
     conn = get_barrios_db_connection()
     cursor = conn.cursor()
-    
-    # Verificar que existe (búsqueda case-insensitive)
     cursor.execute('SELECT nombre FROM barrios_data WHERE LOWER(nombre) = LOWER(?)', (nombre,))
     if not cursor.fetchone():
         conn.close()
         raise HTTPException(status_code=404, detail=f"Barrio no encontrado")
-    
     try:
         data_json = json.dumps(request.data, ensure_ascii=False, indent=2)
-        
-        cursor.execute('''
-            UPDATE barrios_data 
-            SET data = ?, actualizado_por = ?, fecha_actualizacion = CURRENT_TIMESTAMP
-            WHERE nombre = ?
-        ''', (data_json, request.actualizado_por or 'admin', nombre))
-        
+        cursor.execute('UPDATE barrios_data SET data = ?, actualizado_por = ?, fecha_actualizacion = CURRENT_TIMESTAMP WHERE nombre = ?', (data_json, request.actualizado_por or 'admin', nombre))
         conn.commit()
         conn.close()
-        
-        return {
-            "success": True,
-            "message": "Barrio actualizado exitosamente"
-        }
-        
+        return {"success": True, "message": "Barrio actualizado exitosamente"}
     except Exception as e:
         conn.close()
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/barrios/{nombre}/regenerate")
 def regenerar_barrio_ai(nombre: str):
-    """
-    Regenera los datos de un barrio usando Gemini AI
-    """
     nombre_display = nombre.strip()
     nombre_db = nombre.strip().lower()
-    
     conn = get_barrios_db_connection()
     cursor = conn.cursor()
-    
-    # Verificar que existe (búsqueda case-insensitive)
     cursor.execute('SELECT nombre FROM barrios_data WHERE LOWER(nombre) = LOWER(?)', (nombre_db,))
     if not cursor.fetchone():
         conn.close()
         raise HTTPException(status_code=404, detail=f"Barrio no encontrado")
-    
     try:
-        # Generar nuevos datos con IA
         data = generar_datos_barrio_ai(nombre_display)
-        
-        # Actualizar en base de datos
         data_json = json.dumps(data, ensure_ascii=False, indent=2)
-        cursor.execute('''
-            UPDATE barrios_data 
-            SET data = ?, actualizado_por = 'ai', fecha_actualizacion = CURRENT_TIMESTAMP
-            WHERE nombre = ?
-        ''', (data_json, nombre_db))
-        
+        cursor.execute('UPDATE barrios_data SET data = ?, actualizado_por = "ai", fecha_actualizacion = CURRENT_TIMESTAMP WHERE nombre = ?', (data_json, nombre_db))
         conn.commit()
         conn.close()
-        
-        # Transformar datos al formato esperado por el frontend
         frontend_data = transformar_a_formatofrontend(data, nombre_display)
-        
         return {
             "success": True,
             "message": f"Barrio '{nombre_display}' regenerado con IA",
@@ -2507,64 +1772,35 @@ def regenerar_barrio_ai(nombre: str):
             "generado_por_ia": True,
             "fecha_actualizacion": datetime.now().isoformat()
         }
-        
     except Exception as e:
         conn.close()
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.delete("/api/barrios/{nombre}")
 def eliminar_barrio(nombre: str):
-    """
-    Elimina un barrio de la base de datos
-    """
     nombre = nombre.lower().strip()
-    
     conn = get_barrios_db_connection()
     cursor = conn.cursor()
-    
     cursor.execute('DELETE FROM barrios_data WHERE LOWER(nombre) = LOWER(?)', (nombre,))
     deleted = cursor.rowcount
     conn.commit()
     conn.close()
-    
     if deleted == 0:
         raise HTTPException(status_code=404, detail=f"Barrio no encontrado")
-    
-    return {
-        "success": True,
-        "message": f"Barrio '{nombre}' eliminado exitosamente"
-    }
+    return {"success": True, "message": f"Barrio '{nombre}' eliminado exitosamente"}
 
 @app.get("/api/barrios/{nombre}/exists")
 def verificar_barrio_existe(nombre: str):
-    """
-    Verifica si un barrio existe en la base de datos
-    """
     nombre = nombre.lower().strip()
-    
     conn = get_barrios_db_connection()
     cursor = conn.cursor()
-    
     cursor.execute('SELECT nombre, fecha_actualizacion FROM barrios_data WHERE LOWER(nombre) = LOWER(?)', (nombre,))
     row = cursor.fetchone()
     conn.close()
-    
     if row:
-        return {
-            "exists": True,
-            "nombre": row['nombre'],
-            "fecha_actualizacion": row['fecha_actualizacion']
-        }
+        return {"exists": True, "nombre": row['nombre'], "fecha_actualizacion": row['fecha_actualizacion']}
     else:
-        return {
-            "exists": False,
-            "message": "El barrio no existe. Puede crearlo con IA."
-        }
-
-
-# ========================================
-# ENDPOINT PARA EJECUTAR SCRAPER
-# ========================================
+        return {"exists": False, "message": "El barrio no existe. Puede crearlo con IA."}
 
 @app.get("/api/market/run-scrape")
 def run_scraper_endpoint(
@@ -2572,44 +1808,19 @@ def run_scraper_endpoint(
     operacion: str = Query("venta", description="Tipo de operación"),
     tipo: str = Query("departamento", description="Tipo de propiedad")
 ):
-    """
-    Endpoint para ejecutar el script de scraping y retornar los resultados.
-    
-    Este endpoint:
-    1. Ejecuta el script scraper.py con los parámetros indicados
-    2. Espera a que genere el archivo scraping.json
-    3. Lee y retorna los datos del scraping
-    
-    Uso:
-    - GET /api/market/run-scrape?zona=palermo
-    - GET /api/market/run-scrape?zona=belgrano&operacion=venta&tipo=casa
-    """
-    import subprocess
-    import sys
-    import os
-    import json
-    import time
+    import subprocess, sys, os, json, time
     from threading import Thread
-    
     print(f"📊 Solicitud de scraping: zona={zona}, op={operacion}, tipo={tipo}")
-    
-    # Ruta del script scraper y del archivo JSON de salida
     scraper_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scraper.py")
     output_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scraping.json")
-    
-    # Verificar que el script existe
     if not os.path.exists(scraper_script):
         raise HTTPException(status_code=500, detail="Script de scraping no encontrado")
-    
     try:
-        # Ejecutar el script de scraping en un hilo separado para no bloquear
         def execute_scraper():
             try:
                 result = subprocess.run(
                     [sys.executable, scraper_script, "--zona", zona, "--operacion", operacion, "--tipo", tipo, "--output", output_file],
-                    capture_output=True,
-                    text=True,
-                    timeout=180  # 3 minutos de timeout
+                    capture_output=True, text=True, timeout=180
                 )
                 if result.returncode != 0:
                     print(f"❌ Error ejecutando scraper: {result.stderr}")
@@ -2617,39 +1828,26 @@ def run_scraper_endpoint(
                 print("⏰ Timeout ejecutando scraper")
             except Exception as e:
                 print(f"❌ Excepción ejecutando scraper: {e}")
-        
-        # Iniciar el scraper en un hilo separado
         scraper_thread = Thread(target=execute_scraper)
         scraper_thread.start()
-        
-        # Esperar un poco para que el scraper starting
         time.sleep(2)
-        
-        # Mientras el scraper corre, ir leyendo el archivo si existe
-        max_wait = 120  # Esperar hasta 2 minutos
+        max_wait = 120
         waited = 0
         last_data = None
-        
         while waited < max_wait:
             if os.path.exists(output_file):
                 try:
                     with open(output_file, 'r', encoding='utf-8') as f:
                         data = json.load(f)
-                        # Verificar que los datos sean recientes y correspondan a la zona
                         if data.get('zone', '').lower() == zona.lower():
                             last_data = data
-                            # Si tiene datos válidos, retornar
                             if data.get('success') and data.get('data', {}).get('sample_size', 0) > 0:
                                 break
                 except json.JSONDecodeError:
-                    pass  # Archivo aún escribiéndose
-            
+                    pass
             time.sleep(2)
             waited += 2
-            
-            # Verificar si el hilo terminó
             if not scraper_thread.is_alive():
-                # El scraper terminó, hacer una última lectura
                 if os.path.exists(output_file):
                     try:
                         with open(output_file, 'r', encoding='utf-8') as f:
@@ -2659,11 +1857,9 @@ def run_scraper_endpoint(
                     except:
                         pass
                 break
-        
         if last_data:
             return last_data
         else:
-            # Si no hay datos, retornar estado de espera
             return {
                 "success": False,
                 "message": "Scraping en progreso. Por favor espera unos segundos y actualiza la página.",
@@ -2671,32 +1867,15 @@ def run_scraper_endpoint(
                 "waiting": True,
                 "suggestion": "Ejecuta: python backend/scraper.py --zona " + zona
             }
-            
     except Exception as e:
         print(f"❌ Error en endpoint de scraping: {e}")
         raise HTTPException(status_code=500, detail=f"Error ejecutando scraping: {str(e)}")
 
-
-# ========================================
-# ENDPOINT PARA LEER SCRAPING.JSON
-# ========================================
-
 @app.get("/api/market/scraping-data")
 def get_scraping_data():
-    """
-    Endpoint para leer los datos del archivo scraping.json generado por el scraper.
-    
-    Uso:
-    - GET /api/market/scraping-data
-    """
     scraping_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scraping.json")
-    
     if not os.path.exists(scraping_file):
-        return {
-            "success": False,
-            "message": "No hay datos de scraping disponibles. Ejecuta primero el scraper."
-        }
-    
+        return {"success": False, "message": "No hay datos de scraping disponibles. Ejecuta primero el scraper."}
     try:
         with open(scraping_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -2704,23 +1883,9 @@ def get_scraping_data():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error leyendo datos de scraping: {str(e)}")
 
-
-# ✅ INICIO
-if __name__ == "__main__":
-    import uvicorn
-    port = int(os.environ.get("PORT", 8001))
-    uvicorn.run("main-ai:app", host="0.0.0.0", port=port, reload=False)  # reload=False en producción
-
-
 # ========================================
-# METADATOS DE CAMPOS POR RUBRO (PARA CMS Y FRONTEND)
+# METADATOS DE CAMPOS POR RUBRO
 # ========================================
-
-# Definición de los campos específicos que existen en el CMS para cada rubro.
-# Esta estructura es usada por:
-# 1. El CMS (analisis-barrio.js) para generar formularios dinámicos
-# 2. El frontend principal (dantepropiedades.com.ar) para mostrar datos estructurados
-# 3. El endpoint /api/entorno/metadata para integración externa
 
 RUBRO_METADATA = {
     "transporte": {
@@ -2729,24 +1894,9 @@ RUBRO_METADATA = {
         "descripcion": "Acceso a transporte público y conectividad",
         "orden": 1,
         "campos": {
-            "descripcion": {
-                "tipo": "textarea",
-                "label": "Descripción del transporte",
-                "placeholder": "Describe la cobertura de transporte público en la zona...",
-                "orden": 1
-            },
-            "estaciones": {
-                "tipo": "input",
-                "label": "Estaciones de tren/subte",
-                "placeholder": "Ej: Estación Tigre, Estación Bartolomé Mitre",
-                "orden": 2
-            },
-            "colectivos": {
-                "tipo": "input",
-                "label": "Líneas de colectivo",
-                "placeholder": "Ej: 15, 28, 57, 71, 130",
-                "orden": 3
-            }
+            "descripcion": {"tipo": "textarea", "label": "Descripción del transporte", "placeholder": "Describe la cobertura de transporte público en la zona...", "orden": 1},
+            "estaciones": {"tipo": "input", "label": "Estaciones de tren/subte", "placeholder": "Ej: Estación Tigre, Estación Bartolomé Mitre", "orden": 2},
+            "colectivos": {"tipo": "input", "label": "Líneas de colectivo", "placeholder": "Ej: 15, 28, 57, 71, 130", "orden": 3}
         }
     },
     "comercio": {
@@ -2755,24 +1905,9 @@ RUBRO_METADATA = {
         "descripcion": "Comercios locales, supermercados y centros comerciales",
         "orden": 2,
         "campos": {
-            "descripcion": {
-                "tipo": "textarea",
-                "label": "Descripción del comercio",
-                "placeholder": "Describe la oferta comercial de la zona...",
-                "orden": 1
-            },
-            "supermercados": {
-                "tipo": "input",
-                "label": "Supermercados",
-                "placeholder": "Ej: Coto, Jumbo, Día, ChangoMas",
-                "orden": 2
-            },
-            "centros": {
-                "tipo": "input",
-                "label": "Centros comerciales",
-                "placeholder": "Ej: Nordelta Shopping, Paseo de la Costa",
-                "orden": 3
-            }
+            "descripcion": {"tipo": "textarea", "label": "Descripción del comercio", "placeholder": "Describe la oferta comercial de la zona...", "orden": 1},
+            "supermercados": {"tipo": "input", "label": "Supermercados", "placeholder": "Ej: Coto, Jumbo, Día, ChangoMas", "orden": 2},
+            "centros": {"tipo": "input", "label": "Centros comerciales", "placeholder": "Ej: Nordelta Shopping, Paseo de la Costa", "orden": 3}
         }
     },
     "salud": {
@@ -2781,30 +1916,10 @@ RUBRO_METADATA = {
         "descripcion": "Hospitales, centros de salud y farmacias",
         "orden": 3,
         "campos": {
-            "descripcion": {
-                "tipo": "textarea",
-                "label": "Descripción de servicios de salud",
-                "placeholder": "Describe la infraestructura de salud de la zona...",
-                "orden": 1
-            },
-            "hospitales": {
-                "tipo": "input",
-                "label": "Hospitales",
-                "placeholder": "Ej: Hospital Municipal de Tigre",
-                "orden": 2
-            },
-            "centros_salud": {
-                "tipo": "input",
-                "label": "Centros de salud/CAPS",
-                "placeholder": "Ej: CAPS N° 1, Centro Médico del Norte",
-                "orden": 3
-            },
-            "farmacias": {
-                "tipo": "input",
-                "label": "Farmacias",
-                "placeholder": "Ej: Farmacia del Puerto, Farmacia 24hs",
-                "orden": 4
-            }
+            "descripcion": {"tipo": "textarea", "label": "Descripción de servicios de salud", "placeholder": "Describe la infraestructura de salud de la zona...", "orden": 1},
+            "hospitales": {"tipo": "input", "label": "Hospitales", "placeholder": "Ej: Hospital Municipal de Tigre", "orden": 2},
+            "centros_salud": {"tipo": "input", "label": "Centros de salud/CAPS", "placeholder": "Ej: CAPS N° 1, Centro Médico del Norte", "orden": 3},
+            "farmacias": {"tipo": "input", "label": "Farmacias", "placeholder": "Ej: Farmacia del Puerto, Farmacia 24hs", "orden": 4}
         }
     },
     "educacion": {
@@ -2813,36 +1928,11 @@ RUBRO_METADATA = {
         "descripcion": "Instituciones educativas de todos los niveles",
         "orden": 4,
         "campos": {
-            "descripcion": {
-                "tipo": "textarea",
-                "label": "Descripción educativa",
-                "placeholder": "Describe la oferta educativa de la zona...",
-                "orden": 1
-            },
-            "nivel_inicial": {
-                "tipo": "input",
-                "label": "Nivel Inicial/Jardín",
-                "placeholder": "Ej: Jardín Nr. 1, Jardín del Puerto",
-                "orden": 2
-            },
-            "primario": {
-                "tipo": "input",
-                "label": "Escuela Primaria",
-                "placeholder": "Ej: Escuela Nr. 4, Escuela del Litoral",
-                "orden": 3
-            },
-            "secundario": {
-                "tipo": "input",
-                "label": "Escuela Secundaria",
-                "placeholder": "Ej: Secundarias de Tigre, Instituto técnico",
-                "orden": 4
-            },
-            "universitario": {
-                "tipo": "input",
-                "label": "Universidad/Terciario",
-                "placeholder": "Ej: UADE, UTN, Instituto de formación docente",
-                "orden": 5
-            }
+            "descripcion": {"tipo": "textarea", "label": "Descripción educativa", "placeholder": "Describe la oferta educativa de la zona...", "orden": 1},
+            "nivel_inicial": {"tipo": "input", "label": "Nivel Inicial/Jardín", "placeholder": "Ej: Jardín Nr. 1, Jardín del Puerto", "orden": 2},
+            "primario": {"tipo": "input", "label": "Escuela Primaria", "placeholder": "Ej: Escuela Nr. 4, Escuela del Litoral", "orden": 3},
+            "secundario": {"tipo": "input", "label": "Escuela Secundaria", "placeholder": "Ej: Secundarias de Tigre, Instituto técnico", "orden": 4},
+            "universitario": {"tipo": "input", "label": "Universidad/Terciario", "placeholder": "Ej: UADE, UTN, Instituto de formación docente", "orden": 5}
         }
     },
     "recreacion": {
@@ -2851,30 +1941,10 @@ RUBRO_METADATA = {
         "descripcion": "Parques, plazas y áreas deportivas",
         "orden": 5,
         "campos": {
-            "descripcion": {
-                "tipo": "textarea",
-                "label": "Descripción recreativa",
-                "placeholder": "Describe las opciones de recreación y espacios verdes...",
-                "orden": 1
-            },
-            "parques": {
-                "tipo": "input",
-                "label": "Parques",
-                "placeholder": "Ej: Parque de la Costa, Parque Natural",
-                "orden": 2
-            },
-            "plazas": {
-                "tipo": "input",
-                "label": "Plazas",
-                "placeholder": "Ej: Plaza Mitre, Plaza San Martín",
-                "orden": 3
-            },
-            "areas_deportivas": {
-                "tipo": "input",
-                "label": "Áreas deportivas",
-                "placeholder": "Ej: Canchas de fútbol, Club náutico, Gimnasios",
-                "orden": 4
-            }
+            "descripcion": {"tipo": "textarea", "label": "Descripción recreativa", "placeholder": "Describe las opciones de recreación y espacios verdes...", "orden": 1},
+            "parques": {"tipo": "input", "label": "Parques", "placeholder": "Ej: Parque de la Costa, Parque Natural", "orden": 2},
+            "plazas": {"tipo": "input", "label": "Plazas", "placeholder": "Ej: Plaza Mitre, Plaza San Martín", "orden": 3},
+            "areas_deportivas": {"tipo": "input", "label": "Áreas deportivas", "placeholder": "Ej: Canchas de fútbol, Club náutico, Gimnasios", "orden": 4}
         }
     },
     "seguridad": {
@@ -2883,18 +1953,8 @@ RUBRO_METADATA = {
         "descripcion": "Comisarías y nivel de seguridad de la zona",
         "orden": 6,
         "campos": {
-            "descripcion": {
-                "tipo": "textarea",
-                "label": "Descripción de seguridad",
-                "placeholder": "Describe el nivel de seguridad de la zona...",
-                "orden": 1
-            },
-            "comisaria": {
-                "tipo": "input",
-                "label": "Comisaría cercana",
-                "placeholder": "Ej: Comisaría de Tigre 1ra",
-                "orden": 2
-            }
+            "descripcion": {"tipo": "textarea", "label": "Descripción de seguridad", "placeholder": "Describe el nivel de seguridad de la zona...", "orden": 1},
+            "comisaria": {"tipo": "input", "label": "Comisaría cercana", "placeholder": "Ej: Comisaría de Tigre 1ra", "orden": 2}
         }
     },
     "espacios_verdes": {
@@ -2903,18 +1963,8 @@ RUBRO_METADATA = {
         "descripcion": "Áreas verdes y parques",
         "orden": 7,
         "campos": {
-            "descripcion": {
-                "tipo": "textarea",
-                "label": "Descripción de espacios verdes",
-                "placeholder": "Describe las áreas verdes disponibles...",
-                "orden": 1
-            },
-            "parques": {
-                "tipo": "input",
-                "label": "Parques",
-                "placeholder": "Ej: Parque Vías, Reserva natural",
-                "orden": 2
-            }
+            "descripcion": {"tipo": "textarea", "label": "Descripción de espacios verdes", "placeholder": "Describe las áreas verdes disponibles...", "orden": 1},
+            "parques": {"tipo": "input", "label": "Parques", "placeholder": "Ej: Parque Vías, Reserva natural", "orden": 2}
         }
     },
     "contaminacion": {
@@ -2923,24 +1973,9 @@ RUBRO_METADATA = {
         "descripcion": "Nivel de contaminación y ruido ambiental",
         "orden": 8,
         "campos": {
-            "descripcion": {
-                "tipo": "textarea",
-                "label": "Descripción de contaminación",
-                "placeholder": "Describe el nivel de contaminación de la zona...",
-                "orden": 1
-            },
-            "nivel_ruido": {
-                "tipo": "select",
-                "label": "Nivel de ruido",
-                "options": ["Bajo", "Medio", "Alto"],
-                "orden": 2
-            },
-            "fuente": {
-                "tipo": "input",
-                "label": "Fuente de contaminación",
-                "placeholder": "Ej: Tráfico vehicular, Industria",
-                "orden": 3
-            }
+            "descripcion": {"tipo": "textarea", "label": "Descripción de contaminación", "placeholder": "Describe el nivel de contaminación de la zona...", "orden": 1},
+            "nivel_ruido": {"tipo": "select", "label": "Nivel de ruido", "options": ["Bajo", "Medio", "Alto"], "orden": 2},
+            "fuente": {"tipo": "input", "label": "Fuente de contaminación", "placeholder": "Ej: Tráfico vehicular, Industria", "orden": 3}
         }
     },
     "vida_barrio": {
@@ -2949,24 +1984,9 @@ RUBRO_METADATA = {
         "descripcion": "Bares, restaurantes, cultura y entretenimiento",
         "orden": 9,
         "campos": {
-            "descripcion": {
-                "tipo": "textarea",
-                "label": "Descripción de vida nocturna/cultural",
-                "placeholder": "Describe la vida social y cultural del barrio...",
-                "orden": 1
-            },
-            "bares": {
-                "tipo": "input",
-                "label": "Bares y restaurantes",
-                "placeholder": "Ej: Bar del Puerto, Restaurant Delicias",
-                "orden": 2
-            },
-            "cultura": {
-                "tipo": "input",
-                "label": "Cultura (teatros, museos)",
-                "placeholder": "Ej: Teatro Municipal, Museo de la ciudad",
-                "orden": 3
-            }
+            "descripcion": {"tipo": "textarea", "label": "Descripción de vida nocturna/cultural", "placeholder": "Describe la vida social y cultural del barrio...", "orden": 1},
+            "bares": {"tipo": "input", "label": "Bares y restaurantes", "placeholder": "Ej: Bar del Puerto, Restaurant Delicias", "orden": 2},
+            "cultura": {"tipo": "input", "label": "Cultura (teatros, museos)", "placeholder": "Ej: Teatro Municipal, Museo de la ciudad", "orden": 3}
         }
     },
     "servicios_financieros": {
@@ -2975,40 +1995,20 @@ RUBRO_METADATA = {
         "descripcion": "Bancos, cajeros y servicios bancarios",
         "orden": 10,
         "campos": {
-            "descripcion": {
-                "tipo": "textarea",
-                "label": "Descripción de servicios financieros",
-                "placeholder": "Describe los servicios bancarios disponibles...",
-                "orden": 1
-            },
-            "bancos": {
-                "tipo": "input",
-                "label": "Bancos",
-                "placeholder": "Ej: Banco Nación, Banco Provincia",
-                "orden": 2
-            },
-            "cajeros": {
-                "tipo": "input",
-                "label": "Cajeros automáticos",
-                "placeholder": "Ej: Red Link, Banelco",
-                "orden": 3
-            }
+            "descripcion": {"tipo": "textarea", "label": "Descripción de servicios financieros", "placeholder": "Describe los servicios bancarios disponibles...", "orden": 1},
+            "bancos": {"tipo": "input", "label": "Bancos", "placeholder": "Ej: Banco Nación, Banco Provincia", "orden": 2},
+            "cajeros": {"tipo": "input", "label": "Cajeros automáticos", "placeholder": "Ej: Red Link, Banelco", "orden": 3}
         }
     }
 }
 
-
-# ============================================
+# ========================================
 # CONFIGURACIÓN DE ARCHIVO JSON PARA ENTORNO
-# ============================================
+# ========================================
 
 ENTORNO_JSON_PATH = os.environ.get('ENTORNO_JSON_PATH', 'user_input_files/entorno.json')
 
 def load_entorno_json() -> dict:
-    """
-    Lee el archivo entorno.json de forma segura.
-    Returns: dict con la estructura completa o dict vacío si hay error
-    """
     try:
         if os.path.exists(ENTORNO_JSON_PATH):
             with open(ENTORNO_JSON_PATH, 'r', encoding='utf-8') as f:
@@ -3021,19 +2021,10 @@ def load_entorno_json() -> dict:
         return {"metadata": {}, "data": {}}
 
 def save_entorno_json(data: dict) -> bool:
-    """
-    Guarda datos en el archivo entorno.json de forma segura.
-    Args:
-        data: dict con la estructura completa (debe incluir 'metadata' y 'data')
-    Returns: True si se guardó correctamente, False si hubo error
-    """
     try:
-        # Crear directorio si no existe
         os.makedirs(os.path.dirname(ENTORNO_JSON_PATH) if os.path.dirname(ENTORNO_JSON_PATH) else '.', exist_ok=True)
-        
         with open(ENTORNO_JSON_PATH, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
-        
         print(f"✅ Archivo entorno.json guardado exitosamente: {ENTORNO_JSON_PATH}")
         return True
     except Exception as e:
@@ -3041,55 +2032,24 @@ def save_entorno_json(data: dict) -> bool:
         return False
 
 def get_barrios_from_json() -> dict:
-    """
-    Obtiene los barrios del archivo entorno.json.
-    Returns: dict con los barrios como claves
-    """
     entorno_data = load_entorno_json()
     return entorno_data.get('data', {})
 
 def update_barrio_in_json(barrio_nombre: str, barrio_data: dict) -> bool:
-    """
-    Actualiza o añade un barrio en el archivo entorno.json.
-    Args:
-        barrio_nombre: nombre del barrio (clave en el dict)
-        barrio_data: datos del barrio
-    Returns: True si se actualizó correctamente
-    """
     entorno_data = load_entorno_json()
-    
-    # Normalizar nombre del barrio
     nombre_normalizado = barrio_nombre.lower().strip()
     nombre_display = barrio_nombre.strip().title()
-    
-    # Actualizar el barrio
     barrio_data['nombre'] = nombre_display
     barrio_data['fecha_actualizacion'] = datetime.now().isoformat()
-    
     entorno_data['data'][nombre_normalizado] = barrio_data
-    
     return save_entorno_json(entorno_data)
-
 
 @app.get("/api/entorno/metadata")
 def obtener_metadata_entorno():
-    """
-    Endpoint para obtener los metadatos de campos por rubro.
-    Este endpoint es usado por:
-    - El CMS (analisis-barrio.js) para generar formularios dinámicos
-    - Sitios externos (dantepropiedades.com.ar) para integración
-    
-    Returns:
-        dict con la estructura metadata incluyendo:
-        - rubros: definición completa de cada rubro con sus campos
-        - categorias_ordenadas: lista de rubros ordenados por importancia
-    """
-    # Crear lista ordenada de rubros
     rubros_ordenados = sorted(
         [{"key": k, **v} for k, v in RUBRO_METADATA.items()],
         key=lambda x: x.get("orden", 99)
     )
-    
     return {
         "success": True,
         "version": "1.0.0",
@@ -3099,142 +2059,53 @@ def obtener_metadata_entorno():
         "total_rubros": len(RUBRO_METADATA)
     }
 
-
 @app.get("/api/entorno/generate-json")
 def generar_entorno_json_con_metadata():
-    """
-    Genera el archivo entorno.json con metadatos incluidos.
-    Este endpoint combina:
-    1. Los datos de barrios almacenados en la base de datos
-    2. Los metadatos de campos (RUBRO_METADATA)
-    
-    El resultado es un JSON completo con la estructura:
-    {
-        "metadata": {...},  // Definición de campos por rubro
-        "data": {...}       // Datos reales de cada barrio
-    }
-    
-    Este formato es ideal para:
-    - Integración con dantepropiedades.com.ar
-    - Exportación completa del sistema de análisis de entorno
-    """
     conn = get_barrios_db_connection()
     cursor = conn.cursor()
-    
     cursor.execute('SELECT nombre, data, fecha_actualizacion FROM barrios_data ORDER BY nombre')
     rows = cursor.fetchall()
     conn.close()
-    
     if not rows:
         raise HTTPException(status_code=404, detail="No hay barrios registrados")
-    
-    # Datos de respaldo mejorados por categoría
     FALLBACK_DATA = {
-        'transporte': [
-            "Estación de tren cercana con conexiones a toda la ciudad",
-            "Líneas de colectivo con parada principal en la zona",
-            "Acceso fácil a centro de la ciudad",
-            "Parada de taxi y remise a pocas cuadras"
-        ],
-        'educacion': [
-            "Escuela primaria pública en el barrio",
-            "Instituto secundario cercano",
-            "Centro de educación inicial disponible",
-            "Universidad o terciario a distancia accesible"
-        ],
-        'salud': [
-            "Centro de atención primaria a pocas cuadras",
-            "Farmacia de turno disponible",
-            "Consultorios médicos privados en la zona",
-            "Hospital público de referencia en zona cercana"
-        ],
-        'comercio': [
-            "Comercio local de barrio con productos frescos",
-            "Supermercado mayorista y minorista en zona",
-            "Locales comerciales con variedad de rubros",
-            "Mercado de frutos del país cercano"
-        ],
-        'gastronomia': [
-            "Restaurante local con comida tradicional",
-            "Café y panadería de barrio",
-            "Rotisería y local de comidas para llevar",
-            "Bar pub con ambiente familiar"
-        ],
-        'recreacion': [
-            "Plaza principal del barrio con juegos",
-            "Area verde con jardín y bancos",
-            "Club social y deportivo del barrio",
-            "Ciclovía y sendero para caminar"
-        ],
-        'servicios_financieros': [
-            "Banco con sucursal en zona",
-            "Cajero automático disponible 24hs",
-            "Casa de cambios y transferencia",
-            "Cooperativa de ahorro y crédito"
-        ],
-        'seguridad': [
-            "Comisaría de barrio con atención",
-            "Vigilancia privada en zonas residenciales",
-            "Alumbrado público en todas las calles",
-            "Vecinos organizados con ronda nocturna"
-        ],
-        'servicios': [
-            "Correo y oficina postal cercana",
-            "Centro de atención municipal",
-            "Gomería y servicio mecánico",
-            "Lavadero y tintorería en zona"
-        ]
+        'transporte': ["Estación de tren cercana con conexiones a toda la ciudad", "Líneas de colectivo con parada principal en la zona", "Acceso fácil a centro de la ciudad", "Parada de taxi y remise a pocas cuadras"],
+        'educacion': ["Escuela primaria pública en el barrio", "Instituto secundario cercano", "Centro de educación inicial disponible", "Universidad o terciario a distancia accesible"],
+        'salud': ["Centro de atención primaria a pocas cuadras", "Farmacia de turno disponible", "Consultorios médicos privados en la zona", "Hospital público de referencia en zona cercana"],
+        'comercio': ["Comercio local de barrio con productos frescos", "Supermercado mayorista y minorista en zona", "Locales comerciales con variedad de rubros", "Mercado de frutos del país cercano"],
+        'gastronomia': ["Restaurante local con comida tradicional", "Café y panadería de barrio", "Rotisería y local de comidas para llevar", "Bar pub con ambiente familiar"],
+        'recreacion': ["Plaza principal del barrio con juegos", "Area verde con jardín y bancos", "Club social y deportivo del barrio", "Ciclovía y sendero para caminar"],
+        'servicios_financieros': ["Banco con sucursal en zona", "Cajero automático disponible 24hs", "Casa de cambios y transferencia", "Cooperativa de ahorro y crédito"],
+        'seguridad': ["Comisaría de barrio con atención", "Vigilancia privada en zonas residenciales", "Alumbrado público en todas las calles", "Vecinos organizados con ronda nocturna"],
+        'servicios': ["Correo y oficina postal cercana", "Centro de atención municipal", "Gomería y servicio mecánico", "Lavadero y tintorería en zona"]
     }
-    
-    # Mensajes de respaldo por categoría cuando no hay datos específicos
-    FALLBACK_MESSAGES = {
-        'transporte': "Transporte público disponible con fácil acceso a distintas zonas de la ciudad",
-        'educacion': "Cuenta con instituciones educativas para todos los niveles en el barrio o zonas cercanas",
-        'salud': "Servicios de salud accesibles con centros de atención primaria y farmacias en la zona",
-        'comercio': "Variedad de comercios locales que satisfacen las necesidades cotidianas",
-        'gastronomia': "Opciones gastronómicas variadas con locales de comida tradicional y modernos",
-        'recreacion': "Espacios de recreación y áreas verdes para actividades al aire libre",
-        'servicios_financieros': "Servicios bancarios y financieros disponibles en la zona",
-        'seguridad': "Nivel de seguridad estándar con presencia policial y vigilancia comunitaria",
-        'servicios': "Servicios generales y utilitarios disponibles en el barrio"
+    field_mappings = {
+        'transporte': ['estaciones', 'colectivos', 'descripcion'],
+        'educacion': ['escuelas', 'universidades', 'colegios', 'nivel_inicial', 'primario', 'secundario', 'universitario'],
+        'salud': ['hospitales', 'centros_salud', 'clinicas', 'farmacias'],
+        'comercio': ['supermercados', 'centros_comerciales', 'tiendas'],
+        'gastronomia': ['bares_restaurantes', 'restaurantes', 'cafeterias'],
+        'recreacion': ['plazas', 'parques', 'espacios_verdes', 'actividades', 'areas_deportivas'],
+        'servicios_financieros': ['bancos', 'cajeros', 'cajeros_automaticos'],
+        'seguridad': ['comisarias', 'comisaria', 'seguridad'],
+        'servicios': ['farmacias', 'centros_servicios', 'otros_servicios'],
+        'espacios_verdes': ['parques'],
+        'contaminacion': ['nivel_ruido', 'fuente', 'principal_fuente'],
+        'vida_barrio': ['bares', 'cultura']
     }
-    
-    # Transformar datos al formato de entorno.json para el frontend
     entorno_data = {}
-    
     for row in rows:
         nombre = row['nombre']
         data = json.loads(row['data'])
         fecha = row['fecha_actualizacion']
         nombre_title = nombre.title()
-        
-        # Mapeo de campos del backend al formato frontend
-        field_mappings = {
-            'transporte': ['estaciones', 'colectivos', 'descripcion'],
-            'educacion': ['escuelas', 'universidades', 'colegios', 'nivel_inicial', 'primario', 'secundario', 'universitario'],
-            'salud': ['hospitales', 'centros_salud', 'clinicas', 'farmacias'],
-            'comercio': ['supermercados', 'centros_comerciales', 'tiendas'],
-            'gastronomia': ['bares_restaurantes', 'restaurantes', 'cafeterias'],
-            'recreacion': ['plazas', 'parques', 'espacios_verdes', 'actividades', 'areas_deportivas'],
-            'servicios_financieros': ['bancos', 'cajeros', 'cajeros_automaticos'],
-            'seguridad': ['comisarias', 'comisaria', 'seguridad'],
-            'servicios': ['farmacias', 'centros_servicios', 'otros_servicios'],
-            'espacios_verdes': ['parques'],
-            'contaminacion': ['nivel_ruido', 'fuente', 'principal_fuente'],
-            'vida_barrio': ['bares', 'cultura']
-        }
-        
-        # Convertir datos al formato requerido
         barrio_json = {
             'nombre': nombre_title,
             'descripcion_general': data.get('resumen_general', data.get('perfil_barrio', f"{nombre_title} es un barrio con características propias de la zona norte del Gran Buenos Aires, ofreciendo una combinación de residentialidad y servicios locales.")),
             'fecha_actualizacion': fecha
         }
-        
         for cat_key, fields in field_mappings.items():
             cat_data = data.get('categorias', {}).get(cat_key, {}) if 'categorias' in data else data.get(cat_key, {})
-            
-            # Extraer items de los campos disponibles
             items = []
             for field_name in fields:
                 if field_name in cat_data and cat_data[field_name]:
@@ -3244,10 +2115,7 @@ def generar_entorno_json_con_metadata():
                     elif isinstance(value, str) and value.strip():
                         parts = [p.strip() for p in value.split(',') if p.strip()]
                         items.extend(parts)
-            
-            # Si hay items, usarlos; si no, proporcionar fallback mejorado
             if items:
-                # Filtrar duplicados manteniendo el orden
                 seen = set()
                 unique_items = []
                 for item in items:
@@ -3257,12 +2125,8 @@ def generar_entorno_json_con_metadata():
                         unique_items.append(item)
                 barrio_json[cat_key] = unique_items
             else:
-                # Usar datos de respaldo específicos por categoría
                 barrio_json[cat_key] = FALLBACK_DATA.get(cat_key, FALLBACK_DATA['servicios']).copy()
-        
         entorno_data[nombre] = barrio_json
-    
-    # Crear respuesta completa con metadata
     response = {
         "metadata": {
             "version": "1.0.0",
@@ -3273,66 +2137,36 @@ def generar_entorno_json_con_metadata():
         },
         "data": entorno_data
     }
-    
-    # ✅ NUEVO: Guardar el archivo entorno.json para uso externo
     save_entorno_json(response)
-    
     return response
-
 
 @app.get("/api/entorno/data")
 def obtener_entorno_data():
-    """
-    Endpoint directo para obtener los datos de entorno desde el archivo JSON.
-    Este endpoint lee directamente desde user_input_files/entorno.json
-    y es el endpoint principal para dantepropiedades.com.ar
-    
-    Returns:
-        dict con la estructura completa del archivo entorno.json
-    """
     data = load_entorno_json()
-    
     if not data or not data.get('data'):
-        # Si no existe el archivo o está vacío, generar desde la base de datos
         try:
             return generar_entorno_json_con_metadata()
         except HTTPException:
             raise HTTPException(status_code=404, detail="No hay datos de entorno disponibles")
-    
     return data
-
 
 @app.get("/api/entorno/barrio/{nombre}")
 def obtener_entorno_barrio(nombre: str):
-    """
-    Obtiene los datos de un barrio específico desde el archivo JSON.
-    
-    Args:
-        nombre: nombre del barrio a buscar
-    
-    Returns:
-        dict con los datos del barrio o error 404
-    """
     nombre_normalizado = nombre.lower().strip()
-    
     entorno_data = load_entorno_json()
     barrios = entorno_data.get('data', {})
-    
-    # Buscar coincidencia (primero normalizado, luego buscar en claves)
     if nombre_normalizado in barrios:
-        return {
-            "success": True,
-            "nombre": nombre,
-            "data": barrios[nombre_normalizado]
-        }
-    
-    # Buscar por coincidencia parcial en el nombre
+        return {"success": True, "nombre": nombre, "data": barrios[nombre_normalizado]}
     for key, value in barrios.items():
         if nombre_normalizado in key or key in nombre_normalizado:
-            return {
-                "success": True,
-                "nombre": value.get('nombre', key),
-                "data": value
-            }
-    
+            return {"success": True, "nombre": value.get('nombre', key), "data": value}
     raise HTTPException(status_code=404, detail=f"Barrio '{nombre}' no encontrado en entorno.json")
+
+# ========================================
+# INICIO
+# ========================================
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8001))
+    uvicorn.run("main-ai:app", host="0.0.0.0", port=port, reload=False)
