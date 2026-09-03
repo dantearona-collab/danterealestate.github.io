@@ -19,7 +19,7 @@ if project_root not in sys.path:
 from threading import Thread
 from pathlib import Path
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Dict, Any, Union 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -61,6 +61,8 @@ class BarrioUpdateRequest(BaseModel):
     data: dict
     actualizado_por: str = "admin"
 
+.
+
 class PropertyResponse(BaseModel):
     id_temporal: str
     titulo: str
@@ -76,13 +78,13 @@ class PropertyResponse(BaseModel):
     estado: Optional[str] = None
     orientacion: Optional[str] = None
     expensas: Optional[float] = None
-    amenities: Optional[Any] = None  # Cambiado a Any
+    amenities: Optional[Union[str, List[str]]] = None      # <-- Cambio aquí
     cochera: Optional[str] = None
     balcon: Optional[str] = None
     pileta: Optional[str] = None
     acepta_mascotas: Optional[str] = None
     aire_acondicionado: Optional[str] = None
-    info_multimedia: Optional[Any] = None  # Cambiado a Any
+    info_multimedia: Optional[Union[str, List[str]]] = None # <-- Cambio aquí
     documentos: Optional[List[str]] = None
     videos: Optional[List[str]] = None
     fotos: Optional[List[str]] = None
