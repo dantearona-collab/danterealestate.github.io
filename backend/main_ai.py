@@ -31,6 +31,7 @@ from logic.database import (
     get_historial_canal,
     get_last_bot_response,
     log_conversation,
+    add_property, 
     DB_PATH,
     LOG_PATH
 )
@@ -384,7 +385,48 @@ def _construir_data_cms(nombre: str, gastro_data: dict, financial_data: dict, lo
 init_barrios_db()
 
 # ✅ INICIALIZACIÓN Y CONFIGURACIÓN
+# ============================================
+# CARGAR PROPIEDADES DESDE JSON SI LA TABLA ESTÁ VACÍA
+# ============================================
+def cargar_propiedades_iniciales():
+    """Carga las propiedades desde propiedades.json si la tabla está vacía."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM propiedades")
+    count = cursor.fetchone()[0]
+    conn.close()
+    
+    if count == 0:
+        print("📁 Cargando propiedades desde propiedades.json...")
+        try:
+            import json
+            # Buscar el archivo en la raíz del proyecto (un nivel arriba de backend)
+            json_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'propiedades.json')
+            if not os.path.exists(json_path):
+                json_path = 'propiedades.json'  # fallback local
+            with open(json_path, 'r', encoding='utf-8') as f:
+                propiedades = json.load(f)
+            if isinstance(propiedades, list):
+                for prop in propiedades:
+                    # Normalizar valores a minúsculas para evitar problemas de mayúsculas
+                    if 'operacion' in prop:
+                        prop['operacion'] = prop['operacion'].lower()
+                    if 'tipo' in prop:
+                        prop['tipo'] = prop['tipo'].lower()
+                    add_property(prop)
+                print(f"✅ {len(propiedades)} propiedades cargadas desde JSON")
+            else:
+                print("⚠️ El archivo propiedades.json no es un array")
+        except Exception as e:
+            print(f"❌ Error cargando propiedades: {e}")
+    else:
+        print(f"ℹ️ La base de datos ya tiene {count} propiedades, no se cargan datos iniciales.")
+
+
+
+# ✅ INICIALIZACIÓN Y CONFIGURACIÓN
 verificar_y_reparar_bd()
+cargar_propiedades_iniciales()  # <-- AÑADIR ESTA LÍNEA
 CACHE_DURATION = 300  # 5 minutos para cache
 
 class Metrics:
