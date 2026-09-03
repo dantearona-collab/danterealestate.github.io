@@ -32,7 +32,14 @@ def _load_api_keys() -> List[str]:
 
 
 API_KEYS = _load_api_keys()
-MODEL = os.environ.get("WORKING_MODEL", "models/gemini-3.6-flash")
+configured_model = os.environ.get("WORKING_MODEL", "").strip()
+MODEL_CANDIDATES = [
+    model for model in [
+        configured_model,
+        "gemini-2.5-flash",
+        "gemini-2.0-flash",
+    ] if model
+]
 
 
 def get_fallback_response() -> str:
@@ -64,21 +71,22 @@ def call_gemini_with_rotation(prompt: str) -> str:
         return get_fallback_response()
 
     for i, key in enumerate(API_KEYS, start=1):
-        try:
-            client = genai.Client(api_key=key)
-            response = client.models.generate_content(
-                model=MODEL,
-                contents=prompt,
-            )
-            text = getattr(response, "text", None)
-            if not text:
-                raise ValueError("Respuesta vacía de Gemini")
-            return text.strip()
-        except Exception as e:
-            print(f"❌ Error con clave {i}: {e}")
-            continue
+        client = genai.Client(api_key=key)
+        for model in MODEL_CANDIDATES:
+            try:
+                response = client.models.generate_content(
+                    model=model,
+                    contents=prompt,
+                )
+                text = getattr(response, "text", None)
+                if not text:
+                    raise ValueError("Respuesta vacía de Gemini")
+                print(f"✅ Gemini respondió usando {model}")
+                return text.strip()
+            except Exception as e:
+                print(f"❌ Error con clave {i}, modelo {model}: {e}")
 
-    print("💥 Todas las claves fallaron - usando fallback")
+    print("💥 Todos los modelos y claves fallaron - usando fallback")
     return get_fallback_response()
 
 
