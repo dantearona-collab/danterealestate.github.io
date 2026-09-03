@@ -25,7 +25,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from logic.gemini_client import call_gemini_with_rotation, build_prompt
+from logic.gemini_client import call_gemini_with_rotation, build_prompt, get_fallback_response
 from logic.ai_routes import router as ai_router
 from logic.database import query_properties, get_historial_canal, log_conversation, sync_properties_from_json
 from logic.filters import detect_filters
@@ -97,6 +97,20 @@ DATOS COMPLEMENTARIOS DEL BARRIO:
         prompts.append(public_prompt.strip())
 
     return '\n\n--- OTRA PROPIEDAD ---\n\n'.join(prompts)
+
+
+def build_local_property_response(properties: List[Dict[str, Any]]) -> str:
+    """Genera una respuesta útil cuando Gemini no está disponible."""
+    lines = [f"Encontré {len(properties)} propiedades que coinciden con tu búsqueda:"]
+    for property_data in properties[:5]:
+        price = property_data.get('precio') or 'Consultar'
+        currency = property_data.get('moneda_precio') or 'USD'
+        size = property_data.get('metros_cuadrados') or 'N/D'
+        rooms = property_data.get('ambientes') or 'N/D'
+        title = property_data.get('titulo') or 'Propiedad disponible'
+        lines.append(f"- {title}: {rooms} ambientes, {size} m², {currency} {price}.")
+    lines.append("Podés seleccionar una propiedad para ver sus detalles y coordinar una visita.")
+    return "\n".join(lines)
 
 def get_barrios_db_connection():
     Path(os.path.dirname(BARRIOS_DB_PATH)).mkdir(parents=True, exist_ok=True)
@@ -799,6 +813,8 @@ Usa estos datos para responder la pregunta del usuario. No inventes información
 que no aparezca en el contexto y aclara cuando una valoración no esté disponible.
 """
             answer = call_gemini_with_rotation(prompt)
+            if results and answer == get_fallback_response():
+                answer = build_local_property_response(results)
             
             if results and len(results) > 0:
                 lines = answer.split('\n')
