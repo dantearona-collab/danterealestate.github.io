@@ -4,23 +4,73 @@ Backend para Dante Propiedades - Asistente Inmobiliario con IA
 import os
 import sys
 
-# ✅ PRIORIDAD CORRECTA DEL PYTHONPATH
-# La raíz del proyecto debe ir primero para que `logic.*` resuelva el paquete correcto
-# y no el paquete duplicado que existe dentro de /backend.
+# ============================================
+# CONFIGURACIÓN DE SYS.PATH (SIMPLE Y ROBUSTA)
+# ============================================
+# Asegurar que el directorio donde está main_ai.py (backend) esté en sys.path
 current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)   # Prioridad máxima
+
+# Opcional: también agregar la raíz del proyecto si contiene 'logic'
 project_root = os.path.dirname(current_dir)
-for path in [project_root, current_dir]:
-    if path and path not in sys.path:
-        sys.path.append(path)
+logic_in_root = os.path.exists(os.path.join(project_root, "logic", "barrio_data.py"))
+if logic_in_root and project_root not in sys.path:
+    sys.path.append(project_root)     # Segundo lugar
 
-# Reordenar explícitamente para garantizar prioridad de la raíz.
-if project_root in sys.path:
-    sys.path.remove(project_root)
-    sys.path.insert(0, project_root)
+# (Opcional) Imprimir diagnóstico para verificar en logs de Render
+print(f"✅ sys.path configurado. current_dir: {current_dir}")
+print(f"✅ ¿logic/barrio_data.py en current_dir? {os.path.exists(os.path.join(current_dir, 'logic', 'barrio_data.py'))}")
+print(f"✅ ¿logic/barrio_data.py en project_root? {logic_in_root}")
+print(f"✅ sys.path final: {sys.path}")
+# ============================================
 
-if current_dir in sys.path:
-    sys.path.remove(current_dir)
-    sys.path.insert(1, current_dir)
+# Ahora las importaciones de logic.* funcionarán
+from logic.database import ...
+from logic.filters import ...
+from logic.barrio_data import get_gastronomy_info, get_financial_info
+# ... resto del código
+
+import re
+import json
+import time
+from functools import lru_cache
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, Request, HTTPException, Query
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.openapi.utils import get_openapi
+from typing import Optional, Dict, Any, List
+from pydantic import BaseModel, Field
+from pathlib import Path
+import sqlite3
+from datetime import datetime"""
+Backend para Dante Propiedades - Asistente Inmobiliario con IA
+"""
+import os
+import sys
+
+# ============================================
+# CONFIGURACIÓN DE SYS.PATH (SIMPLE Y ROBUSTA)
+# ============================================
+# Asegurar que el directorio donde está main_ai.py (backend) esté en sys.path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)   # Prioridad máxima
+
+# Opcional: también agregar la raíz del proyecto si contiene 'logic'
+project_root = os.path.dirname(current_dir)
+logic_in_root = os.path.exists(os.path.join(project_root, "logic", "barrio_data.py"))
+if logic_in_root and project_root not in sys.path:
+    sys.path.append(project_root)     # Segundo lugar
+
+# (Opcional) Imprimir diagnóstico para verificar en logs de Render
+print(f"✅ sys.path configurado. current_dir: {current_dir}")
+print(f"✅ ¿logic/barrio_data.py en current_dir? {os.path.exists(os.path.join(current_dir, 'logic', 'barrio_data.py'))}")
+print(f"✅ ¿logic/barrio_data.py en project_root? {logic_in_root}")
+print(f"✅ sys.path final: {sys.path}")
+# ============================================
 
 import re
 import json
@@ -107,6 +157,8 @@ def init_barrios_db():
     conn.commit()
     conn.close()
     print("✅ Tabla barrios_data inicializada")
+
+
 
 
 def get_public_ai_context_for_property(property_data: Optional[dict]) -> Optional[dict]:
