@@ -184,6 +184,7 @@ CONTEXTO DEL BARRIO:
 - Transporte: {barrio_ctx.get('aspectos_clave', {}).get('transporte', 'Transporte disponible en la zona.')}
 - Servicios: {barrio_ctx.get('aspectos_clave', {}).get('servicios', 'Servicios cercanos.')}
 - Gastronomía: {barrio_ctx.get('aspectos_clave', {}).get('gastronomia', 'Opciones gastronómicas cercanas.')}
+- Seguridad: {barrio_ctx.get('aspectos_clave', {}).get('seguridad', 'Información de seguridad no disponible.')}
 
 MERCADO:
 - Valor promedio del m² en el barrio: {market.get('avg_m2_barrio')} {market.get('currency', 'USD')}
