@@ -57,7 +57,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.openapi.utils import get_openapi
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Union
 from pydantic import BaseModel, Field
 from pathlib import Path
 import sqlite3
