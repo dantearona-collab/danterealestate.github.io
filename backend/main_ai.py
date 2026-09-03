@@ -40,7 +40,6 @@ from logic.filter_data import BARRIOS, OPERACIONES, TIPOS
 from logic.barrio_data import get_gastronomy_info, get_financial_info
 from logic.constants import USD_RATE
 from logic.environ_database import init_environ_analysis_db, get_environ_analysis, save_environ_analysis, is_environ_analysis_expired, log_environ_analysis_request
-from logic.public_ai_context import build_property_public_context, build_public_prompt
 
 # ============================================
 # FIN DE LA SECCIÓN DE IMPORTACIONES
@@ -112,33 +111,6 @@ def init_barrios_db():
     conn.commit()
     conn.close()
     print("✅ Tabla barrios_data inicializada")
-
-def get_public_ai_context_for_property(property_data: Optional[dict]) -> Optional[dict]:
-    """Construye el contexto público resumido para la IA usando barrio + mercado + propiedad."""
-    if not property_data:
-        return None
-
-    barrio_name = property_data.get('barrio')
-    barrio_context = None
-
-    try:
-        with open('entorno.json', 'r', encoding='utf-8') as f:
-            barrio_data = json.load(f)
-        if isinstance(barrio_data, dict):
-            barrio_context = barrio_data.get(barrio_name) or barrio_data.get(str(barrio_name).lower())
-    except Exception:
-        barrio_context = None
-
-    market_map = {}
-    market_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'market_valuation_map.json')
-    try:
-        if os.path.exists(market_path):
-            with open(market_path, 'r', encoding='utf-8') as f:
-                market_map = json.load(f)
-    except Exception:
-        market_map = {}
-
-    return build_property_public_context(property_data, barrio_context, market_map)
 
 # ============================================
 # FUNCIÓN DE MIGRACIÓN DE DATOS ESTÁTICOS
@@ -857,18 +829,8 @@ Te ayudo a encontrar la propiedad ideal. Podés:
 
 ¿En qué tipo de propiedad estás interesado hoy?"""
         else:
-            if results and len(results) > 0:
-                property_context = get_public_ai_context_for_property(results[0])
-                if property_context:
-                    prompt = build_public_ai_prompt(property_context)
-                    prompt += f"\n\nCONSULTA DEL USUARIO:\n{user_text}\n"
-                    prompt += f"\nFILTROS APLICADOS:\n{json.dumps(filters, ensure_ascii=False, default=str)}\n"
-                    prompt += f"\nESTILO:\n{style_hint}\n"
-                    prompt += f"\nHISTORIAL RECIENTE:\n{contexto_historial}\n"
-                else:
-                    prompt = build_prompt(user_text, results, filters, channel, f"{style_hint}\n{contexto_dinamico}\n{contexto_historial}")
-            else:
-                prompt = build_prompt(user_text, results, filters, channel, f"{style_hint}\n{contexto_dinamico}\n{contexto_historial}")
+            # Siempre usar build_prompt (sin contexto enriquecido de public_ai_context)
+            prompt = build_prompt(user_text, results, filters, channel, f"{style_hint}\n{contexto_dinamico}\n{contexto_historial}")
             metrics.increment_gemini_calls()
             answer = call_gemini_with_rotation(prompt)
             
