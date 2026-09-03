@@ -34,6 +34,8 @@ def verificar_y_reparar_bd():
             print("📦 Creando tablas de base de datos...")
             initialize_databases()
         else:
+            reparar_esquema_propiedades(cursor)
+            conn.commit()
             print("✅ Base de datos verificada")
         
         conn.close()
@@ -97,6 +99,43 @@ def initialize_databases():
     conn.commit()
     conn.close()
     print("✅ Base de datos inicializada correctamente")
+
+
+def reparar_esquema_propiedades(cursor):
+    """Completa columnas faltantes en bases creadas con versiones anteriores."""
+    columnas_requeridas = {
+        'barrio': 'TEXT',
+        'precio': 'REAL',
+        'ambientes': 'INTEGER',
+        'metros_cuadrados': 'REAL',
+        'descripcion': 'TEXT',
+        'operacion': 'TEXT',
+        'tipo': 'TEXT',
+        'direccion': 'TEXT',
+        'antiguedad': 'INTEGER',
+        'estado': 'TEXT',
+        'orientacion': 'TEXT',
+        'expensas': 'REAL',
+        'amenities': 'TEXT',
+        'cochera': 'TEXT',
+        'balcon': 'TEXT',
+        'pileta': 'TEXT',
+        'acepta_mascotas': 'TEXT',
+        'aire_acondicionado': 'TEXT',
+        'info_multimedia': 'TEXT',
+        'documentos': 'TEXT',
+        'videos': 'TEXT',
+        'fotos': 'TEXT',
+        'moneda_precio': 'TEXT',
+        'moneda_expensas': 'TEXT',
+        'fecha_procesamiento': 'TEXT',
+        'created_at': 'TIMESTAMP',
+    }
+    cursor.execute('PRAGMA table_info(propiedades)')
+    columnas_actuales = {row[1] for row in cursor.fetchall()}
+    for nombre, tipo in columnas_requeridas.items():
+        if nombre not in columnas_actuales:
+            cursor.execute(f'ALTER TABLE propiedades ADD COLUMN {nombre} {tipo}')
 
 def query_properties(filters: Dict[str, Any] = None) -> List[Dict]:
     """
@@ -324,6 +363,27 @@ def add_property(propiedad: Dict) -> bool:
         return False
     finally:
         conn.close()
+
+
+def sync_properties_from_json(json_path: str) -> int:
+    """Sincroniza en SQLite las propiedades publicadas en un archivo JSON."""
+    try:
+        with open(json_path, 'r', encoding='utf-8') as file:
+            propiedades = json.load(file)
+        if isinstance(propiedades, dict):
+            propiedades = list(propiedades.values())
+        if not isinstance(propiedades, list):
+            return 0
+
+        sincronizadas = sum(
+            1 for propiedad in propiedades
+            if isinstance(propiedad, dict) and add_property(propiedad)
+        )
+        print(f"✅ Propiedades sincronizadas desde JSON: {sincronizadas}")
+        return sincronizadas
+    except (OSError, json.JSONDecodeError) as error:
+        print(f"⚠️ No se pudieron sincronizar propiedades desde JSON: {error}")
+        return 0
 
 def get_property_count() -> int:
     """
