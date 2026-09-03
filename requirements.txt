@@ -11,8 +11,8 @@ httpx>=0.26.0
 # BeautifulSoup para scraping web
 beautifulsoup4>=4.12.0
 
-# Cliente de Google Gemini (oficial)
-google-generativeai>=0.4.0
+# Cliente de Google Gemini
+google-generativeai>=0.3.0
 
 # Manejo de datos
 pydantic>=2.5.0
