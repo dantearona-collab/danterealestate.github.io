@@ -577,13 +577,13 @@ class PropertyResponse(BaseModel):
     estado: Optional[str] = None
     orientacion: Optional[str] = None
     expensas: Optional[float] = None
-    amenities: Optional[str] = None
+    amenities: Optional[Union[str, List[str]]] = None
     cochera: Optional[str] = None
     balcon: Optional[str] = None
     pileta: Optional[str] = None
     acepta_mascotas: Optional[str] = None
     aire_acondicionado: Optional[str] = None
-    info_multimedia: Optional[str] = None
+    info_multimedia: Optional[Union[str, List[str]]] = None
     documentos: Optional[List[str]] = None
     videos: Optional[List[str]] = None
     fotos: Optional[List[str]] = None
