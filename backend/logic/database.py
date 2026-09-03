@@ -93,21 +93,6 @@ def initialize_databases():
             results_count INTEGER
         )
     ''')
-
-    # Tabla de historial de estadísticas de mercado
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS market_stats_history (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            zona TEXT NOT NULL,
-            operacion TEXT NOT NULL,
-            tipo_propiedad TEXT NOT NULL,
-            precio_promedio REAL,
-            precio_m2_promedio REAL,
-            cantidad_muestra INTEGER,
-            moneda TEXT,
-            fecha TEXT DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
     
     conn.commit()
     conn.close()
@@ -135,11 +120,11 @@ def query_properties(filters: Dict[str, Any] = None) -> List[Dict]:
             params.append(filters['barrio'])
         
         if filters.get('operacion'):
-            query += " AND operacion = ?"
+            query += " AND LOWER(operacion) = LOWER(?)"   # ✅ Cambio aquí
             params.append(filters['operacion'])
         
         if filters.get('tipo'):
-            query += " AND tipo = ?"
+            query += " AND LOWER(tipo) = LOWER(?)"        # ✅ Cambio aquí
             params.append(filters['tipo'])
         
         if filters.get('min_price'):
@@ -355,53 +340,3 @@ def get_property_count() -> int:
     conn.close()
     
     return row['count'] if row else 0
-def save_market_stats(stats_data: Dict[str, Any]) -> bool:
-    """Guarda estadísticas de mercado en el historial"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute('''
-            INSERT INTO market_stats_history 
-            (zona, operacion, tipo_propiedad, precio_promedio, precio_m2_promedio, cantidad_muestra, moneda, fecha)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            stats_data.get('zona'),
-            stats_data.get('operacion'),
-            stats_data.get('tipo_propiedad'),
-            stats_data.get('precio_promedio'),
-            stats_data.get('precio_m2_promedio'),
-            stats_data.get('cantidad_muestra'),
-            stats_data.get('moneda'),
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        ))
-        conn.commit()
-        return True
-    except Exception as e:
-        print(f"Error guardando historial de mercado: {e}")
-        return False
-    finally:
-        conn.close()
-
-def get_historical_stats(operacion: str, tipo_propiedad: str, moneda: str = 'USD') -> List[Dict]:
-    """Obtiene promedios históricos por zona para un tipo de operación/propiedad"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        # Obtenemos el último registro para cada zona para evitar duplicados si se escanea 
-        # la misma zona varias veces, mostrando siempre el dato más reciente.
-        cursor.execute('''
-            SELECT zona, precio_promedio, precio_m2_promedio, MAX(fecha) as ultima_fecha
-            FROM market_stats_history
-            WHERE operacion = ? AND tipo_propiedad = ? AND moneda = ?
-            GROUP BY zona
-            ORDER BY precio_promedio DESC
-            LIMIT 10
-        ''', (operacion, tipo_propiedad, moneda))
-        
-        rows = cursor.fetchall()
-        return [dict(row) for row in rows]
-    except Exception as e:
-        print(f"Error obteniendo historial: {e}")
-        return []
-    finally:
-        conn.close()
