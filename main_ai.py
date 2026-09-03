@@ -72,7 +72,23 @@ class PropertyResponse(BaseModel):
     operacion: str
     tipo: str
     direccion: Optional[str] = None
+    antiguedad: Optional[int] = None
+    estado: Optional[str] = None
+    orientacion: Optional[str] = None
+    expensas: Optional[float] = None
+    amenities: Optional[Any] = None  # Cambiado a Any
+    cochera: Optional[str] = None
+    balcon: Optional[str] = None
+    pileta: Optional[str] = None
+    acepta_mascotas: Optional[str] = None
+    aire_acondicionado: Optional[str] = None
+    info_multimedia: Optional[Any] = None  # Cambiado a Any
+    documentos: Optional[List[str]] = None
+    videos: Optional[List[str]] = None
+    fotos: Optional[List[str]] = None
     moneda_precio: Optional[str] = None
+    moneda_expensas: Optional[str] = None
+    fecha_procesamiento: Optional[str] = None
 
 class ChatRequest(BaseModel):
     message: str
