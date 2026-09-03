@@ -11,7 +11,7 @@ httpx>=0.26.0
 # BeautifulSoup para scraping web
 beautifulsoup4>=4.12.0
 
-# Cliente de Google Gemini
+# ✅ Cliente de Google Gemini (CORREGIDO)
 google-generativeai>=0.3.0
 
 # Manejo de datos
@@ -21,5 +21,5 @@ python-multipart>=0.0.6
 # Utilidades
 python-dateutil>=2.8.0
 
-# Imágenes
+# Imagenes
 Pillow>=10.2.0
