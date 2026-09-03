@@ -41,7 +41,6 @@ from logic.gemini_client import call_gemini_with_rotation, build_prompt
 from logic.gemini_client import get_fallback_response
 from logic.filter_data import BARRIOS, OPERACIONES, TIPOS
 from logic.barrio_data import get_gastronomy_info, get_financial_info
-from logic.public_ai_context import build_property_public_context, build_public_prompt
 from logic.constants import USD_RATE
 from logic.environ_database import init_environ_analysis_db, get_environ_analysis, save_environ_analysis, is_environ_analysis_expired, log_environ_analysis_request
 
@@ -109,6 +108,73 @@ def _get_barrio_context(entorno_data: Dict[str, Any], barrio: str) -> Dict[str, 
         if str(key).strip().lower() == barrio_key and isinstance(value, dict):
             return value
     return {}
+
+
+def build_property_public_context(property_data: Dict[str, Any], barrio_data: Dict[str, Any], market_map: Dict[str, Any]) -> Dict[str, Any]:
+    barrio = property_data.get('barrio') or 'Sin barrio'
+    market = market_map.get(barrio.lower(), {})
+    operation = str(property_data.get('operacion', 'venta')).lower()
+    property_type = str(property_data.get('tipo', 'departamento')).lower()
+    market_bucket = market.get(operation) or market.get('venta') or market.get('alquiler') or market
+    market_data = market_bucket.get(property_type) or market_bucket.get('departamento') or {}
+    average_m2 = market_data.get('avg_m2')
+    price = property_data.get('precio')
+    size = property_data.get('metros_cuadrados')
+    price_comparison = 'No disponible'
+    if average_m2 and price and size:
+        price_m2 = float(price) / float(size)
+        if price_m2 < float(average_m2) * 0.85:
+            price_comparison = 'por debajo del promedio del barrio'
+        elif price_m2 > float(average_m2) * 1.15:
+            price_comparison = 'por encima del promedio del barrio'
+        else:
+            price_comparison = 'en línea con el promedio del barrio'
+    values = lambda key, default: ', '.join(str(item) for item in barrio_data.get(key, [])) or default
+    return {
+        'titulo': property_data.get('titulo', 'Propiedad disponible'),
+        'barrio': barrio,
+        'operacion': operation,
+        'tipo': property_type,
+        'precio': price,
+        'moneda': property_data.get('moneda_precio', 'USD'),
+        'metros': size,
+        'ambientes': property_data.get('ambientes'),
+        'descripcion': property_data.get('descripcion', ''),
+        'resumen_barrio': barrio_data.get('descripcion_general', 'Información del barrio no disponible.'),
+        'transporte': values('transporte', 'No disponible'),
+        'comercio': values('comercio', 'No disponible'),
+        'seguridad': values('seguridad', 'No disponible'),
+        'gastronomia': get_gastronomy_info(barrio).get('descripcion', 'No disponible'),
+        'finanzas': get_financial_info(barrio).get('descripcion', 'No disponible'),
+        'promedio_m2': average_m2,
+        'comparacion_mercado': price_comparison,
+    }
+
+
+def build_public_prompt(context: Dict[str, Any]) -> str:
+    return f"""Eres un asesor inmobiliario para público general.
+
+PROPIEDAD:
+- Título: {context['titulo']}
+- Barrio: {context['barrio']}
+- Operación y tipo: {context['operacion']} / {context['tipo']}
+- Precio: {context['precio']} {context['moneda']}
+- Superficie y ambientes: {context['metros']} m² / {context['ambientes']}
+- Descripción: {context['descripcion']}
+
+CONTEXTO DEL BARRIO:
+- Resumen: {context['resumen_barrio']}
+- Transporte: {context['transporte']}
+- Comercio: {context['comercio']}
+- Seguridad: {context['seguridad']}
+- Gastronomía: {context['gastronomia']}
+- Servicios financieros: {context['finanzas']}
+
+MERCADO:
+- Promedio del m²: {context['promedio_m2']}
+- Comparación: {context['comparacion_mercado']}
+
+Responde de forma clara, breve y honesta. No inventes datos."""
 
 
 def build_enriched_property_context(properties: List[Dict[str, Any]]) -> str:
