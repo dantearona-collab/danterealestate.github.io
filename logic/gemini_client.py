@@ -74,10 +74,7 @@ def call_gemini_with_rotation(prompt: str) -> str:
         client = genai.Client(api_key=key)
         for model in MODEL_CANDIDATES:
             try:
-                response = client.models.generate_content(
-                    model=model,
-                    contents=prompt,
-                )
+                response = client.models.generate_content(model=model, contents=prompt)
                 text = getattr(response, "text", None)
                 if not text:
                     raise ValueError("Respuesta vacía de Gemini")
@@ -86,7 +83,7 @@ def call_gemini_with_rotation(prompt: str) -> str:
             except Exception as e:
                 print(f"❌ Error con clave {i}, modelo {model}: {e}")
 
-    print("💥 Todos los modelos y claves fallaron - usando fallback")
+    print("💥 Todas las claves fallaron - usando fallback")
     return get_fallback_response()
 
 
@@ -186,3 +183,18 @@ Responde de forma concisa (máximo 2-3 oraciones).
 """
     return prompt
 
+    if results is not None and results:
+        prompt += f"""
+📊 Hay {len(results)} propiedades que coinciden con la búsqueda.
+"""
+
+    prompt += """
+Tu objetivo es:
+- Entender la necesidad del usuario
+- Responder de manera útil y natural
+- Sugerir próximos pasos si corresponde
+- Mantener un tono profesional pero amigable
+
+Responde de forma concisa (máximo 2-3 oraciones).
+"""
+    return prompt
