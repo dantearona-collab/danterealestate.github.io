@@ -27,7 +27,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from logic.gemini_client import call_gemini_with_rotation, build_prompt
 from logic.ai_routes import router as ai_router
-from logic.database import query_properties, get_historial_canal, log_conversation
+from logic.database import query_properties, get_historial_canal, log_conversation, sync_properties_from_json
 from logic.filters import detect_filters
 from logic.filter_data import BARRIOS, OPERACIONES, TIPOS
 from logic.environ_database import (
@@ -35,6 +35,7 @@ from logic.environ_database import (
     is_environ_analysis_expired, log_environ_analysis_request
 )
 from logic.barrio_data import get_gastronomy_info, get_financial_info
+from logic.public_ai_context import build_property_public_context, build_public_prompt
 from logic.gemini_client import call_gemini_with_rotation
 
 # ============================================
@@ -42,6 +43,60 @@ from logic.gemini_client import call_gemini_with_rotation
 # ============================================
 
 BARRIOS_DB_PATH = 'instance/barrios_data.db'
+ENTORNO_JSON_PATH = os.path.join(project_root, 'entorno.json')
+MARKET_VALUATION_PATH = os.path.join(project_root, 'backend', 'market_valuation_map.json')
+app = FastAPI(title="Dante Propiedades API")
+
+
+def _load_json_file(path: str) -> Dict[str, Any]:
+    try:
+        with open(path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+            return data if isinstance(data, dict) else {}
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def _get_barrio_context(entorno_data: Dict[str, Any], barrio: str) -> Dict[str, Any]:
+    barrio_key = (barrio or '').strip().lower()
+    for key, value in entorno_data.items():
+        if str(key).strip().lower() == barrio_key and isinstance(value, dict):
+            return value
+    return {}
+
+
+def get_public_ai_context_for_property(property_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Devuelve el contexto público de una propiedad y su barrio para la IA."""
+    entorno_data = _load_json_file(ENTORNO_JSON_PATH)
+    market_data = _load_json_file(MARKET_VALUATION_PATH)
+    barrio = property_data.get('barrio') or ''
+    barrio_context = _get_barrio_context(entorno_data, barrio)
+    barrio_context.setdefault('gastronomia_detallada', get_gastronomy_info(barrio))
+    barrio_context.setdefault('servicios_financieros_detallados', get_financial_info(barrio))
+    return build_property_public_context(property_data, barrio_context, market_data)
+
+
+def build_enriched_property_context(properties: List[Dict[str, Any]]) -> str:
+    """Construye el contexto público de las propiedades para el prompt de Gemini."""
+    prompts = []
+
+    for property_data in properties[:5]:
+        barrio = property_data.get('barrio', '')
+        public_context = get_public_ai_context_for_property(property_data)
+        gastronomy = public_context['barrio_context'].get('gastronomia_detallada', {})
+        financial = public_context['barrio_context'].get('servicios_financieros_detallados', {})
+        public_prompt = build_public_prompt(public_context)
+        public_prompt += f"""
+
+DATOS COMPLEMENTARIOS DEL BARRIO:
+- Gastronomía: {gastronomy.get('descripcion', 'No disponible')}
+- Puntuación gastronómica: {gastronomy.get('puntuacion', 'No disponible')}
+- Servicios financieros: {financial.get('descripcion', 'No disponible')}
+- Puntuación financiera: {financial.get('puntuacion', 'No disponible')}
+"""
+        prompts.append(public_prompt.strip())
+
+    return '\n\n--- OTRA PROPIEDAD ---\n\n'.join(prompts)
 
 def get_barrios_db_connection():
     Path(os.path.dirname(BARRIOS_DB_PATH)).mkdir(parents=True, exist_ok=True)
@@ -60,8 +115,6 @@ class BarrioCreateRequest(BaseModel):
 class BarrioUpdateRequest(BaseModel):
     data: dict
     actualizado_por: str = "admin"
-
-.
 
 class PropertyResponse(BaseModel):
     id_temporal: str
@@ -540,6 +593,7 @@ def generar_datos_barrio_ai(nombre: str) -> dict:
 
 from logic.database import verificar_y_reparar_bd
 verificar_y_reparar_bd()
+sync_properties_from_json(os.path.join(project_root, 'propiedades.json'))
 
 app.add_middleware(
     CORSMiddleware,
@@ -734,6 +788,16 @@ Te ayudo a encontrar la propiedad ideal. Podés:
             historial = get_historial_canal(request.channel)
             contexto = f"Barrios: {', '.join(BARRIOS[:10])}... Tipos: {', '.join(TIPOS)}. Operaciones: {', '.join(OPERACIONES)}."
             prompt = build_prompt(request.message, results, filters, request.channel, contexto)
+            if results:
+                enriched_context = build_enriched_property_context(results)
+                prompt += f"""
+
+CONTEXTO VERIFICADO DE LAS PROPIEDADES:
+{enriched_context}
+
+Usa estos datos para responder la pregunta del usuario. No inventes información
+que no aparezca en el contexto y aclara cuando una valoración no esté disponible.
+"""
             answer = call_gemini_with_rotation(prompt)
             
             if results and len(results) > 0:
