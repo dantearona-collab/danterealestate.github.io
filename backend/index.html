@@ -2645,10 +2645,12 @@
         const CHAT_URL = `${API_BASE_URL}/chat`;
         const STATUS_URL = `${API_BASE_URL}/status`;
         const FILTERS_URL = `${API_BASE_URL}/properties/filter-options`;
+        const CONTACTS_URL = 'https://administrador-63nc.onrender.com/api/guardar-contacto';
 
         // Variables Globales
         let chatBox, input, button, typingIndicator, statusText;
         let conversacionActual = [];
+        let leadGuardado = false;
         let filtrosDinamicos = { operaciones: [], tipos: [], barrios: [] };
         let contextoActual = { tipo: null, resultados: [], propiedad_focus: null, filtros_usados: {}, timestamp: null };
 
@@ -3056,6 +3058,7 @@
             if (confirm('¿Estás seguro de que querés empezar una nueva conversación?')) {
                 chatBox.innerHTML = '';
                 conversacionActual = [];
+                leadGuardado = false;
                 actualizarContexto([], {}, null);
                 limpiarFiltros();
                 addMessage('¡Perfecto! Empecemos de nuevo. ¿Qué propiedad estás buscando?', 'bot');
@@ -3105,6 +3108,39 @@
             console.log('Contexto actualizado:', contextoActual);
         }
 
+        async function guardarContactoDesdeChat() {
+            if (leadGuardado) return;
+
+            const transcript = conversacionActual.map(turno => turno.content).join('\n');
+            const emailMatch = transcript.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+            if (!emailMatch) return;
+
+            const propiedad = contextoActual.propiedad_focus || contextoActual.resultados?.[0];
+            const nombrePropiedad = propiedad?.titulo || 'la propiedad consultada';
+            const mensaje = `Solicitud generada desde el asistente IA.\n\nPropiedad: ${nombrePropiedad}\nConversación:\n${transcript}`;
+            const datos = {
+                nombre: 'Consulta desde asistente IA',
+                email: emailMatch[0],
+                telefono: '',
+                mensaje,
+                interes: 'alquiler'
+            };
+
+            try {
+                const response = await fetch(CONTACTS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(datos)
+                });
+                if (response.ok) {
+                    leadGuardado = true;
+                    console.log('✅ Solicitud del chat guardada en contactos');
+                }
+            } catch (error) {
+                console.warn('No se pudo guardar automáticamente la solicitud del chat:', error);
+            }
+        }
+
         async function send() {
             let msg = input.value.trim();
             const filtrosSeleccionados = obtenerFiltrosSeleccionados();
@@ -3137,6 +3173,7 @@
                 if (data.response) {
                     addMessage(data.response);
                     conversacionActual.push({ role: 'assistant', content: data.response });
+                    await guardarContactoDesdeChat();
                     if (data.propiedades && data.propiedades.length > 0) {
                         actualizarContexto(data.propiedades, filtrosSeleccionados, 'busqueda');
                         mostrarPropiedadesEnInterfaz(data.propiedades);
