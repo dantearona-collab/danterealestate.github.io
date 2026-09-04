@@ -2642,7 +2642,7 @@
         const CHAT_URL = `${API_BASE_URL}/chat`;
         const STATUS_URL = `${API_BASE_URL}/status`;
         const FILTERS_URL = `${API_BASE_URL}/properties/filter-options`;
-        const CONTACTS_URL = 'https://administrador-63nc.onrender.com/api/guardar-contacto';
+        const CONTACTS_URL = `${API_BASE_URL}/api/guardar-contacto`;
 
         // Variables Globales
         let chatBox, input, button, typingIndicator, statusText;
@@ -3115,11 +3115,14 @@
             const propiedad = contextoActual.propiedad_focus || contextoActual.resultados?.[0];
             const nombrePropiedad = propiedad?.titulo || 'la propiedad consultada';
             const mensaje = `Solicitud generada desde el asistente IA.\n\nPropiedad: ${nombrePropiedad}\nConversación:\n${transcript}`;
+            const ultimoMensajeUsuario = [...conversacionActual].reverse().find(turno => turno.role === 'user')?.content || '';
+            const nombreMatch = ultimoMensajeUsuario.match(/^([^,\n]+)\s*,\s*(?:\+?\d|tel)/i);
+            const telefonoMatch = ultimoMensajeUsuario.match(/(?:^|,\s*)\+?(\d[\d\s-]{7,})\s*,/);
             const datos = {
-                nombre: 'Consulta desde asistente IA',
+                nombre: nombreMatch ? nombreMatch[1].trim() : 'Consulta desde asistente IA',
                 email: emailMatch[0],
-                telefono: '',
-                mensaje,
+                telefono: telefonoMatch ? telefonoMatch[1].trim() : '',
+                notas: mensaje,
                 interes: 'alquiler'
             };
 
