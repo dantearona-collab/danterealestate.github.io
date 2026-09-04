@@ -63,6 +63,7 @@ from typing import Optional, Dict, Any, List, Union
 from pydantic import BaseModel, Field
 from pathlib import Path
 import sqlite3
+import hmac
 from datetime import datetime
 
 # ✅ CARGAR VARIABLES DE ENTORNO DESDE .env
@@ -556,6 +557,41 @@ app = FastAPI(
     description="Backend para procesamiento de consultas y filtros de propiedades con IA.",
     version="1.1.0"
 )
+
+CONTACTS_DB_PATH = os.path.join(project_root, 'instance', 'contactos_chat.db')
+ADMIN_TOKEN = os.environ.get('ADMIN_TOKEN', '2205')
+contacts_storage = None
+
+
+def init_contacts_db():
+    Path(os.path.dirname(CONTACTS_DB_PATH)).mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(CONTACTS_DB_PATH)
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS contactos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT UNIQUE NOT NULL,
+            nombre TEXT NOT NULL,
+            email TEXT,
+            telefono TEXT,
+            estado TEXT DEFAULT 'nuevo',
+            notas TEXT,
+            fecha_creacion TEXT DEFAULT CURRENT_TIMESTAMP,
+            fecha_actualizacion TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+
+init_contacts_db()
+
+
+def get_contacts_storage():
+    global contacts_storage
+    if contacts_storage is None and os.environ.get('DATABASE_URL'):
+        from app import PostgreSQLStorageManager
+        contacts_storage = PostgreSQLStorageManager()
+    return contacts_storage
 
 # ============================================
 # ENDPOINTS DE ADMINISTRACIÓN Y MIGRACIÓN
@@ -1081,6 +1117,58 @@ def status():
         "gemini_calls": metrics.gemini_calls,
         "search_queries": metrics.search_queries
     }
+
+
+@app.post("/api/guardar-contacto")
+def guardar_contacto_chat(datos: Dict[str, Any]):
+    nombre = str(datos.get('nombre', '')).strip()
+    email = str(datos.get('email', '')).strip()
+    if not nombre or not email or '@' not in email:
+        raise HTTPException(status_code=400, detail="Nombre y email son obligatorios")
+
+    timestamp = str(int(time.time() * 1000))
+    storage = get_contacts_storage()
+    if storage:
+        datos['timestamp'] = timestamp
+        datos['estado'] = 'nuevo'
+        if not storage.guardar_contacto(datos):
+            raise HTTPException(status_code=500, detail="No se pudo guardar el contacto")
+        return {'success': True, 'message': 'Contacto guardado correctamente', 'timestamp': timestamp}
+
+    conn = sqlite3.connect(CONTACTS_DB_PATH)
+    conn.execute('''
+        INSERT INTO contactos (timestamp, nombre, email, telefono, estado, notas)
+        VALUES (?, ?, ?, ?, 'nuevo', ?)
+    ''', (
+        timestamp,
+        nombre,
+        email,
+        str(datos.get('telefono', '')).strip(),
+        str(datos.get('notas', '')).strip()
+    ))
+    conn.commit()
+    conn.close()
+    return {'success': True, 'message': 'Contacto guardado correctamente', 'timestamp': timestamp}
+
+
+@app.get("/admin/data/{token}")
+def obtener_contactos_admin(token: str):
+    if not hmac.compare_digest(token, ADMIN_TOKEN):
+        raise HTTPException(status_code=403, detail="Acceso no autorizado")
+
+    storage = get_contacts_storage()
+    if storage:
+        return {'success': True, 'data': storage.obtener_todos_contactos()}
+
+    conn = sqlite3.connect(CONTACTS_DB_PATH)
+    conn.row_factory = sqlite3.Row
+    rows = conn.execute('''
+        SELECT id, timestamp, nombre, email, telefono, estado, notas,
+               fecha_creacion, fecha_actualizacion
+        FROM contactos ORDER BY fecha_creacion DESC
+    ''').fetchall()
+    conn.close()
+    return {'success': True, 'data': [dict(row) for row in rows]}
 
 @app.get("/debug-images")
 def debug_images():
