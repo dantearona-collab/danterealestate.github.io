@@ -29,9 +29,14 @@ def _load_api_keys() -> List[str]:
 
 
 API_KEYS = _load_api_keys()
-configured_model = os.environ.get("WORKING_MODEL", "").strip()
+configured_models = os.environ.get("GEMINI_MODELS", "").strip()
+if configured_models:
+    model_names = configured_models.split(",")
+else:
+    model_names = [os.environ.get("WORKING_MODEL", "gemini-3.6-flash")]
 MODEL_CANDIDATES = []
-for model in [configured_model, "gemini-2.5-flash", "gemini-2.0-flash"]:
+for model in model_names:
+    model = model.strip()
     if model and model not in MODEL_CANDIDATES:
         MODEL_CANDIDATES.append(model)
 
