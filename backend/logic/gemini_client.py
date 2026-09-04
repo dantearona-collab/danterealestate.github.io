@@ -127,10 +127,10 @@ Responde de forma concisa y directa.
 """
         return base_prompt
 
-    return build_conversational_prompt(user_text, results, filters, whatsapp_tone)
+    return build_conversational_prompt(user_text, results, filters, whatsapp_tone, style_hint)
 
 
-def build_conversational_prompt(user_text: str, results=None, filters=None, whatsapp_tone=False):
+def build_conversational_prompt(user_text: str, results=None, filters=None, whatsapp_tone=False, style_hint=""):
     """Construye el prompt conversacional."""
     property_types = {
         'departamento': ['depto', 'departamento', 'ph', 'apartamento'],
@@ -171,6 +171,9 @@ User input: "{user_text}"
 
 Context: Property type: {detected_type} | Intent: {intent} | Filters: {filters or 'none'}
 """
+
+    if style_hint:
+        prompt += f"\n{style_hint}\n"
 
     if results is not None and results:
         prompt += f"""
