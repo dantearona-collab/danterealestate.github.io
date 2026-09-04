@@ -80,6 +80,27 @@
             object-fit: contain;
         }
 
+        .ai-header-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 10px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 6px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .ai-header-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+        }
+
         @media (max-width: 768px) {
             .header {
                 padding: 20px 15px;
@@ -1455,6 +1476,10 @@
                 <span class="phone">📞 +54 11 7659-6523</span>
             </div>
         </h1>
+        <button id="ai-chat-btn-integrated" class="ai-header-button" onclick="toggleChatWidget()">
+            <span aria-hidden="true">🤖</span>
+            Asistente IA
+        </button>
         <!-- ELIMINADO: Texto "Sistema sin errores de consola + Slider de múltiples fotos" -->
     </div>
 
@@ -1643,7 +1668,7 @@
                         style="background: #6c757d;">
                         🏠 Inicio
                     </button>
-                    <!-- BOTÓN ASISTENTE IA INTEGRADO -->
+                    <!--
                     <button id="ai-chat-btn-integrated" class="btn-search" onclick="toggleChatWidget()"
                         style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; gap: 8px;">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20"
@@ -1653,6 +1678,7 @@
                         </svg>
                         Asistente IA
                     </button>
+                    -->
                 </div>
             </div>
         </div>
