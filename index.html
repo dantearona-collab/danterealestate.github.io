@@ -2976,7 +2976,7 @@
                 }, 100);
 
                 // Avisar en el chat
-                addMessage(`Mirá lo que encontrè`, 'bot');
+                //addMessage(`Mirá lo que encontrè`, 'bot');
 
                 // AUTO-OCULTAR CHAT (Mejor experiencia de usuario solicitada)
                 setTimeout(() => {
@@ -3111,6 +3111,7 @@
             if (!msg) return;
 
             addMessage(msg, 'user');
+            conversacionActual.push({ role: 'user', content: msg });
             input.value = '';
             button.disabled = true;
             showTypingIndicator(true);
@@ -3119,7 +3120,7 @@
             // ========================================
 
             try {
-                const payload = { message: msg, channel: 'web', filters: filtrosSeleccionados, contexto_anterior: contextoActual };
+                const payload = { message: msg, channel: 'web', filters: filtrosSeleccionados, contexto_anterior: contextoActual, historial_conversacion: conversacionActual.slice(-6) };
                 const response = await fetch(CHAT_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
@@ -3132,6 +3133,7 @@
 
                 if (data.response) {
                     addMessage(data.response);
+                    conversacionActual.push({ role: 'assistant', content: data.response });
                     if (data.propiedades && data.propiedades.length > 0) {
                         actualizarContexto(data.propiedades, filtrosSeleccionados, 'busqueda');
                         mostrarPropiedadesEnInterfaz(data.propiedades);
