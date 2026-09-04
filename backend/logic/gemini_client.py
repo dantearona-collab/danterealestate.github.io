@@ -1,4 +1,5 @@
 import os
+from threading import Lock
 from typing import List
 
 from dotenv import load_dotenv
@@ -13,19 +14,15 @@ load_dotenv()
 
 def _load_api_keys() -> List[str]:
     keys: List[str] = []
-    for key_name in [
-        "GEMINI_API_KEY",
-        "GEMINI_API_KEY_1",
-        "GEMINI_KEYS_1",
-        "GEMINI_KEYS_2",
-        "GEMINI_KEYS_3",
-        "GEMINI_KEYS_4",
-        "GEMINI_KEYS_5",
-    ]:
+    key_names = ["GEMINI_API_KEY"]
+    for index in range(1, 11):
+        key_names.extend([f"GEMINI_API_KEY_{index}", f"GEMINI_KEYS_{index}"])
+
+    for key_name in key_names:
         key_value = os.environ.get(key_name)
         if key_value and key_value.strip():
             value = key_value.strip()
-            if value.startswith(("AIza", "AQ.")):
+            if value.startswith(("AIza", "AQ.")) and value not in keys:
                 keys.append(value)
                 print(f"✅ {key_name}: Clave cargada exitosamente")
     return keys
@@ -33,13 +30,13 @@ def _load_api_keys() -> List[str]:
 
 API_KEYS = _load_api_keys()
 configured_model = os.environ.get("WORKING_MODEL", "").strip()
-MODEL_CANDIDATES = [
-    model for model in [
-        configured_model,
-        "gemini-2.5-flash",
-        "gemini-2.0-flash",
-    ] if model
-]
+MODEL_CANDIDATES = []
+for model in [configured_model, "gemini-2.5-flash", "gemini-2.0-flash"]:
+    if model and model not in MODEL_CANDIDATES:
+        MODEL_CANDIDATES.append(model)
+
+_rotation_lock = Lock()
+_next_key_index = 0
 
 
 def get_fallback_response() -> str:
@@ -62,6 +59,8 @@ def get_fallback_response() -> str:
 
 def call_gemini_with_rotation(prompt: str) -> str:
     """Llama a Gemini usando una clave válida o retorna un fallback."""
+    global _next_key_index
+
     if genai is None:
         print("⚠️ google-genai no está instalado en este entorno; usando fallback.")
         return get_fallback_response()
@@ -70,10 +69,16 @@ def call_gemini_with_rotation(prompt: str) -> str:
         print("⚠️ No hay API keys configuradas")
         return get_fallback_response()
 
-    for i, key in enumerate(API_KEYS, start=1):
-        client = genai.Client(api_key=key)
+    with _rotation_lock:
+        start_index = _next_key_index % len(API_KEYS)
+        _next_key_index = (start_index + 1) % len(API_KEYS)
+
+    ordered_keys = API_KEYS[start_index:] + API_KEYS[:start_index]
+    for offset, key in enumerate(ordered_keys):
+        key_number = (start_index + offset) % len(API_KEYS) + 1
         for model in MODEL_CANDIDATES:
             try:
+                client = genai.Client(api_key=key)
                 response = client.models.generate_content(model=model, contents=prompt)
                 text = getattr(response, "text", None)
                 if not text:
@@ -81,7 +86,7 @@ def call_gemini_with_rotation(prompt: str) -> str:
                 print(f"✅ Gemini respondió usando {model}")
                 return text.strip()
             except Exception as e:
-                print(f"❌ Error con clave {i}, modelo {model}: {e}")
+                print(f"❌ Error con clave {key_number}, modelo {model}: {e}")
 
     print("💥 Todas las claves fallaron - usando fallback")
     return get_fallback_response()
