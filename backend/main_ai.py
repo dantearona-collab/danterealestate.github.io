@@ -689,6 +689,7 @@ class ChatRequest(BaseModel):
     channel: str = Field(default="web")
     filters: Optional[Dict[str, Any]] = None
     contexto_anterior: Optional[Dict[str, Any]] = None
+    historial_conversacion: Optional[List[Dict[str, str]]] = None
     es_seguimiento: Optional[bool] = False
 
 class ChatResponse(BaseModel):
@@ -926,6 +927,7 @@ async def chat(request: ChatRequest):
         channel = request.channel.strip()
         filters_from_frontend = request.filters or {}
         contexto_anterior = request.contexto_anterior
+        historial_conversacion = request.historial_conversacion or []
         text_lower = user_text.lower()
         filters = filters_from_frontend.copy()
         detected_filters = detect_filters(text_lower)
@@ -944,6 +946,15 @@ async def chat(request: ChatRequest):
 
         historial = get_historial_canal(channel)
         contexto_historial = "\nHistorial reciente:\n" + "\n".join(f"- {m}" for m in historial) if historial else ""
+        if historial_conversacion:
+            turnos = []
+            for turno in historial_conversacion[-6:]:
+                rol = "Usuario" if turno.get("role") == "user" else "Asistente"
+                contenido = str(turno.get("content", "")).strip()
+                if contenido:
+                    turnos.append(f"{rol}: {contenido[:1000]}")
+            if turnos:
+                contexto_historial += "\nConversación actual (priorizar para entender seguimientos):\n" + "\n".join(turnos)
         contexto_dinamico = (
             f"Barrios disponibles: {', '.join(BARRIOS)}.\n"
             f"Tipos de propiedad: {', '.join(TIPOS)}.\n"
