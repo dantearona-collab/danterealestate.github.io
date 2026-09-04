@@ -164,6 +164,7 @@ class ChatRequest(BaseModel):
     channel: str = "web"
     filters: Optional[dict] = None
     contexto_anterior: Optional[dict] = None
+    historial_conversacion: Optional[List[Dict[str, str]]] = None
     es_seguimiento: bool = False
 
 class ChatResponse(BaseModel):
@@ -801,6 +802,14 @@ Te ayudo a encontrar la propiedad ideal. Podés:
         else:
             historial = get_historial_canal(request.channel)
             contexto = f"Barrios: {', '.join(BARRIOS[:10])}... Tipos: {', '.join(TIPOS)}. Operaciones: {', '.join(OPERACIONES)}."
+            turnos = []
+            for turno in (request.historial_conversacion or [])[-6:]:
+                rol = "Usuario" if turno.get("role") == "user" else "Asistente"
+                contenido = str(turno.get("content", "")).strip()
+                if contenido:
+                    turnos.append(f"{rol}: {contenido[:1000]}")
+            if turnos:
+                contexto += "\nConversación actual (priorizar para entender seguimientos):\n" + "\n".join(turnos)
             prompt = build_prompt(request.message, results, filters, request.channel, contexto)
             if results:
                 enriched_context = build_enriched_property_context(results)
