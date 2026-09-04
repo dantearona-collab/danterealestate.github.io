@@ -7,6 +7,6 @@ services:
     autoDeploy: true
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn backend.main_ai:app --host 0.0.0.0 --port $PORT
-    envVars: []
-
-    WORKING_MODEL: gemini-2.0-flash-001
+    envVars:
+      - key: WORKING_MODEL
+        value: gemini-3.6-flash
