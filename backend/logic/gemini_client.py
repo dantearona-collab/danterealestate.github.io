@@ -180,6 +180,14 @@ Context: Property type: {detected_type} | Intent: {intent} | Filters: {filters o
     if style_hint:
         prompt += f"\n{style_hint}\n"
 
+    prompt += """
+Si el usuario quiere coordinar o agendar una visita, solicita antes de confirmar:
+nombre completo, número de celular y correo electrónico. El mensaje o comentario
+adicional es opcional. Conserva los datos ya proporcionados y pregunta únicamente
+por los que falten. No afirmes que la cita quedó registrada hasta tener nombre,
+celular y correo.
+"""
+
     if results is not None and results:
         prompt += f"""
 📊 Hay {len(results)} propiedades que coinciden con la búsqueda.
