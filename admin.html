@@ -146,7 +146,7 @@
         // CONFIGURACIÓN PARA DANTEPROPIEDADES.COM.AR + RENDER
         const ADMIN_PASSWORD = '2205';
         const TOKEN = '2205';
-        const BASE_URL = 'https://danterealestate-github-io-ewlg.onrender.com';
+        const BASE_URL = 'https://administrador-63nc.onrender.com';
 
         let contactos = [];
         let contactoSeleccionado = null;
@@ -192,7 +192,7 @@
                     options.body = JSON.stringify(data);
                 }
                 
-                const response = await fetch(`${BASE_URL}/admin/${endpoint}/${TOKEN}`, options);
+                const response = await fetch(`${BASE_URL}/admin/${endpoint}?token=${encodeURIComponent(TOKEN)}`, options);
                 
                 if (!response.ok) {
                     throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -240,12 +240,12 @@
                         <div class="contacto-info">
                             <strong>${contacto.nombre || 'Sin nombre'}</strong><br>
                             <small>📧 ${contacto.email || 'Sin email'} | 📱 ${contacto.telefono || 'Sin teléfono'}</small><br>
-                            <span class="estado estado-${contacto.estado}">${contacto.estado || 'nuevo'}</span>
+                            <span class="estado estado-${contacto.estado || 'nuevo'}">${contacto.estado || 'nuevo'}</span>
                         </div>
                         <div class="contacto-actions">
-                            <button class="btn" onclick="verContacto('${contacto.timestamp}')">👁️ Ver</button>
-                            <button class="btn btn-warning" onclick="editarContacto('${contacto.timestamp}')">✏️ Editar</button>
-                            <button class="btn btn-danger" onclick="eliminarContacto('${contacto.timestamp}')">🗑️ Borrar</button>
+                            <button class="btn" onclick="verContacto('${contacto.timestamp || contacto.id}')">👁️ Ver</button>
+                            <button class="btn btn-warning" onclick="editarContacto('${contacto.timestamp || contacto.id}')">✏️ Editar</button>
+                            <button class="btn btn-danger" onclick="eliminarContacto('${contacto.timestamp || contacto.id}')">🗑️ Borrar</button>
                         </div>
                     </div>
                 `;
@@ -295,7 +295,7 @@
                     document.getElementById('email').value = contacto.email || '';
                     document.getElementById('telefono').value = contacto.telefono || '';
                     document.getElementById('estado').value = contacto.estado || 'nuevo';
-                    document.getElementById('notas').value = contacto.notas || '';
+                    document.getElementById('notas').value = contacto.notas || contacto.mensaje || '';
                     document.getElementById('modalFormulario').style.display = 'flex';
                 }
             } catch (error) {
@@ -315,7 +315,7 @@
                         <p><strong>Email:</strong> ${contacto.email || 'Sin email'}</p>
                         <p><strong>Teléfono:</strong> ${contacto.telefono || 'Sin teléfono'}</p>
                         <p><strong>Estado:</strong> ${contacto.estado || 'nuevo'}</p>
-                        <p><strong>Notas:</strong> ${contacto.notas || 'Sin notas'}</p>
+                        <p><strong>Notas:</strong> ${contacto.notas || contacto.mensaje || 'Sin notas'}</p>
                         <p><strong>Fecha:</strong> ${contacto.fecha_creacion || 'No disponible'}</p>
                     `;
                     document.getElementById('modalVisualizar').style.display = 'flex';
