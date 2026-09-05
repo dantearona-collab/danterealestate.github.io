@@ -613,9 +613,9 @@ def extraer_contacto_del_mensaje(mensaje: str) -> Optional[Dict[str, str]]:
         '',
         texto_sin_datos,
     )
-    nombre = re.sub(r'[,;|:/-]+', ' ', texto_sin_datos)
+    nombre = re.sub(r'[^A-Za-zÁÉÍÓÚáéíóúÑñÜü ]+', ' ', texto_sin_datos)
     nombre = re.sub(r'\s+', ' ', nombre).strip()
-    if len(nombre.split()) < 2 or not re.fullmatch(r"[A-Za-zÁÉÍÓÚáéíóúÑñÜü ]+", nombre):
+    if len(nombre.split()) < 2:
         return None
 
     return {
