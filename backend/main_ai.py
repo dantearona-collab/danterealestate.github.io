@@ -597,9 +597,19 @@ def get_contacts_storage():
 def extraer_contacto_del_mensaje(mensaje: str) -> Optional[Dict[str, str]]:
     """Extrae un contacto cuando el usuario envia nombre, telefono y email juntos."""
     email_match = re.search(r'\b[\w.%+-]+@[\w.-]+\.[A-Za-z]{2,}\b', mensaje)
+    if not email_match:
+        email_match = re.search(
+            r'\b([\w.%+-]+)(gmail|hotmail|outlook|yahoo)\.(com|com\.ar|net)\b',
+            mensaje,
+            re.IGNORECASE,
+        )
     phone_match = re.search(r'(?<!\d)(?:\+?\d[\d\s().-]{7,}\d)(?!\d)', mensaje)
     if not email_match or not phone_match:
         return None
+
+    email = email_match.group(0)
+    if '@' not in email:
+        email = f'{email_match.group(1)}@{email_match.group(2)}.{email_match.group(3)}'
 
     telefono = re.sub(r'\D', '', phone_match.group(0))
     if not 8 <= len(telefono) <= 15:
@@ -620,7 +630,7 @@ def extraer_contacto_del_mensaje(mensaje: str) -> Optional[Dict[str, str]]:
 
     return {
         'nombre': nombre,
-        'email': email_match.group(0),
+        'email': email.lower(),
         'telefono': telefono,
         'notas': f'Solicitud recibida desde el chat: {mensaje.strip()}',
     }
