@@ -1103,6 +1103,33 @@ la valoración de mercado no esté disponible.
                         answer += f"\n\n📊 **Encontré {len(results)} propiedades** - Te las muestro en detalle abajo 👇"
         
         response_time = time.time() - start_time
+        
+        
+        # Después de obtener 'answer' y antes de log_conversation
+        contacto = extraer_contacto_del_mensaje(user_text)
+        if contacto:
+            # Guardar contacto detectado (nombre, email, teléfono)
+            try:
+                resultado_contacto = guardar_contacto_chat(contacto)
+                print(f"✅ CONTACTO DETECTADO Y GUARDADO: {contacto['nombre']} ({contacto['email']})")
+            except Exception as e:
+                print(f"❌ ERROR GUARDANDO CONTACTO DETECTADO: {e}")
+        else:
+            # Guardar como consulta anónima (sin email/teléfono)
+            consulta_gen = {
+                'nombre': 'Usuario Web',
+                'email': 'anonimo@chat.com',  # email genérico para identificar consultas sin contacto
+                'telefono': '',
+                'notas': f'Mensaje: {user_text}\nRespuesta: {answer}',
+                'estado': 'Consulta anónima'  # opcional, para diferenciar
+            }
+            try:
+                guardar_contacto_chat(consulta_gen)
+                print(f"✅ CONSULTA ANÓNIMA GUARDADA: {user_text[:50]}...")
+            except Exception as e:
+                print(f"❌ ERROR GUARDANDO CONSULTA ANÓNIMA: {e}")
+        
+        
         log_conversation(user_text, answer, channel, response_time, search_performed, len(results) if results else 0)
 
         contacto = extraer_contacto_del_mensaje(user_text)
@@ -1175,20 +1202,59 @@ def status():
 
 @app.post("/api/guardar-contacto")
 def guardar_contacto_chat(datos: Dict[str, Any]):
+    import json  # Asegurar importación
+
     nombre = str(datos.get('nombre', '')).strip()
     email = str(datos.get('email', '')).strip()
     if not nombre or not email or '@' not in email:
         raise HTTPException(status_code=400, detail="Nombre y email son obligatorios")
 
+    # ---- Recoger campos extras del formulario ----
+    interes = str(datos.get('interes', '')).strip()
+    presupuesto = str(datos.get('presupuesto', '')).strip()
+    pagina = str(datos.get('pagina', '')).strip()
+    user_agent = str(datos.get('user_agent', '')).strip()
+    
+    # ---- Construir JSON con los extras ----
+    extras = {}
+    if interes:
+        extras['interes'] = interes
+    if presupuesto:
+        extras['presupuesto'] = presupuesto
+    if pagina:
+        extras['pagina'] = pagina
+    if user_agent:
+        extras['user_agent'] = user_agent
+
+    # ---- Notas base + JSON extra (si existen) ----
+    notas_base = str(datos.get('notas', '')).strip()
+    if extras:
+        notas_json = json.dumps(extras, ensure_ascii=False)
+        notas_completas = f"{notas_base} | Datos extra: {notas_json}" if notas_base else f"Datos extra: {notas_json}"
+    else:
+        notas_completas = notas_base
+
     timestamp = str(int(time.time() * 1000))
+
+    # ---- PostgreSQL (usando storage) ----
     storage = get_contacts_storage()
     if storage:
+        # Actualizar el diccionario con el timestamp y el estado
         datos['timestamp'] = timestamp
         datos['estado'] = 'nuevo'
+        # Agregar los extras al diccionario (por si el storage los soporta)
+        datos['interes'] = interes
+        datos['presupuesto'] = presupuesto
+        datos['pagina'] = pagina
+        datos['user_agent'] = user_agent
+        # También actualizar notas con el JSON completo
+        datos['notas'] = notas_completas
+
         if not storage.guardar_contacto(datos):
             raise HTTPException(status_code=500, detail="No se pudo guardar el contacto")
         return {'success': True, 'message': 'Contacto guardado correctamente', 'timestamp': timestamp}
 
+    # ---- SQLite (fallback) ----
     conn = sqlite3.connect(CONTACTS_DB_PATH)
     conn.execute('''
         INSERT INTO contactos (timestamp, nombre, email, telefono, estado, notas)
@@ -1198,12 +1264,11 @@ def guardar_contacto_chat(datos: Dict[str, Any]):
         nombre,
         email,
         str(datos.get('telefono', '')).strip(),
-        str(datos.get('notas', '')).strip()
+        notas_completas   # <--- Ahora incluye los extras en JSON
     ))
     conn.commit()
     conn.close()
     return {'success': True, 'message': 'Contacto guardado correctamente', 'timestamp': timestamp}
-
 
 @app.get("/admin/data/{token}")
 def obtener_contactos_admin(token: str):
