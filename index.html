@@ -101,6 +101,11 @@
             box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
         }
 
+        .ai-header-button svg {
+            width: 20px;
+            height: 20px;
+        }
+
         @media (max-width: 768px) {
             .header {
                 padding: 20px 15px;
@@ -1669,15 +1674,7 @@
                         🏠 Inicio
                     </button>
                     <!--
-                    <button id="ai-chat-btn-integrated" class="btn-search" onclick="toggleChatWidget()"
-                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; gap: 8px;">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20"
-                            height="20">
-                            <path
                                 d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9.48 15.18c.18.33.38.65.6.96-1.28-1.04-2.2-2.36-2.58-3.84.58.26 1.2.45 1.85.55.08.39.19.78.33 1.15-.09.02-.18.04-.28.06-.07.2-.13.4-.19.59-.09.28-.17.56-.23.83zm4.99-2.37c0-1.65-1.35-3-3-3s-3 1.35-3 3 1.35 3 3 3 3-1.35 3-3zm-2.01-7.16c.49 1.01.78 2.1.84 3.26.85-.35 1.59-.93 2.1-1.66-.45-.42-.96-.78-1.52-1.07-.47-.24-.96-.44-1.42-.53zM8.3 6.09c.56.29 1.07.65 1.52 1.07.51.73 1.25 1.31 2.1 1.66.06-1.16.35-2.25.84-3.26-.46.09-.95.29-1.42.53-.57.29-1.09.67-1.54 1.12-1.28.09-2.53.51-3.61 1.2-.23-.69-.35-1.41-.35-2.15 0-.21.02-.42.04-.63 1.55.42 3.01 1.15 4.29 2.16zM4 12c0-.74.12-1.46.35-2.15C4.12 10.54 4 11.26 4 12zm8.52 3.18c-.18-.33-.38-.65-.6-.96 1.28 1.04 2.2 2.36 2.58 3.84-.58-.26-1.2-.45-1.85-.55-.08-.39-.19-.78-.33-1.15.09-.02.18-.04.28-.06.07-.2.13-.4.19-.59.09-.28.17-.56.23-.83z" />
-                        </svg>
-                        Asistente IA
-                    </button>
                     -->
                 </div>
             </div>
@@ -2645,7 +2642,7 @@
         const CHAT_URL = `${API_BASE_URL}/chat`;
         const STATUS_URL = `${API_BASE_URL}/status`;
         const FILTERS_URL = `${API_BASE_URL}/properties/filter-options`;
-        const CONTACTS_URL = `${API_BASE_URL}/api/guardar-contacto`;
+        const CONTACTS_URL = 'https://administrador-63nc.onrender.com/api/guardar-contacto';
 
         // Variables Globales
         let chatBox, input, button, typingIndicator, statusText;
@@ -2981,7 +2978,7 @@
                 }, 100);
 
                 // Avisar en el chat
-                addMessage(`Mirá `, 'bot');
+                //addMessage(`Mirá lo que encontrè`, 'bot');
 
                 // AUTO-OCULTAR CHAT (Mejor experiencia de usuario solicitada)
                 setTimeout(() => {
