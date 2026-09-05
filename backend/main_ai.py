@@ -593,6 +593,38 @@ def get_contacts_storage():
         contacts_storage = PostgreSQLStorageManager()
     return contacts_storage
 
+
+def extraer_contacto_del_mensaje(mensaje: str) -> Optional[Dict[str, str]]:
+    """Extrae un contacto cuando el usuario envia nombre, telefono y email juntos."""
+    email_match = re.search(r'\b[\w.%+-]+@[\w.-]+\.[A-Za-z]{2,}\b', mensaje)
+    phone_match = re.search(r'(?<!\d)(?:\+?\d[\d\s().-]{7,}\d)(?!\d)', mensaje)
+    if not email_match or not phone_match:
+        return None
+
+    telefono = re.sub(r'\D', '', phone_match.group(0))
+    if not 8 <= len(telefono) <= 15:
+        return None
+
+    texto_sin_datos = mensaje
+    texto_sin_datos = texto_sin_datos.replace(email_match.group(0), '')
+    texto_sin_datos = texto_sin_datos.replace(phone_match.group(0), '')
+    texto_sin_datos = re.sub(
+        r'(?i)\b(?:tel(?:efono)?|cel(?:ular)?|email|correo|mail|nombre|soy)\s*[:=-]?\s*',
+        '',
+        texto_sin_datos,
+    )
+    nombre = re.sub(r'[,;|:/-]+', ' ', texto_sin_datos)
+    nombre = re.sub(r'\s+', ' ', nombre).strip()
+    if len(nombre.split()) < 2 or not re.fullmatch(r"[A-Za-zÁÉÍÓÚáéíóúÑñÜü ]+", nombre):
+        return None
+
+    return {
+        'nombre': nombre,
+        'email': email_match.group(0),
+        'telefono': telefono,
+        'notas': f'Solicitud recibida desde el chat: {mensaje.strip()}',
+    }
+
 # ============================================
 # ENDPOINTS DE ADMINISTRACIÓN Y MIGRACIÓN
 # ============================================
@@ -1062,6 +1094,18 @@ la valoración de mercado no esté disponible.
         
         response_time = time.time() - start_time
         log_conversation(user_text, answer, channel, response_time, search_performed, len(results) if results else 0)
+
+        contacto = extraer_contacto_del_mensaje(user_text)
+        if contacto:
+            try:
+                resultado_contacto = guardar_contacto_chat(contacto)
+                print(
+                    f"✅ CONTACTO DETECTADO Y GUARDADO: {contacto['nombre']} "
+                    f"({contacto['email']}) -> {resultado_contacto['timestamp']}"
+                )
+            except Exception as contacto_error:
+                print(f"❌ ERROR GUARDANDO CONTACTO DETECTADO: {contacto_error}")
+
         metrics.increment_success()
         response_data = ChatResponse(
             response=answer,
@@ -1169,6 +1213,30 @@ def obtener_contactos_admin(token: str):
     ''').fetchall()
     conn.close()
     return {'success': True, 'data': [dict(row) for row in rows]}
+
+
+@app.delete("/admin/delete/{token}")
+def eliminar_contacto_admin(token: str, datos: Dict[str, Any]):
+    if not hmac.compare_digest(token, ADMIN_TOKEN):
+        raise HTTPException(status_code=403, detail="Acceso no autorizado")
+
+    timestamp = str(datos.get('timestamp', '')).strip()
+    if not timestamp:
+        raise HTTPException(status_code=400, detail="Timestamp requerido")
+
+    storage = get_contacts_storage()
+    if storage:
+        if not storage.eliminar_contacto(timestamp):
+            raise HTTPException(status_code=500, detail="No se pudo eliminar el contacto")
+        return {'success': True, 'message': 'Contacto eliminado correctamente'}
+
+    conn = sqlite3.connect(CONTACTS_DB_PATH)
+    cursor = conn.execute('DELETE FROM contactos WHERE timestamp = ?', (timestamp,))
+    conn.commit()
+    conn.close()
+    if cursor.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Contacto no encontrado")
+    return {'success': True, 'message': 'Contacto eliminado correctamente'}
 
 @app.get("/debug-images")
 def debug_images():
