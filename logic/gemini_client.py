@@ -29,9 +29,14 @@ def _load_api_keys() -> List[str]:
 
 
 API_KEYS = _load_api_keys()
-configured_model = os.environ.get("WORKING_MODEL", "").strip()
+configured_models = os.environ.get("GEMINI_MODELS", "").strip()
+if configured_models:
+    model_names = configured_models.split(",")
+else:
+    model_names = [os.environ.get("WORKING_MODEL", "gemini-3.6-flash")]
 MODEL_CANDIDATES = []
-for model in [configured_model, "gemini-2.5-flash", "gemini-2.0-flash"]:
+for model in model_names:
+    model = model.strip()
     if model and model not in MODEL_CANDIDATES:
         MODEL_CANDIDATES.append(model)
 
@@ -177,6 +182,14 @@ Context: Property type: {detected_type} | Intent: {intent} | Filters: {filters o
 
     if style_hint:
         prompt += f"\n{style_hint}\n"
+
+    prompt += """
+Si el usuario quiere coordinar o agendar una visita, solicita antes de confirmar:
+nombre completo, número de celular y correo electrónico. El mensaje o comentario
+adicional es opcional. Conserva los datos ya proporcionados y pregunta únicamente
+por los que falten. No afirmes que la cita quedó registrada hasta tener nombre,
+celular y correo.
+"""
 
     if results is not None and results:
         prompt += f"""
