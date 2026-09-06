@@ -89,7 +89,7 @@ except ImportError:
 # ============================================
 # INICIALIZACIÓN DE BASE DE DATOS DE BARRIOS (CMS)
 # ============================================
-
+DATABASE_URL = os.environ.get('DATABASE_URL')
 BARRIOS_DB_PATH = os.environ.get('BARRIOS_DB_PATH', 'instance/barrios_data.db')
 ENTORNO_JSON_PATH = os.path.join(current_dir, 'entorno.json')
 MARKET_VALUATION_PATH = os.path.join(current_dir, 'market_valuation_map.json')
