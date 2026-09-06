@@ -1202,7 +1202,11 @@ def status():
 
 @app.post("/api/guardar-contacto")
 def guardar_contacto_chat(datos: Dict[str, Any]):
+    import psycopg2
     import json
+    import os
+    import sqlite3
+    import time
 
     nombre = str(datos.get('nombre', '')).strip()
     email = str(datos.get('email', '')).strip()
@@ -1210,6 +1214,8 @@ def guardar_contacto_chat(datos: Dict[str, Any]):
         raise HTTPException(status_code=400, detail="Nombre y email son obligatorios")
 
     timestamp = str(int(time.time() * 1000))
+    
+    # Extraer campos extra
     telefono = str(datos.get('telefono', '')).strip()
     interes = str(datos.get('interes', '')).strip()
     presupuesto = str(datos.get('presupuesto', '')).strip()
@@ -1217,47 +1223,39 @@ def guardar_contacto_chat(datos: Dict[str, Any]):
     user_agent = str(datos.get('user_agent', '')).strip()
     notas = str(datos.get('notas', '')).strip()
 
-    storage = get_contacts_storage()
-    if storage:
-        # Preparar diccionario con todos los campos
-        registro = {
-            'timestamp': timestamp,
-            'nombre': nombre,
-            'email': email,
-            'telefono': telefono,
-            'estado': 'nuevo',
-            'notas': notas,
-            'interes': interes,
-            'presupuesto': presupuesto,
-            'pagina': pagina,
-            'user_agent': user_agent
-        }
-        if not storage.guardar_contacto(registro):
-            raise HTTPException(status_code=500, detail="No se pudo guardar el contacto")
-        return {'success': True, 'message': 'Contacto guardado correctamente', 'timestamp': timestamp}
+    # Si DATABASE_URL está configurada, usar PostgreSQL directamente
+    DATABASE_URL = os.environ.get('DATABASE_URL')
+    if DATABASE_URL:
+        try:
+            conn = psycopg2.connect(DATABASE_URL)
+            cur = conn.cursor()
+            cur.execute("""
+                INSERT INTO contactos 
+                (timestamp, nombre, email, telefono, estado, notas, interes, presupuesto, pagina, user_agent)
+                VALUES (%s, %s, %s, %s, 'nuevo', %s, %s, %s, %s, %s)
+            """, (
+                timestamp, nombre, email, telefono, notas, interes, presupuesto, pagina, user_agent
+            ))
+            conn.commit()
+            cur.close()
+            conn.close()
+            return {'success': True, 'message': 'Contacto guardado correctamente', 'timestamp': timestamp}
+        except Exception as e:
+            print(f"❌ Error PostgreSQL: {e}")
+            # Si falla, continuar con SQLite como fallback
 
-    # SQLite (fallback)
+    # Fallback a SQLite (local)
+    CONTACTS_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance', 'contactos_chat.db')
     conn = sqlite3.connect(CONTACTS_DB_PATH)
     conn.execute('''
-        INSERT INTO contactos 
-        (timestamp, nombre, email, telefono, estado, notas, interes, presupuesto, pagina, user_agent)
+        INSERT INTO contactos (timestamp, nombre, email, telefono, estado, notas, interes, presupuesto, pagina, user_agent)
         VALUES (?, ?, ?, ?, 'nuevo', ?, ?, ?, ?, ?)
     ''', (
-        timestamp,
-        nombre,
-        email,
-        telefono,
-        notas,
-        interes,
-        presupuesto,
-        pagina,
-        user_agent
+        timestamp, nombre, email, telefono, notas, interes, presupuesto, pagina, user_agent
     ))
     conn.commit()
     conn.close()
     return {'success': True, 'message': 'Contacto guardado correctamente', 'timestamp': timestamp}
-
-
 
 @app.get("/admin/data/{token}")
 def obtener_contactos_admin(token: str):
