@@ -1120,7 +1120,7 @@ la valoración de mercado no esté disponible.
                 'nombre': 'Usuario Web',
                 'email': 'anonimo@chat.com',  # email genérico para identificar consultas sin contacto
                 'telefono': '',
-                'notas': f'Mensaje: {user_text}\nRespuesta: {answer}',
+                'notas': '',
                 'estado': 'Consulta anónima'  # opcional, para diferenciar
             }
             try:
