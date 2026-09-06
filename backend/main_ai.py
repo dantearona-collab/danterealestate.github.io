@@ -1202,73 +1202,62 @@ def status():
 
 @app.post("/api/guardar-contacto")
 def guardar_contacto_chat(datos: Dict[str, Any]):
-    import json  # Asegurar importación
+    import json
 
     nombre = str(datos.get('nombre', '')).strip()
     email = str(datos.get('email', '')).strip()
     if not nombre or not email or '@' not in email:
         raise HTTPException(status_code=400, detail="Nombre y email son obligatorios")
 
-    # ---- Recoger campos extras del formulario ----
+    timestamp = str(int(time.time() * 1000))
+    telefono = str(datos.get('telefono', '')).strip()
     interes = str(datos.get('interes', '')).strip()
     presupuesto = str(datos.get('presupuesto', '')).strip()
     pagina = str(datos.get('pagina', '')).strip()
     user_agent = str(datos.get('user_agent', '')).strip()
-    
-    # ---- Construir JSON con los extras ----
-    extras = {}
-    if interes:
-        extras['interes'] = interes
-    if presupuesto:
-        extras['presupuesto'] = presupuesto
-    if pagina:
-        extras['pagina'] = pagina
-    if user_agent:
-        extras['user_agent'] = user_agent
+    notas = str(datos.get('notas', '')).strip()
 
-    # ---- Notas base + JSON extra (si existen) ----
-    notas_base = str(datos.get('notas', '')).strip()
-    if extras:
-        notas_json = json.dumps(extras, ensure_ascii=False)
-        notas_completas = f"{notas_base} | Datos extra: {notas_json}" if notas_base else f"Datos extra: {notas_json}"
-    else:
-        notas_completas = notas_base
-
-    timestamp = str(int(time.time() * 1000))
-
-    # ---- PostgreSQL (usando storage) ----
     storage = get_contacts_storage()
     if storage:
-        # Actualizar el diccionario con el timestamp y el estado
-        datos['timestamp'] = timestamp
-        datos['estado'] = 'nuevo'
-        # Agregar los extras al diccionario (por si el storage los soporta)
-        datos['interes'] = interes
-        datos['presupuesto'] = presupuesto
-        datos['pagina'] = pagina
-        datos['user_agent'] = user_agent
-        # También actualizar notas con el JSON completo
-        datos['notas'] = notas_completas
-
-        if not storage.guardar_contacto(datos):
+        # Preparar diccionario con todos los campos
+        registro = {
+            'timestamp': timestamp,
+            'nombre': nombre,
+            'email': email,
+            'telefono': telefono,
+            'estado': 'nuevo',
+            'notas': notas,
+            'interes': interes,
+            'presupuesto': presupuesto,
+            'pagina': pagina,
+            'user_agent': user_agent
+        }
+        if not storage.guardar_contacto(registro):
             raise HTTPException(status_code=500, detail="No se pudo guardar el contacto")
         return {'success': True, 'message': 'Contacto guardado correctamente', 'timestamp': timestamp}
 
-    # ---- SQLite (fallback) ----
+    # SQLite (fallback)
     conn = sqlite3.connect(CONTACTS_DB_PATH)
     conn.execute('''
-        INSERT INTO contactos (timestamp, nombre, email, telefono, estado, notas)
-        VALUES (?, ?, ?, ?, 'nuevo', ?)
+        INSERT INTO contactos 
+        (timestamp, nombre, email, telefono, estado, notas, interes, presupuesto, pagina, user_agent)
+        VALUES (?, ?, ?, ?, 'nuevo', ?, ?, ?, ?, ?)
     ''', (
         timestamp,
         nombre,
         email,
-        str(datos.get('telefono', '')).strip(),
-        notas_completas   # <--- Ahora incluye los extras en JSON
+        telefono,
+        notas,
+        interes,
+        presupuesto,
+        pagina,
+        user_agent
     ))
     conn.commit()
     conn.close()
     return {'success': True, 'message': 'Contacto guardado correctamente', 'timestamp': timestamp}
+
+
 
 @app.get("/admin/data/{token}")
 def obtener_contactos_admin(token: str):
