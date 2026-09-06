@@ -5,6 +5,8 @@ uvicorn[standard]>=0.27.0
 # Base de datos
 aiosqlite>=0.19.0
 
+psycopg2-binary
+
 # Cliente HTTP para APIs externas
 httpx>=0.26.0
 
