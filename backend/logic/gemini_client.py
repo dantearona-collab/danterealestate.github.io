@@ -1,6 +1,7 @@
 import os
 from threading import Lock
 from typing import List
+import time
 
 from dotenv import load_dotenv
 
@@ -63,8 +64,10 @@ def get_fallback_response() -> str:
 
 
 def call_gemini_with_rotation(prompt: str) -> str:
-    """Llama a Gemini usando una clave válida o retorna un fallback."""
+    """Llama a Gemini usando una clave válida con reintentos y backoff, o retorna un fallback."""
     global _next_key_index
+    MAX_RETRIES = 3
+    BACKOFF_FACTOR = 2  # seconds multiplier
 
     if genai is None:
         print("⚠️ google-genai no está instalado en este entorno; usando fallback.")
@@ -74,6 +77,7 @@ def call_gemini_with_rotation(prompt: str) -> str:
         print("⚠️ No hay API keys configuradas")
         return get_fallback_response()
 
+    # Rotación de clave
     with _rotation_lock:
         start_index = _next_key_index % len(API_KEYS)
         _next_key_index = (start_index + 1) % len(API_KEYS)
@@ -82,18 +86,27 @@ def call_gemini_with_rotation(prompt: str) -> str:
     for offset, key in enumerate(ordered_keys):
         key_number = (start_index + offset) % len(API_KEYS) + 1
         for model in MODEL_CANDIDATES:
-            try:
-                client = genai.Client(api_key=key)
-                response = client.models.generate_content(model=model, contents=prompt)
-                text = getattr(response, "text", None)
-                if not text:
-                    raise ValueError("Respuesta vacía de Gemini")
-                print(f"✅ Gemini respondió usando {model}")
-                return text.strip()
-            except Exception as e:
-                print(f"❌ Error con clave {key_number}, modelo {model}: {e}")
-
-    print("💥 Todas las claves fallaron - usando fallback")
+            attempt = 0
+            while attempt < MAX_RETRIES:
+                try:
+                    client = genai.Client(api_key=key)
+                    response = client.models.generate_content(model=model, contents=prompt)
+                    text = getattr(response, "text", None)
+                    if not text:
+                        raise ValueError("Respuesta vacía de Gemini")
+                    print(f"✅ Gemini respondió usando {model} (clave {key_number}) en intento {attempt+1}")
+                    return text.strip()
+                except Exception as e:
+                    attempt += 1
+                    print(f"❌ Error con clave {key_number}, modelo {model}, intento {attempt}: {e}")
+                    if attempt < MAX_RETRIES:
+                        backoff = BACKOFF_FACTOR * (2 ** (attempt - 1))
+                        print(f"⏳ Reintentando en {backoff}s...")
+                        time.sleep(backoff)
+                    else:
+                        # pasar a la siguiente clave/modelo
+                        break
+    print("💥 Todas las claves y modelos fallaron - usando fallback")
     return get_fallback_response()
 
 
