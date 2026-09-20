@@ -454,26 +454,26 @@
         }
 
         // 📤 ENVIAR AL BACKEND RENDER (VERSIÓN ACTUALIZADA)
-        // 📤 ENVIAR AL BACKEND RENDER (VERSIÓN CORREGIDA CON TOKEN)
-        // 📤 ENVIAR AL BACKEND RENDER (VERSIÓN CORREGIDA Y FUNCIONAL)
         async function enviarAlBackend(datos) {
             try {
                 console.log('📤 Enviando al backend...');
                 
-                // URL EXACTA como la usa tu panel admin - CON TOKEN EN URL
+                // ✅ ENDPOINT CORRECTO: /admin/add (que guarda en core.personas + dante.formularios)
                 const BACKEND_URL = 'https://administrador-63nc.onrender.com/admin/add?token=2205';
                 
-                // Datos EXACTOS como los acepta tu backend - SOLO 4 CAMPOS
+                // ✅ AHORA SÍ: enviar TODOS los campos, incluidos interes y presupuesto
                 const datosParaEnviar = {
                     nombre: datos.nombre,
                     email: datos.email,
                     telefono: datos.telefono || '',
-                    mensaje: datos.mensaje || ''
-                    // IMPORTANTE: No incluir otros campos como 'interes', 'presupuesto', etc.
-                    // Tu backend solo acepta estos 4 campos específicos
+                    mensaje: datos.mensaje || '',
+                    interes: datos.interes || '',
+                    presupuesto: datos.presupuesto || '',
+                    pagina: window.location.href,
+                    user_agent: navigator.userAgent
                 };
                 
-                console.log('📤 Enviando datos simplificados:', datosParaEnviar);
+                console.log('📤 Enviando datos completos:', datosParaEnviar);
                 
                 const response = await fetch(BACKEND_URL, {
                     method: 'POST',
@@ -504,10 +504,13 @@
                 return { 
                     success: false, 
                     error: error.message,
-                    fallback: true // Indica que debemos usar localStorage
+                    fallback: true
                 };
             }
         }
+
+
+
         // Función para guardar en localStorage con respaldo
         function guardarEnLocalStorage(datos) {
             try {
