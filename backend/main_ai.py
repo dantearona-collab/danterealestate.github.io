@@ -1202,61 +1202,88 @@ def status():
 
 @app.post("/api/guardar-contacto")
 def guardar_contacto_chat(datos: Dict[str, Any]):
+    """
+    Guarda un formulario web en el nuevo esquema:
+    - core.personas (datos personales)
+    - dante.formularios (interés, presupuesto, mensaje)
+    """
     import psycopg2
-    import json
     import os
-    import sqlite3
-    import time
 
+    # Extraer y limpiar datos
     nombre = str(datos.get('nombre', '')).strip()
-    email = str(datos.get('email', '')).strip()
-    if not nombre or not email or '@' not in email:
-        raise HTTPException(status_code=400, detail="Nombre y email son obligatorios")
-
-    timestamp = str(int(time.time() * 1000))
-    
-    # Extraer campos extra
+    email = str(datos.get('email', '')).strip().lower()
     telefono = str(datos.get('telefono', '')).strip()
     interes = str(datos.get('interes', '')).strip()
     presupuesto = str(datos.get('presupuesto', '')).strip()
+    mensaje = str(datos.get('notas', datos.get('mensaje', ''))).strip()
     pagina = str(datos.get('pagina', '')).strip()
     user_agent = str(datos.get('user_agent', '')).strip()
-    notas = str(datos.get('notas', '')).strip()
+    ip_address = str(datos.get('ip_address', '')).strip()
 
-    # Si DATABASE_URL está configurada, usar PostgreSQL directamente
+    if not nombre or not email or '@' not in email:
+        raise HTTPException(status_code=400, detail="Nombre y email son obligatorios")
+
     DATABASE_URL = os.environ.get('DATABASE_URL')
-    if DATABASE_URL:
-        try:
-            conn = psycopg2.connect(DATABASE_URL)
-            cur = conn.cursor()
+    if not DATABASE_URL:
+        raise HTTPException(status_code=500, detail="DATABASE_URL no configurada")
+
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cur = conn.cursor()
+
+        # 1. Buscar o crear persona en core.personas
+        cur.execute("""
+            SELECT id FROM core.personas 
+            WHERE LOWER(email) = LOWER(%s) 
+            LIMIT 1
+        """, (email,))
+        row = cur.fetchone()
+
+        if row:
+            persona_id = row[0]
             cur.execute("""
-                INSERT INTO contactos 
-                (timestamp, nombre, email, telefono, estado, notas, interes, presupuesto, pagina, user_agent)
-                VALUES (%s, %s, %s, %s, 'nuevo', %s, %s, %s, %s, %s)
-            """, (
-                timestamp, nombre, email, telefono, notas, interes, presupuesto, pagina, user_agent
-            ))
-            conn.commit()
-            cur.close()
+                UPDATE core.personas 
+                SET nombre = %s, telefono = %s, updated_at = CURRENT_TIMESTAMP
+                WHERE id = %s
+            """, (nombre, telefono, persona_id))
+            print(f"✅ Persona actualizada: id={persona_id}, email={email}")
+        else:
+            cur.execute("""
+                INSERT INTO core.personas (nombre, email, telefono, origen)
+                VALUES (%s, %s, %s, 'formulario')
+                RETURNING id
+            """, (nombre, email, telefono))
+            persona_id = cur.fetchone()[0]
+            print(f"✅ Persona creada: id={persona_id}, email={email}")
+
+        # 2. Insertar en dante.formularios
+        cur.execute("""
+            INSERT INTO dante.formularios 
+            (persona_id, interes, presupuesto, mensaje, pagina_origen, user_agent, ip_address)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (persona_id, interes, presupuesto, mensaje, pagina, user_agent, ip_address))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return {
+            'success': True,
+            'message': 'Formulario guardado correctamente',
+            'persona_id': persona_id,
+            'email': email
+        }
+
+    except Exception as e:
+        print(f"❌ Error guardando formulario: {e}")
+        if conn:
+            conn.rollback()
             conn.close()
-            return {'success': True, 'message': 'Contacto guardado correctamente', 'timestamp': timestamp}
-        except Exception as e:
-            print(f"❌ Error PostgreSQL: {e}")
-            # Si falla, continuar con SQLite como fallback
-
-    # Fallback a SQLite (local)
-    CONTACTS_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance', 'contactos_chat.db')
-    conn = sqlite3.connect(CONTACTS_DB_PATH)
-    conn.execute('''
-        INSERT INTO contactos (timestamp, nombre, email, telefono, estado, notas, interes, presupuesto, pagina, user_agent)
-        VALUES (?, ?, ?, ?, 'nuevo', ?, ?, ?, ?, ?)
-    ''', (
-        timestamp, nombre, email, telefono, notas, interes, presupuesto, pagina, user_agent
-    ))
-    conn.commit()
-    conn.close()
-    return {'success': True, 'message': 'Contacto guardado correctamente', 'timestamp': timestamp}
-
+        raise HTTPException(status_code=500, detail=f"Error al guardar: {str(e)}")
+    
+    
+    
 @app.get("/admin/data/{token}")
 def obtener_contactos_admin(token: str):
     if not hmac.compare_digest(token, ADMIN_TOKEN):
