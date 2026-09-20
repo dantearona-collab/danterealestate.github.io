@@ -635,6 +635,42 @@ def extraer_contacto_del_mensaje(mensaje: str) -> Optional[Dict[str, str]]:
         'notas': f'Solicitud recibida desde el chat: {mensaje.strip()}',
     }
 
+def guardar_consulta_chat(mensaje: str, respuesta: str, canal: str,
+                          persona_id=None, search_performed: bool = False,
+                          results_count: int = 0):
+    """
+    Guarda una consulta del chat en dante.consultas_chat.
+    Si hay persona_id, lo asocia; si no, queda como anónima.
+    """
+    import psycopg2
+    import os
+    
+    DATABASE_URL = os.environ.get('DATABASE_URL')
+    if not DATABASE_URL:
+        print("⚠️ DATABASE_URL no configurada, no se guarda la consulta")
+        return None
+    
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT INTO dante.consultas_chat 
+            (persona_id, mensaje, respuesta_ia, canal, search_performed, results_count)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            RETURNING id
+        """, (persona_id, mensaje, respuesta, canal, search_performed, results_count))
+        consulta_id = cur.fetchone()[0]
+        conn.commit()
+        cur.close()
+        conn.close()
+        print(f"✅ Consulta chat guardada: id={consulta_id}, persona_id={persona_id}")
+        return consulta_id
+    except Exception as e:
+        print(f"❌ Error guardando consulta chat: {e}")
+        return None
+
+
+
 # ============================================
 # ENDPOINTS DE ADMINISTRACIÓN Y MIGRACIÓN
 # ============================================
@@ -1102,47 +1138,71 @@ la valoración de mercado no esté disponible.
                     if "propiedad" not in answer.lower() and "encontré" not in answer.lower():
                         answer += f"\n\n📊 **Encontré {len(results)} propiedades** - Te las muestro en detalle abajo 👇"
         
+        
         response_time = time.time() - start_time
         
-        
-        # Después de obtener 'answer' y antes de log_conversation
+        # ============ GUARDADO EN EL NUEVO ESQUEMA ============
+        # 1. Detectar contacto en el mensaje (nombre + email + teléfono)
         contacto = extraer_contacto_del_mensaje(user_text)
+        persona_id = None
+        
         if contacto:
-            # Guardar contacto detectado (nombre, email, teléfono)
+            # Buscar o crear persona en core.personas
+            import psycopg2
+            import os
             try:
-                resultado_contacto = guardar_contacto_chat(contacto)
-                print(f"✅ CONTACTO DETECTADO Y GUARDADO: {contacto['nombre']} ({contacto['email']})")
+                DATABASE_URL = os.environ.get('DATABASE_URL')
+                if DATABASE_URL:
+                    conn_p = psycopg2.connect(DATABASE_URL)
+                    cur_p = conn_p.cursor()
+                    email_lower = contacto['email'].lower()
+                    
+                    cur_p.execute(
+                        "SELECT id FROM core.personas WHERE LOWER(email) = LOWER(%s) LIMIT 1",
+                        (email_lower,)
+                    )
+                    row = cur_p.fetchone()
+                    
+                    if row:
+                        persona_id = row[0]
+                        cur_p.execute("""
+                            UPDATE core.personas 
+                            SET nombre = %s, telefono = %s, updated_at = CURRENT_TIMESTAMP
+                            WHERE id = %s
+                        """, (contacto['nombre'], contacto['telefono'], persona_id))
+                        print(f"✅ Persona actualizada desde chat: id={persona_id}, email={email_lower}")
+                    else:
+                        cur_p.execute("""
+                            INSERT INTO core.personas (nombre, email, telefono, origen)
+                            VALUES (%s, %s, %s, 'chat')
+                            RETURNING id
+                        """, (contacto['nombre'], email_lower, contacto['telefono']))
+                        persona_id = cur_p.fetchone()[0]
+                        print(f"✅ Persona creada desde chat: id={persona_id}, email={email_lower}")
+                    
+                    conn_p.commit()
+                    cur_p.close()
+                    conn_p.close()
             except Exception as e:
-                print(f"❌ ERROR GUARDANDO CONTACTO DETECTADO: {e}")
-        else:
-            # Guardar como consulta anónima (sin email/teléfono)
-            consulta_gen = {
-                'nombre': 'Usuario Web',
-                'email': 'anonimo@chat.com',  # email genérico para identificar consultas sin contacto
-                'telefono': '',
-                'notas': '',
-                'estado': 'Consulta anónima'  # opcional, para diferenciar
-            }
-            try:
-                guardar_contacto_chat(consulta_gen)
-                print(f"✅ CONSULTA ANÓNIMA GUARDADA: {user_text[:50]}...")
-            except Exception as e:
-                print(f"❌ ERROR GUARDANDO CONSULTA ANÓNIMA: {e}")
+                print(f"⚠️ Error guardando persona del chat: {e}")
         
+        # 2. Guardar la consulta en dante.consultas_chat (siempre, con o sin persona_id)
+        try:
+            guardar_consulta_chat(
+                mensaje=user_text,
+                respuesta=answer,
+                canal=channel,
+                persona_id=persona_id,
+                search_performed=search_performed,
+                results_count=len(results) if results else 0
+            )
+        except Exception as e:
+            print(f"⚠️ Error guardando consulta chat: {e}")
         
+        # 3. Log de conversación (histórico interno del canal)
         log_conversation(user_text, answer, channel, response_time, search_performed, len(results) if results else 0)
-
-        contacto = extraer_contacto_del_mensaje(user_text)
-        if contacto:
-            try:
-                resultado_contacto = guardar_contacto_chat(contacto)
-                print(
-                    f"✅ CONTACTO DETECTADO Y GUARDADO: {contacto['nombre']} "
-                    f"({contacto['email']}) -> {resultado_contacto['timestamp']}"
-                )
-            except Exception as contacto_error:
-                print(f"❌ ERROR GUARDANDO CONTACTO DETECTADO: {contacto_error}")
-
+        # ======================================================
+        
         metrics.increment_success()
         response_data = ChatResponse(
             response=answer,
