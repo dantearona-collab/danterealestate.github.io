@@ -185,6 +185,7 @@ Contexto: Tipo de propiedad: {detected_type} | Intención: {intent} | Filtros: {
     else:
         prompt = f"""Eres Dante, un asistente especializado en propiedades en Buenos Aires.
 
+¡Hola! Soy tu asistente IA amigable, listo para ayudarte con cualquier consulta inmobiliaria.
 User input: "{user_text}"
 
 Context: Property type: {detected_type} | Intent: {intent} | Filters: {filters or 'none'}
