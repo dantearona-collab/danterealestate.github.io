@@ -5718,7 +5718,7 @@ console.log('✅ Panel simple de respaldo cargado');
 console.log('✅ Sistema Dante Propiedades completamente cargado');
   // (Removed stray CRM call)
 
-}
+
 // Send button handler – communicates with backend / IA endpoint
 document.getElementById('send-chat').addEventListener('click', async () => {
   const input = document.getElementById('chat-input');
