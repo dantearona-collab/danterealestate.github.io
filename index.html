@@ -1,5 +1,128 @@
 <!DOCTYPE html>
 <html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dante Propiedades - Galería con Múltiples Imágenes</title>
+    <link rel="icon" href="llave.png" type="image/png">
+    <style>
+        /* RESET Y BASE */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+        /* HEADER REDUCIDO 35% */
+        .header {
+            background: linear-gradient(135deg, #232deb 0%, #1a1db4 100%);
+            color: white;
+            padding: 26px 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(35, 45, 235, 0.3);
+        }
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 8px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .header .company-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .header .phone {
+            font-size: 0.4em;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        .header .logo-key {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .header .logo-key img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .ai-header-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 10px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 6px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .ai-header-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+        }
+        .ai-header-button svg {
+            width: 20px;
+            height: 20px;
+        }
+        /* ... resto de los estilos originales ... */
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Dante Propiedades</h1>
+        <!-- Botón Asistente IA -->
+        <button class="ai-header-button" id="open-ia-chat">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 6v6l4 2"/></svg>
+            <span>Asistente IA</span>
+        </button>
+    </header>
+    <!-- ... resto del cuerpo de la página ... -->
+    <!-- Chat modal (añadido al final del body) -->
+    <div id="chat-modal" class="chat-modal" style="display:none;">
+        <div class="chat-header">
+            <h3>Asistente IA</h3>
+            <button id="close-chat" onclick="toggleChat()">✕</button>
+        </div>
+        <div class="chat-welcome">
+            <p>👋 ¡Hola! Soy Dante, tu asistente IA. Pregúntame sobre propiedades, filtros o cualquier duda inmobiliaria.</p>
+        </div>
+        <div id="chat-messages" class="chat-body"></div>
+        <div class="chat-input">
+            <input type="text" id="chat-input" placeholder="Escribe tu mensaje..." />
+            <button id="send-chat">Enviar</button>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+
+<!DOCTYPE html>
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
