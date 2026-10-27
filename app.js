@@ -5719,28 +5719,7 @@ console.log('✅ Sistema Dante Propiedades completamente cargado');
   // (Removed stray CRM call)
 
 
-// Send button handler – communicates with backend / IA endpoint
-document.getElementById('send-chat').addEventListener('click', async () => {
-  const input = document.getElementById('chat-input');
-  const text = input.value.trim();
-  if (!text) return;
-  // Show user message and log it
-  addChatMessage('Usuario', text);
-  input.value = '';
-  // Call your IA backend (replace `/api/chat` if different)
-  try {
-    const resp = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text })
-    });
-    const data = await resp.json();
-    addChatMessage('IA', data.reply);
-  } catch (e) {
-    console.error(e);
-    addChatMessage('Sistema', 'Error al contactar la IA.');
-  }
-});
+
 // ------------------------------------------------
 // Chat‑modal UI & CRM integration (single conversation record)
 // ------------------------------------------------
@@ -5803,8 +5782,7 @@ function addChatMessage(sender, text) {
     message: text
   });
 
-  // Send updated history to CRM
-  sendConversationToCRM();
+  // No automatic CRM send here; will be sent after IA reply
 }
 
 
@@ -5826,6 +5804,7 @@ document.getElementById('send-chat').addEventListener('click', async () => {
     });
     const data = await resp.json();
     addChatMessage('IA', data.reply);
+    sendConversationToCRM();
   } catch (e) {
     console.error(e);
     addChatMessage('Sistema', 'Error al contactar la IA.');
